@@ -6,7 +6,7 @@
           <img src="../../assets/logo.png" alt="Logo" class="logo" />
           <transition name="fade-text">
             <div v-if="!collapsed" class="brand-copy">
-              <span class="logo-kicker">Teacher Console</span>
+              <span class="logo-kicker">教师工作台</span>
               <span class="logo-title">智能教学平台</span>
             </div>
           </transition>
@@ -190,7 +190,7 @@
         </el-main>
 
         <el-footer class="layout-footer">
-          智能学情分析与个性化实验能力提升平台 · Teacher Workspace
+          智能学情分析与个性化实验能力提升平台 · 教师工作空间
         </el-footer>
       </el-container>
     </el-container>

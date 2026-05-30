@@ -553,7 +553,7 @@ export default {
       const response = await apiClient.get(`/api/submissions/${submissionId}`);
       console.log('getSubmissionDetail response:', response);
       if (response && response.success === false) {
-        throw new Error(response.message || 'Failed to load submission detail')
+        throw new Error(response.message || '加载提交详情失败')
       }
       Object.assign(response, sanitizeSubmissionTiming(response))
 

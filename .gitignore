@@ -1,29 +1,53 @@
 # 依赖目录
 node_modules/
 
-# 打包产物
+# 构建产物
 dist/
 build/
-unpackage/dist/
+coverage/
+.cache/
+.temp/
+tmp/
 
-# HBuilderX / uni-app 打包产物
-unpackage/
-!/unpackage/res/
+# Vue CLI / Webpack / ESLint 缓存
+node_modules/.cache/
+.eslintcache
 
-# 日志
+# 日志文件
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
 # 环境变量文件
-.env.local
-.env.*.local
+.env
+.env.*
+!.env.example
+!.env.template
 
-# 编辑器配置
+# 编辑器 / IDE
 .idea/
 .vscode/
+*.swp
+*.swo
 
-# 系统文件
+# 操作系统文件
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# 测试与报告产物
+test-results/
+playwright-report/
+cypress/screenshots/
+cypress/videos/
+
+# HBuilderX / uni-app 产物
+unpackage/
+!/unpackage/res/
+
+# 本地运行输出
+dev-server*.log
+static-server*.log

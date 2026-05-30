@@ -2,23 +2,23 @@
   <div class="submission-list">
     <page-header
       class="my-page-header"
-      title="Student Submissions"
+      title="学生提交"
       :description="headerDescription"
     >
       <template v-if="experimentId">
-        <el-button @click="goBackToExperiment">Back To Experiment</el-button>
+        <el-button @click="goBackToExperiment">返回实验详情</el-button>
       </template>
     </page-header>
 
     <el-card class="filter-card" shadow="hover">
       <div class="card-header">
-        <h3 class="section-title">Filters</h3>
+        <h3 class="section-title">筛选条件</h3>
       </div>
       <el-form :inline="true" :model="filterForm" class="filter-form">
-        <el-form-item v-if="!experimentId" label="Experiment">
+        <el-form-item v-if="!experimentId" label="实验">
           <el-select
             v-model="filterForm.experimentId"
-            placeholder="Select experiment"
+            placeholder="请选择实验"
             clearable
             style="width: 220px"
           >
@@ -31,32 +31,32 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Student Name">
+        <el-form-item label="学生姓名">
           <el-input
             v-model="filterForm.studentName"
-            placeholder="Enter student name"
+            placeholder="请输入学生姓名"
             clearable
           />
         </el-form-item>
 
-        <el-form-item label="Status">
+        <el-form-item label="状态">
           <el-select
             v-model="filterForm.status"
-            placeholder="Select status"
+            placeholder="请选择状态"
             clearable
             style="width: 150px"
           >
-            <el-option label="All" value="" />
-            <el-option label="Submitted" value="submitted" />
-            <el-option label="Graded" value="graded" />
-            <el-option label="Rejected" value="rejected" />
-            <el-option label="Not Started" value="not_started" />
+            <el-option label="全部" value="" />
+            <el-option label="已提交" value="submitted" />
+            <el-option label="已评分" value="graded" />
+            <el-option label="已退回" value="rejected" />
+            <el-option label="未开始" value="not_started" />
           </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="applyFilter">Search</el-button>
-          <el-button @click="resetFilter">Reset</el-button>
+          <el-button type="primary" @click="applyFilter">查询</el-button>
+          <el-button @click="resetFilter">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -64,24 +64,24 @@
     <el-card class="table-card">
       <div class="table-operations">
         <div class="table-stats">
-          <el-tag type="info" effect="plain">Total: {{ filteredSubmissions.length }}</el-tag>
-          <el-tag type="success" effect="plain">Graded: {{ getStatusCount('graded') }}</el-tag>
-          <el-tag type="warning" effect="plain">Submitted: {{ getStatusCount('submitted') }}</el-tag>
-          <el-tag type="danger" effect="plain">Not Started: {{ getStatusCount('not_started') }}</el-tag>
+          <el-tag type="info" effect="plain">总数：{{ filteredSubmissions.length }}</el-tag>
+          <el-tag type="success" effect="plain">已评分：{{ getStatusCount('graded') }}</el-tag>
+          <el-tag type="warning" effect="plain">已提交：{{ getStatusCount('submitted') }}</el-tag>
+          <el-tag type="danger" effect="plain">未开始：{{ getStatusCount('not_started') }}</el-tag>
         </div>
 
         <div class="table-actions">
           <el-button type="primary" size="small" @click="loadSubmissions">
             <el-icon><Refresh /></el-icon>
-            Refresh
+            刷新
           </el-button>
           <el-button type="success" size="small" :disabled="!selectedRows.length" @click="batchGrade">
             <el-icon><Edit /></el-icon>
-            Batch Grade
+            批量评分
           </el-button>
           <el-button type="info" size="small" @click="exportData">
             <el-icon><Download /></el-icon>
-            Export
+            导出
           </el-button>
         </div>
       </div>
@@ -96,40 +96,40 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column v-if="!experimentId" prop="experimentId" label="Experiment ID" width="110" />
+        <el-table-column v-if="!experimentId" prop="experimentId" label="实验 ID" width="110" />
         <el-table-column
           v-if="!experimentId"
           prop="experimentName"
-          label="Experiment Name"
+          label="实验名称"
           min-width="180"
           show-overflow-tooltip
         />
-        <el-table-column prop="studentName" label="Student Name" width="140" />
-        <el-table-column prop="class" label="Class" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="studentName" label="学生姓名" width="140" />
+        <el-table-column prop="class" label="班级" min-width="120" show-overflow-tooltip />
 
-        <el-table-column prop="submitTime" label="Submit Time" width="170" show-overflow-tooltip>
+        <el-table-column prop="submitTime" label="提交时间" width="170" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="hasRealSubmitTime(row)">{{ formatDate(row.submitTime) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="Score" width="90" align="center">
+        <el-table-column label="成绩" width="90" align="center">
           <template #default="{ row }">
             <span v-if="row.score !== null" class="score">{{ row.score }}</span>
-            <span v-else class="text-muted">N/A</span>
+            <span v-else class="text-muted">未评分</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="Plagiarism" width="110" align="center">
+        <el-table-column label="查重率" width="110" align="center">
           <template #default="{ row }">
             <el-tag v-if="row.plagiarismRate !== null" :type="getPlagiarismRateType(row.plagiarismRate)" size="small">
               {{ row.plagiarismRate }}%
             </el-tag>
-            <span v-else class="text-muted">N/A</span>
+            <span v-else class="text-muted">暂无</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="Status" width="100" align="center">
+        <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small" effect="dark">
               {{ getStatusText(row.status) }}
@@ -137,10 +137,10 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Actions" width="170" fixed="right">
+        <el-table-column label="操作" width="170" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="viewSubmissionDetail(row.id)">Detail</el-button>
-            <el-button v-if="row.status === 'submitted'" type="success" link @click="gradeSubmission(row)">Grade</el-button>
+            <el-button type="primary" link @click="viewSubmissionDetail(row.id)">详情</el-button>
+            <el-button v-if="row.status === 'submitted'" type="success" link @click="gradeSubmission(row)">评分</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -158,35 +158,35 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="gradeDialogVisible" title="Grade Submission" width="500px">
+    <el-dialog v-model="gradeDialogVisible" title="提交评分" width="500px">
       <el-form :model="gradeForm" label-width="120px">
-        <el-form-item label="Student Name">
+        <el-form-item label="学生姓名">
           <span>{{ currentSubmission ? currentSubmission.studentName : '' }}</span>
         </el-form-item>
 
-        <el-form-item label="Score">
+        <el-form-item label="成绩">
           <el-input-number v-model="gradeForm.score" :min="0" :max="100" :precision="1" />
         </el-form-item>
 
-        <el-form-item label="Plagiarism Rate">
+        <el-form-item label="查重率">
           <el-input-number v-model="gradeForm.plagiarismRate" :min="0" :max="100" :precision="1" />
           <span class="rate-unit">%</span>
         </el-form-item>
 
-        <el-form-item label="AI Comment">
+        <el-form-item label="AI 评语">
           <el-input
             v-model="gradeForm.aiComment"
             type="textarea"
             :rows="6"
-            placeholder="Enter AI comment"
+            placeholder="请输入 AI 评语"
           />
         </el-form-item>
       </el-form>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="gradeDialogVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="submitGrade">Confirm</el-button>
+          <el-button @click="gradeDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitGrade">确定</el-button>
         </div>
       </template>
     </el-dialog>
@@ -209,8 +209,8 @@ const experimentId = computed(() =>
 )
 const headerDescription = computed(() =>
   experimentId.value
-    ? `Submissions for experiment ${experimentName.value || experimentId.value}`
-    : 'All student submissions'
+    ? `实验 ${experimentName.value || experimentId.value} 的学生提交`
+    : '全部学生提交记录'
 )
 
 const experimentName = ref('')
@@ -300,7 +300,7 @@ const handleSelectionChange = (rows) => {
 }
 
 const batchGrade = () => {
-  ElMessage.info('Batch grade is not implemented yet.')
+  ElMessage.info('批量评分功能暂未实现。')
 }
 
 const formatDate = (dateString) => {
@@ -336,12 +336,12 @@ const getStatusType = (status) => {
 
 const getStatusText = (status) => {
   const textMap = {
-    submitted: 'Submitted',
-    graded: 'Graded',
-    rejected: 'Rejected',
-    not_started: 'Not Started'
+    submitted: '已提交',
+    graded: '已评分',
+    rejected: '已退回',
+    not_started: '未开始'
   }
-  return textMap[status] || 'Unknown'
+  return textMap[status] || '未知'
 }
 
 const normalizeStudentId = (value) => {
@@ -398,8 +398,8 @@ const loadSubmissions = async () => {
       if (current) experimentName.value = current.experimentName || ''
     }
   } catch (error) {
-    console.error('Failed to load submissions:', error)
-    ElMessage.error(`Failed to load submissions: ${error?.message || 'unknown error'}`)
+    console.error('加载学生提交失败:', error)
+    ElMessage.error(`加载学生提交失败：${error?.message || '未知错误'}`)
   } finally {
     tableLoading.value = false
   }
@@ -416,7 +416,7 @@ const loadExperimentOptions = async () => {
       experimentOptions.value = []
     }
   } catch (error) {
-    console.error('Failed to load experiments:', error)
+    console.error('加载实验列表失败:', error)
     experimentOptions.value = []
   }
 }
@@ -462,7 +462,7 @@ const submitGrade = async () => {
     }
 
     await api.gradeSubmission(submissionId, gradeData)
-    ElMessage.success('Grade submitted successfully.')
+    ElMessage.success('评分提交成功。')
     gradeDialogVisible.value = false
 
     const index = submissions.value.findIndex((sub) => sub.id === submissionId)
@@ -475,8 +475,8 @@ const submitGrade = async () => {
       }
     }
   } catch (error) {
-    console.error('Failed to submit grade:', error)
-    ElMessage.error('Failed to submit grade, please retry.')
+    console.error('提交评分失败:', error)
+    ElMessage.error('提交评分失败，请重试。')
   }
 }
 
@@ -491,15 +491,15 @@ const csvEscape = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
 
 const exportData = () => {
   const header = [
-    'Experiment ID',
-    'Experiment Name',
-    'Student ID',
-    'Student Name',
-    'Class',
-    'Submit Time',
-    'Score',
-    'Plagiarism Rate',
-    'Status'
+    '实验 ID',
+    '实验名称',
+    '学号',
+    '学生姓名',
+    '班级',
+    '提交时间',
+    '成绩',
+    '查重率',
+    '状态'
   ]
   const rows = filteredSubmissions.value.map((item) => [
     item.experimentId,
@@ -521,13 +521,13 @@ const exportData = () => {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.setAttribute('download', `submission_list_${new Date().toISOString().slice(0, 10)}.csv`)
+  link.setAttribute('download', `student_submissions_${new Date().toISOString().slice(0, 10)}.csv`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  ElMessage.success('Export succeeded.')
+  ElMessage.success('导出成功。')
 }
 
 onMounted(async () => {

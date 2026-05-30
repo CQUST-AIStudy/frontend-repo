@@ -85,7 +85,7 @@ export function testAIFeedback() {
       passedCases: 3,
       totalCases: 3,
       runtime: '120ms',
-      memory: 'N/A'
+      memory: '暂无'
     },
     skillSuggestions: ['数组操作', '算法优化', '哈希表应用']
   }

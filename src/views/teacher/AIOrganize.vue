@@ -561,7 +561,7 @@ const downloadZip = async () => {
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
       ElMessage.warning('当前整理结果尚未生成，请等待任务完成后再下载。')
     } else {
-      ElMessage.error(`下载失败: ${message || 'unknown error'}`)
+      ElMessage.error(`下载失败: ${message || '未知错误'}`)
     }
   } finally {
     downloading.value = false
@@ -591,7 +591,7 @@ const downloadHistoryZip = async (job) => {
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
       ElMessage.warning('该任务的整理结果尚未生成，暂时无法下载。')
     } else {
-      ElMessage.error(`下载失败: ${message || 'unknown error'}`)
+      ElMessage.error(`下载失败: ${message || '未知错误'}`)
     }
   } finally {
     downloading.value = false

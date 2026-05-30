@@ -181,10 +181,10 @@
         <div class="execution-details" v-if="submitResult.details">
           <el-descriptions title="执行详情" :column="2" border>
             <el-descriptions-item label="执行时间">
-              {{ submitResult.details.runtime || 'N/A' }}
+              {{ submitResult.details.runtime || '暂无' }}
             </el-descriptions-item>
             <el-descriptions-item label="内存消耗">
-              {{ submitResult.details.memory || 'N/A' }}
+              {{ submitResult.details.memory || '暂无' }}
             </el-descriptions-item>
             <el-descriptions-item label="通过用例">
               {{ submitResult.details.passedCases || 0 }} / {{ submitResult.details.totalCases || 0 }}
@@ -486,7 +486,7 @@ async function submitCode() {
       recordTrainingReview(!!response.data.accepted)
 
       if (response.data.status === 'unavailable') {
-        ElMessage.warning('AI evaluation is temporarily unavailable. Fallback result is shown.')
+        ElMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
       } else if (response.data.accepted) {
         markProblemCompleted(problem.value.id)
         ElMessage.success('答案通过')

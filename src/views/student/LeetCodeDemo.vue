@@ -41,7 +41,7 @@
         <div class="execution-details">
           <el-descriptions title="执行详情" :column="2" border>
             <el-descriptions-item label="执行时间">120ms</el-descriptions-item>
-            <el-descriptions-item label="内存消耗">N/A</el-descriptions-item>
+            <el-descriptions-item label="内存消耗">暂无</el-descriptions-item>
             <el-descriptions-item label="通过用例">3 / 3</el-descriptions-item>
           </el-descriptions>
         </div>

@@ -2,7 +2,7 @@
   <div class="chat-page">
     <section class="hero-panel">
       <div class="hero-copy">
-        <span class="hero-badge">Teacher Copilot</span>
+        <span class="hero-badge">教师助手</span>
         <h1>AI 教学对话助手</h1>
         <p>
           支持教学问答、论文检索、课程设计讨论。切换到系统其他页面后，请求会继续执行，返回本页时会自动显示结果。
@@ -107,7 +107,7 @@
         <div v-else class="empty-panel">
           <div class="empty-orb"></div>
           <div class="empty-copy">
-            <span class="empty-label">Suggested prompts</span>
+            <span class="empty-label">推荐提问</span>
             <h3>从一个具体教学问题开始</h3>
             <p>例如课程讲解、实验设计、知识点串讲、论文资料检索或答疑措辞优化。</p>
           </div>

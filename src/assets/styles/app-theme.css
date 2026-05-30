@@ -1,10 +1,10 @@
 :root {
   --app-bg: #eef4f8;
-  --app-surface: rgba(255, 255, 255, 0.88);
+  --app-surface: rgba(255, 255, 255, 0.96);
   --app-surface-strong: #ffffff;
   --app-surface-muted: #f4f8fb;
-  --app-border: rgba(129, 155, 181, 0.22);
-  --app-border-strong: rgba(64, 108, 152, 0.18);
+  --app-border: rgba(104, 133, 162, 0.34);
+  --app-border-strong: rgba(64, 108, 152, 0.28);
   --app-text: #16324a;
   --app-text-secondary: #5d7288;
   --app-text-soft: #8a9aab;
@@ -14,8 +14,8 @@
   --app-success: #1d8f6a;
   --app-warning: #c57b1d;
   --app-danger: #d04c45;
-  --app-shadow: 0 18px 40px rgba(28, 53, 87, 0.08);
-  --app-shadow-soft: 0 10px 24px rgba(19, 54, 89, 0.06);
+  --app-shadow: 0 18px 40px rgba(28, 53, 87, 0.12);
+  --app-shadow-soft: 0 12px 28px rgba(19, 54, 89, 0.1);
   --app-radius-xl: 28px;
   --app-radius-lg: 20px;
   --app-radius-md: 14px;
@@ -37,8 +37,12 @@
   --el-text-color-primary: var(--app-text);
   --el-text-color-regular: var(--app-text-secondary);
   --el-text-color-secondary: var(--app-text-soft);
-  --el-bg-color: transparent;
+  --el-bg-color: rgba(255, 255, 255, 0.96);
+  --el-bg-color-overlay: #ffffff;
+  --el-fill-color-blank: #ffffff;
   --el-fill-color-light: #f6f9fc;
+  --el-card-border-color: var(--app-border);
+  --el-card-bg-color: var(--app-surface);
 }
 
 html,
@@ -104,6 +108,7 @@ select {
   border: 1px solid var(--app-border);
   background: var(--app-surface);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--app-shadow-soft);
 }
 

@@ -5,7 +5,7 @@
     <div v-if="detail" class="review-content">
       <div class="score-banner" :class="scoreLevel">
         <div class="score-main">
-          <span class="score-value">{{ formatScore(detail.totalScore, 'N/A') }}</span>
+          <span class="score-value">{{ formatScore(detail.totalScore, '暂无') }}</span>
           <span class="score-label">总分</span>
         </div>
         <div class="score-info">
@@ -72,7 +72,7 @@
                 <el-tag v-if="score.status === 'NEED_MORE_EVIDENCE'" type="warning" size="small" effect="light">
                   证据不足
                 </el-tag>
-                <span class="dim-value">{{ score.score ?? 'N/A' }}</span>
+                <span class="dim-value">{{ score.score ?? '暂无' }}</span>
                 <span class="dim-max">/ {{ score.maxScore }}</span>
                 <span class="dim-weight">({{ score.weight }}%)</span>
               </div>
