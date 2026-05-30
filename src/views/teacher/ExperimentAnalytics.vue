@@ -258,6 +258,17 @@ const SCORE_LABELS = [
 ]
 
 const SCORE_SHORT_LABELS = ['100', '90-99', '80-89', '70-79', '60-69', '50-59', '40-49', '30-39', '20-29', '10-19', '0-9']
+const EXPERIMENT_LIST_ERROR_TEXT = '实验列表暂时无法加载，请稍后重试；如持续出现，请联系管理员检查数据服务。'
+const EXPERIMENT_ANALYTICS_ERROR_TEXT = '实验分析结果暂时无法加载，请稍后重试；如持续出现，请联系管理员检查数据服务。'
+const EXPERIMENT_COMPARISON_ERROR_TEXT = '实验横向对比暂时无法加载，请稍后重试；如持续出现，请联系管理员检查数据服务。'
+const BACKEND_INTERNAL_ERROR_PATTERNS = [
+  /jdbc exception/i,
+  /executing sql/i,
+  /illegal mix of collations/i,
+  /bad sql grammar/i,
+  /sqlsyntaxerrorexception/i,
+  /dataaccessexception/i,
+]
 
 const userStore = useUserStore()
 
@@ -377,8 +388,17 @@ function normalizeArray(payload) {
   return []
 }
 
+function isBackendInternalError(message) {
+  const text = String(message || '')
+  if (!text) return false
+  if (BACKEND_INTERNAL_ERROR_PATTERNS.some(pattern => pattern.test(text))) return true
+  return text.length > 300 && /\b(SELECT|FROM|JOIN|WHERE|GROUP BY|ORDER BY)\b/i.test(text)
+}
+
 function getErrorText(error, fallback) {
-  return error?.response?.data?.message || error?.message || fallback
+  const message = error?.response?.data?.message || error?.message || ''
+  if (!message || isBackendInternalError(message)) return fallback
+  return message
 }
 
 function safeNumber(value) {
@@ -494,7 +514,7 @@ async function loadExperiments({ autoSelect = true } = {}) {
     experiments.value = []
     selectedExp.value = null
     data.value = null
-    errorMessage.value = getErrorText(error, '实验数据分析加载失败')
+    errorMessage.value = getErrorText(error, EXPERIMENT_LIST_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
     loading.value = false
@@ -518,7 +538,7 @@ async function loadAnalytics() {
     renderAccChart()
   } catch (error) {
     data.value = null
-    errorMessage.value = getErrorText(error, '实验分析结果加载失败')
+    errorMessage.value = getErrorText(error, EXPERIMENT_ANALYTICS_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
     loading.value = false
@@ -535,7 +555,7 @@ async function loadComparison() {
     renderComparisonChart()
   } catch (error) {
     comparisonItems.value = []
-    errorMessage.value = getErrorText(error, '实验横向对比加载失败')
+    errorMessage.value = getErrorText(error, EXPERIMENT_COMPARISON_ERROR_TEXT)
     compChart?.dispose()
     compChart = null
   } finally {
