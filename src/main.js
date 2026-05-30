@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/google-theme.css'
 import './assets/styles/app-theme.css'
+import { normalizeMessageOptions } from './utils/errorMessage'
 import './utils'
 
 if (process.env.NODE_ENV === 'development') {
@@ -34,6 +35,18 @@ for (const [key, component] of Object.entries(ElementPlusComponents)) {
 }
 
 const { ElMessage, ElMessageBox, ElLoading } = ElementPlusComponents
+if (!ElMessage.__friendlyErrorPatched) {
+  const wrapMessageMethod = (methodName, fallbackMessage) => {
+    const originalMethod = ElMessage[methodName]
+    ElMessage[methodName] = (options = {}) => {
+      return originalMethod.call(ElMessage, normalizeMessageOptions(options, fallbackMessage))
+    }
+  }
+
+  wrapMessageMethod('error', '操作失败，请稍后重试')
+  wrapMessageMethod('warning', '操作提醒，请稍后重试')
+  Object.defineProperty(ElMessage, '__friendlyErrorPatched', { value: true })
+}
 app.config.globalProperties.$message = ElMessage
 app.config.globalProperties.$msgbox = ElMessageBox
 app.config.globalProperties.$loading = ElLoading.service

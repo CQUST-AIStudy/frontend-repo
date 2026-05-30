@@ -110,6 +110,7 @@ import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
 import axios from 'axios'
 import { API_BASE_URL } from '../../config/runtime'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const API_BASE = API_BASE_URL
 const loading = ref(true)
@@ -146,7 +147,7 @@ async function fetchData() {
   try {
     const res = await axios.get(`${API_BASE}/api/profile/class`, { withCredentials: true })
     const d = res.data || res
-    if (d.error) { errorMsg.value = d.error; return }
+    if (d.error) { errorMsg.value = getFriendlyResponseMessage(d, '班级画像加载失败，请稍后重试'); return }
     data.value = d
     console.log('[ClassProfile] 数据加载成功:', {
       totalStudents: d.totalStudents,
@@ -157,7 +158,7 @@ async function fetchData() {
     // 延迟一帧确保 DOM 已渲染
     setTimeout(() => renderBar(), 100)
   } catch (e) {
-    errorMsg.value = '加载失败: ' + (e.message || e)
+    errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -233,7 +234,7 @@ async function viewStudent(studentId) {
       })
     }
   } catch (e) {
-    dialogProfile.value = { error: e.message }
+    dialogProfile.value = { error: getFriendlyErrorMessage(e, '学生画像加载失败，请稍后重试') }
   } finally {
     dialogLoading.value = false
   }

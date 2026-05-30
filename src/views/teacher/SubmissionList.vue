@@ -540,7 +540,8 @@ onMounted(async () => {
 
 <style scoped>
 .submission-list {
-  height: 100%;
+  min-width: 0;
+  min-height: 100%;
   padding: 0 16px 20px;
   background-color: #f5f7fa;
 }
@@ -554,6 +555,14 @@ onMounted(async () => {
 
 .table-card {
   padding: 10px;
+}
+
+.table-card :deep(.el-table) {
+  width: 100%;
+}
+
+.table-card :deep(.el-table__body-wrapper) {
+  overflow-x: auto;
 }
 
 .card-header {
@@ -599,6 +608,7 @@ onMounted(async () => {
 
 .table-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -635,6 +645,11 @@ onMounted(async () => {
   .table-operations {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .table-stats,
+  .table-actions {
+    width: 100%;
   }
 
   .my-page-header {

@@ -119,6 +119,7 @@ import {
   getTeacherPtaCredentials,
   updateTeacherPtaCredentials
 } from '../../api/tap'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL_WITH_SLASH,
@@ -205,7 +206,7 @@ async function savePtaCredential() {
     ptaForm.ptaPassword = ''
     ElMessage.success('PTA 账号绑定已保存')
   } catch (error) {
-    ElMessage.error(error.message || 'PTA 账号绑定保存失败')
+    ElMessage.error(getFriendlyErrorMessage(error, 'PTA 账号绑定保存失败，请稍后重试'))
   } finally {
     savingPtaCredential.value = false
   }
@@ -236,7 +237,7 @@ async function clearPtaCredential() {
     ptaForm.ptaPassword = ''
     ElMessage.success('PTA 账号绑定已解除')
   } catch (error) {
-    ElMessage.error(error.message || '解除 PTA 绑定失败')
+    ElMessage.error(getFriendlyErrorMessage(error, '解除 PTA 绑定失败，请稍后重试'))
   } finally {
     savingPtaCredential.value = false
   }
@@ -256,10 +257,10 @@ const changePassword = () => {
         ElMessage.success('密码修改成功')
         resetPasswordForm()
       } else {
-        ElMessage.error(data.message || '密码修改失败')
+        ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
       }
     } catch (e) {
-      ElMessage.error('密码修改失败: ' + (e.response?.data?.message || e.message))
+      ElMessage.error(getFriendlyErrorMessage(e, '密码修改失败，请检查当前密码后重试'))
     } finally {
       changingPassword.value = false
     }

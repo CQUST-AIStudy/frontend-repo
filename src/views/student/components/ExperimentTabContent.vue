@@ -5,7 +5,13 @@
         <el-empty description="暂无实验数据" />
       </el-col>
       
-      <el-col :span="8" v-for="experiment in experiments" :key="experiment.id">
+      <el-col
+        v-for="experiment in experiments"
+        :key="experiment.id"
+        :xs="24"
+        :sm="12"
+        :lg="8"
+      >
         <experiment-card :experiment="experiment" />
       </el-col>
     </el-row>
@@ -27,4 +33,4 @@ defineProps({
 .experiment-tab-content {
   min-height: 200px;
 }
-</style> 
+</style>

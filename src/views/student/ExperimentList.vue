@@ -123,8 +123,11 @@ onBeforeUnmount(() => { progressChart?.dispose() })
 </script>
 
 <style scoped>
-.g-page { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-.g-content { display: flex; flex-direction: column; gap: 20px; }
+.g-page {
+  min-width: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+.g-content { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 .g-tabs { display: flex; gap: 0; border-bottom: 1px solid #dadce0; margin-bottom: 4px; }
 .g-tab {
@@ -136,13 +139,14 @@ onBeforeUnmount(() => { progressChart?.dispose() })
 
 .g-card {
   background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #dadce0;
+  min-width: 0;
 }
 .g-card-head {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 16px; font-size: 15px; font-weight: 500; color: #202124;
 }
 
-.g-bottom-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.g-bottom-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 16px; }
 .g-card-wide, .g-card-narrow { min-width: 0; }
 .g-chart { height: 240px; width: 100%; }
 
@@ -159,4 +163,42 @@ onBeforeUnmount(() => { progressChart?.dispose() })
 /* 日历 Google 风格 */
 .g-card :deep(.el-calendar-table td.is-today .cal-day) { color: #fff; background: #1a73e8; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; text-align: center; }
 .g-card :deep(.el-calendar__header) { padding: 12px 16px; }
+
+@media (max-width: 960px) {
+  .g-bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .g-content {
+    gap: 14px;
+  }
+
+  .g-tabs {
+    overflow-x: auto;
+  }
+
+  .g-tab {
+    flex: 1;
+    min-width: 96px;
+    padding-inline: 12px;
+    white-space: nowrap;
+  }
+
+  .g-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .g-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .g-chart {
+    height: 220px;
+  }
+}
 </style>

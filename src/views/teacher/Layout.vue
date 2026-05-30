@@ -1,7 +1,7 @@
 <template>
   <div class="teacher-layout">
     <el-container class="layout-container">
-      <el-aside :width="collapsed ? '76px' : '260px'" class="layout-aside">
+      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside">
         <div class="logo-container">
           <img src="../../assets/logo.png" alt="Logo" class="logo" />
           <transition name="fade-text">
@@ -119,11 +119,136 @@
         </div>
       </el-aside>
 
+      <el-drawer
+        v-model="mobileMenuVisible"
+        direction="ltr"
+        size="300px"
+        :with-header="false"
+        class="layout-drawer"
+      >
+        <div class="layout-aside mobile-aside">
+          <div class="logo-container">
+            <img src="../../assets/logo.png" alt="Logo" class="logo" />
+            <div class="brand-copy">
+              <span class="logo-kicker">教师工作台</span>
+              <span class="logo-title">智能教学平台</span>
+            </div>
+          </div>
+
+          <div class="menu-scroll-area">
+            <el-scrollbar>
+              <el-menu
+                :default-active="activeMenu"
+                class="layout-menu"
+                router
+                :collapse-transition="false"
+                @select="closeMobileMenu"
+              >
+                <el-menu-item index="/teacher/dashboard">
+                  <el-icon><HomeFilled /></el-icon>
+                  <template #title>首页总览</template>
+                </el-menu-item>
+
+                <el-sub-menu index="class-group">
+                  <template #title>
+                    <el-icon><UserFilled /></el-icon>
+                    <span>教学班管理</span>
+                  </template>
+                  <el-menu-item index="/teacher/class-list">教学班列表</el-menu-item>
+                  <el-menu-item index="/teacher/class-analysis">教学班分析</el-menu-item>
+                  <el-menu-item index="/teacher/class-profile">能力画像</el-menu-item>
+                </el-sub-menu>
+
+                <el-sub-menu index="teaching-group">
+                  <template #title>
+                    <el-icon><Notebook /></el-icon>
+                    <span>实验教学</span>
+                  </template>
+                  <el-menu-item index="/teacher/experiments">实验列表</el-menu-item>
+                  <el-menu-item index="/teacher/experiment-create">创建实验</el-menu-item>
+                  <el-menu-item index="/teacher/submissions">学生提交</el-menu-item>
+                  <el-menu-item index="/teacher/experiment-analytics">实验数据分析</el-menu-item>
+                  <el-menu-item index="/teacher/data-sync">PTA 数据同步</el-menu-item>
+                </el-sub-menu>
+
+                <el-sub-menu index="grading-group">
+                  <template #title>
+                    <el-icon><DocumentChecked /></el-icon>
+                    <span>AI 批改</span>
+                  </template>
+                  <el-menu-item index="/teacher/grading">批改中心</el-menu-item>
+                  <el-menu-item index="/teacher/grading/rubrics">评分标准</el-menu-item>
+                </el-sub-menu>
+
+                <el-sub-menu index="rag-group">
+                  <template #title>
+                    <el-icon><Collection /></el-icon>
+                    <span>课程知识库</span>
+                  </template>
+                  <el-menu-item index="/teacher/knowledge-base">空间与文档</el-menu-item>
+                  <el-menu-item index="/teacher/rag-analytics">RAG 分析</el-menu-item>
+                </el-sub-menu>
+
+                <el-sub-menu index="ai-group">
+                  <template #title>
+                    <el-icon><ChatDotRound /></el-icon>
+                    <span>AI 助教</span>
+                  </template>
+                  <el-menu-item index="/teacher/ai-chat">AI 对话</el-menu-item>
+                  <el-menu-item index="/teacher/class-detailed-analysis">教学建议</el-menu-item>
+                </el-sub-menu>
+
+                <el-sub-menu index="tools-group">
+                  <template #title>
+                    <el-icon><Briefcase /></el-icon>
+                    <span>教辅工具</span>
+                  </template>
+                  <el-menu-item index="/teacher/document-center">文档中心</el-menu-item>
+                  <el-menu-item index="/teacher/bilingual-read">双语阅读</el-menu-item>
+                  <el-menu-item index="/teacher/summary-card">AI 精读</el-menu-item>
+                  <el-menu-item index="/teacher/ai-organize">智能整理</el-menu-item>
+                </el-sub-menu>
+
+                <el-menu-item
+                  v-if="hasPermission(['view_course_classes', 'analyze_course_classes'])"
+                  index="/teacher/course-analysis"
+                >
+                  <el-icon><DataAnalysis /></el-icon>
+                  <template #title>课程分析</template>
+                </el-menu-item>
+
+                <el-sub-menu v-if="hasPermission(['view_all_teachers'])" index="dept-group">
+                  <template #title>
+                    <el-icon><OfficeBuilding /></el-icon>
+                    <span>院系管理</span>
+                  </template>
+                  <el-menu-item index="/teacher/department-teachers">教师管理</el-menu-item>
+                  <el-menu-item v-if="hasPermission(['analyze_all_classes'])" index="/teacher/department-analytics">
+                    院系统计
+                  </el-menu-item>
+                  <el-menu-item v-if="hasPermission(['manage_teacher_ai'])" index="/teacher/teacher-ai-management">
+                    AI 管理
+                  </el-menu-item>
+                </el-sub-menu>
+
+                <div class="menu-divider"></div>
+
+                <el-menu-item index="/teacher/profile">
+                  <el-icon><Setting /></el-icon>
+                  <template #title>个人设置</template>
+                </el-menu-item>
+              </el-menu>
+            </el-scrollbar>
+          </div>
+        </div>
+      </el-drawer>
+
       <el-container class="layout-main">
         <el-header class="layout-header">
           <div class="header-left">
-            <el-icon class="fold-icon" @click="toggleSidebar">
-              <Fold v-if="!collapsed" />
+            <el-icon class="fold-icon" @click="toggleNavigation">
+              <MenuIcon v-if="isMobile" />
+              <Fold v-else-if="!collapsed" />
               <Expand v-else />
             </el-icon>
 
@@ -155,7 +280,7 @@
                 <el-avatar :size="34" :src="userInfo.avatar">
                   <span>{{ (userInfo.name || '教').slice(0, 1) }}</span>
                 </el-avatar>
-                <div v-if="!collapsed" class="user-copy">
+                <div v-if="!isMobile && !collapsed" class="user-copy">
                   <span class="username">{{ userInfo.name || '教师用户' }}</span>
                   <span class="user-subtitle">课程教学工作台</span>
                 </div>
@@ -198,7 +323,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
@@ -212,6 +337,7 @@ import {
   Fold,
   FullScreen,
   HomeFilled,
+  Menu as MenuIcon,
   Notebook,
   OfficeBuilding,
   School,
@@ -221,11 +347,23 @@ import {
 } from '@element-plus/icons-vue'
 import { useUserStore } from '../../store'
 import { clearAuthStorage } from '../../constants/auth'
+import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
 
 const route = useRoute()
 const router = useRouter()
-const collapsed = ref(false)
 const userStore = useUserStore()
+const {
+  isMobile,
+  collapsed,
+  mobileMenuVisible,
+  asideWidth,
+  toggleNavigation,
+  closeMobileMenu
+} = useResponsiveLayout({
+  route,
+  expandedWidth: '260px',
+  collapsedWidth: '76px'
+})
 
 const userInfo = computed(() => userStore.userInfo || { name: '教师用户', avatar: '' })
 const selectedClassName = computed(() => userStore.selectedClass?.name || '')
@@ -278,10 +416,6 @@ const breadcrumbs = computed(() => {
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'teacher' ? paths.slice(1).map((part) => pathMap[part] || part) : []
 })
-
-function toggleSidebar() {
-  collapsed.value = !collapsed.value
-}
 
 function toggleFullScreen() {
   if (!document.fullscreenElement) {
@@ -339,14 +473,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.teacher-layout,
+.teacher-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
 .layout-container {
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .layout-aside {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   border-right: 1px solid rgba(126, 157, 183, 0.14);
   background:
@@ -382,7 +524,7 @@ onMounted(() => {
 .logo-kicker {
   color: rgba(173, 222, 255, 0.7);
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -462,6 +604,7 @@ onMounted(() => {
 }
 
 .layout-main {
+  min-width: 0;
   background: transparent;
 }
 
@@ -470,7 +613,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  height: 78px;
+  min-height: 78px;
   padding: 0 28px;
   border-bottom: 1px solid rgba(126, 157, 183, 0.14);
   background: rgba(248, 251, 253, 0.72);
@@ -482,6 +625,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .fold-icon,
@@ -504,10 +648,17 @@ onMounted(() => {
 }
 
 .header-path {
+  min-width: 0;
   padding: 10px 14px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.64);
   border: 1px solid rgba(126, 157, 183, 0.14);
+}
+
+.header-path :deep(.el-breadcrumb) {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .class-indicator {
@@ -522,6 +673,14 @@ onMounted(() => {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  max-width: min(280px, 32vw);
+}
+
+.class-indicator span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .teacher-level-badge {
@@ -558,6 +717,7 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.64);
   border: 1px solid rgba(126, 157, 183, 0.14);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .user-copy {
@@ -584,8 +744,11 @@ onMounted(() => {
 
 .layout-content {
   padding: 24px 28px 28px;
+  min-width: 0;
   min-height: calc(100vh - 138px);
+  min-height: calc(100dvh - 138px);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .layout-footer {
@@ -621,6 +784,16 @@ onMounted(() => {
   opacity: 0;
 }
 
+.layout-drawer :deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.mobile-aside {
+  width: 100%;
+  border-right: none;
+}
+
 @media (max-width: 960px) {
   .layout-header {
     height: auto;
@@ -636,6 +809,35 @@ onMounted(() => {
 
   .layout-content {
     padding: 16px;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .layout-header {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-path {
+    flex: 1;
+    padding: 8px 10px;
+  }
+
+  .header-path :deep(.el-breadcrumb) {
+    font-size: 12px;
+  }
+
+  .class-indicator {
+    max-width: 100%;
+  }
+
+  .teacher-level-badge {
+    min-height: 30px;
   }
 }
 </style>

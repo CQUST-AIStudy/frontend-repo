@@ -310,6 +310,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
 import api from '../../api'
 import { submitPtaCookie } from '../../api/tap'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const loading = ref(false)
 const syncingClassId = ref(null)
@@ -342,7 +343,7 @@ async function loadDashboard() {
     const res = await api.getAdminDashboardOverview()
     dashboard.value = res?.data ?? res ?? dashboard.value
   } catch (error) {
-    ElMessage.error(error?.response?.data?.message || error.message || '管理员数据加载失败')
+    ElMessage.error(getFriendlyErrorMessage(error, '管理员数据加载失败，请稍后重试'))
   } finally {
     loading.value = false
   }
@@ -356,7 +357,7 @@ async function submitCookieForm() {
     const data = res?.data ?? res ?? {}
     cookieResult.value = {
       valid: !!data.valid,
-      message: data.message || (data.valid ? 'Cookie 已更新' : 'Cookie 无效')
+      message: getFriendlyResponseMessage(data, data.valid ? 'Cookie 已更新' : 'Cookie 无效，请重新提交')
     }
     if (data.valid) {
       ElMessage.success('Cookie 更新成功')
@@ -366,7 +367,7 @@ async function submitCookieForm() {
       ElMessage.warning(cookieResult.value.message)
     }
   } catch (error) {
-    cookieResult.value = { valid: false, message: error.message || 'Cookie 更新失败' }
+    cookieResult.value = { valid: false, message: getFriendlyErrorMessage(error, 'Cookie 更新失败，请稍后重试') }
     ElMessage.error(cookieResult.value.message)
   } finally {
     cookieSubmitting.value = false
@@ -379,13 +380,13 @@ async function triggerSync(row, mode, force = false) {
     const res = await api.triggerAdminClassSync(row.id, { mode, force })
     const data = res?.data ?? res ?? {}
     if (data.blocked) {
-      ElMessage.warning(data.message || '任务被系统拦截')
+      ElMessage.warning(getFriendlyResponseMessage(data, '任务被系统拦截，请稍后重试'))
     } else {
       ElMessage.success(data.message || `${row.name} 已提交${modeText(mode)}`)
     }
     await loadDashboard()
   } catch (error) {
-    ElMessage.error(error?.response?.data?.message || error.message || '同步触发失败')
+    ElMessage.error(getFriendlyErrorMessage(error, '同步触发失败，请稍后重试'))
   } finally {
     syncingClassId.value = null
   }
@@ -517,6 +518,7 @@ function taskModeType(mode) {
 <style scoped>
 .admin-dashboard {
   min-height: 100%;
+  min-width: 0;
 }
 
 .my-page-header {
@@ -527,6 +529,7 @@ function taskModeType(mode) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
 .hero-grid {
@@ -606,6 +609,7 @@ function taskModeType(mode) {
 }
 
 .panel-card {
+  min-width: 0;
   border-radius: 18px;
   border: 1px solid #e7ebf0;
 }
@@ -699,6 +703,29 @@ function taskModeType(mode) {
   .my-page-header {
     padding-left: 0;
     padding-right: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-body {
+    gap: 14px;
+  }
+
+  .hero-card :deep(.el-card__body) {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .hero-value {
+    font-size: 30px;
+  }
+
+  .panel-header,
+  .status-item,
+  .action-row,
+  .cookie-result {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

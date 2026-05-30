@@ -110,6 +110,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import axios from 'axios'
 import { API_BASE_URL } from '../../config/runtime'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const API_BASE = API_BASE_URL
 const route = useRoute()
@@ -154,8 +155,8 @@ async function generateAiComment(force) {
     if (data.success && data.aiComment) {
       localAiComment.value = data.aiComment; aiSource.value = data.source || 'deepseek'
       if (data.source === 'deepseek') ElMessage.success('AI点评已生成')
-    } else { ElMessage.warning(data.message || 'AI点评生成失败') }
-  } catch (e) { ElMessage.error('请求失败: ' + (e.response?.data?.message || e.message)) }
+    } else { ElMessage.warning(getFriendlyResponseMessage(data, 'AI 点评生成失败，请稍后重试')) }
+  } catch (e) { ElMessage.error(getFriendlyErrorMessage(e, 'AI 点评生成失败，请稍后重试')) }
   finally { aiGenerating.value = false }
 }
 

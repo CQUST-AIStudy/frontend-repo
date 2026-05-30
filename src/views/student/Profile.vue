@@ -186,6 +186,7 @@ import LoadingState from '../../components/LoadingState.vue'
 import { useUserStore } from '../../store'
 import api from '../../api'
 import { API_BASE_URL } from '../../config/runtime'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const userStore = useUserStore()
 const loading = ref(true)
@@ -321,9 +322,9 @@ async function changePassword() {
       return
     }
 
-    ElMessage.error(data?.message || '密码修改失败')
+    ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
   } catch (error) {
-    ElMessage.error(`密码修改失败：${error.response?.data?.message || error.message}`)
+    ElMessage.error(getFriendlyErrorMessage(error, '密码修改失败，请检查当前密码后重试'))
   } finally {
     submittingPassword.value = false
   }

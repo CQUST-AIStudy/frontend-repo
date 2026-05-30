@@ -271,6 +271,7 @@ import {
 } from '../../api/tap'
 import { useUserStore } from '../../store'
 import axios from 'axios'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 function normalizeUrl(url) {
   return String(url || '').replace(/\/+$/, '')
@@ -465,7 +466,7 @@ async function triggerSync(mode) {
   }
   const alive = await probeSpiderHealth()
   if (!alive) {
-    ElMessage.error(`爬虫服务不可达: ${spiderUrl.value} (${spiderHealthError.value || 'network error'})`)
+    ElMessage.error(getFriendlyErrorMessage(spiderHealthError.value, '爬虫服务不可达，请检查服务是否已启动'))
     return
   }
 
@@ -505,7 +506,7 @@ async function triggerSync(mode) {
 
     // 冷却拦截
     if (r?.blocked) {
-      ElMessage.warning(r.message)
+      ElMessage.warning(getFriendlyResponseMessage(r, '同步任务暂时无法提交，请稍后重试'))
       syncLoading.value = ''
       return
     }
@@ -519,7 +520,7 @@ async function triggerSync(mode) {
     }
     ElMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
   } catch (e) {
-    ElMessage.error('提交失败: ' + (e.response?.data?.detail || e.message))
+    ElMessage.error(getFriendlyErrorMessage(e, '同步任务提交失败，请稍后重试'))
   } finally {
     syncLoading.value = ''
   }
@@ -537,7 +538,7 @@ function pollTaskStatus(taskId) {
         loadTaskHistory()
         loadCooldown()
         if (r.data.status === 'SUCCESS') ElMessage.success('数据同步完成')
-        else ElMessage.error('同步失败: ' + (r.data.error || '未知错误'))
+        else ElMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
       }
     } catch { /* ignore */ }
   }, 3000)
@@ -549,13 +550,13 @@ async function submitCookieHandler() {
   try {
     const res = await submitPtaCookie(cookieInput.value.trim())
     const d = res?.data || res
-    cookieResult.value = { valid: d?.valid, message: d?.message || (d?.valid ? 'Cookie 有效' : 'Cookie 无效') }
+    cookieResult.value = { valid: d?.valid, message: getFriendlyResponseMessage(d, d?.valid ? 'Cookie 有效' : 'Cookie 无效，请重新提交') }
     if (d?.valid) {
       cookieStatus.value = 'OK'
       ElMessage.success('Cookie 更新成功')
     }
   } catch (e) {
-    cookieResult.value = { valid: false, message: '提交失败: ' + e.message }
+    cookieResult.value = { valid: false, message: getFriendlyErrorMessage(e, 'Cookie 提交失败，请稍后重试') }
   } finally {
     cookieSubmitting.value = false
   }

@@ -17,12 +17,15 @@ body {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 .app-shell {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 .app-orb {
@@ -46,5 +49,14 @@ body {
   top: 18%;
   right: -180px;
   background: radial-gradient(circle, rgba(44, 181, 160, 0.26) 0%, rgba(44, 181, 160, 0) 72%);
+}
+
+@media (max-width: 768px) {
+  .app-orb {
+    width: 260px;
+    height: 260px;
+    filter: blur(48px);
+    opacity: 0.32;
+  }
 }
 </style>

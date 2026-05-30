@@ -341,6 +341,7 @@ import {
   updateCourseSpace,
   uploadCourseSpaceDocument,
 } from '@/api/tap'
+import { getFriendlyErrorMessage } from '@/utils/errorMessage'
 
 const userStore = useUserStore()
 const spaces = ref([])
@@ -463,7 +464,7 @@ async function loadSpaces() {
     const res = await getCourseSpaces()
     spaces.value = res?.data || res || []
   } catch (e) {
-    ElMessage.error(`加载课程空间失败: ${e.message}`)
+    ElMessage.error(getFriendlyErrorMessage(e, '加载课程空间失败，请稍后重试'))
   }
   loading.value = false
 }
@@ -535,7 +536,7 @@ async function saveSpace() {
     dialogVisible.value = false
     await loadSpaces()
   } catch (e) {
-    ElMessage.error(e.message)
+    ElMessage.error(getFriendlyErrorMessage(e, '保存课程空间失败，请稍后重试'))
   }
   saving.value = false
 }
@@ -550,7 +551,7 @@ async function confirmDeleteSpace(space) {
     }
     await loadSpaces()
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error(e.message)
+    if (e !== 'cancel') ElMessage.error(getFriendlyErrorMessage(e, '删除课程空间失败，请稍后重试'))
   }
 }
 
@@ -573,7 +574,7 @@ async function loadDocuments() {
   } catch (e) {
     documents.value = []
     docStatusSummary.value = emptyDocSummary()
-    ElMessage.error(`加载文档状态失败: ${e.message}`)
+    ElMessage.error(getFriendlyErrorMessage(e, '加载文档状态失败，请稍后重试'))
   }
   docsLoading.value = false
 }
@@ -610,7 +611,7 @@ async function reprocessAllDocuments() {
   try {
     await ElMessageBox.confirm('确定重新处理当前课程空间下所有可重跑文档吗？', '确认操作', { type: 'warning' })
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error(e.message)
+    if (e !== 'cancel') ElMessage.error(getFriendlyErrorMessage(e, '上传文档失败，请稍后重试'))
     return
   }
 
@@ -621,7 +622,7 @@ async function reprocessAllDocuments() {
     ElMessage.success(`已加入重处理队列：${data.requestedCount || 0} 个文档`)
     await loadDocuments()
   } catch (e) {
-    ElMessage.error(e.message)
+    ElMessage.error(getFriendlyErrorMessage(e, '文档重新处理失败，请稍后重试'))
   }
   docActionLoading.value = false
 }
@@ -635,7 +636,7 @@ async function reprocessDocument(row) {
     ElMessage.success(data.queued ? '文档已加入重处理队列' : '该文档当前正在处理中')
     await loadDocuments()
   } catch (e) {
-    ElMessage.error(e.message)
+    ElMessage.error(getFriendlyErrorMessage(e, '批量处理失败，请稍后重试'))
   }
   docRowLoadingId.value = null
 }
@@ -647,7 +648,7 @@ async function rebuildBm25IndexAction() {
     await rebuildCourseSpaceBm25(selectedSpace.value.id)
     ElMessage.success('BM25 索引已重建')
   } catch (e) {
-    ElMessage.error(e.message)
+    ElMessage.error(getFriendlyErrorMessage(e, '检索索引重建失败，请稍后重试'))
   }
   docActionLoading.value = false
 }
@@ -659,7 +660,7 @@ async function loadChunksAndAnnotations() {
     const res = await getCourseSpaceChunks(selectedSpace.value.id)
     chunks.value = res?.data || res || []
   } catch (e) {
-    ElMessage.error(`加载分块失败: ${e.message}`)
+    ElMessage.error(getFriendlyErrorMessage(e, '加载分块失败，请稍后重试'))
   }
   chunksLoading.value = false
 }
@@ -670,7 +671,7 @@ async function addAnnotation(chunkId, type) {
     await createAnnotation(selectedSpace.value.id, { chunkId, annotationType: type, note: '' })
     ElMessage.success('标注已添加')
   } catch (e) {
-    ElMessage.error(e.message)
+    ElMessage.error(getFriendlyErrorMessage(e, '保存批注失败，请稍后重试'))
   }
 }
 

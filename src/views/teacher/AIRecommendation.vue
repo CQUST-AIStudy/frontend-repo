@@ -100,6 +100,7 @@ import DOMPurify from 'dompurify'
 import api from '../../api'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import PageHeader from '../../components/PageHeader.vue'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const loading = ref(false)
 const router = useRouter()
@@ -303,13 +304,7 @@ const buildFallbackRecommendation = () => {
 }
 
 const formatAiErrorMessage = (error) => {
-  const raw = String(error?.message || 'AI 服务请求失败')
-  if (raw.includes('401')) return 'AI 服务鉴权失败（401），请重新登录或检查后端密钥配置。'
-  if (raw.includes('403')) return 'AI 服务拒绝访问（403），请确认当前账号权限和接口配置。'
-  if (raw.includes('404')) return 'AI 服务接口不存在（404），请检查后端路由配置。'
-  if (raw.includes('429')) return 'AI 服务请求过于频繁（429），请稍后重试。'
-  if (raw.includes('500')) return 'AI 服务内部错误（500），已切换为本地分析摘要。'
-  return raw.startsWith('AI 服务请求失败') ? raw : `AI 服务请求失败：${raw}`
+  return getFriendlyErrorMessage(error, 'AI 服务请求失败，已切换为本地分析摘要')
 }
 
 const generateRecommendation = async () => {

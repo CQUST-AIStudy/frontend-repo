@@ -23,6 +23,10 @@ import {
   setUserInfo,
 } from '../constants/auth'
 import { API_BASE_URL_WITH_SLASH } from '../config/runtime'
+import {
+  createFriendlyError,
+  getFriendlyErrorMessage
+} from '../utils/errorMessage'
 
 axios.defaults.withCredentials = true;
 
@@ -40,7 +44,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   config => config,
   error => {
-    return Promise.reject(error);
+    return Promise.reject(createFriendlyError(error, '请求发送失败，请稍后重试'));
   }
 );
 
@@ -49,13 +53,29 @@ apiClient.interceptors.response.use(
     return response.data;
   },
   error => {
-    if (error?.response?.status === 401) {
+    const requestUrl = error?.config?.url || ''
+    const isLoginRequest = requestUrl.includes('/api/login')
+    const isSessionExchangeRequest = requestUrl.includes('/api/auth/session')
+    const isAuthRequest = isLoginRequest || isSessionExchangeRequest
+    const fallbackMessage = error?.response?.status === 401 && isLoginRequest
+      ? '用户名或密码不正确，请检查后重试'
+      : '请求失败，请稍后重试'
+    const friendlyError = createFriendlyError(error, fallbackMessage)
+
+    if (error?.response?.status === 401 && isLoginRequest && friendlyError.friendlyMessage === '登录已过期，请重新登录') {
+      friendlyError.message = fallbackMessage
+      friendlyError.friendlyMessage = fallbackMessage
+    }
+
+    if (error?.response?.status === 401 && !isAuthRequest) {
+      friendlyError.message = '登录已过期，请重新登录'
+      friendlyError.friendlyMessage = friendlyError.message
       clearAuthStorage()
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.assign('/login')
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(friendlyError);
   }
 );
 
@@ -227,7 +247,7 @@ export default {
         console.error('鐧诲綍杩囩▼鍙戠敓閿欒:', error)
         return {
           success: false,
-          message: '鐧诲綍杩囩▼鍙戠敓閿欒: ' + (error.message || '鏈煡閿欒'),
+          message: getFriendlyErrorMessage(error, '登录过程中发生错误，请稍后重试'),
           userInfo: null,
           token: null
         }
@@ -294,7 +314,7 @@ export default {
 
       return {
         success: false,
-        message: error.response?.data?.message || error.message || '鐧诲綍璇锋眰澶辫触',
+        message: getFriendlyErrorMessage(error, '登录失败，请稍后重试'),
         userInfo: null
       };
     }
@@ -339,7 +359,7 @@ export default {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || error.message || '娉ㄥ唽璇锋眰澶辫触'
+        message: getFriendlyErrorMessage(error, '注册失败，请稍后重试')
       }
     }
   },
@@ -518,7 +538,7 @@ export default {
         const list = Array.isArray(response.data) ? response.data : []
         return list.map(item => sanitizeSubmissionTiming(item))
       } else {
-        throw new Error(response.message || '鑾峰彇鏁版嵁澶辫触');
+        throw createFriendlyError({ data: response }, '获取数据失败');
       }
     } catch (error) {
       console.error('鑾峰彇鎵€鏈夊鐢熷疄楠屾暟鎹け璐?', error);
@@ -553,7 +573,7 @@ export default {
       const response = await apiClient.get(`/api/submissions/${submissionId}`);
       console.log('getSubmissionDetail response:', response);
       if (response && response.success === false) {
-        throw new Error(response.message || '加载提交详情失败')
+        throw createFriendlyError({ data: response }, '加载提交详情失败')
       }
       Object.assign(response, sanitizeSubmissionTiming(response))
 

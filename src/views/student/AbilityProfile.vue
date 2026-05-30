@@ -150,6 +150,7 @@ import { ElMessage } from 'element-plus'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { API_BASE_URL } from '../../config/runtime'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const API_BASE = API_BASE_URL
 const loading = ref(true)
@@ -213,9 +214,9 @@ async function handleRefreshFeedback() {
     if (studentId) url = `${API_BASE}/api/profile/feedback/refresh/${studentId}`
     const res = await axios.post(url, null, { withCredentials: true })
     const data = res.data || res
-    if (data.error) { ElMessage.error(data.error) }
+    if (data.error) { ElMessage.error(getFriendlyResponseMessage(data, '刷新失败，请稍后重试')) }
     else if (data.feedback) { profile.value.feedback = data.feedback; ElMessage.success('AI分析已更新') }
-  } catch (e) { ElMessage.error('刷新失败: ' + (e.message || e)) }
+  } catch (e) { ElMessage.error(getFriendlyErrorMessage(e, '刷新失败，请稍后重试')) }
   finally { refreshingFeedback.value = false }
 }
 
@@ -232,7 +233,7 @@ async function fetchProfile() {
       res = await axios.get(`${API_BASE}/api/profile/student/${usernum}`, { withCredentials: true })
     }
     const data = res.data || res
-    if (data.error) { errorMsg.value = data.error; return }
+    if (data.error) { errorMsg.value = getFriendlyResponseMessage(data, '能力画像加载失败，请稍后重试'); return }
     profile.value = data
     await nextTick()
     setTimeout(() => {
@@ -244,7 +245,7 @@ async function fetchProfile() {
         trendChart?.resize()
       }, 500)
     }, 300)
-  } catch (e) { errorMsg.value = '加载失败: ' + (e.message || e) }
+  } catch (e) { errorMsg.value = getFriendlyErrorMessage(e, '能力画像加载失败，请稍后重试') }
   finally { loading.value = false }
 }
 

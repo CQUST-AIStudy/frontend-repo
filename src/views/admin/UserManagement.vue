@@ -551,7 +551,8 @@ onMounted(() => {
 
 <style scoped>
 .user-management {
-  height: 100%;
+  min-width: 0;
+  min-height: 100%;
 }
 
 .filter-card,
@@ -566,6 +567,11 @@ onMounted(() => {
 .filter-form {
   display: flex;
   flex-wrap: wrap;
+  gap: 10px 12px;
+}
+
+.filter-form :deep(.el-form-item) {
+  margin-right: 0;
 }
 
 .user-info {
@@ -591,10 +597,43 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+  overflow-x: auto;
+}
+
+.table-card {
+  overflow-x: auto;
+}
+
+.table-card :deep(.el-table) {
+  width: 100%;
+}
+
+.user-management :deep(.el-dialog) {
+  max-width: calc(100vw - 24px);
 }
 
 .my-page-header {
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .my-page-header {
+    padding: 0;
+  }
+
+  .filter-form {
+    flex-direction: column;
+  }
+
+  .filter-form :deep(.el-form-item),
+  .filter-form :deep(.el-input),
+  .filter-form :deep(.el-select) {
+    width: 100%;
+  }
+
+  .pagination-container {
+    justify-content: flex-start;
+  }
 }
 
 </style>

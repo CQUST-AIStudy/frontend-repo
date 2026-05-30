@@ -455,7 +455,7 @@ onBeforeUnmount(() => {
 .hero-kicker {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   opacity: 0.78;
 }
@@ -465,7 +465,7 @@ onBeforeUnmount(() => {
   margin-top: 14px;
   font-size: 28px;
   line-height: 1.16;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   font-weight: 700;
 }
 
@@ -493,7 +493,7 @@ onBeforeUnmount(() => {
   color: #16324a;
   font-size: 34px;
   line-height: 1.05;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
   font-weight: 800;
 }
 
@@ -548,7 +548,7 @@ onBeforeUnmount(() => {
   font-size: 28px;
   line-height: 1;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 .stat-hint {
@@ -563,6 +563,7 @@ onBeforeUnmount(() => {
 }
 
 .panel-card {
+  min-width: 0;
   padding: 22px;
   border-radius: 24px;
   border: 1px solid rgba(126, 157, 183, 0.18);
@@ -652,9 +653,48 @@ onBeforeUnmount(() => {
 
 @media (max-width: 1100px) {
   .hero-strip,
-  .content-grid,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-page {
+    gap: 14px;
+  }
+
+  .hero-card,
+  .panel-card,
+  .stat-card {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .hero-title {
+    font-size: 24px;
+  }
+
+  .hero-number {
+    font-size: 30px;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .panel-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chart-box {
+    height: 280px;
   }
 }
 </style>

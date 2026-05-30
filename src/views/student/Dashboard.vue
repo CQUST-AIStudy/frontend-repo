@@ -212,11 +212,15 @@ onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); prog
 </script>
 
 <style scoped>
-.g-dashboard { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-.g-content { display: flex; flex-direction: column; gap: 20px; }
+.g-dashboard {
+  min-width: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.g-content { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 /* 统计卡片 */
-.g-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.g-stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .g-stat-card {
   background: #fff; border-radius: 16px; padding: 20px;
   border: 1px solid #dadce0;
@@ -242,12 +246,12 @@ onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); prog
 .g-link:hover { text-decoration: underline; }
 
 /* 图表行 */
-.g-chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g-chart-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .g-card-half { min-width: 0; }
 .g-chart { height: 280px; width: 100%; }
 
 /* AI功能 */
-.g-feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.g-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .g-feature-item {
   display: flex; align-items: center; gap: 12px; padding: 16px;
   border-radius: 12px; border: 1px solid #e8eaed; cursor: pointer;
@@ -259,7 +263,7 @@ onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); prog
 .g-feature-desc { font-size: 11px; color: #5f6368; margin-top: 2px; }
 
 /* 底部行 */
-.g-bottom-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.g-bottom-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 16px; }
 .g-card-wide, .g-card-narrow { min-width: 0; }
 
 /* 实验列表 */
@@ -299,4 +303,49 @@ onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); prog
 .g-pill-btn:hover { background: #f8f9fa; border-color: #1a73e8; }
 
 .g-empty-hint { text-align: center; padding: 24px 0; font-size: 13px; color: #9aa0a6; }
+
+@media (max-width: 1180px) {
+  .g-stat-row,
+  .g-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .g-chart-row,
+  .g-bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .g-content {
+    gap: 14px;
+  }
+
+  .g-stat-row,
+  .g-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .g-card,
+  .g-stat-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .g-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .g-chart {
+    height: 240px;
+  }
+
+  .g-exp-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
 </style>

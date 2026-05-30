@@ -75,6 +75,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
 import { buildApiUrl } from '../../config/runtime'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
 const loading = ref(false)
@@ -99,7 +100,7 @@ async function loadJoinedClasses() {
     const data = await response.json()
     joinedClasses.value = Array.isArray(data) ? data : data?.data || []
   } catch (error) {
-    ElMessage.error('加载已加入班级失败')
+    ElMessage.error(getFriendlyErrorMessage(error, '加载已加入班级失败，请稍后重试'))
   } finally {
     loading.value = false
   }
@@ -127,7 +128,7 @@ async function submitJoin() {
     joinForm.password = ''
     await loadJoinedClasses()
   } catch (error) {
-    ElMessage.error(error.message || '加入班级失败')
+    ElMessage.error(getFriendlyErrorMessage(error, '加入班级失败，请检查班级码或密码后重试'))
   } finally {
     joining.value = false
   }

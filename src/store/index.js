@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import api from '../api'
 import { clearAuthStorage, setSessionToken, setUserInfo } from '../constants/auth'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -20,7 +21,7 @@ export const useUserStore = defineStore('user', {
       try {
         const res = await api.login(username, password, teacherLevel)
         if (!(res && res.success)) {
-          return { success: false, message: res?.message || '用户名或密码错误', details: res }
+          return { success: false, message: getFriendlyResponseMessage(res, '用户名或密码不正确，请检查后重试'), details: res }
         }
 
         const userInfo = res.user || res.userInfo
@@ -44,7 +45,7 @@ export const useUserStore = defineStore('user', {
         return { success: true, message: res.message || '登录成功', user: userInfo }
       } catch (error) {
         console.error('登录过程中发生错误:', error)
-        return { success: false, message: '登录过程中发生错误: ' + (error.message || '未知错误') }
+        return { success: false, message: getFriendlyErrorMessage(error, '登录失败，请稍后重试') }
       } finally {
         this.loading = false
       }

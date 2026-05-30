@@ -54,10 +54,15 @@ onMounted(loadExperiments)
 </script>
 
 <style scoped>
-.g-page { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+.g-page {
+  min-width: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 .g-card {
   background: #fff; border-radius: 16px; padding: 20px;
   border: 1px solid #dadce0;
+  min-width: 0;
+  overflow-x: auto;
 }
 .g-card :deep(.el-table) { --el-table-border-color: #f1f3f4; --el-table-header-bg-color: #f8f9fa; }
 .g-card :deep(.el-table th) { font-weight: 500; color: #5f6368; font-size: 12px; }
@@ -79,4 +84,11 @@ onMounted(loadExperiments)
   transition: background 0.2s;
 }
 .g-primary-btn:hover { background: #1765cc; }
+
+@media (max-width: 640px) {
+  .g-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+}
 </style>

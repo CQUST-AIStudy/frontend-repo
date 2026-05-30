@@ -101,6 +101,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
 import api from '../../api'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 // 数据加载状态
 const loading = ref(false)
@@ -163,7 +164,7 @@ const loadExperimentList = async () => {
     console.log('处理后的实验列表:', experimentList.value)
   } catch (error) {
     console.error('加载实验列表失败:', error)
-    ElMessage.error('加载实验列表失败: ' + (error.message || '未知错误'))
+    ElMessage.error(getFriendlyErrorMessage(error, '加载实验列表失败，请稍后重试'))
     experimentList.value = []
   } finally {
     loading.value = false
@@ -322,7 +323,8 @@ onMounted(() => {
 
 <style scoped>
 .experiment-management {
-  height: 100%;
+  min-width: 0;
+  min-height: 100%;
 }
 
 .experiment-management-content {
@@ -335,16 +337,33 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+  overflow-x: auto;
+}
+
+.experiment-management :deep(.el-table) {
+  width: 100%;
 }
 
 .my-page-header {
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .my-page-header {
+    padding: 0;
+  }
+
+  .pagination-container {
+    justify-content: flex-start;
+  }
 }
 
 </style>

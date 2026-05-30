@@ -92,6 +92,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Refresh, Document, MagicStick, Delete } from '@element-plus/icons-vue'
 import { getDocuments, deleteDocument, deleteAllDocuments, createFolder, uploadFiles } from '../../api/tap'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
 const showUpload = ref(false)
@@ -128,7 +129,7 @@ const handleUpload = async () => {
     await uploadFiles(folderId, fileList.value.map(f => f.raw || f))
     ElMessage.success('上传成功')
     fileList.value = []; showUpload.value = false; loadDocs()
-  } catch (e) { uploadError.value = e.message }
+  } catch (e) { uploadError.value = getFriendlyErrorMessage(e, '文件上传失败，请稍后重试') }
   uploading.value = false
 }
 
@@ -138,7 +139,7 @@ const handleDelete = async (id) => {
   try { await ElMessageBox.confirm('确定删除该文档？', '提示', { type: 'warning' }) } catch { return }
   deleting.value = id
   try { await deleteDocument(id); ElMessage.success('删除成功'); loadDocs() }
-  catch (e) { ElMessage.error('删除失败：' + e.message) }
+  catch (e) { ElMessage.error(getFriendlyErrorMessage(e, '删除失败，请稍后重试')) }
   deleting.value = null
 }
 
@@ -158,7 +159,7 @@ const handleDeleteAll = async () => {
     ElMessage.success(`已清空 ${deletedCount} 个文档`)
     await loadDocs()
   } catch (e) {
-    ElMessage.error('清空失败：' + (e.message || '未知错误'))
+    ElMessage.error(getFriendlyErrorMessage(e, '清空失败，请稍后重试'))
   } finally {
     clearingAll.value = false
   }

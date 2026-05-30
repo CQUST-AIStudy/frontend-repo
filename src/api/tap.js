@@ -8,6 +8,7 @@ import {
   setTapUser,
 } from '../constants/auth'
 import { API_BASE_URL } from '../config/runtime'
+import { createFriendlyError, getFriendlyErrorMessage } from '../utils/errorMessage'
 
 const TAP_BASE = API_BASE_URL
 
@@ -162,8 +163,17 @@ tapClient.interceptors.response.use(
     } else if (status === 401 && isAuthRequest) {
       clearTapAuth()
     }
-    const msg = error.response?.data?.message || error.message || '请求失败'
-    return Promise.reject(new Error(msg))
+    const fallbackMessage = status === 401 && requestUrl.includes('/api/auth/login')
+      ? '用户名或密码不正确，请检查后重试'
+      : status === 401
+        ? '登录已过期，请重新登录'
+        : '请求失败，请稍后重试'
+    const friendlyError = createFriendlyError(error, fallbackMessage)
+    if (status === 401 && requestUrl.includes('/api/auth/login') && friendlyError.friendlyMessage === '登录已过期，请重新登录') {
+      friendlyError.message = fallbackMessage
+      friendlyError.friendlyMessage = fallbackMessage
+    }
+    return Promise.reject(friendlyError)
   }
 )
 
@@ -237,10 +247,15 @@ async function parseFetchPayload(res) {
 }
 
 function resolveFetchErrorMessage(res, payload, fallbackMessage) {
-  if (res.status === 413) {
-    return extractProblemMessage(payload) || '涓婁紶鏂囦欢杩囧ぇ锛岃鍘嬬缉鍚庨噸璇曟垨鍒嗘壒涓婁紶'
-  }
-  return extractProblemMessage(payload) || fallbackMessage
+  return getFriendlyErrorMessage({
+    status: res.status,
+    data: payload,
+    response: {
+      status: res.status,
+      data: payload
+    },
+    message: extractProblemMessage(payload)
+  }, fallbackMessage)
 }
 
 // ========== Documents ==========
@@ -283,7 +298,7 @@ export async function uploadFiles(folderId, files, relativePaths = null) {
     body: fd
   })
   const payload = await parseFetchPayload(res)
-  if (!res.ok) throw new Error(resolveFetchErrorMessage(res, payload, '鏂囦欢涓婁紶澶辫触'))
+  if (!res.ok) throw new Error(resolveFetchErrorMessage(res, payload, '文件上传失败，请稍后重试'))
   return payload
 }
 
@@ -298,7 +313,7 @@ export async function uploadZipFolder(folderName, file) {
     body: fd
   })
   const payload = await parseFetchPayload(res)
-  if (!res.ok) throw new Error(resolveFetchErrorMessage(res, payload, 'ZIP 涓婁紶澶辫触'))
+  if (!res.ok) throw new Error(resolveFetchErrorMessage(res, payload, 'ZIP 上传失败，请稍后重试'))
   return payload
 }
 

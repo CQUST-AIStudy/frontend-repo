@@ -69,7 +69,7 @@ defineProps({
   color: #1270d8;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   line-height: 1.4;
   word-break: break-word;
 }
@@ -77,9 +77,8 @@ defineProps({
 .page-header__title {
   margin: 0;
   color: #15314a;
-  font-size: clamp(28px, 3.2vw, 34px);
+  font-size: 32px;
   line-height: 1.15;
-  letter-spacing: -0.03em;
   word-break: break-word;
 }
 
@@ -114,6 +113,27 @@ defineProps({
 
   .page-header__extra {
     justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header__title {
+    font-size: 26px;
+  }
+
+  .page-header__desc {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 18px 16px;
+  }
+
+  .page-header__title {
+    font-size: 22px;
   }
 }
 </style>

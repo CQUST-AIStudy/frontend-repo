@@ -101,6 +101,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../store'
 import api from '../api'
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -176,7 +177,7 @@ function handleLogin() {
     try {
       const result = await userStore.login(loginForm.username, loginForm.password, selectedRole.value)
       if (!(result && result.success)) {
-        ElMessage.error(result?.message || '登录失败')
+        ElMessage.error(getFriendlyResponseMessage(result, '用户名或密码不正确，请检查后重试'))
         return
       }
 
@@ -195,7 +196,7 @@ function handleLogin() {
         await router.push('/student/dashboard')
       }
     } catch (error) {
-      ElMessage.error(`登录异常: ${error.message || '未知错误'}`)
+      ElMessage.error(getFriendlyErrorMessage(error, '登录失败，请稍后重试'))
     } finally {
       loading.value = false
     }
@@ -212,7 +213,7 @@ function handleRegister() {
         role: 'student'
       })
       if (!(result && result.success)) {
-        ElMessage.error(result?.message || '注册失败')
+        ElMessage.error(getFriendlyResponseMessage(result, '注册失败，请检查填写内容后重试'))
         return
       }
 
@@ -226,7 +227,7 @@ function handleRegister() {
       registerForm.usernum = ''
       registerForm.classname = ''
     } catch (error) {
-      ElMessage.error(`注册异常: ${error.message || '未知错误'}`)
+      ElMessage.error(getFriendlyErrorMessage(error, '注册失败，请稍后重试'))
     } finally {
       loading.value = false
     }
@@ -237,9 +238,11 @@ function handleRegister() {
 <style scoped>
 .login-page {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   isolation: isolate;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,6 +278,7 @@ function handleRegister() {
   position: relative;
   overflow: hidden;
   width: min(100%, 440px);
+  max-width: calc(100vw - 28px);
   padding: 36px 32px 26px;
   margin-inline: auto;
   border-radius: 28px;
@@ -319,7 +323,7 @@ function handleRegister() {
   margin: 0 0 10px;
   font-size: 30px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   color: #193754;
 }
 
@@ -327,7 +331,7 @@ function handleRegister() {
   margin: 0;
   color: #61788e;
   font-size: 14px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0;
 }
 
 .login-tabs :deep(.el-tabs__header) {
@@ -362,6 +366,7 @@ function handleRegister() {
 .login-tabs :deep(.el-radio-group) {
   display: flex;
   width: 100%;
+  min-width: 0;
   padding: 4px;
   border-radius: 16px;
   background: rgba(245, 249, 253, 0.88);
@@ -370,6 +375,7 @@ function handleRegister() {
 
 .login-tabs :deep(.el-radio-button) {
   flex: 1;
+  min-width: 0;
 }
 
 .login-tabs :deep(.el-radio-button__inner) {
@@ -413,7 +419,7 @@ function handleRegister() {
   margin-top: 10px;
   border-radius: 14px;
   font-size: 15px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   box-shadow: 0 16px 28px rgba(18, 112, 216, 0.22);
 }
 
@@ -444,6 +450,17 @@ function handleRegister() {
   .login-tabs :deep(.el-radio-button__inner) {
     font-size: 13px;
     padding-inline: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-tabs :deep(.el-radio-group) {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .login-tabs :deep(.el-radio-button__inner) {
+    min-height: 36px;
   }
 }
 </style>

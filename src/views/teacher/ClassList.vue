@@ -350,6 +350,7 @@ import {
   triggerPtaSync,
   updateTeachingClass
 } from '../../api/tap'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -819,7 +820,7 @@ const submitCookieForm = async () => {
   } catch (error) {
     cookieSubmitResult.value = {
       valid: false,
-      message: `提交失败：${error.message || '未知错误'}`
+      message: getFriendlyErrorMessage(error, 'Cookie 提交失败，请稍后重试')
     }
   } finally {
     cookieSubmitting.value = false
@@ -841,7 +842,8 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 
 <style scoped>
 .class-list {
-  height: 100%;
+  min-width: 0;
+  min-height: 100%;
   overflow-y: auto;
 }
 
@@ -875,6 +877,7 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 .class-grid {
   display: flex;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .class-grid__item {
@@ -1045,7 +1048,16 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 }
 
 .student-toolbar__search {
+  width: 100%;
   max-width: 260px;
+}
+
+.class-list :deep(.el-dialog) {
+  max-width: calc(100vw - 24px);
+}
+
+.class-list :deep(.el-table) {
+  width: 100%;
 }
 
 .student-count {
@@ -1119,6 +1131,10 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 }
 
 @media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+  }
+
   .class-card {
     min-height: auto;
     border-radius: 20px;
@@ -1146,6 +1162,23 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 
   .student-toolbar__search {
     max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .class-grid {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .class-grid__item {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .card-actions :deep(.el-button) {
+    flex: 1 1 100%;
+    margin-left: 0;
   }
 }
 </style>

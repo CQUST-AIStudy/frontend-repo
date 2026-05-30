@@ -85,6 +85,7 @@ import { useRoute } from 'vue-router'
 import { Loading } from '@element-plus/icons-vue'
 import { getDocuments, summarizeArxiv, summarizeDoi, summarizeFreeText, summarizeDocument } from '../../api/tap'
 import ResultBlock from './components/ResultBlock.vue'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const route = useRoute()
 const queryDocId = typeof route.query.docId === 'string' ? route.query.docId : ''
@@ -159,7 +160,7 @@ const restoreLocalState = () => {
     if (!queryDocId && typeof data?.docId === 'string') docId.value = data.docId
     if (typeof data?.docResult === 'string') docResult.value = data.docResult
     if (typeof data?.docMeta === 'string') docMeta.value = data.docMeta
-    if (typeof data?.error === 'string') error.value = data.error
+    if (typeof data?.error === 'string') error.value = getFriendlyErrorMessage(data.error, '摘要生成失败，请稍后重试')
   } catch {
     // ignore parse errors
   }
@@ -200,7 +201,7 @@ const genArxiv = async (force) => {
     if (msg.includes('timeout') || msg.includes('Timeout') || msg.includes('ECONNABORTED')) {
       error.value = 'arXiv 论文抓取超时，请稍后重试。部分论文 PDF 较大，可能需要更长时间。'
     } else {
-      error.value = msg
+      error.value = getFriendlyErrorMessage(e, 'arXiv 摘要生成失败，请稍后重试')
     }
   }
   arxivLoading.value = false
@@ -212,7 +213,7 @@ const genDoi = async () => {
     const d = unwrap(await summarizeDoi(doi.value.trim()))
     doiResult.value = d?.markdown ?? ''
     doiMeta.value = d ? `《${d.title}》 | 引擎：${d.provider}` : ''
-  } catch (e) { error.value = e.message }
+  } catch (e) { error.value = getFriendlyErrorMessage(e, 'DOI 摘要生成失败，请稍后重试') }
   doiLoading.value = false
 }
 
@@ -222,7 +223,7 @@ const genFreeText = async () => {
     const d = unwrap(await summarizeFreeText(ftTitle.value.trim(), ftText.value.trim()))
     ftResult.value = d?.markdown ?? ''
     ftMeta.value = d ? `引擎：${d.provider} | 字数：${d.charCountZh}` : ''
-  } catch (e) { error.value = e.message }
+  } catch (e) { error.value = getFriendlyErrorMessage(e, '文本摘要生成失败，请稍后重试') }
   ftLoading.value = false
 }
 
@@ -232,7 +233,7 @@ const genDoc = async (force) => {
     const d = unwrap(await summarizeDocument(docId.value, force))
     docResult.value = d?.markdown ?? ''
     docMeta.value = d ? `引擎：${d.provider} | 模型：${d.model}` : ''
-  } catch (e) { error.value = e.message }
+  } catch (e) { error.value = getFriendlyErrorMessage(e, '文档摘要生成失败，请稍后重试') }
   docLoading.value = false
 }
 

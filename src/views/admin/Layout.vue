@@ -1,7 +1,7 @@
 <template>
   <div class="admin-layout">
     <el-container class="layout-container">
-      <el-aside :width="collapsed ? '64px' : '240px'" class="layout-aside">
+      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside">
         <div class="logo-container">
           <img src="../../assets/logo.png" alt="Logo" class="logo" />
           <transition name="fade-text">
@@ -52,11 +52,69 @@
         </el-scrollbar>
       </el-aside>
 
+      <el-drawer
+        v-model="mobileMenuVisible"
+        direction="ltr"
+        size="280px"
+        :with-header="false"
+        class="layout-drawer"
+      >
+        <div class="layout-aside mobile-aside">
+          <div class="logo-container">
+            <img src="../../assets/logo.png" alt="Logo" class="logo" />
+            <span class="logo-title">系统管理后台</span>
+          </div>
+
+          <el-scrollbar class="menu-scrollbar">
+            <el-menu
+              :default-active="activeMenu"
+              class="layout-menu"
+              router
+              :collapse-transition="false"
+              @select="closeMobileMenu"
+            >
+              <el-menu-item index="/admin/dashboard">
+                <el-icon><HomeFilled /></el-icon>
+                <template #title>首页</template>
+              </el-menu-item>
+
+              <el-menu-item index="/admin/user-management">
+                <el-icon><User /></el-icon>
+                <template #title>用户管理</template>
+              </el-menu-item>
+
+              <el-menu-item index="/admin/class-management">
+                <el-icon><OfficeBuilding /></el-icon>
+                <template #title>班级管理</template>
+              </el-menu-item>
+
+              <el-menu-item index="/admin/experiment-management">
+                <el-icon><DocumentCopy /></el-icon>
+                <template #title>实验管理</template>
+              </el-menu-item>
+
+              <el-menu-item index="/admin/system-log">
+                <el-icon><DataAnalysis /></el-icon>
+                <template #title>系统日志</template>
+              </el-menu-item>
+
+              <div class="menu-divider"></div>
+
+              <el-menu-item index="/admin/profile">
+                <el-icon><Setting /></el-icon>
+                <template #title>个人设置</template>
+              </el-menu-item>
+            </el-menu>
+          </el-scrollbar>
+        </div>
+      </el-drawer>
+
       <el-container class="layout-main">
         <el-header class="layout-header">
           <div class="header-left">
-            <el-icon class="fold-icon" @click="toggleSidebar">
-              <Fold v-if="!collapsed" />
+            <el-icon class="fold-icon" @click="toggleNavigation">
+              <MenuIcon v-if="isMobile" />
+              <Fold v-else-if="!collapsed" />
               <Expand v-else />
             </el-icon>
             <el-breadcrumb separator="/">
@@ -128,14 +186,27 @@ import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
-  Setting, Fold, Expand, FullScreen, ArrowDown, SwitchButton, WarningFilled
+  Setting, Fold, Expand, FullScreen, ArrowDown, SwitchButton, WarningFilled,
+  Menu as MenuIcon
 } from '@element-plus/icons-vue'
 import { getPtaCookieStatus } from '../../api/tap'
+import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
 
 const route = useRoute()
 const router = useRouter()
-const collapsed = ref(false)
 const userStore = useUserStore()
+const {
+  isMobile,
+  collapsed,
+  mobileMenuVisible,
+  asideWidth,
+  toggleNavigation,
+  closeMobileMenu
+} = useResponsiveLayout({
+  route,
+  expandedWidth: '240px',
+  collapsedWidth: '64px'
+})
 
 const userInfo = computed(() => userStore.userInfo || { name: '管理员' })
 
@@ -149,8 +220,6 @@ const breadcrumbs = computed(() => {
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'admin' ? paths.slice(1).map(p => pathMap[p.split('/')[0]] || p) : []
 })
-
-const toggleSidebar = () => { collapsed.value = !collapsed.value }
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen()
@@ -206,10 +275,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-layout { height: 100vh; width: 100%; }
-.layout-container { height: 100%; }
+.admin-layout {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.layout-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
 
 .layout-aside {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
   background: linear-gradient(180deg, #1a1a2e 0%, #202134 100%);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -229,10 +311,15 @@ onMounted(() => {
 
 .logo-title {
   font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.9);
-  white-space: nowrap; letter-spacing: 0.5px;
+  white-space: nowrap; letter-spacing: 0;
 }
 
-.menu-scrollbar { height: calc(100vh - 64px); }
+.menu-scrollbar {
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+}
 .menu-scrollbar :deep(.el-scrollbar__bar.is-vertical) { width: 4px; right: 2px; }
 .menu-scrollbar :deep(.el-scrollbar__thumb) { background: rgba(255,255,255,0.15); border-radius: 4px; }
 
@@ -263,26 +350,51 @@ onMounted(() => {
 
 .menu-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 12px; }
 
-.layout-main { background: #f8f9fa; }
+.layout-main {
+  min-width: 0;
+  background: #f8f9fa;
+}
 
 .layout-header {
   background: #fff; display: flex; align-items: center; justify-content: space-between;
   box-shadow: 0 1px 2px rgba(60,64,67,0.1); padding: 0 24px; height: 56px;
   border-bottom: 1px solid #dadce0;
+  gap: 16px;
 }
 
-.header-left { display: flex; align-items: center; gap: 12px; }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header-left :deep(.el-breadcrumb) {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
 .fold-icon {
-  cursor: pointer; font-size: 20px; color: #5f6368; padding: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex: 0 0 36px;
+  cursor: pointer; font-size: 20px; color: #5f6368;
   border-radius: 8px; transition: all 0.2s;
 }
 .fold-icon:hover { background: #f1f3f4; color: #202124; }
 
-.header-right { display: flex; align-items: center; gap: 12px; }
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
 
 .header-icon {
-  cursor: pointer; font-size: 18px; color: #5f6368; padding: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex: 0 0 36px;
+  cursor: pointer; font-size: 18px; color: #5f6368;
   border-radius: 8px; transition: all 0.2s;
 }
 .header-icon:hover { background: #f1f3f4; color: #202124; }
@@ -297,7 +409,13 @@ onMounted(() => {
 .arrow-icon { font-size: 12px; color: #9aa0a6; }
 
 .layout-content {
-  background: #f8f9fa; padding: 24px; min-height: calc(100vh - 120px); overflow-y: auto;
+  background: #f8f9fa;
+  padding: 24px;
+  min-width: 0;
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .layout-footer {
@@ -313,4 +431,50 @@ onMounted(() => {
 
 .fade-text-enter-active, .fade-text-leave-active { transition: opacity 0.2s; }
 .fade-text-enter-from, .fade-text-leave-to { opacity: 0; }
+
+.layout-drawer :deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+.mobile-aside {
+  width: 100%;
+  border-right: none;
+}
+
+@media (max-width: 960px) {
+  .layout-header {
+    height: auto;
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-left,
+  .header-right {
+    width: 100%;
+  }
+
+  .header-right {
+    flex-wrap: wrap;
+  }
+
+  .layout-content {
+    padding: 16px;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .layout-header {
+    gap: 10px;
+  }
+
+  .username {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 </style>

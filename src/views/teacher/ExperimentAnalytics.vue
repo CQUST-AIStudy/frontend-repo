@@ -242,6 +242,7 @@ import {
   getExperimentComparison,
 } from '../../api/tap'
 import { useUserStore } from '../../store'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const SCORE_LABELS = [
   '[100,100]',
@@ -398,7 +399,7 @@ function isBackendInternalError(message) {
 function getErrorText(error, fallback) {
   const message = error?.response?.data?.message || error?.message || ''
   if (!message || isBackendInternalError(message)) return fallback
-  return message
+  return getFriendlyErrorMessage(error, fallback)
 }
 
 function safeNumber(value) {

@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { chatSend, chatStreamSend, validateChatMessage } from '../api/tap'
+import { getFriendlyErrorMessage } from '../utils/errorMessage'
 
 const MAX_MESSAGES = 50
 const PAPERS_MARKER = '<!--PAPERS:'
-const DEFAULT_EMPTY_REPLY = 'No response from AI.'
-const DEFAULT_ERROR_MESSAGE = 'Request failed. Please try again later.'
+const DEFAULT_EMPTY_REPLY = 'AI 暂时没有返回内容。'
+const DEFAULT_ERROR_MESSAGE = '请求失败，请稍后重试'
 const STREAM_FIRST_CHUNK_TIMEOUT_MS = 10000
 
 function trimMessages(messages) {
@@ -46,12 +47,19 @@ async function readErrorMessage(response) {
   try {
     if (contentType.includes('application/json')) {
       const payload = await response.json()
-      return payload?.message || payload?.error || `Request failed (${response.status})`
+      return getFriendlyErrorMessage({
+        status: response.status,
+        response: { status: response.status, data: payload },
+        data: payload
+      }, DEFAULT_ERROR_MESSAGE)
     }
     const text = await response.text()
-    return text || `Request failed (${response.status})`
+    return getFriendlyErrorMessage({
+      status: response.status,
+      message: text
+    }, DEFAULT_ERROR_MESSAGE)
   } catch {
-    return `Request failed (${response.status})`
+    return getFriendlyErrorMessage(response.status, DEFAULT_ERROR_MESSAGE)
   }
 }
 
@@ -236,7 +244,7 @@ export const useTeacherAiChatStore = defineStore('teacherAiChat', {
             }
           }
         } catch {
-          const errorText = `Request failed: ${error?.message || DEFAULT_ERROR_MESSAGE}`
+          const errorText = getFriendlyErrorMessage(error, DEFAULT_ERROR_MESSAGE)
           if (assistantIndex === -1) {
             this.messages = appendAssistantMessage(this.messages, errorText, undefined)
           } else {

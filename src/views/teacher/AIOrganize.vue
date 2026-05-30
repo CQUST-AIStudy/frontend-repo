@@ -261,6 +261,7 @@ import {
   retryZipOrganizeJob,
   downloadZipOrganizeJobZip,
 } from '../../api/tap'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const ORGANIZE_STATE_KEY = 'tap_ai_organize_state_v2'
 
@@ -381,7 +382,7 @@ const createFolder = async () => {
     saveLocalState()
     ElMessage.success('文档中心文件夹已创建')
   } catch (e) {
-    ElMessage.error(e?.message || '创建文件夹失败')
+    ElMessage.error(getFriendlyErrorMessage(e, '创建文件夹失败，请稍后重试'))
   } finally {
     creating.value = false
   }
@@ -425,7 +426,7 @@ const uploadAndSubmit = async () => {
     await submitJob({ folderId }, 'agent')
     ElMessage.success('文档中心整理任务已提交')
   } catch (e) {
-    ElMessage.error(e?.message || '提交失败')
+    ElMessage.error(getFriendlyErrorMessage(e, '提交失败，请稍后重试'))
   } finally {
     submitLoading.value = false
   }
@@ -455,7 +456,7 @@ const uploadZipAndSubmit = async () => {
     await submitJob({ file: zipRaw }, 'zip')
     ElMessage.success('隔离 ZIP 整理任务已提交')
   } catch (e) {
-    ElMessage.error(e?.message || 'ZIP 提交失败')
+    ElMessage.error(getFriendlyErrorMessage(e, 'ZIP 提交失败，请稍后重试'))
   } finally {
     zipSubmitLoading.value = false
   }
@@ -471,7 +472,7 @@ const uploadDirectoryAndSubmit = async () => {
     await submitJob({ folderId }, 'agent')
     ElMessage.success('目录整理任务已提交')
   } catch (e) {
-    ElMessage.error(e?.message || '目录提交失败')
+    ElMessage.error(getFriendlyErrorMessage(e, '目录提交失败，请稍后重试'))
   } finally {
     dirSubmitLoading.value = false
   }
@@ -527,7 +528,7 @@ const retryJob = async () => {
     startPolling()
     ElMessage.success('任务已重新提交')
   } catch (e) {
-    ElMessage.error(e?.message || '重试失败')
+    ElMessage.error(getFriendlyErrorMessage(e, '重试失败，请稍后重试'))
   } finally {
     retrying.value = false
   }
@@ -561,7 +562,7 @@ const downloadZip = async () => {
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
       ElMessage.warning('当前整理结果尚未生成，请等待任务完成后再下载。')
     } else {
-      ElMessage.error(`下载失败: ${message || '未知错误'}`)
+      ElMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
     }
   } finally {
     downloading.value = false
@@ -591,7 +592,7 @@ const downloadHistoryZip = async (job) => {
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
       ElMessage.warning('该任务的整理结果尚未生成，暂时无法下载。')
     } else {
-      ElMessage.error(`下载失败: ${message || '未知错误'}`)
+      ElMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
     }
   } finally {
     downloading.value = false

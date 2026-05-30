@@ -99,11 +99,14 @@ function goCreateClass() {
 <style scoped>
 .class-selector-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   background: #f5f7fb;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .selector-card {
@@ -140,7 +143,7 @@ function goCreateClass() {
 
 .class-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -220,12 +223,28 @@ function goCreateClass() {
 }
 
 @media (max-width: 768px) {
+  .class-selector-page {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
   .selector-card {
     padding: 24px;
   }
 
   .class-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .selector-card {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .selector-header h1 {
+    font-size: 24px;
   }
 }
 </style>

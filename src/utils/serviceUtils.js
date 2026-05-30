@@ -1,4 +1,5 @@
 import { ElMessage, ElLoading } from 'element-plus';
+import { getFriendlyErrorMessage, getFriendlyResponseMessage } from './errorMessage';
 
 /**
  * 使用Promise包装的全局loading服务
@@ -51,7 +52,7 @@ export function handleApiResponse(response, options = {}) {
     
     return response;
   } else {
-    const errorMsg = (response && response.message) || '操作失败';
+    const errorMsg = getFriendlyResponseMessage(response, '操作失败，请稍后重试');
     
     if (showErrorMessage) {
       ElMessage.error(errorMsg);
@@ -72,21 +73,7 @@ export function handleApiResponse(response, options = {}) {
  * @param {Function} callback - 错误处理后的回调
  */
 export function handleError(error, fallbackMessage = '发生错误', callback = null) {
-  let errorMessage = fallbackMessage;
-  
-  if (error) {
-    if (error.response && error.response.data) {
-      // axios错误
-      const { data } = error.response;
-      errorMessage = data.message || data.error || String(data);
-    } else if (error.message) {
-      // 一般JavaScript错误
-      errorMessage = error.message;
-    } else if (typeof error === 'string') {
-      // 字符串错误
-      errorMessage = error;
-    }
-  }
+  const errorMessage = getFriendlyErrorMessage(error, fallbackMessage);
   
   // 显示错误提示
   ElMessage.error(errorMessage);

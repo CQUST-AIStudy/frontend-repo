@@ -67,6 +67,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getDocuments, translateDocument } from '../../api/tap'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const route = useRoute()
 const docId = ref(route.query.docId || '')
@@ -94,7 +95,7 @@ const loadDocs = async () => {
     docs.value = res?.data ?? res ?? []
   } catch (e) {
     console.error(e)
-    error.value = '获取文档列表失败: ' + (e.message || '未知错误')
+    error.value = getFriendlyErrorMessage(e, '获取文档列表失败，请稍后重试')
   }
   docsLoading.value = false
 }
@@ -128,7 +129,7 @@ const translate = async () => {
     } else if (msg.includes('no text to translate')) {
       error.value = '文档没有可提取的文本内容'
     } else {
-      error.value = '翻译失败: ' + msg
+      error.value = getFriendlyErrorMessage(e, '翻译失败，请稍后重试')
     }
   }
   loading.value = false
