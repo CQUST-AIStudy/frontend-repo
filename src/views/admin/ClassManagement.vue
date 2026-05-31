@@ -1,15 +1,15 @@
 <template>
-  <div class="class-management">
+  <div class="class-management [min-width:0] [min-height:100%]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [padding:20px] max-[768px]:[padding:0]"
         title="班级管理"
         description="管理系统中的班级信息"
     >
       <el-button type="primary" @click="showAddClassDialog">添加班级</el-button>
     </page-header>
 
-    <el-card class="filter-card">
-      <el-form :inline="true" :model="filterForm" class="filter-form">
+    <el-card class="filter-card [margin-bottom:20px] [border-radius:8px] [overflow:hidden]">
+      <el-form :inline="true" :model="filterForm" class="filter-form [display:flex] [flex-wrap:wrap] [gap:10px_12px] [&_.el-form-item]:[margin-right:0] max-[768px]:[flex-direction:column] max-[768px]:[&_.el-form-item]:[width:100%] max-[768px]:[&_.el-input]:[width:100%] max-[768px]:[&_.el-select]:[width:100%] [gap:10px]">
         <el-form-item label="班级名称">
           <el-input v-model="filterForm.name" placeholder="输入班级名称" clearable/>
         </el-form-item>
@@ -31,8 +31,8 @@
       </el-form>
     </el-card>
 
-    <el-card class="table-card">
-      <el-table :data="filteredClasses" style="width: 100%" border>
+    <el-card class="table-card [margin-bottom:20px] [overflow-x:auto] [&_.el-table]:[width:100%] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
+      <el-table :data="filteredClasses" class="[width:100%]" border>
         <el-table-column prop="id" label="班级ID" width="120"/>
         <el-table-column prop="name" label="班级名称" min-width="180"/>
         <el-table-column prop="grade" label="年级" width="120"/>
@@ -66,7 +66,7 @@
       </el-table>
     </el-card>
 
-    <!-- 添加/编辑班级对话框 -->
+    <!-- 添加/编辑班级对话框-->
     <el-dialog
         v-model="classDialogVisible"
         :title="dialogType === 'add' ? '添加班级' : '编辑班级'"
@@ -78,7 +78,7 @@
         </el-form-item>
 
         <el-form-item label="年级" prop="grade">
-          <el-select v-model="classForm.grade" placeholder="选择年级" style="width: 100%">
+          <el-select v-model="classForm.grade" placeholder="选择年级" class="[width:100%]">
             <el-option label="2023级" value="2023"/>
             <el-option label="2022级" value="2022"/>
             <el-option label="2021级" value="2021"/>
@@ -87,7 +87,7 @@
         </el-form-item>
 
         <el-form-item label="班主任" prop="teacherId">
-          <el-select v-model="classForm.teacherId" placeholder="选择班主任" style="width: 100%">
+          <el-select v-model="classForm.teacherId" placeholder="选择班主任" class="[width:100%]">
             <el-option
                 v-for="teacher in teacherOptions"
                 :key="teacher.id"
@@ -99,7 +99,7 @@
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="classDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="saveClass">确定</el-button>
         </div>
@@ -109,6 +109,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import {ref, reactive, computed, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
@@ -127,7 +128,7 @@ const classes = ref([
   // },
   // {
   //   id: 'C2023002',
-  //   name: '计算机科学与技术2班',
+  //   name: '计算机科学与技术珀,
   //   grade: '2023',
   //   studentCount: 45,
   //   teacherId: 'T2023002',
@@ -135,11 +136,11 @@ const classes = ref([
   // },
   // {
   //   id: 'C2022001',
-  //   name: '软件工程1班',
+  //   name: '软件工程1班,
   //   grade: '2022',
   //   studentCount: 38,
   //   teacherId: 'T2023003',
-  //   teacherName: '张教授'
+  //   teacherName: '张教授
   // }
 ])
 
@@ -273,7 +274,7 @@ const manageStudents = (cls) => {
 // 删除班级
 const deleteClass = (cls) => {
   ElMessageBox.confirm(
-      `确定要删除班级 ${cls.name} 吗？此操作不可恢复。`,
+      `确定要删除班级${cls.name} 吗？此操作不可恢复。`,
       '警告',
       {
         confirmButtonText: '确定',
@@ -298,7 +299,7 @@ const loadTeacherOptions = async () => {
     // const teachers = await api.getTeacherList()
     // teacherOptions.value = teachers
   } catch (error) {
-    console.error('加载教师列表失败:', error)
+    logger.error('加载教师列表失败:', error)
   }
 }
 
@@ -307,52 +308,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.class-management {
-  min-width: 0;
-  min-height: 100%;
-}
-
-.filter-card,
-.table-card {
-  margin-bottom: 20px;
-}
-
-.filter-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 12px;
-}
-
-.filter-form :deep(.el-form-item) {
-  margin-right: 0;
-}
-
-.table-card {
-  overflow-x: auto;
-}
-
-.table-card :deep(.el-table) {
-  width: 100%;
-}
-.my-page-header {
-  padding: 20px;
-}
-
-@media (max-width: 768px) {
-  .my-page-header {
-    padding: 0;
-  }
-
-  .filter-form {
-    flex-direction: column;
-  }
-
-  .filter-form :deep(.el-form-item),
-  .filter-form :deep(.el-input),
-  .filter-form :deep(.el-select) {
-    width: 100%;
-  }
-}
-
-</style>

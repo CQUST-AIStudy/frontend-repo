@@ -1,14 +1,14 @@
 <template>
-  <div class="class-join-page">
+  <div class="class-join-page [display:flex] [flex-direction:column] [gap:20px]">
     <page-header
       title="教学班"
       description="加入教学班后，AI 学习助手会自动解锁该班级可访问的课程知识库和 RAG 问答空间。"
     />
 
-    <div class="class-join-grid">
-      <el-card class="join-card" shadow="hover">
+    <div class="class-join-grid [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] max-[960px]:[grid-template-columns:1fr]">
+      <el-card class="join-card [border-radius:16px]" shadow="hover">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>加入新班级</span>
           </div>
         </template>
@@ -27,21 +27,21 @@
           </el-form-item>
         </el-form>
 
-        <div class="join-actions">
+        <div class="join-actions [display:flex] [gap:12px]">
           <el-button type="primary" :loading="joining" :disabled="!canSubmit" @click="submitJoin">
             加入班级
           </el-button>
           <el-button @click="goAssistant">前往 AI 助手</el-button>
         </div>
 
-        <div class="join-tip">
+        <div class="join-tip [margin-top:12px] [color:#909399] [font-size:13px] [line-height:1.6]">
           加入成功后，AI 助手会自动展示你当前教学班有权限访问的课程空间。
         </div>
       </el-card>
 
-      <el-card class="joined-card" shadow="hover">
+      <el-card class="joined-card [border-radius:16px]" shadow="hover">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>已加入班级</span>
             <el-button link :loading="loading" @click="loadJoinedClasses">刷新</el-button>
           </div>
@@ -49,11 +49,11 @@
 
         <el-empty v-if="!loading && joinedClasses.length === 0" description="你还没有加入任何教学班" />
 
-        <div v-else v-loading="loading" class="joined-list">
-          <div v-for="item in joinedClasses" :key="item.id" class="joined-item">
-            <div class="joined-main">
-              <div class="joined-title">{{ item.name }}</div>
-              <div class="joined-meta">
+        <div v-else v-loading="loading" class="joined-list [display:flex] [flex-direction:column] [gap:12px] [min-height:120px]">
+          <div v-for="item in joinedClasses" :key="item.id" class="joined-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:16px] [border:1px_solid_#ebeef5] [border-radius:12px] [background:#fcfcfd]">
+            <div class="joined-main [display:flex] [flex-direction:column] [gap:6px]">
+              <div class="joined-title [color:#303133] [font-size:15px] [font-weight:600]">{{ item.name }}</div>
+              <div class="joined-meta [display:flex] [flex-wrap:wrap] [gap:10px] [color:#909399] [font-size:13px]">
                 <span v-if="item.courseName">{{ item.courseName }}</span>
                 <span v-if="item.grade">{{ item.grade }}级</span>
                 <span>{{ item.classCode }}</span>
@@ -143,92 +143,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.class-join-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
-.class-join-grid {
-  display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 20px;
-}
-
-.join-card,
-.joined-card {
-  border-radius: 16px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.join-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.join-tip {
-  margin-top: 12px;
-  color: #909399;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.joined-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 120px;
-}
-
-.joined-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid #ebeef5;
-  border-radius: 12px;
-  background: #fcfcfd;
-}
-
-.joined-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.joined-title {
-  color: #303133;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.joined-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  color: #909399;
-  font-size: 13px;
-}
-
-@media (max-width: 960px) {
-  .class-join-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .join-actions {
-    flex-wrap: wrap;
-  }
-
-  .joined-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-</style>

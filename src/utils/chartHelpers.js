@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 /**
  * 安全地初始化echarts，包含错误处理和DOM检查
  * @param {Array} chartRefs - 包含图表容器refs的数组
@@ -6,7 +7,7 @@
  */
 export function safeInitCharts(chartRefs, initFunction, delay = 300) {
   if (!Array.isArray(chartRefs)) {
-    console.error('chartRefs必须是数组')
+    logger.error('chartRefs必须是数组')
     return Promise.resolve(false)
   }
 
@@ -16,18 +17,18 @@ export function safeInitCharts(chartRefs, initFunction, delay = 300) {
     
     if (!allRefsValid) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('容器尚未完全渲染，增加延迟等待...', delay)
+        logger.debug('容器尚未完全渲染，增加延迟等待...', delay)
       }
       delay += 100 // 增加延迟时间
       
       if (delay > 2000) { // 设置最大延迟时间，避免无限等待
-        console.error('等待DOM渲染超时，尝试继续初始化')
+        logger.error('等待DOM渲染超时，尝试继续初始化')
         setTimeout(() => {
           try {
             initFunction()
             resolve(true)
           } catch (error) {
-            console.error('图表初始化失败:', error)
+            logger.error('图表初始化失败:', error)
             resolve(false)
           }
         }, 100)
@@ -47,7 +48,7 @@ export function safeInitCharts(chartRefs, initFunction, delay = 300) {
         initFunction()
         resolve(true)
       } catch (error) {
-        console.error('图表初始化失败:', error)
+        logger.error('图表初始化失败:', error)
         resolve(false)
       }
     }, delay)

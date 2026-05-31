@@ -1,52 +1,52 @@
 <template>
-  <div class="rag-analytics-container">
-    <page-header class="my-page-header" title="RAG 运营面板" description="课程知识库问答质量监控与分析" />
+  <div class="rag-analytics-container [height:100%] [overflow-y:auto] [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
+    <page-header class="my-page-header [padding:0]" title="RAG 运营面板" description="课程知识库问答质量监控与分析" />
 
-    <div style="padding: 0 20px 10px">
-      <el-select v-model="selectedSpaceId" placeholder="选择课程空间" style="width: 300px" @change="loadAll">
+    <div class="[padding:0_20px_10px]">
+      <el-select v-model="selectedSpaceId" placeholder="选择课程空间" class="[width:300px]" @change="loadAll">
         <el-option v-for="cs in courseSpaces" :key="cs.id" :label="cs.name" :value="cs.id" />
       </el-select>
     </div>
 
-    <div v-if="selectedSpaceId" class="analytics-content" v-loading="loading">
+    <div v-if="selectedSpaceId" class="analytics-content [min-height:400px]" v-loading="loading">
       <!-- 统计卡片 -->
-      <el-row :gutter="16" style="padding: 0 20px 16px">
+      <el-row :gutter="16" class="[padding:0_20px_16px]">
         <el-col :span="6">
-          <el-card shadow="hover" class="stat-card">
-            <div class="stat-label">命中率</div>
-            <div class="stat-value">{{ (hitRate * 100).toFixed(1) }}%</div>
-            <div class="stat-desc">coverage > 0.4 的比例</div>
+          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">命中率</div>
+            <div class="stat-value [font-size:28px] [font-weight:700] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ (hitRate * 100).toFixed(1) }}%</div>
+            <div class="stat-desc [font-size:12px] [color:#9aa0a6] [margin-top:6px]">coverage > 0.4 的比例</div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" class="stat-card">
-            <div class="stat-label">联网触发率</div>
-            <div class="stat-value">{{ (webTriggerRate * 100).toFixed(1) }}%</div>
-            <div class="stat-desc">触发联网兜底的比例</div>
+          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">联网触发率</div>
+            <div class="stat-value [font-size:28px] [font-weight:700] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ (webTriggerRate * 100).toFixed(1) }}%</div>
+            <div class="stat-desc [font-size:12px] [color:#9aa0a6] [margin-top:6px]">触发联网兜底的比例</div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" class="stat-card feedback-card">
-            <div class="stat-label">用户反馈</div>
-            <div class="stat-value">
-              <span style="color: #67c23a">👍 {{ feedbackStats.thumbsUp }}</span>
-              <span style="margin: 0 8px; color: #dcdfe6">/</span>
-              <span style="color: #f56c6c">👎 {{ feedbackStats.thumbsDown }}</span>
+          <el-card shadow="hover" class="stat-card feedback-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">用户反馈</div>
+            <div class="stat-value [font-size:28px] [font-weight:700] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">
+              <span class="[color:#67c23a]">👍 {{ feedbackStats.thumbsUp }}</span>
+              <span class="[margin:0_8px] [color:#dcdfe6]">/</span>
+              <span class="[color:#f56c6c]">👎 {{ feedbackStats.thumbsDown }}</span>
             </div>
-            <div class="stat-desc">共 {{ feedbackStats.total }} 次问答</div>
+            <div class="stat-desc [font-size:12px] [color:#9aa0a6] [margin-top:6px]">全{{ feedbackStats.total }} 次问答</div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card shadow="hover" class="stat-card">
-            <div class="stat-label">满意率</div>
-            <div class="stat-value">{{ satisfactionRate }}%</div>
-            <div class="stat-desc">点赞 / (点赞+踩)</div>
+          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">满意率</div>
+            <div class="stat-value [font-size:28px] [font-weight:700] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ satisfactionRate }}%</div>
+            <div class="stat-desc [font-size:12px] [color:#9aa0a6] [margin-top:6px]">点赞 / (点赞+踩</div>
           </el-card>
         </el-col>
       </el-row>
 
       <!-- 问题热榜 + 资料缺口 -->
-      <el-row :gutter="16" style="padding: 0 20px 16px">
+      <el-row :gutter="16" class="[padding:0_20px_16px]">
         <el-col :span="14">
           <el-card shadow="hover">
             <template #header><span>🔥 问题热榜 TOP 20</span></template>
@@ -60,13 +60,13 @@
         <el-col :span="10">
           <el-card shadow="hover">
             <template #header><span>⚠️ 资料缺口提示</span></template>
-            <div v-if="resourceGaps.length === 0" style="text-align: center; color: #9aa0a6; padding: 40px 0">
+            <div v-if="resourceGaps.length === 0" class="[text-align:center] [color:#9aa0a6] [padding:40px_0]">
               暂无资料缺口，知识库覆盖良好 🎉
             </div>
-            <div v-else class="gap-list">
-              <div v-for="(gap, idx) in resourceGaps" :key="idx" class="gap-item">
-                <div class="gap-query">{{ gap.query }}</div>
-                <div class="gap-meta">
+            <div v-else class="gap-list [max-height:320px] [overflow-y:auto]">
+              <div v-for="(gap, idx) in resourceGaps" :key="idx" class="gap-item [padding:10px_0] [border-bottom:1px_solid_#f1f3f4] last:[border-bottom:none]">
+                <div class="gap-query [font-size:14px] [color:#202124] [margin-bottom:6px]">{{ gap.query }}</div>
+                <div class="gap-meta [display:flex] [gap:8px]">
                   <el-tag size="small" type="danger">提问 {{ gap.count }} 次</el-tag>
                   <el-tag size="small" type="warning">平均覆盖 {{ (gap.avgCoverage * 100).toFixed(0) }}%</el-tag>
                 </div>
@@ -76,8 +76,8 @@
         </el-col>
       </el-row>
 
-      <!-- 引用覆盖率 -->
-      <el-row :gutter="16" style="padding: 0 20px 16px">
+      <!-- 引用覆盖率-->
+      <el-row :gutter="16" class="[padding:0_20px_16px]">
         <el-col :span="24">
           <el-card shadow="hover">
             <template #header><span>📚 文档引用频次</span></template>
@@ -96,13 +96,14 @@
       </el-row>
     </div>
 
-    <div v-else style="text-align: center; padding: 80px 0; color: #9aa0a6">
+    <div v-else class="[text-align:center] [padding:80px_0] [color:#9aa0a6]">
       请先选择一个课程空间查看分析数据
     </div>
   </div>
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
@@ -173,34 +174,9 @@ onMounted(async () => {
     const res = await getCourseSpaces()
     courseSpaces.value = Array.isArray(res) ? res : (res?.data || [])
   } catch (e) {
-    console.warn('获取课程空间失败', e)
+    logger.warn('获取课程空间失败', e)
   }
 })
 </script>
 
-<style scoped>
-.rag-analytics-container { height: 100%; overflow-y: auto; }
-.my-page-header { padding: 0; }
-.analytics-content { min-height: 400px; }
-.stat-card {
-  text-align: center;
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  transition: all 0.25s;
-}
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
-.stat-label { font-size: 13px; color: #5f6368; margin-bottom: 8px; }
-.stat-value { font-size: 28px; font-weight: 700; color: #202124; }
-.stat-desc { font-size: 12px; color: #9aa0a6; margin-top: 6px; }
-.gap-list { max-height: 320px; overflow-y: auto; }
-.gap-item { padding: 10px 0; border-bottom: 1px solid #f1f3f4; }
-.gap-item:last-child { border-bottom: none; }
-.gap-query { font-size: 14px; color: #202124; margin-bottom: 6px; }
-.gap-meta { display: flex; gap: 8px; }
-.rag-analytics-container :deep(.el-card) {
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-</style>
+

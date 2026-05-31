@@ -1,7 +1,7 @@
 <template>
   <div class="user-management">
     <page-header
-        class="my-page-header"
+      class="my-page-header"
       title="用户管理"
       description="管理系统用户，包括学生、教师和管理员"
     >
@@ -10,11 +10,11 @@
 
     <el-alert
       v-if="!userManagementReady"
-      class="read-only-alert"
+      class="read-only-alert [margin-bottom:20px]"
       type="warning"
       :closable="false"
       title="当前用户管理页仍是前端样例数据"
-      description="后端还没有 /api/users 这组真实接口，新增、编辑、重置密码、删除和启停状态暂时禁用，避免页面显示成功但数据实际上没有落库。"
+      description="后端还没有/api/users 这组真实接口，新增、编辑、重置密码、删除和启停状态暂时禁用，避免页面显示成功但数据实际上没有落库。"
       show-icon
     />
 
@@ -37,55 +37,61 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="applyFilter">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
+        <el-form-item class="filter-actions-item">
+          <div class="filter-actions">
+            <el-button type="primary" @click="applyFilter">查询</el-button>
+            <el-button @click="resetFilter">重置</el-button>
+          </div>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-card class="table-card">
-      <el-table :data="filteredUsers" style="width: 100%" border>
-        <el-table-column prop="id" label="用户ID" width="120" />
-        <el-table-column label="用户信息" min-width="200">
-          <template #default="scope">
-            <div class="user-info">
-              <el-avatar :size="32" :src="scope.row.avatar" />
-              <div class="user-details">
-                <div class="user-name">{{ scope.row.name }}</div>
-                <div class="user-extra">{{ scope.row.role === 'student' ? scope.row.class : scope.row.department }}</div>
+      <div class="user-table-wrap">
+        <el-table :data="filteredUsers" border>
+          <el-table-column prop="id" label="用户ID" width="120" />
+          <el-table-column label="用户信息" min-width="220">
+            <template #default="scope">
+              <div class="user-cell">
+                <el-avatar :size="32" :src="scope.row.avatar" />
+                <div class="user-cell__details">
+                  <div class="user-cell__name">{{ scope.row.name }}</div>
+                  <div class="user-cell__extra">{{ scope.row.role === 'student' ? scope.row.class : scope.row.department }}</div>
+                </div>
               </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="email" label="邮箱" min-width="180" />
-        <el-table-column prop="phone" label="电话" width="150" />
-        <el-table-column label="角色" width="100">
-          <template #default="scope">
-            <el-tag :type="getRoleType(scope.row.role)">
-              {{ getRoleText(scope.row.role) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" width="100">
-          <template #default="scope">
-            <el-switch
-              v-model="scope.row.status"
-              :active-value="'active'"
-              :inactive-value="'inactive'"
-              :disabled="!userManagementReady"
-              @change="handleStatusChange(scope.row)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button type="primary" link :disabled="!userManagementReady" @click="editUser(scope.row)">编辑</el-button>
-            <el-button type="primary" link :disabled="!userManagementReady" @click="resetPassword(scope.row)">重置密码</el-button>
-            <el-button type="danger" link :disabled="!userManagementReady" @click="deleteUser(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+          <el-table-column prop="email" label="邮箱" min-width="180" />
+          <el-table-column prop="phone" label="电话" width="150" />
+          <el-table-column label="角色" width="100">
+            <template #default="scope">
+              <el-tag :type="getRoleType(scope.row.role)">
+                {{ getRoleText(scope.row.role) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" width="100">
+            <template #default="scope">
+              <el-switch
+                v-model="scope.row.status"
+                :active-value="'active'"
+                :inactive-value="'inactive'"
+                :disabled="!userManagementReady"
+                @change="handleStatusChange(scope.row)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="190">
+            <template #default="scope">
+              <div class="table-actions">
+                <el-button type="primary" link :disabled="!userManagementReady" @click="editUser(scope.row)">编辑</el-button>
+                <el-button type="primary" link :disabled="!userManagementReady" @click="resetPassword(scope.row)">重置密码</el-button>
+                <el-button type="danger" link :disabled="!userManagementReady" @click="deleteUser(scope.row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <div class="pagination-container">
         <el-pagination
@@ -101,7 +107,7 @@
       </div>
     </el-card>
 
-    <!-- 添加/编辑用户对话框 -->
+    <!-- 添加/编辑用户对话框-->
     <el-dialog
       v-model="userDialogVisible"
       :title="dialogType === 'add' ? '添加用户' : '编辑用户'"
@@ -113,7 +119,7 @@
         </el-form-item>
 
         <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" placeholder="选择角色" style="width: 100%">
+          <el-select v-model="userForm.role" placeholder="选择角色" class="[width:100%]">
             <el-option label="学生" value="student" />
             <el-option label="教师" value="teacher" />
             <el-option label="管理员" value="admin" />
@@ -130,7 +136,7 @@
 
         <template v-if="userForm.role === 'student'">
           <el-form-item label="班级" prop="class">
-            <el-select v-model="userForm.class" placeholder="选择班级" style="width: 100%">
+            <el-select v-model="userForm.class" placeholder="选择班级" class="[width:100%]">
               <el-option
                 v-for="item in classList"
                 :key="item.id"
@@ -170,7 +176,7 @@
       </template>
     </el-dialog>
 
-    <!-- 重置密码对话框 -->
+    <!-- 重置密码对话框-->
     <el-dialog v-model="resetPasswordDialogVisible" title="重置密码" width="400px">
       <el-form ref="resetPasswordFormRef" :model="resetPasswordForm" label-width="100px">
         <el-form-item label="新密码" prop="password">
@@ -193,6 +199,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
@@ -349,7 +356,7 @@ const loadClassList = async () => {
     const classes = await api.getClassList()
     classList.value = classes
   } catch (error) {
-    console.error('加载班级列表失败:', error)
+    logger.error('加载班级列表失败:', error)
   }
 }
 
@@ -526,7 +533,7 @@ const deleteUser = (user) => {
     return
   }
   ElMessageBox.confirm(
-    `确定要删除用户 ${user.name} 吗？此操作不可恢复。`,
+    `确定要删除用户${user.name} 吗？此操作不可恢复。`,
     '警告',
     {
       confirmButtonText: '确定',
@@ -549,91 +556,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.user-management {
-  min-width: 0;
-  min-height: 100%;
-}
-
-.filter-card,
-.table-card {
-  margin-bottom: 20px;
-}
-
-.read-only-alert {
-  margin-bottom: 20px;
-}
-
-.filter-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 12px;
-}
-
-.filter-form :deep(.el-form-item) {
-  margin-right: 0;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-.user-details {
-  margin-left: 10px;
-}
-
-.user-name {
-  font-weight: 500;
-}
-
-.user-extra {
-  font-size: 12px;
-  color: #999;
-  margin-top: 3px;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-}
-
-.table-card {
-  overflow-x: auto;
-}
-
-.table-card :deep(.el-table) {
-  width: 100%;
-}
-
-.user-management :deep(.el-dialog) {
-  max-width: calc(100vw - 24px);
-}
-
-.my-page-header {
-  padding: 20px;
-}
-
-@media (max-width: 768px) {
-  .my-page-header {
-    padding: 0;
-  }
-
-  .filter-form {
-    flex-direction: column;
-  }
-
-  .filter-form :deep(.el-form-item),
-  .filter-form :deep(.el-input),
-  .filter-form :deep(.el-select) {
-    width: 100%;
-  }
-
-  .pagination-container {
-    justify-content: flex-start;
-  }
-}
-
-</style>

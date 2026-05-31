@@ -1,17 +1,17 @@
 <template>
-  <div class="exp-analytics">
+  <div class="exp-analytics [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
     <page-header
       title="实验数据分析"
       description="基于 PTA 成绩单的多维分析，包括分数分布、题目得分率、难度系数与区分度。"
     />
 
-    <div class="selector-bar">
+    <div class="selector-bar [display:flex] [gap:12px] [align-items:center] [margin-bottom:12px] [flex-wrap:wrap] max-[768px]:[align-items:stretch] max-[768px]:[&_>_*]:![width:100%]">
       <el-select
         v-if="classPrefixes.length > 1"
         v-model="selectedClass"
         placeholder="选择班级前缀"
         clearable
-        style="width: 180px"
+        class="[width:180px]"
         @change="onClassChange"
       >
         <el-option label="全部实验" value="" />
@@ -28,7 +28,7 @@
         placeholder="选择实验"
         filterable
         clearable
-        style="width: 360px"
+        class="[width:360px]"
         @change="loadAnalytics"
       >
         <el-option
@@ -43,7 +43,7 @@
         {{ showComparison ? '返回单实验分析' : '实验横向对比' }}
       </el-button>
 
-      <el-tag type="info" size="small" class="count-tag">
+      <el-tag type="info" size="small" class="count-tag [margin-left:auto] max-[768px]:[margin-left:0]">
         {{ activeClassLabel }} / {{ experiments.length }} 个实验
       </el-tag>
     </div>
@@ -53,7 +53,7 @@
       type="error"
       :closable="false"
       show-icon
-      class="fallback-alert"
+      class="fallback-alert [margin-bottom:12px]"
       :title="errorMessage"
     />
 
@@ -62,7 +62,7 @@
       type="warning"
       :closable="false"
       show-icon
-      class="fallback-alert"
+      class="fallback-alert [margin-bottom:12px]"
       title="当前教学班没有匹配到实验前缀，已自动切换为全部实验。"
     />
 
@@ -71,39 +71,39 @@
       type="info"
       :closable="false"
       show-icon
-      class="scope-alert"
+      class="scope-alert [margin-bottom:12px]"
       :title="scopeTitle"
       :description="scopeDescription"
     />
 
     <template v-if="showComparison">
-      <el-card class="g-card" v-loading="compLoading">
+      <el-card class="g-card [border-radius:8px] [border:1px_solid_#dadce0] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:12px] [&_.el-table_td]:[color:#202124]" v-loading="compLoading">
         <template #header>
           <span>实验横向对比</span>
         </template>
-        <div v-if="comparisonItems.length" ref="compChartRef" style="height: 340px"></div>
+        <div v-if="comparisonItems.length" ref="compChartRef" class="[height:340px]"></div>
         <el-empty v-else-if="!compLoading" description="暂无可对比的实验数据" />
       </el-card>
     </template>
 
     <template v-else-if="data && data.overview && selectedExp">
-      <div class="kpi-grid">
-        <div v-for="item in kpiItems" :key="item.label" class="kpi">
-          <div class="kpi-val" :style="{ color: item.color || '#202124' }">{{ item.value }}</div>
-          <div class="kpi-label">{{ item.label }}</div>
+      <div class="kpi-grid [display:grid] [grid-template-columns:repeat(10,_minmax(0,_1fr))] [gap:8px]">
+        <div v-for="item in kpiItems" :key="item.label" class="kpi [background:#fff] [border-radius:8px] [padding:10px_8px] [text-align:center] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,_0,_0,_0.08)]">
+          <div class="kpi-val [font-size:20px] [font-weight:700] [line-height:1.2]" :class="kpiValueClass(item)">{{ item.value }}</div>
+          <div class="kpi-label [font-size:11px] [color:#5f6368] [margin-top:2px]">{{ item.label }}</div>
         </div>
       </div>
 
-      <el-card class="g-card compact" style="margin-top: 12px">
+      <el-card class="g-card compact [margin-top:12px] [font-size:12px]">
         <template #header>
           <span>PTA 概览统计</span>
         </template>
 
-        <div class="pta-stats-wrapper">
-          <table class="pta-table">
+        <div class="pta-stats-wrapper [overflow-x:auto]">
+          <table class="pta-table [width:100%] [border-collapse:collapse] [font-size:12px] [text-align:center]">
             <thead>
               <tr>
-                <th class="pta-th-title">统计项</th>
+                <th class="pta-th-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">统计项</th>
                 <th>总人数</th>
                 <th>已提交</th>
                 <th>有成绩</th>
@@ -119,7 +119,7 @@
             </thead>
             <tbody>
               <tr>
-                <td class="pta-td-title">数值</td>
+                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">数值</td>
                 <td>{{ safeNumber(data.overview.totalStudents) }}</td>
                 <td>{{ safeNumber(data.overview.submittedCount) }}</td>
                 <td>{{ safeNumber(data.overview.scoredCount) }}</td>
@@ -135,22 +135,22 @@
             </tbody>
           </table>
 
-          <table class="pta-table" style="margin-top: 12px">
+          <table class="pta-table [margin-top:12px] [width:100%] [border-collapse:collapse] [font-size:12px] [text-align:center]">
             <thead>
               <tr>
-                <th class="pta-th-title">分数段</th>
+                <th class="pta-th-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">分数段</th>
                 <th v-for="segment in scoreSegments" :key="segment.label">{{ segment.label }}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="pta-td-title">人数</td>
+                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">人数</td>
                 <td v-for="segment in scoreSegments" :key="`count-${segment.label}`">
                   {{ segment.count }}
                 </td>
               </tr>
               <tr>
-                <td class="pta-td-title">比例</td>
+                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">比例</td>
                 <td v-for="segment in scoreSegments" :key="`percent-${segment.label}`">
                   {{ segment.percent }}
                 </td>
@@ -158,34 +158,34 @@
             </tbody>
           </table>
 
-          <div class="pta-notes">
-            <span>难度系数 = 1 - 平均分 / 满分，数值越大说明整体得分越低。</span>
-            <span>区分度 = (高位平均 - 低位平均) / 满分，通常大于 0.30 说明区分效果较好。</span>
+          <div class="pta-notes [display:flex] [gap:24px] [margin-top:8px] [font-size:11px] [color:#5f6368] [flex-wrap:wrap]">
+            <span>难度系数 = 1 - 平均分/ 满分，数值越大说明整体得分越低。</span>
+            <span>区分度= (高位平均 - 低位平均) / 满分，通常大于 0.30 说明区分效果较好。</span>
           </div>
         </div>
       </el-card>
 
-      <el-row :gutter="16" style="margin-top: 12px">
+      <el-row :gutter="16" class="[margin-top:12px]">
         <el-col :xs="24" :sm="24" :md="12">
-          <el-card class="g-card compact">
+          <el-card class="g-card compact [font-size:12px]">
             <template #header>
               <span>分数分布</span>
             </template>
-            <div ref="distChartRef" style="height: 260px"></div>
+            <div ref="distChartRef" class="[height:260px]"></div>
           </el-card>
         </el-col>
         <el-col :xs="24" :sm="24" :md="12">
-          <el-card class="g-card compact">
+          <el-card class="g-card compact [font-size:12px]">
             <template #header>
               <span>每题得分率</span>
             </template>
-            <div v-if="problemAccuracy.length" ref="accChartRef" style="height: 260px"></div>
+            <div v-if="problemAccuracy.length" ref="accChartRef" class="[height:260px]"></div>
             <el-empty v-else description="暂无题目维度数据" />
           </el-card>
         </el-col>
       </el-row>
 
-      <el-card class="g-card compact" style="margin-top: 12px">
+      <el-card class="g-card compact [margin-top:12px] [font-size:12px]">
         <template #header>
           <span>题目明细</span>
         </template>
@@ -215,7 +215,7 @@
       </el-card>
     </template>
 
-    <div v-else-if="loading" class="loading-wrap">
+    <div v-else-if="loading" class="loading-wrap [padding:40px]">
       <el-skeleton :rows="6" animated />
     </div>
 
@@ -232,6 +232,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 import PageHeader from '../../components/PageHeader.vue'
@@ -352,6 +353,14 @@ const kpiItems = computed(() => {
   ]
 })
 
+function kpiValueClass(item) {
+  if (item.color === '#1a73e8') return '[color:#1a73e8]'
+  if (item.color === '#1e8e3e') return '[color:#1e8e3e]'
+  if (item.color === '#d93025') return '[color:#d93025]'
+  if (item.color === '#e37400') return '[color:#e37400]'
+  return '[color:#202124]'
+}
+
 const scoreSegments = computed(() => {
   const distribution = data.value?.scoreDistribution
   if (!distribution) return []
@@ -469,7 +478,7 @@ async function loadClassPrefixes() {
   } catch (error) {
     classPrefixes.value = []
     selectedClass.value = ''
-    console.warn('加载实验班级前缀失败:', error)
+    logger.warn('加载实验班级前缀失败:', error)
   }
 }
 
@@ -744,175 +753,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.exp-analytics {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
 
-.selector-bar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.count-tag {
-  margin-left: auto;
-}
-
-.fallback-alert,
-.scope-alert {
-  margin-bottom: 12px;
-}
-
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.kpi {
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
-  border: 1px solid #e8eaed;
-  transition: box-shadow 0.2s;
-}
-
-.kpi:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.kpi-val {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.kpi-label {
-  font-size: 11px;
-  color: #5f6368;
-  margin-top: 2px;
-}
-
-.g-card {
-  border-radius: 8px;
-  border: 1px solid #dadce0;
-}
-
-.g-card.compact :deep(.el-card__header) {
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.g-card.compact :deep(.el-card__body) {
-  padding: 8px 12px;
-}
-
-.g-card :deep(.el-table th) {
-  font-weight: 500;
-  color: #5f6368;
-  font-size: 12px;
-}
-
-.g-card :deep(.el-table td) {
-  font-size: 12px;
-  color: #202124;
-}
-
-.pta-stats-wrapper {
-  overflow-x: auto;
-}
-
-.pta-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  text-align: center;
-}
-
-.pta-table th,
-.pta-table td {
-  border: 1px solid #e8eaed;
-  padding: 6px 8px;
-  white-space: nowrap;
-}
-
-.pta-table thead th {
-  background: #f8f9fa;
-  color: #5f6368;
-  font-weight: 500;
-}
-
-.pta-th-title,
-.pta-td-title {
-  background: #f1f3f4;
-  font-weight: 600;
-  color: #202124;
-  min-width: 72px;
-}
-
-.pta-table tbody td {
-  color: #202124;
-  font-weight: 500;
-}
-
-.pta-good {
-  color: #1e8e3e;
-  font-weight: 700;
-}
-
-.pta-warn {
-  color: #e37400;
-  font-weight: 700;
-}
-
-.pta-danger {
-  color: #d93025;
-  font-weight: 700;
-}
-
-.pta-notes {
-  display: flex;
-  gap: 24px;
-  margin-top: 8px;
-  font-size: 11px;
-  color: #5f6368;
-  flex-wrap: wrap;
-}
-
-.loading-wrap {
-  padding: 40px;
-}
-
-@media (max-width: 1200px) {
-  .kpi-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .selector-bar {
-    align-items: stretch;
-  }
-
-  .selector-bar > * {
-    width: 100% !important;
-  }
-
-  .count-tag {
-    margin-left: 0;
-  }
-
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .pta-notes {
-    gap: 8px;
-  }
-}
-</style>

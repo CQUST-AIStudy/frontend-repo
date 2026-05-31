@@ -1,5 +1,5 @@
 <template>
-  <div class="experiment-tab-content">
+  <div class="experiment-tab-content [min-height:200px]">
     <el-row :gutter="20">
       <el-col :span="24" v-if="experiments.length === 0">
         <el-empty description="暂无实验数据" />
@@ -29,8 +29,4 @@ defineProps({
 })
 </script>
 
-<style scoped>
-.experiment-tab-content {
-  min-height: 200px;
-}
-</style>
+

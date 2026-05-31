@@ -1,30 +1,30 @@
 <template>
-  <div class="system-log">
+  <div class="system-log [height:100%]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [padding:20px]"
       title="系统日志"
       description="系统操作和事件记录"
     />
 
-    <div class="system-log-content">
+    <div class="system-log-content [display:flex] [flex-direction:column] [gap:20px]">
       <el-card>
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <div class="left">
               <span>日志列表</span>
             </div>
-            <div class="right">
+            <div class="right [display:flex] [gap:10px] [align-items:center]">
               <el-input
                 placeholder="搜索日志内容"
                 v-model="searchKeyword"
-                class="search-input"
+                class="search-input [width:200px] [width:250px]"
                 clearable
               >
                 <template #prefix>
                   <el-icon><Search /></el-icon>
                 </template>
               </el-input>
-              <el-select v-model="logLevel" placeholder="日志级别" clearable class="level-select">
+              <el-select v-model="logLevel" placeholder="日志级别" clearable class="level-select [width:120px]">
                 <el-option label="全部" value="" />
                 <el-option label="信息" value="INFO" />
                 <el-option label="警告" value="WARNING" />
@@ -36,7 +36,7 @@
           </div>
         </template>
 
-        <el-table :data="filteredLogs" v-loading="loading" border style="width: 100%">
+        <el-table :data="filteredLogs" v-loading="loading" border class="[width:100%]">
           <el-table-column prop="timestamp" label="时间" width="180" sortable />
           <el-table-column label="级别" width="100">
             <template #default="scope">
@@ -59,7 +59,7 @@
           </el-table-column>
         </el-table>
 
-        <div class="pagination-container">
+        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
           <el-pagination
             background
             layout="total, sizes, prev, pager, next, jumper"
@@ -94,7 +94,7 @@
         <el-descriptions-item label="错误堆栈" v-if="selectedLog.stackTrace">
           <el-collapse>
             <el-collapse-item title="查看错误堆栈信息">
-              <pre class="stack-trace">{{ selectedLog.stackTrace }}</pre>
+              <pre class="stack-trace [font-family:monospace] [white-space:pre-wrap] [background-color:#f5f5f5] [padding:10px] [border-radius:4px] [color:#666] [font-size:12px] [max-height:300px] [overflow-y:auto]">{{ selectedLog.stackTrace }}</pre>
             </el-collapse-item>
           </el-collapse>
         </el-descriptions-item>
@@ -105,7 +105,7 @@
     <el-dialog v-model="clearConfirmVisible" title="警告" width="30%">
       <span>确定要清空所有日志吗？此操作不可撤销!</span>
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="clearConfirmVisible = false">取消</el-button>
           <el-button type="danger" @click="confirmClearLogs">确定</el-button>
         </div>
@@ -346,57 +346,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.system-log {
-  height: 100%;
-}
 
-.system-log-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.search-input {
-  width: 200px;
-}
-
-.level-select {
-  width: 120px;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.stack-trace {
-  font-family: monospace;
-  white-space: pre-wrap;
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-  color: #666;
-  font-size: 12px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.my-page-header {
-  padding: 20px;
-}
-
-</style>

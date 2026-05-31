@@ -1,22 +1,22 @@
 <template>
-  <div class="teacher-layout">
-    <el-container class="layout-container">
-      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside">
-        <div class="logo-container">
-          <img src="../../assets/logo.png" alt="Logo" class="logo" />
+  <div class="teacher-layout [min-height:100vh] [min-height:100dvh] [overflow-x:hidden]">
+    <el-container class="layout-container [min-height:100vh] [min-height:100dvh]">
+      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [overflow:hidden] [border-right:1px_solid_rgba(126,_157,_183,_0.14)] [background:linear-gradient(180deg,_rgba(12,_31,_50,_0.94),_rgba(16,_49,_77,_0.92)),_radial-gradient(circle_at_top_left,_rgba(44,_181,_160,_0.16),_transparent_32%)] [box-shadow:inset_-1px_0_0_rgba(255,_255,_255,_0.04)] [transition:width_0.28s_ease]">
+        <div class="logo-container [display:flex] [align-items:center] [gap:14px] [height:74px] [padding:0_18px] [border-bottom:1px_solid_rgba(255,_255,_255,_0.08)]">
+          <img src="../../assets/logo.png" alt="Logo" class="logo [width:42px] [height:42px] [border-radius:14px] [border:1px_solid_rgba(130,_220,_255,_0.18)] [box-shadow:0_10px_24px_rgba(10,_30,_50,_0.28)]" />
           <transition name="fade-text">
-            <div v-if="!collapsed" class="brand-copy">
-              <span class="logo-kicker">教师工作台</span>
-              <span class="logo-title">智能教学平台</span>
+            <div v-if="!collapsed" class="brand-copy [display:flex] [flex-direction:column] [gap:2px]">
+              <span class="logo-kicker [color:rgba(173,_222,_255,_0.7)] [font-size:11px] [letter-spacing:0] [text-transform:uppercase]">教师工作台</span>
+              <span class="logo-title [color:#f3f8fc] [font-size:16px] [font-weight:700]">智能教学平台</span>
             </div>
           </transition>
         </div>
 
-        <div class="menu-scroll-area">
+        <div class="menu-scroll-area [flex:1] [min-height:0] [overflow:hidden] [padding:10px_8px_16px] [&_.el-scrollbar]:[height:100%] [&_.el-scrollbar__wrap]:[overflow-x:hidden]">
           <el-scrollbar>
             <el-menu
               :default-active="activeMenu"
-              class="layout-menu"
+              class="layout-menu [border-right:none] ![background:transparent] [--el-menu-bg-color:transparent] [--el-menu-text-color:rgba(222,_236,_248,_0.7)] [--el-menu-active-color:#ffffff] [--el-menu-hover-bg-color:rgba(255,_255,_255,_0.08)] [--el-menu-hover-text-color:#ffffff] [padding:0] [&_.el-menu-item]:[height:46px] [&_.el-menu-item]:[line-height:46px] [&_.el-menu-item]:[margin:4px_0] [&_.el-menu-item]:[border-radius:16px] [&_.el-menu-item]:[font-size:13px] [&_.el-menu-item]:[transition:all_0.22s_ease] [&_.el-sub-menu__title]:[height:46px] [&_.el-sub-menu__title]:[line-height:46px] [&_.el-sub-menu__title]:[margin:4px_0] [&_.el-sub-menu__title]:[border-radius:16px] [&_.el-sub-menu__title]:[font-size:13px] [&_.el-sub-menu__title]:[transition:all_0.22s_ease] [&_.el-menu-item.is-active]:![background:linear-gradient(135deg,_rgba(20,_114,_219,_0.92),_rgba(43,_181,_160,_0.88))] [&_.el-menu-item.is-active]:[box-shadow:0_14px_26px_rgba(18,_112,_216,_0.2)] [&_.el-menu-item:hover]:![background:rgba(255,_255,_255,_0.08)] [&_.el-sub-menu__title:hover]:![background:rgba(255,_255,_255,_0.08)] [&_.el-sub-menu_.el-menu]:![background:transparent] [&_.el-sub-menu_.el-menu_.el-menu-item]:[margin-left:12px] [&_.el-sub-menu_.el-menu_.el-menu-item]:![padding-left:42px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[height:40px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[line-height:40px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[border-radius:14px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[font-size:12px] [&_.el-icon]:[font-size:18px]"
               :collapse="collapsed"
               router
               :collapse-transition="false"
@@ -108,7 +108,7 @@
                 </el-menu-item>
               </el-sub-menu>
 
-              <div class="menu-divider"></div>
+              <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
 
               <el-menu-item index="/teacher/profile">
                 <el-icon><Setting /></el-icon>
@@ -126,7 +126,7 @@
         :with-header="false"
         class="layout-drawer"
       >
-        <div class="layout-aside mobile-aside">
+        <div class="layout-aside mobile-aside [width:100%] [border-right:none]">
           <div class="logo-container">
             <img src="../../assets/logo.png" alt="Logo" class="logo" />
             <div class="brand-copy">
@@ -231,7 +231,7 @@
                   </el-menu-item>
                 </el-sub-menu>
 
-                <div class="menu-divider"></div>
+                <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
 
                 <el-menu-item index="/teacher/profile">
                   <el-icon><Setting /></el-icon>
@@ -243,16 +243,16 @@
         </div>
       </el-drawer>
 
-      <el-container class="layout-main">
-        <el-header class="layout-header">
-          <div class="header-left">
-            <el-icon class="fold-icon" @click="toggleNavigation">
+      <el-container class="layout-main [min-width:0] [background:#f8f9fa] [background:transparent]">
+        <el-header class="layout-header [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [padding:0_24px] [height:56px] [border-bottom:1px_solid_#dadce0] [gap:16px] [box-shadow:0_1px_2px_rgba(60,_64,_67,_0.1)] [min-height:56px] [gap:18px] [min-height:78px] [padding:0_28px] [border-bottom:1px_solid_rgba(126,_157,_183,_0.14)] [background:rgba(248,_251,_253,_0.72)] [backdrop-filter:blur(14px)]">
+          <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
+            <el-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
               <Fold v-else-if="!collapsed" />
               <Expand v-else />
             </el-icon>
 
-            <div class="header-path">
+            <div class="header-path [min-width:0] [padding:10px_14px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)]">
               <el-breadcrumb separator="/">
                 <el-breadcrumb-item :to="{ path: '/teacher/dashboard' }">首页</el-breadcrumb-item>
                 <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="index">
@@ -262,29 +262,29 @@
             </div>
           </div>
 
-          <div class="header-right">
-            <div v-if="selectedClassName" class="class-indicator" @click="switchClass">
+          <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
+            <div v-if="selectedClassName" class="class-indicator [display:inline-flex] [align-items:center] [gap:8px] [min-height:40px] [padding:0_14px] [border-radius:999px] [background:linear-gradient(135deg,_rgba(18,_112,_216,_0.12),_rgba(44,_181,_160,_0.1))] [color:#1270d8] [font-size:13px] [font-weight:700] [cursor:pointer] [max-width:min(280px,_32vw)]" @click="switchClass">
               <el-icon><School /></el-icon>
               <span>{{ selectedClassName }}</span>
               <el-icon :size="12"><ArrowDown /></el-icon>
             </div>
 
-            <span class="teacher-level-badge" :class="teacherLevelClass">{{ teacherLevelText }}</span>
+            <span class="teacher-level-badge [min-height:34px] [padding:0_12px] [border-radius:999px] [display:inline-flex] [align-items:center] [font-size:12px] [font-weight:700]" :class="teacherLevelClass">{{ teacherLevelText }}</span>
 
             <el-tooltip content="全屏" placement="bottom">
-              <el-icon class="header-icon" @click="toggleFullScreen"><FullScreen /></el-icon>
+              <el-icon class="header-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleFullScreen"><FullScreen /></el-icon>
             </el-tooltip>
 
             <el-dropdown trigger="click" @command="handleCommand">
-              <div class="user-info">
+              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)] [flex-shrink:0]">
                 <el-avatar :size="34" :src="userInfo.avatar">
                   <span>{{ (userInfo.name || '教').slice(0, 1) }}</span>
                 </el-avatar>
-                <div v-if="!isMobile && !collapsed" class="user-copy">
-                  <span class="username">{{ userInfo.name || '教师用户' }}</span>
-                  <span class="user-subtitle">课程教学工作台</span>
+                <div v-if="!isMobile && !collapsed" class="user-copy [display:flex] [flex-direction:column] [gap:2px]">
+                  <span class="username [font-size:14px] [color:#202124] [font-weight:500] [color:#16324a] [font-size:13px] [font-weight:700]">{{ userInfo.name || '教师用户' }}</span>
+                  <span class="user-subtitle [color:#7f92a6] [font-size:11px]">课程教学工作台</span>
                 </div>
-                <el-icon class="arrow-icon"><ArrowDown /></el-icon>
+                <el-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:#8ca0b3]"><ArrowDown /></el-icon>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -306,7 +306,7 @@
           </div>
         </el-header>
 
-        <el-main class="layout-content">
+        <el-main class="layout-content [background:#f8f9fa] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -314,7 +314,7 @@
           </router-view>
         </el-main>
 
-        <el-footer class="layout-footer">
+        <el-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
           智能学情分析与个性化实验能力提升平台 · 教师工作空间
         </el-footer>
       </el-container>
@@ -472,372 +472,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.teacher-layout {
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
 
-.layout-container {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.layout-aside {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  border-right: 1px solid rgba(126, 157, 183, 0.14);
-  background:
-    linear-gradient(180deg, rgba(12, 31, 50, 0.94), rgba(16, 49, 77, 0.92)),
-    radial-gradient(circle at top left, rgba(44, 181, 160, 0.16), transparent 32%);
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
-  transition: width 0.28s ease;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 74px;
-  padding: 0 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid rgba(130, 220, 255, 0.18);
-  box-shadow: 0 10px 24px rgba(10, 30, 50, 0.28);
-}
-
-.brand-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.logo-kicker {
-  color: rgba(173, 222, 255, 0.7);
-  font-size: 11px;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.logo-title {
-  color: #f3f8fc;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.menu-scroll-area {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: 10px 8px 16px;
-}
-
-.menu-scroll-area :deep(.el-scrollbar) {
-  height: 100%;
-}
-
-.menu-scroll-area :deep(.el-scrollbar__wrap) {
-  overflow-x: hidden;
-}
-
-.layout-menu {
-  border-right: none;
-  background: transparent !important;
-  --el-menu-bg-color: transparent;
-  --el-menu-text-color: rgba(222, 236, 248, 0.7);
-  --el-menu-active-color: #ffffff;
-  --el-menu-hover-bg-color: rgba(255, 255, 255, 0.08);
-  --el-menu-hover-text-color: #ffffff;
-  padding: 0;
-}
-
-.layout-menu :deep(.el-menu-item),
-.layout-menu :deep(.el-sub-menu__title) {
-  height: 46px;
-  line-height: 46px;
-  margin: 4px 0;
-  border-radius: 16px;
-  font-size: 13px;
-  transition: all 0.22s ease;
-}
-
-.layout-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, rgba(20, 114, 219, 0.92), rgba(43, 181, 160, 0.88)) !important;
-  box-shadow: 0 14px 26px rgba(18, 112, 216, 0.2);
-}
-
-.layout-menu :deep(.el-menu-item:hover),
-.layout-menu :deep(.el-sub-menu__title:hover) {
-  background: rgba(255, 255, 255, 0.08) !important;
-}
-
-.layout-menu :deep(.el-sub-menu .el-menu) {
-  background: transparent !important;
-}
-
-.layout-menu :deep(.el-sub-menu .el-menu .el-menu-item) {
-  margin-left: 12px;
-  padding-left: 42px !important;
-  height: 40px;
-  line-height: 40px;
-  border-radius: 14px;
-  font-size: 12px;
-}
-
-.layout-menu :deep(.el-icon) {
-  font-size: 18px;
-}
-
-.menu-divider {
-  height: 1px;
-  margin: 10px 12px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.layout-main {
-  min-width: 0;
-  background: transparent;
-}
-
-.layout-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  min-height: 78px;
-  padding: 0 28px;
-  border-bottom: 1px solid rgba(126, 157, 183, 0.14);
-  background: rgba(248, 251, 253, 0.72);
-  backdrop-filter: blur(14px);
-}
-
-.header-left,
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.fold-icon,
-.header-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  color: #5d7288;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.fold-icon:hover,
-.header-icon:hover {
-  background: rgba(18, 112, 216, 0.08);
-  color: #1270d8;
-}
-
-.header-path {
-  min-width: 0;
-  padding: 10px 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.64);
-  border: 1px solid rgba(126, 157, 183, 0.14);
-}
-
-.header-path :deep(.el-breadcrumb) {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.class-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(18, 112, 216, 0.12), rgba(44, 181, 160, 0.1));
-  color: #1270d8;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  max-width: min(280px, 32vw);
-}
-
-.class-indicator span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.teacher-level-badge {
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.level-normal {
-  background: rgba(111, 134, 156, 0.12);
-  color: #5d7288;
-}
-
-.level-course_leader {
-  background: rgba(18, 112, 216, 0.12);
-  color: #1270d8;
-}
-
-.level-department_head {
-  background: rgba(29, 143, 106, 0.12);
-  color: #1d8f6a;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.64);
-  border: 1px solid rgba(126, 157, 183, 0.14);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.user-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.username {
-  color: #16324a;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.user-subtitle {
-  color: #7f92a6;
-  font-size: 11px;
-}
-
-.arrow-icon {
-  color: #8ca0b3;
-  font-size: 12px;
-}
-
-.layout-content {
-  padding: 24px 28px 28px;
-  min-width: 0;
-  min-height: calc(100vh - 138px);
-  min-height: calc(100dvh - 138px);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.layout-footer {
-  padding: 12px 16px 18px;
-  text-align: center;
-  color: #8ca0b3;
-  font-size: 12px;
-  background: transparent;
-}
-
-.page-slide-enter-active,
-.page-slide-leave-active {
-  transition: all 0.24s ease;
-}
-
-.page-slide-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.page-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.fade-text-enter-active,
-.fade-text-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-text-enter-from,
-.fade-text-leave-to {
-  opacity: 0;
-}
-
-.layout-drawer :deep(.el-drawer__body) {
-  padding: 0;
-  overflow: hidden;
-}
-
-.mobile-aside {
-  width: 100%;
-  border-right: none;
-}
-
-@media (max-width: 960px) {
-  .layout-header {
-    height: auto;
-    padding: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-right {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .layout-content {
-    padding: 16px;
-    min-height: auto;
-  }
-}
-
-@media (max-width: 600px) {
-  .layout-header {
-    gap: 12px;
-    padding: 12px;
-  }
-
-  .header-left {
-    width: 100%;
-  }
-
-  .header-path {
-    flex: 1;
-    padding: 8px 10px;
-  }
-
-  .header-path :deep(.el-breadcrumb) {
-    font-size: 12px;
-  }
-
-  .class-indicator {
-    max-width: 100%;
-  }
-
-  .teacher-level-badge {
-    min-height: 30px;
-  }
-}
-</style>

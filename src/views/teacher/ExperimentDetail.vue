@@ -1,51 +1,51 @@
 <template>
-  <div class="experiment-detail">
+  <div class="experiment-detail [padding:20px]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [margin-bottom:20px]"
       title="实验详情"
-      :description="experimentData.name || '加载中...'"
+      :description="experimentData.name || '加载中..'"
     >
       <el-button @click="goBack">返回列表</el-button>
     </page-header>
 
-    <div class="detail-content" v-loading="loading">
+    <div class="detail-content [background:#fff] [padding:20px] [border-radius:4px] [display:flex] [flex-direction:column] [gap:15px]" v-loading="loading">
       <!-- 实验数据统计卡片 -->
-      <el-row :gutter="20" class="stat-row">
+      <el-row :gutter="20" class="stat-row [margin-bottom:20px]">
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-value">{{ submissionStats.totalStudents }}</div>
-            <div class="stat-label">学生总数</div>
+          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.totalStudents }}</div>
+            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">学生总数</div>
           </el-card>
         </el-col>
 
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-value">{{ submissionStats.submittedCount }}</div>
-            <div class="stat-label">已提交数量</div>
+          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.submittedCount }}</div>
+            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">已提交数量</div>
           </el-card>
         </el-col>
 
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-value accent-blue">{{ submissionStats.completionRate }}%</div>
-            <div class="stat-label">完成率</div>
+          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-value accent-blue [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.completionRate }}%</div>
+            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">完成率</div>
           </el-card>
         </el-col>
 
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-value" :class="getScoreClass(submissionStats.averageScore)">
+          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]" :class="getScoreClass(submissionStats.averageScore)">
               {{ submissionStats.averageScore || '暂无' }}
             </div>
-            <div class="stat-label">平均分</div>
+            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">平均分</div>
           </el-card>
         </el-col>
       </el-row>
 
       <!-- 基本信息卡片 -->
-      <el-card class="detail-card">
+      <el-card class="detail-card [margin-bottom:20px]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>基本信息</span>
             <el-button type="primary" link @click="openEditDialog">编辑</el-button>
           </div>
@@ -82,7 +82,7 @@
       <!-- 实验要求卡片 -->
       <el-card class="detail-card">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>实验要求</span>
             <el-button type="primary" link @click="openEditContentDialog">编辑内容</el-button>
           </div>
@@ -97,7 +97,7 @@
           <p class="experimentDescription">{{ experimentData.description }}</p>
 
           <h3>实验要求</h3>
-          <ul class="experimentRequest">
+          <ul class="experimentRequest [padding-left:30px]">
             <li v-for="(req, index) in experimentData.requirements" :key="index">
               {{ req }}
             </li>
@@ -115,26 +115,26 @@
       </el-card>
 
       <!-- 提交情况图表 -->
-      <el-row :gutter="20" class="chart-row">
+      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
         <el-col :span="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>提交情况统计</span>
               </div>
             </template>
-            <div class="chart-container" ref="submissionChartRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="submissionChartRef"></div>
           </el-card>
         </el-col>
 
         <el-col :span="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>成绩分布</span>
               </div>
             </template>
-            <div class="chart-container" ref="scoreChartRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreChartRef"></div>
           </el-card>
         </el-col>
       </el-row>
@@ -142,15 +142,15 @@
       <!-- 学生提交列表 -->
       <el-card class="detail-card">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>学生提交情况</span>
-            <div class="header-actions">
+            <div class="header-actions [display:flex] [gap:8px] [align-items:center]">
               <el-input
                 v-model="searchKeyword"
                 placeholder="搜索学生姓名/班级"
                 prefix-icon="Search"
                 clearable
-                style="width: 220px; margin-right: 10px;"
+                class="[width:220px] [margin-right:10px]"
               />
               <el-button type="primary" @click="viewAllSubmissions">查看全部</el-button>
             </div>
@@ -159,7 +159,7 @@
 
         <el-table
           :data="filteredSubmissions"
-          style="width: 100%"
+          class="[width:100%]"
           border
           stripe
           v-loading="submissionsLoading"
@@ -170,7 +170,7 @@
           <el-table-column prop="submitTime" label="提交时间" width="180" sortable>
             <template #default="scope">
               <span v-if="scope.row.submitTime">{{ formatDate(scope.row.submitTime) }}</span>
-              <span v-else class="text-muted">未提交</span>
+              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未提交</span>
             </template>
           </el-table-column>
           <el-table-column label="得分" width="100" sortable>
@@ -179,7 +179,7 @@
                     :class="getScoreClass(scope.row.score)">
                 {{ scope.row.score }}
               </span>
-              <span v-else class="text-muted">未评分</span>
+              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未评分</span>
             </template>
           </el-table-column>
           <el-table-column label="查重率" width="100" align="center">
@@ -191,7 +191,7 @@
               >
                 {{ scope.row.plagiarismRate }}%
               </el-tag>
-              <span v-else class="text-muted">未检测</span>
+              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未检测</span>
             </template>
           </el-table-column>
           <el-table-column label="状态" width="100" align="center">
@@ -226,8 +226,8 @@
           </el-table-column>
         </el-table>
 
-        <!-- 分页器 -->
-        <div class="pagination-container" v-if="allSubmissions.length > pageSize">
+        <!-- 分页器-->
+        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]" v-if="allSubmissions.length > pageSize">
           <el-pagination
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
@@ -241,7 +241,7 @@
       </el-card>
     </div>
 
-    <!-- 编辑实验基本信息对话框 -->
+    <!-- 编辑实验基本信息对话框-->
     <el-dialog
       v-model="editDialogVisible"
       title="编辑实验"
@@ -260,12 +260,12 @@
             placeholder="选择截止日期"
             format="YYYY-MM-DD HH:mm"
             value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
+            class="[width:100%]"
           />
         </el-form-item>
 
         <el-form-item label="状态">
-          <el-select v-model="editForm.status" placeholder="选择实验状态" style="width: 100%">
+          <el-select v-model="editForm.status" placeholder="选择实验状态" class="[width:100%]">
             <el-option label="草稿" value="draft" />
             <el-option label="进行中" value="active" />
             <el-option label="已截止" value="expired" />
@@ -277,7 +277,7 @@
             v-model="editForm.classes"
             multiple
             placeholder="选择关联班级"
-            style="width: 100%"
+            class="[width:100%]"
           >
             <el-option
               v-for="cls in classList"
@@ -298,14 +298,14 @@
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="editDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitEditForm">确定</el-button>
         </div>
       </template>
     </el-dialog>
 
-    <!-- 编辑实验内容对话框 -->
+    <!-- 编辑实验内容对话框-->
     <el-dialog
       v-model="editContentDialogVisible"
       title="编辑实验内容"
@@ -323,14 +323,14 @@
         </el-form-item>
 
         <el-form-item label="实验要求">
-          <div v-for="(req, index) in contentForm.requirements" :key="index" class="requirement-item">
-            <el-input v-model="contentForm.requirements[index]" class="requirement-input" />
+          <div v-for="(req, index) in contentForm.requirements" :key="index" class="requirement-item [display:flex] [align-items:center] [margin-bottom:10px]">
+            <el-input v-model="contentForm.requirements[index]" class="requirement-input [flex:1]" />
             <el-button
               type="danger"
               circle
               @click="removeRequirement(index)"
               size="small"
-              class="requirement-delete"
+              class="requirement-delete [margin-left:10px]"
             >
               <el-icon><Delete /></el-icon>
             </el-button>
@@ -348,19 +348,19 @@
           >
             <el-button type="primary">选择文件</el-button>
             <template #tip>
-              <div class="el-upload__tip">可上传任意类型文件，单个文件不超过10MB</div>
+              <div class="el-upload__tip">可上传任意类型文件，单个文件不超过0MB</div>
             </template>
           </el-upload>
 
-          <div v-if="contentForm.attachments && contentForm.attachments.length" class="attachments-list">
-            <div v-for="(file, index) in contentForm.attachments" :key="index" class="attachment-item">
+          <div v-if="contentForm.attachments && contentForm.attachments.length" class="attachments-list [margin-top:10px]">
+            <div v-for="(file, index) in contentForm.attachments" :key="index" class="attachment-item [display:flex] [align-items:center] [margin-bottom:10px]">
               <span>{{ file.name }}</span>
               <el-button
                 type="danger"
                 size="small"
                 circle
                 @click="removeAttachment(index)"
-                class="attachment-delete"
+                class="attachment-delete [margin-left:10px]"
               >
                 <el-icon><Delete /></el-icon>
               </el-button>
@@ -370,14 +370,14 @@
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="editContentDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitContentForm">确定</el-button>
         </div>
       </template>
     </el-dialog>
 
-    <!-- 评分对话框 -->
+    <!-- 评分对话框-->
     <el-dialog
       v-model="gradeDialogVisible"
       title="评分"
@@ -395,7 +395,7 @@
             :min="0"
             :max="100"
             :precision="1"
-            style="width: 180px"
+            class="[width:180px]"
           />
         </el-form-item>
 
@@ -405,9 +405,9 @@
             :min="0"
             :max="100"
             :precision="1"
-            style="width: 180px"
+            class="[width:180px]"
           />
-          <span class="rate-unit">%</span>
+          <span class="rate-unit [margin-left:5px]">%</span>
         </el-form-item>
 
         <el-form-item label="AI评语">
@@ -421,7 +421,7 @@
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="gradeDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitGrade">确定</el-button>
         </div>
@@ -431,6 +431,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -470,7 +471,7 @@ let scoreChart = null
 // 实验详情数据
 const experimentData = ref({
   id: experimentId.value,
-  name: '加载中...',
+  name: '加载中..',
   deadline: '',
   createdTime: '',
   status: '',
@@ -581,24 +582,24 @@ const loadExperimentDetail = async () => {
   try {
     // 加载实验详情数据
     const response = await api.getTeacherExperimentList()
-    console.log('API返回的实验列表数据:', response)
+    logger.debug('API返回的实验列表数据', response)
 
     let experiments = []
     // 处理不同的响应结构
     if (response && response.data && Array.isArray(response.data)) {
-      // 数据在 response.data 数组中
+      // 数据在response.data 数组中
       experiments = response.data
     } else if (response && Array.isArray(response)) {
       // 响应本身就是数组
       experiments = response
     } else if (response && typeof response === 'object') {
-      // 处理新的数据结构，后端返回的是 {data: [...], status: 'success', ...} 格式
+      // 处理新的数据结构，后端返回的是{data: [...], status: 'success', ...} 格式
       if (response.data && Array.isArray(response.data)) {
         experiments = response.data
       }
     }
 
-    console.log('处理后的实验数据:', experiments)
+    logger.debug('处理后的实验数据:', experiments)
     const experiment = experiments.find(exp => exp.id === experimentId.value)
 
     if (experiment) {
@@ -612,7 +613,7 @@ const loadExperimentDetail = async () => {
         attachments: experiment.attachments || []
       }
     } else {
-      console.error(`未找到ID为${experimentId.value}的实验`)
+      logger.error(`未找到ID为${experimentId.value}的实验`)
       ElMessage.warning(`未找到ID为${experimentId.value}的实验`)
     }
 
@@ -628,7 +629,7 @@ const loadExperimentDetail = async () => {
       initCharts()
     })
   } catch (error) {
-    console.error('加载实验详情失败:', error)
+    logger.error('加载实验详情失败:', error)
     ElMessage.error('加载实验详情失败: ' + (error.message || '未知错误'))
   } finally {
     loading.value = false
@@ -671,36 +672,12 @@ const loadSubmissions = async () => {
     // 计算统计数据
     syncSubmissionStats(submissions)
   } catch (error) {
-    console.error('加载提交列表失败:', error)
+    logger.error('加载提交列表失败:', error)
     ElMessage.error('加载提交列表失败: ' + (error.message || '未知错误'))
     allSubmissions.value = []
   } finally {
     submissionsLoading.value = false
   }
-}
-
-// 计算统计数据
-const calculateStats = (submissions) => {
-  // 从提交数据中统计唯一学生数
-  const studentIds = new Set(submissions.map(s => normalizeStudentId(s.studentId)))
-  submissionStats.totalStudents = studentIds.size || submissions.length
-
-  // 已提交数量
-  submissionStats.submittedCount = submissions.filter(sub =>
-    sub.status === 'submitted' || sub.status === 'graded'
-  ).length
-
-  // 完成率
-  submissionStats.completionRate = submissionStats.totalStudents > 0
-    ? Math.round((submissionStats.submittedCount / submissionStats.totalStudents) * 100)
-    : 0
-
-  // 平均分
-  const scoredSubmissions = submissions.filter(sub => sub.score !== null && sub.score !== undefined)
-  const totalScore = scoredSubmissions.reduce((sum, sub) => sum + sub.score, 0)
-  submissionStats.averageScore = scoredSubmissions.length > 0
-    ? Math.round((totalScore / scoredSubmissions.length) * 10) / 10
-    : null
 }
 
 // 初始化图表
@@ -888,7 +865,7 @@ const submitEditForm = async () => {
     ElMessage.success('更新成功')
     editDialogVisible.value = false
   } catch (error) {
-    console.error('更新实验失败:', error)
+    logger.error('更新实验失败:', error)
     ElMessage.error('更新实验失败: ' + (error.message || '未知错误'))
   }
 }
@@ -944,7 +921,7 @@ const submitContentForm = async () => {
     ElMessage.success('内容更新成功')
     editContentDialogVisible.value = false
   } catch (error) {
-    console.error('更新实验内容失败:', error)
+    logger.error('更新实验内容失败:', error)
     ElMessage.error('更新实验内容失败: ' + (error.message || '未知错误'))
   }
 }
@@ -999,7 +976,7 @@ const submitGrade = async () => {
       initCharts()
     }
   } catch (error) {
-    console.error('评分失败:', error)
+    logger.error('评分失败:', error)
     ElMessage.error('评分失败: ' + (error.message || '未知错误'))
   }
 }
@@ -1120,107 +1097,4 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-.experiment-detail {
-  padding: 20px;
-}
 
-.my-page-header {
-  margin-bottom: 20px;
-}
-
-.detail-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 4px;
-}
-
-.stat-row {
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #999;
-}
-
-.detail-card {
-  margin-bottom: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.header-actions el-input {
-  margin-right: 10px;
-}
-
-.chart-row {
-  margin-bottom: 20px;
-}
-
-/* 图表样式强化 */
-.chart-card {
-  height: 400px; /* 增加图表卡片高度 */
-  margin-bottom: 20px;
-}
-
-.chart-container {
-  height: 320px; /* 明确设置图表容器高度 */
-  width: 100%;
-}
-
-.pagination-container {
-  margin-top: 10px;
-  text-align: right;
-}
-
-.requirement-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.requirement-input {
-  flex: 1;
-}
-
-.requirement-delete {
-  margin-left: 10px;
-}
-
-.attachments-list {
-  margin-top: 10px;
-}
-
-.attachment-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.attachment-delete {
-  margin-left: 10px;
-}
-
-.experimentRequest{
-padding-left: 30px;
-}
-</style>

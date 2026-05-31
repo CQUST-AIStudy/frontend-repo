@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 /**
  * 格式化日期
  * @param {Date|String|Number} date - 日期对象、日期字符串或时间戳
@@ -10,7 +11,7 @@ export function formatDate(date, format = 'YYYY-MM-DD') {
   const d = date instanceof Date ? date : new Date(date);
   
   if (isNaN(d.getTime())) {
-    console.error('无效的日期:', date);
+    logger.error('无效的日期', date);
     return '';
   }
   
@@ -41,7 +42,7 @@ export function getRelativeTime(date) {
   const d = date instanceof Date ? date : new Date(date);
   
   if (isNaN(d.getTime())) {
-    console.error('无效的日期:', date);
+    logger.error('无效的日期', date);
     return '';
   }
   

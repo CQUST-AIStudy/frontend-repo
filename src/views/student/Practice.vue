@@ -1,20 +1,20 @@
 <template>
-  <div class="practice-container">
-    <page-header class="my-page-header" title="推荐练习" description="根据您的学习情况和技能掌握程度AI推荐的练习内容" />
+  <div class="practice-container [height:100%]">
+    <page-header class="my-page-header [padding:20px]" title="推荐练习" description="根据您的学习情况和技能掌握程度AI推荐的练习内容" />
 
     <loading-state :loading="loading">
-      <div class="practice-content">
+      <div class="practice-content [height:100%]">
         <el-row :gutter="20">
           <el-col :span="18">
-            <div class="practice-header">
+            <div class="practice-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_#dadce0]">
               <div class="header-tabs">
                 <el-radio-group v-model="activeTab" size="large">
                   <el-radio-button label="recommended">为我推荐</el-radio-button>
                 </el-radio-group>
               </div>
 
-              <div class="header-filter">
-                <el-select v-model="filterDifficulty" placeholder="难度筛选" clearable style="width: 150px;">
+              <div class="header-filter [display:flex] [align-items:center] [gap:10px] [&_.el-select]:[width:150px]">
+                <el-select v-model="filterDifficulty" placeholder="难度筛选" clearable class="[width:150px]">
                   <el-option label="简单" value="easy" />
                   <el-option label="中等" value="medium" />
                   <el-option label="困难" value="hard" />
@@ -22,45 +22,46 @@
               </div>
             </div>
 
-            <div class="practice-list">
-              <el-empty v-if="filteredPractices.length === 0" description="没有找到符合条件的练习题目" /><el-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card"
+            <div class="practice-list [margin-bottom:20px] [display:flex] [flex-direction:column] [gap:12px]">
+              <el-empty v-if="filteredPractices.length === 0" description="没有找到符合条件的练习题目" />
+              <el-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card [margin-bottom:15px] [cursor:pointer] [transition:all_0.3s] [border-left:3px_solid_transparent] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] hover:[transform:translateY(-2px)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [background:#fff] [text-align:left] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0]"
                 :class="{ 'selected': selectedPractice?.id === practice.id || selectedPractice?.number === practice.number }" 
                 @click="selectPractice(practice)">
-                <div v-if="practice.type === 'introduction'" class="introduction-card">
-                  <div class="introduction-title">AI推荐说明</div>
-                  <div class="introduction-content" v-html="getFormattedDescription(practice)"></div>
+                <div v-if="practice.type === 'introduction'" class="introduction-card [padding:10px]">
+                  <div class="introduction-title [font-size:16px] [font-weight:500] [color:#1a73e8] [margin-bottom:10px] [border-bottom:1px_solid_#dadce0] [padding-bottom:5px]">AI推荐说明</div>
+                  <div class="introduction-content [color:#5f6368] [line-height:1.6]" v-html="getFormattedDescription(practice)"></div>
                 </div>
-                <div v-else class="practice-card-content">
-                  <div class="practice-title">
+                <div v-else class="practice-card-content [display:flex] [flex-direction:column] [gap:10px]">
+                  <div class="practice-title [display:flex] [justify-content:space-between] [align-items:center] [font-size:16px] [font-weight:500] [color:#202124]">
                     <span>{{ practice.title || practice.name }}</span>
-                    <div class="match-rate" v-if="practice.matchRate">
-                      匹配度 <span class="rate">{{ practice.matchRate }}%</span>
+                    <div class="match-rate [font-size:14px] [color:#5f6368] [&_.rate]:[color:#f56c6c] [&_.rate]:[font-weight:600]" v-if="practice.matchRate">
+                      匹配度<span class="rate">{{ practice.matchRate }}%</span>
                     </div>
                   </div>
 
-                  <div v-if="practice.reason" class="practice-reason">
+                  <div v-if="practice.reason" class="practice-reason [color:#5f6368] [font-size:13px] [line-height:1.5]">
                     {{ practice.reason }}
                   </div>
 
-                  <div class="practice-info">
-                    <span class="practice-number" v-if="practice.number">题目 {{practice.number}}</span>
+                  <div class="practice-info [display:flex] [justify-content:flex-end] [align-items:center]">
+                    <span class="practice-number [font-size:14px] [color:#909399] [margin-right:10px] [margin-left:10px]" v-if="practice.number">题目 {{practice.number}}</span>
                     <el-tag size="small" :type="difficultyType(practice.difficulty)">
                       {{ getDifficultyText(practice.difficulty) }}
                     </el-tag>
-                    <el-tag v-if="practice.estimatedMinutes" size="small" effect="plain" style="margin-left: 8px;">
-                      约 {{ practice.estimatedMinutes }} 分钟
+                    <el-tag v-if="practice.estimatedMinutes" size="small" effect="plain" class="[margin-left:8px]">
+                      约{{ practice.estimatedMinutes }} 分钟
                     </el-tag>
                     <el-button
                       v-if="isTrackableRecommendation(practice)"
                       text
                       type="warning"
                       @click.stop="handleDislike(practice)"
-                      style="margin-left: 10px;"
+                      class="[margin-left:10px]"
                     >
                       不感兴趣
                     </el-button>
                     <el-button type="primary" size="small" @click.stop="startProblem(practice)"
-                      style="margin-left: 10px;">
+                      class="[margin-left:10px]">
                       开始解答
                     </el-button>
                   </div>
@@ -68,39 +69,39 @@
               </el-card>
             </div>
 
-            <div class="pagination-container">
+            <div class="pagination-container [display:flex] [justify-content:center] [margin-top:20px] [margin-bottom:20px] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
               <el-pagination background layout="prev, pager, next" :total="filteredPractices.length"
                 :page-size="pageSize" :current-page="currentPage" @current-change="handlePageChange" />
             </div>
           </el-col>
 
           <el-col :span="6">
-            <div class="practice-detail">              <el-card v-if="selectedPractice" class="detail-card">
+            <div class="practice-detail [display:flex] [flex-direction:column] [gap:20px] [height:100%]">              <el-card v-if="selectedPractice" class="detail-card [margin-bottom:15px]">
                 <template #header>
-                  <div class="detail-header">
+                  <div class="detail-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[font-size:18px] [&_h3]:[font-weight:600] [&_h3]:[color:#202124] [gap:12px]">
                     <h3>{{ selectedPractice.title || selectedPractice.name }}</h3>
-                    <div class="practice-number" v-if="selectedPractice.number">
+                    <div class="practice-number [font-size:14px] [color:#909399] [margin-right:10px] [margin-left:10px]" v-if="selectedPractice.number">
                       题目 #{{ selectedPractice.number }}
                     </div>
-                    <div class="difficulty-label" :class="'difficulty-' + (selectedPractice.difficulty || 'medium')">
+                    <div class="difficulty-label [padding:4px_8px] [border-radius:4px] [font-size:12px] [font-weight:500]" :class="'difficulty-' + (selectedPractice.difficulty || 'medium')">
                       {{ getDifficultyText(selectedPractice.difficulty) }}
                     </div>
                   </div>
                 </template>
 
-                <div class="detail-content">
-                  <div v-if="selectedPractice.type === 'introduction'" class="introduction-detail">
+                <div class="detail-content [display:flex] [flex-direction:column] [gap:15px]">
+                  <div v-if="selectedPractice.type === 'introduction'" class="introduction-detail [color:#5f6368] [line-height:1.8] [padding:10px] [background-color:#f8f9fa] [border-radius:4px]">
                     <div v-html="getFormattedDescription(selectedPractice)"></div>
                   </div>
                   <div v-else>
-                    <div v-if="selectedPractice.reason" class="recommendation-reason">
+                    <div v-if="selectedPractice.reason" class="recommendation-reason [margin-bottom:12px] [padding:12px] [border-radius:8px] [background:#f7faff] [border-left:4px_solid_#1a73e8]">
                       <h4>推荐理由</h4>
                       <p>{{ selectedPractice.reason }}</p>
                     </div>
-                    <div v-if="selectedPractice.estimatedMinutes" class="recommendation-meta">
+                    <div v-if="selectedPractice.estimatedMinutes" class="recommendation-meta [margin-bottom:12px] [color:#5f6368] [font-size:13px]">
                       预计用时 {{ selectedPractice.estimatedMinutes }} 分钟
                     </div>
-                    <div class="detail-actions" v-if="canStartPractice(selectedPractice)">
+                    <div class="detail-actions [display:flex] [gap:10px] [margin-top:10px]" v-if="canStartPractice(selectedPractice)">
                       <el-button
                         v-if="isTrackableRecommendation(selectedPractice)"
                         type="warning"
@@ -115,33 +116,33 @@
                 </div>
               </el-card>
 
-              <el-card v-else class="empty-detail">
-                <div class="empty-detail-content">
+              <el-card v-else class="empty-detail [display:flex] [align-items:center] [justify-content:center] [height:300px]">
+                <div class="empty-detail-content [text-align:center] [color:#9aa0a6]">
                   <el-icon><Select /></el-icon>
                   <p>请从左侧选择一道题目</p>
                 </div>
               </el-card>
 
-              <el-card class="stats-card">
+              <el-card class="stats-card [margin-top:auto] [margin-bottom:15px]">
                 <template #header>
-                  <div class="card-header">
+                  <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                     <span>我的练习统计</span>
                   </div>
                 </template>
 
-                <div class="stats-content">
-                  <div class="stats-item">
-                    <div class="stats-label">已完成题目</div>
-                    <div class="stats-value">{{ completedCount }}</div>
+                <div class="stats-content [padding:10px_0]">
+                  <div class="stats-item [display:flex] [justify-content:space-between] [margin-bottom:15px]">
+                    <div class="stats-label [color:#5f6368]">已完成题目</div>
+                    <div class="stats-value [font-weight:600] [color:#202124]">{{ completedCount }}</div>
                   </div>
 
-                  <div class="stats-item">
-                    <div class="stats-label">待完成题目</div>
-                    <div class="stats-value">{{ pendingCount }}</div>
+                  <div class="stats-item [display:flex] [justify-content:space-between] [margin-bottom:15px]">
+                    <div class="stats-label [color:#5f6368]">待完成题目</div>
+                    <div class="stats-value [font-weight:600] [color:#202124]">{{ pendingCount }}</div>
                   </div>
 
-                  <div class="stats-progress">
-                    <div class="progress-header">
+                  <div class="stats-progress [margin-top:20px]">
+                    <div class="progress-header [display:flex] [justify-content:space-between] [margin-bottom:10px] [color:#5f6368]">
                       <span>整体进度</span>
                       <span>{{ completionRate }}%</span>
                     </div>
@@ -153,28 +154,28 @@
           </el-col>
         </el-row>
       </div>
-    </loading-state>    <!-- 题目详情对话框 -->
+    </loading-state>    <!-- 题目详情对话框-->
     <el-dialog v-model="detailDialogVisible" title="题目详情" width="60%" :destroy-on-close="true">
-      <div class="practice-detail-dialog" v-if="selectedPractice">
-        <div class="detail-header-dialog">
+      <div class="practice-detail-dialog [padding:0_20px]" v-if="selectedPractice">
+        <div class="detail-header-dialog [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_#dadce0]">
           <h2>{{ selectedPractice.title || selectedPractice.name }}</h2>
           <div class="practice-number" v-if="selectedPractice.number">
             题目 #{{ selectedPractice.number }}
           </div>
-          <el-tag :type="difficultyType(selectedPractice.difficulty)" class="difficulty-tag">
+          <el-tag :type="difficultyType(selectedPractice.difficulty)" class="difficulty-tag [font-size:14px] [padding:6px_12px]">
             {{ getDifficultyText(selectedPractice.difficulty) }}
           </el-tag>
         </div>
 
-        <div class="detail-section" v-if="selectedPractice.type === 'introduction'">
-          <div class="section-content" v-html="getFormattedDescription(selectedPractice)"></div>
+        <div class="detail-section [margin-bottom:25px]" v-if="selectedPractice.type === 'introduction'">
+          <div class="section-content [font-size:15px] [line-height:1.8] [color:#111827] [color:#5f6368]" v-html="getFormattedDescription(selectedPractice)"></div>
         </div>
 
-        <div class="detail-actions-dialog" v-if="canStartPractice(selectedPractice)">
+        <div class="detail-actions-dialog [display:flex] [gap:10px] [margin-top:20px] [justify-content:flex-end]" v-if="canStartPractice(selectedPractice)">
           <el-button type="primary" @click="startProblem(selectedPractice)">开始解题</el-button>
           <el-button @click="detailDialogVisible = false">关闭</el-button>
         </div>
-        <div class="detail-actions-dialog" v-else>
+        <div class="detail-actions-dialog [display:flex] [gap:10px] [margin-top:20px] [justify-content:flex-end]" v-else>
           <el-button @click="detailDialogVisible = false">关闭</el-button>
         </div>
       </div>
@@ -183,6 +184,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, computed, onMounted, watch } from 'vue'
 import { Select } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -191,7 +193,6 @@ import { useLearningStore } from '../../store'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import api from '@/api'
-import { getCurrentStudentId as readCurrentStudentId } from '../../constants/auth'
 
 const router = useRouter()
 const learningStore = useLearningStore()
@@ -224,7 +225,7 @@ const practices = computed(() => {
     // 如果已经是数组，直接返回
     return practicesToReturn;
   } else {
-    console.warn('获取到的推荐题目格式异常:', practicesToReturn);
+    logger.warn('获取到的推荐题目格式异常:', practicesToReturn);
     return []; // 如果格式不符，返回空数组避免错误
   }
 })
@@ -313,13 +314,9 @@ const startProblem = (practice) => {
   }
 
   ElMessage({
-    message: `开始解答题目: ${currentPractice.title || currentPractice.name}`,
+    message: `开始解答题目 ${currentPractice.title || currentPractice.name}`,
     type: 'success'
   })
-}
-
-const getCurrentStudentId = () => {
-  return readCurrentStudentId()
 }
 
 const getPracticeProblemId = (practice) => {
@@ -386,7 +383,7 @@ const recordRecommendationFeedback = async (practice, action) => {
     sentFeedbackKeys.value = [...sentFeedbackKeys.value, feedbackKey]
     return true
   } catch (error) {
-    console.warn('记录推荐反馈失败:', action, problemId, error)
+    logger.warn('记录推荐反馈失败:', action, problemId, error)
     return false
   }
 }
@@ -494,7 +491,7 @@ const getFormattedDescription = (practice) => {
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // 粗体
       .replace(/\*(.*?)\*/g, '<em>$1</em>');  // 斜体
     
-    // 将换行符转换为<br>标签
+    // 将换行符转换为br>标签
     html = html.replace(/\n/g, '<br>');
     return html;
   }
@@ -515,9 +512,9 @@ const getFormattedDescription = (practice) => {
   html = html.replace(/```(\w*)([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
 
   // 行内代码处理
-  html = html.replace(/`([^`]+)`/g, '<code style="background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px;">$1</code>');
+  html = html.replace(/`([^`]+)`/g, '<code class="[background-color:#f5f5f5] [padding:2px_4px] [border-radius:3px]">$1</code>');
 
-  // 将换行符转换为<br>标签
+  // 将换行符转换为br>标签
   html = html.replace(/\n/g, '<br>');
 
   return html;
@@ -576,430 +573,11 @@ onMounted(async () => {
     await trackVisiblePracticeExposure()
 
   } catch (error) {
-    console.error('加载推荐练习失败:', error)
+    logger.error('加载推荐练习失败:', error)
   } finally {
     loading.value = false
   }
 })
 </script>
 
-<style scoped>
-.my-page-header {
-  padding: 20px;
-}
 
-.practice-container {
-  height: 100%;
-}
-
-.practice-content {
-  height: 100%;
-}
-
-/* 练习列表区域样式 */
-.practice-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #dadce0;
-}
-
-.practice-list {
-  margin-bottom: 20px;
-}
-
-.practice-card {
-  margin-bottom: 15px;
-  cursor: pointer;
-  transition: all 0.3s;
-  border-left: 3px solid transparent;
-}
-
-.practice-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.practice-card.selected {
-  border-left-color: #1a73e8;
-  background-color: #e8f0fe;
-}
-
-.practice-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.practice-reason {
-  color: #5f6368;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.practice-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 500;
-  color: #202124;
-}
-
-.match-rate {
-  font-size: 14px;
-  color: #5f6368;
-}
-
-.match-rate .rate {
-  color: #f56c6c;
-  font-weight: 600;
-}
-
-.practice-info {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-/* 详情区域样式 */
-.practice-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  height: 100%;
-}
-
-.detail-card {
-  margin-bottom: 15px;
-}
-
-.recommendation-reason {
-  margin-bottom: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  background: #f7faff;
-  border-left: 4px solid #1a73e8;
-}
-
-.recommendation-reason h4 {
-  margin: 0 0 8px;
-  color: #1a73e8;
-}
-
-.recommendation-reason p {
-  margin: 0;
-  color: #3c4043;
-  line-height: 1.6;
-}
-
-.recommendation-meta {
-  margin-bottom: 12px;
-  color: #5f6368;
-  font-size: 13px;
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.detail-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #202124;
-}
-
-.difficulty-label {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.difficulty-easy {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.difficulty-medium {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.difficulty-hard {
-  background-color: #fef0f0;
-  color: #f56c6c;
-}
-
-.detail-content {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.detail-description h4,
-.detail-examples h4,
-.detail-hints h4 {
-  font-size: 16px;
-  color: #303133;
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.detail-description p,
-.detail-hints p {
-  color: #606266;
-  line-height: 1.6;
-  white-space: pre-line;
-}
-
-.truncated-description {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-}
-
-.view-more-container {
-  margin-top: 10px;
-}
-
-.example-item {
-  background-color: #f5f7fa;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.example-title {
-  font-weight: 500;
-  margin-bottom: 5px;
-  color: #303133;
-}
-
-.example-code {
-  background-color: #ebeef5;
-  padding: 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  margin: 0 0 10px 0;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.detail-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.empty-detail {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-}
-
-.empty-detail-content {
-  text-align: center;
-  color: #9aa0a6;
-}
-
-.empty-detail-content .el-icon {
-  font-size: 48px;
-  margin-bottom: 10px;
-}
-
-/* 统计卡片样式 */
-.stats-card {
-  margin-top: auto;
-}
-
-.stats-content {
-  padding: 10px 0;
-}
-
-.stats-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.stats-label {
-  color: #5f6368;
-}
-
-.stats-value {
-  font-weight: 600;
-  color: #202124;
-}
-
-.stats-progress {
-  margin-top: 20px;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  color: #5f6368;
-}
-
-.header-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-filter .el-select {
-  width: 150px;
-}
-
-/* 对话框中的详情样式 */
-.practice-detail-dialog {
-  padding: 0 20px;
-}
-
-.detail-header-dialog {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #dadce0;
-}
-
-.detail-header-dialog h2 {
-  margin: 0;
-  color: #202124;
-  font-size: 22px;
-}
-
-.difficulty-tag {
-  font-size: 14px;
-  padding: 6px 12px;
-}
-
-.detail-section {
-  margin-bottom: 25px;
-}
-
-.detail-section h3 {
-  font-size: 18px;
-  color: #202124;
-  margin-top: 0;
-  margin-bottom: 15px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #dadce0;
-}
-
-.section-content {
-  color: #5f6368;
-  line-height: 1.8;
-  font-size: 15px;
-}
-
-.requirements-list ul {
-  padding-left: 20px;
-  margin: 10px 0;
-}
-
-.requirements-list li {
-  color: #606266;
-  line-height: 1.8;
-  margin-bottom: 8px;
-}
-
-.example-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.example-box {
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.example-header {
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 8px;
-}
-
-.example-content {
-  background-color: #f2f6fc;
-  padding: 12px;
-  border-radius: 4px;
-  font-family: 'Courier New', Courier, monospace;
-  overflow-x: auto;
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  color: #5a5a5a;
-}
-
-.practice-number {
-  font-size: 14px;
-  color: #909399;
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-.introduction-card {
-  padding: 10px;
-}
-
-.introduction-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a73e8;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #dadce0;
-  padding-bottom: 5px;
-}
-
-.introduction-content {
-  color: #5f6368;
-  line-height: 1.6;
-}
-
-.introduction-detail {
-  color: #5f6368;
-  line-height: 1.8;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.detail-header-dialog .practice-number {
-  font-size: 16px;
-  color: #606266;
-  margin-right: auto;
-  margin-left: 10px;
-}
-
-.practice-card.selected .practice-number {
-  color: #1a73e8;
-}
-
-.detail-actions-dialog {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  justify-content: flex-end;
-}
-</style>

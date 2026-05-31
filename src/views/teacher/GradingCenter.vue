@@ -1,10 +1,10 @@
 <template>
-  <div class="grading-center">
+  <div class="grading-center [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
     <!-- Hero -->
-    <div class="hero">
-      <div class="hero-inner">
-        <div class="hero-icon">📝</div>
-        <div class="hero-text">
+    <div class="hero [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:20px] [border:1px_solid_#dadce0] [display:flex] [align-items:center] [gap:16px]">
+      <div class="hero-inner [display:flex] [align-items:center] [gap:16px]">
+        <div class="hero-icon [font-size:36px]">📝</div>
+        <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
           <h1>AI 批改中心</h1>
           <p>上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
         </div>
@@ -12,16 +12,16 @@
     </div>
 
     <!-- Create Task Card -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">创建批改任务</span>
+    <div class="card [background:#fff] [border-radius:16px] [margin-bottom:20px] [border:1px_solid_#dadce0] [overflow:hidden] [&_.el-table]:[--el-table-border-color:#f1f3f4] [&_.el-table]:[--el-table-header-bg-color:#f8f9fa] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:13px] [&_.el-table_td]:[color:#202124] [&_.el-button--primary]:[border-radius:100px]">
+      <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [padding:16px_24px] [border-bottom:1px_solid_#e8eaed] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+        <span class="card-title [font-size:15px] [font-weight:500] [color:#202124] [font-weight:600] [font-size:16px]">创建批改任务</span>
       </div>
-      <div class="card-body">
+      <div class="card-body [padding:20px_24px]">
         <el-form :model="createForm" label-width="100px">
           <el-row :gutter="16">
             <el-col :span="8">
               <el-form-item label="评分标准">
-                <el-select v-model="createForm.rubricId" placeholder="选择评分标准" style="width:100%">
+                <el-select v-model="createForm.rubricId" placeholder="选择评分标准" class="[width:100%]">
                   <el-option v-for="r in rubrics" :key="r.id" :label="r.name" :value="r.id" />
                 </el-select>
               </el-form-item>
@@ -47,8 +47,8 @@
               <el-form-item label="期望分数区间">
                 <el-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
                   :marks="{ 0: '0', 75: '75', 90: '90', 99: '99', 100: '100' }"
-                  style="padding: 0 12px" />
-                <div style="font-size:12px;color:#9aa0a6;margin-top:4px">
+                  class="[padding:0_12px]" />
+                <div class="[font-size:12px] [color:#9aa0a6] [margin-top:4px]">
                   大多数学生的成绩应落在此区间内（{{ createForm.scoreRange[0] }} - {{ createForm.scoreRange[1] }}分），允许个别异常值
                 </div>
               </el-form-item>
@@ -57,14 +57,14 @@
           <el-form-item label="上传PDF">
             <el-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
                        accept=".pdf,.docx,.doc" multiple drag :file-list="fileList" :on-remove="onFileRemove">
-              <el-icon style="font-size:40px;color:#9aa0a6"><UploadFilled /></el-icon>
-              <div style="color:#5f6368;margin-top:8px">拖拽 PDF 文件到此处，或点击上传（最多 200 份）</div>
+              <el-icon class="[font-size:40px] [color:#9aa0a6]"><UploadFilled /></el-icon>
+              <div class="[color:#5f6368] [margin-top:8px]">拖拽 PDF 文件到此处，或点击上传（最多200 份）</div>
             </el-upload>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitTask" :loading="submitting"
                        :disabled="!createForm.rubricId || fileList.length === 0">
-              开始批改 ({{ fileList.length }} 份)
+              开始批改({{ fileList.length }} 件)
             </el-button>
             <el-button @click="$router.push('/teacher/grading/rubrics')">管理评分标准</el-button>
           </el-form-item>
@@ -73,15 +73,15 @@
     </div>
 
     <!-- Task List -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">批改任务列表</span>
+    <div class="card [background:#fff] [border-radius:16px] [margin-bottom:20px] [border:1px_solid_#dadce0] [overflow:hidden] [&_.el-table]:[--el-table-border-color:#f1f3f4] [&_.el-table]:[--el-table-header-bg-color:#f8f9fa] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:13px] [&_.el-table_td]:[color:#202124] [&_.el-button--primary]:[border-radius:100px]">
+      <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [padding:16px_24px] [border-bottom:1px_solid_#e8eaed] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+        <span class="card-title [font-size:15px] [font-weight:500] [color:#202124] [font-weight:600] [font-size:16px]">批改任务列表</span>
         <el-button @click="loadTasks" :loading="loading" link type="primary">
           <el-icon><Refresh /></el-icon> 刷新
         </el-button>
       </div>
-      <div class="card-body">
-        <el-table :data="tasks" v-loading="loading" stripe style="width:100%"
+      <div class="card-body [padding:20px_24px]">
+        <el-table :data="tasks" v-loading="loading" stripe class="[width:100%]"
           :header-cell-style="{ background: '#f8f9fa', color: '#202124', fontWeight: 600 }">
           <el-table-column prop="taskId" label="ID" width="70" />
           <el-table-column label="状态" width="120">
@@ -97,15 +97,15 @@
                 :percentage="row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0"
                 :status="row.failedCount > 0 ? 'exception' : row.status === 'COMPLETED' ? 'success' : ''"
                 :stroke-width="8" />
-              <span class="progress-text">
+              <span class="progress-text [margin-left:10px] [font-size:13px] [font-size:12px] [color:#9aa0a6] [margin-top:4px] [display:block]">
                 {{ row.completedCount }}/{{ row.totalCount }} 完成
-                <span v-if="row.failedCount > 0" style="color:#ef4444">，{{ row.failedCount }} 失败</span>
+                <span v-if="row.failedCount > 0" class="[color:#ef4444]">，{{ row.failedCount }} 失败</span>
               </span>
             </template>
           </el-table-column>
           <el-table-column prop="createdAt" label="创建时间" width="180">
             <template #default="{row}">
-              <span class="time-text">{{ formatTime(row.createdAt) }}</span>
+              <span class="time-text [font-size:13px] [color:#5f6368]">{{ formatTime(row.createdAt) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" min-width="250">
@@ -130,7 +130,7 @@
         </el-table>
 
         <el-empty v-if="!loading && tasks.length === 0" description="暂无批改任务">
-          <template #image><div style="font-size:48px">📋</div></template>
+          <template #image><div class="[font-size:48px]">📋</div></template>
         </el-empty>
       </div>
     </div>
@@ -138,6 +138,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled, Refresh } from '@element-plus/icons-vue'
@@ -181,7 +182,7 @@ async function submitTask() {
       fd.append('scoreRangeMax', createForm.value.scoreRange[1])
     }
     await createGradingTask(fd)
-    ElMessage.success('批改任务已创建，AI 正在处理中...')
+    ElMessage.success('批改任务已创建，AI 正在处理中..')
     fileList.value = []
     createForm.value.teacherSignature = ''
     loadTasks()
@@ -238,7 +239,7 @@ onMounted(async () => {
     const res = await getRubrics()
     const data = res?.data ?? res
     rubrics.value = Array.isArray(data) ? data : []
-  } catch (e) { console.error('加载评分标准失败:', e) }
+  } catch (e) { logger.error('加载评分标准失败:', e) }
   loadTasks()
   refreshTimer = setInterval(() => {
     if (tasks.value.some(t => t.status === 'PROCESSING' || t.status === 'PENDING')) loadTasks()
@@ -248,35 +249,4 @@ onMounted(async () => {
 onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
 </script>
 
-<style scoped>
-.grading-center { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 
-.hero {
-  background: #fff; border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
-  border: 1px solid #dadce0; display: flex; align-items: center; gap: 16px;
-}
-.hero-inner { display: flex; align-items: center; gap: 16px; }
-.hero-icon { font-size: 36px; }
-.hero-text h1 { margin: 0 0 4px; font-size: 22px; font-weight: 400; color: #202124; }
-.hero-text p { margin: 0; font-size: 14px; color: #5f6368; }
-
-.card {
-  background: #fff; border-radius: 16px; margin-bottom: 20px;
-  border: 1px solid #dadce0; overflow: hidden;
-}
-.card-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 24px; border-bottom: 1px solid #e8eaed;
-}
-.card-title { font-size: 15px; font-weight: 500; color: #202124; }
-.card-body { padding: 20px 24px; }
-
-.card :deep(.el-table) { --el-table-border-color: #f1f3f4; --el-table-header-bg-color: #f8f9fa; }
-.card :deep(.el-table th) { font-weight: 500; color: #5f6368; font-size: 12px; }
-.card :deep(.el-table td) { font-size: 13px; color: #202124; }
-
-.progress-text { font-size: 12px; color: #9aa0a6; margin-top: 4px; display: block; }
-.time-text { font-size: 13px; color: #5f6368; }
-
-.card :deep(.el-button--primary) { border-radius: 100px; }
-</style>

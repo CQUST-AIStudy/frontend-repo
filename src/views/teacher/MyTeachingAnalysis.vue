@@ -1,74 +1,74 @@
 <template>
-  <div class="teaching-analysis">
+  <div class="teaching-analysis [height:100%] [padding:0_20px_20px]">
     <page-header title="我的教学分析" description="个人教学数据可视化分析">
       <el-button type="primary" @click="refreshData">刷新数据</el-button>
     </page-header>
     
-    <div v-if="loading" class="loading-container">
-      <el-skeleton style="width: 100%" :rows="10" animated />
+    <div v-if="loading" class="loading-container [padding:20px] [min-height:400px] [display:flex] [justify-content:center] [align-items:center] [width:100%]">
+      <el-skeleton class="[width:100%]" :rows="10" animated />
     </div>
 
-    <div v-else class="analysis-content">
+    <div v-else class="analysis-content [display:flex] [flex-direction:column] [gap:15px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
       <!-- 教学概览卡片 -->
-      <el-row :gutter="20" class="info-summary">
+      <el-row :gutter="20" class="info-summary [margin-top:20px] [margin-bottom:10px]">
         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card">
-            <div class="summary-icon"><i class="el-icon-user"></i></div>
-            <div class="summary-info">
-              <div class="summary-title">教授班级</div>
-              <div class="summary-value">{{ teachingData.classCounts || 0 }}班</div>
+          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
+            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-user"></i></div>
+            <div class="summary-info [margin-left:15px]">
+              <div class="summary-title [font-size:13px] [color:#909399]">教授班级</div>
+              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.classCounts || 0 }}班</div>
             </div>
           </el-card>
         </el-col>
         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card">
-            <div class="summary-icon"><i class="el-icon-files"></i></div>
-            <div class="summary-info">
-              <div class="summary-title">实验数量</div>
-              <div class="summary-value">{{ teachingData.experimentCounts || 0 }}个</div>
+          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
+            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-files"></i></div>
+            <div class="summary-info [margin-left:15px]">
+              <div class="summary-title [font-size:13px] [color:#909399]">实验数量</div>
+              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.experimentCounts || 0 }}个</div>
             </div>
         </el-card>
         </el-col>
         <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card">
-            <div class="summary-icon"><i class="el-icon-collection"></i></div>
-            <div class="summary-info">
-              <div class="summary-title">学生提交</div>
-              <div class="summary-value">{{ teachingData.submissionCounts || 0 }}份</div>
+          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
+            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-collection"></i></div>
+            <div class="summary-info [margin-left:15px]">
+              <div class="summary-title [font-size:13px] [color:#909399]">学生提交</div>
+              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.submissionCounts || 0 }}份</div>
       </div>
           </el-card>
         </el-col>
       </el-row>
       
-      <!-- 分析图表和数据 -->
+      <!-- 分析图表和数据-->
       <el-row :gutter="20">
         <!-- 年级学生分布 -->
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:15px] [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-size:14px] [font-weight:600] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>年级学生分布</span>
                 <el-tooltip content="不同年级学生的人数分布情况" placement="top">
-                  <i class="el-icon-question" style="margin-left: 5px; font-size: 14px; color: #909399;"></i>
+                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
                 </el-tooltip>
               </div>
             </template>
-            <div class="chart-container" ref="gradeDistributionRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="gradeDistributionRef"></div>
           </el-card>
         </el-col>
       
         <!-- 实验完成情况 -->
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>实验完成情况</span>
                 <el-tooltip content="各个实验的学生完成率" placement="top">
-                  <i class="el-icon-question" style="margin-left: 5px; font-size: 14px; color: #909399;"></i>
+                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
                 </el-tooltip>
             </div>
           </template>
-            <div class="chart-container" ref="experimentCompletionRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="experimentCompletionRef"></div>
         </el-card>
         </el-col>
       </el-row>
@@ -76,31 +76,31 @@
       <el-row :gutter="20">
         <!-- 成绩趋势 -->
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>成绩趋势分析</span>
                 <el-tooltip content="不同班级的成绩变化趋势" placement="top">
-                  <i class="el-icon-question" style="margin-left: 5px; font-size: 14px; color: #909399;"></i>
+                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
                 </el-tooltip>
             </div>
           </template>
-            <div class="chart-container" ref="scoreTrendRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreTrendRef"></div>
         </el-card>
         </el-col>
         
-        <!-- 学生能力雷达图 -->
+        <!-- 学生能力雷达图-->
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>学生能力分析</span>
                 <el-tooltip content="学生在各个能力维度的表现情况" placement="top">
-                  <i class="el-icon-question" style="margin-left: 5px; font-size: 14px; color: #909399;"></i>
+                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
                 </el-tooltip>
             </div>
           </template>
-            <div class="chart-container" ref="studentAbilityRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="studentAbilityRef"></div>
         </el-card>
         </el-col>
       </el-row>
@@ -108,14 +108,14 @@
       <!-- 班级列表 -->
       <el-row :gutter="20">
         <el-col :span="24">
-          <el-card class="table-card">
+          <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>我的班级</span>
                 <el-button type="text" @click="goToClassList">查看所有</el-button>
             </div>
           </template>
-            <el-table :data="teachingData.classes || []" style="width: 100%" v-loading="loading">
+            <el-table :data="teachingData.classes || []" class="[width:100%]" v-loading="loading">
               <el-table-column prop="id" label="班级ID" width="120" />
               <el-table-column prop="name" label="班级名称" />
               <el-table-column prop="grade" label="年级" width="120" />
@@ -134,6 +134,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
@@ -184,7 +185,7 @@ const fetchTeachingData = async () => {
     const gradeDistribution = {}
     myClasses.forEach(cls => {
       const name = cls.name || cls.className || ''
-      // 从班级名中提取年级，如"计科23" → "23级"
+      // 从班级名中提取年级，如计科23" →"23级
       const match = name.match(/(\d{2})/)
       const grade = match ? match[1] + '级' : '其他'
       gradeDistribution[grade] = (gradeDistribution[grade] || 0) + (cls.studentCount || 0)
@@ -261,7 +262,7 @@ const fetchTeachingData = async () => {
 
     setTimeout(() => { initCharts() }, 100)
   } catch (err) {
-    console.error('获取教学数据失败:', err)
+    logger.error('获取教学数据失败:', err)
   } finally {
     loading.value = false
   }
@@ -272,7 +273,7 @@ const initCharts = () => {
   // 确保DOM引用已经可用
   if (!gradeDistributionRef.value || !experimentCompletionRef.value ||
       !scoreTrendRef.value || !studentAbilityRef.value) {
-    console.error('图表容器未找到')
+    logger.error('图表容器未找到')
     return
   }
   
@@ -306,7 +307,7 @@ const initGradeDistributionChart = () => {
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{b}: {c}人 ({d}%)'
+      formatter: '{b}: {c}人({d}%)'
     },
     legend: {
       orient: 'vertical',
@@ -449,8 +450,8 @@ const initScoreTrendChart = () => {
       max: 100,
       axisLabel: {
         formatter: '{value}分'
-          }
-        },
+      }
+    },
     series: classes.map(className => ({
       name: className,
       type: 'line',
@@ -526,94 +527,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.teaching-analysis {
-  height: 100%;
-  padding: 0 20px 20px;
-}
 
-.loading-container {
-  padding: 20px;
-  min-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.analysis-content {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.info-summary {
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  height: 100px;
-}
-
-.summary-icon {
-  font-size: 24px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: #f2f6fc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #409EFF;
-}
-
-.summary-info {
-  margin-left: 15px;
-}
-
-.summary-title {
-  font-size: 13px;
-  color: #909399;
-}
-
-.summary-value {
-  font-size: 22px;
-  font-weight: 600;
-  margin-top: 5px;
-}
-
-.chart-card {
-  margin-bottom: 15px;
-}
-
-.chart-container {
-  height: 240px;
-  width: 100%;
-}
-
-.table-card {
-  margin-bottom: 15px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* Responsive styles */
-@media screen and (max-width: 768px) {
-  .chart-container {
-    height: 200px;
-}
-
-  .summary-card {
-    margin-bottom: 15px;
-  }
-}
-</style>

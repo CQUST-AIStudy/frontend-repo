@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 import {
   delay,
   studentInfo,
@@ -9,9 +10,7 @@ import {
   recommendedPractices,
   teacherExperimentList,
   studentSubmissionsList,
-  classList,
-  classAnalysisData,
-  classDetailAnalysis
+  classList
 } from '../mock'
 
 import axios from 'axios'
@@ -188,7 +187,7 @@ export default {
     if (
       // process.env.NODE_ENV === 'development' &&
       USE_MOCK_DATA) {
-      console.log('开发环境登录，用户名：', username, '教师级别:', teacherLevel)
+      logger.debug('开发环境登录，用户名：', username, '教师级别:', teacherLevel)
       await delay(1000)
 
       let userInfo = null
@@ -236,15 +235,15 @@ export default {
           try {
             setSessionToken(token)
             setUserInfo(userInfo)
-            console.log('登录信息已保存到 localStorage')
+            logger.debug('登录信息已保存到 localStorage')
           } catch (e) {
-            console.error('保存登录信息失败:', e)
+            logger.error('保存登录信息失败:', e)
           }
         }
-        console.log('用户信息:', userInfo)
+        logger.debug('用户信息:', userInfo)
         return { success, message, userInfo, token }
       } catch (error) {
-        console.error('登录过程中发生错误:', error)
+        logger.error('登录过程中发生错误', error)
         return {
           success: false,
           message: getFriendlyErrorMessage(error, '登录过程中发生错误，请稍后重试'),
@@ -255,7 +254,7 @@ export default {
     }
 
     try {
-      console.log('发送登录请求（详细）:', {
+      logger.debug('发送登录请求（详细）', {
         username: username,
         password: '***',
         role: teacherLevel,
@@ -280,7 +279,7 @@ export default {
       };
 
       const response = await apiClient.post('/api/login', requestData, config);
-      console.log('登录原始响应:', response);
+      logger.debug('登录原始响应:', response);
 
       if (response) {
         if (response.success) {
@@ -289,24 +288,24 @@ export default {
             if (userInfo) {
 
               setUserInfo(userInfo);
-              console.log('用户信息已保存到 localStorage');
+              logger.debug('用户信息已保存到 localStorage');
 
               const token = 'legacy_session';
               setSessionToken(token);
             }
           } catch (e) {
-            console.error('保存用户信息失败:', e);
+            logger.error('保存用户信息失败:', e);
           }
 
           this.tryTapLogin();
         } else {
-          console.warn('登录响应显示失败:', response.message);
+          logger.warn('登录响应显示失败:', response.message);
         }
       }
 
       return response;
     } catch (error) {
-      console.error('API登录请求失败（详细）:', {
+      logger.error('API登录请求失败（详细）:', {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data
@@ -331,10 +330,10 @@ export default {
           role: data.role,
           username: null
         });
-        console.log('TAP session 换票成功');
+        logger.debug('TAP session 换票成功');
       }
     } catch (e) {
-      console.warn('TAP session 换票失败（可忽略）:', e.message);
+      logger.warn('TAP session 换票失败（可忽略）', e.message);
     }
   },
 
@@ -371,15 +370,15 @@ export default {
       return experimentList
     }
     try {
-      console.log('正在发送获取实验列表请求...');
+      logger.debug('正在发送获取实验列表请求..');
       const config = {
         withCredentials: true
       };
       const response = await apiClient.get('/api/experiments', config);
-      console.log('从后端的 response:', response);
+      logger.debug('从后端的 response:', response);
       return response;
     } catch (error) {
-      console.error('获取实验列表失败:', error);
+      logger.error('获取实验列表失败:', error);
       throw error;
     }
   },
@@ -391,15 +390,15 @@ export default {
       return experimentList
     }
     try {
-      console.log('正在发送获取实验列表请求...');
+      logger.debug('正在发送获取实验列表请求..');
       const config = {
         withCredentials: true
       };
       const response = await apiClient.get('/api/experiments1', config);
-      console.log('从后端的 response:', response);
+      logger.debug('从后端的 response:', response);
       return response;
     } catch (error) {
-      console.error('获取实验列表失败:', error);
+      logger.error('获取实验列表失败:', error);
       throw error;
     }
   },
@@ -407,22 +406,22 @@ export default {
   async getTeacherExperimentList(options) {
     if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       await delay(500)
-      console.log('使用模拟数据返回教师实验列表');
+      logger.debug('使用模拟数据返回教师实验列表');
       return teacherExperimentList
     }
 
     try {
-      console.log('正在发送获取教师实验列表请求...');
+      logger.debug('正在发送获取教师实验列表请求..');
       const classId = resolveTeacherClassId(options)
       const config = {
         withCredentials: true,
         params: classId ? { classId } : undefined
       };
       const response = await apiClient.get('/api/teacher/experiments', config);
-      console.log('从后端获取的教师实验列表:', response);
+      logger.debug('从后端获取的教师实验列表:', response);
       return response;
     } catch (error) {
-      console.error('获取教师实验列表失败:', error);
+      logger.error('获取教师实验列表失败:', error);
       throw error;
     }
   },
@@ -433,9 +432,9 @@ export default {
       return experimentDetails
     }
     try {
-      console.log('正在发送获取实验详情请求...');
+      logger.debug('正在发送获取实验详情请求..');
       const response = await apiClient.get(`/api/experiments/${id}`);
-      console.log('从后端的实验详情 response:', response);
+      logger.debug('从后端的实验详情 response:', response);
 
       if (response.success && !response.data && typeof response === 'object') {
         return {
@@ -446,7 +445,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('获取实验详情失败:', error);
+      logger.error('获取实验详情失败:', error);
       throw error;
     }
   },
@@ -457,9 +456,9 @@ export default {
       return learningAnalysisData
     }
     try {
-      console.log('正在发送获取学习分析请求...');
+      logger.debug('正在发送获取学习分析请求..');
       const response = await apiClient.get('/api/student/learning-analysis')
-      console.log('从后端获取的学习分析 response:', response);
+      logger.debug('从后端获取的学习分析 response:', response);
 
       if (response.success && !response.data && typeof response === 'object') {
         return {
@@ -470,7 +469,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('获取学习分析失败:', error);
+      logger.error('获取学习分析失败:', error);
       throw error;
     }
   },
@@ -527,12 +526,12 @@ export default {
     }
 
     try {
-      console.log('正在获取所有学生实验数据...');
+      logger.debug('正在获取所有学生实验数据..');
       const classId = resolveTeacherClassId(options)
       const response = await apiClient.get('/api/teacher/allStudentExperiments', {
         params: classId ? { classId } : undefined
       });
-      console.log('获取到所有学生实验数据:', response);
+      logger.debug('获取到所有学生实验数据', response);
 
       if (response.success) {
         const list = Array.isArray(response.data) ? response.data : []
@@ -541,7 +540,7 @@ export default {
         throw createFriendlyError({ data: response }, '获取数据失败');
       }
     } catch (error) {
-      console.error('获取所有学生实验数据失败:', error);
+      logger.error('获取所有学生实验数据失败', error);
       throw error;
     }
   },
@@ -550,7 +549,7 @@ export default {
     if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       await delay(600)
 
-      console.log('使用模拟数据返回提交详情，提交ID:', submissionId);
+      logger.debug('使用模拟数据返回提交详情，提交ID:', submissionId);
       return {
         id: submissionId,
         studentId: '2019443672',
@@ -640,9 +639,9 @@ void Del_negative(SqList* L)
     }
 
     try {
-      console.log('正在获取提交详情...');
+      logger.debug('正在获取提交详情...');
       const response = await apiClient.get(`/api/submissions/${submissionId}`);
-      console.log('getSubmissionDetail response:', response);
+      logger.debug('getSubmissionDetail response:', response);
       if (response && response.success === false) {
         throw createFriendlyError({ data: response }, '加载提交详情失败')
       }
@@ -662,7 +661,7 @@ void Del_negative(SqList* L)
               response.code = codeRes.code.code
             }
           } catch (e) {
-            console.warn('Fallback code query failed:', e)
+            logger.warn('Fallback code query failed:', e)
           }
         }
 
@@ -690,7 +689,7 @@ void Del_negative(SqList* L)
               }
             }
           } catch (e) {
-            console.warn('Fallback student/experiment merge failed:', e)
+            logger.warn('Fallback student/experiment merge failed:', e)
           }
         }
       }
@@ -702,7 +701,7 @@ void Del_negative(SqList* L)
 
       return response;
     } catch (error) {
-      console.error('获取提交详情失败:', error);
+      logger.error('获取提交详情失败:', error);
       throw error;
     }
   },
@@ -714,7 +713,7 @@ void Del_negative(SqList* L)
     }
 
     try {
-      console.log('正在获取班级列表...');
+      logger.debug('正在获取班级列表...');
       try {
         const unifiedResponse = await apiClient.get('/api/classes', {
           validateStatus: status => status < 500
@@ -731,11 +730,11 @@ void Del_negative(SqList* L)
           return unifiedClasses;
         }
       } catch (unifiedError) {
-        console.warn('统一班级接口不可用，回退到教师班级接口:', unifiedError?.message || unifiedError);
+        logger.warn('统一班级接口不可用，回退到教师班级接口', unifiedError?.message || unifiedError);
       }
 
       const response = await apiClient.get('/api/teacher/class');
-      console.log('获取到班级列表数据:', response);
+      logger.debug('获取到班级列表数据', response);
 
       if (response && !Array.isArray(response)) {
         if (response.data && Array.isArray(response.data)) {
@@ -757,7 +756,7 @@ void Del_negative(SqList* L)
 
       return response;
     } catch (error) {
-      console.error('获取班级列表失败:', error);
+      logger.error('获取班级列表失败:', error);
       throw error;
     }
   },
@@ -804,12 +803,12 @@ void Del_negative(SqList* L)
     }
 
     try {
-      console.log('正在获取学生列表...');
+      logger.debug('正在获取学生列表...');
       const response = await apiClient.get('/api/teacher/studentList');
-      console.log('获取到学生列表数据:', response);
+      logger.debug('获取到学生列表数据', response);
       return response;
     } catch (error) {
-      console.error('获取学生列表失败:', error);
+      logger.error('获取学生列表失败:', error);
       throw error;
     }
   },
@@ -881,7 +880,7 @@ void Del_negative(SqList* L)
         topStudents
       };
     } catch (error) {
-      console.error('获取班级分析数据失败:', error);
+      logger.error('获取班级分析数据失败:', error);
       throw error;
     }
   },

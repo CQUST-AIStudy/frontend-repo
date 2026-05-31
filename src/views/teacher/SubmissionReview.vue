@@ -1,14 +1,14 @@
 <template>
-  <div class="submission-review">
+  <div class="submission-review [min-height:100%]">
     <el-page-header @back="$router.back()" title="返回" :content="`评阅: ${detail?.studentName || ''}`" />
 
-    <div v-if="detail" class="review-content">
-      <div class="score-banner" :class="scoreLevel">
-        <div class="score-main">
-          <span class="score-value">{{ formatScore(detail.totalScore, '暂无') }}</span>
-          <span class="score-label">总分</span>
+    <div v-if="detail" class="review-content [margin-top:20px]">
+      <div class="score-banner [display:flex] [align-items:center] [justify-content:space-between] [gap:24px] [padding:24px_32px] [border-radius:18px] [margin-bottom:24px] [background:linear-gradient(135deg,_#f0fdf4,_#dcfce7)] [border:1px_solid_#bbf7d0] [&.level-ok]:[background:linear-gradient(135deg,_#fffbeb,_#fef3c7)] [&.level-ok]:[border-color:#fde68a] [&.level-low]:[background:linear-gradient(135deg,_#fef2f2,_#fecaca)] [&.level-low]:[border-color:#fca5a5]" :class="scoreLevel">
+        <div class="score-main [display:flex] [align-items:baseline] [gap:8px]">
+          <span class="score-value [font-size:36px] [font-weight:700] [color:#15803d]">{{ formatScore(detail.totalScore, '暂无') }}</span>
+          <span class="score-label [color:#5f6368]">总分</span>
         </div>
-        <div class="score-info">
+        <div class="score-info [color:#5f6368] [display:flex] [align-items:center] [gap:12px] [font-size:14px]">
           <span>学生: {{ detail.studentName }}</span>
           <span v-if="detail.className">| {{ detail.className }}</span>
           <el-tag :type="statusTag(detail.status)" effect="light" round size="small">
@@ -17,10 +17,10 @@
         </div>
       </div>
 
-      <div class="review-card">
-        <div class="review-card-header">
-          <span class="review-title">教师总评</span>
-          <div class="review-actions">
+      <div class="review-card [background:#fff] [border-radius:18px] [padding:20px_24px] [margin-bottom:24px] [border:1px_solid_#dadce0]">
+        <div class="review-card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [margin-bottom:8px]">
+          <span class="review-title [font-weight:600] [color:#202124]">教师总评</span>
+          <div class="review-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
             <el-button size="small" type="success" plain @click="downloadReport" :loading="downloadingReport"
               :disabled="!detail?.hasDownloadableReport">
               下载批注报告
@@ -42,10 +42,10 @@
             </el-button>
           </div>
         </div>
-        <p class="review-hint">
+        <p class="review-hint [margin:0_0_12px] [font-size:13px] [line-height:1.6] [color:#5f6368]">
           导入后会把当前总分和教师总评写入学生实验报告，学生端导出的 Word 会显示红色手写评语。
         </p>
-        <p class="review-hint" v-if="detail?.hasDownloadableReport">
+        <p class="review-hint [margin:0_0_12px] [font-size:13px] [line-height:1.6] [color:#5f6368]" v-if="detail?.hasDownloadableReport">
           当前已生成 {{ preferredReportLabel }}，可直接下载查看。
         </p>
         <el-input
@@ -59,33 +59,33 @@
 
       <el-row :gutter="20">
         <el-col :span="14">
-          <div class="section-title">评分维度</div>
+          <div class="section-title [font-size:16px] [font-weight:600] [color:#202124] [margin-bottom:16px] [padding-bottom:8px] [border-bottom:2px_solid_#dadce0] [margin-bottom:12px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [margin:0] [font-weight:500] [color:#303133]">评分维度</div>
           <div
             v-for="score in detail.scores"
             :key="score.dimensionId"
-            class="score-card"
+            class="score-card [background:#fff] [border-radius:16px] [margin-bottom:12px] [border:1px_solid_#dadce0] [overflow:hidden] [transition:box-shadow_0.2s_ease,_transform_0.2s_ease] hover:[box-shadow:0_8px_20px_rgba(0,_0,_0,_0.06)] hover:[transform:translateY(-1px)] [&.need-evidence]:[border-left:3px_solid_#f59e0b]"
             :class="{ 'need-evidence': score.status === 'NEED_MORE_EVIDENCE' }"
           >
-            <div class="score-card-header">
-              <span class="dim-name">{{ getDimName(score.dimensionId) }}</span>
-              <div class="dim-score">
+            <div class="score-card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [padding:14px_20px] [background:#f8f9fa] [border-bottom:1px_solid_#f1f3f4]">
+              <span class="dim-name [font-weight:600] [color:#202124] [font-size:16px] [font-weight:700] [color:#303133]">{{ getDimName(score.dimensionId) }}</span>
+              <div class="dim-score [display:flex] [align-items:center] [gap:6px]">
                 <el-tag v-if="score.status === 'NEED_MORE_EVIDENCE'" type="warning" size="small" effect="light">
                   证据不足
                 </el-tag>
-                <span class="dim-value">{{ score.score ?? '暂无' }}</span>
-                <span class="dim-max">/ {{ score.maxScore }}</span>
-                <span class="dim-weight">({{ score.weight }}%)</span>
+                <span class="dim-value [font-size:20px] [font-weight:700] [color:#202124]">{{ score.score ?? '暂无' }}</span>
+                <span class="dim-max [color:#9aa0a6]">/ {{ score.maxScore }}</span>
+                <span class="dim-weight [color:#9aa0a6] [font-size:12px]">({{ score.weight }}%)</span>
               </div>
             </div>
-            <div class="score-card-body">
-              <div v-if="score.comment" class="ai-comment">
-                <div class="comment-label">
+            <div class="score-card-body [padding:16px_20px]">
+              <div v-if="score.comment" class="ai-comment [margin-bottom:12px] [margin-top:20px]">
+                <div class="comment-label [display:flex] [align-items:center] [gap:4px] [font-size:12px] [color:#1a73e8] [font-weight:600] [margin-bottom:6px]">
                   <el-icon><ChatDotRound /></el-icon>
                   <span>AI 评语</span>
                 </div>
-                <p class="comment-text">{{ score.comment }}</p>
+                <p class="comment-text [font-size:14px] [line-height:1.7] [color:#3c4043] [margin:0] [padding:10px_14px] [background:#f8f9fa] [border-radius:10px] [border-left:3px_solid_#1a73e8]">{{ score.comment }}</p>
               </div>
-              <div v-else class="no-comment">暂无评语</div>
+              <div v-else class="no-comment [color:#9aa0a6] [font-size:13px] [margin-bottom:12px]">暂无评语</div>
               <el-button size="small" type="primary" plain @click="startOverride(score)">
                 <el-icon><Edit /></el-icon>
                 <span>修改评分</span>
@@ -95,18 +95,18 @@
         </el-col>
 
         <el-col :span="10">
-          <div class="section-title">证据材料 ({{ detail.evidenceBlocks?.length || 0 }})</div>
-          <div class="evidence-list">
-            <div v-for="eb in detail.evidenceBlocks" :key="eb.evidenceId" class="evidence-card">
-              <div class="evidence-header">
+          <div class="section-title [font-size:16px] [font-weight:600] [color:#202124] [margin-bottom:16px] [padding-bottom:8px] [border-bottom:2px_solid_#dadce0] [margin-bottom:12px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [margin:0] [font-weight:500] [color:#303133]">证据材料 ({{ detail.evidenceBlocks?.length || 0 }})</div>
+          <div class="evidence-list [display:flex] [flex-direction:column] [gap:10px]">
+            <div v-for="eb in detail.evidenceBlocks" :key="eb.evidenceId" class="evidence-card [background:#fff] [border-radius:12px] [padding:14px] [border:1px_solid_#dadce0]">
+              <div class="evidence-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [margin-bottom:8px]">
                 <el-tag size="small" effect="plain">{{ eb.evidenceId }}</el-tag>
-                <div class="evidence-meta">
+                <div class="evidence-meta [display:flex] [align-items:center] [gap:8px]">
                   <el-tag size="small" :type="kindType(eb.kind)" effect="light">{{ kindLabel(eb.kind) }}</el-tag>
-                  <span class="page-num">页 {{ eb.page }}</span>
+                  <span class="page-num [font-size:12px] [color:#5f6368]">页 {{ eb.page }}</span>
                 </div>
               </div>
-              <pre class="evidence-content">{{ (eb.content || '').slice(0, 500) }}</pre>
-              <div v-if="eb.confidence" class="confidence">
+              <pre class="evidence-content [margin:0] [white-space:pre-wrap] [word-break:break-word] [font-size:13px] [line-height:1.6] [color:#202124] [background:#f8f9fa] [border-radius:10px] [padding:12px]">{{ (eb.content || '').slice(0, 500) }}</pre>
+              <div v-if="eb.confidence" class="confidence [font-size:12px] [color:#5f6368]">
                 置信度 {{ (eb.confidence * 100).toFixed(1) }}%
               </div>
             </div>
@@ -120,7 +120,7 @@
       <el-form :model="overrideForm" label-width="80px">
         <el-form-item label="新分数">
           <el-input-number v-model="overrideForm.newScore" :min="0" :max="overrideForm.maxScore" :step="0.5" />
-          <span class="field-suffix">/ {{ overrideForm.maxScore }}</span>
+          <span class="field-suffix [margin-left:8px] [color:#9aa0a6]">/ {{ overrideForm.maxScore }}</span>
         </el-form-item>
         <el-form-item label="新评语">
           <el-input v-model="overrideForm.newComment" type="textarea" :rows="3" placeholder="输入修改后的评语" />
@@ -135,7 +135,7 @@
       </template>
     </el-dialog>
 
-    <div v-if="loading" v-loading="true" style="height: 200px" />
+    <div v-if="loading" v-loading="true" class="[height:200px]" />
   </div>
 </template>
 
@@ -352,248 +352,4 @@ async function loadDetail() {
 onMounted(loadDetail)
 </script>
 
-<style scoped>
-.submission-review {
-  min-height: 100%;
-}
 
-.review-content {
-  margin-top: 20px;
-}
-
-.score-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 24px 32px;
-  border-radius: 18px;
-  margin-bottom: 24px;
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border: 1px solid #bbf7d0;
-}
-
-.score-banner.level-ok {
-  background: linear-gradient(135deg, #fffbeb, #fef3c7);
-  border-color: #fde68a;
-}
-
-.score-banner.level-low {
-  background: linear-gradient(135deg, #fef2f2, #fecaca);
-  border-color: #fca5a5;
-}
-
-.score-main {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.score-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: #15803d;
-}
-
-.level-ok .score-value {
-  color: #d97706;
-}
-
-.level-low .score-value {
-  color: #dc2626;
-}
-
-.score-label,
-.score-info {
-  color: #5f6368;
-}
-
-.score-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-}
-
-.review-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 20px 24px;
-  margin-bottom: 24px;
-  border: 1px solid #dadce0;
-}
-
-.review-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.review-title {
-  font-weight: 600;
-  color: #202124;
-}
-
-.review-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.review-hint {
-  margin: 0 0 12px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #5f6368;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #202124;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #dadce0;
-}
-
-.score-card {
-  background: #fff;
-  border-radius: 16px;
-  margin-bottom: 12px;
-  border: 1px solid #dadce0;
-  overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.score-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
-}
-
-.score-card.need-evidence {
-  border-left: 3px solid #f59e0b;
-}
-
-.score-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #f1f3f4;
-}
-
-.dim-name {
-  font-weight: 600;
-  color: #202124;
-}
-
-.dim-score {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.dim-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: #202124;
-}
-
-.dim-max,
-.dim-weight {
-  color: #9aa0a6;
-}
-
-.dim-weight {
-  font-size: 12px;
-}
-
-.score-card-body {
-  padding: 16px 20px;
-}
-
-.ai-comment {
-  margin-bottom: 12px;
-}
-
-.comment-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #1a73e8;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.comment-text {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #3c4043;
-  margin: 0;
-  padding: 10px 14px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border-left: 3px solid #1a73e8;
-}
-
-.no-comment {
-  color: #9aa0a6;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.evidence-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.evidence-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px;
-  border: 1px solid #dadce0;
-}
-
-.evidence-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.evidence-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.page-num,
-.confidence {
-  font-size: 12px;
-  color: #5f6368;
-}
-
-.evidence-content {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #202124;
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.field-suffix {
-  margin-left: 8px;
-  color: #9aa0a6;
-}
-</style>

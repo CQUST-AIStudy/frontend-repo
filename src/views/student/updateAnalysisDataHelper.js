@@ -1,7 +1,8 @@
+import logger from '@/utils/logger'
 // 更新分析数据函数
 export const updateAnalysisData = (analysisData, experimentStore) => {
   if (!analysisData || !analysisData.value || !analysisData.value.overall) {
-    console.warn('分析数据不存在，无法更新');
+    logger.warn('分析数据不存在，无法更新');
     return;
   }
   
@@ -9,7 +10,7 @@ export const updateAnalysisData = (analysisData, experimentStore) => {
   const allExperiments = experimentStore.experimentList || [];
   
   if (!allExperiments || allExperiments.length === 0) {
-    console.warn('实验列表为空，无法更新分析数据');
+    logger.warn('实验列表为空，无法更新分析数据');
     return;
   }
   
@@ -25,12 +26,12 @@ export const updateAnalysisData = (analysisData, experimentStore) => {
     avgScore = Math.round(scoreSum / completedExperiments.length);
   }
   
-  // 计算完成率 - 已完成实验数 / 总实验数
+  // 计算完成率- 已完成实验数 / 总实验数
   const completionRate = allExperiments.length > 0 
     ? Math.round((completedExperiments.length / allExperiments.length) * 100) 
     : 0;
   
-  console.log(`实时计算分析数据 - 平均成绩: ${avgScore}, 实验完成率: ${completionRate}%`);
+  logger.debug(`实时计算分析数据 - 平均成绩: ${avgScore}, 实验完成率 ${completionRate}%`);
   
   // 更新分析数据
   analysisData.value.overall.averageScore = avgScore;

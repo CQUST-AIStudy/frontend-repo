@@ -1,75 +1,75 @@
-<template>
-  <div class="ability-profile">
-    <div v-if="loading" class="loading-container">
+﻿<template>
+  <div class="ability-profile [padding:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+    <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
       <el-skeleton :rows="10" animated />
     </div>
     <el-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
     <template v-else>
       <!-- 概览卡片 -->
-      <el-row :gutter="16" class="overview-row">
+      <el-row :gutter="16" class="overview-row [margin-bottom:20px]">
         <el-col :span="6" v-for="item in overviewCards" :key="item.label">
-          <el-card shadow="hover" class="stat-card">
-            <div class="stat-icon" :style="{ background: item.bg }">
+          <el-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <div class="stat-icon [width:48px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
               <el-icon :size="24" color="#fff"><component :is="item.icon" /></el-icon>
             </div>
-            <div class="stat-info">
-              <div class="stat-value" :style="{ color: item.color }">{{ item.value }}</div>
-              <div class="stat-label">{{ item.label }}</div>
+            <div class="stat-info [flex:1]">
+              <div class="stat-value [font-size:24px] [font-weight:600] [color:#202124] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
+              <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
             </div>
           </el-card>
         </el-col>
       </el-row>
 
       <!-- 雷达图 + 趋势 -->
-      <el-row :gutter="16" style="margin-top:16px">
+      <el-row :gutter="16" class="[margin-top:16px]">
         <el-col :span="12">
           <el-card shadow="hover">
-            <template #header><span class="card-title">🎯 能力雷达图</span></template>
-            <div ref="radarChartRef" class="chart-box"></div>
+            <template #header><span class="card-title [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]">🎯 能力雷达图</span></template>
+            <div ref="radarChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
           </el-card>
         </el-col>
         <el-col :span="12">
           <el-card shadow="hover">
             <template #header>
-              <span class="card-title">📈 学期趋势</span>
-              <el-tag :type="trendTagType" size="small" style="margin-left:8px" effect="dark">{{ trendText }}</el-tag>
+              <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">📈 学期趋势</span>
+              <el-tag :type="trendTagType" size="small" class="[margin-left:8px]" effect="dark">{{ trendText }}</el-tag>
             </template>
-            <div ref="trendChartRef" class="chart-box"></div>
+            <div ref="trendChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
           </el-card>
         </el-col>
       </el-row>
 
       <!-- AI学习建议 (全宽) -->
-      <el-card shadow="hover" style="margin-top:16px" class="feedback-card">
+      <el-card shadow="hover" class="feedback-card [margin-top:16px]">
         <template #header>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <span class="card-title">🤖 AI 学习建议</span>
+          <div class="[display:flex] [align-items:center] [justify-content:space-between]">
+            <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🤖 AI 学习建议</span>
             <el-button type="primary" size="small" :loading="refreshingFeedback" @click="handleRefreshFeedback" round>
               {{ refreshingFeedback ? '分析中...' : '🔄 重新分析' }}
             </el-button>
           </div>
         </template>
-        <div v-if="refreshingFeedback" class="feedback-loading">
+        <div v-if="refreshingFeedback" class="feedback-loading [padding:10px_0]">
           <el-skeleton :rows="4" animated />
-          <div class="feedback-loading-tip">正在调用 DeepSeek 分析学习数据，请稍候...</div>
+          <div class="feedback-loading-tip [text-align:center] [color:#5f6368] [font-size:13px] [margin-top:12px]">正在调用 DeepSeek 分析学习数据，请稍候...</div>
         </div>
-        <div v-else-if="profile.feedback" class="feedback-content" v-html="renderedFeedback"></div>
-        <div v-else class="feedback-empty">
+        <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff]" v-html="renderedFeedback"></div>
+        <div v-else class="feedback-empty [padding:20px_0]">
           <el-empty description="暂无AI分析，点击上方按钮生成" :image-size="80" />
         </div>
       </el-card>
 
       <!-- 学习特征 -->
-      <el-card shadow="hover" style="margin-top:16px">
-        <template #header><span class="card-title">🏷️ 学习特征</span></template>
+      <el-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🏷️ 学习特征</span></template>
         <el-row :gutter="16">
           <el-col :span="8" v-for="p in profile.patterns" :key="p.tag">
-            <div class="pattern-card" :class="'pattern-' + patternClass(p.tag)">
-              <div class="pattern-icon">{{ patternEmoji(p.tag) }}</div>
+            <div class="pattern-card [display:flex] [gap:12px] [padding:14px] [border-radius:12px] [border:1px_solid_#e8eaed] [transition:transform_.2s] [height:100%] hover:[transform:translateX(4px)]" :class="'pattern-' + patternClass(p.tag)">
+              <div class="pattern-icon [font-size:28px] [flex-shrink:0] [margin-top:2px]">{{ patternEmoji(p.tag) }}</div>
               <div class="pattern-body">
-                <div class="pattern-tag-name">{{ p.tag }}</div>
-                <div class="pattern-desc">{{ p.description }}</div>
-                <div class="pattern-evidence">📊 {{ p.evidence }}</div>
+                <div class="pattern-tag-name [font-weight:500] [font-size:15px] [color:#202124]">{{ p.tag }}</div>
+                <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
+                <div class="pattern-evidence [font-size:12px] [color:#9aa0a6] [margin-top:4px]">📊 {{ p.evidence }}</div>
               </div>
             </div>
           </el-col>
@@ -77,25 +77,25 @@
       </el-card>
 
       <!-- Top薄弱点 -->
-      <el-card shadow="hover" style="margin-top:16px">
-        <template #header><span class="card-title">⚠️ Top 薄弱点</span></template>
+      <el-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">⚠️ Top 薄弱点</span></template>
         <el-row :gutter="16">
           <el-col :span="8" v-for="(w, idx) in profile.weaknesses" :key="w.experimentId">
-            <div class="weakness-card">
-              <div class="weakness-rank">#{{ idx + 1 }}</div>
-              <div class="weakness-header">
-                <span class="weakness-name">{{ w.experimentName }}</span>
+            <div class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]">
+              <div class="weakness-rank [position:absolute] [top:-8px] [left:-8px] [width:28px] [height:28px] [background:#F56C6C] [color:#fff] [border-radius:50%] [display:flex] [align-items:center] [justify-content:center] [font-weight:700] [font-size:13px]">#{{ idx + 1 }}</div>
+              <div class="weakness-header [display:flex] [align-items:center] [justify-content:space-between]">
+                <span class="weakness-name [font-weight:600] [font-size:14px]">{{ w.experimentName }}</span>
                 <el-tag type="danger" size="small" effect="plain">{{ w.dimension }}</el-tag>
               </div>
-              <el-progress :percentage="Math.round(w.mastery)" :color="masteryColor(w.mastery)" :stroke-width="12" style="margin:10px 0" />
-              <div class="weakness-evidence">
+              <el-progress :percentage="Math.round(w.mastery)" :color="masteryColor(w.mastery)" :stroke-width="12" class="[margin:10px_0]" />
+              <div class="weakness-evidence [display:flex] [gap:10px] [font-size:12px] [color:#909399] [flex-wrap:wrap]">
                 <span>📝 提交{{ w.evidence?.totalSubmissions }}次</span>
                 <span>✅ AC{{ w.evidence?.acCount }}次</span>
                 <span>❌ 编译错误{{ w.evidence?.compileErrors }}</span>
               </div>
-              <div v-if="w.weakQuestions?.length" class="weakness-questions">
-                <div class="q-title">薄弱题目:</div>
-                <div v-for="q in w.weakQuestions" :key="q.serial_number" class="q-item">
+              <div v-if="w.weakQuestions?.length" class="weakness-questions [margin-top:8px] [padding-top:8px] [border-top:1px_dashed_#fde2e2]">
+                <div class="q-title [font-size:12px] [color:#606266] [font-weight:600]">薄弱题目:</div>
+                <div v-for="q in w.weakQuestions" :key="q.serial_number" class="q-item [font-size:12px] [color:#909399]">
                   题{{ q.serial_number }}: 尝试{{ q.attempts }}次, AC{{ q.ac_count }}次
                 </div>
               </div>
@@ -105,29 +105,29 @@
       </el-card>
 
       <!-- 技能树 -->
-      <el-card shadow="hover" style="margin-top:16px">
-        <template #header><span class="card-title">🌳 技能树详情</span></template>
-        <div class="skill-tree">
-          <div v-for="dim in profile.skillTree" :key="dim.dimension" class="tree-dimension">
-            <div class="tree-dim-header" :class="'dim-' + dim.level">
-              <div class="dim-left">
-                <span class="dim-icon">{{ dimEmoji(dim.dimension) }}</span>
-                <span class="dim-name">{{ dim.dimension }}</span>
+      <el-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🌳 技能树详情</span></template>
+        <div class="skill-tree [display:flex] [flex-direction:column] [gap:20px]">
+          <div v-for="dim in profile.skillTree" :key="dim.dimension" class="tree-dimension [border:1px_solid_#eee] [border-radius:12px] [overflow:hidden] [transition:box-shadow_.2s] hover:[box-shadow:0_2px_12px_rgba(0,0,0,0.06)]">
+            <div class="tree-dim-header [display:flex] [align-items:center] [justify-content:space-between] [padding:14px_18px] [background:#fafafa] [&.dim-good]:[background:linear-gradient(90deg,_#f0f9eb,_#fafafa)] [&.dim-medium]:[background:linear-gradient(90deg,_#fdf6ec,_#fafafa)] [&.dim-weak]:[background:linear-gradient(90deg,_#fef0f0,_#fafafa)]" :class="'dim-' + dim.level">
+              <div class="dim-left [display:flex] [align-items:center] [gap:8px]">
+                <span class="dim-icon [font-size:20px]">{{ dimEmoji(dim.dimension) }}</span>
+                <span class="dim-name [font-size:16px] [font-weight:700] [color:#303133]">{{ dim.dimension }}</span>
                 <el-tag :type="levelTagType(dim.level)" size="small" effect="dark">{{ dim.avgMastery }}分</el-tag>
               </div>
-              <span class="dim-desc">{{ dim.description }}</span>
+              <span class="dim-desc [font-size:12px] [color:#909399]">{{ dim.description }}</span>
             </div>
-            <div class="tree-leaves">
+            <div class="tree-leaves [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(240px,_1fr))] [gap:1px] [background:#f0f0f0]">
               <div v-for="c in dim.children" :key="c.experimentId"
-                   class="tree-leaf" :class="'leaf-' + c.level">
-                <div class="leaf-top">
-                  <span class="leaf-name">{{ c.name }}</span>
-                  <span class="leaf-score" :style="{ color: masteryColor(c.mastery) }">{{ c.mastery }}分</span>
+                   class="tree-leaf [background:#fff] [padding:12px_16px] [transition:background_.15s] hover:[background:#f9f9f9]" :class="'leaf-' + c.level">
+                <div class="leaf-top [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:6px]">
+                  <span class="leaf-name [font-size:13px] [font-weight:600] [color:#303133]">{{ c.name }}</span>
+                  <span class="leaf-score [font-size:14px] [font-weight:700]" :class="masteryColorClass(c.mastery)">{{ c.mastery }}分</span>
                 </div>
-                <div class="leaf-bar">
-                  <div class="leaf-bar-fill" :style="{ width: c.mastery + '%', background: masteryGradient(c.mastery) }"></div>
+                <div class="leaf-bar [height:6px] [background:#f0f0f0] [border-radius:3px] [overflow:hidden]">
+                  <div class="leaf-bar-fill [height:100%] [border-radius:3px] [transition:width_.6s_ease]" :class="masteryGradientClass(c.mastery)" :style="{ width: c.mastery + '%' }"></div>
                 </div>
-                <div class="leaf-bottom" v-if="c.totalSubmissions">
+                <div class="leaf-bottom [display:flex] [gap:12px] [font-size:11px] [color:#909399] [margin-top:6px]" v-if="c.totalSubmissions">
                   <span>提交{{ c.totalSubmissions }}</span>
                   <span>AC{{ c.acCount }}</span>
                   <span>{{ c.questionCount }}题</span>
@@ -169,6 +169,20 @@ const overviewCards = computed(() => [
   { label: '已参与实验', value: (profile.value.overview?.experimentsCovered || 0) + '/' + (profile.value.overview?.totalExperiments || 19), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
 ])
 
+function overviewIconClass(item) {
+  if (item.color === '#409EFF') return '[background:linear-gradient(135deg,#409EFF,#79bbff)]'
+  if (item.color === '#67C23A') return '[background:linear-gradient(135deg,#67C23A,#95d475)]'
+  if (item.color === '#E6A23C') return '[background:linear-gradient(135deg,#E6A23C,#eebe77)]'
+  return '[background:linear-gradient(135deg,#909399,#b1b3b8)]'
+}
+
+function overviewValueClass(item) {
+  if (item.color === '#409EFF') return '[color:#409EFF]'
+  if (item.color === '#67C23A') return '[color:#67C23A]'
+  if (item.color === '#E6A23C') return '[color:#E6A23C]'
+  return '[color:#909399]'
+}
+
 const trendText = computed(() => {
   const d = profile.value.trend?.direction
   return d === 'up' ? '↑ 进步' : d === 'down' ? '↓ 下降' : '→ 平稳'
@@ -186,10 +200,11 @@ const renderedFeedback = computed(() => {
 })
 
 function masteryColor(v) { return v >= 70 ? '#67C23A' : v >= 40 ? '#E6A23C' : '#F56C6C' }
-function masteryGradient(v) {
-  if (v >= 70) return 'linear-gradient(90deg,#95d475,#67C23A)'
-  if (v >= 40) return 'linear-gradient(90deg,#eebe77,#E6A23C)'
-  return 'linear-gradient(90deg,#fab6b6,#F56C6C)'
+function masteryColorClass(v) { return v >= 70 ? '[color:#67C23A]' : v >= 40 ? '[color:#E6A23C]' : '[color:#F56C6C]' }
+function masteryGradientClass(v) {
+  if (v >= 70) return '[background:linear-gradient(90deg,#95d475,#67C23A)]'
+  if (v >= 40) return '[background:linear-gradient(90deg,#eebe77,#E6A23C)]'
+  return '[background:linear-gradient(90deg,#fab6b6,#F56C6C)]'
 }
 function levelTagType(l) { return l === 'good' ? 'success' : l === 'medium' ? 'warning' : 'danger' }
 function patternClass(tag) {
@@ -295,74 +310,4 @@ onMounted(() => { fetchProfile(); window.addEventListener('resize', handleResize
 onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); radarChart?.dispose(); trendChart?.dispose() })
 </script>
 
-<style scoped>
-.ability-profile { padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-.loading-container { padding: 40px }
-.card-title { font-weight: 500; font-size: 15px; color: #202124; }
-.chart-box { height: 340px; width: 100%; min-width: 0 }
 
-.stat-card { border-radius: 16px; border: 1px solid #dadce0; box-shadow: none; }
-.stat-card:hover { box-shadow: 0 1px 3px rgba(60,64,67,0.15), 0 4px 8px rgba(60,64,67,0.08); }
-.stat-card :deep(.el-card__body) { display: flex; align-items: center; gap: 14px; padding: 18px }
-.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
-.stat-info { flex: 1 }
-.stat-value { font-size: 24px; font-weight: 600; color: #202124; }
-.stat-label { font-size: 13px; color: #5f6368; margin-top: 2px }
-
-/* 学习特征 - 横向排列 */
-.pattern-card { display: flex; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid #e8eaed; transition: transform .2s; height: 100% }
-.pattern-card:hover { transform: translateX(4px) }
-.pattern-good { background: #e6f4ea; border-color: #ceead6 }
-.pattern-warn { background: #fef7e0; border-color: #feefc3 }
-.pattern-bad { background: #fce8e6; border-color: #f5c6c2 }
-.pattern-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px }
-.pattern-tag-name { font-weight: 500; font-size: 15px; color: #202124 }
-.pattern-desc { font-size: 13px; color: #5f6368; margin-top: 3px }
-.pattern-evidence { font-size: 12px; color: #9aa0a6; margin-top: 4px }
-
-/* AI反馈 - 全宽 + Markdown渲染 */
-.feedback-card :deep(.el-card__body) { padding: 20px }
-.feedback-content { font-size: 14px; line-height: 1.9; color: #202124; background: #e6f4ea; padding: 20px 24px; border-radius: 12px; border-left: 4px solid #1e8e3e }
-.feedback-content :deep(h1), .feedback-content :deep(h2), .feedback-content :deep(h3) { color: #1a73e8; margin: 16px 0 8px 0; font-size: 16px }
-.feedback-content :deep(h1:first-child), .feedback-content :deep(h2:first-child), .feedback-content :deep(h3:first-child) { margin-top: 0 }
-.feedback-content :deep(p) { margin: 6px 0 }
-.feedback-content :deep(ol), .feedback-content :deep(ul) { padding-left: 20px; margin: 6px 0 }
-.feedback-content :deep(li) { margin: 4px 0 }
-.feedback-content :deep(strong) { color: #e37400 }
-.feedback-loading { padding: 10px 0 }
-.feedback-loading-tip { text-align: center; color: #5f6368; font-size: 13px; margin-top: 12px }
-.feedback-empty { padding: 20px 0 }
-
-/* 薄弱点 */
-.weakness-card { background: #fff; border: 1px solid #fde2e2; border-radius: 12px; padding: 16px; position: relative; transition: box-shadow .2s; height: 100% }
-.weakness-card:hover { box-shadow: 0 4px 12px rgba(245,108,108,0.15) }
-.weakness-rank { position: absolute; top: -8px; left: -8px; width: 28px; height: 28px; background: #F56C6C; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px }
-.weakness-header { display: flex; align-items: center; justify-content: space-between }
-.weakness-name { font-weight: 600; font-size: 14px }
-.weakness-evidence { display: flex; gap: 10px; font-size: 12px; color: #909399; flex-wrap: wrap }
-.weakness-questions { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #fde2e2 }
-.q-title { font-size: 12px; color: #606266; font-weight: 600 }
-.q-item { font-size: 12px; color: #909399 }
-
-/* 技能树 */
-.skill-tree { display: flex; flex-direction: column; gap: 20px }
-.tree-dimension { border: 1px solid #eee; border-radius: 12px; overflow: hidden; transition: box-shadow .2s }
-.tree-dimension:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06) }
-.tree-dim-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fafafa }
-.tree-dim-header.dim-good { background: linear-gradient(90deg, #f0f9eb, #fafafa) }
-.tree-dim-header.dim-medium { background: linear-gradient(90deg, #fdf6ec, #fafafa) }
-.tree-dim-header.dim-weak { background: linear-gradient(90deg, #fef0f0, #fafafa) }
-.dim-left { display: flex; align-items: center; gap: 8px }
-.dim-icon { font-size: 20px }
-.dim-name { font-size: 16px; font-weight: 700; color: #303133 }
-.dim-desc { font-size: 12px; color: #909399 }
-.tree-leaves { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1px; background: #f0f0f0 }
-.tree-leaf { background: #fff; padding: 12px 16px; transition: background .15s }
-.tree-leaf:hover { background: #f9f9f9 }
-.leaf-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px }
-.leaf-name { font-size: 13px; font-weight: 600; color: #303133 }
-.leaf-score { font-size: 14px; font-weight: 700 }
-.leaf-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden }
-.leaf-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease }
-.leaf-bottom { display: flex; gap: 12px; font-size: 11px; color: #909399; margin-top: 6px }
-</style>

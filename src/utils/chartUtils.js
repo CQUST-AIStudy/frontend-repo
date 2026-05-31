@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 import * as echarts from 'echarts/core'
 import { BarChart, PieChart, LineChart, RadarChart } from 'echarts/charts'
 import {
@@ -32,13 +33,13 @@ echarts.use([
  */
 export function initChart(container, options, existingChart = null) {
   if (!container) {
-    console.error('图表容器未找到')
+    logger.error('图表容器未找到')
     return null
   }
 
   // 检查容器是否有宽高
   if (container.offsetHeight === 0 || container.offsetWidth === 0) {
-    console.error('图表容器宽高为0，无法渲染图表')
+    logger.error('图表容器宽高为0，无法渲染图表')
     return null
   }
 
@@ -56,7 +57,7 @@ export function initChart(container, options, existingChart = null) {
     
     return chart
   } catch (error) {
-    console.error('初始化图表失败:', error)
+    logger.error('初始化图表失败:', error)
     return null
   }
 }

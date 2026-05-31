@@ -1,7 +1,7 @@
 <template>
-  <div class="class-list">
+  <div class="class-list [min-width:0] [min-height:100%] [overflow-y:auto] [&_.el-button--primary]:[border-radius:999px] [&_.el-dialog]:[max-width:calc(100vw_-_24px)] [&_.el-table]:[width:100%]">
     <page-header
-      class="my-page-header"
+      class="my-page-header [margin-bottom:10px]"
       title="班级管理"
       description="管理教学班级、学生信息与 PTA 同步设置，首屏卡片会根据内容自动伸展。"
     >
@@ -13,26 +13,26 @@
 
     <el-alert
       v-if="cookieStatus === 'EXPIRED'"
-      class="cookie-alert"
+      class="cookie-alert [margin-bottom:18px] [border-radius:18px]"
       title="PTA 登录凭证已过期"
       type="warning"
       :closable="false"
       show-icon
     >
       <template #default>
-        <div class="cookie-alert__content">
-          <span>系统自动登录失败。可以手动更新 Cookie，也可以在“个人资料”绑定 PTA 账号，或在发起同步时临时输入账号密码。</span>
+        <div class="cookie-alert__content [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [flex-wrap:wrap] [font-size:13px] [line-height:1.7]">
+          <span>系统自动登录失败。可以手动更新Cookie，也可以在“个人资料”绑定PTA 账号，或在发起同步时临时输入账号密码。</span>
           <el-button type="warning" size="small" @click="openCookieDialog">更新 Cookie</el-button>
         </div>
       </template>
     </el-alert>
 
-    <div class="class-cards" v-loading="loading">
+    <div class="class-cards [padding-bottom:24px]" v-loading="loading">
       <el-empty v-if="classes.length === 0 && !loading" description="暂无班级，点击上方按钮创建">
         <el-button type="primary" @click="openCreateDialog">创建第一个班级</el-button>
       </el-empty>
 
-      <el-row v-else :gutter="20" class="class-grid">
+      <el-row v-else :gutter="20" class="class-grid [display:flex] [flex-wrap:wrap] [min-width:0]">
         <el-col
           v-for="cls in classes"
           :key="cls.id"
@@ -41,25 +41,25 @@
           :md="24"
           :lg="12"
           :xl="12"
-          class="class-grid__item"
+          class="class-grid__item [display:flex] [margin-bottom:20px]"
         >
-          <el-card shadow="hover" class="class-card">
+          <el-card shadow="hover" class="class-card [height:100%] [cursor:pointer] [transition:all_0.3s] [border:2px_solid_transparent] hover:[transform:translateY(-5px)] hover:[border-color:#409EFF] hover:[box-shadow:0_10px_15px_rgba(0,_0,_0,_0.1)] [width:100%] [min-height:380px] [display:flex] [flex-direction:column] [border:1px_solid_#dce5f0] [border-radius:24px] [background:radial-gradient(circle_at_top_right,_rgba(26,_115,_232,_0.08),_transparent_30%),_linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] [box-shadow:0_14px_36px_rgba(38,_61,_89,_0.07)]">
             <template #header>
-              <div class="card-header">
-                <div class="card-header__main">
-                  <h3 class="class-name">{{ displayClassName(cls) }}</h3>
-                  <div class="class-meta">
-                    <span class="meta-pill">{{ displayGrade(cls) }}</span>
-                    <span class="meta-pill meta-pill--soft">{{ studentCountValue(cls) }} 人</span>
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+                <div class="card-header__main [min-width:0] [flex:1]">
+                  <h3 class="class-name [margin:0] [font-size:26px] [line-height:1.2] [color:#16314a] [word-break:break-word]">{{ displayClassName(cls) }}</h3>
+                  <div class="class-meta [display:flex] [flex-wrap:wrap] [gap:8px] [margin-top:12px]">
+                    <span class="meta-pill [display:inline-flex] [align-items:center] [padding:6px_12px] [border-radius:999px] [background:rgba(18,_112,_216,_0.1)] [color:#1860b7] [font-size:12px] [font-weight:600]">{{ displayGrade(cls) }}</span>
+                    <span class="meta-pill meta-pill--soft [display:inline-flex] [align-items:center] [padding:6px_12px] [border-radius:999px] [background:rgba(18,_112,_216,_0.1)] [color:#1860b7] [font-size:12px] [font-weight:600] [background:rgba(126,_157,_183,_0.12)] [color:#5c7188]">{{ studentCountValue(cls) }} 人</span>
                   </div>
                 </div>
                 <el-dropdown trigger="click">
-                  <el-icon class="card-menu"><MoreFilled /></el-icon>
+                  <el-icon class="card-menu [cursor:pointer] [color:#71839a] [font-size:18px]"><MoreFilled /></el-icon>
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item @click="editClass(cls)">编辑班级</el-dropdown-item>
                       <el-dropdown-item @click="manageStudents(cls)">学生管理</el-dropdown-item>
-                      <el-dropdown-item divided @click="confirmDelete(cls)" style="color: #f56c6c">
+                      <el-dropdown-item divided @click="confirmDelete(cls)" class="[color:#f56c6c]">
                         删除班级
                       </el-dropdown-item>
                     </el-dropdown-menu>
@@ -68,41 +68,41 @@
               </div>
             </template>
 
-            <div class="class-summary">
-              <div class="summary-chip">
-                <span class="summary-chip__label">班级号</span>
+            <div class="class-summary [display:flex] [flex-wrap:wrap] [gap:12px]">
+              <div class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]">
+                <span class="summary-chip__label [color:#8091a5] [font-size:12px] [white-space:nowrap]">班级号</span>
                 <strong>{{ displayClassCode(cls) }}</strong>
                 <el-button link size="small" @click="copyCode(displayClassCode(cls))">复制</el-button>
               </div>
-              <div class="summary-chip" v-if="hasPtaConfig(cls)">
-                <span class="summary-chip__label">PTA 同步</span>
+              <div class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" v-if="hasPtaConfig(cls)">
+                <span class="summary-chip__label [color:#8091a5] [font-size:12px] [white-space:nowrap]">PTA 同步</span>
                 <el-tag size="small" :type="syncTagType(cls.syncStatus)" effect="plain">
                   {{ syncStatusText(cls.syncStatus) }}
                 </el-tag>
-                <span v-if="cls.lastSyncAt" class="summary-chip__time">{{ formatTime(cls.lastSyncAt) }}</span>
+                <span v-if="cls.lastSyncAt" class="summary-chip__time [font-size:12px] [color:#8b9bae]">{{ formatTime(cls.lastSyncAt) }}</span>
               </div>
             </div>
 
-            <div class="info-grid">
-              <div class="info-block">
-                <span class="info-label">加入密码</span>
-                <span class="info-value">{{ displayJoinPassword(cls) }}</span>
+            <div class="info-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:14px]">
+              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
+                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">加入密码</span>
+                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayJoinPassword(cls) }}</span>
               </div>
-              <div class="info-block">
-                <span class="info-label">课程</span>
-                <span class="info-value">{{ displayCourseName(cls) }}</span>
+              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
+                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">课程</span>
+                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayCourseName(cls) }}</span>
               </div>
-              <div class="info-block">
-                <span class="info-label">描述</span>
-                <span class="info-value">{{ displayDescription(cls) }}</span>
+              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
+                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">描述</span>
+                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayDescription(cls) }}</span>
               </div>
-              <div class="info-block">
-                <span class="info-label">同步关键词</span>
-                <span class="info-value">{{ displayPtaKeyword(cls) }}</span>
+              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
+                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">同步关键词</span>
+                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayPtaKeyword(cls) }}</span>
               </div>
             </div>
 
-            <div class="card-actions">
+            <div class="card-actions [display:flex] [justify-content:space-between] [gap:10px] [margin-top:auto] [flex-wrap:wrap] [padding-top:6px]">
               <el-button type="primary" @click="enterClassSpace(cls)">进入教学班</el-button>
               <el-button @click="manageStudents(cls)">学生管理</el-button>
               <el-button
@@ -122,7 +122,7 @@
                 :disabled="cls.syncStatus === 'RUNNING'"
                 @click="openSyncDialog(cls)"
               >
-                {{ cls.syncStatus === 'RUNNING' ? '同步中...' : '立即同步' }}
+                {{ cls.syncStatus === 'RUNNING' ? '同步中..' : '立即同步' }}
               </el-button>
             </div>
           </el-card>
@@ -138,10 +138,10 @@
     >
       <el-form :model="classForm" :rules="classRules" ref="classFormRef" label-width="90px">
         <el-form-item label="班级名称" prop="name">
-          <el-input v-model="classForm.name" placeholder="例如：计算机科学与技术 23 级 1 班" />
+          <el-input v-model="classForm.name" placeholder="例如：计算机科学与技术23 级1 班" />
         </el-form-item>
         <el-form-item label="班级号" prop="classCode" v-if="!editingClass">
-          <el-input v-model="classForm.classCode" placeholder="唯一标识，例如 CS2023-01">
+          <el-input v-model="classForm.classCode" placeholder="唯一标识，例如CS2023-01">
             <template #append>
               <el-button @click="generateCode">随机生成</el-button>
             </template>
@@ -151,7 +151,7 @@
           <el-input v-model="classForm.joinPassword" placeholder="学生加入班级时需要输入" show-password />
         </el-form-item>
         <el-form-item label="年级">
-          <el-select v-model="classForm.grade" placeholder="选择年级" clearable style="width: 100%">
+          <el-select v-model="classForm.grade" placeholder="选择年级" clearable class="[width:100%]">
             <el-option v-for="y in gradeOptions" :key="y" :label="`${y} 级`" :value="y" />
           </el-select>
         </el-form-item>
@@ -167,13 +167,13 @@
         <el-form-item label="PTA 关键词">
           <el-input
             v-model="classForm.ptaKeyword"
-            placeholder="例如：计科 23 数据结构"
+            placeholder="例如：计科23 数据结构"
           />
-          <div class="form-help">填写后可自动从 PTA 同步该班级的实验数据。</div>
+          <div class="form-help [margin-top:6px] [font-size:12px] [color:#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</div>
         </el-form-item>
         <el-form-item label="定时同步">
           <el-switch v-model="classForm.syncEnabled" :disabled="!classForm.ptaKeyword.trim()" />
-          <span class="switch-hint">
+          <span class="switch-hint [margin-left:10px] [font-size:13px] [color:#7b8ba0]">
             {{ classForm.syncEnabled ? '已开启，每天凌晨自动同步一次。' : '关闭' }}
           </span>
         </el-form-item>
@@ -190,8 +190,8 @@
       width="720px"
       destroy-on-close
     >
-      <div class="student-toolbar">
-        <el-input v-model="studentSearch" placeholder="搜索姓名或学号" clearable class="student-toolbar__search" />
+      <div class="student-toolbar [display:flex] [justify-content:space-between] [gap:12px] [margin-bottom:14px]">
+        <el-input v-model="studentSearch" placeholder="搜索姓名或学号" clearable class="student-toolbar__search [width:100%] [max-width:260px]" />
         <el-button type="primary" size="small" @click="openAddStudentDialog">添加学生</el-button>
       </div>
       <el-table :data="filteredStudents" stripe size="small" v-loading="studentsLoading" max-height="420">
@@ -207,7 +207,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="student-count">共 {{ students.length }} 名学生</div>
+      <div class="student-count [margin-top:14px] [font-size:13px] [color:#7f90a4]">共{{ students.length }} 名学生</div>
     </el-dialog>
 
     <el-dialog v-model="addStudentVisible" title="添加学生" width="400px" append-to-body>
@@ -229,21 +229,21 @@
       <el-alert
         type="info"
         :closable="false"
-        class="cookie-helper"
-        title="优先使用个人资料中已绑定的 PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前 Cookie 会话。"
+        class="cookie-helper [margin-bottom:16px] [border-radius:14px]"
+        title="优先使用个人资料中已绑定的PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前Cookie 会话。"
       />
-      <div v-if="hasBoundPtaCredentials" class="sync-dialog__bound">
-        已绑定 PTA 账号：{{ boundPtaUsername }}（留空时将默认用于本次同步）
+      <div v-if="hasBoundPtaCredentials" class="sync-dialog__bound [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
+        已绑定PTA 账号：{{ boundPtaUsername }}（留空时将默认用于本次同步）
       </div>
-      <div v-else class="sync-dialog__bound sync-dialog__bound--warning">
-        当前未绑定 PTA 账号；若本次留空，则只会尝试现有 Cookie。
+      <div v-else class="sync-dialog__bound sync-dialog__bound--warning [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [background:#fef7e0] [color:#b26a00]">
+        当前未绑定PTA 账号；若本次留空，则只会尝试现有 Cookie。
       </div>
       <el-form :model="syncForm" label-width="90px" autocomplete="off">
         <el-form-item label="同步关键词">
-          <el-input v-model="syncForm.ptaKeyword" autocomplete="off" name="pta-sync-keyword" placeholder="例如：计科25数据结构" clearable />
+          <el-input v-model="syncForm.ptaKeyword" autocomplete="off" name="pta-sync-keyword" placeholder="例如：计科5数据结构" clearable />
         </el-form-item>
         <el-form-item label="PTA 账号">
-          <el-input v-model="syncForm.ptaUsername" autocomplete="off" name="pta-sync-username" placeholder="本次同步使用的 PTA 账号（可选）" clearable />
+          <el-input v-model="syncForm.ptaUsername" autocomplete="off" name="pta-sync-username" placeholder="本次同步使用的PTA 账号（可选）" clearable />
         </el-form-item>
         <el-form-item label="PTA 密码">
           <el-input
@@ -252,19 +252,19 @@
             name="pta-sync-password"
             type="password"
             show-password
-            placeholder="本次同步使用的 PTA 密码（可选）"
+            placeholder="本次同步使用的PTA 密码（可选）"
             clearable
           />
         </el-form-item>
       </el-form>
-      <div class="sync-dialog__actions">
+      <div class="sync-dialog__actions [display:flex] [gap:8px] [margin-top:4px]">
         <el-button size="small" type="primary" plain @click="submitSyncTempCredential">提交临时账号密码</el-button>
         <el-button size="small" @click="clearSyncTempCredential">清空临时凭据</el-button>
       </div>
-      <div v-if="syncTempCredentialSubmitted" class="sync-dialog__bound">
-        已提交临时 PTA 账号：{{ syncForm.ptaUsername.trim() }}，本次同步将优先使用该账号。
+      <div v-if="syncTempCredentialSubmitted" class="sync-dialog__bound [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
+        已提交临时PTA 账号：{{ syncForm.ptaUsername.trim() }}，本次同步将优先使用该账号。
       </div>
-      <div class="sync-dialog__source">
+      <div class="sync-dialog__source [display:flex] [align-items:center] [gap:8px] [margin:12px_0_4px] [color:#44536b] [font-size:13px]">
         <span>本次预计使用：</span>
         <el-tag size="small" effect="plain" :type="credentialSourceTagType(plannedSyncCredentialSource)">{{ credentialSourceText(plannedSyncCredentialSource) }}</el-tag>
       </div>
@@ -277,22 +277,22 @@
     </el-dialog>
 
     <el-dialog v-model="cookieDialogVisible" title="手动更新 PTA Cookie" width="600px" destroy-on-close>
-      <el-steps :active="1" simple class="cookie-steps">
+      <el-steps :active="1" simple class="cookie-steps [margin-bottom:18px] [padding-left:18px] [font-size:12.5px] [color:#3c4043] [line-height:1.8]">
         <el-step title="获取 Cookie" />
         <el-step title="粘贴到下方" />
         <el-step title="验证生效" />
       </el-steps>
 
-      <el-alert type="info" :closable="false" class="cookie-helper">
+      <el-alert type="info" :closable="false" class="cookie-helper [margin-bottom:16px] [border-radius:14px]">
         <template #title>
-          <span class="cookie-helper__title">获取步骤</span>
+          <span class="cookie-helper__title [font-weight:600]">获取步骤</span>
         </template>
         <template #default>
-          <ol class="cookie-helper__list">
+          <ol class="cookie-helper__list [margin:8px_0_0] [padding-left:18px] [color:#4d6077] [line-height:1.8]">
             <li>打开 <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer">pintia.cn</a> 并登录。</li>
-            <li>按 `F12` 打开开发者工具，切换到 `Application`。</li>
-            <li>在左侧找到 `Cookies`，选择 `https://pintia.cn`。</li>
-            <li>复制导出的 Cookie JSON，粘贴到下方输入框。</li>
+            <li>按`F12` 打开开发者工具，切换到`Application`。</li>
+            <li>在左侧找到`Cookies`，选择 `https://pintia.cn`。</li>
+            <li>复制导出的Cookie JSON，粘贴到下方输入框。</li>
           </ol>
         </template>
       </el-alert>
@@ -305,7 +305,7 @@
         class="cookie-textarea"
       />
 
-      <div v-if="cookieSubmitResult" class="cookie-result">
+      <div v-if="cookieSubmitResult" class="cookie-result [margin-top:12px] [display:flex] [align-items:center] [gap:10px] [margin-top:14px] [gap:6px] [padding:10px_14px] [border-radius:8px] [font-size:13px] [&.valid]:[background:#e6f4ea] [&.valid]:[color:#1e8e3e] [&.invalid]:[background:#fce8e6] [&.invalid]:[color:#d93025]">
         <el-alert
           :title="cookieSubmitResult.message"
           :type="cookieSubmitResult.valid ? 'success' : 'error'"
@@ -406,11 +406,13 @@ const hasBoundPtaCredentials = ref(false)
 
 const extract = (res) => res?.data ?? res
 
+const replacementChar = String.fromCharCode(0xfffd)
+
 const isCorruptedText = (value) => {
   const text = String(value || '').trim()
   if (!text) return true
-  const mojibakePattern = /(鑾|姝|鍙|鍚|鐢|鐝|鏁|瀹|澶|绾|浣|鎻|鎵|淇|閿|绯|鍓|褰|闈|璇)/
-  return text.includes('??') || text.includes('�') || mojibakePattern.test(text)
+  const mojibakeMarkers = ['鑾', '姝', '鍙', '鍚', '鐢', '鐝', '鏁', '瀹', '澶', '绾', '浣', '鎻', '鎵', '淇', '閿', '绯', '鍓', '褰', '闈', '璇']
+  return text.includes('??') || text.includes(replacementChar) || mojibakeMarkers.some(marker => text.includes(marker))
 }
 
 const cleanText = (value, fallback = '未设置') => {
@@ -527,7 +529,7 @@ const submitClassForm = async () => {
       if (ptaKeyword && created?.id) {
         try {
           await triggerPtaSync(created.id)
-          ElMessage.success('已自动触发 PTA 数据同步')
+          ElMessage.success('已自动触发PTA 数据同步')
         } catch (syncError) {
           ElMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '爬虫服务可能未启动'}`)
         }
@@ -545,7 +547,7 @@ const submitClassForm = async () => {
 
 const confirmDelete = (cls) => {
   ElMessageBox.confirm(
-    `确定删除班级“${displayClassName(cls)}”？此操作不可恢复，班级内学生关系也会一并删除。`,
+      `确定删除班级“${displayClassName(cls)}”？此操作不可恢复，班级内学生关系也会一并删除。`,
     '警告',
     {
       confirmButtonText: '确定删除',
@@ -626,11 +628,11 @@ const submitSyncTempCredential = () => {
   const username = syncForm.ptaUsername.trim()
   const password = syncForm.ptaPassword
   if (!username || !password) {
-    ElMessage.warning('请先输入完整的临时 PTA 账号和密码，再点击提交')
+    ElMessage.warning('请先输入完整的临时PTA 账号和密码，再点击提交')
     return
   }
   syncTempCredentialSubmitted.value = true
-  ElMessage.success(`已提交临时 PTA 账号：${username}`)
+  ElMessage.success(`已提交临时PTA 账号：${username}`)
 }
 
 const clearSyncTempCredential = () => {
@@ -703,9 +705,9 @@ const importStudentsForClass = async (cls) => {
     const updated = Number(data.updatedCount || 0)
 
     if (matched === 0) {
-      ElMessage.warning(`未找到 ${displayClassName(cls)} 的已同步 PTA 学生数据`)
+      ElMessage.warning(`未找到${displayClassName(cls)} 的已同步 PTA 学生数据`)
     } else {
-      ElMessage.success(`已导入 ${created} 人，更新 ${updated} 人`)
+      ElMessage.success(`已导入${created} 人，更新 ${updated} 人`)
     }
 
     if (currentClass.value?.id === cls.id && studentDialogVisible.value) {
@@ -841,345 +843,3 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 })
 </script>
 
-<style scoped>
-.class-list {
-  min-width: 0;
-  min-height: 100%;
-  overflow-y: auto;
-}
-
-.my-page-header {
-  margin-bottom: 10px;
-}
-
-.class-list :deep(.el-button--primary) {
-  border-radius: 999px;
-}
-
-.cookie-alert {
-  margin-bottom: 18px;
-  border-radius: 18px;
-}
-
-.cookie-alert__content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.class-cards {
-  padding-bottom: 24px;
-}
-
-.class-grid {
-  display: flex;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.class-grid__item {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.class-card {
-  width: 100%;
-  min-height: 380px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #dce5f0;
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(26, 115, 232, 0.08), transparent 30%),
-    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 14px 36px rgba(38, 61, 89, 0.07);
-}
-
-.class-card :deep(.el-card__header) {
-  padding: 22px 24px 14px;
-}
-
-.class-card :deep(.el-card__body) {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 0 24px 24px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.card-header__main {
-  min-width: 0;
-  flex: 1;
-}
-
-.class-name {
-  margin: 0;
-  font-size: 26px;
-  line-height: 1.2;
-  color: #16314a;
-  word-break: break-word;
-}
-
-.class-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.meta-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(18, 112, 216, 0.1);
-  color: #1860b7;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.meta-pill--soft {
-  background: rgba(126, 157, 183, 0.12);
-  color: #5c7188;
-}
-
-.card-menu {
-  cursor: pointer;
-  color: #71839a;
-  font-size: 18px;
-}
-
-.class-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.summary-chip {
-  min-width: min(280px, 100%);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(244, 248, 253, 0.92);
-  border: 1px solid #e3ebf5;
-  color: #34475d;
-  line-height: 1.6;
-  word-break: break-word;
-}
-
-.summary-chip__label {
-  color: #8091a5;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.summary-chip__time {
-  font-size: 12px;
-  color: #8b9bae;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.info-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid #e8eef6;
-  min-height: 108px;
-}
-
-.info-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #8092a6;
-}
-
-.info-value {
-  color: #24384f;
-  font-size: 14px;
-  line-height: 1.7;
-  word-break: break-word;
-}
-
-.card-actions {
-  margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 6px;
-}
-
-.form-help {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #7b8ba0;
-}
-
-.switch-hint {
-  margin-left: 10px;
-  font-size: 13px;
-  color: #7b8ba0;
-}
-
-.student-toolbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.student-toolbar__search {
-  width: 100%;
-  max-width: 260px;
-}
-
-.class-list :deep(.el-dialog) {
-  max-width: calc(100vw - 24px);
-}
-
-.class-list :deep(.el-table) {
-  width: 100%;
-}
-
-.student-count {
-  margin-top: 14px;
-  font-size: 13px;
-  color: #7f90a4;
-}
-
-.cookie-steps {
-  margin-bottom: 18px;
-}
-
-.cookie-helper {
-  margin-bottom: 16px;
-  border-radius: 14px;
-}
-
-.cookie-helper__title {
-  font-weight: 600;
-}
-
-.cookie-helper__list {
-  margin: 8px 0 0;
-  padding-left: 18px;
-  color: #4d6077;
-  line-height: 1.8;
-}
-
-.cookie-textarea :deep(.el-textarea__inner) {
-  font-family: Consolas, 'Courier New', monospace;
-  font-size: 12px;
-}
-
-.cookie-result {
-  margin-top: 14px;
-}
-
-.sync-dialog__actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.sync-dialog__source {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 4px;
-  color: #44536b;
-  font-size: 13px;
-}
-
-.sync-dialog__bound {
-  margin: 12px 0 16px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #e6f4ea;
-  color: #1e8e3e;
-  font-size: 13px;
-}
-
-.sync-dialog__bound--warning {
-  background: #fef7e0;
-  color: #b26a00;
-}
-
-@media (max-width: 900px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .card-header {
-    flex-direction: column;
-  }
-
-  .class-card {
-    min-height: auto;
-    border-radius: 20px;
-  }
-
-  .class-card :deep(.el-card__header) {
-    padding: 18px 18px 12px;
-  }
-
-  .class-card :deep(.el-card__body) {
-    padding: 0 18px 18px;
-  }
-
-  .class-name {
-    font-size: 22px;
-  }
-
-  .summary-chip {
-    width: 100%;
-  }
-
-  .student-toolbar {
-    flex-direction: column;
-  }
-
-  .student-toolbar__search {
-    max-width: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .class-grid {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .class-grid__item {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .card-actions :deep(.el-button) {
-    flex: 1 1 100%;
-    margin-left: 0;
-  }
-}
-</style>

@@ -1,56 +1,56 @@
 <template>
-  <div class="dashboard-page">
+  <div class="dashboard-page [display:flex] [flex-direction:column] [gap:18px] max-[640px]:[gap:14px]">
     <page-header title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
       <el-button @click="goToClasses">教学班管理</el-button>
       <el-button type="primary" @click="goToExperiments">进入实验中心</el-button>
     </page-header>
 
-    <div class="hero-strip">
-      <div class="hero-card hero-card--wide">
-        <div class="hero-kicker">当前教学班</div>
-        <div class="hero-title">{{ classLabel }} 的实验、知识库和批改工作台</div>
-        <div class="hero-meta">
+    <div class="hero-strip [display:grid] [grid-template-columns:minmax(0,_1.4fr)_minmax(280px,_0.6fr)] [gap:16px] max-[1100px]:[grid-template-columns:1fr]">
+      <div class="hero-card hero-card--wide [position:relative] [overflow:hidden] [min-height:148px] [padding:24px_26px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.2)] [background:linear-gradient(135deg,_#10355a_0%,_#0b5e95_62%,_#0f766e_100%)] [box-shadow:0_18px_38px_rgba(25,_53,_83,_0.16)] [color:#f7fbff] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
+        <div class="hero-kicker [font-size:12px] [font-weight:700] [letter-spacing:0] [text-transform:uppercase] [color:#dcecff]">当前教学班</div>
+        <div class="hero-title [max-width:620px] [margin-top:14px] [color:#ffffff] [font-size:28px] [line-height:1.16] [letter-spacing:0] [font-weight:800] [text-shadow:0_1px_2px_rgba(0,_0,_0,_0.22)] max-[640px]:[font-size:24px]">{{ classLabel }} 的实验、知识库和批改工作台</div>
+        <div class="hero-meta [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:18px] [&_span]:[min-height:34px] [&_span]:[padding:0_12px] [&_span]:[border-radius:999px] [&_span]:[display:inline-flex] [&_span]:[align-items:center] [&_span]:[background:rgba(255,_255,_255,_0.18)] [&_span]:[border:1px_solid_rgba(255,_255,_255,_0.26)] [&_span]:[color:#f7fbff] [&_span]:[font-size:12px] [&_span]:[font-weight:700]">
           <span>实验 {{ stats.experimentCount }}</span>
-          <span>待处理 {{ stats.pendingSubmissions }}</span>
+          <span>待处理{{ stats.pendingSubmissions }}</span>
           <span>班级 {{ stats.classCount }}</span>
         </div>
       </div>
 
-      <div class="hero-card hero-card--compact">
-        <div class="hero-kicker">当前班级</div>
-        <div class="hero-number">{{ classLabel }}</div>
-        <div class="hero-desc">切换班级后，分析面板与实验数据会自动联动。</div>
+      <div class="hero-card hero-card--compact [position:relative] [overflow:hidden] [min-height:148px] [padding:24px_26px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.18)] [background:linear-gradient(135deg,_rgba(255,_255,_255,_0.9),_rgba(241,_248,_252,_0.86)),_radial-gradient(circle_at_top_right,_rgba(18,_112,_216,_0.12),_transparent_36%)] [box-shadow:0_18px_38px_rgba(25,_53,_83,_0.08)] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
+        <div class="hero-kicker [font-size:12px] [font-weight:700] [letter-spacing:0] [text-transform:uppercase] [color:#39536c]">当前班级</div>
+        <div class="hero-number [margin-top:14px] [color:#16324a] [font-size:34px] [line-height:1.05] [letter-spacing:0] [font-weight:800] max-[640px]:[font-size:30px]">{{ classLabel }}</div>
+        <div class="hero-desc [margin-top:12px] [color:#5d7288] [font-size:13px] [line-height:1.7]">切换班级后，分析面板与实验数据会自动联动。</div>
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div v-for="card in statCards" :key="card.label" class="stat-card">
-        <div class="stat-icon" :style="{ background: card.bg, color: card.color }">
+    <div class="stats-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1100px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[640px]:[grid-template-columns:1fr] max-[640px]:[gap:12px] [grid-template-columns:repeat(3,_minmax(0,_1fr))] [gap:12px]">
+      <div v-for="card in statCards" :key="card.label" class="stat-card [display:flex] [align-items:center] [gap:16px] [padding:20px] [border-radius:20px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_14px_28px_rgba(24,_50,_78,_0.08)] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px] [text-align:center] [padding:20px_0] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+        <div class="stat-icon [width:48px] [height:48px] [border-radius:16px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="card.iconClass">
           <el-icon :size="20"><component :is="card.icon" /></el-icon>
         </div>
-        <div class="stat-main">
-          <span class="stat-label">{{ card.label }}</span>
-          <span class="stat-value">{{ card.value }}</span>
-          <span class="stat-hint">{{ card.hint }}</span>
+        <div class="stat-main [display:flex] [flex-direction:column] [gap:4px]">
+          <span class="stat-label [color:#5d7288] [font-size:12px] [font-weight:600] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">{{ card.label }}</span>
+          <span class="stat-value [color:#16324a] [font-size:28px] [line-height:1] [font-weight:800] [letter-spacing:0] [font-size:24px] [font-weight:bold] [color:#409EFF] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ card.value }}</span>
+          <span class="stat-hint [color:#92a2b2] [font-size:12px]">{{ card.hint }}</span>
         </div>
       </div>
     </div>
 
-    <div class="content-grid">
-      <div class="panel-card">
-        <div class="panel-head">
+    <div class="content-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:16px] max-[1100px]:[grid-template-columns:1fr]">
+      <div class="panel-card [min-width:0] [padding:22px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_16px_34px_rgba(24,_50,_78,_0.09)] [&_.el-table]:[--el-table-border-color:rgba(126,_157,_183,_0.18)] [&_.el-table]:[--el-table-header-bg-color:#f1f7fb] [&_.el-table]:[background:#ffffff] [&_.el-table_th]:[background:#f1f7fb] [&_.el-table_th]:[font-weight:700] [&_.el-table_th]:[color:#304a62] [&_.el-table_td]:[background:#ffffff] [&_.el-table_td]:[color:#22384d] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
+        <div class="panel-head [display:flex] [align-items:flex-start] [justify-content:space-between] [gap:16px] [margin-bottom:16px] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px] [align-items:center] [gap:10px] [flex-wrap:wrap]">
           <div>
-            <div class="panel-title">近期发布实验</div>
-            <div class="panel-desc">优先关注仍在进行中的实验与即将截止的任务。</div>
+            <div class="panel-title [color:#16324a] [font-size:18px] [font-weight:700]">近期发布实验</div>
+            <div class="panel-desc [margin-top:6px] [color:#6e8297] [font-size:13px] [line-height:1.6]">优先关注仍在进行中的实验与即将截止的任务。</div>
           </div>
-          <a class="panel-link" @click="goToExperiments">查看全部</a>
+          <a class="panel-link [color:#1270d8] [font-size:13px] [font-weight:700] [cursor:pointer]" @click="goToExperiments">查看全部</a>
         </div>
-        <el-table :data="recentExperiments" size="small" style="width: 100%">
+        <el-table :data="recentExperiments" size="small" class="teacher-dashboard-table [width:100%]">
           <el-table-column prop="name" label="实验名称" min-width="180" />
           <el-table-column prop="deadline" label="截止日期" width="128" />
           <el-table-column label="状态" width="108">
             <template #default="{ row }">
-              <span class="status-chip" :class="`status-${row.status}`">{{ getExpStatusText(row.status) }}</span>
+              <span class="status-chip [display:inline-flex] [align-items:center] [min-height:28px] [padding:0_10px] [border-radius:999px] [font-size:12px] [font-weight:700]" :class="`status-${row.status}`">{{ getExpStatusText(row.status) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="90">
@@ -61,15 +61,15 @@
         </el-table>
       </div>
 
-      <div class="panel-card">
-        <div class="panel-head">
+      <div class="panel-card [min-width:0] [padding:22px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_16px_34px_rgba(24,_50,_78,_0.09)] [&_.el-table]:[--el-table-border-color:rgba(126,_157,_183,_0.18)] [&_.el-table]:[--el-table-header-bg-color:#f1f7fb] [&_.el-table]:[background:#ffffff] [&_.el-table_th]:[background:#f1f7fb] [&_.el-table_th]:[font-weight:700] [&_.el-table_th]:[color:#304a62] [&_.el-table_td]:[background:#ffffff] [&_.el-table_td]:[color:#22384d] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
+        <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
           <div>
             <div class="panel-title">最新学生提交</div>
             <div class="panel-desc">用于快速定位刚进入批改队列的学生作业。</div>
           </div>
           <a class="panel-link" @click="goToSubmissions">查看全部</a>
         </div>
-        <el-table :data="recentSubmissions" size="small" style="width: 100%">
+        <el-table :data="recentSubmissions" size="small" class="teacher-dashboard-table [width:100%]">
           <el-table-column prop="studentName" label="学生" width="110" />
           <el-table-column prop="experimentId" label="实验 ID" width="90" />
           <el-table-column prop="submitTime" label="提交时间" min-width="150" />
@@ -82,20 +82,21 @@
       </div>
     </div>
 
-    <div class="panel-card panel-card--chart">
-      <div class="panel-head">
+    <div class="panel-card panel-card--chart [padding-bottom:14px]">
+      <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
         <div>
           <div class="panel-title">实验完成率排行</div>
           <div class="panel-desc">按实验维度估算班级完成情况，帮助你识别推进节奏较慢的内容。</div>
         </div>
         <a class="panel-link" @click="goToClasses">查看教学班</a>
       </div>
-      <div ref="classChartRef" class="chart-box"></div>
+      <div ref="classChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
     </div>
   </div>
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
@@ -144,32 +145,28 @@ const statCards = computed(() => [
     label: '实验总数',
     value: stats.experimentCount,
     hint: '当前已创建实验',
-    bg: '#ddecff',
-    color: '#1270d8',
+    iconClass: '[background:#ddecff] [color:#1270d8]',
     icon: markRaw(Document)
   },
   {
     label: '进行中实验',
     value: stats.activeExperiments,
     hint: '需要关注课堂节奏',
-    bg: '#dff5ec',
-    color: '#1d8f6a',
+    iconClass: '[background:#dff5ec] [color:#1d8f6a]',
     icon: markRaw(DocumentChecked)
   },
   {
     label: '待处理提交',
     value: stats.pendingSubmissions,
     hint: '建议优先进入批改中心',
-    bg: '#fff1dc',
-    color: '#c57b1d',
+    iconClass: '[background:#fff1dc] [color:#c57b1d]',
     icon: markRaw(Timer)
   },
   {
     label: '教学班数量',
     value: stats.classCount,
     hint: '可管理班级总数',
-    bg: '#e7ecff',
-    color: '#5369d8',
+    iconClass: '[background:#e7ecff] [color:#5369d8]',
     icon: markRaw(UserFilled)
   }
 ])
@@ -272,7 +269,7 @@ async function loadExperiments() {
     const response = await api.getTeacherExperimentList()
     applyExperimentList(extractList(response))
   } catch (error) {
-    console.error('加载实验列表失败:', error)
+    logger.error('加载实验列表失败:', error)
     applyExperimentList([])
   }
 }
@@ -296,7 +293,7 @@ async function loadSubmissions() {
     recentSubmissions.value = sorted.slice(0, 5)
     stats.pendingSubmissions = formatted.filter((item) => item.status === 'submitted').length
   } catch (error) {
-    console.error('加载提交列表失败:', error)
+    logger.error('加载提交列表失败:', error)
   }
 }
 
@@ -305,7 +302,7 @@ async function loadClassCount() {
     const classes = await getTeachingClasses()
     stats.classCount = (Array.isArray(classes) ? classes : (classes?.data || [])).length
   } catch (error) {
-    console.error('加载教学班数量失败:', error)
+    logger.error('加载教学班数量失败', error)
   }
 }
 
@@ -419,282 +416,3 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.hero-strip {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
-  gap: 16px;
-}
-
-.hero-card {
-  position: relative;
-  overflow: hidden;
-  min-height: 148px;
-  padding: 24px 26px;
-  border-radius: 24px;
-  border: 1px solid rgba(126, 157, 183, 0.18);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(241, 248, 252, 0.86)),
-    radial-gradient(circle at top right, rgba(18, 112, 216, 0.12), transparent 36%);
-  box-shadow: 0 18px 38px rgba(25, 53, 83, 0.08);
-}
-
-.hero-card--wide {
-  background:
-    linear-gradient(135deg, rgba(17, 54, 90, 0.96), rgba(11, 94, 149, 0.88)),
-    radial-gradient(circle at top right, rgba(125, 231, 213, 0.16), transparent 36%);
-  color: #f4f9fc;
-}
-
-.hero-kicker {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  opacity: 0.78;
-}
-
-.hero-title {
-  max-width: 620px;
-  margin-top: 14px;
-  font-size: 28px;
-  line-height: 1.16;
-  letter-spacing: 0;
-  font-weight: 700;
-}
-
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.hero-meta span {
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.hero-number {
-  margin-top: 14px;
-  color: #16324a;
-  font-size: 34px;
-  line-height: 1.05;
-  letter-spacing: 0;
-  font-weight: 800;
-}
-
-.hero-desc {
-  margin-top: 12px;
-  color: #5d7288;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(126, 157, 183, 0.18);
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 14px 28px rgba(24, 50, 78, 0.06);
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-main {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-label {
-  color: #5d7288;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.stat-value {
-  color: #16324a;
-  font-size: 28px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.stat-hint {
-  color: #92a2b2;
-  font-size: 12px;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.panel-card {
-  min-width: 0;
-  padding: 22px;
-  border-radius: 24px;
-  border: 1px solid rgba(126, 157, 183, 0.18);
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 16px 34px rgba(24, 50, 78, 0.07);
-}
-
-.panel-card--chart {
-  padding-bottom: 14px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.panel-title {
-  color: #16324a;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.panel-desc {
-  margin-top: 6px;
-  color: #6e8297;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.panel-link {
-  color: #1270d8;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.status-active,
-.status-graded {
-  background: rgba(29, 143, 106, 0.12);
-  color: #1d8f6a;
-}
-
-.status-draft,
-.status-not_started {
-  background: rgba(111, 134, 156, 0.12);
-  color: #5d7288;
-}
-
-.status-expired,
-.status-rejected {
-  background: rgba(208, 76, 69, 0.12);
-  color: #d04c45;
-}
-
-.status-submitted {
-  background: rgba(197, 123, 29, 0.14);
-  color: #c57b1d;
-}
-
-.chart-box {
-  height: 340px;
-  width: 100%;
-}
-
-.panel-card :deep(.el-table) {
-  --el-table-border-color: rgba(126, 157, 183, 0.14);
-  --el-table-header-bg-color: rgba(241, 247, 251, 0.96);
-}
-
-.panel-card :deep(.el-table th) {
-  font-weight: 700;
-  color: #5d7288;
-}
-
-@media (max-width: 1100px) {
-  .hero-strip,
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .dashboard-page {
-    gap: 14px;
-  }
-
-  .hero-card,
-  .panel-card,
-  .stat-card {
-    border-radius: 18px;
-    padding: 18px;
-  }
-
-  .hero-title {
-    font-size: 24px;
-  }
-
-  .hero-number {
-    font-size: 30px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .panel-head {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .chart-box {
-    height: 280px;
-  }
-}
-</style>

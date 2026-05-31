@@ -1,14 +1,14 @@
 <template>
-  <div class="experiment-create">
+  <div class="experiment-create [height:100%]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [padding:20px]"
       title="创建实验"
       description="创建新的数据结构实验任务"
     >
       <el-button @click="goBack">返回列表</el-button>
     </page-header>
 
-    <el-card class="form-card">
+    <el-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
       <el-form
         ref="formRef"
         :model="formData"
@@ -25,7 +25,7 @@
             type="datetime"
             placeholder="选择截止日期"
             value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
+            class="[width:100%]"
           />
         </el-form-item>
 
@@ -39,8 +39,8 @@
         </el-form-item>
 
         <el-form-item label="实验要求">
-          <div class="requirements-section">
-            <div v-for="(req, index) in formData.requirements" :key="index" class="requirement-item">
+          <div class="requirements-section [display:flex] [flex-direction:column] [gap:10px]">
+            <div v-for="(req, index) in formData.requirements" :key="index" class="requirement-item [display:flex] [align-items:center] [gap:10px] [margin-bottom:10px]">
               <el-input v-model="formData.requirements[index]" placeholder="请输入实验要求" />
               <el-button type="danger" link @click="removeRequirement(index)">删除</el-button>
             </div>
@@ -54,7 +54,7 @@
             multiple
             collapse-tags
             placeholder="请选择班级"
-            style="width: 100%"
+            class="[width:100%]"
           >
             <el-option
               v-for="item in classList"
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -141,7 +142,7 @@ const submitForm = () => {
         router.push('/teacher/experiments')
       }
     } catch (error) {
-      console.error('创建实验失败:', error)
+      logger.error('创建实验失败:', error)
       ElMessage.error('创建实验失败，请稍后重试')
     }
   })
@@ -165,7 +166,7 @@ const loadClassList = async () => {
     const list = Array.isArray(classes) ? classes : (classes?.data || [])
     classList.value = list.map(c => ({ id: c.id, name: c.name || c.className || `班级${c.id}` }))
   } catch (error) {
-    console.error('加载班级列表失败:', error)
+    logger.error('加载班级列表失败:', error)
   }
 }
 
@@ -174,29 +175,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.experiment-create {
-  height: 100%;
-}
 
-.form-card {
-  margin-bottom: 20px;
-}
-
-.requirements-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.requirement-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.my-page-header {
-  padding: 20px;
-}
-
-</style>

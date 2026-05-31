@@ -1,59 +1,59 @@
 <template>
-  <div class="teacher-profile">
-    <page-header class="my-page-header" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
+  <div class="teacher-profile [height:100%]">
+    <page-header class="my-page-header [padding:20px]" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
 
     <el-row :gutter="20">
       <el-col :span="8">
-        <el-card class="profile-card">
-          <div class="profile-header">
+        <el-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#9aa0a6]">
             <el-avatar :size="100" :src="avatarUrl" />
             <h3>{{ displayName }}</h3>
             <p>{{ roleText }}</p>
           </div>
 
-          <div class="profile-info">
-            <div class="info-item">
-              <span class="info-label">用户名</span>
-              <span class="info-value">{{ userInfo.username }}</span>
+          <div class="profile-info [margin-top:20px]">
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户名</span>
+              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.username }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">角色</span>
-              <span class="info-value">{{ roleText }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">角色</span>
+              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ roleText }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">工号/学号</span>
-              <span class="info-value">{{ userInfo.usernum || '未设置' }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">工号/学号</span>
+              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.usernum || '未设置' }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">电子邮箱</span>
-              <span class="info-value">{{ userInfo.email || '未设置' }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">电子邮箱</span>
+              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email || '未设置' }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">班级</span>
-              <span class="info-value">{{ userInfo.class || '未设置' }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">班级</span>
+              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.class || '未设置' }}</span>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="16">
-        <el-card class="form-card">
+        <el-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header"><span>绑定 PTA 账号</span></div>
+            <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>绑定 PTA 账号</span></div>
           </template>
 
-          <div class="pta-hint">
+          <div class="pta-hint [margin-bottom:12px] [font-size:13px] [line-height:1.7] [color:#5f6368]">
             绑定后，PTA 数据同步会优先使用此账号登录；在同步页面临时输入的账号密码会覆盖本次任务。
           </div>
 
-          <div v-if="hasBoundCredential" class="pta-bound">
+          <div v-if="hasBoundCredential" class="pta-bound [margin-bottom:16px] [padding:10px_12px] [border-radius:10px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
             当前已绑定 PTA 账号：<strong>{{ ptaCredential.ptaUsername }}</strong>
           </div>
-          <div v-else class="pta-bound pta-bound--warning">
+          <div v-else class="pta-bound pta-bound--warning [margin-bottom:16px] [padding:10px_12px] [border-radius:10px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [background:#fef7e0] [color:#b26a00]">
             当前未绑定 PTA 账号。
           </div>
 
-          <el-form label-width="110px" class="pta-form">
+          <el-form label-width="110px" class="pta-form [margin-top:4px]">
             <el-form-item label="PTA 账号">
               <el-input
                 v-model="ptaForm.ptaUsername"
@@ -81,9 +81,9 @@
           </el-form>
         </el-card>
 
-        <el-card class="form-card">
+        <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header"><span>修改密码</span></div>
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>修改密码</span></div>
           </template>
 
           <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
@@ -278,44 +278,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.teacher-profile { height: 100%; }
-.profile-card { margin-bottom: 20px; padding: 20px; }
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.profile-header h3 { margin: 10px 0 5px; font-size: 18px; }
-.profile-header p { margin: 0; font-size: 14px; color: #9aa0a6; }
-.profile-info { margin-top: 20px; }
-.info-item { display: flex; justify-content: space-between; margin-bottom: 15px; }
-.info-label { color: #9aa0a6; }
-.info-value { color: #202124; font-weight: 500; }
-.form-card { margin-bottom: 20px; }
-.card-header { font-weight: 600; }
-.my-page-header { padding: 20px; }
-.pta-hint {
-  margin-bottom: 12px;
-  font-size: 13px;
-  line-height: 1.7;
-  color: #5f6368;
-}
-.pta-bound {
-  margin-bottom: 16px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #e6f4ea;
-  color: #1e8e3e;
-  font-size: 13px;
-}
-.pta-bound--warning {
-  background: #fef7e0;
-  color: #b26a00;
-}
-.pta-form {
-  margin-top: 4px;
-}
-</style>
+

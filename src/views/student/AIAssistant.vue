@@ -1,13 +1,13 @@
 <template>
-  <div class="ai-assistant-page">
-    <div class="sidebar">
+  <div class="ai-assistant-page [display:flex] [gap:16px] [height:100%] [padding:16px] [background:#f5f7fa] max-[900px]:[flex-direction:column]">
+    <div class="sidebar [width:260px] [flex-shrink:0] [display:flex] [flex-direction:column] [gap:12px] [padding:12px] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] max-[900px]:[width:100%]">
       <h3>AI 学习助手</h3>
 
       <el-select
         v-model="selectedCourseSpaceId"
         placeholder="选择课程空间（可选）"
         clearable
-        style="width: 100%"
+        class="[width:100%]"
       >
         <el-option
           v-for="item in courseSpaces"
@@ -17,28 +17,28 @@
         />
       </el-select>
 
-      <div v-if="selectedCourseSpaceId" class="mode-row">
+      <div v-if="selectedCourseSpaceId" class="mode-row [display:flex] [flex-direction:column] [gap:8px]">
         <el-switch
           v-model="isOpenMode"
           active-text="开放模式"
           inactive-text="严格模式"
           size="small"
         />
-        <p class="mode-hint">
+        <p class="mode-hint [margin:0] [color:#909399] [font-size:12px] [line-height:1.5]">
           严格模式只依据课程资料回答。开放模式在课程覆盖不足时允许补充联网检索。
         </p>
-        <div class="space-summary">
+        <div class="space-summary [padding:8px_10px] [background:#f5f7fa] [border-radius:8px] [font-size:12px] [color:#606266] [line-height:1.5]">
           当前空间：{{ buildCourseSpaceLabel(selectedCourseSpace) }}
         </div>
       </div>
 
-      <div v-else class="empty-space-tip">
-        <div class="empty-space-title">还没有可用的课程空间</div>
+      <div v-else class="empty-space-tip [display:flex] [flex-direction:column] [gap:8px] [padding:12px] [background:#fff8e8] [border:1px_solid_#f5d28b] [border-radius:10px] [&_p]:[margin:0] [&_p]:[color:#8c6d1f] [&_p]:[font-size:12px] [&_p]:[line-height:1.6]">
+        <div class="empty-space-title [font-size:14px] [font-weight:600] [color:#7a4f01]">还没有可用的课程空间</div>
         <p>你可以先加入教学班，解锁班级授权的课程知识库；也可以先使用普通聊天模式。</p>
         <el-button size="small" @click="goClassJoin">去加入教学班</el-button>
       </div>
 
-      <div class="quick-list">
+      <div class="quick-list [display:flex] [flex-direction:column] [gap:4px]">
         <el-button
           v-for="q in quickPrompts"
           :key="q.label"
@@ -50,17 +50,17 @@
       </div>
     </div>
 
-    <div class="chat-panel">
+    <div class="chat-panel [flex:1] [display:flex] [flex-direction:column] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] [overflow:hidden]">
       <el-alert
         v-if="assistantNotice"
-        class="assistant-alert"
+        class="assistant-alert [margin:12px_12px_0]"
         type="warning"
         :closable="false"
         :title="assistantNotice"
         show-icon
       />
 
-      <div ref="chatContainer" class="messages">
+      <div ref="chatContainer" class="messages [flex:1] [overflow-y:auto] [padding:16px]">
         <div v-for="(message, index) in messages" :key="index" :class="['msg', message.role]">
           <div class="meta">
             <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
@@ -68,8 +68,8 @@
           </div>
           <div class="body" v-html="formatMessage(message.content)" />
 
-          <div v-if="message.citations && message.citations.length" class="citations">
-            <div v-for="cite in message.citations" :key="`${index}-${cite.index}`" class="citation-item">
+          <div v-if="message.citations && message.citations.length" class="citations [margin-top:8px] [display:flex] [flex-direction:column] [gap:4px] [font-size:12px] [color:#606266]">
+            <div v-for="cite in message.citations" :key="`${index}-${cite.index}`" class="citation-item [line-height:1.5]">
               [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
               <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
               <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
@@ -77,13 +77,13 @@
           </div>
         </div>
 
-        <div v-if="isTyping" class="msg ai">
+        <div v-if="isTyping" class="msg ai [margin-bottom:12px] [&_.meta]:[display:flex] [&_.meta]:[justify-content:space-between] [&_.meta]:[color:#909399] [&_.meta]:[font-size:12px] [&_.meta]:[margin-bottom:4px] [&_.body]:[padding:10px] [&_.body]:[border-radius:8px] [&_.body]:[line-height:1.7]">
           <div class="meta"><span>AI 助手</span><span>正在生成...</span></div>
           <div class="body">...</div>
         </div>
       </div>
 
-      <div class="input-area">
+      <div class="input-area [border-top:1px_solid_#e6eaf0] [padding:12px]">
         <el-input
           v-model="userInput"
           type="textarea"
@@ -92,7 +92,7 @@
           placeholder="输入你的问题，按 Ctrl + Enter 发送"
           @keyup.enter.ctrl="sendMessage"
         />
-        <div class="actions">
+        <div class="actions [margin-top:8px] [display:flex] [justify-content:space-between] [align-items:center] [color:#909399] [font-size:12px]">
           <span>{{ selectedCourseSpaceId ? '当前为 RAG 问答模式' : '当前为普通聊天模式' }}</span>
           <el-button
             type="primary"
@@ -312,158 +312,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.ai-assistant-page {
-  display: flex;
-  gap: 16px;
-  height: 100%;
-  padding: 16px;
-  background: #f5f7fa;
-}
 
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #e6eaf0;
-}
-
-.mode-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mode-hint {
-  margin: 0;
-  color: #909399;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.space-summary {
-  padding: 8px 10px;
-  background: #f5f7fa;
-  border-radius: 8px;
-  font-size: 12px;
-  color: #606266;
-  line-height: 1.5;
-}
-
-.empty-space-tip {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: #fff8e8;
-  border: 1px solid #f5d28b;
-  border-radius: 10px;
-}
-
-.empty-space-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #7a4f01;
-}
-
-.empty-space-tip p {
-  margin: 0;
-  color: #8c6d1f;
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-.quick-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.chat-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #e6eaf0;
-  overflow: hidden;
-}
-
-.assistant-alert {
-  margin: 12px 12px 0;
-}
-
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
-.msg {
-  margin-bottom: 12px;
-}
-
-.msg .meta {
-  display: flex;
-  justify-content: space-between;
-  color: #909399;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.msg .body {
-  padding: 10px;
-  border-radius: 8px;
-  line-height: 1.7;
-}
-
-.msg.user .body {
-  background: #e8f3ff;
-}
-
-.msg.ai .body {
-  background: #f7f7f7;
-}
-
-.citations {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #606266;
-}
-
-.citation-item {
-  line-height: 1.5;
-}
-
-.input-area {
-  border-top: 1px solid #e6eaf0;
-  padding: 12px;
-}
-
-.actions {
-  margin-top: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #909399;
-  font-size: 12px;
-}
-
-@media (max-width: 900px) {
-  .ai-assistant-page {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-}
-</style>

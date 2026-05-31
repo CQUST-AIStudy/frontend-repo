@@ -1,21 +1,21 @@
 <template>
-  <div class="experiment-management">
+  <div class="experiment-management [min-width:0] [min-height:100%] [&_.el-table]:[width:100%]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [padding:20px] max-[768px]:[padding:0]"
       title="实验管理"
       description="管理系统中的所有实验"
     />
 
-    <div class="experiment-management-content">
+    <div class="experiment-management-content [display:flex] [flex-direction:column] [gap:20px]">
       <el-card>
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [flex-wrap:wrap] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>实验列表</span>
             <el-button type="primary" @click="openCreateDialog">添加实验</el-button>
           </div>
         </template>
 
-        <el-table :data="experimentList" v-loading="loading" border style="width: 100%">
+        <el-table :data="experimentList" v-loading="loading" border class="[width:100%]">
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="title" label="标题" min-width="200" />
           <el-table-column prop="className" label="所属班级" width="150" />
@@ -38,7 +38,7 @@
           </el-table-column>
         </el-table>
 
-        <div class="pagination-container">
+        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
           <el-pagination
             background
             layout="total, sizes, prev, pager, next, jumper"
@@ -52,14 +52,14 @@
       </el-card>
     </div>
 
-    <!-- 创建实验对话框 -->
+    <!-- 创建实验对话框-->
     <el-dialog v-model="createDialogVisible" title="添加实验" width="50%">
       <el-form :model="experimentForm" :rules="rules" ref="experimentFormRef" label-width="100px">
         <el-form-item label="实验标题" prop="title">
           <el-input v-model="experimentForm.title" placeholder="请输入实验标题"></el-input>
         </el-form-item>
         <el-form-item label="所属班级" prop="classId">
-          <el-select v-model="experimentForm.classId" placeholder="请选择班级" style="width: 100%">
+          <el-select v-model="experimentForm.classId" placeholder="请选择班级" class="[width:100%]">
             <el-option
               v-for="item in classList"
               :key="item.id"
@@ -74,7 +74,7 @@
             type="datetime"
             placeholder="选择截止日期"
             format="YYYY-MM-DD HH:mm"
-            style="width: 100%"
+            class="[width:100%]"
           ></el-date-picker>
         </el-form-item>
         <el-form-item label="实验描述" prop="description">
@@ -87,7 +87,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="createDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitExperiment" :loading="submitLoading">确认</el-button>
         </div>
@@ -97,6 +97,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
@@ -128,7 +129,7 @@ const loadExperimentList = async () => {
   loading.value = true
   try {
     const response = await api.getTeacherExperimentList({ scope: 'all' })
-    console.log('API返回的实验数据:', response)
+    logger.debug('API返回的实验数据', response)
 
     // 兼容不同的返回数据结构
     let experiments = []
@@ -145,7 +146,7 @@ const loadExperimentList = async () => {
       }
     }
 
-    // 将所有实验的创建老师统一显示为"王老师"
+    // 将所有实验的创建老师统一显示为王老师"
     experimentList.value = experiments.map(exp => {
       return {
         id: exp.id,
@@ -161,9 +162,9 @@ const loadExperimentList = async () => {
 
     total.value = experimentList.value.length
     
-    console.log('处理后的实验列表:', experimentList.value)
+    logger.debug('处理后的实验列表:', experimentList.value)
   } catch (error) {
-    console.error('加载实验列表失败:', error)
+    logger.error('加载实验列表失败:', error)
     ElMessage.error(getFriendlyErrorMessage(error, '加载实验列表失败，请稍后重试'))
     experimentList.value = []
   } finally {
@@ -247,7 +248,7 @@ const editExperiment = (row) => {
 
 // 确认删除
 const confirmDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除实验"${row.title}"吗？此操作不可逆!`, '警告', {
+  ElMessageBox.confirm(`确定要删除实验"${row.title}"吗？此操作不可逆`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
@@ -321,49 +322,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.experiment-management {
-  min-width: 0;
-  min-height: 100%;
-}
-
-.experiment-management-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-}
-
-.experiment-management :deep(.el-table) {
-  width: 100%;
-}
-
-.my-page-header {
-  padding: 20px;
-}
-
-@media (max-width: 768px) {
-  .my-page-header {
-    padding: 0;
-  }
-
-  .pagination-container {
-    justify-content: flex-start;
-  }
-}
-
-</style>

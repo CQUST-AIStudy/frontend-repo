@@ -1,14 +1,14 @@
 <template>
-  <div class="generate-ppt">
+  <div class="generate-ppt [display:flex] [flex-direction:column] [gap:20px]">
     <page-header
       title="生成教学 PPT"
       description="根据课程主题、知识点和难度要求，快速生成可直接整理成课件的教学大纲。"
     />
 
-    <div class="page-layout">
-      <el-card class="form-card">
+    <div class="page-layout [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] [align-items:start] max-[1080px]:[grid-template-columns:1fr]">
+      <el-card class="form-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [font-weight:600] [color:#1d3557] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>生成配置</span>
           </div>
         </template>
@@ -33,7 +33,7 @@
               collapse-tags
               collapse-tags-tooltip
               placeholder="选择本次 PPT 需要覆盖的知识点"
-              style="width: 100%"
+              class="[width:100%]"
             >
               <el-option
                 v-for="item in knowledgeTopics"
@@ -73,7 +73,7 @@
             />
           </el-form-item>
 
-          <div class="form-actions">
+          <div class="form-actions [display:flex] [align-items:center] [gap:14px] [flex-wrap:wrap] [gap:12px]">
             <el-button type="primary" :loading="generating" @click="generatePPT">
               {{ generating ? '正在生成...' : '生成 PPT 大纲' }}
             </el-button>
@@ -82,9 +82,9 @@
         </el-form>
       </el-card>
 
-      <el-card class="preview-card">
+      <el-card class="preview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>内容预览</span>
             <el-button type="primary" plain :disabled="!previewSlides.length" @click="downloadPPT">
               下载文本
@@ -92,26 +92,26 @@
           </div>
         </template>
 
-        <div v-if="generating" class="loading-state">
+        <div v-if="generating" class="loading-state [display:flex] [align-items:center] [gap:10px] [padding:18px_2px] [color:#48607c]">
           <el-icon class="is-loading" :size="22"><Loading /></el-icon>
           <span>AI 正在生成课件内容，请稍候。</span>
         </div>
 
-        <div v-else-if="previewSlides.length" class="slides-grid">
+        <div v-else-if="previewSlides.length" class="slides-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(260px,_1fr))] [gap:16px]">
           <article
             v-for="(slide, index) in previewSlides"
             :key="`${slide.title}-${index}`"
-            class="slide-card"
+            class="slide-card [overflow:hidden] [border:1px_solid_#dbe5ef] [border-radius:18px] [background:linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)]"
             :class="{ 'slide-card--title': slide.isTitle }"
           >
-            <header class="slide-card__header">第 {{ index + 1 }} 页</header>
-            <div class="slide-card__body">
+            <header class="slide-card__header [padding:10px_14px] [border-bottom:1px_solid_#e6edf5] [font-size:13px] [color:#68809c]">第 {{ index + 1 }} 页</header>
+            <div class="slide-card__body [padding:18px]">
               <h3>{{ slide.title }}</h3>
-              <p v-if="slide.isTitle" class="slide-card__subtitle">{{ pptTypeText }}</p>
-              <div v-else-if="slide.isCode" class="code-block">
+              <p v-if="slide.isTitle" class="slide-card__subtitle [margin:0] [color:#5f7690]">{{ pptTypeText }}</p>
+              <div v-else-if="slide.isCode" class="code-block [overflow:auto] [border-radius:14px] [background:#10233b] [color:#f8fbff] [padding:14px]">
                 <pre><code>{{ slide.content }}</code></pre>
               </div>
-              <div v-else class="slide-card__content" v-html="formatSlideContent(slide.content)"></div>
+              <div v-else class="slide-card__content [color:#31465f] [line-height:1.8]" v-html="formatSlideContent(slide.content)"></div>
             </div>
           </article>
         </div>
@@ -306,119 +306,4 @@ function downloadPPT() {
 }
 </script>
 
-<style scoped>
-.generate-ppt {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
-.page-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-
-.form-card,
-.preview-card {
-  border-radius: 20px;
-  border: 1px solid #dbe5ef;
-  box-shadow: 0 12px 30px rgba(28, 52, 84, 0.06);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-weight: 600;
-  color: #1d3557;
-}
-
-.form-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.loading-state {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 2px;
-  color: #48607c;
-}
-
-.slides-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.slide-card {
-  overflow: hidden;
-  border: 1px solid #dbe5ef;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-}
-
-.slide-card--title {
-  background: linear-gradient(160deg, #eef5ff 0%, #f8fbff 100%);
-}
-
-.slide-card__header {
-  padding: 10px 14px;
-  border-bottom: 1px solid #e6edf5;
-  font-size: 13px;
-  color: #68809c;
-}
-
-.slide-card__body {
-  padding: 18px;
-}
-
-.slide-card__body h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  line-height: 1.35;
-  color: #16304f;
-}
-
-.slide-card__subtitle {
-  margin: 0;
-  color: #5f7690;
-}
-
-.slide-card__content {
-  color: #31465f;
-  line-height: 1.8;
-}
-
-.slide-card__content :deep(ul) {
-  margin: 0;
-  padding-left: 18px;
-}
-
-.slide-card__content :deep(li) {
-  margin-bottom: 6px;
-}
-
-.code-block {
-  overflow: auto;
-  border-radius: 14px;
-  background: #10233b;
-  color: #f8fbff;
-  padding: 14px;
-}
-
-.code-block pre {
-  margin: 0;
-}
-
-@media (max-width: 1080px) {
-  .page-layout {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

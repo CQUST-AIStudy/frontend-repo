@@ -1,19 +1,19 @@
 <template>
   <div class="learning-analysis-container">
-    <page-header class="my-page-header" title="学习分析" description="基于您的PTA平台提交数据的AI深度分析" />
+    <page-header class="my-page-header [padding:20px]" title="学习分析" description="基于您的PTA平台提交数据的AI深度分析" />
 
     <loading-state :loading="loading">
-      <div class="analysis-content">
+      <div class="analysis-content [display:flex] [flex-direction:column] [gap:20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
         <!-- 总体概览 -->
         <el-row :gutter="20">
           <el-col :span="6" v-for="item in overviewCards" :key="item.label">
-            <el-card shadow="hover" class="stat-card">
-              <div class="stat-icon" :style="{ background: item.bg }">
+            <el-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+              <div class="stat-icon [width:44px] [height:44px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
                 <el-icon :size="22" color="#fff"><component :is="item.icon" /></el-icon>
               </div>
-              <div class="stat-info">
-                <div class="stat-value" :style="{ color: item.color }">{{ item.value }}</div>
-                <div class="stat-label">{{ item.label }}</div>
+              <div class="stat-info [flex:1]">
+                <div class="stat-value [font-size:22px] [font-weight:600] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
+                <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
               </div>
             </el-card>
           </el-col>
@@ -27,61 +27,61 @@
           show-icon
         />
 
-        <!-- 雷达图 + 趋势 -->
-        <el-row :gutter="20" class="chart-row">
+        <!-- 雷达图+ 趋势 -->
+        <el-row :gutter="20" class="chart-row [margin-top:0] [margin-bottom:0] [margin-bottom:20px]">
           <el-col :span="12">
-            <el-card class="chart-card">
-              <template #header><div class="card-header"><span>知识掌握雷达图</span></div></template>
-              <div class="chart-container"><div ref="radarChartRef" class="chart"></div></div>
+            <el-card class="chart-card [min-height:420px] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] [margin-bottom:20px] [height:400px]">
+              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-size:15px] [font-weight:500] [color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>知识掌握雷达图</span></div></template>
+              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="radarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </el-card>
           </el-col>
           <el-col :span="12">
-            <el-card class="chart-card">
-              <template #header><div class="card-header"><span>各实验掌握度趋势</span></div></template>
-              <div class="chart-container"><div ref="trendChartRef" class="chart"></div></div>
+            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验掌握度趋势</span></div></template>
+              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="trendChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </el-card>
           </el-col>
         </el-row>
 
-        <!-- 实验得分对比 + 能力维度柱状图 -->
-        <el-row :gutter="20" class="chart-row">
+        <!-- 实验得分对比 + 能力维度柱状图-->
+        <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
           <el-col :span="12">
-            <el-card class="chart-card">
-              <template #header><div class="card-header"><span>各维度能力对比</span></div></template>
-              <div class="chart-container"><div ref="dimBarChartRef" class="chart"></div></div>
+            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各维度能力对比</span></div></template>
+              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </el-card>
           </el-col>
           <el-col :span="12">
-            <el-card class="chart-card">
-              <template #header><div class="card-header"><span>提交效率分析</span></div></template>
-              <div class="chart-container"><div ref="efficiencyChartRef" class="chart"></div></div>
+            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>提交效率分析</span></div></template>
+              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="efficiencyChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </el-card>
           </el-col>
         </el-row>
 
         <!-- 班级对比分析 -->
-        <el-card class="chart-card" style="margin-top:20px" v-if="classData && classData.experiments?.length">
+        <el-card class="chart-card [margin-top:20px] [margin-bottom:20px] [height:400px]" v-if="classData && classData.experiments?.length">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>📊 班级对比分析</span>
-              <div class="class-summary-chips" v-if="classData.summary">
-                <span class="summary-chip" :class="avgDiffClass">
+              <div class="class-summary-chips [display:flex] [gap:8px]" v-if="classData.summary">
+                <span class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" :class="avgDiffClass">
                   {{ avgDiffText }}
                 </span>
-                <span class="summary-chip neutral">共 {{ classData.summary.experimentCount }} 个实验</span>
+                <span class="summary-chip neutral [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]">全{{ classData.summary.experimentCount }} 个实验</span>
               </div>
             </div>
           </template>
           <div class="class-compare-body">
-            <!-- 趋势对比图: 我的分 vs 班级均分 -->
-            <div ref="classCompareChartRef" style="height:300px"></div>
+            <!-- 趋势对比图 我的分vs 班级均分 -->
+            <div ref="classCompareChartRef" class="[height:300px]"></div>
             <!-- 每个实验的百分位指示 -->
-            <div class="percentile-row">
-              <div class="pct-item" v-for="exp in classData.experiments" :key="exp.experimentId">
-                <div class="pct-name" :title="exp.name">{{ shortName(exp.name) }}</div>
-                <div class="pct-bar-wrap">
-                  <div class="pct-bar" :style="{ width: exp.percentile + '%', background: pctColor(exp.percentile) }"></div>
-                  <span class="pct-label">超过{{ exp.percentile }}%</span>
+            <div class="percentile-row [display:flex] [flex-direction:column] [gap:6px] [margin-top:12px] [padding:0_4px]">
+              <div class="pct-item [display:flex] [align-items:center] [gap:10px]" v-for="exp in classData.experiments" :key="exp.experimentId">
+                <div class="pct-name [width:90px] [font-size:11px] [color:#5f6368] [text-align:right] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [flex-shrink:0]" :title="exp.name">{{ shortName(exp.name) }}</div>
+                <div class="pct-bar-wrap [flex:1] [height:18px] [background:#f1f3f4] [border-radius:9px] [position:relative] [overflow:hidden]">
+                  <div class="pct-bar [height:100%] [border-radius:9px] [transition:width_0.6s_ease] [min-width:2px]" :class="pctColorClass(exp.percentile)" :style="{ width: exp.percentile + '%' }"></div>
+                  <span class="pct-label [position:absolute] [right:8px] [top:50%] [transform:translateY(-50%)] [font-size:10px] [font-weight:500] [color:#202124]">超过{{ exp.percentile }}%</span>
                 </div>
               </div>
             </div>
@@ -91,18 +91,18 @@
         <!-- AI智能学情分析 -->
         <el-alert
           v-else-if="classCompareUnavailableReason"
-          class="class-compare-alert"
+          class="class-compare-alert [margin-top:20px]"
           type="warning"
           :closable="false"
           :title="classCompareUnavailableReason"
           show-icon
         />
 
-        <el-card class="ai-analysis-card" style="margin-top:20px">
+        <el-card class="ai-analysis-card [margin-top:20px]">
           <template #header>
-            <div class="card-header ai-header">
-              <div class="ai-title">
-                <el-icon class="ai-icon-title"><Connection /></el-icon>
+            <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [align-items:flex-start] [gap:16px] [gap:10px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+              <div class="ai-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
+                <el-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></el-icon>
                 <span>AI智能学情分析</span>
               </div>
               <el-tag type="success" effect="dark">基于真实数据</el-tag>
@@ -110,27 +110,27 @@
           </template>
           <div class="ai-analysis-content">
             <!-- 学习特征标签 -->
-            <div class="section-block">
-              <h4>🏷️ 学习特征</h4>
-              <div class="patterns-row">
-                <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card" :class="patternClass(p.tag)">
-                  <span class="pattern-emoji">{{ patternEmoji(p.tag) }}</span>
+            <div class="section-block [margin-bottom:24px]">
+              <h4>🏷️学习特征</h4>
+              <div class="patterns-row [display:flex] [gap:12px] [flex-wrap:wrap]">
+                <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card [display:flex] [gap:10px] [padding:12px_16px] [border-radius:12px] [border:1px_solid_#e8eaed] [flex:1] [min-width:200px] [&.pat-good]:[background:#e6f4ea] [&.pat-good]:[border-color:#ceead6] [&.pat-warn]:[background:#fef7e0] [&.pat-warn]:[border-color:#feefc3] [&.pat-bad]:[background:#fce8e6] [&.pat-bad]:[border-color:#f5c6c2]" :class="patternClass(p.tag)">
+                  <span class="pattern-emoji [font-size:24px]">{{ patternEmoji(p.tag) }}</span>
                   <div>
-                    <div class="pattern-name">{{ p.tag }}</div>
-                    <div class="pattern-desc">{{ p.description }}</div>
+                    <div class="pattern-name [font-weight:500] [font-size:14px] [color:#202124]">{{ p.tag }}</div>
+                    <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- 能力趋势 -->
-            <div class="section-block">
+            <div class="section-block [margin-bottom:24px]">
               <h4>📊 各维度能力水平</h4>
-              <div class="ability-list">
-                <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item">
-                  <div class="ability-header">
-                    <span class="ability-name">{{ dimEmoji(dim.dimension) }} {{ dim.dimension }}</span>
-                    <div class="ability-score">
+              <div class="ability-list [display:flex] [flex-direction:column] [gap:16px]">
+                <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item [padding:12px_16px] [border:1px_solid_#e8eaed] [border-radius:12px]">
+                  <div class="ability-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
+                    <span class="ability-name [font-weight:500] [font-size:14px] [color:#202124]">{{ dimEmoji(dim.dimension) }} {{ dim.dimension }}</span>
+                    <div class="ability-score [display:flex] [align-items:center] [gap:8px] [font-weight:500]">
                       <span>{{ dim.avgMastery }}分</span>
                       <el-tag size="small" :type="dim.level === 'good' ? 'success' : dim.level === 'medium' ? 'warning' : 'danger'">
                         {{ dim.level === 'good' ? '掌握良好' : dim.level === 'medium' ? '需要巩固' : '薄弱' }}
@@ -138,18 +138,18 @@
                     </div>
                   </div>
                   <el-progress :percentage="Math.min(100, Math.round(dim.avgMastery))" :color="masteryColor(dim.avgMastery)" :stroke-width="12" />
-                  <div class="ability-desc">{{ dim.description }}</div>
+                  <div class="ability-desc [font-size:12px] [color:#5f6368] [margin-top:6px]">{{ dim.description }}</div>
                 </div>
               </div>
             </div>
 
-            <!-- 薄弱点 -->
-            <div class="section-block" v-if="profileData.weaknesses?.length">
+            <!-- 薄弱点-->
+            <div class="section-block [margin-bottom:24px]" v-if="profileData.weaknesses?.length">
               <h4>⚠️ 重点提升方向</h4>
-              <div class="improvement-items">
-                <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item">
-                  <el-icon class="improvement-icon" :class="i === 0 ? 'high-priority' : ''"><Warning /></el-icon>
-                  <span>{{ w.experimentName }}（{{ w.dimension }}）掌握度仅 {{ Math.round(w.mastery) }}分，建议重点练习</span>
+              <div class="improvement-items [display:flex] [flex-direction:column] [gap:10px]">
+                <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item [display:flex] [align-items:center] [gap:8px] [font-size:14px] [color:#5f6368]">
+                  <el-icon class="improvement-icon [color:#e37400] [font-size:18px] [&.high-priority]:[color:#d93025]" :class="i === 0 ? 'high-priority' : ''"><Warning /></el-icon>
+                  <span>{{ w.experimentName }}（{{ w.dimension }}）掌握度仅{{ Math.round(w.mastery) }}分，建议重点练习</span>
                 </div>
               </div>
             </div>
@@ -157,12 +157,12 @@
         </el-card>
 
         <!-- 学习建议 -->
-        <el-card style="margin-top:20px">
-          <template #header><div class="card-header"><span>📚 学习方法推荐</span></div></template>
-          <div class="method-container">
-            <el-card v-for="(item, index) in learningMethods" :key="index" class="method-card" shadow="hover">
-              <div class="method-header">
-                <el-icon :size="24" class="method-icon"><component :is="item.icon" /></el-icon>
+        <el-card class="[margin-top:20px]">
+          <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>📚 学习方法推荐</span></div></template>
+          <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
+            <el-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
+              <div class="method-header [display:flex] [flex-direction:column] [align-items:center] [gap:8px] [margin-bottom:8px]">
+                <el-icon :size="24" class="method-icon [color:#1a73e8]"><component :is="item.icon" /></el-icon>
                 <h4>{{ item.title }}</h4>
               </div>
               <p>{{ item.description }}</p>
@@ -175,6 +175,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning } from '@element-plus/icons-vue'
 import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@element-plus/icons-vue'
@@ -216,11 +217,11 @@ const avgDiffText = computed(() => {
 function shortName(name) {
   return name && name.length > 8 ? name.substring(0, 8) + '…' : name
 }
-function pctColor(p) {
-  if (p >= 75) return '#1e8e3e'
-  if (p >= 50) return '#1a73e8'
-  if (p >= 25) return '#e37400'
-  return '#d93025'
+function pctColorClass(p) {
+  if (p >= 75) return '[background:#1e8e3e]'
+  if (p >= 50) return '[background:#1a73e8]'
+  if (p >= 25) return '[background:#e37400]'
+  return '[background:#d93025]'
 }
 
 const overviewCards = computed(() => {
@@ -232,6 +233,20 @@ const overviewCards = computed(() => {
     { label: '已参与实验', value: (o.experimentsCovered || 0) + '/' + (o.totalExperiments || 19), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
   ]
 })
+
+function overviewIconClass(item) {
+  if (item.color === '#409EFF') return '[background:linear-gradient(135deg,#409EFF,#79bbff)]'
+  if (item.color === '#67C23A') return '[background:linear-gradient(135deg,#67C23A,#95d475)]'
+  if (item.color === '#E6A23C') return '[background:linear-gradient(135deg,#E6A23C,#eebe77)]'
+  return '[background:linear-gradient(135deg,#909399,#b1b3b8)]'
+}
+
+function overviewValueClass(item) {
+  if (item.color === '#409EFF') return '[color:#409EFF]'
+  if (item.color === '#67C23A') return '[color:#67C23A]'
+  if (item.color === '#E6A23C') return '[color:#E6A23C]'
+  return '[color:#909399]'
+}
 
 const learningMethods = [
   { icon: Reading, title: '系统学习', description: '通过教材和参考书籍系统地学习理论知识，掌握数据结构的基本概念和算法原理。' },
@@ -278,7 +293,7 @@ async function fetchStudentAnalytics(studentId) {
     const response = await getStudentAnalyticsOverview(studentId)
     return response?.data || response || null
   } catch (error) {
-    console.warn('获取学生成绩分析降级数据失败:', error)
+    logger.warn('获取学生成绩分析降级数据失败:', error)
     return null
   }
 }
@@ -374,7 +389,7 @@ async function loadData() {
       }, 500)
     }, 200)
   } catch (e) {
-    console.error('加载学习分析失败:', e)
+    logger.error('加载学习分析失败:', e)
     loading.value = false
   }
 }
@@ -511,7 +526,7 @@ async function loadClassComparison() {
     setTimeout(() => initClassCompareChart(), 100)
   } catch (e) {
     classCompareUnavailableReason.value = resolveClassCompareError(e)
-    console.warn('班级对比数据加载失败:', e)
+    logger.warn('班级对比数据加载失败:', e)
   }
 }
 
@@ -549,64 +564,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.my-page-header { padding: 20px }
-.analysis-content { display: flex; flex-direction: column; gap: 20px }
-.stat-card { border-radius: 16px; border: 1px solid #dadce0; box-shadow: none; }
-.stat-card:hover { box-shadow: 0 1px 3px rgba(60,64,67,0.15), 0 4px 8px rgba(60,64,67,0.08); }
-.stat-card :deep(.el-card__body) { display: flex; align-items: center; gap: 14px; padding: 18px }
-.stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
-.stat-info { flex: 1 }
-.stat-value { font-size: 22px; font-weight: 600; color: #202124; }
-.stat-label { font-size: 13px; color: #5f6368; margin-top: 2px }
-.chart-row { margin-top: 0 }
-.chart-card { min-height: 420px; border-radius: 16px; border: 1px solid #dadce0; box-shadow: none; }
-.class-compare-alert { margin-top: 20px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 500; color: #202124; }
-.chart-container { height: 340px; width: 100%; position: relative }
-.chart { width: 100%; height: 100% }
-.ai-header { display: flex; align-items: center; justify-content: space-between }
-.ai-title { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; color: #202124; }
-.ai-icon-title { font-size: 20px; color: #1a73e8 }
-.section-block { margin-bottom: 24px }
-.section-block h4 { font-size: 15px; color: #202124; margin-bottom: 12px }
-.patterns-row { display: flex; gap: 12px; flex-wrap: wrap }
-.pattern-tag-card { display: flex; gap: 10px; padding: 12px 16px; border-radius: 12px; border: 1px solid #e8eaed; flex: 1; min-width: 200px }
-.pattern-tag-card.pat-good { background: #e6f4ea; border-color: #ceead6 }
-.pattern-tag-card.pat-warn { background: #fef7e0; border-color: #feefc3 }
-.pattern-tag-card.pat-bad { background: #fce8e6; border-color: #f5c6c2 }
-.pattern-emoji { font-size: 24px }
-.pattern-name { font-weight: 500; font-size: 14px; color: #202124 }
-.pattern-desc { font-size: 12px; color: #5f6368; margin-top: 2px }
-.ability-list { display: flex; flex-direction: column; gap: 16px }
-.ability-item { padding: 12px 16px; border: 1px solid #e8eaed; border-radius: 12px }
-.ability-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px }
-.ability-name { font-weight: 500; font-size: 14px; color: #202124; }
-.ability-score { display: flex; align-items: center; gap: 8px; font-weight: 500 }
-.ability-desc { font-size: 12px; color: #5f6368; margin-top: 6px }
-.improvement-items { display: flex; flex-direction: column; gap: 10px }
-.improvement-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #5f6368 }
-.improvement-icon { color: #e37400; font-size: 18px }
-.improvement-icon.high-priority { color: #d93025 }
-.method-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px }
-.method-card { text-align: center; border-radius: 16px; border: 1px solid #dadce0; box-shadow: none; }
-.method-card:hover { box-shadow: 0 1px 3px rgba(60,64,67,0.15), 0 4px 8px rgba(60,64,67,0.08); }
-.method-header { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px }
-.method-icon { color: #1a73e8 }
-.method-header h4 { margin: 0; font-size: 15px; color: #202124; }
-.method-card p { font-size: 13px; color: #5f6368; margin: 0 }
 
-/* 班级对比 */
-.class-summary-chips { display: flex; gap: 8px; }
-.summary-chip { font-size: 12px; padding: 3px 10px; border-radius: 100px; font-weight: 500; }
-.summary-chip.positive { background: #e6f4ea; color: #1e8e3e; }
-.summary-chip.negative { background: #fce8e6; color: #d93025; }
-.summary-chip.neutral { background: #f1f3f4; color: #5f6368; }
-.class-compare-body { }
-.percentile-row { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; padding: 0 4px; }
-.pct-item { display: flex; align-items: center; gap: 10px; }
-.pct-name { width: 90px; font-size: 11px; color: #5f6368; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-.pct-bar-wrap { flex: 1; height: 18px; background: #f1f3f4; border-radius: 9px; position: relative; overflow: hidden; }
-.pct-bar { height: 100%; border-radius: 9px; transition: width 0.6s ease; min-width: 2px; }
-.pct-label { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 500; color: #202124; }
-</style>

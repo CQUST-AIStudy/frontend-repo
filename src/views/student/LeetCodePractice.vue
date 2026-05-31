@@ -1,13 +1,13 @@
-﻿<template>
-  <div class="leetcode-practice">
+<template>
+  <div class="leetcode-practice [display:flex] [height:calc(100vh_-_120px)] [gap:16px] [padding:16px] max-[1200px]:[flex-direction:column] max-[1200px]:[height:auto]">
     <!-- 题目详情区域 -->
-    <div class="problem-section">
-      <div class="problem-header">
-        <div class="problem-title">
+    <div class="problem-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [overflow-y:auto] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)] max-[1200px]:[flex:none]">
+      <div class="problem-header [display:flex] [justify-content:space-between] [align-items:flex-start] [margin-bottom:20px] [padding-bottom:16px] [border-bottom:1px_solid_#eee]">
+        <div class="problem-title [&_h2]:[margin:0_0_8px_0] [&_h2]:[color:#333] [&_h2]:[font-size:24px]">
           <h2>{{ problem.problemCode }} {{ problem.title }}</h2>
           <el-tag :type="difficultyType" size="large">{{ problem.difficulty }}</el-tag>
         </div>
-        <div class="problem-actions">
+        <div class="problem-actions [display:flex] [gap:8px]">
           <el-button @click="showSolution = !showSolution" type="info" plain>
             {{ showSolution ? '隐藏题解' : '查看题解' }}
           </el-button>
@@ -16,30 +16,30 @@
       </div>
 
       <!-- 题目内容 -->
-      <div class="problem-content">
-        <div class="problem-description">
-          <div class="content-section">
+      <div class="problem-content [line-height:1.6]">
+        <div class="problem-description [font-size:14px] [color:#555] [&_pre]:[background:#f5f5f5] [&_pre]:[padding:12px] [&_pre]:[border-radius:4px] [&_pre]:[overflow-x:auto] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_4px] [&_code]:[border-radius:2px] [&_code]:[font-family:'Courier_New',_monospace]">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
             <h3>题目描述</h3>
-            <div class="formatted-content" v-html="renderedProblemText"></div>
+            <div class="formatted-content [font-size:14px] [color:#555] [background:#fafafa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff] [max-height:340px] [overflow:auto]" v-html="renderedProblemText"></div>
           </div>
           
-          <div class="content-section" v-if="problem.examples">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="problem.examples">
             <h3>示例</h3>
-            <div class="examples-container">
+            <div class="examples-container [background:#f8f9fa] [padding:16px] [border-radius:8px]">
               <div 
                 v-for="(example, index) in parsedExamples" 
                 :key="index" 
-                class="example-item"
+                class="example-item [margin-bottom:16px] [padding:12px] [background:white] [border-radius:6px] [border:1px_solid_#e0e0e0] [&:last-child]:[margin-bottom:0] [&_h4]:[margin:0_0_8px_0] [&_h4]:[color:#409eff] [&_h4]:[font-size:14px] [background-color:#f5f7fa] [padding:10px] [border-radius:4px]"
               >
                 <h4>示例 {{ index + 1 }}:</h4>
-                <div class="example-content">
-                  <div class="example-input">
+                <div class="example-content [font-family:'Courier_New',_monospace] [font-size:13px] [background-color:#f2f6fc] [padding:12px] [border-radius:4px] [font-family:'Courier_New',_Courier,_monospace] [overflow-x:auto] [margin:0] [white-space:pre-wrap] [word-wrap:break-word] [color:#5a5a5a]">
+                  <div class="example-input [margin-bottom:4px] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_6px] [&_code]:[border-radius:3px] [&_code]:[color:#e74c3c]">
                     <strong>输入:</strong> <code>{{ example.input }}</code>
                   </div>
-                  <div class="example-output">
+                  <div class="example-output [margin-bottom:4px] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_6px] [&_code]:[border-radius:3px] [&_code]:[color:#e74c3c]">
                     <strong>输出:</strong> <code>{{ example.output }}</code>
                   </div>
-                  <div v-if="example.explanation" class="example-explanation">
+                  <div v-if="example.explanation" class="example-explanation [margin-top:8px] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_sans-serif] [color:#666] [font-style:italic]">
                     <strong>解释:</strong> {{ example.explanation }}
                   </div>
                 </div>
@@ -47,45 +47,45 @@
             </div>
           </div>
 
-          <div class="content-section" v-if="problem.constraints">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="problem.constraints">
             <h3>提示</h3>
-            <div class="constraints-content" v-html="renderedConstraints"></div>
+            <div class="constraints-content [background:#fff3cd] [padding:12px] [border-radius:6px] [border-left:4px_solid_#ffc107] [font-size:13px]" v-html="renderedConstraints"></div>
           </div>
         </div>
       </div>
 
       <!-- 官方题解 -->
-      <el-collapse v-if="showSolution" class="solution-section">
+      <el-collapse v-if="showSolution" class="solution-section [margin-top:20px]">
         <el-collapse-item name="solution">
           <template #title>
-            <div class="solution-title">
+            <div class="solution-title [display:flex] [align-items:center] [gap:8px] [font-weight:600] [color:#409eff]">
               <el-icon><Document /></el-icon>
               <span>官方题解</span>
             </div>
           </template>
-          <div class="solution-content">
+          <div class="solution-content [max-height:none] [overflow:visible] [max-height:400px] [overflow-y:auto]">
             <div class="solution-approach" v-if="parsedSolution.approach">
               <h4>解题思路</h4>
-              <div class="approach-content" v-html="parsedSolution.approach"></div>
+              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="parsedSolution.approach"></div>
             </div>
             
             <div class="solution-code" v-if="parsedSolution.code">
               <h4>参考代码</h4>
-              <el-tabs v-model="solutionLanguage" class="solution-tabs">
+              <el-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
                 <el-tab-pane 
                   v-for="(codeBlock, lang) in parsedSolution.code" 
                   :key="lang"
                   :label="getLanguageLabel(lang)" 
                   :name="lang"
                 >
-                  <pre class="solution-code-block"><code>{{ codeBlock }}</code></pre>
+                  <pre class="solution-code-block [background:#2d3748] [color:#e2e8f0] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.5] [margin:0]"><code>{{ codeBlock }}</code></pre>
                 </el-tab-pane>
               </el-tabs>
             </div>
 
             <div class="solution-complexity" v-if="parsedSolution.complexity">
               <h4>复杂度分析</h4>
-              <div class="complexity-content" v-html="parsedSolution.complexity"></div>
+              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="parsedSolution.complexity"></div>
             </div>
           </div>
         </el-collapse-item>
@@ -93,8 +93,8 @@
     </div>
 
     <!-- 代码编辑区域 -->
-    <div class="code-section">
-      <div class="code-header">
+    <div class="code-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [display:flex] [flex-direction:column] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)]">
+      <div class="code-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_#eee] [margin-bottom:15px] [padding-right:10px]">
         <div class="language-selector">
           <el-select v-model="selectedLanguage" @change="onLanguageChange">
             <el-option label="Java" value="java" />
@@ -104,7 +104,7 @@
             <el-option label="JavaScript" value="javascript" />
           </el-select>
         </div>
-        <div class="code-actions">
+        <div class="code-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
           <el-button @click="runCode" :loading="running" type="primary" plain>
             运行代码
           </el-button>
@@ -115,20 +115,20 @@
       </div>
 
       <!-- 代码编辑器 -->
-      <div class="code-editor" @click="focusEditor">
+      <div class="code-editor [flex:1] [border:1px_solid_#ddd] [border-radius:4px] [overflow:hidden] [cursor:text]" @click="focusEditor">
         <codemirror
           ref="editorRef"
           v-model="code"
           :extensions="editorExtensions"
           :autofocus="false"
           :tab-size="4"
-          :style="{ height: '100%' }"
+          class="[height:100%]"
           @ready="onEditorReady"
         />
       </div>
 
       <!-- 测试用例输入 -->
-      <div class="test-input">
+      <div class="test-input [margin-top:16px] [height:200px]">
         <el-tabs v-model="activeTab">
           <el-tab-pane label="测试用例" name="testcase">
             <el-input
@@ -139,8 +139,8 @@
             />
           </el-tab-pane>
           <el-tab-pane label="运行结果" name="result" v-if="runResult">
-            <div class="run-result">
-              <div class="result-status" :class="runResult.status">
+            <div class="run-result [padding:12px]">
+              <div class="result-status [display:flex] [align-items:center] [gap:8px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#67c23a] [&.error]:[color:#f56c6c]" :class="runResult.status">
                 <el-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></el-icon>
                 {{ runResult.status === 'success' ? '运行成功' : '运行失败' }}
               </div>
@@ -160,25 +160,25 @@
       width="80%"
       :close-on-click-modal="false"
     >
-      <div v-if="submitResult" class="submit-result">
-        <div class="result-header">
-          <div class="status" :class="submitResult.status">
+      <div v-if="submitResult" class="submit-result [max-height:70vh] [overflow-y:auto]">
+        <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
+          <div class="status [display:flex] [align-items:center] [gap:8px] [font-size:18px] [font-weight:bold] [&.accepted]:[color:#67c23a] [&.rejected]:[color:#f56c6c]" :class="submitResult.status">
             <el-icon><Check v-if="submitResult.accepted" /><Close v-else /></el-icon>
             {{ submitResult.status === 'unavailable' ? '评测暂不可用' : (submitResult.accepted ? '通过' : '未通过') }}
           </div>
-          <div class="score" v-if="submitResult.score !== null && submitResult.score !== undefined">
+          <div class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]" v-if="submitResult.score !== null && submitResult.score !== undefined">
             得分: {{ submitResult.score }}/100
           </div>
         </div>
 
         <!-- AI评测结果 -->
-        <div class="ai-feedback" v-if="submitResult.aiFeedback">
+        <div class="ai-feedback [margin:20px_0]" v-if="submitResult.aiFeedback">
           <h3>AI 评测反馈</h3>
-          <div class="feedback-content" v-html="renderedAiFeedback"></div>
+          <div class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff]" v-html="renderedAiFeedback"></div>
         </div>
 
         <!-- 执行详情 -->
-        <div class="execution-details" v-if="submitResult.details">
+        <div class="execution-details [margin:20px_0]" v-if="submitResult.details">
           <el-descriptions title="执行详情" :column="2" border>
             <el-descriptions-item label="执行时间">
               {{ submitResult.details.runtime || '暂无' }}
@@ -190,18 +190,18 @@
               {{ submitResult.details.passedCases || 0 }} / {{ submitResult.details.totalCases || 0 }}
             </el-descriptions-item>
             <el-descriptions-item label="错误信息" v-if="submitResult.details.error">
-              <pre class="error-message">{{ submitResult.details.error }}</pre>
+              <pre class="error-message [color:#f56c6c] [background:#fef0f0] [padding:8px] [border-radius:4px] [margin:0] [color:#d93025] [font-size:12px]">{{ submitResult.details.error }}</pre>
             </el-descriptions-item>
           </el-descriptions>
         </div>
 
         <!-- 技能提升建议 -->
-        <div class="skill-suggestions" v-if="submitResult.skillSuggestions">
+        <div class="skill-suggestions [margin:20px_0]" v-if="submitResult.skillSuggestions">
           <h3>技能提升建议</h3>
           <el-tag
             v-for="suggestion in submitResult.skillSuggestions"
             :key="suggestion"
-            class="suggestion-tag"
+            class="suggestion-tag [margin:4px_8px_4px_0]"
             type="info"
           >
             {{ suggestion }}
@@ -218,6 +218,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -320,11 +321,6 @@ const difficultyType = computed(() => {
 const renderedProblemText = computed(() => {
   if (!problem.value.problemText) return ''
   return DOMPurify.sanitize(marked(problem.value.problemText))
-})
-
-const renderedSolutionText = computed(() => {
-  if (!problem.value.solutionText) return ''
-  return DOMPurify.sanitize(marked(problem.value.solutionText))
 })
 
 const renderedAiFeedback = computed(() => {
@@ -447,7 +443,7 @@ async function runCode() {
       ElMessage.error('运行失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
-    console.error('运行代码失败:', error)
+    logger.error('运行代码失败:', error)
     let errorMessage = '运行代码失败'
     
     if (error.response) {
@@ -497,7 +493,7 @@ async function submitCode() {
       ElMessage.error('提交失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
-    console.error('提交代码失败:', error)
+    logger.error('提交代码失败:', error)
     let errorMessage = '提交代码失败'
     
     if (error.response) {
@@ -541,7 +537,7 @@ async function loadProblem() {
       testInput.value = problem.value.sampleTestCases.join('\n')
     }
   } catch (error) {
-    console.error('加载题目失败:', error)
+    logger.error('加载题目失败:', error)
     ElMessage.error('加载题目失败')
     router.push('/student/practice')
   }
@@ -606,7 +602,7 @@ function markProblemCompleted(problemId) {
       sessionStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(normalized))
     }
   } catch (error) {
-    console.warn('保存完成题目记录失败:', error)
+    logger.warn('保存完成题目记录失败:', error)
   }
 }
 
@@ -620,411 +616,5 @@ watch(() => route.params.id, () => {
 })
 </script>
 
-<style scoped>
-.leetcode-practice {
-  display: flex;
-  height: calc(100vh - 120px);
-  gap: 16px;
-  padding: 16px;
-}
 
-.problem-section {
-  flex: 1;
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  overflow-y: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.problem-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
-}
-
-.problem-title h2 {
-  margin: 0 0 8px 0;
-  color: #333;
-  font-size: 24px;
-}
-
-.problem-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.problem-content {
-  line-height: 1.6;
-}
-
-.content-section {
-  margin-bottom: 24px;
-}
-
-.content-section h3 {
-  color: #333;
-  font-size: 18px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #409eff;
-}
-
-.formatted-content {
-  font-size: 14px;
-  color: #555;
-  background: #fafafa;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid #409eff;
-  max-height: 340px;
-  overflow: auto;
-}
-
-.examples-container {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.example-item {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: white;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
-}
-
-.example-item:last-child {
-  margin-bottom: 0;
-}
-
-.example-item h4 {
-  margin: 0 0 8px 0;
-  color: #409eff;
-  font-size: 14px;
-}
-
-.example-content {
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-}
-
-.example-input, .example-output {
-  margin-bottom: 4px;
-}
-
-.example-input code, .example-output code {
-  background: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 3px;
-  color: #e74c3c;
-}
-
-.example-explanation {
-  margin-top: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #666;
-  font-style: italic;
-}
-
-.constraints-content {
-  background: #fff3cd;
-  padding: 12px;
-  border-radius: 6px;
-  border-left: 4px solid #ffc107;
-  font-size: 13px;
-}
-
-.solution-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: #409eff;
-}
-
-.solution-content {
-  max-height: none;
-  overflow: visible;
-}
-
-.solution-approach h4,
-.solution-code h4,
-.solution-complexity h4 {
-  color: #333;
-  margin: 16px 0 8px 0;
-  font-size: 16px;
-}
-
-.approach-content {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.solution-tabs {
-  margin-top: 8px;
-}
-
-.solution-code-block {
-  background: #2d3748;
-  color: #e2e8f0;
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.complexity-content {
-  background: #e8f5e8;
-  padding: 12px;
-  border-radius: 6px;
-  border-left: 4px solid #28a745;
-}
-
-.problem-description {
-  font-size: 14px;
-  color: #555;
-}
-
-.problem-description :deep(pre) {
-  background: #f5f5f5;
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.problem-description :deep(code) {
-  background: #f0f0f0;
-  padding: 2px 4px;
-  border-radius: 2px;
-  font-family: 'Courier New', monospace;
-}
-
-.solution-section {
-  margin-top: 20px;
-}
-
-.solution-content {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.code-section {
-  flex: 1;
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.code-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
-}
-
-.code-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.code-editor {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-  cursor: text;
-}
-
-.code-editor :deep(.CodeMirror) {
-  height: 100%;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  cursor: text;
-}
-
-.code-editor :deep(.CodeMirror-cursor) {
-  border-left: 2px solid #409eff;
-}
-
-.code-editor :deep(.CodeMirror-selected) {
-  background: #409eff33;
-}
-
-.code-editor :deep(.CodeMirror-line) {
-  cursor: text;
-}
-
-.code-editor :deep(.CodeMirror-scroll) {
-  cursor: text;
-}
-
-.code-editor :deep(.cm-editor) {
-  height: 100%;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-}
-
-.code-editor :deep(.cm-focused) {
-  outline: 2px solid #409eff;
-  outline-offset: -2px;
-}
-
-.code-editor :deep(.cm-editor.cm-focused .cm-cursor) {
-  border-left-color: #409eff;
-}
-
-.code-editor :deep(.cm-selectionBackground) {
-  background: #409eff33 !important;
-}
-
-.test-input {
-  margin-top: 16px;
-  height: 200px;
-}
-
-.run-result {
-  padding: 12px;
-}
-
-.result-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-weight: bold;
-}
-
-.result-status.success {
-  color: #67c23a;
-}
-
-.result-status.error {
-  color: #f56c6c;
-}
-
-.result-content pre {
-  background: #f5f5f5;
-  padding: 12px;
-  border-radius: 4px;
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.submit-result {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.result-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.status.accepted {
-  color: #67c23a;
-}
-
-.status.rejected {
-  color: #f56c6c;
-}
-
-.score {
-  font-size: 16px;
-  font-weight: bold;
-  color: #409eff;
-}
-
-.ai-feedback {
-  margin: 20px 0;
-}
-
-.ai-feedback h3 {
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.feedback-content {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid #409eff;
-}
-
-.feedback-content :deep(pre) {
-  background: #fff;
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-.execution-details {
-  margin: 20px 0;
-}
-
-.error-message {
-  color: #f56c6c;
-  background: #fef0f0;
-  padding: 8px;
-  border-radius: 4px;
-  margin: 0;
-}
-
-.skill-suggestions {
-  margin: 20px 0;
-}
-
-.skill-suggestions h3 {
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.suggestion-tag {
-  margin: 4px 8px 4px 0;
-}
-
-@media (max-width: 1200px) {
-  .leetcode-practice {
-    flex-direction: column;
-    height: auto;
-  }
-  
-  .problem-section,
-  .code-section {
-    flex: none;
-  }
-  
-  .code-section {
-    min-height: 600px;
-  }
-}
-</style>
 

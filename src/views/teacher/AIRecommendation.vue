@@ -6,22 +6,22 @@
       description="基于课程真实数据生成教学分析。当 AI 服务异常时，页面会自动展示本地兜底建议。"
     />
 
-    <div class="recommendation-content">
-      <el-card class="form-card">
+    <div class="recommendation-content [display:flex] [flex-direction:column] [gap:20px] [margin-bottom:40px] [padding:10px_0]">
+      <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [flex-wrap:wrap] [align-items:flex-start] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>分析配置</span>
-            <div class="stat-strip" v-if="courseData">
+            <div class="stat-strip [display:flex] [flex-wrap:wrap] [gap:10px] [color:#6e8097] [font-size:12px]" v-if="courseData">
               <span>{{ courseData.studentCount }} 名学生</span>
               <span>{{ courseData.totalExperiments }} 个实验</span>
-              <span>平均提交率 {{ courseData.avgSubmissionRate }}%</span>
+              <span>平均提交率{{ courseData.avgSubmissionRate }}%</span>
             </div>
           </div>
         </template>
 
-        <el-form :model="analysisForm" label-position="top" class="analysis-form">
+        <el-form :model="analysisForm" label-position="top" class="analysis-form [padding-top:4px]">
           <el-form-item label="分析内容">
-            <el-checkbox-group v-model="analysisForm.content" class="checkbox-grid">
+            <el-checkbox-group v-model="analysisForm.content" class="checkbox-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:10px_16px]">
               <el-checkbox label="learning_status">学习状态分析</el-checkbox>
               <el-checkbox label="knowledge_points">知识点掌握情况</el-checkbox>
               <el-checkbox label="improvement">改进建议</el-checkbox>
@@ -29,17 +29,17 @@
             </el-checkbox-group>
           </el-form-item>
 
-          <div class="form-actions">
+          <div class="form-actions [display:flex] [align-items:center] [gap:14px] [flex-wrap:wrap] [gap:12px]">
             <el-button type="primary" :loading="loading" @click="generateRecommendation">
-              {{ loading ? 'AI 分析中...' : '生成 AI 教学建议' }}
+              {{ loading ? 'AI 分析中..' : '生成 AI 教学建议' }}
             </el-button>
-            <span class="form-hint">如果后端返回 401/500，页面会切换为本地分析结果。</span>
+            <span class="form-hint [font-size:12px] [color:#7a8da5]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
           </div>
         </el-form>
       </el-card>
 
-      <el-card v-if="dataLoading" class="result-card">
-        <div class="loading-hint">
+      <el-card v-if="dataLoading" class="result-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
+        <div class="loading-hint [display:flex] [align-items:center] [gap:10px] [padding:20px] [color:#8a9cb0]">
           <el-icon class="is-loading" :size="24"><Loading /></el-icon>
           <span>正在加载课程数据...</span>
         </div>
@@ -47,7 +47,7 @@
 
       <el-alert
         v-if="errorMessage"
-        class="error-alert"
+        class="error-alert [border-radius:18px]"
         :title="errorMessage"
         type="warning"
         :closable="false"
@@ -58,10 +58,10 @@
         </template>
       </el-alert>
 
-      <el-card v-if="aiContent || loading || errorMessage" class="result-card">
+      <el-card v-if="aiContent || loading || errorMessage" class="result-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
         <template #header>
-          <div class="card-header">
-            <div class="result-title">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="result-title [display:flex] [align-items:center] [gap:10px]">
               <span>AI 教学建议</span>
               <el-tag v-if="usingFallback" type="warning" size="small" effect="plain">本地兜底</el-tag>
             </div>
@@ -71,19 +71,19 @@
           </div>
         </template>
 
-        <div class="ai-content">
-          <div class="ai-header">
+        <div class="ai-content [display:flex] [flex-direction:column] [gap:18px] [padding:10px_0]">
+          <div class="ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:10px]">
             <el-avatar :size="38">AI</el-avatar>
-            <div class="ai-header__text">
-              <span class="ai-name">教学分析助手</span>
-              <span class="ai-subtitle">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>
+            <div class="ai-header__text [display:flex] [flex-direction:column] [gap:4px]">
+              <span class="ai-name [font-weight:700] [color:#1d3557]">教学分析助手</span>
+              <span class="ai-subtitle [font-size:12px] [color:#7b8ea5]">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>
             </div>
           </div>
 
-          <div v-if="loading" class="loading-block">
+          <div v-if="loading" class="loading-block [padding-top:6px]">
             <el-skeleton :rows="7" animated />
           </div>
-          <div v-else class="ai-text" v-html="renderedContent"></div>
+          <div v-else class="ai-text [line-height:1.9] [color:#1f344c] [font-size:14px] [line-height:1.8] [color:#202124]" v-html="renderedContent"></div>
         </div>
       </el-card>
     </div>
@@ -91,6 +91,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -151,10 +152,10 @@ const loadCourseData = async () => {
     ])
 
     if (expResult.status === 'rejected') {
-      console.error('加载教师实验列表失败:', expResult.reason)
+      logger.error('加载教师实验列表失败:', expResult.reason)
     }
     if (subResult.status === 'rejected') {
-      console.error('加载学生提交数据失败:', subResult.reason)
+      logger.error('加载学生提交数据失败:', subResult.reason)
     }
 
     const expRes = expResult.status === 'fulfilled' ? expResult.value : null
@@ -194,7 +195,7 @@ const loadCourseData = async () => {
       lowScoreExps: experimentStats.filter(item => item.averageScore > 0 && item.averageScore < 60)
     }
   } catch (error) {
-    console.error('加载课程数据失败:', error)
+    logger.error('加载课程数据失败:', error)
     ElMessage.warning('加载课程数据失败，将使用有限信息生成建议')
   } finally {
     dataLoading.value = false
@@ -283,8 +284,8 @@ const buildFallbackRecommendation = () => {
   return [
     '## 课程整体判断',
     '',
-    `- 当前共覆盖 ${data.studentCount} 名学生、${data.totalExperiments} 个实验。`,
-    `- 平均提交率约为 ${data.avgSubmissionRate}% 。若该数值持续偏低，优先排查实验节奏和作业说明是否清晰。`,
+    `- 当前共覆盖${data.studentCount} 名学生、${data.totalExperiments} 个实验。`,
+    `- 平均提交率约为${data.avgSubmissionRate}% 。若该数值持续偏低，优先排查实验节奏和作业说明是否清晰。`,
     '',
     '## 需要重点关注的实验',
     '',
@@ -327,7 +328,7 @@ const generateRecommendation = async () => {
     aiContent.value = data?.reply || '暂无建议'
     ElMessage.success('AI 教学建议生成完成')
   } catch (error) {
-    console.error('生成失败:', error)
+    logger.error('生成失败:', error)
     errorMessage.value = formatAiErrorMessage(error)
     usingFallback.value = true
     aiContent.value = buildFallbackRecommendation()
@@ -351,155 +352,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.recommendation-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 40px;
-}
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.form-card,
-.result-card {
-  border-radius: 22px;
-  border: 1px solid #dbe4ef;
-  box-shadow: 0 12px 32px rgba(48, 72, 104, 0.06);
-}
-
-.analysis-form {
-  padding-top: 4px;
-}
-
-.stat-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  color: #6e8097;
-  font-size: 12px;
-}
-
-.checkbox-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 16px;
-}
-
-.form-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.form-hint {
-  font-size: 12px;
-  color: #7a8da5;
-}
-
-.loading-hint {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px;
-  color: #8a9cb0;
-}
-
-.error-alert {
-  border-radius: 18px;
-}
-
-.result-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-content {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.ai-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ai-header__text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ai-name {
-  font-weight: 700;
-  color: #1d3557;
-}
-
-.ai-subtitle {
-  font-size: 12px;
-  color: #7b8ea5;
-}
-
-.loading-block {
-  padding-top: 6px;
-}
-
-.ai-text {
-  line-height: 1.9;
-  color: #1f344c;
-  font-size: 14px;
-}
-
-.ai-text :deep(h1),
-.ai-text :deep(h2),
-.ai-text :deep(h3),
-.ai-text :deep(h4) {
-  margin: 20px 0 10px;
-  color: #18314d;
-}
-
-.ai-text :deep(p) {
-  margin: 0 0 10px;
-}
-
-.ai-text :deep(ul),
-.ai-text :deep(ol) {
-  padding-left: 20px;
-}
-
-.ai-text :deep(li) {
-  margin-bottom: 6px;
-}
-
-.ai-text :deep(code) {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: #f4f7fb;
-  color: #275187;
-  font-size: 13px;
-}
-
-.ai-text :deep(blockquote) {
-  margin: 12px 0;
-  padding: 10px 14px;
-  border-left: 4px solid #4d8be6;
-  background: rgba(77, 139, 230, 0.08);
-  border-radius: 10px;
-}
-
-@media (max-width: 768px) {
-  .checkbox-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

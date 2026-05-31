@@ -1,10 +1,10 @@
 <template>
-  <div class="bilingual-page">
+  <div class="bilingual-page [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
     <!-- 顶部 -->
-    <div class="hero">
-      <div class="hero-inner">
-        <div class="hero-icon">🌐</div>
-        <div class="hero-text">
+    <div class="hero [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:24px] [border:1px_solid_#dadce0] [display:flex] [align-items:center]">
+      <div class="hero-inner [display:flex] [align-items:center] [gap:16px]">
+        <div class="hero-icon [font-size:36px]">🌐</div>
+        <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
           <h1>双语对照阅读</h1>
           <p>高质量翻译，左右对照查看文档内容</p>
         </div>
@@ -12,13 +12,13 @@
     </div>
 
     <!-- 控制面板 -->
-    <div class="control-panel">
-      <el-select v-model="docId" placeholder="选择文档" :loading="docsLoading" filterable class="ctrl-select"
+    <div class="control-panel [display:flex] [align-items:center] [gap:12px] [flex-wrap:wrap] [background:#fff] [border-radius:16px] [padding:16px_20px] [margin-bottom:24px] [border:1px_solid_#dadce0]">
+      <el-select v-model="docId" placeholder="选择文档" :loading="docsLoading" filterable class="ctrl-select [flex:1] [min-width:200px]"
         @change="onDocChange">
         <el-option v-for="d in docs" :key="d.id" :value="String(d.id)"
           :label="`${d.filename} (${(d.sizeBytes/1024).toFixed(0)} KB)`" />
       </el-select>
-      <el-select v-model="lang" class="ctrl-lang">
+      <el-select v-model="lang" class="ctrl-lang [width:120px]">
         <el-option label="中文" value="ZH" />
         <el-option label="英文" value="EN-US" />
         <el-option label="日文" value="JA" />
@@ -30,40 +30,41 @@
       <el-button type="primary" :loading="loading" :disabled="!docId" @click="translate">
         {{ loading ? '翻译中...' : '开始翻译' }}
       </el-button>
-      <span v-if="meta" class="meta-tag">{{ meta }}</span>
+      <span v-if="meta" class="meta-tag [font-size:12px] [color:#5f6368] [background:#f1f3f4] [padding:4px_10px] [border-radius:100px]">{{ meta }}</span>
     </div>
 
     <el-alert v-if="error" :title="error" type="error" show-icon closable
-      style="margin-bottom:20px" @close="error = ''" />
+      class="[margin-bottom:20px]" @close="error = ''" />
 
     <!-- 翻译结果 -->
-    <div v-if="segments.length > 0" class="segments-list">
-      <div class="segments-header">
-        <span class="seg-count">共 {{ segments.length }} 段</span>
+    <div v-if="segments.length > 0" class="segments-list [display:flex] [flex-direction:column] [gap:10px]">
+      <div class="segments-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
+        <span class="seg-count [font-size:13px] [color:#5f6368]">全{{ segments.length }} 段</span>
       </div>
-      <div v-for="seg in segments" :key="seg.index" class="seg-row">
-        <div class="seg-num">{{ seg.index + 1 }}</div>
-        <div class="seg-source">
-          <div class="seg-label">原文</div>
-          <div class="seg-body">{{ seg.source }}</div>
+      <div v-for="seg in segments" :key="seg.index" class="seg-row [display:flex] [align-items:stretch] [gap:0] [background:#fff] [border-radius:16px] [overflow:hidden] [border:1px_solid_#dadce0] [transition:all_.2s] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]">
+        <div class="seg-num [width:44px] [display:flex] [align-items:center] [justify-content:center] [background:#f8f9fa] [color:#9aa0a6] [font-size:13px] [font-weight:500] [flex-shrink:0] [border-right:1px_solid_#e8eaed]">{{ seg.index + 1 }}</div>
+        <div class="seg-source [flex:1] [padding:16px_20px]">
+          <div class="seg-label [font-size:11px] [font-weight:500] [text-transform:uppercase] [color:#1a73e8] [margin-bottom:8px] [letter-spacing:.5px] [&.target]:[color:#1e8e3e]">原文</div>
+          <div class="seg-body [font-size:14px] [line-height:1.8] [color:#202124] [white-space:pre-wrap]">{{ seg.source }}</div>
         </div>
-        <div class="seg-divider"></div>
-        <div class="seg-target">
-          <div class="seg-label target">译文</div>
-          <div class="seg-body">{{ seg.target }}</div>
+        <div class="seg-divider [width:1px] [background:#e8eaed] [flex-shrink:0]"></div>
+        <div class="seg-target [flex:1] [padding:16px_20px]">
+          <div class="seg-label target [font-size:11px] [font-weight:500] [text-transform:uppercase] [color:#1a73e8] [margin-bottom:8px] [letter-spacing:.5px] [&.target]:[color:#1e8e3e]">译文</div>
+          <div class="seg-body [font-size:14px] [line-height:1.8] [color:#202124] [white-space:pre-wrap]">{{ seg.target }}</div>
         </div>
       </div>
     </div>
 
     <el-empty v-if="!loading && segments.length === 0 && !error" description="选择文档后点击「开始翻译」">
       <template #image>
-        <div style="font-size:48px">📄</div>
+        <div class="[font-size:48px]">📄</div>
       </template>
     </el-empty>
   </div>
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getDocuments, translateDocument } from '../../api/tap'
@@ -94,7 +95,7 @@ const loadDocs = async () => {
     const res = await getDocuments()
     docs.value = res?.data ?? res ?? []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     error.value = getFriendlyErrorMessage(e, '获取文档列表失败，请稍后重试')
   }
   docsLoading.value = false
@@ -138,57 +139,4 @@ const translate = async () => {
 onMounted(loadDocs)
 </script>
 
-<style scoped>
-.bilingual-page { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
 
-.hero {
-  background: #fff; border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
-  border: 1px solid #dadce0; display: flex; align-items: center;
-}
-.hero-inner { display: flex; align-items: center; gap: 16px; }
-.hero-icon { font-size: 36px; }
-.hero-text h1 { margin: 0 0 4px; font-size: 22px; font-weight: 400; color: #202124; }
-.hero-text p { margin: 0; font-size: 14px; color: #5f6368; }
-
-.control-panel {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  background: #fff; border-radius: 16px; padding: 16px 20px;
-  margin-bottom: 24px; border: 1px solid #dadce0;
-}
-.ctrl-select { flex: 1; min-width: 200px; }
-.ctrl-lang { width: 120px; }
-.meta-tag {
-  font-size: 12px; color: #5f6368; background: #f1f3f4;
-  padding: 4px 10px; border-radius: 100px;
-}
-
-.segments-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 12px;
-}
-.seg-count { font-size: 13px; color: #5f6368; }
-
-.segments-list { display: flex; flex-direction: column; gap: 10px; }
-.seg-row {
-  display: flex; align-items: stretch; gap: 0;
-  background: #fff; border-radius: 16px; overflow: hidden;
-  border: 1px solid #dadce0;
-  transition: all .2s;
-}
-.seg-row:hover {
-  box-shadow: 0 1px 3px rgba(60,64,67,0.15), 0 4px 8px rgba(60,64,67,0.08);
-}
-.seg-num {
-  width: 44px; display: flex; align-items: center; justify-content: center;
-  background: #f8f9fa; color: #9aa0a6; font-size: 13px; font-weight: 500;
-  flex-shrink: 0; border-right: 1px solid #e8eaed;
-}
-.seg-source, .seg-target { flex: 1; padding: 16px 20px; }
-.seg-divider { width: 1px; background: #e8eaed; flex-shrink: 0; }
-.seg-label {
-  font-size: 11px; font-weight: 500; text-transform: uppercase;
-  color: #1a73e8; margin-bottom: 8px; letter-spacing: .5px;
-}
-.seg-label.target { color: #1e8e3e; }
-.seg-body { font-size: 14px; line-height: 1.8; color: #202124; white-space: pre-wrap; }
-</style>

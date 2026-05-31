@@ -1,87 +1,87 @@
 <template>
-  <div class="department-analytics">
+  <div class="department-analytics [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
     <page-header
       class="my-page-header"
       title="系部分析"
       description="基于真实教学数据的系部统计分析"
     />
 
-    <div class="analytics-content" v-loading="pageLoading">
+    <div class="analytics-content [display:flex] [flex-direction:column] [gap:20px]" v-loading="pageLoading">
       <!-- 概览卡片 -->
-      <el-card class="overview-card">
+      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
         <template #header>
-          <div class="card-header"><span>教学概览</span></div>
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>教学概览</span></div>
         </template>
         <el-row :gutter="20">
           <el-col :span="6">
-            <div class="stat-card">
-              <div class="stat-value">{{ overview.experimentCount }}</div>
-              <div class="stat-title">实验总数</div>
+            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.experimentCount }}</div>
+              <div class="stat-title [font-size:13px] [color:#5f6368]">实验总数</div>
             </div>
           </el-col>
           <el-col :span="6">
-            <div class="stat-card">
-              <div class="stat-value">{{ overview.classCount }}</div>
-              <div class="stat-title">班级数量</div>
+            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.classCount }}</div>
+              <div class="stat-title [font-size:13px] [color:#5f6368]">班级数量</div>
             </div>
           </el-col>
           <el-col :span="6">
-            <div class="stat-card">
-              <div class="stat-value">{{ overview.studentCount }}</div>
-              <div class="stat-title">学生总数</div>
+            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.studentCount }}</div>
+              <div class="stat-title [font-size:13px] [color:#5f6368]">学生总数</div>
             </div>
           </el-col>
           <el-col :span="6">
-            <div class="stat-card">
-              <div class="stat-value">{{ overview.avgScore }}</div>
-              <div class="stat-title">平均分</div>
+            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
+              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.avgScore }}</div>
+              <div class="stat-title [font-size:13px] [color:#5f6368]">平均分</div>
             </div>
           </el-col>
         </el-row>
       </el-card>
 
-      <el-row :gutter="20" class="chart-row">
-        <!-- 实验完成率排行 -->
+      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
+        <!-- 实验完成率排行-->
         <el-col :span="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header"><span>实验完成率排行</span></div>
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>实验完成率排行</span></div>
             </template>
-            <div ref="completionChartRef" class="chart-container"></div>
+            <div ref="completionChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
           </el-card>
         </el-col>
         <!-- 成绩分布 -->
         <el-col :span="12">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header"><span>全部学生成绩分布</span></div>
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>全部学生成绩分布</span></div>
             </template>
-            <div ref="gradeChartRef" class="chart-container"></div>
+            <div ref="gradeChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
           </el-card>
         </el-col>
       </el-row>
 
-      <el-row :gutter="20" class="chart-row">
+      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
         <!-- 各实验平均分趋势 -->
         <el-col :span="24">
-          <el-card class="chart-card">
+          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
             <template #header>
-              <div class="card-header"><span>各实验平均分趋势</span></div>
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验平均分趋势</span></div>
             </template>
-            <div ref="trendChartRef" class="chart-container"></div>
+            <div ref="trendChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
           </el-card>
         </el-col>
       </el-row>
 
       <!-- 低完成率实验预警 -->
-      <el-card class="table-card">
+      <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>低完成率实验预警</span>
             <el-button type="primary" size="small" @click="exportReport">导出报告</el-button>
           </div>
         </template>
-        <el-table :data="warningExperiments" style="width: 100%" stripe>
+        <el-table :data="warningExperiments" class="[width:100%]" stripe>
           <el-table-column prop="name" label="实验名称" min-width="200" show-overflow-tooltip />
           <el-table-column label="完成率" width="120" align="center">
             <template #default="scope">
@@ -90,27 +90,27 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="提交数/总数" width="120" align="center">
+          <el-table-column label="提交数总数" width="120" align="center">
             <template #default="scope">
               {{ scope.row.submissionCount }} / {{ overview.studentCount }}
             </template>
           </el-table-column>
           <el-table-column label="平均分" width="100" align="center">
             <template #default="scope">
-              <span :style="{ color: scope.row.avgScore < 60 ? '#F56C6C' : '#303133' }">
+              <span :class="averageScoreClass(scope.row.avgScore)">
                 {{ scope.row.avgScore }}
               </span>
             </template>
           </el-table-column>
           <el-table-column label="建议" min-width="200">
             <template #default="scope">
-              <span v-if="scope.row.completionRate < 30" style="color: #F56C6C">
+              <span v-if="scope.row.completionRate < 30" class="[color:#F56C6C]">
                 完成率极低，建议检查实验难度或延长截止时间
               </span>
-              <span v-else-if="scope.row.completionRate < 50" style="color: #E6A23C">
+              <span v-else-if="scope.row.completionRate < 50" class="[color:#E6A23C]">
                 完成率偏低，建议增加辅导答疑
               </span>
-              <span v-else style="color: #909399">
+              <span v-else class="[color:#909399]">
                 完成率一般，可适当关注
               </span>
             </template>
@@ -122,11 +122,16 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import api from '../../api'
+
+function averageScoreClass(score) {
+  return score < 60 ? '[color:#F56C6C]' : '[color:#303133]'
+}
 
 const pageLoading = ref(true)
 const completionChartRef = ref(null)
@@ -186,7 +191,7 @@ const loadData = async () => {
     initGradeChart()
     initTrendChart()
   } catch (e) {
-    console.error('加载系部分析数据失败:', e)
+    logger.error('加载系部分析数据失败:', e)
     ElMessage.error('加载数据失败')
   } finally {
     pageLoading.value = false
@@ -238,7 +243,7 @@ const initGradeChart = () => {
   })
 
   chart.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c}人 ({d}%)' },
+    tooltip: { trigger: 'item', formatter: '{b}: {c}人({d}%)' },
     legend: { orient: 'vertical', left: 'left' },
     series: [{
       type: 'pie', radius: ['40%', '70%'],
@@ -286,7 +291,7 @@ const handleDeptResize = () => {
 }
 
 const exportReport = () => {
-  const header = '实验名称,完成率(%),提交数,学生总数,平均分\n'
+  const header = '实验名称,完成率%),提交数学生总数,平均分\n'
   const total = overview.studentCount || 1
   const rows = experimentsData.value.map(e => {
     const subs = submissionsData.value.filter(s => s.experimentId === e.id && s.score > 0)
@@ -319,22 +324,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.analytics-content { display: flex; flex-direction: column; gap: 20px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.chart-row { margin-bottom: 0; }
-.chart-container { height: 350px; }
-.stat-card {
-  text-align: center; padding: 20px;
-  background: linear-gradient(135deg, #f8f9fa, #f1f3f4);
-  border-radius: 10px; border: 1px solid #dadce0;
-}
-.stat-value { font-size: 28px; font-weight: 700; color: #202124; margin-bottom: 5px; }
-.stat-title { font-size: 13px; color: #5f6368; }
-.table-card { margin-bottom: 20px; }
-.department-analytics :deep(.el-card) {
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-</style>
+

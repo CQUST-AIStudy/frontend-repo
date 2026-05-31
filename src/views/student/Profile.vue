@@ -1,81 +1,81 @@
 <template>
-  <div class="student-profile">
+  <div class="student-profile [height:100%]">
     <page-header
-      class="my-page-header"
+      class="my-page-header [margin-bottom:8px]"
       title="个人信息"
       description="查看当前登录学生的基本信息、学习概况与账户安全设置。"
     />
 
     <loading-state :loading="loading">
-      <div class="profile-layout">
-        <section class="profile-main">
-          <el-card class="profile-card">
-            <div class="profile-card__top">
-              <el-avatar :size="88" class="profile-card__avatar">
+      <div class="profile-layout [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] max-[1080px]:[grid-template-columns:1fr]">
+        <section class="profile-main [display:flex] [flex-direction:column] [gap:20px]">
+          <el-card class="profile-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+            <div class="profile-card__top [display:flex] [align-items:center] [gap:18px] [margin-bottom:20px] max-[640px]:[flex-direction:column] max-[640px]:[align-items:flex-start]">
+              <el-avatar :size="88" class="profile-card__avatar [background:linear-gradient(135deg,_#1f7ae0,_#45b2ff)] [color:#fff] [font-size:28px] [font-weight:700]">
                 {{ avatarText }}
               </el-avatar>
-              <div class="profile-card__meta">
+              <div class="profile-card__meta [&_h2]:[margin:0] [&_h2]:[font-size:28px] [&_h2]:[color:#173153] [&_p]:[margin:8px_0_0] [&_p]:[color:#64809b]">
                 <h2>{{ displayName }}</h2>
                 <p>{{ className || '未绑定教学班' }}</p>
-                <div class="profile-tags">
+                <div class="profile-tags [display:flex] [gap:8px] [flex-wrap:wrap] [margin-top:14px]">
                   <el-tag effect="plain" type="primary">学生</el-tag>
                   <el-tag effect="plain" type="success">{{ gradeText }}</el-tag>
                 </div>
               </div>
             </div>
 
-            <div class="profile-info">
-              <div class="info-item">
-                <span class="info-label">用户名</span>
-                <span class="info-value">{{ currentUser.username || '-' }}</span>
+            <div class="profile-info [display:grid] [gap:12px]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+                <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户名</span>
+                <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.username || '-' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">学号</span>
-                <span class="info-value">{{ studentId || '-' }}</span>
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+                <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">学号</span>
+                <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ studentId || '-' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">班级</span>
-                <span class="info-value">{{ className || '-' }}</span>
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+                <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">班级</span>
+                <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ className || '-' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">邮箱</span>
-                <span class="info-value">{{ currentUser.email || '未设置' }}</span>
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+                <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">邮箱</span>
+                <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.email || '未设置' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">手机号</span>
-                <span class="info-value">{{ currentUser.phone || '未设置' }}</span>
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+                <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">手机号</span>
+                <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.phone || '未设置' }}</span>
               </div>
             </div>
 
-            <div class="profile-actions">
+            <div class="profile-actions [display:flex] [gap:12px] [flex-wrap:wrap] [margin-top:20px]">
               <el-button type="primary" @click="openProfileDialog">更新展示信息</el-button>
               <el-button @click="openPasswordDialog">修改密码</el-button>
             </div>
           </el-card>
 
-          <el-card class="security-card">
+          <el-card class="security-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [font-weight:700] [color:#1c3554] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>账户设置</span>
               </div>
             </template>
 
-            <div class="setting-list">
-              <div class="setting-item">
+            <div class="setting-list [display:flex] [flex-direction:column] [gap:16px]">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
                 <div>
                   <strong>系统通知</strong>
                   <p>接收实验发布、截止时间和课堂更新提醒。</p>
                 </div>
                 <el-switch v-model="settings.notifications" />
               </div>
-              <div class="setting-item">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
                 <div>
                   <strong>截止提醒</strong>
                   <p>在实验截止前推送提醒，避免漏交。</p>
                 </div>
                 <el-switch v-model="settings.deadlineReminder" />
               </div>
-              <div class="setting-item">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
                 <div>
                   <strong>AI 反馈提示</strong>
                   <p>实验报告生成评语和学习建议时同步提醒。</p>
@@ -86,37 +86,37 @@
           </el-card>
         </section>
 
-        <section class="profile-side">
-          <el-card class="overview-card">
+        <section class="profile-side [display:flex] [flex-direction:column] [gap:20px]">
+          <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>学习概况</span>
               </div>
             </template>
 
-            <div class="overview-grid">
-              <div class="overview-item">
+            <div class="overview-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:14px]">
+              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
                 <span>实验总数</span>
                 <strong>{{ stats.totalExperiments }}</strong>
               </div>
-              <div class="overview-item">
+              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
                 <span>已完成</span>
                 <strong>{{ stats.completedExperiments }}</strong>
               </div>
-              <div class="overview-item">
+              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
                 <span>平均成绩</span>
                 <strong>{{ stats.averageScore }}</strong>
               </div>
-              <div class="overview-item">
+              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
                 <span>进行中</span>
                 <strong>{{ stats.inProgressExperiments }}</strong>
               </div>
             </div>
           </el-card>
 
-          <el-card class="activity-card">
+          <el-card class="activity-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
-              <div class="card-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>最近动态</span>
               </div>
             </template>
@@ -128,8 +128,8 @@
                 :timestamp="item.time"
                 :color="item.color"
               >
-                <h4 class="activity-title">{{ item.title }}</h4>
-                <p class="activity-content">{{ item.content }}</p>
+                <h4 class="activity-title [margin:0_0_6px] [color:#173153] [font-size:15px]">{{ item.title }}</h4>
+                <p class="activity-content [margin:0] [color:#607792] [line-height:1.6]">{{ item.content }}</p>
               </el-timeline-item>
             </el-timeline>
           </el-card>
@@ -384,196 +384,4 @@ async function loadProfile() {
 onMounted(loadProfile)
 </script>
 
-<style scoped>
-.student-profile {
-  height: 100%;
-}
 
-.my-page-header {
-  margin-bottom: 8px;
-}
-
-.profile-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 20px;
-}
-
-.profile-main,
-.profile-side {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.profile-card,
-.security-card,
-.overview-card,
-.activity-card {
-  border-radius: 20px;
-  border: 1px solid #dbe5ef;
-  box-shadow: 0 14px 34px rgba(22, 48, 79, 0.06);
-}
-
-.profile-card__top {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 20px;
-}
-
-.profile-card__avatar {
-  background: linear-gradient(135deg, #1f7ae0, #45b2ff);
-  color: #fff;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.profile-card__meta h2 {
-  margin: 0;
-  font-size: 28px;
-  color: #173153;
-}
-
-.profile-card__meta p {
-  margin: 8px 0 0;
-  color: #64809b;
-}
-
-.profile-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-}
-
-.profile-info {
-  display: grid;
-  gap: 12px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: #f7fbff;
-}
-
-.info-label {
-  color: #6b8198;
-}
-
-.info-value {
-  color: #173153;
-  font-weight: 600;
-  text-align: right;
-  word-break: break-word;
-}
-
-.profile-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-.card-header {
-  font-weight: 700;
-  color: #1c3554;
-}
-
-.setting-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.setting-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0;
-  border-bottom: 1px solid #edf2f7;
-}
-
-.setting-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.setting-item strong {
-  color: #173153;
-}
-
-.setting-item p {
-  margin: 6px 0 0;
-  color: #6b8198;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.overview-item {
-  padding: 18px 16px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
-}
-
-.overview-item span {
-  display: block;
-  color: #6b8198;
-  font-size: 13px;
-}
-
-.overview-item strong {
-  display: block;
-  margin-top: 10px;
-  font-size: 28px;
-  color: #173153;
-}
-
-.activity-title {
-  margin: 0 0 6px;
-  color: #173153;
-  font-size: 15px;
-}
-
-.activity-content {
-  margin: 0;
-  color: #607792;
-  line-height: 1.6;
-}
-
-@media (max-width: 1080px) {
-  .profile-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .profile-card__top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .overview-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .info-item {
-    flex-direction: column;
-  }
-
-  .info-value {
-    text-align: left;
-  }
-}
-</style>

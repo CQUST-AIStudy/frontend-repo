@@ -1,41 +1,41 @@
 <template>
-  <div class="admin-dashboard">
+  <div class="admin-dashboard [min-height:100%] [min-width:0]">
     <page-header
-      class="my-page-header"
+      class="my-page-header [padding:20px_20px_0] max-[768px]:[padding-left:0] max-[768px]:[padding-right:0]"
       title="管理员控制台"
       description="统一查看 API 资源、PTA 爬虫状态和教师侧数据更新情况"
     />
 
     <el-skeleton v-if="loading" :rows="12" animated />
 
-    <div v-else class="dashboard-body">
-      <section class="hero-grid">
-        <el-card class="hero-card hero-card-ai" shadow="hover">
-          <div class="hero-label">今日 AI 请求</div>
-          <div class="hero-value">{{ formatNumber(stats.aiRequestsUsedToday) }}</div>
-          <div class="hero-meta">上限 {{ formatNumber(stats.aiRequestsLimit) }}</div>
+    <div v-else class="dashboard-body [display:flex] [flex-direction:column] [gap:20px] [min-width:0] max-[640px]:[gap:14px]">
+      <section class="hero-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1280px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[768px]:[grid-template-columns:1fr]">
+        <el-card class="hero-card hero-card-ai [border:none] [overflow:hidden] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[flex-direction:column] [&_.el-card__body]:[gap:12px] [&_.el-card__body]:[min-height:150px] [background:linear-gradient(135deg,_#16324f,_#245c7a)] [color:#f3f7fb] max-[640px]:[&_.el-card__body]:[min-height:auto] max-[640px]:[&_.el-card__body]:[padding:18px]" shadow="hover">
+          <div class="hero-label [font-size:14px] [opacity:0.88]">今日 AI 请求</div>
+          <div class="hero-value [font-size:34px] [font-weight:700] [line-height:1] max-[640px]:[font-size:30px]">{{ formatNumber(stats.aiRequestsUsedToday) }}</div>
+          <div class="hero-meta [font-size:13px] [opacity:0.8] [word-break:break-all]">上限 {{ formatNumber(stats.aiRequestsLimit) }}</div>
           <el-progress :percentage="quotaPercent('ai')" :stroke-width="8" :show-text="false" />
         </el-card>
 
-        <el-card class="hero-card hero-card-tr" shadow="hover">
-          <div class="hero-label">今日翻译字符</div>
-          <div class="hero-value">{{ formatNumber(stats.translationCharsUsedToday) }}</div>
-          <div class="hero-meta">上限 {{ formatNumber(stats.translationCharsLimit) }}</div>
+        <el-card class="hero-card hero-card-tr [border:none] [overflow:hidden] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[flex-direction:column] [&_.el-card__body]:[gap:12px] [&_.el-card__body]:[min-height:150px] [background:linear-gradient(135deg,_#17463a,_#1d6f59)] [color:#effbf6] max-[640px]:[&_.el-card__body]:[min-height:auto] max-[640px]:[&_.el-card__body]:[padding:18px]" shadow="hover">
+          <div class="hero-label [font-size:14px] [opacity:0.88]">今日翻译字符</div>
+          <div class="hero-value [font-size:34px] [font-weight:700] [line-height:1] max-[640px]:[font-size:30px]">{{ formatNumber(stats.translationCharsUsedToday) }}</div>
+          <div class="hero-meta [font-size:13px] [opacity:0.8] [word-break:break-all]">上限 {{ formatNumber(stats.translationCharsLimit) }}</div>
           <el-progress :percentage="quotaPercent('translation')" :stroke-width="8" :show-text="false" status="success" />
         </el-card>
 
-        <el-card class="hero-card hero-card-sync" shadow="hover">
-          <div class="hero-label">开启同步班级</div>
-          <div class="hero-value">{{ formatNumber(stats.syncEnabledClassCount) }}</div>
-          <div class="hero-meta">运行中 {{ formatNumber(stats.runningClassCount) }} 个</div>
-          <div class="hero-chip-row">
+        <el-card class="hero-card hero-card-sync [border:none] [overflow:hidden] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[flex-direction:column] [&_.el-card__body]:[gap:12px] [&_.el-card__body]:[min-height:150px] [background:linear-gradient(135deg,_#5b3a16,_#8d5f1f)] [color:#fff8ef] max-[640px]:[&_.el-card__body]:[min-height:auto] max-[640px]:[&_.el-card__body]:[padding:18px]" shadow="hover">
+          <div class="hero-label [font-size:14px] [opacity:0.88]">开启同步班级</div>
+          <div class="hero-value [font-size:34px] [font-weight:700] [line-height:1] max-[640px]:[font-size:30px]">{{ formatNumber(stats.syncEnabledClassCount) }}</div>
+          <div class="hero-meta [font-size:13px] [opacity:0.8] [word-break:break-all]">运行中 {{ formatNumber(stats.runningClassCount) }} 个</div>
+          <div class="hero-chip-row [display:flex] [gap:8px] [flex-wrap:wrap]">
             <el-tag effect="plain" type="warning">待关注 {{ formatNumber(stats.attentionClassCount) }}</el-tag>
           </div>
         </el-card>
 
-        <el-card class="hero-card hero-card-spider" shadow="hover">
-          <div class="hero-label">爬虫与 Cookie</div>
-          <div class="hero-status-row">
+        <el-card class="hero-card hero-card-spider [border:none] [overflow:hidden] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[flex-direction:column] [&_.el-card__body]:[gap:12px] [&_.el-card__body]:[min-height:150px] [background:linear-gradient(135deg,_#3c234f,_#6d3e92)] [color:#faf5ff] max-[640px]:[&_.el-card__body]:[min-height:auto] max-[640px]:[&_.el-card__body]:[padding:18px]" shadow="hover">
+          <div class="hero-label [font-size:14px] [opacity:0.88]">爬虫与 Cookie</div>
+          <div class="hero-status-row [display:flex] [gap:8px] [flex-wrap:wrap]">
             <el-tag :type="spider.healthy ? 'success' : 'danger'" effect="dark">
               {{ spider.healthy ? '爬虫在线' : '爬虫离线' }}
             </el-tag>
@@ -43,53 +43,55 @@
               Cookie {{ cookieStatusText(spider.cookieStatus) }}
             </el-tag>
           </div>
-          <div class="hero-meta">{{ spider.baseUrl || '未配置' }}</div>
-          <div class="hero-meta" v-if="spider.cookieLastUpdated">
+          <div class="hero-meta [font-size:13px] [opacity:0.8] [word-break:break-all]">{{ spider.baseUrl || '未配置' }}</div>
+          <div class="hero-meta [font-size:13px] [opacity:0.8] [word-break:break-all]" v-if="spider.cookieLastUpdated">
             上次更新 {{ formatDateTime(spider.cookieLastUpdated) }}
           </div>
         </el-card>
       </section>
 
-      <section class="content-grid">
-        <div class="main-column">
-          <el-card class="panel-card" shadow="never">
+      <section class="content-grid [display:grid] [grid-template-columns:minmax(0,_1.9fr)_minmax(320px,_0.95fr)] [gap:16px] [align-items:start] max-[1280px]:[grid-template-columns:1fr]">
+        <div class="main-column [display:flex] [flex-direction:column] [gap:16px]">
+          <el-card class="panel-card [min-width:0] [border-radius:18px] [border:1px_solid_#e7ebf0]" shadow="never">
             <template #header>
-              <div class="panel-header">
+              <div class="panel-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column]">
                 <div>
-                  <div class="panel-title">API 资源池</div>
-                  <div class="panel-desc">查看 Key 状态、来源、当日用量和更换建议</div>
+                  <div class="panel-title [font-size:16px] [font-weight:700] [color:#1f2937]">API 资源池</div>
+                  <div class="panel-desc [margin-top:4px] [font-size:12px] [color:#667085]">查看 Key 状态、来源、当日用量和更换建议</div>
                 </div>
                 <el-button text @click="loadDashboard">刷新</el-button>
               </div>
             </template>
 
-            <el-table :data="apiServices" stripe>
-              <el-table-column prop="name" label="服务" min-width="120" />
-              <el-table-column label="状态" width="110">
-                <template #default="{ row }">
-                  <el-tag :type="serviceStatusType(row.status)" effect="dark">
-                    {{ serviceStatusText(row.status) }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="provider" label="Provider" width="120" />
-              <el-table-column prop="model" label="模型/用途" min-width="150" />
-              <el-table-column label="Key" min-width="180">
-                <template #default="{ row }">
-                  <div class="mono">{{ row.maskedKey || '未配置' }}</div>
-                  <div class="muted">{{ row.envName }} / {{ row.source }}</div>
-                </template>
-              </el-table-column>
-              <el-table-column label="今日用量" min-width="180">
-                <template #default="{ row }">
-                  <div v-if="row.limit > 0">
-                    {{ formatUsage(row.usedToday, row.usageUnit) }} / {{ formatUsage(row.limit, row.usageUnit) }}
-                  </div>
-                  <div v-else class="muted">未接入统计</div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="actionHint" label="建议动作" min-width="220" />
-            </el-table>
+            <div class="dashboard-table-wrap dashboard-table-wrap--api">
+              <el-table :data="apiServices" stripe>
+                <el-table-column prop="name" label="服务" min-width="120" />
+                <el-table-column label="状态" width="110">
+                  <template #default="{ row }">
+                    <el-tag :type="serviceStatusType(row.status)" effect="dark">
+                      {{ serviceStatusText(row.status) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="provider" label="Provider" width="120" />
+                <el-table-column prop="model" label="模型/用途" min-width="150" />
+                <el-table-column label="Key" min-width="180">
+                  <template #default="{ row }">
+                    <div class="mono table-text-clip">{{ row.maskedKey || '未配置' }}</div>
+                    <div class="muted table-text-wrap">{{ row.envName }} / {{ row.source }}</div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="今日用量" min-width="180">
+                  <template #default="{ row }">
+                    <div v-if="row.limit > 0">
+                      {{ formatUsage(row.usedToday, row.usageUnit) }} / {{ formatUsage(row.limit, row.usageUnit) }}
+                    </div>
+                    <div v-else class="muted table-text-wrap">未接入统计</div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="actionHint" label="建议动作" min-width="220" />
+              </el-table>
+            </div>
           </el-card>
 
           <el-card class="panel-card" shadow="never">
@@ -103,58 +105,60 @@
               </div>
             </template>
 
-            <el-table :data="classes" stripe>
-              <el-table-column prop="name" label="班级" min-width="150" />
-              <el-table-column prop="teacherName" label="教师" width="130" />
-              <el-table-column prop="ptaKeyword" label="PTA 关键词" min-width="140" />
-              <el-table-column label="同步开关" width="100">
-                <template #default="{ row }">
-                  <el-tag :type="row.syncEnabled ? 'success' : 'info'" effect="plain">
-                    {{ row.syncEnabled ? '已开启' : '未开启' }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="状态" width="110">
-                <template #default="{ row }">
-                  <el-tag :type="syncStatusType(row.syncStatus)" effect="dark">
-                    {{ syncStatusText(row.syncStatus) }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="上次成功更新" min-width="165">
-                <template #default="{ row }">
-                  {{ row.lastSyncAt ? formatDateTime(row.lastSyncAt) : '未同步' }}
-                </template>
-              </el-table-column>
-              <el-table-column label="关注项" min-width="170">
-                <template #default="{ row }">
-                  <el-tag v-if="row.attention" type="warning" effect="plain">{{ row.attentionReason }}</el-tag>
-                  <span v-else class="muted">正常</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="190" fixed="right">
-                <template #default="{ row }">
-                  <div class="action-row">
-                    <el-button
-                      type="primary"
-                      link
-                      :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
-                      @click="triggerSync(row, 'incremental')"
-                    >
-                      增量同步
-                    </el-button>
-                    <el-button
-                      type="danger"
-                      link
-                      :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
-                      @click="confirmFullSync(row)"
-                    >
-                      全量同步
-                    </el-button>
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
+            <div class="dashboard-table-wrap dashboard-table-wrap--classes">
+              <el-table :data="classes" stripe>
+                <el-table-column prop="name" label="班级" min-width="150" />
+                <el-table-column prop="teacherName" label="教师" width="130" />
+                <el-table-column prop="ptaKeyword" label="PTA 关键词" min-width="140" />
+                <el-table-column label="同步开关" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.syncEnabled ? 'success' : 'info'" effect="plain">
+                      {{ row.syncEnabled ? '已开启' : '未开启' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" width="110">
+                  <template #default="{ row }">
+                    <el-tag :type="syncStatusType(row.syncStatus)" effect="dark">
+                      {{ syncStatusText(row.syncStatus) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="上次成功更新" min-width="165">
+                  <template #default="{ row }">
+                    {{ row.lastSyncAt ? formatDateTime(row.lastSyncAt) : '未同步' }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="关注项" min-width="170">
+                  <template #default="{ row }">
+                    <el-tag v-if="row.attention" type="warning" effect="plain">{{ row.attentionReason }}</el-tag>
+                    <span v-else class="muted table-text-wrap">正常</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="190">
+                  <template #default="{ row }">
+                    <div class="action-row">
+                      <el-button
+                        type="primary"
+                        link
+                        :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
+                        @click="triggerSync(row, 'incremental')"
+                      >
+                        增量同步
+                      </el-button>
+                      <el-button
+                        type="danger"
+                        link
+                        :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
+                        @click="confirmFullSync(row)"
+                      >
+                        全量同步
+                      </el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </el-card>
 
           <el-card class="panel-card" shadow="never">
@@ -168,34 +172,36 @@
               </div>
             </template>
 
-            <el-table :data="recentTasks" stripe>
-              <el-table-column prop="taskId" label="任务 ID" min-width="110" />
-              <el-table-column prop="keyword" label="关键词" min-width="120" />
-              <el-table-column label="模式" width="100">
-                <template #default="{ row }">
-                  <el-tag :type="taskModeType(row.mode)" effect="plain">{{ modeText(row.mode) }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="状态" width="100">
-                <template #default="{ row }">
-                  <el-tag :type="syncStatusType(row.status)" effect="dark">{{ syncStatusText(row.status) }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="增量结果" min-width="240">
-                <template #default="{ row }">
-                  新题集 {{ row.newSetsCount || 0 }}，刷新 {{ row.refreshedCount || 0 }}，提交 {{ row.submissionsCount || 0 }}
-                </template>
-              </el-table-column>
-              <el-table-column label="创建时间" min-width="160">
-                <template #default="{ row }">
-                  {{ formatDateTime(row.createdAt) }}
-                </template>
-              </el-table-column>
-            </el-table>
+            <div class="dashboard-table-wrap dashboard-table-wrap--tasks">
+              <el-table :data="recentTasks" stripe>
+                <el-table-column prop="taskId" label="任务 ID" min-width="110" />
+                <el-table-column prop="keyword" label="关键词" min-width="120" />
+                <el-table-column label="模式" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="taskModeType(row.mode)" effect="plain">{{ modeText(row.mode) }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="syncStatusType(row.status)" effect="dark">{{ syncStatusText(row.status) }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="增量结果" min-width="240">
+                  <template #default="{ row }">
+                    新题集 {{ row.newSetsCount || 0 }}，刷新 {{ row.refreshedCount || 0 }}，提交 {{ row.submissionsCount || 0 }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="创建时间" min-width="160">
+                  <template #default="{ row }">
+                    {{ formatDateTime(row.createdAt) }}
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </el-card>
         </div>
 
-        <div class="side-column">
+        <div class="side-column [display:flex] [flex-direction:column] [gap:16px]">
           <el-card class="panel-card side-status-card" shadow="never">
             <template #header>
               <div class="panel-header">
@@ -206,32 +212,32 @@
               </div>
             </template>
 
-            <div class="status-list">
-              <div class="status-item">
-                <span class="status-label">爬虫服务</span>
+            <div class="status-list [display:flex] [flex-direction:column] [gap:12px]">
+              <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
+                <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">爬虫服务</span>
                 <el-tag :type="spider.healthy ? 'success' : 'danger'" effect="dark">
                   {{ spider.healthy ? '在线' : '离线' }}
                 </el-tag>
               </div>
-              <div class="status-item">
-                <span class="status-label">Cookie 状态</span>
+              <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
+                <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">Cookie 状态</span>
                 <el-tag :type="cookieStatusType(spider.cookieStatus)" effect="plain">
                   {{ cookieStatusText(spider.cookieStatus) }}
                 </el-tag>
               </div>
-              <div class="status-item">
-                <span class="status-label">Cookie 更新时间</span>
+              <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
+                <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">Cookie 更新时间</span>
                 <span>{{ spider.cookieLastUpdated ? formatDateTime(spider.cookieLastUpdated) : '未知' }}</span>
               </div>
-              <div class="status-item">
-                <span class="status-label">爬虫地址</span>
-                <span class="mono compact">{{ spider.baseUrl || '未配置' }}</span>
+              <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
+                <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">爬虫地址</span>
+                <span class="mono compact [font-family:Consolas,_'Courier_New',_monospace] [font-size:12px]">{{ spider.baseUrl || '未配置' }}</span>
               </div>
             </div>
 
             <el-alert
               v-if="spider.cookieError"
-              class="inline-alert"
+              class="inline-alert [margin-top:12px]"
               type="warning"
               :closable="false"
               show-icon
@@ -239,7 +245,7 @@
             />
             <el-alert
               v-if="spider.healthError"
-              class="inline-alert"
+              class="inline-alert [margin-top:12px]"
               type="error"
               :closable="false"
               show-icon
@@ -270,11 +276,11 @@
             <el-button type="primary" :loading="cookieSubmitting" :disabled="!cookieInput.trim()" @click="submitCookieForm">
               验证并保存 Cookie
             </el-button>
-            <div v-if="cookieResult" class="cookie-result">
+            <div v-if="cookieResult" class="cookie-result [margin-top:12px] [display:flex] [align-items:center] [gap:10px] [margin-top:14px] [gap:6px] [padding:10px_14px] [border-radius:8px] [font-size:13px] [&.valid]:[background:#e6f4ea] [&.valid]:[color:#1e8e3e] [&.invalid]:[background:#fce8e6] [&.invalid]:[color:#d93025]">
               <el-tag :type="cookieResult.valid ? 'success' : 'danger'" effect="dark">
                 {{ cookieResult.valid ? '验证成功' : '验证失败' }}
               </el-tag>
-              <span class="cookie-message">{{ cookieResult.message }}</span>
+              <span class="cookie-message [color:#344054] [font-size:13px]">{{ cookieResult.message }}</span>
             </div>
           </el-card>
 
@@ -288,15 +294,17 @@
               </div>
             </template>
 
-            <el-table :data="topUsers" size="small">
-              <el-table-column prop="username" label="账号" min-width="110" />
-              <el-table-column label="AI 请求" width="80">
-                <template #default="{ row }">{{ formatNumber(row.aiRequests) }}</template>
-              </el-table-column>
-              <el-table-column label="翻译字符" min-width="110">
-                <template #default="{ row }">{{ formatNumber(row.translationChars) }}</template>
-              </el-table-column>
-            </el-table>
+            <div class="dashboard-table-wrap dashboard-table-wrap--compact">
+              <el-table :data="topUsers" size="small">
+                <el-table-column prop="username" label="账号" min-width="110" />
+                <el-table-column label="AI 请求" width="80">
+                  <template #default="{ row }">{{ formatNumber(row.aiRequests) }}</template>
+                </el-table-column>
+                <el-table-column label="翻译字符" min-width="110">
+                  <template #default="{ row }">{{ formatNumber(row.translationChars) }}</template>
+                </el-table-column>
+              </el-table>
+            </div>
           </el-card>
         </div>
       </section>
@@ -515,217 +523,3 @@ function taskModeType(mode) {
 }
 </script>
 
-<style scoped>
-.admin-dashboard {
-  min-height: 100%;
-  min-width: 0;
-}
-
-.my-page-header {
-  padding: 20px 20px 0;
-}
-
-.dashboard-body {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-width: 0;
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.hero-card {
-  border: none;
-  overflow: hidden;
-}
-
-.hero-card :deep(.el-card__body) {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 150px;
-}
-
-.hero-card-ai {
-  background: linear-gradient(135deg, #16324f, #245c7a);
-  color: #f3f7fb;
-}
-
-.hero-card-tr {
-  background: linear-gradient(135deg, #17463a, #1d6f59);
-  color: #effbf6;
-}
-
-.hero-card-sync {
-  background: linear-gradient(135deg, #5b3a16, #8d5f1f);
-  color: #fff8ef;
-}
-
-.hero-card-spider {
-  background: linear-gradient(135deg, #3c234f, #6d3e92);
-  color: #faf5ff;
-}
-
-.hero-label {
-  font-size: 14px;
-  opacity: 0.88;
-}
-
-.hero-value {
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.hero-meta {
-  font-size: 13px;
-  opacity: 0.8;
-  word-break: break-all;
-}
-
-.hero-chip-row,
-.hero-status-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(320px, 0.95fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.main-column,
-.side-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.panel-card {
-  min-width: 0;
-  border-radius: 18px;
-  border: 1px solid #e7ebf0;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.panel-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.panel-desc {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #667085;
-}
-
-.status-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.status-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.status-label {
-  color: #667085;
-}
-
-.inline-alert {
-  margin-top: 12px;
-}
-
-.action-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mono {
-  font-family: Consolas, 'Courier New', monospace;
-}
-
-.compact {
-  font-size: 12px;
-}
-
-.muted {
-  color: #98a2b3;
-  font-size: 12px;
-}
-
-.cookie-result {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.cookie-message {
-  color: #344054;
-  font-size: 13px;
-}
-
-@media (max-width: 1280px) {
-  .hero-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .my-page-header {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-@media (max-width: 640px) {
-  .dashboard-body {
-    gap: 14px;
-  }
-
-  .hero-card :deep(.el-card__body) {
-    min-height: auto;
-    padding: 18px;
-  }
-
-  .hero-value {
-    font-size: 30px;
-  }
-
-  .panel-header,
-  .status-item,
-  .action-row,
-  .cookie-result {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-</style>

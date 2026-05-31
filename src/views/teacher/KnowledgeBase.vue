@@ -1,9 +1,9 @@
 <template>
-  <div class="knowledge-base-container">
+  <div class="knowledge-base-container [padding:0] [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0]">
     <page-header title="课程知识库" description="管理课程资料、查看 RAG 处理状态，并进行课程问答" />
 
     <div v-if="!selectedSpace" class="space-list-view">
-      <div class="space-actions">
+      <div class="space-actions [margin-bottom:20px]">
         <el-button type="primary" @click="showCreateDialog">
           <el-icon><Plus /></el-icon>
           创建课程空间
@@ -12,7 +12,7 @@
 
       <el-alert
         v-if="currentClassName"
-        class="scope-alert"
+        class="scope-alert [margin-bottom:20px] [border-radius:16px]"
         type="info"
         :closable="false"
         show-icon
@@ -27,17 +27,17 @@
       <el-empty v-if="visibleSpaces.length === 0 && !loading" description="暂无课程空间，先创建一个再上传资料" />
 
       <el-row :gutter="20" v-loading="loading">
-        <el-col v-for="space in visibleSpaces" :key="space.id" :span="8" class="space-col">
-          <el-card class="space-card" shadow="hover" @click="selectSpace(space)">
+        <el-col v-for="space in visibleSpaces" :key="space.id" :span="8" class="space-col [margin-bottom:20px]">
+          <el-card class="space-card [cursor:pointer] [transition:transform_0.25s_ease,_box-shadow_0.25s_ease] [border-radius:16px] [border:1px_solid_#dadce0] hover:[transform:translateY(-3px)] hover:[box-shadow:0_10px_24px_rgba(0,_0,_0,_0.08)]" shadow="hover" @click="selectSpace(space)">
             <template #header>
-              <div class="card-header">
-                <span class="card-title">{{ space.name }}</span>
-                <div class="card-header-actions">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+                <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">{{ space.name }}</span>
+                <div class="card-header-actions [display:flex] [align-items:center] [gap:8px]">
                   <el-tag size="small" :type="visibilityTagType(space.docVisibility)">
                     {{ visibilityLabel(space.docVisibility) }}
                   </el-tag>
                   <el-dropdown @click.stop trigger="click">
-                    <el-icon class="card-more"><MoreFilled /></el-icon>
+                    <el-icon class="card-more [cursor:pointer] [font-size:18px] [color:#9aa0a6]"><MoreFilled /></el-icon>
                     <template #dropdown>
                       <el-dropdown-menu>
                         <el-dropdown-item @click="editSpace(space)">编辑</el-dropdown-item>
@@ -52,11 +52,11 @@
             <div class="card-body">
               <p v-if="space.term"><el-icon><Calendar /></el-icon>{{ space.term }}</p>
               <p v-if="space.courseName"><el-icon><Reading /></el-icon>{{ space.courseName }}</p>
-              <p class="card-stats">模式：{{ modeLabel(space.defaultMode) }}</p>
-              <p v-if="space.docVisibility === 'class'" class="card-stats">
+              <p class="card-stats ![color:#6b7280]">模式：{{ modeLabel(space.defaultMode) }}</p>
+              <p v-if="space.docVisibility === 'class'" class="card-stats ![color:#6b7280]">
                 绑定班级：{{ (space.boundClassIds || []).length }}
               </p>
-              <p class="card-stats">文档数：{{ space.docCount || 0 }}</p>
+              <p class="card-stats ![color:#6b7280]">文档数：{{ space.docCount || 0 }}</p>
             </div>
           </el-card>
         </el-col>
@@ -64,21 +64,21 @@
     </div>
 
     <div v-else class="space-detail-view">
-      <div class="detail-header">
+      <div class="detail-header [display:flex] [align-items:center] [gap:12px]">
         <el-button @click="backToList">
           <el-icon><ArrowLeft /></el-icon>
           返回
         </el-button>
         <h2>{{ selectedSpace.name }}</h2>
-        <span v-if="selectedSpace.term" class="detail-meta">{{ selectedSpace.term }}</span>
+        <span v-if="selectedSpace.term" class="detail-meta [color:#5f6368] [font-size:14px] [background:#f1f3f4] [padding:2px_10px] [border-radius:999px]">{{ selectedSpace.term }}</span>
         <el-tag size="small" :type="visibilityTagType(selectedSpace.docVisibility)">
           {{ visibilityLabel(selectedSpace.docVisibility) }}
         </el-tag>
       </div>
 
-      <el-tabs v-model="activeTab" class="detail-tabs">
+      <el-tabs v-model="activeTab" class="detail-tabs [margin-top:16px]">
         <el-tab-pane label="文档管理" name="docs">
-          <el-card class="section-card">
+          <el-card class="section-card [margin-bottom:16px]">
             <template #header>
               <span>上传课程资料</span>
             </template>
@@ -98,8 +98,8 @@
               </template>
             </el-upload>
 
-            <div v-if="pendingFiles.length > 0" class="upload-actions">
-              <el-select v-model="uploadDocType" class="doc-type-select">
+            <div v-if="pendingFiles.length > 0" class="upload-actions [margin-top:12px] [display:flex] [justify-content:flex-end] [gap:8px]">
+              <el-select v-model="uploadDocType" class="doc-type-select [width:160px]">
                 <el-option label="教材" value="textbook" />
                 <el-option label="讲义" value="lecture" />
                 <el-option label="参考书" value="reference" />
@@ -112,34 +112,34 @@
             </div>
           </el-card>
 
-          <div class="doc-summary-grid">
-            <div class="doc-summary-card">
-              <div class="doc-summary-label">文档总数</div>
-              <div class="doc-summary-value">{{ docStatusSummary.total }}</div>
+          <div class="doc-summary-grid [display:grid] [grid-template-columns:repeat(5,_minmax(0,_1fr))] [gap:12px] [margin-bottom:16px]">
+            <div class="doc-summary-card [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
+              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">文档总数</div>
+              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.total }}</div>
             </div>
-            <div class="doc-summary-card success">
-              <div class="doc-summary-label">已就绪</div>
-              <div class="doc-summary-value">{{ docStatusSummary.ready }}</div>
+            <div class="doc-summary-card success [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
+              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">已就绪</div>
+              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.ready }}</div>
             </div>
-            <div class="doc-summary-card warning">
-              <div class="doc-summary-label">处理中</div>
-              <div class="doc-summary-value">{{ docStatusSummary.pending + docStatusSummary.processing }}</div>
+            <div class="doc-summary-card warning [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
+              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">处理中</div>
+              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.pending + docStatusSummary.processing }}</div>
             </div>
-            <div class="doc-summary-card danger">
-              <div class="doc-summary-label">失败</div>
-              <div class="doc-summary-value">{{ docStatusSummary.failed }}</div>
+            <div class="doc-summary-card danger [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
+              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">失败</div>
+              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.failed }}</div>
             </div>
-            <div class="doc-summary-card accent">
-              <div class="doc-summary-label">总分块</div>
-              <div class="doc-summary-value">{{ docStatusSummary.totalChunks }}</div>
+            <div class="doc-summary-card accent [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
+              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">总分块</div>
+              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.totalChunks }}</div>
             </div>
           </div>
 
-          <el-card class="section-card">
+          <el-card class="section-card [margin-bottom:16px]">
             <template #header>
-              <div class="doc-list-header">
+              <div class="doc-list-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
                 <span>文档处理结果</span>
-                <div class="doc-list-actions">
+                <div class="doc-list-actions [display:flex] [align-items:center] [gap:8px]">
                   <el-button link :loading="docsLoading" @click="loadDocuments">刷新</el-button>
                   <el-button link :loading="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</el-button>
                   <el-button type="warning" plain :loading="docActionLoading" @click="reprocessAllDocuments">
@@ -166,8 +166,8 @@
               <el-table-column prop="createdAt" label="创建时间" min-width="180" />
               <el-table-column label="错误信息" min-width="220">
                 <template #default="{ row }">
-                  <span v-if="row.errorMessage" class="error-message">{{ row.errorMessage }}</span>
-                  <span v-else class="muted-text">-</span>
+                  <span v-if="row.errorMessage" class="error-message [color:#f56c6c] [background:#fef0f0] [padding:8px] [border-radius:4px] [margin:0] [color:#d93025] [font-size:12px]">{{ row.errorMessage }}</span>
+                  <span v-else class="muted-text [color:#9aa0a6]">-</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="130" fixed="right">
@@ -188,12 +188,12 @@
         </el-tab-pane>
 
         <el-tab-pane label="知识问答" name="chat">
-          <div class="chat-container">
-            <div ref="chatMessagesRef" class="chat-messages">
-              <div v-if="chatMessages.length === 0" class="chat-empty">
-                <el-icon class="chat-empty-icon"><ChatDotRound /></el-icon>
+          <div class="chat-container [display:flex] [flex-direction:column] [height:520px] [border:1px_solid_#dadce0] [border-radius:16px] [overflow:hidden]">
+            <div ref="chatMessagesRef" class="chat-messages [flex:1] [overflow-y:auto] [padding:16px] [background:#f8fafc]">
+              <div v-if="chatMessages.length === 0" class="chat-empty [text-align:center] [padding:64px_20px] [color:#6b7280]">
+                <el-icon class="chat-empty-icon [font-size:48px] [color:#c3cad6]"><ChatDotRound /></el-icon>
                 <p>向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
-                <div class="chat-suggestions">
+                <div class="chat-suggestions [margin-top:16px] [display:flex] [flex-wrap:wrap] [gap:8px] [justify-content:center]">
                   <el-button v-for="suggestion in suggestions" :key="suggestion" size="small" round @click="askQuestion(suggestion)">
                     {{ suggestion }}
                   </el-button>
@@ -201,26 +201,26 @@
               </div>
 
               <div v-for="(msg, idx) in chatMessages" :key="idx" :class="['chat-msg', msg.role]">
-                <div class="msg-bubble">
+                <div class="msg-bubble [max-width:80%] [padding:10px_14px] [border-radius:14px] [font-size:14px] [line-height:1.7]">
                   <div v-if="msg.role === 'user'" class="msg-text">{{ msg.content }}</div>
                   <div v-else class="msg-text" v-html="renderMarkdown(msg.content)"></div>
-                  <div v-if="msg.citations && msg.citations.length" class="msg-citations">
-                    <span class="citation-label">引用来源：</span>
-                    <el-tag v-for="citation in msg.citations" :key="citation.index" size="small" type="info" class="citation-tag">
+                  <div v-if="msg.citations && msg.citations.length" class="msg-citations [margin-top:8px] [padding-top:8px] [border-top:1px_solid_#e8eaed]">
+                    <span class="citation-label [font-size:12px] [color:#6b7280] [margin-right:4px]">引用来源：</span>
+                    <el-tag v-for="citation in msg.citations" :key="citation.index" size="small" type="info" class="citation-tag [margin:2px]">
                       [{{ citation.index }}] {{ citation.docName }} {{ citation.chapterPath }}
                     </el-tag>
                   </div>
                 </div>
               </div>
 
-              <div v-if="chatLoading" class="chat-msg assistant">
-                <div class="msg-bubble">
-                  <span class="typing-indicator">AI 正在思考...</span>
+              <div v-if="chatLoading" class="chat-msg assistant [margin-bottom:12px] [display:flex] [&.user]:[justify-content:flex-end] [&.assistant]:[justify-content:flex-start]">
+                <div class="msg-bubble [max-width:80%] [padding:10px_14px] [border-radius:14px] [font-size:14px] [line-height:1.7]">
+                  <span class="typing-indicator [color:#6b7280] [font-style:italic]">AI 正在思考...</span>
                 </div>
               </div>
             </div>
 
-            <div class="chat-input-area">
+            <div class="chat-input-area [display:flex] [gap:8px] [padding:12px] [background:#fff] [border-top:1px_solid_#e8eaed] [align-items:flex-end]">
               <el-input
                 v-model="chatInput"
                 type="textarea"
@@ -237,9 +237,9 @@
         </el-tab-pane>
 
         <el-tab-pane label="分块标注" name="annotations">
-          <el-card class="section-card">
+          <el-card class="section-card [margin-bottom:16px]">
             <template #header>
-              <div class="doc-list-header">
+              <div class="doc-list-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
                 <span>知识分块（{{ chunks.length }}）</span>
                 <el-button link :loading="chunksLoading" @click="loadChunksAndAnnotations">刷新</el-button>
               </div>
@@ -247,17 +247,17 @@
 
             <el-empty v-if="chunks.length === 0 && !chunksLoading" description="暂无分块数据，请先上传并处理文档" />
 
-            <div v-else class="chunk-list">
-              <div v-for="chunk in chunks" :key="chunk.id" class="chunk-item">
+            <div v-else class="chunk-list [max-height:520px] [overflow-y:auto]">
+              <div v-for="chunk in chunks" :key="chunk.id" class="chunk-item [padding:14px_4px] [border-bottom:1px_solid_#eef2f7]">
                 <div class="chunk-content">
-                  <span class="chunk-meta">
+                  <span class="chunk-meta [font-size:12px] [color:#6b7280]">
                     [{{ chunk.id }}]
                     {{ chunk.chapterPath || '未分类' }}
                     <template v-if="chunk.pageRange"> / {{ chunk.pageRange }}</template>
                   </span>
                   <p>{{ chunk.contentPreview || '' }}</p>
                 </div>
-                <div class="chunk-actions">
+                <div class="chunk-actions [display:flex] [gap:8px]">
                   <el-button size="small" type="warning" @click="addAnnotation(chunk.id, 'important')">重点</el-button>
                   <el-button size="small" type="danger" @click="addAnnotation(chunk.id, 'error_prone')">易错</el-button>
                 </div>
@@ -283,14 +283,14 @@
           <el-input v-model="spaceForm.description" type="textarea" :rows="2" />
         </el-form-item>
         <el-form-item label="可见范围">
-          <el-select v-model="spaceForm.docVisibility" class="full-width">
+          <el-select v-model="spaceForm.docVisibility" class="full-width [width:100%]">
             <el-option label="公开" value="public" />
             <el-option label="班级可见" value="class" />
             <el-option label="仅教师" value="private" />
           </el-select>
         </el-form-item>
         <el-form-item v-if="spaceForm.docVisibility === 'class'" label="绑定班级">
-          <el-select v-model="spaceForm.classIds" multiple collapse-tags collapse-tags-tooltip class="full-width">
+          <el-select v-model="spaceForm.classIds" multiple collapse-tags collapse-tags-tooltip class="full-width [width:100%]">
             <el-option
               v-for="cls in teacherClasses"
               :key="cls.id"
@@ -300,7 +300,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="默认模式">
-          <el-select v-model="spaceForm.defaultMode" class="full-width">
+          <el-select v-model="spaceForm.defaultMode" class="full-width [width:100%]">
             <el-option label="Strict" value="strict" />
             <el-option label="Open" value="open" />
           </el-select>
@@ -469,7 +469,7 @@ function renderMarkdown(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br>')
-    .replace(/\[(\d+)\]/g, '<sup style="color:#1a73e8;cursor:pointer">[$1]</sup>')
+    .replace(/\[(\d+)\]/g, '<sup class="[color:#1a73e8] [cursor:pointer]">[$1]</sup>')
 }
 
 async function loadSpaces() {
@@ -780,347 +780,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.knowledge-base-container {
-  padding: 0;
-}
 
-.space-actions {
-  margin-bottom: 20px;
-}
-
-.scope-alert {
-  margin-bottom: 20px;
-  border-radius: 16px;
-}
-
-.space-col {
-  margin-bottom: 20px;
-}
-
-.space-card {
-  cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-}
-
-.space-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.card-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: #202124;
-}
-
-.card-more {
-  cursor: pointer;
-  font-size: 18px;
-  color: #9aa0a6;
-}
-
-.card-body p {
-  margin: 6px 0;
-  color: #3c4043;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.card-stats {
-  color: #6b7280 !important;
-}
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.detail-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #202124;
-}
-
-.detail-meta {
-  color: #5f6368;
-  font-size: 14px;
-  background: #f1f3f4;
-  padding: 2px 10px;
-  border-radius: 999px;
-}
-
-.detail-tabs {
-  margin-top: 16px;
-}
-
-.section-card {
-  margin-bottom: 16px;
-}
-
-.upload-actions {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.doc-type-select {
-  width: 160px;
-}
-
-.doc-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.doc-summary-card {
-  padding: 16px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #f8fafc, #eef2ff);
-  border: 1px solid #dbe5f0;
-}
-
-.doc-summary-card.success {
-  background: linear-gradient(135deg, #effaf3, #dcfce7);
-}
-
-.doc-summary-card.warning {
-  background: linear-gradient(135deg, #fff8eb, #fef3c7);
-}
-
-.doc-summary-card.danger {
-  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
-}
-
-.doc-summary-card.accent {
-  background: linear-gradient(135deg, #eef6ff, #dbeafe);
-}
-
-.doc-summary-label {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.doc-summary-value {
-  margin-top: 8px;
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.doc-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.doc-list-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.error-message {
-  color: #d93025;
-  font-size: 12px;
-}
-
-.muted-text {
-  color: #9aa0a6;
-}
-
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 520px;
-  border: 1px solid #dadce0;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  background: #f8fafc;
-}
-
-.chat-empty {
-  text-align: center;
-  padding: 64px 20px;
-  color: #6b7280;
-}
-
-.chat-empty-icon {
-  font-size: 48px;
-  color: #c3cad6;
-}
-
-.chat-suggestions {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-
-.chat-msg {
-  margin-bottom: 12px;
-  display: flex;
-}
-
-.chat-msg.user {
-  justify-content: flex-end;
-}
-
-.chat-msg.assistant {
-  justify-content: flex-start;
-}
-
-.msg-bubble {
-  max-width: 80%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
-.chat-msg.user .msg-bubble {
-  background: #1a73e8;
-  color: #fff;
-  border-bottom-right-radius: 4px;
-}
-
-.chat-msg.assistant .msg-bubble {
-  background: #fff;
-  color: #202124;
-  border: 1px solid #e8eaed;
-  border-bottom-left-radius: 4px;
-}
-
-.msg-citations {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #e8eaed;
-}
-
-.citation-label {
-  font-size: 12px;
-  color: #6b7280;
-  margin-right: 4px;
-}
-
-.citation-tag {
-  margin: 2px;
-}
-
-.typing-indicator {
-  color: #6b7280;
-  font-style: italic;
-}
-
-.chat-input-area {
-  display: flex;
-  gap: 8px;
-  padding: 12px;
-  background: #fff;
-  border-top: 1px solid #e8eaed;
-  align-items: flex-end;
-}
-
-.chat-input-area .el-textarea {
-  flex: 1;
-}
-
-.chunk-list {
-  max-height: 520px;
-  overflow-y: auto;
-}
-
-.chunk-item {
-  padding: 14px 4px;
-  border-bottom: 1px solid #eef2f7;
-}
-
-.chunk-meta {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.chunk-content p {
-  margin: 8px 0;
-  font-size: 14px;
-  color: #334155;
-  line-height: 1.6;
-}
-
-.chunk-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.knowledge-base-container :deep(.el-card) {
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-}
-
-@media (max-width: 1200px) {
-  .doc-summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .doc-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .doc-list-header,
-  .detail-header,
-  .upload-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .doc-list-actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 640px) {
-  .doc-summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .msg-bubble {
-    max-width: 92%;
-  }
-}
-</style>

@@ -1,24 +1,24 @@
 <template>
-  <div class="organize-page">
-    <div class="hero">
-      <div class="hero-text">
+  <div class="organize-page [min-height:100%]">
+    <div class="hero [background:linear-gradient(135deg,_#1a73e8_0%,_#4285f4_100%)] [border-radius:14px] [padding:28px_36px] [margin-bottom:24px] [color:#fff] [position:relative] [overflow:hidden]">
+      <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:24px] [&_h1]:[font-weight:700] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[opacity:0.9]">
         <h1>AI 智能整理</h1>
         <p>支持文档中心整理和隔离 ZIP 整理。ZIP 模式不会把文件写入文档中心，只返回整理后的结果包。</p>
       </div>
     </div>
 
-    <div class="cards-row">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-icon">上传</span>
+    <div class="cards-row [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(420px,_1fr))] [gap:20px]">
+      <div class="card [background:#fff] [border-radius:16px] [padding:24px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,_0,_0,_0.04)]">
+        <div class="card-head [display:flex] [align-items:center] [gap:10px] [margin-bottom:10px] [&_h3]:[margin:0] [&_h3]:[font-size:17px] [&_h3]:[font-weight:600] [&_h3]:[color:#202124]">
+          <span class="card-icon [font-size:14px] [color:#1a73e8] [font-weight:700] [min-width:30px]">上传</span>
           <h3>上传与提交</h3>
         </div>
-        <p class="card-desc">
+        <p class="card-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px] [line-height:1.6]">
           多文件和目录模式沿用文档中心链路。ZIP 一键整理走隔离任务，不会写入文档中心。
         </p>
 
-        <div class="inline-form">
-          <el-input v-model="folderName" placeholder="文件夹名称（可选）" style="width: 240px" />
+        <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
+          <el-input v-model="folderName" placeholder="文件夹名称（可选）" class="[width:240px]" />
           <el-radio-group v-model="uploadMode" size="small">
             <el-radio-button label="files">多文件</el-radio-button>
             <el-radio-button label="zip">隔离 ZIP</el-radio-button>
@@ -27,12 +27,12 @@
         </div>
 
         <template v-if="uploadMode === 'files'">
-          <div class="inline-form" style="margin-top: 12px">
+          <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap] [margin-top:12px]">
             <el-button type="primary" :loading="creating" @click="createFolder">1. 创建文档中心文件夹</el-button>
-            <span v-if="currentFolderId" class="folder-tag">当前文件夹 #{{ currentFolderId }}</span>
+            <span v-if="currentFolderId" class="folder-tag [font-size:12px] [color:#1a73e8] [font-weight:500]">当前文件夹 #{{ currentFolderId }}</span>
           </div>
 
-          <div v-if="currentFolderId" class="upload-area">
+          <div v-if="currentFolderId" class="upload-area [margin-top:14px]">
             <el-upload
               ref="uploadRef"
               v-model:file-list="fileList"
@@ -41,14 +41,14 @@
               drag
               accept=".pdf,.docx,.doc,.pptx,.txt,.md,.csv,.zip"
             >
-              <div class="upload-hint">
+              <div class="upload-hint [text-align:center] [padding:20px] [&_p]:[margin:4px_0] [&_p]:[color:#5f6368] [&_p]:[font-size:13px]">
                 <p>拖拽文件到此处，或点击选择</p>
-                <p class="upload-sub">支持 PDF、DOCX、PPTX、TXT、ZIP 等格式</p>
+                <p class="upload-sub [font-size:12px] [color:#9aa0a6]">支持 PDF、DOCX、PPTX、TXT、ZIP 等格式</p>
               </div>
             </el-upload>
             <el-button
               type="primary"
-              style="margin-top: 12px"
+              class="[margin-top:12px]"
               :loading="submitLoading"
               :disabled="fileList.length === 0"
               @click="uploadAndSubmit"
@@ -74,7 +74,7 @@
               :limit="1"
               drag
               accept=".zip"
-              style="margin-top: 12px"
+              class="[margin-top:12px]"
             >
               <div class="upload-hint">
                 <p>拖拽一个 ZIP 到此处，或点击选择</p>
@@ -83,7 +83,7 @@
             </el-upload>
             <el-button
               type="primary"
-              style="margin-top: 12px"
+              class="[margin-top:12px]"
               :loading="zipSubmitLoading"
               :disabled="zipFileList.length === 0"
               @click="uploadZipAndSubmit"
@@ -97,7 +97,7 @@
           <div class="upload-area">
             <input
               ref="dirInputRef"
-              class="hidden-dir-input"
+              class="hidden-dir-input [display:none]"
               type="file"
               webkitdirectory
               directory
@@ -108,12 +108,12 @@
               <el-button @click="openDirectoryPicker">选择本地目录</el-button>
               <span v-if="selectedDirName" class="folder-tag">已选择：{{ selectedDirName }}</span>
             </div>
-            <p class="upload-sub" style="margin-top: 8px">
+            <p class="upload-sub [margin-top:8px]">
               已选 {{ dirFiles.length }} 个文件，保留原始目录结构上传到文档中心。
             </p>
             <el-button
               type="primary"
-              style="margin-top: 12px"
+              class="[margin-top:12px]"
               :loading="dirSubmitLoading"
               :disabled="dirFiles.length === 0"
               @click="uploadDirectoryAndSubmit"
@@ -130,15 +130,15 @@
           <h3>整理进度</h3>
         </div>
 
-        <div v-if="!jobId" class="empty-hint">提交任务后会在这里展示进度、结果和下载入口。</div>
+        <div v-if="!jobId" class="empty-hint [color:#9aa0a6] [font-size:14px] [text-align:center] [padding:40px_0]">提交任务后会在这里展示进度、结果和下载入口。</div>
 
         <template v-else>
-          <div class="status-bar">
+          <div class="status-bar [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px] [flex-wrap:wrap]">
             <el-tag :type="statusTypeC">{{ statusLabelC }}</el-tag>
             <el-tag size="small" :type="currentJobKind === 'zip' ? 'success' : 'info'">
               {{ currentJobKind === 'zip' ? '隔离 ZIP' : '文档中心' }}
             </el-tag>
-            <span v-if="jobData?.currentStep" class="step-label">
+            <span v-if="jobData?.currentStep" class="step-label [font-size:13px] [color:#5f6368]">
               {{ stepLabels[jobData.currentStep] || jobData.currentStep }}
             </span>
           </div>
@@ -147,35 +147,35 @@
             :percentage="jobData?.progress || 0"
             :stroke-width="10"
             :color="jobData?.status === 'FAILED' ? '#d93025' : '#1a73e8'"
-            style="margin: 12px 0"
+            class="[margin:12px_0]"
           />
 
-          <p v-if="jobData?.stepDetail" class="step-detail">{{ jobData.stepDetail }}</p>
-          <p v-if="jobData?.errorMessage" class="error-msg">{{ jobData.errorMessage }}</p>
+          <p v-if="jobData?.stepDetail" class="step-detail [font-size:12px] [color:#5f6368] [margin:4px_0]">{{ jobData.stepDetail }}</p>
+          <p v-if="jobData?.errorMessage" class="error-msg [font-size:13px] [color:#d93025] [margin:8px_0]">{{ jobData.errorMessage }}</p>
 
           <template v-if="jobData?.status === 'SUCCEEDED' && resultData">
-            <div class="result-summary">
-              <div class="stat">
-                <span class="stat-num">{{ resultData.totalFiles || 0 }}</span>
-                <span class="stat-label">文件</span>
+            <div class="result-summary [display:flex] [gap:24px] [margin:16px_0]">
+              <div class="stat [text-align:center]">
+                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.totalFiles || 0 }}</span>
+                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">文件</span>
               </div>
-              <div class="stat">
-                <span class="stat-num">{{ resultData.reviewCount || 0 }}</span>
-                <span class="stat-label">待确认</span>
+              <div class="stat [text-align:center]">
+                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.reviewCount || 0 }}</span>
+                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">待确认</span>
               </div>
-              <div class="stat">
-                <span class="stat-num">{{ resultData.duplicateCount || 0 }}</span>
-                <span class="stat-label">重复</span>
+              <div class="stat [text-align:center]">
+                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.duplicateCount || 0 }}</span>
+                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">重复</span>
               </div>
             </div>
 
-            <p class="topic-line">主题：{{ resultData.folderTopic || '未识别' }}</p>
-            <div v-if="resultData.folderTags?.length" class="tag-row">
+            <p class="topic-line [font-size:14px] [color:#202124] [margin:8px_0] [font-weight:500]">主题：{{ resultData.folderTopic || '未识别' }}</p>
+            <div v-if="resultData.folderTags?.length" class="tag-row [display:flex] [gap:6px] [flex-wrap:wrap] [margin-bottom:12px]">
               <el-tag v-for="tag in resultData.folderTags" :key="tag" size="small" type="info">{{ tag }}</el-tag>
             </div>
 
-            <div v-if="resultData.files?.length" class="file-table-wrap">
-              <table class="file-table">
+            <div v-if="resultData.files?.length" class="file-table-wrap [max-height:300px] [overflow:auto] [border:1px_solid_#e8eaed] [border-radius:10px] [margin-top:12px]">
+              <table class="file-table [width:100%] [border-collapse:collapse] [font-size:12px]">
                 <thead>
                   <tr>
                     <th>原文件</th>
@@ -203,34 +203,34 @@
               </table>
             </div>
 
-            <el-button type="primary" size="large" style="margin-top: 16px; width: 100%" :loading="downloading" @click="downloadZip">
+            <el-button type="primary" size="large" class="[margin-top:16px] [width:100%]" :loading="downloading" @click="downloadZip">
               下载整理结果 ZIP
             </el-button>
           </template>
 
-          <div v-if="jobData?.status === 'FAILED'" class="action-row">
+          <div v-if="jobData?.status === 'FAILED'" class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
             <el-button type="warning" :loading="retrying" @click="retryJob">重试</el-button>
           </div>
         </template>
 
-        <div class="history-panel">
-          <div class="history-head">
+        <div class="history-panel [margin-top:16px] [padding-top:12px] [border-top:1px_dashed_#d0d7de]">
+          <div class="history-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px] [font-size:13px] [color:#5f6368]">
             <span>{{ uploadMode === 'zip' ? '隔离 ZIP 任务历史' : '文档中心整理历史' }}</span>
             <el-button text size="small" :loading="historyLoading" @click="loadHistory">刷新</el-button>
           </div>
-          <div v-if="historyJobs.length === 0" class="history-empty">暂无历史任务</div>
-          <div v-else class="history-list">
-            <div v-for="job in historyJobs" :key="job.id" class="history-item">
+          <div v-if="historyJobs.length === 0" class="history-empty [color:#9aa0a6] [font-size:12px] [padding:6px_0]">暂无历史任务</div>
+          <div v-else class="history-list [display:flex] [flex-direction:column] [gap:8px] [max-height:220px] [overflow:auto]">
+            <div v-for="job in historyJobs" :key="job.id" class="history-item [display:flex] [justify-content:space-between] [align-items:center] [border:1px_solid_#e8eaed] [border-radius:8px] [padding:8px] [gap:8px] [padding:10px_0]">
               <div class="history-main">
-                <div class="history-title">
+                <div class="history-title [font-size:12px] [color:#202124] [font-weight:600] [font-weight:500] [margin-bottom:5px]">
                   #{{ job.id }} · {{ job.status }}
-                  <el-tag size="small" :type="job.jobKind === 'zip' ? 'success' : 'info'" style="margin-left: 6px">
+                  <el-tag size="small" :type="job.jobKind === 'zip' ? 'success' : 'info'" class="[margin-left:6px]">
                     {{ job.jobKind === 'zip' ? 'ZIP' : '文档中心' }}
                   </el-tag>
                 </div>
-                <div class="history-sub">{{ formatTime(job.createdAt) }}</div>
+                <div class="history-sub [font-size:11px] [color:#80868b] [margin-top:2px]">{{ formatTime(job.createdAt) }}</div>
               </div>
-              <div class="history-actions">
+              <div class="history-actions [display:flex] [gap:6px] [margin-top:5px]">
                 <el-button size="small" @click="openHistoryJob(job)">查看</el-button>
                 <el-button size="small" type="primary" plain :disabled="!job.hasZip" @click="downloadHistoryZip(job)">
                   ZIP
@@ -653,77 +653,4 @@ const kindType = (kind) => {
 }
 </script>
 
-<style scoped>
-.organize-page { min-height: 100%; }
-.hero {
-  background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
-  border-radius: 14px;
-  padding: 28px 36px;
-  margin-bottom: 24px;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.hero::after {
-  content: '';
-  position: absolute;
-  right: -30px;
-  top: -30px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-}
-.hero-text h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
-.hero-text p { margin: 0; font-size: 14px; opacity: 0.9; }
 
-.cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; }
-.card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.card-icon { font-size: 14px; color: #1a73e8; font-weight: 700; min-width: 30px; }
-.card-head h3 { margin: 0; font-size: 17px; font-weight: 600; color: #202124; }
-.card-desc { color: #5f6368; font-size: 13px; margin: 0 0 16px; line-height: 1.6; }
-.inline-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-.upload-area { margin-top: 14px; }
-.hidden-dir-input { display: none; }
-.folder-tag { font-size: 12px; color: #1a73e8; font-weight: 500; }
-.upload-hint { text-align: center; padding: 20px; }
-.upload-hint p { margin: 4px 0; color: #5f6368; font-size: 13px; }
-.upload-sub { font-size: 12px; color: #9aa0a6; }
-.empty-hint { color: #9aa0a6; font-size: 14px; text-align: center; padding: 40px 0; }
-
-.status-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.step-label { font-size: 13px; color: #5f6368; }
-.step-detail { font-size: 12px; color: #5f6368; margin: 4px 0; }
-.error-msg { font-size: 13px; color: #d93025; margin: 8px 0; }
-
-.result-summary { display: flex; gap: 24px; margin: 16px 0; }
-.stat { text-align: center; }
-.stat-num { display: block; font-size: 28px; font-weight: 700; color: #1a73e8; }
-.stat-label { font-size: 12px; color: #5f6368; }
-.topic-line { font-size: 14px; color: #202124; margin: 8px 0; font-weight: 500; }
-.tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-
-.file-table-wrap { max-height: 300px; overflow: auto; border: 1px solid #e8eaed; border-radius: 10px; margin-top: 12px; }
-.file-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.file-table th { background: #f8f9fa; padding: 8px 10px; text-align: left; color: #5f6368; font-weight: 500; position: sticky; top: 0; }
-.file-table td { padding: 6px 10px; border-top: 1px solid #e8eaed; }
-.file-table .fname { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.review-row { background: #fef7e0; }
-.action-row { margin-top: 12px; display: flex; gap: 10px; }
-.history-panel { margin-top: 16px; padding-top: 12px; border-top: 1px dashed #d0d7de; }
-.history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: #5f6368; }
-.history-empty { color: #9aa0a6; font-size: 12px; padding: 6px 0; }
-.history-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow: auto; }
-.history-item { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e8eaed; border-radius: 8px; padding: 8px; gap: 8px; }
-.history-title { font-size: 12px; color: #202124; font-weight: 600; }
-.history-sub { font-size: 11px; color: #80868b; margin-top: 2px; }
-.history-actions { display: flex; gap: 6px; }
-</style>

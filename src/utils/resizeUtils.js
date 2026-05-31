@@ -1,10 +1,11 @@
+import logger from '@/utils/logger'
 /**
  * 调整图表大小
  * @param {Array} charts - 图表实例数组
  */
 export function resizeCharts(charts) {
   if (!charts || !Array.isArray(charts)) {
-    console.error('charts参数必须是数组')
+    logger.error('charts参数必须是数组')
     return
   }
   
@@ -17,7 +18,7 @@ export function resizeCharts(charts) {
         try {
           chart.resize()
         } catch (error) {
-          console.error('调整图表大小失败:', error)
+          logger.error('调整图表大小失败:', error)
         }
       }
     })
@@ -32,13 +33,13 @@ export function resizeCharts(charts) {
 }
 
 /**
- * 使用防抖的图表大小调整 
+ * 使用防抖的图表大小调整
  * @param {Array} charts - 图表实例数组
  * @param {Number} delay - 防抖延迟时间，默认200ms
  */
 export function resizeChartsWithDebounce(charts, delay = 200) {
   if (!charts || !Array.isArray(charts)) {
-    console.error('charts参数必须是数组')
+    logger.error('charts参数必须是数组')
     return
   }
   
@@ -58,7 +59,7 @@ export function resizeChartsWithDebounce(charts, delay = 200) {
           try {
             chart.resize()
           } catch (error) {
-            console.error('调整图表大小失败:', error)
+            logger.error('调整图表大小失败:', error)
           }
         }
       })

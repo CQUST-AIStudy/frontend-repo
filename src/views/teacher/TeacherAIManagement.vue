@@ -1,16 +1,16 @@
 <template>
-  <div class="teacher-ai-management">
+  <div class="teacher-ai-management [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
     <page-header
       class="my-page-header"
       title="教师AI能力管理"
       description="查看教师与学生的AI功能使用概况"
     />
 
-    <div class="management-content">
+    <div class="management-content [display:flex] [flex-direction:column] [gap:20px] [margin-bottom:40px]">
       <!-- 概览统计 -->
-      <el-card class="overview-card">
+      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>AI使用概览</span>
             <el-button type="primary" size="small" @click="refreshData" :loading="loading">
               刷新数据
@@ -18,21 +18,21 @@
           </div>
         </template>
 
-        <div class="stats-cards">
-          <div class="stat-card" v-for="(stat, index) in statistics" :key="index">
-            <div class="stat-value">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
+        <div class="stats-cards [display:flex] [flex-wrap:wrap] [gap:15px] [margin-bottom:20px]">
+          <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]" v-for="(stat, index) in statistics" :key="index">
+            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ stat.value }}</div>
+            <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">{{ stat.label }}</div>
           </div>
         </div>
 
-        <div class="charts-container">
-          <div class="chart-wrapper">
+        <div class="charts-container [display:flex] [flex-wrap:wrap] [gap:20px] [margin-top:10px]">
+          <div class="chart-wrapper [flex:1] [min-width:45%]">
             <h4>各实验完成情况</h4>
-            <div class="chart-container" ref="completionChartRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="completionChartRef"></div>
           </div>
-          <div class="chart-wrapper">
+          <div class="chart-wrapper [flex:1] [min-width:45%]">
             <h4>成绩分布</h4>
-            <div class="chart-container" ref="scoreDistChartRef"></div>
+            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreDistChartRef"></div>
           </div>
         </div>
       </el-card>
@@ -40,12 +40,12 @@
       <!-- 班级学生列表 -->
       <el-card class="teacher-management-card">
         <template #header>
-          <div class="card-header">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>学生实验数据</span>
             <el-input
               v-model="searchQuery"
               placeholder="搜索学生姓名或学号"
-              class="search-input"
+              class="search-input [width:250px]"
               clearable
               prefix-icon="Search"
             />
@@ -54,7 +54,7 @@
 
         <el-table
           :data="pagedStudents"
-          style="width: 100%"
+          class="[width:100%]"
           border
           v-loading="loading"
         >
@@ -70,7 +70,7 @@
           </el-table-column>
           <el-table-column prop="averageScore" label="平均分" width="90" sortable>
             <template #default="{ row }">
-              <span :style="{ color: row.averageScore >= 80 ? '#67C23A' : row.averageScore >= 60 ? '#E6A23C' : '#F56C6C' }">
+              <span :class="averageScoreClass(row.averageScore)">
                 {{ row.averageScore || '-' }}
               </span>
             </template>
@@ -79,7 +79,7 @@
           <el-table-column prop="lowestScore" label="最低分" width="90" />
         </el-table>
 
-        <div class="pagination-container">
+        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
           <el-pagination
             layout="total, sizes, prev, pager, next"
             :total="filteredStudents.length"
@@ -91,13 +91,13 @@
       </el-card>
 
       <!-- AI模型配置 -->
-      <el-card class="model-config-card">
+      <el-card class="model-config-card [margin-bottom:20px]">
         <template #header>
-          <div class="card-header"><span>AI模型配置</span></div>
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>AI模型配置</span></div>
         </template>
         <el-form :model="modelConfig" label-position="top">
           <el-form-item label="AI助手模型">
-            <el-select v-model="modelConfig.model" style="width: 100%">
+            <el-select v-model="modelConfig.model" class="[width:100%]">
               <el-option label="DeepSeek Chat (当前)" value="deepseek-chat" />
               <el-option label="DeepSeek Coder" value="deepseek-coder" />
             </el-select>
@@ -112,7 +112,7 @@
               </el-form-item>
             </el-collapse-item>
           </el-collapse>
-          <el-form-item style="margin-top: 16px">
+          <el-form-item class="[margin-top:16px]">
             <el-button type="primary" @click="saveModelConfig">保存配置</el-button>
           </el-form-item>
         </el-form>
@@ -122,6 +122,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
 import api from '../../api'
@@ -135,6 +136,12 @@ const currentPage = ref(1)
 
 const completionChartRef = ref(null)
 const scoreDistChartRef = ref(null)
+
+function averageScoreClass(score) {
+  if (score >= 80) return '[color:#67C23A]'
+  if (score >= 60) return '[color:#E6A23C]'
+  return '[color:#F56C6C]'
+}
 
 const statistics = ref([
   { label: '学生总数', value: '-' },
@@ -228,7 +235,7 @@ const refreshData = async () => {
     renderCompletionChart(experiments)
     renderScoreDistChart(allScored)
   } catch (e) {
-    console.error('加载数据失败:', e)
+    logger.error('加载数据失败:', e)
     ElMessage.error('加载数据失败: ' + (e.message || ''))
   } finally {
     loading.value = false
@@ -252,7 +259,7 @@ const renderCompletionChart = (experiments) => {
   chart.setOption({
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: names, axisLabel: { rotate: 30, fontSize: 10 } },
-    yAxis: { type: 'value', max: 100, name: '完成率%' },
+    yAxis: { type: 'value', max: 100, name: '完成率' },
     series: [{ type: 'bar', data: rates, itemStyle: { color: '#409EFF' }, barWidth: '50%' }],
     grid: { left: 50, right: 20, bottom: 60, top: 30 }
   })
@@ -313,28 +320,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.management-content { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.search-input { width: 250px; }
-.stats-cards { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-.stat-card {
-  flex: 1; min-width: 180px;
-  background: linear-gradient(135deg, #f8f9fa, #f1f3f4);
-  border-radius: 10px; padding: 18px; text-align: center;
-  border: 1px solid #dadce0;
-}
-.stat-value { font-size: 28px; font-weight: 700; color: #202124; }
-.stat-label { font-size: 13px; color: #5f6368; margin-top: 4px; }
-.charts-container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 10px; }
-.chart-wrapper { flex: 1; min-width: 45%; }
-.chart-wrapper h4 { margin-bottom: 10px; font-weight: 500; color: #202124; }
-.chart-container { height: 320px; }
-.pagination-container { margin-top: 16px; display: flex; justify-content: flex-end; }
-.model-config-card { margin-bottom: 20px; }
-.teacher-ai-management :deep(.el-card) {
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-</style>
+

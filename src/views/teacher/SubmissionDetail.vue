@@ -1,32 +1,32 @@
 <template>
-  <div class="submission-detail">
-    <page-header class="my-page-header" title="学生提交详情" :description="`${studentName} 的实验提交`">
+  <div class="submission-detail [height:100%]">
+    <page-header class="my-page-header [padding:20px]" title="学生提交详情" :description="`${studentName} 的实验提交`">
       <el-button @click="goBack" icon="Back">返回提交列表</el-button>
     </page-header>
 
-    <div class="page-content" v-loading="loading">
+    <div class="page-content [display:flex] [flex-direction:column] [gap:20px]" v-loading="loading">
       <el-row :gutter="20">
-        <!-- 左侧区域：学生信息、统计数据及小卡片 -->
+        <!-- 左侧区域：学生信息、统计数据及小卡片-->
         <el-col :span="6">
           <!-- 学生基本信息卡片 -->
-          <el-card class="info-card">
-            <div class="student-info">
-              <div class="avatar-container text-center">
+          <el-card class="info-card [margin-bottom:0] [margin-bottom:15px] [height:100%]">
+            <div class="student-info [display:flex] [align-items:center] [gap:20px]">
+              <div class="avatar-container text-center [text-align:center]">
                 <el-avatar :size="80"
                            :src="submission.studentAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
               </div>
-              <div class="student-details">
-                <h3 class="text-center">{{ submission.studentName }}</h3>
-                <div class="detail-item">
-                  <span class="label">学号：</span>
+              <div class="student-details [display:flex] [flex-direction:column] [gap:5px] [&_h3]:[margin:0] [&_h3]:[font-size:18px] [&_h3]:[line-height:1.5]">
+                <h3 class="text-center [text-align:center]">{{ submission.studentName }}</h3>
+                <div class="detail-item [font-size:14px] [color:#606266]">
+                  <span class="label [font-weight:500] [margin-right:5px]">学号：</span>
                   <span>{{ submission.studentId }}</span>
                 </div>
-                <div class="detail-item">
-                  <span class="label">班级：</span>
+                <div class="detail-item [font-size:14px] [color:#606266]">
+                  <span class="label [font-weight:500] [margin-right:5px]">班级：</span>
                   <span>{{ submission.class }}</span>
                 </div>
-                <!-- <div class="text-center">
-                  <el-tag :type="getStatusType(submission.status)" effect="dark" size="large" class="status-tag">
+                <!-- <div class="text-center [text-align:center]">
+                  <el-tag :type="getStatusType(submission.status)" effect="dark" size="large" class="status-tag [margin-top:10px] [align-self:flex-start]">
                     {{ getStatusText(submission.status) }}
                   </el-tag>
                 </div> -->
@@ -35,17 +35,17 @@
           </el-card>
 
           <!-- 统计数据卡片 -->
-          <el-card class="stats-card">
+          <el-card class="stats-card [margin-bottom:15px] [&_.stat-grid]:[display:grid] [&_.stat-grid]:[grid-template-columns:1fr] [&_.stat-grid]:[gap:10px] [&_.stat-item]:[background-color:#f7f9fc] [&_.stat-item]:[border-radius:8px] [&_.stat-item]:[padding:15px] [&_.stat-item]:[transition:all_0.3s_ease] [&_.stat-item:hover]:[transform:translateY(-2px)] [&_.stat-item:hover]:[box-shadow:0_2px_12px_0_rgba(0,_0,_0,_0.1)] [margin-top:auto]">
             <div class="stat-grid">
-              <div class="stat-item">
-                <div class="stat-label">上机成绩评分</div>
-                <div class="stat-value" :class="{ 'highlighted': submission.status === 'graded' }">
+              <div class="stat-item [text-align:center] [padding:10px]">
+                <div class="stat-label [font-size:14px] [color:#909399] [margin-bottom:5px] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">上机成绩评分</div>
+                <div class="stat-value [font-size:24px] [font-weight:600] [color:#303133] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]" :class="{ 'highlighted': submission.status === 'graded' }">
                   {{ submission.score !== null ? submission.score : '未评分' }}
                 </div>
               </div>
-              <div class="stat-item">
-                <div class="stat-label">查重率</div>
-                <div class="stat-value" :class="{
+              <div class="stat-item [text-align:center] [padding:10px]">
+                <div class="stat-label [font-size:14px] [color:#909399] [margin-bottom:5px] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">查重率</div>
+                <div class="stat-value [font-size:24px] [font-weight:600] [color:#303133] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]" :class="{
                   'low-plagiarism': submission.plagiarismRate < 15,
                   'medium-plagiarism': submission.plagiarismRate >= 15 && submission.plagiarismRate < 30,
                   'high-plagiarism': submission.plagiarismRate >= 30
@@ -53,23 +53,23 @@
                   {{ submission.plagiarismRate !== null ? `${submission.plagiarismRate}%` : '未检测' }}
                 </div>
               </div>
-              <div v-if="submitDisplayTime" class="stat-item">
-                <div class="stat-label">提交时间</div>
-                <div class="stat-value time-value">{{ submitDisplayTime }}</div>
+              <div v-if="submitDisplayTime" class="stat-item [text-align:center] [padding:10px]">
+                <div class="stat-label [font-size:14px] [color:#909399] [margin-bottom:5px] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">提交时间</div>
+                <div class="stat-value time-value [font-size:24px] [font-weight:600] [color:#303133] [font-size:18px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submitDisplayTime }}</div>
               </div>
             </div>
           </el-card>
 
           <!-- 操作按钮卡片 -->
-          <el-card class="action-card">
+          <el-card class="action-card [margin-bottom:15px] [&_.action-buttons]:[display:flex] [&_.action-buttons]:[flex-direction:column] [&_.action-buttons]:[gap:10px]">
             <div class="action-buttons">
-              <el-button type="primary" @click="openGradeDialog" class="full-width-btn">
+              <el-button type="primary" @click="openGradeDialog" class="full-width-btn [margin-left:0] [width:100%]">
                 <el-icon>
                   <Edit />
                 </el-icon>{{ submission.status === 'graded' ? '重新评分' : '评分' }}
               </el-button>
               <!-- <el-button type="danger" @click="rejectSubmission" v-if="submission.status !== 'rejected'"
-                class="full-width-btn">
+                class="full-width-btn [margin-left:0] [width:100%]">
                 <el-icon>
                   <Close />
                 </el-icon>拒绝提交
@@ -81,7 +81,7 @@
                 @click="generateAIComment"
                 :loading="generatingComment"
                 :disabled="generatingComment"
-                class="full-width-btn"
+                class="full-width-btn [margin-left:0] [width:100%]"
               >
                 <el-icon><Magic /></el-icon>AI辅助评测
               </el-button> -->
@@ -90,10 +90,10 @@
           </el-card>
 
           <!-- AI评测结果卡片 -->
-          <!-- <el-card class="ai-comment-card" v-if="submission.aiComment">
+          <!-- <el-card class="ai-comment-card [margin-bottom:20px] [margin-bottom:15px]" v-if="submission.aiComment">
             <template #header>
-              <div class="card-header">
-                <div class="ai-header">
+              <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+                <div class="ai-header [display:flex] [align-items:center] [gap:10px] [justify-content:space-between] [gap:12px]">
                   <el-icon>
                     <Magic />
                   </el-icon>
@@ -114,7 +114,7 @@
                 </div>
               </div>
             </template>
-<div class="ai-comment-content">
+<div class="ai-comment-content [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
   {{ submission.aiComment }}
 </div>
 </el-card> -->
@@ -122,13 +122,13 @@
 
         <!-- 右侧区域：代码和报告内容 -->
         <el-col :span="18">
-          <!-- 提交内容标签页 -->
-          <el-card class="content-card">
-            <el-tabs v-model="activeTab" class="main-tabs">
+          <!-- 提交内容标签页-->
+          <el-card class="content-card [height:80vh] [margin-bottom:50px]">
+            <el-tabs v-model="activeTab" class="main-tabs [height:70vh]">
               <el-tab-pane label="代码" name="code">
-                <div class="code-header">
+                <div class="code-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_#eee] [margin-bottom:15px] [padding-right:10px]">
                   <h3>实验代码</h3>
-                  <div class="code-actions">
+                  <div class="code-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
                     <el-button type="info" @click="copyCode">
                       <el-icon>
                         <CopyDocument />
@@ -166,19 +166,19 @@
                 </div>
 
                 <!-- 题目列表显示 -->
-                <el-tabs v-model="activeQuestionTab" tab-position="left" class="question-tabs"
+                <el-tabs v-model="activeQuestionTab" tab-position="left" class="question-tabs [margin-bottom:20px] [border:1px_solid_#ebeef5] [border-radius:4px]"
                          v-if="submission.code">
                   <el-tab-pane label="完整源码" name="full">
-                    <div class="question-container">
-                      <pre class="code-display"><code>{{ submission.code }}</code></pre>
+                    <div class="question-container [padding:15px]">
+                      <pre class="code-display [background-color:#f5f7fa] [border-radius:4px] [padding:16px] [overflow-x:auto] [font-family:monospace] [line-height:1.5] [padding:15px] [font-family:'Courier_New',_monospace] [white-space:pre-wrap] [font-size:14px] [max-height:500px] [overflow-y:auto]"><code>{{ submission.code }}</code></pre>
                     </div>
                   </el-tab-pane>
-                  <el-tab-pane v-for="(question, index) in parsedQuestions" :key="index" :label="`第${question.number}题`"
+              <el-tab-pane v-for="(question, index) in parsedQuestions" :key="index" :label="`第${question.number}题`"
                                :name="String(index)">
-                    <div class="question-container">
-                      <pre class="code-display"><code>{{ question.code }}</code></pre>
+                    <div class="question-container [padding:15px]">
+                      <pre class="code-display [background-color:#f5f7fa] [border-radius:4px] [padding:16px] [overflow-x:auto] [font-family:monospace] [line-height:1.5] [padding:15px] [font-family:'Courier_New',_monospace] [white-space:pre-wrap] [font-size:14px] [max-height:500px] [overflow-y:auto]"><code>{{ question.code }}</code></pre>
 
-                      <div class="test-results" v-if="question.testResults">
+                      <div class="test-results [margin-top:15px] [padding:10px] [background-color:#f8f8f8] [border-radius:4px]" v-if="question.testResults">
                         <h4>测试结果</h4>
                         <div v-html="formatTestResults(question.testResults)"></div>
                       </div>
@@ -186,10 +186,10 @@
                       <el-divider content-position="left">教师评语</el-divider>
 
                       <!-- 在评语编辑区添加ref引用 -->
-                      <div class="comment-edit" ref="commentDivs">
-                        <el-input v-model="question.comment" type="textarea" :rows="3" placeholder="请输入对本题的评语..."
+                      <div class="comment-edit [padding:10px_0]" ref="commentDivs">
+                        <el-input v-model="question.comment" type="textarea" :rows="3" placeholder="请输入对本题的评语.."
                                   @input="updateQuestionComment(index, $event)" />
-                        <div class="comment-actions">
+                        <div class="comment-actions [display:flex] [justify-content:flex-end] [margin-top:10px]">
                           <el-button type="primary" size="small" @click="saveQuestionComment(index)"
                                      :loading="question.saving">
                             保存评语
@@ -204,21 +204,21 @@
                 <el-empty v-else description="暂无代码提交"></el-empty>
 
                 <!-- 代码运行结果 -->
-                <div class="code-result" v-if="codeResult">
-                  <div class="result-header">
+                <div class="code-result [margin-top:20px] [border-top:1px_solid_#ebeef5] [padding-top:15px]" v-if="codeResult">
+                  <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
                     <h3>运行结果</h3>
                     <el-tag :type="codeResult.success ? 'success' : 'danger'">
                       {{ codeResult.success ? '运行成功' : '运行失败' }}
                     </el-tag>
                   </div>
-                  <pre class="result-output">{{ codeResult.output }}</pre>
+                  <pre class="result-output [background-color:#f5f7fa] [border-radius:4px] [padding:15px] [font-family:'Courier_New',_monospace] [max-height:200px] [overflow-y:auto] [white-space:pre-wrap] [font-size:14px] [line-height:1.5]">{{ codeResult.output }}</pre>
                 </div>
               </el-tab-pane>
 
               <el-tab-pane label="实验报告" name="report">
-                <div class="report-header">
+                <div class="report-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:15px] [padding-right:10px]">
                   <h3>实验报告</h3>
-                  <div class="report-actions">
+                  <div class="report-actions [display:flex] [gap:10px] [margin-top:25px]">
                     <!-- <el-button type="primary" round size="small" @click="printReport">
                       <el-icon>
                         <Printer />
@@ -259,7 +259,7 @@
                   </div>
                 </div>
 
-                <div v-if="submission.report" class="report-container">
+                <div v-if="submission.report" class="report-container [max-width:1024px] [margin:0_auto] [padding:20px] [background:#fff]">
                   <!-- 使用标准报告组件 -->
                   <report-generator :report-data="reportData" @update:report-data="handleReportDataUpdate"
                                     ref="reportGeneratorRef" />
@@ -276,10 +276,10 @@
                 <el-timeline>
                   <el-timeline-item v-for="(item, index) in submissionHistory" :key="index" :timestamp="item.time"
                     :color="getHistoryItemColor(item.type)">
-                    <div class="history-item">
-                      <div class="history-title">{{ item.title }}</div>
-                      <div class="history-content">{{ item.content }}</div>
-                      <div class="history-actions" v-if="item.code">
+                    <div class="history-item [display:flex] [justify-content:space-between] [align-items:center] [border:1px_solid_#e8eaed] [border-radius:8px] [padding:8px] [gap:8px] [padding:10px_0]">
+                      <div class="history-title [font-size:12px] [color:#202124] [font-weight:600] [font-weight:500] [margin-bottom:5px]">{{ item.title }}</div>
+                      <div class="history-content [color:#606266] [font-size:14px]">{{ item.content }}</div>
+                      <div class="history-actions [display:flex] [gap:6px] [margin-top:5px]" v-if="item.code">
                         <el-button type="primary" round size="small" @click="viewHistoryCode(item)">
                           查看代码
                         </el-button>
@@ -296,31 +296,31 @@
 
                 <el-row :gutter="20">
                   <el-col :span="12">
-                    <el-card class="chart-card" shadow="hover">
+                    <el-card class="chart-card [margin-bottom:20px] [height:400px]" shadow="hover">
                       <template #header>
-                        <div class="chart-header">
+                        <div class="chart-header [display:flex] [align-items:center]">
                           <span>实验成绩趋势</span>
                         </div>
                       </template>
-                      <div class="chart-container" ref="scoreChartContainer"></div>
+                      <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreChartContainer"></div>
                     </el-card>
                   </el-col>
 
                   <el-col :span="12">
-                    <el-card class="chart-card" shadow="hover">
+                    <el-card class="chart-card [margin-bottom:20px] [height:400px]" shadow="hover">
                       <template #header>
-                        <div class="chart-header">
+                        <div class="chart-header [display:flex] [align-items:center]">
                           <span>实验完成情况</span>
                         </div>
                       </template>
-                      <div class="chart-container" ref="completionChartContainer"></div>
+                      <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="completionChartContainer"></div>
                     </el-card>
                   </el-col>
                 </el-row>
 
-                <el-card class="performance-card" shadow="hover">
+                <el-card class="performance-card [margin-top:20px]" shadow="hover">
                   <template #header>
-                    <div class="card-header">
+                    <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                       <span>综合表现评估</span>
                       <!-- <el-button type="primary" round size="small" @click="generatePerformanceReport">
                         生成综合评估报告
@@ -338,7 +338,7 @@
                       {{ studentPerformance.completionRate }}%
                     </el-descriptions-item>
                     <el-descriptions-item label="班级排名">
-                      第 {{ studentPerformance.classRank }} 名
+                      第{{ studentPerformance.classRank }} 名
                     </el-descriptions-item>
                     <el-descriptions-item label="作业提交及时性">
                       <el-rate v-model="studentPerformance.punctuality" disabled show-score
@@ -354,9 +354,9 @@
                     </el-descriptions-item>
                   </el-descriptions>
 
-                  <div class="performance-analysis">
+                  <div class="performance-analysis [margin-top:20px]">
                     <h4>AI助教点评</h4>
-                    <div class="ai-comment-content" v-html="renderMarkdown(submission.aiRemarks)"></div>
+                    <div class="ai-comment-content [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]" v-html="renderMarkdown(submission.aiRemarks)"></div>
                   </div>
 
                   <el-divider />
@@ -365,9 +365,9 @@
                     <h4>学习建议</h4>
                     <el-collapse v-if="learningRecommendations.length > 0">
                       <el-collapse-item v-for="(rec, index) in learningRecommendations" :key="index" :title="rec.title">
-                        <div class="recommendation-content">
+                        <div class="recommendation-content [padding:10px_0]">
                           <p>{{ rec.content }}</p>
-                          <div class="resource-links" v-if="rec.resources && rec.resources.length">
+                          <div class="resource-links [margin-top:10px]" v-if="rec.resources && rec.resources.length">
                             <h5>推荐资源：</h5>
                             <ul>
                               <li v-for="(resource, rIndex) in rec.resources" :key="rIndex">
@@ -388,7 +388,7 @@
       </el-row>
     </div>
 
-    <!-- 评分对话框 -->
+    <!-- 评分对话框-->
     <el-dialog v-model="gradeDialogVisible" title="评分" width="500px">
       <el-form :model="gradeForm" label-width="100px">
         <el-form-item label="学生">
@@ -400,35 +400,36 @@
         </el-form-item>
 
         <el-form-item label="上机成绩得分" prop="score">
-          <el-input-number v-model="gradeForm.score" :min="0" :max="100" :precision="1" style="width: 150px;" />
+          <el-input-number v-model="gradeForm.score" :min="0" :max="100" :precision="1" class="[width:150px]" />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="gradeDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitGrade">提交评分</el-button>
         </div>
       </template>
     </el-dialog>
 
-    <!-- 历史代码对话框 -->
+    <!-- 历史代码对话框-->
     <el-dialog v-model="historyCodeVisible" :title="selectedHistory ? selectedHistory.title : '历史代码'" width="70%">
       <div v-if="selectedHistory" class="history-code-dialog">
-        <div class="history-info">
+        <div class="history-info [margin-bottom:15px] [padding-bottom:15px] [border-bottom:1px_solid_#ebeef5]">
           <div><strong>提交时间：</strong>{{ selectedHistory.time }}</div>
           <div><strong>描述：</strong>{{ selectedHistory.content }}</div>
         </div>
-        <pre class="code-display"><code>{{ selectedHistory.code }}</code></pre>
+        <pre class="code-display [background-color:#f5f7fa] [border-radius:4px] [padding:16px] [overflow-x:auto] [font-family:monospace] [line-height:1.5] [padding:15px] [font-family:'Courier_New',_monospace] [white-space:pre-wrap] [font-size:14px] [max-height:500px] [overflow-y:auto]"><code>{{ selectedHistory.code }}</code></pre>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 import api from '../../api'
 import PageHeader from '../../components/PageHeader.vue'
 import { marked } from 'marked'
@@ -444,8 +445,7 @@ import {
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import {
-  VideoPlay, Warning, CopyDocument, Document, ArrowDown, Download,
-  Operation, Printer, Magic, ChatLineRound, Check, Close, Edit
+  CopyDocument, Document, ArrowDown, Download, Edit
 } from '@element-plus/icons-vue'
 import ReportGenerator from '../../components/ReportGenerator.vue'
 // 引入 DocxGenerator
@@ -520,7 +520,6 @@ const gradeForm = reactive({
   aiComment: '',
   teacherComment: ''
 })
-const generatingComment = ref(false)
 
 // 历史记录相关
 const submissionHistory = ref([])
@@ -544,8 +543,6 @@ const learningRecommendations = ref([])
 // 新增报告相关变量
 const reportData = ref({})
 const reportGeneratorRef = ref(null)
-const isEditingComment = ref(false)
-const editingTeacherComment = ref('')
 
 
 
@@ -632,7 +629,7 @@ const renderMarkdown = (text) => {
 
 const splitAiRemarksToQuestions = () => {
   const aiRemarks = submission.value.aiRemarks || '';
-  // 假设格式：第1题评语: ... 第2题评语: ... 总评语: ...
+  // 假设格式：第1题评语 ... 第题评语 ... 总评语 ...
   const questionRegex = /题目\s*([123456789\d]+)[:：]([\s\S]*?)(?=题目[123456789\d]+[:：]|总体评估|$)/g;
   const summaryRegex = /总体评估([\s\S]*)$/;
   let match;
@@ -664,11 +661,11 @@ const generateCommentImage = async (question) => {
   commentContainer.style.left = '-9999px';
   commentContainer.style.top = '-9999px';
   commentContainer.innerHTML = `
-    <div style="padding:15px; border:1px solid #ddd; background:#f9f9f9; width:100%; box-sizing:border-box;">
-      <h3 style="margin-top:0; color:#333; font-size:16px; border-bottom:1px solid #eee; padding-bottom:8px; color: red" class="handwritten-title">
+    <div class="[padding:15px] [border:1px_solid_#ddd] [background:#f9f9f9] [width:100%] [box-sizing:border-box]">
+      <h3 class="[margin-top:0] [color:#333] [font-size:16px] [border-bottom:1px_solid_#eee] [padding-bottom:8px] [color:red]" class="handwritten-title">
         教师评语：
       </h3>
-      <div style="color:#333; line-height:1.5; font-size:14px; white-space:pre-wrap; color: red" class="handwritten-romantic">
+      <div class="[color:#333] [line-height:1.5] [font-size:14px] [white-space:pre-wrap] [color:red]" class="handwritten-romantic">
         ${question.comment.replace(/\n/g, '<br>')}
       </div>
     </div>
@@ -717,11 +714,11 @@ const saveQuestionComment = async (index) => {
 
     // 修改评语容器HTML部分
     commentContainer.innerHTML = `
-  <div style="padding:15px; border:1px solid #ddd; background:#f9f9f9; width:100%; box-sizing:border-box;">
-    <h3 style="margin-top:0; color:#333; font-size:16px; border-bottom:1px solid #eee; padding-bottom:8px; color: red" class="handwritten-title">
+  <div class="[padding:15px] [border:1px_solid_#ddd] [background:#f9f9f9] [width:100%] [box-sizing:border-box]">
+    <h3 class="[margin-top:0] [color:#333] [font-size:16px] [border-bottom:1px_solid_#eee] [padding-bottom:8px] [color:red]" class="handwritten-title">
       教师评语：
     </h3>
-    <div style="color:#333; line-height:1.5; font-size:14px; white-space:pre-wrap; color: red" class="handwritten-romantic">
+    <div class="[color:#333] [line-height:1.5] [font-size:14px] [white-space:pre-wrap] [color:red]" class="handwritten-romantic">
       ${question.comment.replace(/\n/g, '<br>')}
     </div>
   </div>
@@ -753,10 +750,10 @@ const saveQuestionComment = async (index) => {
     question.commentImageWidth = imageWidth;
 
     updateReportWithComments();
-    ElMessage.success(`第${question.number}题评语保存成功`);
+      ElMessage.success(`第${question.number}题评语保存成功`);
   } catch (error) {
-    console.error('保存评语失败:', error);
-    ElMessage.error(`第${question.number}题评语保存失败: ${error.message}`);
+    logger.error('保存评语失败:', error);
+      ElMessage.error(`第${question.number}题评语保存失败 ${error.message}`);
   } finally {
     question.saving = false;
   }
@@ -767,7 +764,7 @@ const ensureFontsLoaded = () => {
   return new Promise((resolve) => {
     // 使用FontFaceObserver库检查字体加载
     // 如果不使用该库，可以使用简单的超时方法
-    setTimeout(resolve, 500); // 给字体加载预留500ms时间
+    setTimeout(resolve, 500); // 给字体加载预留00ms时间
 
     // 如果使用FontFaceObserver库，代码会是：
     // const zitangKai = new FontFaceObserver('ZitangKai');
@@ -785,7 +782,7 @@ const updateReportWithComments = () => {
   // 构建steps内容，包含题目、代码和评语图片
   let stepsContent = '';
   parsedQuestions.value.forEach((question) => {
-    stepsContent += `### 第${question.number}题\n\n`;
+      stepsContent += `### 第${question.number}题\n\n`;
     stepsContent += '```c\n' + question.code + '\n```\n\n';
 
     // 如果有评语图片，添加评语图片标记
@@ -794,7 +791,7 @@ const updateReportWithComments = () => {
     }
     // 如果只有文字评语但没有图片，保留文字评语作为备选
     else if (question.comment) {
-      stepsContent += `**教师评语**：${question.comment}\n\n`;
+        stepsContent += `**教师评语**：${question.comment}\n\n`;
     }
   });
 
@@ -896,7 +893,7 @@ const loadSubmissionHistory = async () => {
       time: formatDateTime(item.time)
     }))
   } catch (error) {
-    console.error('加载提交历史失败:', error)
+    logger.error('加载提交历史失败:', error)
     submissionHistory.value = []
   }
 }
@@ -947,7 +944,7 @@ const loadLearningRecommendations = async () => {
     }
     learningRecommendations.value = recs
   } catch (error) {
-    console.error('加载学习建议失败:', error)
+    logger.error('加载学习建议失败:', error)
     learningRecommendations.value = []
   }
 }
@@ -987,7 +984,7 @@ const loadStudentPerformance = async () => {
     // 及时性评分（基于完成率，5分制）
     studentPerformance.punctuality = Math.min(5, Math.round(studentPerformance.completionRate / 20 * 10) / 10)
 
-    // 代码质量评分（基于平均分，5分制）
+    // 代码质量评分（基于平均分，分制）
     studentPerformance.codeQuality = Math.min(5, Math.round(studentPerformance.averageScore / 20 * 10) / 10)
 
     // 参与度（基于提交数量占总实验比例，5分制）
@@ -996,7 +993,7 @@ const loadStudentPerformance = async () => {
     // 更新图表
     updatePerformanceCharts(studentSubs, allData)
   } catch (error) {
-    console.error('加载学生表现数据失败:', error)
+    logger.error('加载学生表现数据失败:', error)
   }
 }
 
@@ -1162,11 +1159,11 @@ const submitGrade = async () => {
     // 直接更新报告数据中的成绩
     if (reportData.value) {
       reportData.value.score = gradeForm.score;
-      console.log('评分后更新报告数据:', reportData.value);
+      logger.debug('评分后更新报告数据', reportData.value);
     } else {
       // 如果报告数据还没准备好，创建它
       prepareReportData();
-      console.log('评分后初始化报告数据:', reportData.value);
+      logger.debug('评分后初始化报告数据:', reportData.value);
     }
 
     // 更新报告中的评语内容
@@ -1176,12 +1173,12 @@ const submitGrade = async () => {
     if (activeTab.value === 'report' && reportGeneratorRef.value) {
       // 使用 nextTick 确保在DOM更新后执行
       nextTick(() => {
-        console.log('尝试调用 updateReport 方法...');
+        logger.debug('尝试调用 updateReport 方法...');
         if (typeof reportGeneratorRef.value.updateReport === 'function') {
-          console.log('调用 updateReport 方法成功');
+          logger.debug('调用 updateReport 方法成功');
           reportGeneratorRef.value.updateReport();
         } else {
-          console.warn('ReportGenerator 组件缺少 updateReport 方法');
+          logger.warn('ReportGenerator 组件缺少 updateReport 方法');
         }
       });
     }
@@ -1189,14 +1186,14 @@ const submitGrade = async () => {
     gradeDialogVisible.value = false
     ElMessage.success('评分成功')
   } catch (error) {
-    console.error('评分失败:', error)
+    logger.error('评分失败:', error)
     ElMessage.error('评分失败，请稍后重试')
   }
 }
 
 // 拒绝提交
 // const rejectSubmission = () => {
-//   ElMessageBox.confirm('确定要拒绝此次提交吗？学生将需要重新提交。', '提示', {
+//   ElMessageBox.confirm('确定要拒绝此次提交吗？学生将需要重新提交。, '提示', {
 //     confirmButtonText: '确定',
 //     cancelButtonText: '取消',
 //     type: 'warning'
@@ -1204,101 +1201,19 @@ const submitGrade = async () => {
 //     try {
 //       // await api.rejectSubmission(submissionId.value)
 //       submission.value.status = 'rejected'
-//       ElMessage.success('已拒绝此次提交')
+//       ElMessage.success('已拒绝此次提交)
 //     } catch (error) {
-//       console.error('操作失败:', error)
+//       logger.error('操作失败:', error)
 //       ElMessage.error('操作失败，请稍后重试')
 //     }
 //   }).catch(() => { })
 // }
 
-// 生成AI评语
-const generateAIComment = async () => {
-  generatingComment.value = true
-  try {
-    // 这里应该调用API生成AI评语
-    // const result = await api.generateAIComment(submissionId.value)
-
-    // 模拟生成
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    const aiComment = '代码实现了基本的链表功能，包括创建、插入和遍历操作。优点是结构清晰，函数命名规范；不足之处是缺少必要的错误处理，例如内存分配失败的情况没有处理。' +
-        '建议优化内存管理，添加链表删除节点的功能，并完善错误处理机制。总体来说，这是一个良好的实现，展示了对链表基本概念的理解。'
-
-    if (gradeDialogVisible.value) {
-      gradeForm.aiComment = aiComment
-    } else {
-      submission.value.aiComment = aiComment
-    }
-
-    ElMessage.success('AI评语生成成功')
-  } catch (error) {
-    console.error('生成AI评语失败:', error)
-    ElMessage.error('生成AI评语失败，请稍后重试')
-  } finally {
-    generatingComment.value = false
-  }
-}
-
-// 修改AI评语
-const editAIComment = () => {
-  ElMessageBox.prompt('请修改AI评语', '修改评语', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputType: 'textarea',
-    inputValue: submission.value.aiComment,
-    inputPlaceholder: '请输入修改后的AI评语'
-  }).then(({ value }) => {
-    submission.value.aiComment = value
-    ElMessage.success('AI评语已修改')
-  }).catch(() => { })
-}
-
-// 重新生成AI评语
-const regenerateAIComment = () => {
-  ElMessageBox.confirm('确定要重新生成AI评语吗？这将覆盖当前的评语。', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    generateAIComment()
-  }).catch(() => { })
-}
-
-// 修改教师评语
-const editTeacherComment = () => {
-  editingTeacherComment.value = submission.value.teacherComment || ''
-  isEditingComment.value = true
-}
-
-// 保存教师评语
-const saveTeacherComment = async () => {
-  try {
-    // 这里应该调用API保存评语
-    // await api.saveTeacherComment(submissionId.value, editingTeacherComment.value)
-
-    // 更新本地数据
-    submission.value.teacherComment = editingTeacherComment.value
-
-    isEditingComment.value = false
-    ElMessage.success('评语保存成功')
-  } catch (error) {
-    console.error('保存评语失败:', error)
-    ElMessage.error('保存评语失败，请稍后重试')
-  }
-}
-
-// 取消编辑评语
-const cancelEditComment = () => {
-  isEditingComment.value = false
-  editingTeacherComment.value = submission.value.teacherComment || ''
-}
-
 // 准备报告数据
 const prepareReportData = () => {
   if (!submission.value) return
 
-  console.log('准备报告数据，当前成绩:', submission.value.score) // 调试日志
+  logger.debug('准备报告数据，当前成绩', submission.value.score) // 调试日志
 
   // 基础信息
   reportData.value = {
@@ -1340,7 +1255,7 @@ const prepareReportData = () => {
           report.match(/##?\s*心得体会[^\n]*\n+([\s\S]+?)(?=$)/i)
       if (summaryMatch) reportData.value.summary = summaryMatch[1].trim()
     } catch (e) {
-      console.error('解析报告内容失败:', e)
+      logger.error('解析报告内容失败:', e)
     }
   }
 
@@ -1349,7 +1264,7 @@ const prepareReportData = () => {
     updateReportWithComments()
   }
 
-  console.log('报告数据准备完成，成绩值:', reportData.value.score) // 调试日志
+  logger.debug('报告数据准备完成，成绩值', reportData.value.score) // 调试日志
 }
 
 // 处理报告数据更新
@@ -1373,12 +1288,12 @@ const handleReportDataUpdate = (newData) => {
 
 //     ElMessage.success('代码运行成功')
 //   } catch (error) {
-//     console.error('代码运行失败:', error)
+//     logger.error('代码运行失败:', error)
 //     ElMessage.error('代码运行失败')
 
 //     codeResult.value = {
 //       success: false,
-//       output: "编译错误:\nError: undefined reference to 'printLinkedList'\n代码编译失败，请检查函数声明和定义。"
+//       output: "编译错误:\nError: undefined reference to 'printLinkedList'\n代码编译失败，请检查函数声明和定义。
 //     }
 //   }
 // }
@@ -1417,7 +1332,7 @@ const downloadCode = () => {
 // // 下载报告
 // const downloadReport = () => {
 //   if (!submission.value.report) {
-//     ElMessage.warning('没有报告可下载')
+//     ElMessage.warning('没有报告可下载)
 //     return
 //   }
 
@@ -1445,7 +1360,7 @@ const downloadWordDoc = async () => {
       exportData.score = String(submission.value.score)
     }
 
-    console.log('下载Word文档时的成绩:', exportData.score)
+    logger.debug('下载Word文档时的成绩:', exportData.score)
 
     // 如果有教师评语，将其添加到报告数据中
     if (submission.value.teacherComment) {
@@ -1458,13 +1373,13 @@ const downloadWordDoc = async () => {
     const docxGenerator = new DocxGenerator()
     const blob = await docxGenerator.generateStandardReport(exportData)
 
-    // 下载文件名格式: 学号_姓名_实验名称.docx
+    // 下载文件名格式 学号_姓名_实验名称.docx
     const fileName = `${submission.value.studentId}_${submission.value.studentName}_${submission.value.experimentName}.docx`
     DocxGenerator.downloadReport(blob, fileName)
 
     ElMessage.success('Word文档下载成功')
   } catch (error) {
-    console.error('生成Word文档失败:', error)
+    logger.error('生成Word文档失败:', error)
     ElMessage.error('生成Word文档失败，请稍后重试')
   }
 }
@@ -1475,7 +1390,7 @@ const downloadPDF = async () => {
     // 显示加载提示
     const loadingInstance = ElLoading.service({
       lock: true,
-      text: 'PDF生成中，请稍候...',
+      text: 'PDF生成中，请稍候..',
       background: 'rgba(0, 0, 0, 0.7)'
     });
 
@@ -1487,18 +1402,18 @@ const downloadPDF = async () => {
       exportData.score = String(submission.value.score);
     }
 
-    console.log('下载PDF文档时的成绩:', exportData.score);
+    logger.debug('下载PDF文档时的成绩:', exportData.score);
 
     // 如果有教师评语，将其添加到报告数据中
     if (submission.value.teacherComment) {
       exportData.teacherComment = submission.value.teacherComment;
     }
 
-    // 先生成 Word 文档
+    // 先生成Word 文档
     const docxGenerator = new DocxGenerator();
     const wordBlob = await docxGenerator.generateStandardReport(exportData);
 
-    // 发送 Word 文档到服务器进行转换
+    // 发送Word 文档到服务器进行转换
     const formData = new FormData();
     formData.append('wordFile', new Blob([wordBlob]), 'report.docx');
 
@@ -1522,7 +1437,7 @@ const downloadPDF = async () => {
 
     ElMessage.success('PDF文档下载成功');
   } catch (error) {
-    console.error('生成PDF文档失败:', error);
+    logger.error('生成PDF文档失败:', error);
     ElMessage.error('生成PDF文档失败，请稍后重试');
 
     // 关闭可能存在的加载提示
@@ -1553,11 +1468,11 @@ onMounted(() => {
       // 确保ReportGenerator组件更新
       nextTick(() => {
         if (reportGeneratorRef.value && typeof reportGeneratorRef.value.updateReport === 'function') {
-          console.log('切换到报告标签页，更新报告，当前成绩:', reportData.value.score);
+          logger.debug('切换到报告标签页，更新报告，当前成绩:', reportData.value.score);
           reportGeneratorRef.value.updateReport();
           reportComponentInitialized = true;
         } else {
-          console.warn('ReportGenerator组件缺少updateReport方法或组件未挂载');
+          logger.warn('ReportGenerator组件缺少updateReport方法或组件未挂载');
           // 组件未就绪，设置延迟重试
           setTimeout(() => {
             if (reportGeneratorRef.value && typeof reportGeneratorRef.value.updateReport === 'function') {
@@ -1573,7 +1488,7 @@ onMounted(() => {
   // 监听成绩变化，确保报告数据同步更新
   watch(() => submission.value.score, (newScore) => {
     if (reportData.value) {
-      console.log('成绩已变更为:', newScore);
+      logger.debug('成绩已变更为:', newScore);
       reportData.value.score = newScore;
       // 如果当前在报告预览页面，刷新报告视图
       if (activeTab.value === 'report' && reportGeneratorRef.value) {
@@ -1589,7 +1504,7 @@ onMounted(() => {
   // 监听 reportGeneratorRef 以处理组件后期挂载的情况
   watch(() => reportGeneratorRef.value, (newRef) => {
     if (newRef && !reportComponentInitialized && activeTab.value === 'report' && reportData.value) {
-      console.log('ReportGenerator组件已挂载，初始化报告数据');
+      logger.debug('ReportGenerator组件已挂载，初始化报告数据');
       nextTick(() => {
         if (typeof newRef.updateReport === 'function') {
           newRef.updateReport();
@@ -1608,633 +1523,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.submission-detail {
-  height: 100%;
-}
 
-.my-page-header {
-  padding: 20px;
-}
-
-.page-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.info-card {
-  margin-bottom: 0;
-}
-
-.student-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.student-details {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.student-details h3 {
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.5;
-}
-
-.detail-item {
-  font-size: 14px;
-  color: #606266;
-}
-
-.label {
-  font-weight: 500;
-  margin-right: 5px;
-}
-
-.status-tag {
-  margin-top: 10px;
-  align-self: flex-start;
-}
-
-.submission-stats {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 10px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 5px;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.time-value {
-  font-size: 18px;
-}
-
-.highlighted {
-  color: #67C23A;
-}
-
-.low-plagiarism {
-  color: #67C23A;
-}
-
-.medium-plagiarism {
-  color: #E6A23C;
-}
-
-.high-plagiarism {
-  color: #F56C6C;
-}
-
-.full-width-btn {
-  margin-left: 0;
-  width: 100%;
-}
-
-
-.code-header,
-.report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-right: 10px;
-}
-
-.code-header h3,
-.report-header h3,
-.history-header h3,
-.performance-header h3 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.code-display {
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  padding: 15px;
-  font-family: 'Courier New', monospace;
-  white-space: pre-wrap;
-  font-size: 14px;
-  line-height: 1.5;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.code-result {
-  margin-top: 20px;
-  border-top: 1px solid #ebeef5;
-  padding-top: 15px;
-}
-
-.result-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.result-header h3 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.result-output {
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  padding: 15px;
-  font-family: 'Courier New', monospace;
-  max-height: 200px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.markdown-content {
-  padding: 10px;
-  line-height: 1.6;
-}
-
-.markdown-content :deep(h1),
-.markdown-content :deep(h2),
-.markdown-content :deep(h3) {
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-.markdown-content :deep(p),
-.markdown-content :deep(ul),
-.markdown-content :deep(ol) {
-  margin-bottom: 16px;
-}
-
-.markdown-content :deep(code) {
-  background-color: #f5f7fa;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
-}
-
-.markdown-content :deep(pre) {
-  background-color: #f5f7fa;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-.markdown-content :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-}
-
-.markdown-content :deep(th),
-.markdown-content :deep(td) {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.history-item {
-  padding: 10px 0;
-}
-
-.history-title {
-  font-weight: 500;
-  margin-bottom: 5px;
-}
-
-.history-content {
-  color: #606266;
-  font-size: 14px;
-}
-
-.history-actions {
-  margin-top: 5px;
-}
-
-.history-info {
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.history-code-dialog .code-display {
-  max-height: 400px;
-}
-
-.chart-card {
-  height: 400px;
-}
-
-.chart-container {
-  width: 30vw;
-  height: 300px;
-}
-
-.chart-header {
-  display: flex;
-  align-items: center;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.performance-card {
-  margin-top: 20px;
-}
-
-.performance-analysis {
-  margin-top: 20px;
-}
-
-.performance-analysis h4,
-.learning-recommendation h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.analysis-content {
-  padding: 10px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  line-height: 1.6;
-}
-
-.recommendation-content {
-  padding: 10px 0;
-}
-
-.resource-links {
-  margin-top: 10px;
-}
-
-.resource-links h5 {
-  margin: 5px 0;
-}
-
-.resource-links ul {
-  padding-left: 20px;
-}
-
-.resource-links li {
-  list-style-type: disc;
-}
-
-.ai-comment-card,
-.teacher-comment-card {
-  margin-bottom: 20px;
-}
-
-/* 题目选项卡样式 */
-.question-tabs {
-  margin-bottom: 20px;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-}
-
-.question-container {
-  padding: 15px;
-}
-
-.test-results {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 4px;
-}
-
-.test-results h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.ai-header,
-.teacher-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-comment-content,
-.teacher-comment-content {
-  padding: 10px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  line-height: 1.6;
-}
-
-.generate-comment {
-  margin-top: 5px;
-  text-align: right;
-}
-
-.unit {
-  margin-left: 5px;
-}
-
-.plagiarism-result {
-  line-height: 1.5;
-}
-
-.code-comparison {
-  display: flex;
-  margin-top: 10px;
-  gap: 20px;
-}
-
-.comparison-left,
-.comparison-right {
-  flex: 1;
-}
-
-.comparison-divider {
-  width: 1px;
-  background-color: #dcdfe6;
-}
-
-.code-snippet {
-  background-color: #f5f7fa;
-  padding: 10px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  white-space: pre-wrap;
-  font-size: 13px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-/* 评分样式 */
-.score-excellent {
-  color: #67C23A;
-  font-weight: bold;
-}
-
-.score-good {
-  color: #409EFF;
-  font-weight: bold;
-}
-
-.score-pass {
-  color: #E6A23C;
-}
-
-.score-fail {
-  color: #F56C6C;
-  font-weight: bold;
-}
-
-/* 教师评语编辑区域样式 */
-.comment-card {
-  margin-top: 20px;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.comment-header .title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.comment-edit {
-  padding: 10px 0;
-}
-
-.comment-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.comment-view {
-  padding: 10px;
-  min-height: 80px;
-}
-
-.comment-content {
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  padding: 15px;
-  line-height: 1.6;
-}
-
-/* 左侧区域样式优化 */
-.info-card,
-.stats-card,
-.action-card,
-.ai-comment-card,
-.teacher-comment-card {
-  margin-bottom: 15px;
-}
-
-.stats-card .stat-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.stats-card .stat-item {
-  background-color: #f7f9fc;
-  border-radius: 8px;
-  padding: 15px;
-  transition: all 0.3s ease;
-}
-
-.stats-card .stat-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.action-card .action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-/* 右侧区域样式优化 */
-.content-card {
-  height: 80vh;
-  margin-bottom: 50px;
-}
-
-.main-tabs {
-  height: 70vh;
-
-}
-
-/* 修改标签页内容区域样式 */
-.main-tabs :deep(.el-tabs__content) {
-  height: calc(100% - 55px);
-  position: relative;
-  /* 添加相对定位 */
-}
-
-/* 为每个标签页面板添加滚动功能 */
-.main-tabs :deep(.el-tab-pane) {
-  height: 100%;
-  overflow-y: auto;
-}
-
-.code-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* 修改报告容器样式，确保可以滚动 */
-.report-container {
-  padding-bottom: 100px;
-  max-width: 95%;
-  margin: 0 auto;
-  font-size: 0.95em;
-  overflow-y: auto;
-  /* 添加垂直滚动条 */
-  max-height: 70vh;
-  /* 限制最大高度，确保需要滚动 */
-}
-
-/* 确保报告生成器组件可以滚动 */
-.report-container :deep(.report-generator) {
-  width: 100%;
-  max-width: 100%;
-  overflow-y: auto;
-  /* 改为visible，让滚动由父容器处理 */
-}
-
-
-/* 美化按钮样式 */
-.el-button.is-round {
-  border-radius: 20px;
-  padding-left: 15px;
-  padding-right: 15px;
-  transition: all 0.3s ease;
-}
-
-.el-button.is-round:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-/* 美化卡片样式 */
-.el-card {
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* 打印样式优化 */
-@media print {
-
-  .my-page-header,
-  .info-card,
-  .stats-card,
-  .action-card,
-  .ai-comment-card,
-  .teacher-comment-card,
-  .el-tabs__header,
-  .report-header,
-  .comment-card {
-    display: none !important;
-  }
-
-  .page-content {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  .content-card {
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  .report-container {
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-.performance {
-  padding-bottom: 20px;
-  max-width: 95%;
-  margin: 0 auto;
-  font-size: 0.95em;
-  overflow-y: auto;
-  /* 添加垂直滚动条 */
-  max-height: 70vh;
-  overflow: hidden;
-}
-
-.ai-comment-content :deep(h1),
-.ai-comment-content :deep(h2),
-.ai-comment-content :deep(h3) {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-}
-
-.ai-comment-content :deep(p) {
-  margin-bottom: 0.8em;
-}
-
-.ai-comment-content :deep(ul),
-.ai-comment-content :deep(ol) {
-  padding-left: 2em;
-  margin-bottom: 1em;
-}
-
-.ai-comment-content :deep(code) {
-  background-color: #f5f7fa;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
-}
-
-/* 添加评语相关样式 */
-.teacher-comment-image {
-  margin: 10px 0;
-  max-width: 100%;
-}
-
-.teacher-comment-image img {
-  max-width: 100%;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.teacher-comment-preview {
-  max-width: 600px;
-  margin: 0 auto;
-  font-family: 'Microsoft YaHei', sans-serif;
-}
-</style>

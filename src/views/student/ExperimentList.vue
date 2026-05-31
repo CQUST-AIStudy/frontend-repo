@@ -1,12 +1,12 @@
 <template>
-  <div class="g-page">
+  <div class="g-page [min-width:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
     <page-header title="实验列表" description="数据结构课程所有实验项目" />
 
     <loading-state :loading="loading">
-      <div class="g-content">
-        <!-- 标签页 -->
-        <div class="g-tabs">
-          <button v-for="t in tabs" :key="t.key" class="g-tab" :class="{ active: activeTab === t.key }"
+      <div class="g-content [display:flex] [flex-direction:column] [gap:20px] [min-width:0] max-[640px]:[gap:14px]">
+        <!-- 标签页-->
+        <div class="g-tabs [display:flex] [gap:0] [border-bottom:1px_solid_#dadce0] [margin-bottom:4px] max-[640px]:[overflow-x:auto]">
+          <button v-for="t in tabs" :key="t.key" class="g-tab [background:none] [border:none] [padding:10px_20px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] max-[640px]:[flex:1] max-[640px]:[min-width:96px] max-[640px]:[padding-inline:12px] max-[640px]:[white-space:nowrap]" :class="{ active: activeTab === t.key }"
                   @click="activeTab = t.key">
             {{ t.label }} ({{ t.count }})
           </button>
@@ -14,31 +14,31 @@
 
         <experiment-tab-content :experiments="filteredExperiments" />
 
-        <!-- 底部：日历 + 统计 -->
-        <div class="g-bottom-row">
-          <div class="g-card g-card-wide">
-            <div class="g-card-head"><span>实验安排日历</span></div>
+        <!-- 底部：日历+ 统计 -->
+        <div class="g-bottom-row [display:grid] [grid-template-columns:minmax(0,_2fr)_minmax(280px,_1fr)] [gap:16px] max-[960px]:[grid-template-columns:1fr]">
+          <div class="g-card g-card-wide [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#dadce0] [min-width:0] [&_.el-calendar-table_td.is-today_.cal-day]:[color:#fff] [&_.el-calendar-table_td.is-today_.cal-day]:[background:#1a73e8] [&_.el-calendar-table_td.is-today_.cal-day]:[border-radius:50%] [&_.el-calendar-table_td.is-today_.cal-day]:[width:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[height:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[line-height:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[text-align:center] [&_.el-calendar__header]:[padding:12px_16px] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]">
+            <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#202124] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]"><span>实验安排日历</span></div>
             <el-calendar v-model="calendarValue">
               <template #date-cell="{ data }">
-                <div class="cal-cell" :class="{ 'has-exp': hasExperimentOnDate(data.day) }">
-                  <div class="cal-day">{{ data.day.split('-')[2] }}</div>
-                  <div v-if="getExperimentForDate(data.day)" class="cal-exp">
+                <div class="cal-cell [height:100%] [display:flex] [flex-direction:column] [align-items:center] [justify-content:center]" :class="{ 'has-exp': hasExperimentOnDate(data.day) }">
+                  <div class="cal-day [font-size:14px]">{{ data.day.split('-')[2] }}</div>
+                  <div v-if="getExperimentForDate(data.day)" class="cal-exp [font-size:10px] [color:#1a73e8] [text-align:center] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [max-width:100%]">
                     {{ getExperimentForDate(data.day).name }}
                   </div>
                 </div>
               </template>
             </el-calendar>
           </div>
-          <div class="g-card g-card-narrow">
+          <div class="g-card g-card-narrow [min-width:0]">
             <div class="g-card-head"><span>完成情况</span></div>
-            <div ref="progressChartRef" class="g-chart"></div>
-            <div class="g-stats">
-              <div class="g-stat-line"><span>总实验数</span><span class="g-stat-v">{{ allExperiments.length }}</span></div>
-              <div class="g-stat-line"><span>已完成</span><span class="g-stat-v" style="color:#1e8e3e">{{ completedExperiments.length }}</span></div>
-              <div class="g-stat-line"><span>未开始</span><span class="g-stat-v">{{ notStartedExperiments.length }}</span></div>
-              <div class="g-stat-line">
+            <div ref="progressChartRef" class="g-chart [height:240px] [width:100%]"></div>
+            <div class="g-stats [padding:0_4px]">
+              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>总实验数</span><span class="g-stat-v [font-weight:600] [color:#202124]">{{ allExperiments.length }}</span></div>
+              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>已完成</span><span class="g-stat-v [color:#1e8e3e] [font-weight:600] [color:#202124]">{{ completedExperiments.length }}</span></div>
+              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>未开始</span><span class="g-stat-v [font-weight:600] [color:#202124]">{{ notStartedExperiments.length }}</span></div>
+              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]">
                 <span>完成率</span>
-                <span class="g-stat-v" style="color:#1a73e8">{{ completionRate }}%</span>
+                <span class="g-stat-v [color:#1a73e8] [font-weight:600] [color:#202124]">{{ completionRate }}%</span>
               </div>
             </div>
           </div>
@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
 import LoadingState from '../../components/LoadingState.vue'
@@ -116,89 +117,9 @@ onMounted(async () => {
   try {
     if (!experimentStore.experimentList?.length) await experimentStore.fetchExperimentList()
     setTimeout(initChart, 300)
-  } catch (e) { console.error('加载失败:', e) }
+  } catch (e) { logger.error('加载失败:', e) }
   finally { loading.value = false }
 })
 onBeforeUnmount(() => { progressChart?.dispose() })
 </script>
 
-<style scoped>
-.g-page {
-  min-width: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-.g-content { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-
-.g-tabs { display: flex; gap: 0; border-bottom: 1px solid #dadce0; margin-bottom: 4px; }
-.g-tab {
-  background: none; border: none; padding: 10px 20px; font-size: 14px; font-weight: 500;
-  color: #5f6368; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
-}
-.g-tab.active { color: #1a73e8; border-bottom-color: #1a73e8; }
-.g-tab:hover:not(.active) { color: #202124; }
-
-.g-card {
-  background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #dadce0;
-  min-width: 0;
-}
-.g-card-head {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px; font-size: 15px; font-weight: 500; color: #202124;
-}
-
-.g-bottom-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 16px; }
-.g-card-wide, .g-card-narrow { min-width: 0; }
-.g-chart { height: 240px; width: 100%; }
-
-.g-stats { padding: 0 4px; }
-.g-stat-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #5f6368; }
-.g-stat-line:last-child { border-bottom: none; }
-.g-stat-v { font-weight: 600; color: #202124; }
-
-.cal-cell { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.cal-day { font-size: 14px; }
-.has-exp { background: #e8f0fe; border-radius: 8px; }
-.cal-exp { font-size: 10px; color: #1a73e8; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-
-/* 日历 Google 风格 */
-.g-card :deep(.el-calendar-table td.is-today .cal-day) { color: #fff; background: #1a73e8; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; text-align: center; }
-.g-card :deep(.el-calendar__header) { padding: 12px 16px; }
-
-@media (max-width: 960px) {
-  .g-bottom-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .g-content {
-    gap: 14px;
-  }
-
-  .g-tabs {
-    overflow-x: auto;
-  }
-
-  .g-tab {
-    flex: 1;
-    min-width: 96px;
-    padding-inline: 12px;
-    white-space: nowrap;
-  }
-
-  .g-card {
-    padding: 16px;
-    border-radius: 14px;
-  }
-
-  .g-card-head {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .g-chart {
-    height: 220px;
-  }
-}
-</style>

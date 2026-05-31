@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 import { ElMessage, ElLoading } from 'element-plus';
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from './errorMessage';
 
@@ -9,7 +10,7 @@ import { getFriendlyErrorMessage, getFriendlyResponseMessage } from './errorMess
  */
 export async function withLoading(promiseFn, options = {}) {
   const defaultOptions = {
-    text: '加载中...',
+    text: '加载中..',
     background: 'rgba(0, 0, 0, 0.7)'
   };
   
@@ -79,7 +80,7 @@ export function handleError(error, fallbackMessage = '发生错误', callback = 
   ElMessage.error(errorMessage);
   
   if (process.env.NODE_ENV === 'development') {
-    console.error('Error details:', error);
+    logger.error('Error details:', error);
   }
   
   // 执行回调

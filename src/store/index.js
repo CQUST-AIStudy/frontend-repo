@@ -1,3 +1,4 @@
+import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
 import { clearAuthStorage, setSessionToken, setUserInfo } from '../constants/auth'
@@ -39,12 +40,12 @@ export const useUserStore = defineStore('user', {
           const { restoreTapSession } = await import('../api/tap')
           await restoreTapSession()
         } catch (error) {
-          console.warn('TAP session 换票失败:', error.message)
+          logger.warn('TAP session 换票失败:', error.message)
         }
 
         return { success: true, message: res.message || '登录成功', user: userInfo }
       } catch (error) {
-        console.error('登录过程中发生错误:', error)
+        logger.error('登录过程中发生错误', error)
         return { success: false, message: getFriendlyErrorMessage(error, '登录失败，请稍后重试') }
       } finally {
         this.loading = false
@@ -98,7 +99,7 @@ export const useExperimentStore = defineStore('experiment', {
           this.experimentList = []
         }
       } catch (error) {
-        console.error('获取实验列表失败:', error)
+        logger.error('获取实验列表失败:', error)
         this.experimentList = []
       } finally {
         this.loading = false
@@ -120,7 +121,7 @@ export const useExperimentStore = defineStore('experiment', {
         }
         return this.currentExperiment
       } catch (error) {
-        console.error(`获取实验 ${id} 详情失败:`, error)
+        logger.error(`获取实验 ${id} 详情失败:`, error)
         return null
       } finally {
         this.loading = false

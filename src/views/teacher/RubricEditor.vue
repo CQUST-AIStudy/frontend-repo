@@ -1,12 +1,12 @@
 <template>
-  <div class="rubric-editor">
+  <div class="rubric-editor [padding:0] [&_.el-card]:[border-radius:12px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
     <el-page-header @back="$router.back()" title="返回" content="评分标准管理" />
 
-    <el-card style="margin-top:16px">
+    <el-card class="[margin-top:16px]">
       <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="[display:flex] [justify-content:space-between] [align-items:center]">
           <span>我的评分标准</span>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div class="[display:flex] [gap:8px] [align-items:center]">
             <el-button @click="pickTemplate" :loading="drafting">模板生成</el-button>
             <el-button type="primary" @click="showCreate">+ 新建标准</el-button>
           </div>
@@ -36,27 +36,27 @@
         <el-form-item label="自定义提示">
           <el-input v-model="form.customPrompt" type="textarea" :rows="3"
             placeholder="输入自定义评分提示词，AI 评分时会参考此内容（如：重点关注代码注释质量、要求实验数据真实等）" />
-          <div style="font-size:12px;color:#9aa0a6;margin-top:4px">此提示词将作为 AI 评分的额外指导，影响所有维度的评分</div>
+          <div class="[font-size:12px] [color:#9aa0a6] [margin-top:4px]">此提示词将作为 AI 评分的额外指导，影响所有维度的评分</div>
         </el-form-item>
       </el-form>
 
-      <h4 style="margin:16px 0 8px">评分维度 <el-tag :type="weightSum === 100 ? 'success' : 'danger'" size="small">权重合计: {{ weightSum }}%</el-tag></h4>
+      <h4 class="[margin:16px_0_8px]">评分维度 <el-tag :type="weightSum === 100 ? 'success' : 'danger'" size="small">权重合计: {{ weightSum }}%</el-tag></h4>
 
-      <div v-for="(dim, i) in form.dimensions" :key="i" style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-        <el-input v-model="dim.name" placeholder="维度名称" style="width:150px" />
-        <el-input v-model="dim.description" placeholder="描述" style="flex:1" />
-        <el-input-number v-model="dim.maxScore" :min="1" :max="100" placeholder="满分" style="width:100px" />
-        <el-input-number v-model="dim.weight" :min="1" :max="100" placeholder="权重%" style="width:100px" />
+      <div v-for="(dim, i) in form.dimensions" :key="i" class="[display:flex] [gap:8px] [margin-bottom:8px] [align-items:center]">
+        <el-input v-model="dim.name" placeholder="维度名称" class="[width:150px]" />
+        <el-input v-model="dim.description" placeholder="描述" class="[flex:1]" />
+        <el-input-number v-model="dim.maxScore" :min="1" :max="100" placeholder="满分" class="[width:100px]" />
+        <el-input-number v-model="dim.weight" :min="1" :max="100" placeholder="权重%" class="[width:100px]" />
         <el-button type="danger" link @click="form.dimensions.splice(i, 1)">删除</el-button>
       </div>
-      <el-button @click="addDimension" type="dashed" style="width:100%">+ 添加维度</el-button>
+      <el-button @click="addDimension" type="dashed" class="[width:100%]">+ 添加维度</el-button>
 
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="saveRubric" :disabled="weightSum !== 100" :loading="saving">保存</el-button>
       </template>
     </el-dialog>
-    <input ref="templateInput" type="file" accept=".pdf,.docx,.doc" style="display:none" @change="onTemplatePicked" />
+    <input ref="templateInput" type="file" accept=".pdf,.docx,.doc" class="[display:none]" @change="onTemplatePicked" />
   </div>
 </template>
 
@@ -166,11 +166,4 @@ async function saveRubric() {
 onMounted(loadRubrics)
 </script>
 
-<style scoped>
-.rubric-editor { padding: 0; }
-.rubric-editor :deep(.el-card) {
-  border-radius: 12px;
-  border: 1px solid #dadce0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-</style>
+

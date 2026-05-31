@@ -1,7 +1,7 @@
 <template>
-  <div class="submission-list">
+  <div class="submission-list [min-width:0] [min-height:100%] [padding:0_16px_20px] [background-color:#f5f7fa] max-[768px]:[padding:0_8px_16px]">
     <page-header
-      class="my-page-header"
+      class="my-page-header [padding:24px_0] max-[768px]:[padding:16px_0]"
       title="学生提交"
       :description="headerDescription"
     >
@@ -10,17 +10,17 @@
       </template>
     </page-header>
 
-    <el-card class="filter-card" shadow="hover">
-      <div class="card-header">
-        <h3 class="section-title">筛选条件</h3>
+    <el-card class="filter-card [margin-bottom:20px] [border-radius:8px] [overflow:hidden]" shadow="hover">
+      <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+        <h3 class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">筛选条件</h3>
       </div>
-      <el-form :inline="true" :model="filterForm" class="filter-form">
+      <el-form :inline="true" :model="filterForm" class="filter-form [display:flex] [flex-wrap:wrap] [gap:10px]">
         <el-form-item v-if="!experimentId" label="实验">
           <el-select
             v-model="filterForm.experimentId"
             placeholder="请选择实验"
             clearable
-            style="width: 220px"
+            class="[width:220px]"
           >
             <el-option
               v-for="item in experimentOptions"
@@ -44,7 +44,7 @@
             v-model="filterForm.status"
             placeholder="请选择状态"
             clearable
-            style="width: 150px"
+            class="[width:150px]"
           >
             <el-option label="全部" value="" />
             <el-option label="已提交" value="submitted" />
@@ -61,16 +61,16 @@
       </el-form>
     </el-card>
 
-    <el-card class="table-card">
-      <div class="table-operations">
-        <div class="table-stats">
+    <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
+      <div class="table-operations [margin-bottom:16px] [display:flex] [justify-content:space-between] [align-items:center] [gap:10px]">
+        <div class="table-stats [display:flex] [flex-wrap:wrap] [gap:10px]">
           <el-tag type="info" effect="plain">总数：{{ filteredSubmissions.length }}</el-tag>
           <el-tag type="success" effect="plain">已评分：{{ getStatusCount('graded') }}</el-tag>
           <el-tag type="warning" effect="plain">已提交：{{ getStatusCount('submitted') }}</el-tag>
           <el-tag type="danger" effect="plain">未开始：{{ getStatusCount('not_started') }}</el-tag>
         </div>
 
-        <div class="table-actions">
+        <div class="table-actions [display:flex] [flex-wrap:wrap] [gap:8px]">
           <el-button type="primary" size="small" @click="loadSubmissions">
             <el-icon><Refresh /></el-icon>
             刷新
@@ -92,7 +92,7 @@
         stripe
         highlight-current-row
         v-loading="tableLoading"
-        style="width: 100%"
+        class="[width:100%]"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
@@ -115,8 +115,8 @@
 
         <el-table-column label="成绩" width="90" align="center">
           <template #default="{ row }">
-            <span v-if="row.score !== null" class="score">{{ row.score }}</span>
-            <span v-else class="text-muted">未评分</span>
+            <span v-if="row.score !== null" class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]">{{ row.score }}</span>
+            <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未评分</span>
           </template>
         </el-table-column>
 
@@ -125,7 +125,7 @@
             <el-tag v-if="row.plagiarismRate !== null" :type="getPlagiarismRateType(row.plagiarismRate)" size="small">
               {{ row.plagiarismRate }}%
             </el-tag>
-            <span v-else class="text-muted">暂无</span>
+            <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">暂无</span>
           </template>
         </el-table-column>
 
@@ -145,7 +145,7 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-container">
+      <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
@@ -170,7 +170,7 @@
 
         <el-form-item label="查重率">
           <el-input-number v-model="gradeForm.plagiarismRate" :min="0" :max="100" :precision="1" />
-          <span class="rate-unit">%</span>
+          <span class="rate-unit [margin-left:5px]">%</span>
         </el-form-item>
 
         <el-form-item label="AI 评语">
@@ -178,13 +178,13 @@
             v-model="gradeForm.aiComment"
             type="textarea"
             :rows="6"
-            placeholder="请输入 AI 评语"
+            placeholder="请输入AI 评语"
           />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
+        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
           <el-button @click="gradeDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitGrade">确定</el-button>
         </div>
@@ -194,6 +194,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -398,7 +399,7 @@ const loadSubmissions = async () => {
       if (current) experimentName.value = current.experimentName || ''
     }
   } catch (error) {
-    console.error('加载学生提交失败:', error)
+    logger.error('加载学生提交失败:', error)
     ElMessage.error(`加载学生提交失败：${error?.message || '未知错误'}`)
   } finally {
     tableLoading.value = false
@@ -416,7 +417,7 @@ const loadExperimentOptions = async () => {
       experimentOptions.value = []
     }
   } catch (error) {
-    console.error('加载实验列表失败:', error)
+    logger.error('加载实验列表失败:', error)
     experimentOptions.value = []
   }
 }
@@ -475,7 +476,7 @@ const submitGrade = async () => {
       }
     }
   } catch (error) {
-    console.error('提交评分失败:', error)
+    logger.error('提交评分失败:', error)
     ElMessage.error('提交评分失败，请重试。')
   }
 }
@@ -538,122 +539,4 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
-.submission-list {
-  min-width: 0;
-  min-height: 100%;
-  padding: 0 16px 20px;
-  background-color: #f5f7fa;
-}
 
-.filter-card,
-.table-card {
-  margin-bottom: 20px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.table-card {
-  padding: 10px;
-}
-
-.table-card :deep(.el-table) {
-  width: 100%;
-}
-
-.table-card :deep(.el-table__body-wrapper) {
-  overflow-x: auto;
-}
-
-.card-header {
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.section-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #303133;
-}
-
-.filter-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.rate-unit {
-  margin-left: 5px;
-}
-
-.my-page-header {
-  padding: 24px 0;
-}
-
-.table-operations {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.table-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.table-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.text-muted {
-  color: #909399;
-  font-size: 13px;
-}
-
-.score {
-  font-weight: 700;
-  color: #409eff;
-}
-
-@media screen and (max-width: 768px) {
-  .submission-list {
-    padding: 0 8px 16px;
-  }
-
-  .filter-form {
-    flex-direction: column;
-  }
-
-  .el-form-item {
-    width: 100%;
-    margin-right: 0;
-  }
-
-  .table-operations {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .table-stats,
-  .table-actions {
-    width: 100%;
-  }
-
-  .my-page-header {
-    padding: 16px 0;
-  }
-}
-</style>

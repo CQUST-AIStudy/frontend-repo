@@ -1,53 +1,53 @@
 <template>
-  <div class="page">
+  <div class="page [display:flex] [flex-direction:column] [gap:20px]">
     <page-header title="错题本与专项训练" description="把薄弱点转成回炉计划、专项题单和掌握度回升记录。">
       <el-button plain @click="goPractice">推荐练习</el-button>
       <el-button type="primary" :loading="loading" @click="loadPageData">刷新数据</el-button>
     </page-header>
 
     <loading-state :loading="loading">
-      <div v-if="weaknessCards.length" class="content">
-        <div class="summary-grid">
-          <el-card v-for="item in summaryCards" :key="item.label" class="summary-card" shadow="hover">
-            <div class="summary-icon" :style="{ background: item.bg, color: item.color }">
+      <div v-if="weaknessCards.length" class="content [display:flex] [flex-direction:column] [gap:20px]">
+        <div class="summary-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1200px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[760px]:[grid-template-columns:1fr]">
+          <el-card v-for="item in summaryCards" :key="item.label" class="summary-card [&_.el-card__body]:[display:flex] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[padding:18px]" shadow="hover">
+            <div class="summary-icon [width:44px] [height:44px] [border-radius:14px] [display:flex] [align-items:center] [justify-content:center]" :class="summaryIconClass(item)">
               <el-icon><component :is="item.icon" /></el-icon>
             </div>
             <div>
-              <div class="summary-value">{{ item.value }}</div>
-              <div class="summary-label">{{ item.label }}</div>
-              <div class="summary-tip">{{ item.tip }}</div>
+              <div class="summary-value [font-size:24px] [font-weight:700] [color:#0f172a]">{{ item.value }}</div>
+              <div class="summary-label [color:#475569] [font-size:13px]">{{ item.label }}</div>
+              <div class="summary-tip [color:#64748b] [font-size:12px]">{{ item.tip }}</div>
             </div>
           </el-card>
         </div>
 
-        <div class="main-grid">
-          <el-card class="panel" shadow="hover">
+        <div class="main-grid [display:grid] [grid-template-columns:minmax(320px,_360px)_minmax(0,_1fr)] [gap:20px] max-[1200px]:[grid-template-columns:1fr]">
+          <el-card class="panel [border-radius:20px] [border:1px_solid_#e7edf4]" shadow="hover">
             <template #header>
-              <div class="panel-head">
+              <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                 <span>薄弱点总览</span>
                 <el-tag type="danger" effect="plain">{{ weaknessCards.length }} 个</el-tag>
               </div>
             </template>
 
-            <div class="weakness-list">
+            <div class="weakness-list [display:flex] [flex-direction:column] [gap:12px]">
               <button
                 v-for="item in weaknessCards"
                 :key="item.experimentId"
-                class="weakness-card"
+                class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]"
                 :class="{ active: item.experimentId === selectedWeaknessId }"
                 @click="selectWeakness(item.experimentId)"
               >
-                <div class="card-row">
+                <div class="card-row [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <div>
-                    <div class="title">{{ item.experimentName }}</div>
-                    <div class="muted">{{ item.dimension }} · 掌握度 {{ item.mastery }} 分</div>
+                    <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ item.experimentName }}</div>
+                    <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ item.dimension }} · 掌握度{{ item.mastery }} 分</div>
                   </div>
                   <el-tag :type="item.estimatedMastery >= 70 ? 'success' : item.estimatedMastery >= 50 ? 'warning' : 'danger'">
                     估算 {{ item.estimatedMastery }}
                   </el-tag>
                 </div>
                 <el-progress :percentage="item.planProgress" :stroke-width="10" />
-                <div class="meta-line">
+                <div class="meta-line [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:10px] [color:#64748b] [font-size:12px]">
                   <span>计划 {{ item.completedCount }}/{{ item.targetCount || item.recommendedPracticeCount }}</span>
                   <span>错题 {{ item.weakQuestionCount }}</span>
                   <span>回炉 {{ item.acceptedReviewCount }}</span>
@@ -55,7 +55,7 @@
               </button>
             </div>
 
-            <div class="section-title">最近回炉记录</div>
+            <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">最近回炉记录</div>
             <el-timeline v-if="recentReviewRecords.length">
               <el-timeline-item
                 v-for="record in recentReviewRecords"
@@ -63,22 +63,22 @@
                 :type="record.accepted ? 'success' : 'warning'"
                 :timestamp="formatTime(record.createdAt)"
               >
-                <div class="title small">{{ record.problemTitle }}</div>
-                <div class="muted">{{ record.dimension || '专项训练' }} · {{ record.accepted ? '通过提交' : '已尝试' }}</div>
+                <div class="title small [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ record.problemTitle }}</div>
+                <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ record.dimension || '专项训练' }} · {{ record.accepted ? '通过提交' : '已尝试' }}</div>
               </el-timeline-item>
             </el-timeline>
             <el-empty v-else description="还没有回炉记录" :image-size="68" />
           </el-card>
 
-          <div v-if="selectedWeakness" class="detail-column">
+          <div v-if="selectedWeakness" class="detail-column [display:flex] [flex-direction:column] [gap:20px]">
             <el-card class="panel" shadow="hover">
               <template #header>
-                <div class="panel-head">
+                <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <div>
-                    <div class="title">{{ selectedWeakness.experimentName }}</div>
-                    <div class="muted">{{ selectedWeakness.dimension }} · {{ selectedWeakness.evidenceSummary }}</div>
+                    <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ selectedWeakness.experimentName }}</div>
+                    <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ selectedWeakness.dimension }} · {{ selectedWeakness.evidenceSummary }}</div>
                   </div>
-                  <div class="action-row">
+                  <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
                     <el-button plain @click="resetPlan(selectedWeakness)">重置计划</el-button>
                     <el-button type="primary" @click="buildPlan(selectedWeakness)">
                       {{ selectedWeakness.hasPlan ? '更新计划' : '生成计划' }}
@@ -87,26 +87,26 @@
                 </div>
               </template>
 
-              <div class="stats-grid">
-                <div class="stat-box">
+              <div class="stats-grid [display:grid] [grid-template-columns:repeat(3,_minmax(0,_1fr))] [gap:12px]">
+                <div class="stat-box [background:#f8fbff] [border:1px_solid_#e6edf7] [border-radius:16px] [padding:14px] [display:flex] [flex-direction:column] [gap:8px] [color:#64748b] [font-size:12px]">
                   <span>当前掌握度</span>
                   <strong>{{ selectedWeakness.mastery }}</strong>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box [background:#f8fbff] [border:1px_solid_#e6edf7] [border-radius:16px] [padding:14px] [display:flex] [flex-direction:column] [gap:8px] [color:#64748b] [font-size:12px]">
                   <span>估算掌握度</span>
                   <strong>{{ selectedWeakness.estimatedMastery }}</strong>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box [background:#f8fbff] [border:1px_solid_#e6edf7] [border-radius:16px] [padding:14px] [display:flex] [flex-direction:column] [gap:8px] [color:#64748b] [font-size:12px]">
                   <span>计划完成度</span>
                   <strong>{{ selectedWeakness.planProgress }}%</strong>
                 </div>
               </div>
 
-              <div class="chip-list" v-if="selectedWeakness.weakQuestions.length">
+              <div class="chip-list [display:flex] [flex-wrap:wrap] [gap:10px]" v-if="selectedWeakness.weakQuestions.length">
                 <div
                   v-for="question in selectedWeakness.weakQuestions"
                   :key="question.problemId"
-                  class="chip"
+                  class="chip [display:inline-flex] [gap:8px] [padding:8px_12px] [border-radius:999px] [border:1px_solid_#fecaca] [background:#fff5f5] [color:#b91c1c] [font-size:12px] [&.done]:[border-color:#bbf7d0] [&.done]:[background:#effaf2] [&.done]:[color:#166534]"
                   :class="{ done: isProblemCompleted(question.problemId, selectedWeakness) }"
                 >
                   <span>#{{ question.problemId }}</span>
@@ -115,7 +115,7 @@
                 </div>
               </div>
 
-              <div class="section-title">专项训练说明</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">专项训练说明</div>
               <el-input
                 v-model="selectedPlanNote"
                 type="textarea"
@@ -128,34 +128,34 @@
 
             <el-card class="panel" shadow="hover">
               <template #header>
-                <div class="panel-head">
+                <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <span>专项题单</span>
                   <el-button type="primary" plain @click="startNextProblem(selectedWeakness)">开始下一题</el-button>
                 </div>
               </template>
 
-              <div class="practice-list">
+              <div class="practice-list [display:flex] [flex-direction:column] [gap:12px]">
                 <div
                   v-for="practice in selectedWeakness.practicePool"
                   :key="practice.problemId"
-                  class="practice-card"
+                  class="practice-card [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [background:#fff] [text-align:left] [cursor:pointer] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0]"
                   :class="{ completed: isProblemCompleted(practice.problemId, selectedWeakness) }"
                 >
-                  <div class="card-row">
-                    <div class="title">{{ practice.displayTitle }}</div>
-                    <div class="action-row">
+                  <div class="card-row [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
+                    <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ practice.displayTitle }}</div>
+                    <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
                       <el-tag size="small" :type="tagTypeForSource(practice.sourceKind)">{{ sourceLabel(practice.sourceKind) }}</el-tag>
                       <el-tag size="small" effect="plain">{{ difficultyLabel(practice.difficulty) }}</el-tag>
                     </div>
                   </div>
-                  <div class="muted">{{ practice.reasonText }}</div>
-                  <div class="meta-line">
+                  <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ practice.reasonText }}</div>
+                  <div class="meta-line [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:10px] [color:#64748b] [font-size:12px]">
                     <span>题号 #{{ practice.problemId }}</span>
-                    <span v-if="practice.matchRate">匹配度 {{ practice.matchRate }}%</span>
+                    <span v-if="practice.matchRate">匹配度{{ practice.matchRate }}%</span>
                     <span v-if="practice.attempts">历史尝试 {{ practice.attempts }}</span>
                     <span v-if="practice.estimatedMinutes">建议 {{ practice.estimatedMinutes }} 分钟</span>
                   </div>
-                  <div class="action-row">
+                  <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
                     <el-button
                       size="small"
                       :type="isInPlan(selectedWeakness, practice.problemId) ? 'warning' : 'info'"
@@ -172,7 +172,7 @@
 
             <el-card class="panel" shadow="hover">
               <template #header>
-                <div class="panel-head">
+                <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <span>掌握度回升记录</span>
                   <el-tag :type="selectedWeakness.estimatedMastery >= 70 ? 'success' : 'warning'">
                     估算 {{ selectedWeakness.estimatedMastery }} 分
@@ -180,13 +180,13 @@
                 </div>
               </template>
 
-              <div v-if="selectedWeakness.reviewRecords.length" class="recovery-list">
-                <div v-for="record in selectedWeakness.recoveryTimeline" :key="record.id" class="recovery-item">
+              <div v-if="selectedWeakness.reviewRecords.length" class="recovery-list [display:flex] [flex-direction:column] [gap:12px]">
+                <div v-for="record in selectedWeakness.recoveryTimeline" :key="record.id" class="recovery-item [display:flex] [align-items:center] [justify-content:space-between] [gap:14px] [padding:14px_16px] [border-radius:14px] [border:1px_solid_#e6edf5] [background:#f8fbff]">
                   <div>
-                    <div class="title small">{{ record.problemTitle }}</div>
-                    <div class="muted">{{ formatTime(record.createdAt) }} · {{ record.accepted ? '通过后计入回升' : '尝试中' }}</div>
+                    <div class="title small [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ record.problemTitle }}</div>
+                    <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ formatTime(record.createdAt) }} · {{ record.accepted ? '通过后计入回升' : '尝试中' }}</div>
                   </div>
-                  <strong class="recovery-score">{{ record.estimatedMastery }} 分</strong>
+                  <strong class="recovery-score [color:#1d4ed8] [white-space:nowrap]">{{ record.estimatedMastery }} 分</strong>
                 </div>
               </div>
               <el-empty v-else description="完成专项题提交后，这里会开始累计。" :image-size="68" />
@@ -207,6 +207,7 @@
 </template>
 
 <script setup>
+import logger from '@/utils/logger'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -393,7 +394,7 @@ const weaknessCards = computed(() => {
       recoveryTimeline,
       hasPlan: !!existingPlan,
       planNote: existingPlan?.note || '',
-      evidenceSummary: `总提交 ${Number(weakness?.evidence?.totalSubmissions || 0)} 次，错误提交 ${Number(weakness?.evidence?.wrongAnswers || 0)} 次`
+      evidenceSummary: `总提交${Number(weakness?.evidence?.totalSubmissions || 0)} 次，错误提交 ${Number(weakness?.evidence?.wrongAnswers || 0)} 次`
     }
   })
 })
@@ -416,9 +417,17 @@ const summaryCards = computed(() => {
     { label: '待巩固模块', value: weaknessCards.value.length, tip: '来自画像中的薄弱点', icon: DataAnalysis, bg: '#e8f0fe', color: '#1a73e8' },
     { label: '已建专项计划', value: activePlanCount, tip: `累计题量 ${totalPlanProblems}`, icon: ListIcon, bg: '#eef8e8', color: '#1e8e3e' },
     { label: '完成回炉题', value: acceptedReviewCount, tip: '以提交通过为准', icon: Finished, bg: '#fff5e8', color: '#e37400' },
-    { label: '回升中的模块', value: recoveredCount, tip: '估算掌握度达到 70+', icon: TrendCharts, bg: '#f3e8fd', color: '#7c3aed' }
+    { label: '回升中的模块', value: recoveredCount, tip: '估算掌握度达到70+', icon: TrendCharts, bg: '#f3e8fd', color: '#7c3aed' }
   ]
 })
+
+function summaryIconClass(item) {
+  if (item.bg === '#e8f0fe') return '[background:#e8f0fe] [color:#1a73e8]'
+  if (item.bg === '#eef8e8') return '[background:#eef8e8] [color:#1e8e3e]'
+  if (item.bg === '#fff5e8') return '[background:#fff5e8] [color:#e37400]'
+  if (item.bg === '#f3e8fd') return '[background:#f3e8fd] [color:#7c3aed]'
+  return '[background:#f1f5f9] [color:#475569]'
+}
 
 watch(selectedWeakness, (value) => {
   selectedPlanNote.value = value?.planNote || ''
@@ -578,7 +587,7 @@ async function loadPageData() {
       selectedWeaknessId.value = getNormalizedProblemId(profile.value.weaknesses[0].experimentId)
     }
   } catch (error) {
-    console.error('加载专项训练数据失败:', error)
+    logger.error('加载专项训练数据失败:', error)
     ElMessage.error('加载专项训练数据失败')
   } finally {
     loading.value = false
@@ -590,38 +599,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.page, .content, .detail-column { display: flex; flex-direction: column; gap: 20px; }
-.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.summary-card :deep(.el-card__body) { display: flex; gap: 14px; align-items: center; padding: 18px; }
-.summary-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-.summary-value { font-size: 24px; font-weight: 700; color: #0f172a; }
-.summary-label { color: #475569; font-size: 13px; }
-.summary-tip, .muted { color: #64748b; font-size: 12px; }
-.main-grid { display: grid; grid-template-columns: minmax(320px, 360px) minmax(0, 1fr); gap: 20px; }
-.panel { border-radius: 20px; border: 1px solid #e7edf4; }
-.panel-head, .card-row, .action-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.weakness-list, .practice-list, .recovery-list { display: flex; flex-direction: column; gap: 12px; }
-.weakness-card, .practice-card { width: 100%; border: 1px solid #e8eef6; border-radius: 16px; padding: 14px; background: #fff; text-align: left; cursor: pointer; transition: .2s; }
-.weakness-card:hover, .weakness-card.active { border-color: #93c5fd; box-shadow: 0 10px 24px rgba(30, 64, 175, 0.08); transform: translateY(-1px); }
-.practice-card.completed { background: #f6fff7; border-color: #bbf7d0; }
-.title { color: #0f172a; font-size: 15px; font-weight: 700; }
-.title.small { font-size: 14px; }
-.meta-line { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; color: #64748b; font-size: 12px; }
-.section-title { margin: 6px 0 2px; color: #334155; font-size: 13px; font-weight: 600; }
-.stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.stat-box { background: #f8fbff; border: 1px solid #e6edf7; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; color: #64748b; font-size: 12px; }
-.stat-box strong { color: #0f172a; font-size: 22px; }
-.chip-list { display: flex; flex-wrap: wrap; gap: 10px; }
-.chip { display: inline-flex; gap: 8px; padding: 8px 12px; border-radius: 999px; border: 1px solid #fecaca; background: #fff5f5; color: #b91c1c; font-size: 12px; }
-.chip.done { border-color: #bbf7d0; background: #effaf2; color: #166534; }
-.recovery-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 14px; border: 1px solid #e6edf5; background: #f8fbff; }
-.recovery-score { color: #1d4ed8; white-space: nowrap; }
-@media (max-width: 1200px) {
-  .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .main-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 760px) {
-  .summary-grid, .stats-grid { grid-template-columns: 1fr; }
-}
-</style>
+

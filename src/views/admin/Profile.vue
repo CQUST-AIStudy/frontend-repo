@@ -1,48 +1,48 @@
 <template>
-  <div class="admin-profile">
+  <div class="admin-profile [height:100%]">
     <page-header
-        class="my-page-header"
+        class="my-page-header [padding:20px]"
       title="个人信息"
       description="查看和编辑您的个人信息"
     />
 
     <el-row :gutter="20">
       <el-col :span="8">
-        <el-card class="profile-card">
-          <div class="profile-header">
+        <el-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#909399]">
             <el-avatar :size="100" :src="userInfo.avatar" />
             <h3>{{ userInfo.name }}</h3>
             <p>{{ userInfo.role === 'admin' ? '系统管理员' : '未知角色' }}</p>
           </div>
 
-          <div class="profile-info">
-            <div class="info-item">
-              <span class="info-label">用户ID</span>
-              <span class="info-value">{{ userInfo.id }}</span>
+          <div class="profile-info [margin-top:20px]">
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户ID</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.id }}</span>
             </div>
 
-            <div class="info-item">
-              <span class="info-label">部门</span>
-              <span class="info-value">{{ userInfo.department }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">部门</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.department }}</span>
             </div>
 
-            <div class="info-item">
-              <span class="info-label">电子邮箱</span>
-              <span class="info-value">{{ userInfo.email }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">电子邮箱</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email }}</span>
             </div>
 
-            <div class="info-item">
-              <span class="info-label">联系电话</span>
-              <span class="info-value">{{ userInfo.phone }}</span>
+            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
+              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">联系电话</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone }}</span>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="16">
-        <el-card class="form-card">
+        <el-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>修改个人信息</span>
             </div>
           </template>
@@ -71,9 +71,9 @@
           </el-form>
         </el-card>
 
-        <el-card class="form-card">
+        <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>修改密码</span>
             </div>
           </template>
@@ -213,64 +213,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.admin-profile {
-  height: 100%;
-}
 
-.profile-card {
-  margin-bottom: 20px;
-  padding: 20px;
-}
-
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.profile-header h3 {
-  margin: 10px 0 5px;
-  font-size: 18px;
-}
-
-.profile-header p {
-  margin: 0;
-  font-size: 14px;
-  color: #909399;
-}
-
-.profile-info {
-  margin-top: 20px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.info-label {
-  color: #909399;
-}
-
-.info-value {
-  color: #303133;
-  font-weight: 500;
-}
-
-.form-card {
-  margin-bottom: 20px;
-}
-
-.card-header {
-  font-weight: 600;
-}
-
-.my-page-header {
-  padding: 20px;
-}
-
-</style>

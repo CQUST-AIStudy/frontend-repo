@@ -1,12 +1,12 @@
-<template>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-header">
+﻿<template>
+  <div class="login-page [position:relative] [overflow-x:hidden] [overflow-y:auto] [isolation:isolate] [min-height:100vh] [min-height:100dvh] [display:flex] [align-items:center] [justify-content:center] [padding:32px_clamp(24px,_6vw,_72px)] [background:linear-gradient(115deg,_rgba(244,_249,_255,_0.5)_10%,_rgba(236,_244,_252,_0.2)_38%,_rgba(15,_35,_68,_0.08)_74%),_url('../images/login-background.png')_center_center_/_cover_no-repeat] max-[480px]:[justify-content:center] max-[480px]:[padding:20px_14px]">
+    <div class="login-card [position:relative] [overflow:hidden] [width:min(100%,_440px)] [max-width:calc(100vw_-_28px)] [padding:36px_32px_26px] [margin-inline:auto] [border-radius:28px] [background:linear-gradient(180deg,_rgba(255,_255,_255,_0.84)_0%,_rgba(248,_251,_255,_0.74)_100%)] [border:1px_solid_rgba(228,_239,_249,_0.62)] [box-shadow:0_24px_54px_rgba(26,_54,_86,_0.18),_0_10px_24px_rgba(255,_255,_255,_0.16),_inset_0_1px_0_rgba(255,_255,_255,_0.9)] [backdrop-filter:blur(18px)] max-[480px]:[padding:28px_18px_20px] max-[480px]:[border-radius:22px]">
+      <div class="login-header [position:relative] [margin-bottom:24px] [text-align:center] [&_h1]:[margin:0_0_10px] [&_h1]:[font-size:30px] [&_h1]:[font-weight:700] [&_h1]:[letter-spacing:0] [&_h1]:[color:#193754] [&_p]:[margin:0] [&_p]:[color:#61788e] [&_p]:[font-size:14px] [&_p]:[letter-spacing:0] max-[480px]:[&_h1]:[font-size:24px]">
         <h1>智能教辅平台</h1>
         <p>使用账号登录系统</p>
       </div>
 
-      <el-tabs v-model="activeTab" stretch class="login-tabs">
+      <el-tabs v-model="activeTab" stretch class="login-tabs [&_.el-tabs__header]:[margin-bottom:24px] [&_.el-tabs__nav-wrap::after]:[height:1px] [&_.el-tabs__nav-wrap::after]:[background:rgba(129,_155,_181,_0.18)] [&_.el-tabs__nav]:[gap:4px] [&_.el-tabs__item]:[height:42px] [&_.el-tabs__item]:[color:#6f8194] [&_.el-tabs__item]:[font-weight:600] [&_.el-tabs__item]:[transition:color_0.2s_ease] [&_.el-tabs__item.is-active]:[color:#1270d8] [&_.el-form-item__label]:[font-weight:600] [&_.el-form-item__label]:[color:#3f5b74] [&_.el-radio-group]:[display:flex] [&_.el-radio-group]:[width:100%] [&_.el-radio-group]:[min-width:0] [&_.el-radio-group]:[padding:4px] [&_.el-radio-group]:[border-radius:16px] [&_.el-radio-group]:[background:rgba(245,_249,_253,_0.88)] [&_.el-radio-group]:[box-shadow:inset_0_0_0_1px_rgba(174,_198,_220,_0.18)] [&_.el-radio-button]:[flex:1] [&_.el-radio-button]:[min-width:0] [&_.el-radio-button__inner]:[width:100%] [&_.el-radio-button__inner]:[min-height:40px] [&_.el-radio-button__inner]:[border:none] [&_.el-radio-button__inner]:[border-radius:12px] [&_.el-radio-button__inner]:[background:transparent] [&_.el-radio-button__inner]:[color:#5d7288] [&_.el-radio-button__inner]:[box-shadow:none] [&_.el-radio-button__inner]:[font-weight:600] [&_.el-radio-button__inner]:[transition:all_0.2s_ease] [&_.el-radio-button:first-child_.el-radio-button__inner]:[border-radius:12px] [&_.el-radio-button:last-child_.el-radio-button__inner]:[border-radius:12px] [&_.el-radio-button__original-radio:checked_+_.el-radio-button__inner]:[color:#1270d8] [&_.el-radio-button__original-radio:checked_+_.el-radio-button__inner]:[background:rgba(255,_255,_255,_0.95)] [&_.el-radio-button__original-radio:checked_+_.el-radio-button__inner]:[box-shadow:0_8px_18px_rgba(18,_112,_216,_0.1),_inset_0_0_0_1px_rgba(18,_112,_216,_0.12)] [&_.el-input__wrapper]:[min-height:48px] [&_.el-input__wrapper]:[background:rgba(255,_255,_255,_0.78)] [&_.el-input__prefix]:[color:#8aa0b3] [&_.el-input__suffix]:[color:#8aa0b3] max-[480px]:[&_.el-radio-button__inner]:[font-size:13px] max-[480px]:[&_.el-radio-button__inner]:[padding-inline:8px] max-[360px]:[&_.el-radio-group]:[flex-direction:column] max-[360px]:[&_.el-radio-group]:[gap:4px] max-[360px]:[&_.el-radio-button__inner]:[min-height:36px]">
         <el-tab-pane label="登录" name="login">
           <el-form
             ref="loginFormRef"
@@ -37,7 +37,7 @@
               />
             </el-form-item>
 
-            <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleLogin">
+            <el-button type="primary" size="large" class="submit-btn [width:100%] [min-height:48px] [margin-top:10px] [border-radius:14px] [font-size:15px] [letter-spacing:0] [box-shadow:0_16px_28px_rgba(18,_112,_216,_0.22)]" :loading="loading" @click="handleLogin">
               登录
             </el-button>
           </el-form>
@@ -83,14 +83,14 @@
               <el-input v-model="registerForm.classname" placeholder="例如：计科23" size="large" />
             </el-form-item>
 
-            <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleRegister">
+            <el-button type="primary" size="large" class="submit-btn [width:100%] [min-height:48px] [margin-top:10px] [border-radius:14px] [font-size:15px] [letter-spacing:0] [box-shadow:0_16px_28px_rgba(18,_112,_216,_0.22)]" :loading="loading" @click="handleRegister">
               注册学生账号
             </el-button>
           </el-form>
         </el-tab-pane>
       </el-tabs>
 
-      <p v-if="isDevelopment" class="dev-hint">开发环境已自动填充默认测试账号。</p>
+      <p v-if="isDevelopment" class="dev-hint [margin:18px_0_0] [padding-top:14px] [border-top:1px_solid_rgba(129,_155,_181,_0.14)] [text-align:center] [color:#8a9aab] [font-size:12px]">开发环境已自动填充默认测试账号。</p>
     </div>
   </div>
 </template>
@@ -235,232 +235,3 @@ function handleRegister() {
 }
 </script>
 
-<style scoped>
-.login-page {
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-  isolation: isolate;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px clamp(24px, 6vw, 72px);
-  background:
-    linear-gradient(115deg, rgba(244, 249, 255, 0.5) 10%, rgba(236, 244, 252, 0.2) 38%, rgba(15, 35, 68, 0.08) 74%),
-    url('../assets/images/login-background.png') center center / cover no-repeat;
-}
-
-.login-page::before,
-.login-page::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.login-page::before {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.03) 26%, rgba(255, 255, 255, 0) 42%),
-    radial-gradient(circle at 34% 60%, rgba(255, 238, 215, 0.34), transparent 24%),
-    radial-gradient(circle at 76% 16%, rgba(181, 223, 255, 0.16), transparent 18%);
-}
-
-.login-page::after {
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 28%, rgba(9, 27, 51, 0.12) 100%),
-    linear-gradient(180deg, rgba(12, 34, 64, 0.02), rgba(12, 34, 64, 0.16));
-}
-
-.login-card {
-  position: relative;
-  overflow: hidden;
-  width: min(100%, 440px);
-  max-width: calc(100vw - 28px);
-  padding: 36px 32px 26px;
-  margin-inline: auto;
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(248, 251, 255, 0.74) 100%);
-  border: 1px solid rgba(228, 239, 249, 0.62);
-  box-shadow:
-    0 24px 54px rgba(26, 54, 86, 0.18),
-    0 10px 24px rgba(255, 255, 255, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(18px);
-}
-
-.login-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 132px;
-  background:
-    linear-gradient(135deg, rgba(115, 182, 255, 0.2), rgba(255, 232, 205, 0.18) 58%, transparent 100%);
-  pointer-events: none;
-}
-
-.login-card::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12));
-  pointer-events: none;
-}
-
-.login-header {
-  position: relative;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.login-header h1 {
-  margin: 0 0 10px;
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: #193754;
-}
-
-.login-header p {
-  margin: 0;
-  color: #61788e;
-  font-size: 14px;
-  letter-spacing: 0;
-}
-
-.login-tabs :deep(.el-tabs__header) {
-  margin-bottom: 24px;
-}
-
-.login-tabs :deep(.el-tabs__nav-wrap::after) {
-  height: 1px;
-  background: rgba(129, 155, 181, 0.18);
-}
-
-.login-tabs :deep(.el-tabs__nav) {
-  gap: 4px;
-}
-
-.login-tabs :deep(.el-tabs__item) {
-  height: 42px;
-  color: #6f8194;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.login-tabs :deep(.el-tabs__item.is-active) {
-  color: #1270d8;
-}
-
-.login-tabs :deep(.el-form-item__label) {
-  font-weight: 600;
-  color: #3f5b74;
-}
-
-.login-tabs :deep(.el-radio-group) {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  padding: 4px;
-  border-radius: 16px;
-  background: rgba(245, 249, 253, 0.88);
-  box-shadow: inset 0 0 0 1px rgba(174, 198, 220, 0.18);
-}
-
-.login-tabs :deep(.el-radio-button) {
-  flex: 1;
-  min-width: 0;
-}
-
-.login-tabs :deep(.el-radio-button__inner) {
-  width: 100%;
-  min-height: 40px;
-  border: none;
-  border-radius: 12px;
-  background: transparent;
-  color: #5d7288;
-  box-shadow: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.login-tabs :deep(.el-radio-button:first-child .el-radio-button__inner),
-.login-tabs :deep(.el-radio-button:last-child .el-radio-button__inner) {
-  border-radius: 12px;
-}
-
-.login-tabs :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  color: #1270d8;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 8px 18px rgba(18, 112, 216, 0.1),
-    inset 0 0 0 1px rgba(18, 112, 216, 0.12);
-}
-
-.login-tabs :deep(.el-input__wrapper) {
-  min-height: 48px;
-  background: rgba(255, 255, 255, 0.78);
-}
-
-.login-tabs :deep(.el-input__prefix),
-.login-tabs :deep(.el-input__suffix) {
-  color: #8aa0b3;
-}
-
-.submit-btn {
-  width: 100%;
-  min-height: 48px;
-  margin-top: 10px;
-  border-radius: 14px;
-  font-size: 15px;
-  letter-spacing: 0;
-  box-shadow: 0 16px 28px rgba(18, 112, 216, 0.22);
-}
-
-.dev-hint {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid rgba(129, 155, 181, 0.14);
-  text-align: center;
-  color: #8a9aab;
-  font-size: 12px;
-}
-
-@media (max-width: 480px) {
-  .login-page {
-    justify-content: center;
-    padding: 20px 14px;
-  }
-
-  .login-card {
-    padding: 28px 18px 20px;
-    border-radius: 22px;
-  }
-
-  .login-header h1 {
-    font-size: 24px;
-  }
-
-  .login-tabs :deep(.el-radio-button__inner) {
-    font-size: 13px;
-    padding-inline: 8px;
-  }
-}
-
-@media (max-width: 360px) {
-  .login-tabs :deep(.el-radio-group) {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .login-tabs :deep(.el-radio-button__inner) {
-    min-height: 36px;
-  }
-}
-</style>

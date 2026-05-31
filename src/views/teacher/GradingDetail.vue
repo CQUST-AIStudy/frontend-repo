@@ -1,32 +1,32 @@
 <template>
-  <div class="grading-detail">
+  <div class="grading-detail [min-height:100%]">
     <el-page-header @back="router.push('/teacher/grading')" title="返回" :content="`批改任务 #${taskId}`" />
 
-    <div v-if="task" class="task-overview">
-      <div class="overview-item">
-        <span class="ov-label">状态</span>
+    <div v-if="task" class="task-overview [display:flex] [align-items:center] [gap:24px] [background:#fff] [border-radius:16px] [padding:20px_24px] [margin-top:20px] [margin-bottom:20px] [border:1px_solid_#dadce0]">
+      <div class="overview-item [display:flex] [flex-direction:column] [gap:4px] [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+        <span class="ov-label [font-size:13px] [color:#5f6368]">状态</span>
         <el-tag :type="statusType(task.status)" effect="light" round>{{ statusText(task.status) }}</el-tag>
       </div>
-      <div class="overview-item">
-        <span class="ov-value">{{ task.totalCount || 0 }}</span>
-        <span class="ov-label">总数</span>
+      <div class="overview-item [display:flex] [flex-direction:column] [gap:4px] [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+        <span class="ov-value [font-size:28px] [font-weight:700] [color:#202124] [&.success]:[color:#16a34a] [&.danger]:[color:#ef4444]">{{ task.totalCount || 0 }}</span>
+        <span class="ov-label [font-size:13px] [color:#5f6368]">总数</span>
       </div>
-      <div class="overview-item">
-        <span class="ov-value success">{{ task.completedCount || 0 }}</span>
-        <span class="ov-label">已完成</span>
+      <div class="overview-item [display:flex] [flex-direction:column] [gap:4px] [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+        <span class="ov-value success [font-size:28px] [font-weight:700] [color:#202124] [&.success]:[color:#16a34a] [&.danger]:[color:#ef4444]">{{ task.completedCount || 0 }}</span>
+        <span class="ov-label [font-size:13px] [color:#5f6368]">已完成</span>
       </div>
-      <div class="overview-item">
-        <span class="ov-value danger">{{ task.failedCount || 0 }}</span>
-        <span class="ov-label">失败</span>
+      <div class="overview-item [display:flex] [flex-direction:column] [gap:4px] [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+        <span class="ov-value danger [font-size:28px] [font-weight:700] [color:#202124] [&.success]:[color:#16a34a] [&.danger]:[color:#ef4444]">{{ task.failedCount || 0 }}</span>
+        <span class="ov-label [font-size:13px] [color:#5f6368]">失败</span>
       </div>
-      <div class="signature-box">
-        <span class="ov-label">教师署名</span>
-        <div class="signature-actions">
+      <div class="signature-box [min-width:280px] [display:flex] [flex-direction:column] [gap:8px]">
+        <span class="ov-label [font-size:13px] [color:#5f6368]">教师署名</span>
+        <div class="signature-actions [display:flex] [align-items:center] [gap:10px]">
           <el-input v-model="signatureDraft" maxlength="32" show-word-limit placeholder="例如：张老师" clearable />
           <el-button :loading="signatureSaving" @click="saveSignature">保存署名</el-button>
         </div>
       </div>
-      <div class="spacer" />
+      <div class="spacer [flex:1]" />
       <el-button type="danger" plain :loading="annotating" :disabled="submissions.length === 0" @click="doBatchAnnotate">
         生成红笔批改报告
       </el-button>
@@ -38,9 +38,9 @@
       </el-button>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">提交列表</span>
+    <div class="card [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
+      <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:18px_20px] [border-bottom:1px_solid_#eceff1] [align-items:flex-start] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+        <span class="card-title [font-size:16px] [font-weight:600] [color:#202124]">提交列表</span>
         <el-radio-group v-model="statusFilter" size="small">
           <el-radio-button label="">全部</el-radio-button>
           <el-radio-button label="SCORED">已评分</el-radio-button>
@@ -50,7 +50,7 @@
         </el-radio-group>
       </div>
 
-      <div class="card-body">
+      <div class="card-body [padding:16px_20px_20px]">
         <el-table
           :data="filteredSubs"
           v-loading="loading"
@@ -69,7 +69,7 @@
           </el-table-column>
           <el-table-column label="总分" width="100">
             <template #default="{ row }">
-              <span class="score-cell" :class="scoreClass(row.totalScore)">
+              <span class="score-cell [font-weight:600]" :class="scoreClass(row.totalScore)">
                 {{ formatScore(row.totalScore) }}
               </span>
             </template>
@@ -80,13 +80,13 @@
               <el-tag v-if="row.hasDownloadableReport" size="small" type="success" effect="light">
                 {{ reportTypeLabel(row.preferredReportFileType) }}
               </el-tag>
-              <span v-else class="muted-text">未生成</span>
+              <span v-else class="muted-text [color:#9aa0a6]">未生成</span>
             </template>
           </el-table-column>
           <el-table-column label="总评" min-width="260" show-overflow-tooltip>
             <template #default="{ row }">
               <span v-if="row.finalReviewComment">{{ row.finalReviewComment }}</span>
-              <span v-else class="muted-text">暂无</span>
+              <span v-else class="muted-text [color:#9aa0a6]">暂无</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="240" fixed="right">
@@ -117,13 +117,13 @@
         <el-form-item label="选择学生">
           <el-checkbox v-model="exportSelectAll" @change="toggleSelectAll">全选</el-checkbox>
         </el-form-item>
-        <div class="export-list">
+        <div class="export-list [max-height:280px] [overflow:auto] [border:1px_solid_#eceff1] [border-radius:12px] [padding:10px_12px]">
           <el-checkbox-group v-model="exportSelected">
             <div v-for="sub in submissions" :key="sub.submissionId" class="export-item">
               <el-checkbox :label="sub.submissionId">
                 {{ sub.studentName || '未知学生' }}
-                <span class="muted-inline">{{ sub.className || '' }}</span>
-                <span class="score-inline">{{ sub.totalScore != null ? `${formatScore(sub.totalScore)}分` : '-' }}</span>
+                <span class="muted-inline [color:#9aa0a6]">{{ sub.className || '' }}</span>
+                <span class="score-inline [margin-left:8px] [color:#5f6368]">{{ sub.totalScore != null ? `${formatScore(sub.totalScore)}分` : '-' }}</span>
               </el-checkbox>
             </div>
           </el-checkbox-group>
@@ -383,126 +383,4 @@ async function loadDetail() {
 onMounted(loadDetail)
 </script>
 
-<style scoped>
-.grading-detail {
-  min-height: 100%;
-}
 
-.task-overview {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px 24px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  border: 1px solid #dadce0;
-}
-
-.overview-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.signature-box {
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.signature-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ov-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #202124;
-}
-
-.ov-value.success {
-  color: #16a34a;
-}
-
-.ov-value.danger {
-  color: #ef4444;
-}
-
-.ov-label {
-  font-size: 13px;
-  color: #5f6368;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.card {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #dadce0;
-  overflow: hidden;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 20px;
-  border-bottom: 1px solid #eceff1;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #202124;
-}
-
-.card-body {
-  padding: 16px 20px 20px;
-}
-
-.score-cell {
-  font-weight: 600;
-}
-
-.score-good {
-  color: #16a34a;
-}
-
-.score-ok {
-  color: #d97706;
-}
-
-.score-low {
-  color: #dc2626;
-}
-
-.muted-text,
-.muted-inline {
-  color: #9aa0a6;
-}
-
-.score-inline {
-  margin-left: 8px;
-  color: #5f6368;
-}
-
-.export-list {
-  max-height: 280px;
-  overflow: auto;
-  border: 1px solid #eceff1;
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-
-.export-item + .export-item {
-  margin-top: 10px;
-}
-</style>
