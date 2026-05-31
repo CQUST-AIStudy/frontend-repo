@@ -145,7 +145,7 @@ const routes = [
         name: 'TeacherProfile',
         component: () => import('../views/teacher/Profile.vue')
       },
-      // »ù´¡ AI ¹¦ÄÜ
+      // åŸºç¡€ AI åŠŸèƒ½
       {
         path: 'ai-recommendation',
         name: 'AIRecommendation',
@@ -156,14 +156,14 @@ const routes = [
         name: 'GeneratePPT',
         component: () => import('../views/teacher/GeneratePPT.vue')
       },
-      // ¿Î³Ì¸ºÔðÈËÂ·ÓÉ
+      // è¯¾ç¨‹è´Ÿè´£äººè·¯ç”±
       {
         path: 'course-analysis',
         name: 'CourseAnalysis',
         component: () => import('../views/teacher/CourseAnalysis.vue'),
         meta: { requiredPermissions: ['view_course_classes', 'analyze_course_classes'] }
       },
-      // ÏµÖ÷ÈÎÂ·ÓÉ
+      // ç³»ä¸»ä»»è·¯ç”±
       {
         path: 'department-teachers',
         name: 'DepartmentTeachers',
@@ -176,7 +176,7 @@ const routes = [
         component: () => import('../views/teacher/DepartmentAnalytics.vue'),
         meta: { requiredPermissions: ['analyze_all_classes'] }
       },
-      // ç³»ä¸»ä»»ç‰¹æ®ŠAIç®¡ç†åŠŸèƒ½
+      // ç³»ä¸»ä»»ç‰¹æ®Š AI ç®¡ç†åŠŸèƒ½
       {
         path: 'teacher-ai-management',
         name: 'TeacherAIManagement',
@@ -236,7 +236,7 @@ const routes = [
         name: 'RubricEditor',
         component: () => import('../views/teacher/RubricEditor.vue')
       },
-      // ¿Î³ÌÖªÊ¶¿â£¨RAG£©
+      // è¯¾ç¨‹çŸ¥è¯†åº“ï¼ˆRAGï¼‰
       {
         path: 'knowledge-base',
         name: 'KnowledgeBase',

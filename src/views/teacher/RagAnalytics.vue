@@ -114,7 +114,7 @@ import {
   getWebTriggerRate,
   getFeedbackStats,
   getResourceGaps
-} from '../../api/tap'
+} from '../../api/rag'
 
 const courseSpaces = ref([])
 const selectedSpaceId = ref(null)

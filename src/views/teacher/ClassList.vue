@@ -409,7 +409,8 @@ const extract = (res) => res?.data ?? res
 const isCorruptedText = (value) => {
   const text = String(value || '').trim()
   if (!text) return true
-  return text.includes('??') || text.includes('�')
+  const mojibakePattern = /(鑾|姝|鍙|鍚|鐢|鐝|鏁|瀹|澶|绾|浣|鎻|鎵|淇|閿|绯|鍓|褰|闈|璇)/
+  return text.includes('??') || text.includes('�') || mojibakePattern.test(text)
 }
 
 const cleanText = (value, fallback = '未设置') => {

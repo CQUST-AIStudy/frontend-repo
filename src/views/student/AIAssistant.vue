@@ -115,6 +115,7 @@ import { ElMessage } from 'element-plus'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { buildApiUrl } from '../../config/runtime'
+import { getKnowledgeBases, normalizeSourcesForDisplay, streamRagChat } from '../../api/rag'
 
 const router = useRouter()
 const userInput = ref('')
@@ -159,14 +160,7 @@ async function scrollToBottom() {
 
 async function fetchCourseSpaces() {
   try {
-    const response = await fetch(buildApiUrl('/api/student-rag/course-spaces'), {
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-    const data = await response.json()
-    const spaces = Array.isArray(data) ? data : data?.data || []
+    const spaces = await getKnowledgeBases()
     courseSpaces.value = spaces
     if (!selectedCourseSpaceId.value && spaces.length > 0) {
       selectedCourseSpaceId.value = spaces[0].id
@@ -177,25 +171,6 @@ async function fetchCourseSpaces() {
     assistantNotice.value = friendlyMessage
     ElMessage.warning(friendlyMessage)
     courseSpaces.value = []
-  }
-}
-
-function extractCitations(content) {
-  const match = (content || '').match(/<!--CITATIONS:(.*?)-->/)
-  if (!match) {
-    return { text: content, citations: [] }
-  }
-
-  let citations = []
-  try {
-    citations = JSON.parse(match[1])
-  } catch (error) {
-    citations = []
-  }
-
-  return {
-    text: content.replace(/\n?\n?<!--CITATIONS:.*?-->/, ''),
-    citations
   }
 }
 
@@ -249,45 +224,55 @@ async function sendMessage() {
 
   try {
     const isRagMode = !!selectedCourseSpaceId.value
-    const url = isRagMode ? buildApiUrl('/api/student-rag/chat') : buildApiUrl('/api/chat')
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(
-        isRagMode
-          ? {
-              courseSpaceId: selectedCourseSpaceId.value,
-              query: text,
-              mode: isOpenMode.value ? 'open' : 'strict'
-            }
-          : { userInput: text }
-      )
-    })
-
-    if (!response.ok) {
-      throw new Error(await readErrorMessage(response))
-    }
-
-    const reader = response.body?.getReader()
-    if (!reader) {
-      throw new Error('No response body reader')
-    }
-
-    const decoder = new TextDecoder()
-    let done = false
-    while (!done) {
-      const chunk = await reader.read()
-      done = chunk.done
-      if (done) break
-      messages.value[aiIndex].content += decoder.decode(chunk.value, { stream: true })
-      await scrollToBottom()
-    }
-
     if (isRagMode) {
-      const parsed = extractCitations(messages.value[aiIndex].content)
-      messages.value[aiIndex].content = parsed.text
-      messages.value[aiIndex].citations = parsed.citations
+      await streamRagChat({
+        query: text,
+        knowledgeBaseIds: [String(selectedCourseSpaceId.value)],
+        mode: isOpenMode.value ? 'open' : 'strict',
+        options: {
+          topK: 10,
+          rerankTopN: 3,
+          scoreThreshold: 0,
+          enableRerank: true,
+          temperature: 0.7,
+          maxTokens: 1024,
+        },
+      }, {
+        onRetrieval: ({ sources }) => {
+          messages.value[aiIndex].citations = normalizeSourcesForDisplay(sources || [])
+          scrollToBottom()
+        },
+        onDelta: ({ content }) => {
+          messages.value[aiIndex].content += content || ''
+          scrollToBottom()
+        },
+      })
+    } else {
+      const response = await fetch(buildApiUrl('/api/chat'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userInput: text })
+      })
+
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response))
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No response body reader')
+      }
+
+      const decoder = new TextDecoder()
+      let done = false
+      while (!done) {
+        const chunk = await reader.read()
+        done = chunk.done
+        if (done) break
+        messages.value[aiIndex].content += decoder.decode(chunk.value, { stream: true })
+        await scrollToBottom()
+      }
     }
   } catch (error) {
     const isRagMode = !!selectedCourseSpaceId.value

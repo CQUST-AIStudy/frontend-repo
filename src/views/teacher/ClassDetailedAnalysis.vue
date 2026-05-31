@@ -774,18 +774,24 @@ const refreshClassList = () => {
   loadClassList()
 }
 
+const normalizeExperimentListResponse = response => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.data)) return response.data
+  if (Array.isArray(response?.data?.data)) return response.data.data
+  return []
+}
+
 // 加载实验列表
 const loadExperimentList = async () => {
   try {
     console.log('开始加载实验列表');
-    const data = await api.getExperimentList()
+    const response = await api.getTeacherExperimentList({ classId: filterForm.classId })
+    const experiments = normalizeExperimentListResponse(response)
 
-    if (data && Array.isArray(data)) {
-      experimentList.value = data;
-    } else if (data && data.data && Array.isArray(data.data)) {
-      experimentList.value = data.data;
+    if (experiments.length > 0) {
+      experimentList.value = experiments;
     } else {
-      console.warn('实验列表返回格式不正确:', data);
+      console.warn('实验列表返回格式不正确:', response);
       experimentList.value = [];
     }
   } catch (error) {
@@ -979,13 +985,11 @@ const loadClassData = async () => {
   aiAdviceError.value = '';
 
   try {
-    // 确保先加载实验列表
-    if (experimentList.value.length === 0) {
-      try {
-        await loadExperimentList();
-      } catch (err) {
-        console.error('加载实验列表失败', err);
-      }
+    // 确保先按当前班级加载实验列表
+    try {
+      await loadExperimentList();
+    } catch (err) {
+      console.error('加载实验列表失败', err);
     }
 
     // 获取班级基本信息
@@ -1643,9 +1647,8 @@ const classIdFromRoute = computed(() => {
 })
 
 onMounted(() => {
-  // 先加载班级列表和实验列表
+  // 先加载班级列表
   loadClassList()
-  loadExperimentList()
 
   // 只有当路由中明确指定了班级ID时才自动加载该班级的详细分析
   const idFromRoute = classIdFromRoute.value

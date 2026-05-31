@@ -376,17 +376,26 @@ const goBack = () => {
 }
 
 // 加载实验列表
+const normalizeExperimentListResponse = response => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.data)) return response.data
+  if (Array.isArray(response?.data?.data)) return response.data.data
+  return []
+}
+
 const loadExperimentList = async () => {
   try {
-    const data = await api.getExperimentList()
-    experimentList.value = data
+    const response = await api.getTeacherExperimentList({ classId: classId.value })
+    const experiments = normalizeExperimentListResponse(response)
+    experimentList.value = experiments
     
     // 如果有实验，默认选中第一个
-    if (data.length > 0) {
-      selectedExperiment.value = data[0].id
+    if (experiments.length > 0 && !selectedExperiment.value) {
+      selectedExperiment.value = experiments[0].id
     }
   } catch (error) {
     console.error('加载实验列表失败:', error)
+    experimentList.value = []
   }
 }
 
@@ -439,14 +448,7 @@ onMounted(() => {
   loadClassData()
   
   // 加载实验列表
-  api.getExperimentList().then(data => {
-    experimentList.value = data
-    if (data.length > 0) {
-      selectedExperiment.value = data[0].id
-    }
-  }).catch(err => {
-    console.error('加载实验列表失败:', err)
-  })
+  loadExperimentList()
   
   // 模拟加载学生列表数据
   // 实际项目中应该基于selectedExperiment获取对应实验的学生提交

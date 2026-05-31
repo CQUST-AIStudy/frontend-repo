@@ -333,14 +333,15 @@ import {
   getCourseSpaceChunks,
   getCourseSpaceDocumentStatusSummary,
   getCourseSpaces,
-  getTeachingClasses,
-  ragChatStream,
+  normalizeSourcesForDisplay,
   rebuildCourseSpaceBm25,
   reprocessAllCourseSpaceDocuments,
   reprocessCourseSpaceDocument,
+  streamRagChat,
   updateCourseSpace,
   uploadCourseSpaceDocument,
-} from '@/api/tap'
+} from '@/api/rag'
+import { getTeachingClasses } from '@/api/tap'
 import { getFriendlyErrorMessage } from '@/utils/errorMessage'
 
 const userStore = useUserStore()
@@ -427,15 +428,28 @@ function visibilityTagType(visibility) {
 }
 
 function statusTagType(status) {
-  return { READY: 'success', PROCESSING: '', PENDING: 'warning', FAILED: 'danger' }[status] || 'info'
+  return {
+    READY: 'success',
+    completed: 'success',
+    PROCESSING: '',
+    processing: '',
+    PENDING: 'warning',
+    pending: 'warning',
+    FAILED: 'danger',
+    failed: 'danger',
+  }[status] || 'info'
 }
 
 function statusLabel(status) {
   return {
     READY: '已就绪',
+    completed: '已就绪',
     PROCESSING: '处理中',
+    processing: '处理中',
     PENDING: '等待处理',
+    pending: '等待处理',
     FAILED: '失败',
+    failed: '失败',
   }[status] || status
 }
 
@@ -690,37 +704,31 @@ async function sendChat() {
   scrollToBottom()
 
   try {
-    const resp = await ragChatStream(selectedSpace.value.id, question, 'strict', {
-      classId: currentClassId.value,
-      className: currentClassName.value,
-    })
-    const reader = resp.body.getReader()
-    const decoder = new TextDecoder()
-    let fullText = ''
     const messageIndex = chatMessages.value.length
     chatMessages.value.push({ role: 'assistant', content: '', citations: [] })
 
-    let done = false
-    while (!done) {
-      const readResult = await reader.read()
-      done = readResult.done
-      if (done) break
-      const chunk = decoder.decode(readResult.value, { stream: true })
-      fullText += chunk
-
-      const citationMatch = fullText.match(/<!--CITATIONS:(.+?)-->/)
-      if (citationMatch) {
-        try {
-          chatMessages.value[messageIndex].citations = JSON.parse(citationMatch[1])
-        } catch {
-          // ignore malformed citation marker
-        }
-        chatMessages.value[messageIndex].content = fullText.replace(/\n\n<!--CITATIONS:.+?-->/, '')
-      } else {
-        chatMessages.value[messageIndex].content = fullText
-      }
-      scrollToBottom()
-    }
+    await streamRagChat({
+      query: question,
+      knowledgeBaseIds: [String(selectedSpace.value.id)],
+      mode: selectedSpace.value.defaultMode === 'open' ? 'open' : 'strict',
+      options: {
+        topK: 10,
+        rerankTopN: 3,
+        scoreThreshold: 0,
+        enableRerank: true,
+        temperature: 0.7,
+        maxTokens: 1024,
+      },
+    }, {
+      onRetrieval: ({ sources }) => {
+        chatMessages.value[messageIndex].citations = normalizeSourcesForDisplay(sources || [])
+        scrollToBottom()
+      },
+      onDelta: ({ content }) => {
+        chatMessages.value[messageIndex].content += content || ''
+        scrollToBottom()
+      },
+    })
   } catch (e) {
     chatMessages.value.push({ role: 'assistant', content: `网络错误: ${e.message}` })
   }
@@ -758,7 +766,9 @@ onMounted(() => {
   loadTeachingClasses()
   refreshTimer = setInterval(() => {
     if (!selectedSpace.value) return
-    const hasActiveTasks = documents.value.some((doc) => doc.status === 'PROCESSING' || doc.status === 'PENDING')
+    const hasActiveTasks = documents.value.some((doc) =>
+      ['PROCESSING', 'PENDING', 'processing', 'pending'].includes(doc.status)
+    )
     if (hasActiveTasks) {
       loadDocuments()
     }

@@ -7,6 +7,10 @@ module.exports = {
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
+      '/rag': {
+        target: 'http://127.0.0.1:8001',
+        changeOrigin: true,
+      },
       '/spider': {
         target: 'http://127.0.0.1:8100',
         changeOrigin: true,

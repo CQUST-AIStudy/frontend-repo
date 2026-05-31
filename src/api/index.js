@@ -188,20 +188,20 @@ export default {
     if (
       // process.env.NODE_ENV === 'development' &&
       USE_MOCK_DATA) {
-      console.log('寮€鍙戠幆澧冪櫥褰曪紝鐢ㄦ埛鍚?', username, '鏁欏笀绾у埆:', teacherLevel)
+      console.log('开发环境登录，用户名：', username, '教师级别:', teacherLevel)
       await delay(1000)
 
       let userInfo = null
       let token = null
       let success = true
-      let message = '鐧诲綍鎴愬姛'
+      let message = '登录成功'
 
       try {
 
         if (username === 'student' && password === 'password123') {
           userInfo = {
             id: 'S2023001',
-            name: '寮犱笁',
+            name: '张三',
             role: 'student',
             avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
           }
@@ -229,22 +229,22 @@ export default {
 
         } else {
           success = false
-          message = '鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒'
+          message = '用户名或密码错误'
         }
 
         if (success) {
           try {
             setSessionToken(token)
             setUserInfo(userInfo)
-            console.log('鐧诲綍淇℃伅宸蹭繚瀛樺埌localStorage')
+            console.log('登录信息已保存到 localStorage')
           } catch (e) {
-            console.error('淇濆瓨鐧诲綍淇℃伅澶辫触:', e)
+            console.error('保存登录信息失败:', e)
           }
         }
-        console.log('鐢ㄦ埛淇℃伅:', userInfo)
+        console.log('用户信息:', userInfo)
         return { success, message, userInfo, token }
       } catch (error) {
-        console.error('鐧诲綍杩囩▼鍙戠敓閿欒:', error)
+        console.error('登录过程中发生错误:', error)
         return {
           success: false,
           message: getFriendlyErrorMessage(error, '登录过程中发生错误，请稍后重试'),
@@ -255,7 +255,7 @@ export default {
     }
 
     try {
-      console.log('鍙戦€佺櫥褰曡姹?(璇︾粏):', {
+      console.log('发送登录请求（详细）:', {
         username: username,
         password: '***',
         role: teacherLevel,
@@ -280,7 +280,7 @@ export default {
       };
 
       const response = await apiClient.post('/api/login', requestData, config);
-      console.log('鐧诲綍鍘熷鍝嶅簲:', response);
+      console.log('登录原始响应:', response);
 
       if (response) {
         if (response.success) {
@@ -289,24 +289,24 @@ export default {
             if (userInfo) {
 
               setUserInfo(userInfo);
-              console.log('鐢ㄦ埛淇℃伅宸蹭繚瀛樺埌localStorage');
+              console.log('用户信息已保存到 localStorage');
 
               const token = 'legacy_session';
               setSessionToken(token);
             }
           } catch (e) {
-            console.error('淇濆瓨鐢ㄦ埛淇℃伅澶辫触:', e);
+            console.error('保存用户信息失败:', e);
           }
 
           this.tryTapLogin();
         } else {
-          console.warn('鐧诲綍鍝嶅簲鏄剧ず澶辫触:', response.message);
+          console.warn('登录响应显示失败:', response.message);
         }
       }
 
       return response;
     } catch (error) {
-      console.error('API鐧诲綍璇锋眰澶辫触 (璇︾粏):', {
+      console.error('API登录请求失败（详细）:', {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data
@@ -371,7 +371,7 @@ export default {
       return experimentList
     }
     try {
-      console.log('姝ｅ湪鍙戦€佽幏鍙栧疄楠屽垪琛ㄨ姹?..');
+      console.log('正在发送获取实验列表请求...');
       const config = {
         withCredentials: true
       };
@@ -379,7 +379,7 @@ export default {
       console.log('从后端的 response:', response);
       return response;
     } catch (error) {
-      console.error('鑾峰彇瀹為獙鍒楄〃澶辫触:', error);
+      console.error('获取实验列表失败:', error);
       throw error;
     }
   },
@@ -391,7 +391,7 @@ export default {
       return experimentList
     }
     try {
-      console.log('姝ｅ湪鍙戦€佽幏鍙栧疄楠屽垪琛ㄨ姹?..');
+      console.log('正在发送获取实验列表请求...');
       const config = {
         withCredentials: true
       };
@@ -399,7 +399,7 @@ export default {
       console.log('从后端的 response:', response);
       return response;
     } catch (error) {
-      console.error('鑾峰彇瀹為獙鍒楄〃澶辫触:', error);
+      console.error('获取实验列表失败:', error);
       throw error;
     }
   },
@@ -407,12 +407,12 @@ export default {
   async getTeacherExperimentList(options) {
     if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       await delay(500)
-      console.log('浣跨敤妯℃嫙鏁版嵁杩斿洖鏁欏笀瀹為獙鍒楄〃');
+      console.log('使用模拟数据返回教师实验列表');
       return teacherExperimentList
     }
 
     try {
-      console.log('姝ｅ湪鍙戦€佽幏鍙栨暀甯堝疄楠屽垪琛ㄨ姹?..');
+      console.log('正在发送获取教师实验列表请求...');
       const classId = resolveTeacherClassId(options)
       const config = {
         withCredentials: true,
@@ -422,7 +422,7 @@ export default {
       console.log('从后端获取的教师实验列表:', response);
       return response;
     } catch (error) {
-      console.error('鑾峰彇鏁欏笀瀹為獙鍒楄〃澶辫触:', error);
+      console.error('获取教师实验列表失败:', error);
       throw error;
     }
   },
@@ -433,7 +433,7 @@ export default {
       return experimentDetails
     }
     try {
-      console.log('姝ｅ湪鍙戦€佽幏鍙栧疄楠岀粏鑺傝姹?..');
+      console.log('正在发送获取实验详情请求...');
       const response = await apiClient.get(`/api/experiments/${id}`);
       console.log('从后端的实验详情 response:', response);
 
@@ -446,7 +446,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('鑾峰彇瀹為獙缁嗚妭澶辫触:', error);
+      console.error('获取实验详情失败:', error);
       throw error;
     }
   },
@@ -457,9 +457,9 @@ export default {
       return learningAnalysisData
     }
     try {
-      console.log('姝ｅ湪鍙戦€佽幏鍙栨帹鑽愰鐩姹?..');
+      console.log('正在发送获取学习分析请求...');
       const response = await apiClient.get('/api/student/learning-analysis')
-      console.log('从后端的实验详情 response:', response);
+      console.log('从后端获取的学习分析 response:', response);
 
       if (response.success && !response.data && typeof response === 'object') {
         return {
@@ -470,7 +470,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('鑾峰彇瀹為獙缁嗚妭澶辫触:', error);
+      console.error('获取学习分析失败:', error);
       throw error;
     }
   },
@@ -527,7 +527,7 @@ export default {
     }
 
     try {
-      console.log('姝ｅ湪鑾峰彇鎵€鏈夊鐢熷疄楠屾暟鎹?..');
+      console.log('正在获取所有学生实验数据...');
       const classId = resolveTeacherClassId(options)
       const response = await apiClient.get('/api/teacher/allStudentExperiments', {
         params: classId ? { classId } : undefined
@@ -541,7 +541,7 @@ export default {
         throw createFriendlyError({ data: response }, '获取数据失败');
       }
     } catch (error) {
-      console.error('鑾峰彇鎵€鏈夊鐢熷疄楠屾暟鎹け璐?', error);
+      console.error('获取所有学生实验数据失败:', error);
       throw error;
     }
   },
@@ -550,16 +550,87 @@ export default {
     if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       await delay(600)
 
-      console.log('浣跨敤妯℃嫙鏁版嵁杩斿洖鎻愪氦璇︽儏, 鎻愪氦ID:', submissionId);
+      console.log('使用模拟数据返回提交详情，提交ID:', submissionId);
       return {
         id: submissionId,
         studentId: '2019443672',
         studentName: '易星贵',
         experimentId: 'exp001',
-        experimentName: '绾挎€ц〃瀹為獙',
+        experimentName: '线性表实验',
         status: 'submitted',
         score: null,
-        code: '"绗?1 棰樺涓?\n//// 鍒涘缓绌虹殑椤哄簭琛?\n// List MakeEmpty ()\n// {\n// List list = malloc (sizeof (struct LNode));\n// //if (list == NULL)\n// // return false;\n// list->Last = -1;\n// return list;\n// }\n// 鍏冪礌 x 鎻掑叆浣嶇疆 p\n//bool Insert (List L, ElementType X, Position P)\n// {\n// if (L->Last>= MAXSIZE-1)\n// {\n// printf ("FULL");\n// return 0;\n// }\n// for (int i = L->Last+1; i >P; i--)\n// {\n// L->Data [i] = L->Data [i-1];\n// }\n// L->Data [P] = X;\n// L->Last++;\n// //printf ("last==% d", L->Data [L->Last]);\n// return 1;\n// }\n// 鏌ユ壘 x 鐨勪綅缃?\n// Position Find (List L, ElementType X)\n// {\n// for (int i = 0; i <= L->Last; i++)\n// {\n// if (L->Data [i] == X)\n// {\n// return i;\n// }\n// }\n// return ERROR;\n// }\n// 灏嗕綅缃?P 鐨勫厓绱犲垹闄?\n//bool Delete (List L, Position P)\n// {\n// if (P > L->Last||P<0)\n// {\n// printf ("POSITION % d EMPTY",P);\n// return 0;\n// }\n// for (int i = P; i <= L->Last; i++)\n// {\n// L->Data [i] = L->Data [i + 1];\n// }\n// L->Last--;\n// return 1;\n// }\nList MakeEmpty ()\n List L;\n L=(List) malloc (sizeof (struct LNode));\n L->Last=-1;\n return L;\nPosition Find ( List L, ElementType X )\n int i;\n for (i=0;i<=L->Last;i++)\n {\n if (L->Data [i]==X)\n return i;\n }\n return ERROR;\nbool Insert ( List L, ElementType X, Position P )\n int i;\n if (L->Last==MAXSIZE-1)\n {\n printf ("FULL");\n return false;\n }\n if (P>L->Last+1||P<0)\n {\n printf ("ILLEGAL POSITION");\n return false;\n }\n for ( i=L->Last;i>=P;i-- )\n {\n L->Data [i+1]=L->Data [i];\n }\n L->Data [P]=X;\n L->Last++;\n return true;\nbool Delete ( List L, Position P )\n Position j;\n if (P<0||P>L->Last){\n printf ("POSITION % d EMPTY",P);\n return false;\n }\n for (j=P;j < L->Last;j++)\n L->Data [j]=L->Data [j+1];\n L->Last--;\n return true;\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?2 棰樺涓?\nList Delete (List L, ElementType minD, ElementType maxD)\n for (int i = 0; i <= L->Last; i++)\n {\n if (L->Data [i]>minD&&L->Data [i]<maxD)\n {\n for (int j = i; j < L->Last; j++)\n {\n L->Data [j] = L->Data [j + 1];\n }\n L->Last--;\n i--;\n }\n }\n return L;\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?3 棰樺涓?\nvoid Del_negative (SqList* L)\n int x = 0;\n for (int i = 0; i < L->length; i++)\n {\n if (L->items [i] < 0)\n {\n SqListDelete (L, i+1, &x);\n i--;\n }\n }\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?4 棰樺涓?\n#define _CRT_SECURE_NO_WARNINGS 0\n#define _CRT_SECURE_NO_WARNINGS 0\n#include<stdio.h>\nint main ()\n int n, m, count = 0;\n int array [100] = { 0 };\n scanf ("% d % d", &n, &m);\n for (int i = 0; i < n; i++)\n {\n scanf ("% d", &array [i]);\n //printf ("% d", array [i]);\n }\n for (int i = 0; i < m; i++)\n {\n count = array [0];\n for (int j = 0; j < n - 1; j++)\n {\n //count=array [0];\n array [j] = array [j + 1];\n }\n array [n - 1] = count;\n }\n for (int i = 0; i < n; i++)\n {\n printf ("% d", array [i]);\n if (i < n - 1)\n {\n printf ("");\n }\n }\n return 0;\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?5 棰樺涓?\n#include<stdio.h>\nint main ()\n int A [100],B [100];\n int m,n,p=0;\n scanf ("% d % d",&m,&n);\n //scanf ("%")\n for (int i=0;i<m;i++)\n {\n scanf ("% d ",&A [i]);\n }\n for (int j=0;j<n;j++)\n {\n scanf ("% d ",&B [j]);\n }\n for (int i=0;i<m;i++)\n for (int j=0;j<n;j++)\n {\n if (A [i]==B [j])\n {\n if (p!=0)\n printf (" ");\n printf ("% d",A [i]);\n p++;\n }\n }\n if (p==0)\n printf ("NULL");\n return 0;\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?6 棰樺涓?\n// #define _CRT_SECURE_NO_WARNINGS 1\n// #include<stdio.h>\n//int main ()\n// {\n// int A [10000], B [10000], C [10000];\n// int m, n;\n// scanf ("% d % d", &m, &n);\n// for (int i = 0; i < m; i++)\n// {\n// scanf ("% d ", &A [i]);\n// }\n// for (int i = 0; i < n; i++)\n// {\n// scanf ("% d ", &B [i]);\n// }\n// //maopao (A, m);\n// //maopao (B, n);\n// int x = 0;\n// //for (int i = 0,j=0; i < m &&j<n;)\n// int count = 0;\n// for (int i = 0; i < m; i++)\n// {\n// for (int j = 0; j < n; j++)\n// {\n// if (A [i] == B [j])\n// {\n// count++;\n// continue;\n// }\n// }\n// if (count == 0)\n// C [x++] = A [i];\n// count = 0;\n// }\n// int n1 = 0;\n// for (int i = 0; i < x - 1; i++)\n// for (int j = 0; j < x - 1 - i; j++)\n// {\n// if (C [j] > C [j + 1])\n// {\n// n1 = C [j];\n// C [j] = C [j + 1];\n// C [j + 1] = n1;\n// }\n// } for (int i = 0; i < x; i++)\n// printf ("% d ", C [i]);\n// if (x == 0)\n// {\n// printf ("% d",0);\n// }\n// return 0;\n// }\n#define _CRT_SECURE_NO_WARNINGS 1\n#include <stdio.h>\n#include <stdlib.h>\n#define maxsize 10000\ntypedef struct\n int data [maxsize];\n int length;\n} sqlist;\nint main ()\n sqlist* c = (sqlist*) malloc (sizeof (sqlist));\n c->length = 0;\n int n, m;\n scanf ("% d % d", &n, &m);\n sqlist* a = (sqlist*) malloc (sizeof (sqlist));\n sqlist* b = (sqlist*) malloc (sizeof (sqlist));\n for (int i = 0; i < n; i++)\n scanf ("% d", &a->data [i]);\n a->length = n;\n for (int j = 0; j < m; j++)\n scanf ("% d", &b->data [j]);\n b->length = m;\n int i = 0, j = 0, x = 0;\n while (i < a->length && j < b->length)\n {\n if (a->data [i] < b->data [j])\n {\n c->data [x] = a->data [i];\n x++;\n i++;\n }\n else if (a->data [i] == b->data [j])\n {\n i++;\n j++;\n }\n else\n j++;\n }\n int y = i;\n for (int k = y; k < a->length; k++)\n {\n c->data [x++] = a->data [k];\n }\n c->length = x;\n if (c->length == 0)\n {\n printf ("0");\n }\n for (int i = 0; i < c->length; i++)\n {\n printf ("% d ", c->data [i]);\n }\n free (a);\n free (b);\n free (c);\n return 0;\n| 娴嬭瘯鐐?| 缁撴灉 | 娴嬭瘯鐐瑰緱鍒?| 鑰楁椂 | 鍐呭瓨 |\n| --- | --- | --- | --- | --- |\n| 0 | 绛旀姝ｇ‘ | 15 | 1.00 ms | 364 KB |\n| 1 | 绛旀姝ｇ‘ | 15 | 2.00 ms | 356 KB |\n| 2 | 绛旀姝ｇ‘ | 10 | 1.00 ms | 364 KB |\n 绗?7 棰樺涓?\n#define _CRT_SECURE_NO_WARNINGS 1\n#include<stdio.h>\nint main ()\n int A [100],B [100];\n int m, n,count=0,x;\n scanf ("% d", &m);\n x = m;\n for (int i = 0; i < m; i++)\n {\n scanf ("% d", &A [i]);\n }\n scanf ("% d", &n);\n for (int j = 0; j < n; j++)\n {\n scanf ("% d", &B [j]);\n for (int i = 0; i < m; i++)\n {\n if (B [j] == A [i])\n {\n count++;\n }\n }\n if (count == 0)\n {\n A [x++] = B [j];\n }\n count = 0;\n }\n for (int i = 0; i < x; i++)\n printf ("% d ", A [i]);\n return 0;',
+        code: `第 1 题如下：
+//// 创建空的顺序表
+List MakeEmpty()
+{
+  List list = malloc(sizeof(struct LNode));
+  list->Last = -1;
+  return list;
+}
+
+// 元素 X 插入位置 P
+bool Insert(List L, ElementType X, Position P)
+{
+  if (L->Last >= MAXSIZE - 1) {
+    printf("FULL");
+    return false;
+  }
+  if (P < 0 || P > L->Last + 1) {
+    printf("ILLEGAL POSITION");
+    return false;
+  }
+  for (int i = L->Last; i >= P; i--) {
+    L->Data[i + 1] = L->Data[i];
+  }
+  L->Data[P] = X;
+  L->Last++;
+  return true;
+}
+
+| 测试点 | 结果 | 测试点得分 | 耗时 | 内存 |
+| --- | --- | --- | --- | --- |
+| 0 | 答案正确 | 15 | 1.00 ms | 364 KB |
+| 1 | 答案正确 | 15 | 2.00 ms | 356 KB |
+| 2 | 答案正确 | 10 | 1.00 ms | 364 KB |
+
+第 2 题如下：
+List Delete(List L, ElementType minD, ElementType maxD)
+{
+  for (int i = 0; i <= L->Last; i++) {
+    if (L->Data[i] > minD && L->Data[i] < maxD) {
+      for (int j = i; j < L->Last; j++) {
+        L->Data[j] = L->Data[j + 1];
+      }
+      L->Last--;
+      i--;
+    }
+  }
+  return L;
+}
+
+| 测试点 | 结果 | 测试点得分 | 耗时 | 内存 |
+| --- | --- | --- | --- | --- |
+| 0 | 答案正确 | 15 | 1.00 ms | 364 KB |
+| 1 | 答案正确 | 15 | 2.00 ms | 356 KB |
+| 2 | 答案正确 | 10 | 1.00 ms | 364 KB |
+
+第 3 题如下：
+void Del_negative(SqList* L)
+{
+  int x = 0;
+  for (int i = 0; i < L->length; i++) {
+    if (L->items[i] < 0) {
+      SqListDelete(L, i + 1, &x);
+      i--;
+    }
+  }
+}
+
+| 测试点 | 结果 | 测试点得分 | 耗时 | 内存 |
+| --- | --- | --- | --- | --- |
+| 0 | 答案正确 | 15 | 1.00 ms | 364 KB |
+| 1 | 答案正确 | 15 | 2.00 ms | 356 KB |
+| 2 | 答案正确 | 10 | 1.00 ms | 364 KB |`,
         plagiarismRate: 0.05,
         class: '计算机科学1班',
         report: `# 线性表实验报告\n\n## 实验目的\n实现顺序表的基本操作\n实现链表的基本操作\n完成示例应用程序\n撰写实验报告分析性能\n\n## 实验环境\nVisual Studio Code, JavaScript\n\n## 实验内容\n实验内容：线性表基础操作，包括顺序表的初始化、插入、删除、查找和遍历实现，包括增删改查等功能。\n\n## 实验步骤\n1. 首先定义线性表的结构\n2. 实现增加元素的方法\n3. 实现删除元素的方法\n4. 实现查找元素的方法\n\n## 实验结果\n成功实现了线性表的各项功能，测试通过。\n\n## 实验总结\n通过本次实验，我深入理解了线性表的工作原理和实现方法。`,
@@ -569,7 +640,7 @@ export default {
     }
 
     try {
-      console.log('姝ｅ湪鑾峰彇鎻愪氦璇︽儏...');
+      console.log('正在获取提交详情...');
       const response = await apiClient.get(`/api/submissions/${submissionId}`);
       console.log('getSubmissionDetail response:', response);
       if (response && response.success === false) {
@@ -631,7 +702,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('鑾峰彇鎻愪氦璇︽儏澶辫触:', error);
+      console.error('获取提交详情失败:', error);
       throw error;
     }
   },
@@ -643,7 +714,7 @@ export default {
     }
 
     try {
-      console.log('姝ｅ湪鑾峰彇鐝骇鍒楄〃...');
+      console.log('正在获取班级列表...');
       try {
         const unifiedResponse = await apiClient.get('/api/classes', {
           validateStatus: status => status < 500
@@ -686,7 +757,7 @@ export default {
 
       return response;
     } catch (error) {
-      console.error('鑾峰彇鐝骇鍒楄〃澶辫触:', error);
+      console.error('获取班级列表失败:', error);
       throw error;
     }
   },
@@ -733,12 +804,12 @@ export default {
     }
 
     try {
-      console.log('姝ｅ湪鑾峰彇瀛︾敓鍒楄〃...');
+      console.log('正在获取学生列表...');
       const response = await apiClient.get('/api/teacher/studentList');
       console.log('获取到学生列表数据:', response);
       return response;
     } catch (error) {
-      console.error('鑾峰彇瀛︾敓鍒楄〃澶辫触:', error);
+      console.error('获取学生列表失败:', error);
       throw error;
     }
   },
@@ -748,7 +819,7 @@ export default {
       await delay(800);
       return {
         id: classId, name: '计算机科学1班', studentCount: 49, grade: '2023级',
-        teacherName: '鐜嬭€佸笀', averageScore: 87, completionRate: 75
+        teacherName: '王老师', averageScore: 87, completionRate: 75
       };
     }
 
@@ -810,7 +881,7 @@ export default {
         topStudents
       };
     } catch (error) {
-      console.error('鑾峰彇鐝骇鍒嗘瀽鏁版嵁澶辫触:', error);
+      console.error('获取班级分析数据失败:', error);
       throw error;
     }
   },
