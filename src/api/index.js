@@ -503,6 +503,10 @@ export default {
     return apiClient.get('/api/current/recommendedPractices')
   },
 
+  async submitSelfAssessment(data) {
+    return apiClient.post('/api/self-assessments', data)
+  },
+
   async getStudentSubmissions(experimentId) {
     if (process.env.NODE_ENV === 'development' && USE_MOCK_DATA) {
       await delay(600)
@@ -930,6 +934,10 @@ void Del_negative(SqList* L)
       return { success: true }
     }
     return apiClient.post(`/api/submissions/${id}/reject`)
+  },
+
+  async getUsers(params = {}) {
+    return apiClient.get('/api/users', { params })
   },
 
   async addUser(data) {

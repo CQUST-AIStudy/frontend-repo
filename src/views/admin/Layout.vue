@@ -1,18 +1,18 @@
 <template>
   <div class="admin-layout [width:100%] [min-height:100vh] [min-height:100dvh] [overflow-x:hidden]">
     <el-container class="layout-container [min-height:100vh] [min-height:100dvh]">
-      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:linear-gradient(180deg,_#1a1a2e_0%,_#202134_100%)] [transition:width_0.3s_cubic-bezier(0.4,_0,_0.2,_1)] [overflow:hidden] [border-right:1px_solid_rgba(255,255,255,0.06)]">
-        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:1px_solid_rgba(255,255,255,0.08)]">
-          <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:12px] [border:2px_solid_rgba(26,115,232,0.5)] [height:40px] [width:40px] [flex-shrink:0] [transition:all_0.3s]" />
+      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:rgba(246,_246,_248,_0.82)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_rgba(0,_0,_0,_0.06)] [backdrop-filter:blur(20px)_saturate(180%)]">
+        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_rgba(0,_0,_0,_0.06)]">
+          <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_rgba(0,_0,_0,_0.08)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
           <transition name="fade-text">
-            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:rgba(255,255,255,0.9)] [white-space:nowrap] [letter-spacing:0]">系统管理后台</span>
+            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:#1d1d1f] [white-space:nowrap] [letter-spacing:-0.01em]">系统管理后台</span>
           </transition>
         </div>
 
-        <el-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.el-scrollbar__bar.is-vertical]:[width:4px] [&_.el-scrollbar__bar.is-vertical]:[right:2px] [&_.el-scrollbar__thumb]:[background:rgba(255,255,255,0.15)] [&_.el-scrollbar__thumb]:[border-radius:4px]">
+        <el-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.el-scrollbar__bar.is-vertical]:[width:4px] [&_.el-scrollbar__bar.is-vertical]:[right:2px] [&_.el-scrollbar__thumb]:[background:rgba(0,_0,_0,_0.1)] [&_.el-scrollbar__thumb]:[border-radius:4px]">
           <el-menu
             :default-active="activeMenu"
-            class="layout-menu [border-right:none] ![background:transparent] [--el-menu-bg-color:transparent] [--el-menu-text-color:#9aa0a6] [--el-menu-active-color:#8ab4f8] [--el-menu-hover-bg-color:rgba(26,115,232,0.1)] [--el-menu-hover-text-color:#d2e3fc] [padding:8px] [&_.el-menu-item]:[border-radius:8px] [&_.el-menu-item]:[margin:2px_0] [&_.el-menu-item]:[height:44px] [&_.el-menu-item]:[line-height:44px] [&_.el-menu-item]:[font-size:13.5px] [&_.el-menu-item]:[transition:all_0.2s] [&_.el-menu-item.is-active]:![background:linear-gradient(135deg,_rgba(26,115,232,0.2),_rgba(66,133,244,0.15))] [&_.el-menu-item.is-active]:![color:#aecbfa] [&_.el-menu-item.is-active]:[font-weight:600] [&_.el-menu-item.is-active::before]:[position:absolute] [&_.el-menu-item.is-active::before]:[left:0] [&_.el-menu-item.is-active::before]:[top:50%] [&_.el-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.el-menu-item.is-active::before]:[width:3px] [&_.el-menu-item.is-active::before]:[height:20px] [&_.el-menu-item.is-active::before]:[background:#8ab4f8] [&_.el-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.el-menu-item:hover]:![background:rgba(26,115,232,0.1)] [&_.el-icon]:[font-size:18px]"
+            class="layout-menu [border-right:none] ![background:transparent] [--el-menu-bg-color:transparent] [--el-menu-text-color:#6e6e73] [--el-menu-active-color:#007aff] [--el-menu-hover-bg-color:rgba(0,_0,_0,_0.04)] [--el-menu-hover-text-color:#1d1d1f] [padding:8px] [&_.el-menu-item]:[border-radius:8px] [&_.el-menu-item]:[margin:2px_0] [&_.el-menu-item]:[height:40px] [&_.el-menu-item]:[line-height:40px] [&_.el-menu-item]:[font-size:13.5px] [&_.el-menu-item]:[transition:all_0.2s] [&_.el-menu-item.is-active]:![background:rgba(0,_122,_255,_0.1)] [&_.el-menu-item.is-active]:![color:#007aff] [&_.el-menu-item.is-active]:[font-weight:600] [&_.el-menu-item.is-active::before]:[position:absolute] [&_.el-menu-item.is-active::before]:[left:0] [&_.el-menu-item.is-active::before]:[top:50%] [&_.el-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.el-menu-item.is-active::before]:[width:3px] [&_.el-menu-item.is-active::before]:[height:18px] [&_.el-menu-item.is-active::before]:[background:#007aff] [&_.el-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.el-menu-item:hover]:![background:rgba(0,_0,_0,_0.04)] [&_.el-icon]:[font-size:18px]"
             :collapse="collapsed"
             router
             :collapse-transition="false"
@@ -42,7 +42,7 @@
               <template #title>系统日志</template>
             </el-menu-item>
 
-            <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
+            <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
             <el-menu-item index="/admin/profile">
               <el-icon><Setting /></el-icon>
@@ -98,7 +98,7 @@
                 <template #title>系统日志</template>
               </el-menu-item>
 
-              <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
+              <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
               <el-menu-item index="/admin/profile">
                 <el-icon><Setting /></el-icon>

@@ -1,65 +1,73 @@
 <template>
-  <div class="bilingual-page [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
-    <!-- 顶部 -->
-    <div class="hero [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:24px] [border:1px_solid_#dadce0] [display:flex] [align-items:center]">
-      <div class="hero-inner [display:flex] [align-items:center] [gap:16px]">
-        <div class="hero-icon [font-size:36px]">🌐</div>
-        <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
-          <h1>双语对照阅读</h1>
-          <p>高质量翻译，左右对照查看文档内容</p>
-        </div>
+  <div class="min-h-full">
+    <!-- Hero -->
+    <div class="flex items-center gap-4 p-7 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+      <div class="text-4xl">🌐</div>
+      <div>
+        <h1 class="m-0 mb-1 text-[22px] font-semibold text-[#1d1d1f]">双语对照阅读</h1>
+        <p class="m-0 text-sm text-[#6e6e73]">高质量翻译，左右对照查看文档内容</p>
       </div>
     </div>
 
-    <!-- 控制面板 -->
-    <div class="control-panel [display:flex] [align-items:center] [gap:12px] [flex-wrap:wrap] [background:#fff] [border-radius:16px] [padding:16px_20px] [margin-bottom:24px] [border:1px_solid_#dadce0]">
-      <el-select v-model="docId" placeholder="选择文档" :loading="docsLoading" filterable class="ctrl-select [flex:1] [min-width:200px]"
-        @change="onDocChange">
-        <el-option v-for="d in docs" :key="d.id" :value="String(d.id)"
-          :label="`${d.filename} (${(d.sizeBytes/1024).toFixed(0)} KB)`" />
-      </el-select>
-      <el-select v-model="lang" class="ctrl-lang [width:120px]">
-        <el-option label="中文" value="ZH" />
-        <el-option label="英文" value="EN-US" />
-        <el-option label="日文" value="JA" />
-        <el-option label="韩文" value="KO" />
-        <el-option label="法文" value="FR" />
-        <el-option label="德文" value="DE" />
-      </el-select>
-      <el-checkbox v-model="force" label="强制重新翻译" />
-      <el-button type="primary" :loading="loading" :disabled="!docId" @click="translate">
+    <!-- Control Panel -->
+    <div class="flex items-center gap-3 flex-wrap p-4 px-5 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+      <select v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+        <option value="" disabled>选择文档</option>
+        <option v-for="d in docs" :key="d.id" :value="String(d.id)">{{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)</option>
+      </select>
+
+      <select v-model="lang" class="w-[120px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+        <option value="ZH">中文</option>
+        <option value="EN-US">英文</option>
+        <option value="JA">日文</option>
+        <option value="KO">韩文</option>
+        <option value="FR">法文</option>
+        <option value="DE">德文</option>
+      </select>
+
+      <label class="inline-flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer select-none">
+        <input type="checkbox" v-model="force" class="w-4 h-4 rounded accent-[#007aff]" />
+        强制重新翻译
+      </label>
+
+      <button @click="translate" :disabled="!docId || loading" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none">
         {{ loading ? '翻译中...' : '开始翻译' }}
-      </el-button>
-      <span v-if="meta" class="meta-tag [font-size:12px] [color:#5f6368] [background:#f1f3f4] [padding:4px_10px] [border-radius:100px]">{{ meta }}</span>
+      </button>
+
+      <span v-if="meta" class="text-[12px] text-[#6e6e73] bg-[#f5f5f7] px-2.5 py-1 rounded-full">{{ meta }}</span>
     </div>
 
-    <el-alert v-if="error" :title="error" type="error" show-icon closable
-      class="[margin-bottom:20px]" @close="error = ''" />
+    <!-- Error Alert -->
+    <div v-if="error" class="flex items-start gap-3 p-4 mb-5 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)]">
+      <span class="text-[#ff3b30] text-lg shrink-0">⚠</span>
+      <div class="flex-1 text-sm text-[#ff3b30]">{{ error }}</div>
+      <button @click="error = ''" class="text-[#ff3b30]/60 hover:text-[#ff3b30] text-lg cursor-pointer bg-transparent border-none">×</button>
+    </div>
 
-    <!-- 翻译结果 -->
-    <div v-if="segments.length > 0" class="segments-list [display:flex] [flex-direction:column] [gap:10px]">
-      <div class="segments-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
-        <span class="seg-count [font-size:13px] [color:#5f6368]">全{{ segments.length }} 段</span>
+    <!-- Segments -->
+    <div v-if="segments.length > 0" class="flex flex-col gap-2.5">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-[13px] text-[#6e6e73]">共 {{ segments.length }} 段</span>
       </div>
-      <div v-for="seg in segments" :key="seg.index" class="seg-row [display:flex] [align-items:stretch] [gap:0] [background:#fff] [border-radius:16px] [overflow:hidden] [border:1px_solid_#dadce0] [transition:all_.2s] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]">
-        <div class="seg-num [width:44px] [display:flex] [align-items:center] [justify-content:center] [background:#f8f9fa] [color:#9aa0a6] [font-size:13px] [font-weight:500] [flex-shrink:0] [border-right:1px_solid_#e8eaed]">{{ seg.index + 1 }}</div>
-        <div class="seg-source [flex:1] [padding:16px_20px]">
-          <div class="seg-label [font-size:11px] [font-weight:500] [text-transform:uppercase] [color:#1a73e8] [margin-bottom:8px] [letter-spacing:.5px] [&.target]:[color:#1e8e3e]">原文</div>
-          <div class="seg-body [font-size:14px] [line-height:1.8] [color:#202124] [white-space:pre-wrap]">{{ seg.source }}</div>
+      <div v-for="seg in segments" :key="seg.index" class="flex items-stretch gap-0 bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+        <div class="w-11 flex items-center justify-center bg-[#f9f9f9] text-[#aeaeb2] text-[13px] font-medium shrink-0 border-r border-black/[0.06]">{{ seg.index + 1 }}</div>
+        <div class="flex-1 p-4 px-5">
+          <div class="text-[11px] font-medium uppercase text-[#007aff] mb-2 tracking-wide">原文</div>
+          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.source }}</div>
         </div>
-        <div class="seg-divider [width:1px] [background:#e8eaed] [flex-shrink:0]"></div>
-        <div class="seg-target [flex:1] [padding:16px_20px]">
-          <div class="seg-label target [font-size:11px] [font-weight:500] [text-transform:uppercase] [color:#1a73e8] [margin-bottom:8px] [letter-spacing:.5px] [&.target]:[color:#1e8e3e]">译文</div>
-          <div class="seg-body [font-size:14px] [line-height:1.8] [color:#202124] [white-space:pre-wrap]">{{ seg.target }}</div>
+        <div class="w-px bg-black/[0.06] shrink-0"></div>
+        <div class="flex-1 p-4 px-5">
+          <div class="text-[11px] font-medium uppercase text-[#34c759] mb-2 tracking-wide">译文</div>
+          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.target }}</div>
         </div>
       </div>
     </div>
 
-    <el-empty v-if="!loading && segments.length === 0 && !error" description="选择文档后点击「开始翻译」">
-      <template #image>
-        <div class="[font-size:48px]">📄</div>
-      </template>
-    </el-empty>
+    <!-- Empty State -->
+    <div v-if="!loading && segments.length === 0 && !error" class="flex flex-col items-center justify-center py-20 text-center">
+      <div class="text-5xl mb-4">📄</div>
+      <p class="text-sm text-[#aeaeb2]">选择文档后点击「开始翻译」</p>
+    </div>
   </div>
 </template>
 
@@ -112,7 +120,6 @@ const translate = async () => {
       loading.value = false
       return
     }
-    // Handle the response - segments may be nested in data
     const segs = data.segments ?? data.data?.segments ?? []
     if (segs.length === 0) {
       error.value = '文档没有可翻译的文本内容，请确认文档已正确上传且包含文本'
@@ -138,5 +145,3 @@ const translate = async () => {
 
 onMounted(loadDocs)
 </script>
-
-

@@ -1,46 +1,50 @@
 <template>
-  <div class="class-selector-page [min-height:100vh] [min-height:100dvh] [display:flex] [align-items:center] [justify-content:center] [padding:24px] [background:#f5f7fb] [overflow-x:hidden] [overflow-y:auto] max-[768px]:[align-items:flex-start] max-[768px]:[padding:16px]">
-    <div class="selector-card [width:100%] [max-width:860px] [padding:36px] [border-radius:24px] [background:#fff] [border:1px_solid_#e6eaf2] [box-shadow:0_18px_48px_rgba(15,_23,_42,_0.08)] max-[768px]:[padding:24px] max-[480px]:[padding:20px_16px] max-[480px]:[border-radius:18px]">
-      <div class="selector-header [margin-bottom:24px] [text-align:center] [&_h1]:[margin:0_0_8px] [&_h1]:[color:#1f2937] [&_h1]:[font-size:28px] [&_p]:[margin:0] [&_p]:[color:#6b7280] max-[480px]:[&_h1]:[font-size:24px]">
-        <h1>选择教学班</h1>
-        <p>教师端按教学班隔离管理。先选择当前教学班，或先创建新的教学班。</p>
+  <div class="min-h-screen min-h-dvh flex items-center justify-center p-6 bg-[#f5f5f7] overflow-x-hidden overflow-y-auto max-[768px]:items-start max-[768px]:p-4">
+    <div class="w-full max-w-[860px] p-9 rounded-[24px] bg-white/95 backdrop-blur-[20px] border border-black/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.08)] max-[768px]:p-6 max-[480px]:p-5 max-[480px]:rounded-[20px]">
+      <div class="mb-6 text-center">
+        <h1 class="text-[28px] font-bold text-[#1d1d1f] mb-2 max-[480px]:text-[24px]">选择教学班</h1>
+        <p class="text-[15px] text-[#6e6e73] m-0">教师端按教学班隔离管理。先选择当前教学班，或先创建新的教学班。</p>
       </div>
 
-      <div v-if="loading" class="loading-state [padding:40px_0] [text-align:center] [color:#6b7280] [display:flex] [align-items:center] [gap:10px] [padding:18px_2px] [color:#48607c]">
-        <el-icon class="is-loading" :size="30"><Loading /></el-icon>
-        <p>正在加载教学班...</p>
+      <div v-if="loading" class="py-10 text-center text-[#6e6e73] flex items-center justify-center gap-2.5">
+        <Loading class="w-7 h-7 animate-spin text-[#007aff]" />
+        <p class="text-[14px] m-0">正在加载教学班...</p>
       </div>
 
       <template v-else>
-        <div v-if="classList.length" class="class-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(min(280px,_100%),_1fr))] [gap:16px] [margin-bottom:24px] max-[768px]:[grid-template-columns:1fr] [display:flex] [flex-wrap:wrap] [min-width:0]">
+        <div v-if="classList.length" class="flex flex-wrap gap-4 mb-6 min-w-0 max-[768px]:flex-col">
           <div
             v-for="cls in classList"
             :key="cls.id"
-            class="class-item [display:flex] [align-items:flex-start] [gap:14px] [min-height:112px] [padding:20px_20px_18px] [border:1px_solid_#dbe2ea] [border-radius:18px] [cursor:pointer] [transition:0.2s_ease] hover:[border-color:#9fb3c8] hover:[background:#f8fbff] [&.selected]:[border-color:#2563eb] [&.selected]:[background:#eff6ff]"
-            :class="{ selected: selected === cls.id }"
+            class="flex items-start gap-3.5 min-h-[112px] p-5 border border-black/[0.08] rounded-[18px] cursor-pointer transition-all duration-200 flex-1 min-w-[280px] max-[768px]:min-w-0 hover:border-[#007aff]/30 hover:bg-[rgba(0,122,255,0.02)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
+            :class="selected === cls.id ? 'border-[#007aff] bg-[rgba(0,122,255,0.04)] shadow-[0_0_0_3px_rgba(0,122,255,0.12)]' : ''"
             @click="selected = cls.id"
           >
-            <div class="class-icon [width:48px] [height:48px] [display:grid] [place-items:center] [border-radius:14px] [background:#e0ecff] [color:#1d4ed8] [font-weight:700] [flex-shrink:0]">班</div>
-            <div class="class-info [flex:1] [display:flex] [flex-direction:column] [min-width:0] [flex-grow:1] [margin-bottom:15px]">
-              <span class="class-name [color:#111827] [font-weight:700] [font-size:20px] [line-height:1.35] [word-break:break-word] [margin:0] [font-size:26px] [line-height:1.2] [color:#16314a]">{{ cls.name }}</span>
-              <span class="class-meta [margin-top:6px] [color:#6b7280] [font-size:14px] [line-height:1.6] [word-break:break-word] [display:flex] [flex-wrap:wrap] [gap:8px] [margin-top:12px]">{{ cls.courseName || '未设置课程' }} · {{ cls.studentCount || 0 }} 人</span>
+            <div class="w-12 h-12 grid place-items-center rounded-[14px] bg-[rgba(0,122,255,0.1)] text-[#007aff] font-bold text-[15px] shrink-0">班</div>
+            <div class="flex-1 flex flex-col min-w-0">
+              <span class="text-[20px] font-bold text-[#1d1d1f] leading-tight break-words">{{ cls.name }}</span>
+              <span class="mt-2 text-[14px] text-[#6e6e73] leading-relaxed flex flex-wrap gap-2">{{ cls.courseName || '未设置课程' }} · {{ cls.studentCount || 0 }} 人</span>
             </div>
-            <el-icon v-if="selected === cls.id" class="check-icon [color:#2563eb] [font-size:20px]"><CircleCheckFilled /></el-icon>
+            <CircleCheckFilled v-if="selected === cls.id" class="w-5 h-5 text-[#007aff] shrink-0" />
           </div>
         </div>
 
-        <el-empty v-else description="你还没有创建任何教学班">
-          <el-button type="primary" @click="goCreateClass">去创建教学班</el-button>
-        </el-empty>
+        <div v-else class="py-16 text-center">
+          <div class="text-[48px] mb-4 opacity-40">📚</div>
+          <p class="text-[15px] text-[#aeaeb2] mb-5">你还没有创建任何教学班</p>
+          <button @click="goCreateClass" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+            去创建教学班
+          </button>
+        </div>
       </template>
 
-      <div class="selector-actions [display:flex] [gap:12px] [flex-wrap:wrap]">
-        <el-button v-if="classList.length" type="primary" size="large" class="confirm-btn [flex:1] [border-radius:12px]" :disabled="!selected" @click="confirmSelect">
+      <div class="flex gap-3 flex-wrap">
+        <button v-if="classList.length" :disabled="!selected" @click="confirmSelect" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100">
           进入当前教学班
-        </el-button>
-        <el-button v-if="classList.length" size="large" class="secondary-btn [flex:1] [border-radius:12px]" @click="goCreateClass">
+        </button>
+        <button v-if="classList.length" @click="goCreateClass" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
           新建教学班
-        </el-button>
+        </button>
       </div>
     </div>
   </div>

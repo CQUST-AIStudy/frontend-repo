@@ -6,86 +6,111 @@
       description="基于课程真实数据生成教学分析。当 AI 服务异常时，页面会自动展示本地兜底建议。"
     />
 
-    <div class="recommendation-content [display:flex] [flex-direction:column] [gap:20px] [margin-bottom:40px] [padding:10px_0]">
-      <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [flex-wrap:wrap] [align-items:flex-start] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>分析配置</span>
-            <div class="stat-strip [display:flex] [flex-wrap:wrap] [gap:10px] [color:#6e8097] [font-size:12px]" v-if="courseData">
-              <span>{{ courseData.studentCount }} 名学生</span>
-              <span>{{ courseData.totalExperiments }} 个实验</span>
-              <span>平均提交率{{ courseData.avgSubmissionRate }}%</span>
+    <div class="flex flex-col gap-5 mb-10 py-2.5">
+      <!-- Form Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-start gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">分析配置</span>
+          <div class="flex flex-wrap gap-2.5 text-[12px] text-[#86868b] ml-auto" v-if="courseData">
+            <span>{{ courseData.studentCount }} 名学生</span>
+            <span>{{ courseData.totalExperiments }} 个实验</span>
+            <span>平均提交率{{ courseData.avgSubmissionRate }}%</span>
+          </div>
+        </div>
+
+        <div class="pt-1">
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-3">分析内容</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
+                <input type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[#007aff]" />
+                <span class="text-[13px] text-[#1d1d1f]">学习状态分析</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
+                <input type="checkbox" v-model="analysisForm.content" value="knowledge_points" class="w-4 h-4 rounded accent-[#007aff]" />
+                <span class="text-[13px] text-[#1d1d1f]">知识点掌握情况</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
+                <input type="checkbox" v-model="analysisForm.content" value="improvement" class="w-4 h-4 rounded accent-[#007aff]" />
+                <span class="text-[13px] text-[#1d1d1f]">改进建议</span>
+              </label>
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
+                <input type="checkbox" v-model="analysisForm.content" value="course_design" class="w-4 h-4 rounded accent-[#007aff]" />
+                <span class="text-[13px] text-[#1d1d1f]">课程设计优化</span>
+              </label>
             </div>
           </div>
-        </template>
 
-        <el-form :model="analysisForm" label-position="top" class="analysis-form [padding-top:4px]">
-          <el-form-item label="分析内容">
-            <el-checkbox-group v-model="analysisForm.content" class="checkbox-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:10px_16px]">
-              <el-checkbox label="learning_status">学习状态分析</el-checkbox>
-              <el-checkbox label="knowledge_points">知识点掌握情况</el-checkbox>
-              <el-checkbox label="improvement">改进建议</el-checkbox>
-              <el-checkbox label="course_design">课程设计优化</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <div class="form-actions [display:flex] [align-items:center] [gap:14px] [flex-wrap:wrap] [gap:12px]">
-            <el-button type="primary" :loading="loading" @click="generateRecommendation">
+          <div class="flex items-center flex-wrap gap-3">
+            <button
+              class="inline-flex items-center gap-2 h-[38px] px-5 rounded-[10px] bg-[#007aff] text-white text-[14px] font-medium shadow-[0_2px_8px_rgba(0,122,255,0.3)] transition-all hover:bg-[#0066d6] active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="loading"
+              @click="generateRecommendation"
+            >
               {{ loading ? 'AI 分析中..' : '生成 AI 教学建议' }}
-            </el-button>
-            <span class="form-hint [font-size:12px] [color:#7a8da5]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
+            </button>
+            <span class="text-[12px] text-[#86868b]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
           </div>
-        </el-form>
-      </el-card>
-
-      <el-card v-if="dataLoading" class="result-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
-        <div class="loading-hint [display:flex] [align-items:center] [gap:10px] [padding:20px] [color:#8a9cb0]">
-          <el-icon class="is-loading" :size="24"><Loading /></el-icon>
-          <span>正在加载课程数据...</span>
         </div>
-      </el-card>
+      </div>
 
-      <el-alert
+      <!-- Data Loading Card -->
+      <div v-if="dataLoading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center gap-2.5 py-5 text-[#86868b]">
+          <Loading class="w-6 h-6 animate-spin text-[#007aff]" />
+          <span class="text-[14px]">正在加载课程数据...</span>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div
         v-if="errorMessage"
-        class="error-alert [border-radius:18px]"
-        :title="errorMessage"
-        type="warning"
-        :closable="false"
-        show-icon
+        class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)]"
       >
-        <template #default>
-          <span>页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</span>
-        </template>
-      </el-alert>
-
-      <el-card v-if="aiContent || loading || errorMessage" class="result-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <div class="result-title [display:flex] [align-items:center] [gap:10px]">
-              <span>AI 教学建议</span>
-              <el-tag v-if="usingFallback" type="warning" size="small" effect="plain">本地兜底</el-tag>
-            </div>
-            <el-button v-if="aiContent && !loading" type="primary" plain size="small" @click="copyResult">
-              复制结果
-            </el-button>
-          </div>
-        </template>
-
-        <div class="ai-content [display:flex] [flex-direction:column] [gap:18px] [padding:10px_0]">
-          <div class="ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:10px]">
-            <el-avatar :size="38">AI</el-avatar>
-            <div class="ai-header__text [display:flex] [flex-direction:column] [gap:4px]">
-              <span class="ai-name [font-weight:700] [color:#1d3557]">教学分析助手</span>
-              <span class="ai-subtitle [font-size:12px] [color:#7b8ea5]">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>
-            </div>
-          </div>
-
-          <div v-if="loading" class="loading-block [padding-top:6px]">
-            <el-skeleton :rows="7" animated />
-          </div>
-          <div v-else class="ai-text [line-height:1.9] [color:#1f344c] [font-size:14px] [line-height:1.8] [color:#202124]" v-html="renderedContent"></div>
+        <span class="text-[#ff9500] text-lg shrink-0">⚠</span>
+        <div class="flex-1">
+          <div class="text-[14px] font-medium text-[#ff9500]">{{ errorMessage }}</div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
         </div>
-      </el-card>
+      </div>
+
+      <!-- Result Card -->
+      <div v-if="aiContent || loading || errorMessage" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <div class="flex items-center gap-2.5">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">AI 教学建议</span>
+            <span v-if="usingFallback" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(255,149,0,0.1)] text-[#ff9500]">本地兜底</span>
+          </div>
+          <button
+            v-if="aiContent && !loading"
+            class="ml-auto inline-flex items-center gap-1.5 h-[30px] px-3 rounded-[8px] border border-[#007aff]/20 text-[#007aff] text-[13px] font-medium transition-all hover:bg-[#007aff]/5 active:scale-[0.97]"
+            @click="copyResult"
+          >
+            复制结果
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-4 py-2.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center text-white text-[13px] font-bold shrink-0">AI</div>
+            <div class="flex flex-col gap-1">
+              <span class="font-bold text-[14px] text-[#1d1d1f]">教学分析助手</span>
+              <span class="text-[12px] text-[#86868b]">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>
+            </div>
+          </div>
+
+          <div v-if="loading" class="pt-1.5 space-y-3">
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-full"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[92%]"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[85%]"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[96%]"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[78%]"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[88%]"></div>
+            <div class="h-4 bg-[#f5f5f7] rounded-[6px] animate-pulse w-[70%]"></div>
+          </div>
+          <div v-else class="leading-[1.8] text-[14px] text-[#1d1d1f] prose prose-sm max-w-none" v-html="renderedContent"></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -351,5 +376,3 @@ onMounted(() => {
   router.replace('/teacher/class-detailed-analysis')
 })
 </script>
-
-

@@ -1,96 +1,124 @@
 <template>
-  <div class="dashboard-page [display:flex] [flex-direction:column] [gap:18px] max-[640px]:[gap:14px]">
+  <div class="flex flex-col gap-[18px] max-[640px]:gap-3.5">
     <page-header title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
-      <el-button @click="goToClasses">教学班管理</el-button>
-      <el-button type="primary" @click="goToExperiments">进入实验中心</el-button>
+      <button @click="goToClasses" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f] bg-white/80 border border-black/[0.1] backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] cursor-pointer">教学班管理</button>
+      <button @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25),0_1px_3px_rgba(0,122,255,0.15)] transition-all duration-200 hover:from-[#4da6ff] hover:to-[#0066d6] hover:shadow-[0_4px_16px_rgba(0,122,255,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</button>
     </page-header>
 
-    <div class="hero-strip [display:grid] [grid-template-columns:minmax(0,_1.4fr)_minmax(280px,_0.6fr)] [gap:16px] max-[1100px]:[grid-template-columns:1fr]">
-      <div class="hero-card hero-card--wide [position:relative] [overflow:hidden] [min-height:148px] [padding:24px_26px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.2)] [background:linear-gradient(135deg,_#10355a_0%,_#0b5e95_62%,_#0f766e_100%)] [box-shadow:0_18px_38px_rgba(25,_53,_83,_0.16)] [color:#f7fbff] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
-        <div class="hero-kicker [font-size:12px] [font-weight:700] [letter-spacing:0] [text-transform:uppercase] [color:#dcecff]">当前教学班</div>
-        <div class="hero-title [max-width:620px] [margin-top:14px] [color:#ffffff] [font-size:28px] [line-height:1.16] [letter-spacing:0] [font-weight:800] [text-shadow:0_1px_2px_rgba(0,_0,_0,_0.22)] max-[640px]:[font-size:24px]">{{ classLabel }} 的实验、知识库和批改工作台</div>
-        <div class="hero-meta [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:18px] [&_span]:[min-height:34px] [&_span]:[padding:0_12px] [&_span]:[border-radius:999px] [&_span]:[display:inline-flex] [&_span]:[align-items:center] [&_span]:[background:rgba(255,_255,_255,_0.18)] [&_span]:[border:1px_solid_rgba(255,_255,_255,_0.26)] [&_span]:[color:#f7fbff] [&_span]:[font-size:12px] [&_span]:[font-weight:700]">
-          <span>实验 {{ stats.experimentCount }}</span>
-          <span>待处理{{ stats.pendingSubmissions }}</span>
-          <span>班级 {{ stats.classCount }}</span>
+    <!-- Hero Strip -->
+    <div class="grid grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-4 max-[1100px]:grid-cols-1">
+      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] bg-gradient-to-br from-[#007aff] to-[#5856d6] shadow-[0_8px_24px_rgba(0,122,255,0.2),0_2px_8px_rgba(0,122,255,0.1)] text-white max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="text-[12px] font-bold uppercase text-white/70">当前教学班</div>
+        <div class="max-w-[620px] mt-3.5 text-[28px] leading-[1.16] font-extrabold text-shadow-[0_1px_2px_rgba(0,0,0,0.22)] max-[640px]:text-2xl">{{ classLabel }} 的实验、知识库和批改工作台</div>
+        <div class="flex flex-wrap gap-2.5 mt-[18px]">
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">实验 {{ stats.experimentCount }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">待处理 {{ stats.pendingSubmissions }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">班级 {{ stats.classCount }}</span>
         </div>
       </div>
 
-      <div class="hero-card hero-card--compact [position:relative] [overflow:hidden] [min-height:148px] [padding:24px_26px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.18)] [background:linear-gradient(135deg,_rgba(255,_255,_255,_0.9),_rgba(241,_248,_252,_0.86)),_radial-gradient(circle_at_top_right,_rgba(18,_112,_216,_0.12),_transparent_36%)] [box-shadow:0_18px_38px_rgba(25,_53,_83,_0.08)] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
-        <div class="hero-kicker [font-size:12px] [font-weight:700] [letter-spacing:0] [text-transform:uppercase] [color:#39536c]">当前班级</div>
-        <div class="hero-number [margin-top:14px] [color:#16324a] [font-size:34px] [line-height:1.05] [letter-spacing:0] [font-weight:800] max-[640px]:[font-size:30px]">{{ classLabel }}</div>
-        <div class="hero-desc [margin-top:12px] [color:#5d7288] [font-size:13px] [line-height:1.7]">切换班级后，分析面板与实验数据会自动联动。</div>
-      </div>
-    </div>
-
-    <div class="stats-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1100px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[640px]:[grid-template-columns:1fr] max-[640px]:[gap:12px] [grid-template-columns:repeat(3,_minmax(0,_1fr))] [gap:12px]">
-      <div v-for="card in statCards" :key="card.label" class="stat-card [display:flex] [align-items:center] [gap:16px] [padding:20px] [border-radius:20px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_14px_28px_rgba(24,_50,_78,_0.08)] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px] [text-align:center] [padding:20px_0] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-        <div class="stat-icon [width:48px] [height:48px] [border-radius:16px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="card.iconClass">
-          <el-icon :size="20"><component :is="card.icon" /></el-icon>
-        </div>
-        <div class="stat-main [display:flex] [flex-direction:column] [gap:4px]">
-          <span class="stat-label [color:#5d7288] [font-size:12px] [font-weight:600] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">{{ card.label }}</span>
-          <span class="stat-value [color:#16324a] [font-size:28px] [line-height:1] [font-weight:800] [letter-spacing:0] [font-size:24px] [font-weight:bold] [color:#409EFF] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ card.value }}</span>
-          <span class="stat-hint [color:#92a2b2] [font-size:12px]">{{ card.hint }}</span>
-        </div>
+      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="text-[12px] font-bold uppercase text-[#6e6e73]">当前班级</div>
+        <div class="mt-3.5 text-[34px] leading-[1.05] font-extrabold text-[#1d1d1f] max-[640px]:text-[30px]">{{ classLabel }}</div>
+        <div class="mt-3 text-[13px] leading-[1.7] text-[#6e6e73]">切换班级后，分析面板与实验数据会自动联动。</div>
       </div>
     </div>
 
-    <div class="content-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:16px] max-[1100px]:[grid-template-columns:1fr]">
-      <div class="panel-card [min-width:0] [padding:22px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_16px_34px_rgba(24,_50,_78,_0.09)] [&_.el-table]:[--el-table-border-color:rgba(126,_157,_183,_0.18)] [&_.el-table]:[--el-table-header-bg-color:#f1f7fb] [&_.el-table]:[background:#ffffff] [&_.el-table_th]:[background:#f1f7fb] [&_.el-table_th]:[font-weight:700] [&_.el-table_th]:[color:#304a62] [&_.el-table_td]:[background:#ffffff] [&_.el-table_td]:[color:#22384d] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
-        <div class="panel-head [display:flex] [align-items:flex-start] [justify-content:space-between] [gap:16px] [margin-bottom:16px] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px] [align-items:center] [gap:10px] [flex-wrap:wrap]">
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2 max-[640px]:grid-cols-1 max-[640px]:gap-3">
+      <div v-for="card in statCards" :key="card.label" class="flex items-center gap-4 p-5 rounded-2xl border border-black/[0.06] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 max-[640px]:rounded-[14px] max-[640px]:p-4">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="card.iconClass">
+          <component :is="card.icon" class="w-5 h-5" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[12px] font-semibold text-[#6e6e73]">{{ card.label }}</span>
+          <span class="text-[26px] leading-none font-bold text-[#1d1d1f] tracking-tight">{{ card.value }}</span>
+          <span class="text-[12px] text-[#aeaeb2]">{{ card.hint }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid: Tables -->
+    <div class="grid grid-cols-2 gap-4 max-[1100px]:grid-cols-1">
+      <!-- Recent Experiments -->
+      <div class="min-w-0 p-[22px] rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="flex items-center justify-between gap-2.5 mb-4 flex-wrap">
           <div>
-            <div class="panel-title [color:#16324a] [font-size:18px] [font-weight:700]">近期发布实验</div>
-            <div class="panel-desc [margin-top:6px] [color:#6e8297] [font-size:13px] [line-height:1.6]">优先关注仍在进行中的实验与即将截止的任务。</div>
+            <div class="text-[18px] font-bold text-[#1d1d1f]">近期发布实验</div>
+            <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">优先关注仍在进行中的实验与即将截止的任务。</div>
           </div>
-          <a class="panel-link [color:#1270d8] [font-size:13px] [font-weight:700] [cursor:pointer]" @click="goToExperiments">查看全部</a>
+          <a @click="goToExperiments" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
         </div>
-        <el-table :data="recentExperiments" size="small" class="teacher-dashboard-table [width:100%]">
-          <el-table-column prop="name" label="实验名称" min-width="180" />
-          <el-table-column prop="deadline" label="截止日期" width="128" />
-          <el-table-column label="状态" width="108">
-            <template #default="{ row }">
-              <span class="status-chip [display:inline-flex] [align-items:center] [min-height:28px] [padding:0_10px] [border-radius:999px] [font-size:12px] [font-weight:700]" :class="`status-${row.status}`">{{ getExpStatusText(row.status) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="90">
-            <template #default="{ row }">
-              <a class="panel-link" @click="goToExperimentDetail(row.id)">详情</a>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div class="overflow-x-auto rounded-xl">
+          <table class="w-full text-left text-[13px]">
+            <thead>
+              <tr class="border-b border-black/[0.06]">
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[128px]">截止日期</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[108px]">状态</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[90px]">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in recentExperiments" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+                <td class="py-3 px-3 text-[#1d1d1f]">{{ row.name }}</td>
+                <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
+                <td class="py-3 px-3"><span class="inline-flex items-center h-7 px-2.5 rounded-full text-[12px] font-bold" :class="statusClass(row.status)">{{ getExpStatusText(row.status) }}</span></td>
+                <td class="py-3 px-3"><a @click="goToExperimentDetail(row.id)" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3]">详情</a></td>
+              </tr>
+              <tr v-if="!recentExperiments.length">
+                <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无实验数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="panel-card [min-width:0] [padding:22px] [border-radius:24px] [border:1px_solid_rgba(126,_157,_183,_0.22)] [background:#ffffff] [box-shadow:0_16px_34px_rgba(24,_50,_78,_0.09)] [&_.el-table]:[--el-table-border-color:rgba(126,_157,_183,_0.18)] [&_.el-table]:[--el-table-header-bg-color:#f1f7fb] [&_.el-table]:[background:#ffffff] [&_.el-table_th]:[background:#f1f7fb] [&_.el-table_th]:[font-weight:700] [&_.el-table_th]:[color:#304a62] [&_.el-table_td]:[background:#ffffff] [&_.el-table_td]:[color:#22384d] max-[640px]:[border-radius:18px] max-[640px]:[padding:18px]">
-        <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
+      <!-- Recent Submissions -->
+      <div class="min-w-0 p-[22px] rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="flex items-center justify-between gap-2.5 flex-wrap">
           <div>
-            <div class="panel-title">最新学生提交</div>
-            <div class="panel-desc">用于快速定位刚进入批改队列的学生作业。</div>
+            <div class="text-[18px] font-bold text-[#1d1d1f]">最新学生提交</div>
+            <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">用于快速定位刚进入批改队列的学生作业。</div>
           </div>
-          <a class="panel-link" @click="goToSubmissions">查看全部</a>
+          <a @click="goToSubmissions" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
         </div>
-        <el-table :data="recentSubmissions" size="small" class="teacher-dashboard-table [width:100%]">
-          <el-table-column prop="studentName" label="学生" width="110" />
-          <el-table-column prop="experimentId" label="实验 ID" width="90" />
-          <el-table-column prop="submitTime" label="提交时间" min-width="150" />
-          <el-table-column label="状态" width="100">
-            <template #default="{ row }">
-              <span class="status-chip" :class="`status-${row.status}`">{{ getSubStatusText(row.status) }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div class="overflow-x-auto rounded-xl mt-4">
+          <table class="w-full text-left text-[13px]">
+            <thead>
+              <tr class="border-b border-black/[0.06]">
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[110px]">学生</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[90px]">实验 ID</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">提交时间</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in recentSubmissions" :key="row.id || row.submitTime" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+                <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.studentName }}</td>
+                <td class="py-3 px-3 text-[#6e6e73]">{{ row.experimentId }}</td>
+                <td class="py-3 px-3 text-[#6e6e73]">{{ row.submitTime }}</td>
+                <td class="py-3 px-3"><span class="inline-flex items-center h-7 px-2.5 rounded-full text-[12px] font-bold" :class="statusClass(row.status)">{{ getSubStatusText(row.status) }}</span></td>
+              </tr>
+              <tr v-if="!recentSubmissions.length">
+                <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无提交数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="panel-card panel-card--chart [padding-bottom:14px]">
-      <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
+    <!-- Chart Panel -->
+    <div class="p-[22px] pb-3.5 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+      <div class="flex items-center justify-between gap-2.5 flex-wrap">
         <div>
-          <div class="panel-title">实验完成率排行</div>
-          <div class="panel-desc">按实验维度估算班级完成情况，帮助你识别推进节奏较慢的内容。</div>
+          <div class="text-[18px] font-bold text-[#1d1d1f]">实验完成率排行</div>
+          <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">按实验维度估算班级完成情况，帮助你识别推进节奏较慢的内容。</div>
         </div>
-        <a class="panel-link" @click="goToClasses">查看教学班</a>
+        <a @click="goToClasses" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看教学班</a>
       </div>
-      <div ref="classChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
+      <div ref="classChartRef" class="h-[340px] w-full min-w-0 max-[640px]:h-[280px]"></div>
     </div>
   </div>
 </template>
@@ -145,28 +173,28 @@ const statCards = computed(() => [
     label: '实验总数',
     value: stats.experimentCount,
     hint: '当前已创建实验',
-    iconClass: '[background:#ddecff] [color:#1270d8]',
+    iconClass: '[background:rgba(0,_122,_255,_0.1)] [color:#007aff]',
     icon: markRaw(Document)
   },
   {
     label: '进行中实验',
     value: stats.activeExperiments,
     hint: '需要关注课堂节奏',
-    iconClass: '[background:#dff5ec] [color:#1d8f6a]',
+    iconClass: '[background:rgba(52,_199,_89,_0.1)] [color:#34c759]',
     icon: markRaw(DocumentChecked)
   },
   {
     label: '待处理提交',
     value: stats.pendingSubmissions,
     hint: '建议优先进入批改中心',
-    iconClass: '[background:#fff1dc] [color:#c57b1d]',
+    iconClass: '[background:rgba(255,_149,_0,_0.1)] [color:#ff9500]',
     icon: markRaw(Timer)
   },
   {
     label: '教学班数量',
     value: stats.classCount,
     hint: '可管理班级总数',
-    iconClass: '[background:#e7ecff] [color:#5369d8]',
+    iconClass: '[background:rgba(88,_86,_214,_0.1)] [color:#5856d6]',
     icon: markRaw(UserFilled)
   }
 ])
@@ -321,6 +349,19 @@ function getSubStatusText(status) {
     rejected: '已驳回',
     not_started: '未开始'
   }[status] || '未知'
+}
+
+function statusClass(status) {
+  const map = {
+    active: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    graded: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    draft: 'bg-black/5 text-[#6e6e73]',
+    not_started: 'bg-black/5 text-[#6e6e73]',
+    expired: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    rejected: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    submitted: 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]'
+  }
+  return map[status] || 'bg-black/5 text-[#6e6e73]'
 }
 
 function getCompletionColor(rate) {

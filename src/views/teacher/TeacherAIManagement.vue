@@ -1,122 +1,186 @@
 <template>
-  <div class="teacher-ai-management [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
+  <div class="space-y-5">
     <page-header
       class="my-page-header"
       title="教师AI能力管理"
       description="查看教师与学生的AI功能使用概况"
     />
 
-    <div class="management-content [display:flex] [flex-direction:column] [gap:20px] [margin-bottom:40px]">
+    <div class="flex flex-col gap-5 mb-10">
       <!-- 概览统计 -->
-      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>AI使用概览</span>
-            <el-button type="primary" size="small" @click="refreshData" :loading="loading">
-              刷新数据
-            </el-button>
-          </div>
-        </template>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">AI使用概览</span>
+          <button
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+            @click="refreshData"
+            :disabled="loading"
+          >
+            {{ loading ? '加载中...' : '刷新数据' }}
+          </button>
+        </div>
 
-        <div class="stats-cards [display:flex] [flex-wrap:wrap] [gap:15px] [margin-bottom:20px]">
-          <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]" v-for="(stat, index) in statistics" :key="index">
-            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ stat.value }}</div>
-            <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">{{ stat.label }}</div>
+        <div class="flex flex-wrap gap-4 mb-5">
+          <div
+            v-for="(stat, index) in statistics"
+            :key="index"
+            class="flex-1 min-w-[180px] text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[10px] border border-black/[0.06]"
+          >
+            <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ stat.value }}</div>
+            <div class="text-[13px] text-[#6e6e73] mt-1">{{ stat.label }}</div>
           </div>
         </div>
 
-        <div class="charts-container [display:flex] [flex-wrap:wrap] [gap:20px] [margin-top:10px]">
-          <div class="chart-wrapper [flex:1] [min-width:45%]">
-            <h4>各实验完成情况</h4>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="completionChartRef"></div>
+        <div class="flex flex-wrap gap-5 mt-2.5">
+          <div class="flex-1 min-w-[45%]">
+            <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">各实验完成情况</h4>
+            <div class="h-[320px] w-full relative" ref="completionChartRef"></div>
           </div>
-          <div class="chart-wrapper [flex:1] [min-width:45%]">
-            <h4>成绩分布</h4>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreDistChartRef"></div>
+          <div class="flex-1 min-w-[45%]">
+            <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">成绩分布</h4>
+            <div class="h-[320px] w-full relative" ref="scoreDistChartRef"></div>
           </div>
         </div>
-      </el-card>
+      </div>
 
       <!-- 班级学生列表 -->
-      <el-card class="teacher-management-card">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>学生实验数据</span>
-            <el-input
-              v-model="searchQuery"
-              placeholder="搜索学生姓名或学号"
-              class="search-input [width:250px]"
-              clearable
-              prefix-icon="Search"
-            />
-          </div>
-        </template>
-
-        <el-table
-          :data="pagedStudents"
-          class="[width:100%]"
-          border
-          v-loading="loading"
-        >
-          <el-table-column prop="studentId" label="学号" width="130" />
-          <el-table-column prop="studentName" label="姓名" width="100" />
-          <el-table-column prop="className" label="班级" width="160" />
-          <el-table-column prop="experimentCount" label="实验数" width="90" sortable />
-          <el-table-column prop="completedCount" label="已完成" width="90" sortable />
-          <el-table-column label="完成率" width="120" sortable :sort-by="row => row.completionRate">
-            <template #default="{ row }">
-              <el-progress :percentage="row.completionRate" :color="row.completionRate >= 80 ? '#67C23A' : row.completionRate >= 50 ? '#E6A23C' : '#F56C6C'" :stroke-width="10" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="averageScore" label="平均分" width="90" sortable>
-            <template #default="{ row }">
-              <span :class="averageScoreClass(row.averageScore)">
-                {{ row.averageScore || '-' }}
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="highestScore" label="最高分" width="90" />
-          <el-table-column prop="lowestScore" label="最低分" width="90" />
-        </el-table>
-
-        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
-          <el-pagination
-            layout="total, sizes, prev, pager, next"
-            :total="filteredStudents.length"
-            v-model:page-size="pageSize"
-            v-model:current-page="currentPage"
-            :page-sizes="[10, 20, 50]"
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">学生实验数据</span>
+          <input
+            v-model="searchQuery"
+            placeholder="搜索学生姓名或学号"
+            class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
         </div>
-      </el-card>
+
+        <div v-if="loading" class="flex items-center justify-center py-12 text-[#6e6e73] text-sm">
+          加载中...
+        </div>
+
+        <div v-else class="overflow-x-auto rounded-[12px] border border-black/[0.06]">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-[#f5f5f7]/80">
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">学号</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">姓名</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">班级</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">实验数</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">已完成</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">完成率</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">平均分</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">最高分</th>
+                <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">最低分</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="pagedStudents.length === 0">
+                <td colspan="9" class="px-3 py-8 text-center text-[#6e6e73]">暂无数据</td>
+              </tr>
+              <tr
+                v-for="row in pagedStudents"
+                :key="row.studentId"
+                class="border-t border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors"
+              >
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.studentId }}</td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.studentName }}</td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.className }}</td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.experimentCount }}</td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.completedCount }}</td>
+                <td class="px-3 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 bg-black/[0.04] rounded-full overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all"
+                        :class="row.completionRate >= 80 ? 'bg-[#34c759]' : row.completionRate >= 50 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"
+                        :style="{ width: row.completionRate + '%' }"
+                      ></div>
+                    </div>
+                    <span class="text-xs text-[#6e6e73] w-9 text-right">{{ row.completionRate }}%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5">
+                  <span :class="averageScoreClass(row.averageScore)">
+                    {{ row.averageScore || '-' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.highestScore }}</td>
+                <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.lowestScore }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <AppPagination
+            :current="currentPage"
+            :total="filteredStudents.length"
+            :page-size="pageSize"
+            @update:current="handlePageChange"
+          />
+        </div>
+      </div>
 
       <!-- AI模型配置 -->
-      <el-card class="model-config-card [margin-bottom:20px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>AI模型配置</span></div>
-        </template>
-        <el-form :model="modelConfig" label-position="top">
-          <el-form-item label="AI助手模型">
-            <el-select v-model="modelConfig.model" class="[width:100%]">
-              <el-option label="DeepSeek Chat (当前)" value="deepseek-chat" />
-              <el-option label="DeepSeek Coder" value="deepseek-coder" />
-            </el-select>
-          </el-form-item>
-          <el-collapse>
-            <el-collapse-item title="高级参数" name="1">
-              <el-form-item label="温度 (Temperature)">
-                <el-slider v-model="modelConfig.temperature" :min="0" :max="1" :step="0.01" show-input />
-              </el-form-item>
-              <el-form-item label="最大输出长度">
-                <el-slider v-model="modelConfig.maxTokens" :min="100" :max="4000" :step="100" show-input />
-              </el-form-item>
-            </el-collapse-item>
-          </el-collapse>
-          <el-form-item class="[margin-top:16px]">
-            <el-button type="primary" @click="saveModelConfig">保存配置</el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">AI模型配置</span>
+        </div>
+
+        <div class="space-y-5 max-w-xl">
+          <div>
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">AI助手模型</label>
+            <select
+              v-model="modelConfig.model"
+              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+            >
+              <option value="deepseek-chat">DeepSeek Chat (当前)</option>
+              <option value="deepseek-coder">DeepSeek Coder</option>
+            </select>
+          </div>
+
+          <!-- 高级参数折叠 -->
+          <details class="group">
+            <summary class="text-sm font-medium text-[#1d1d1f] cursor-pointer select-none flex items-center gap-1.5 hover:text-[#007aff] transition-colors">
+              <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-90" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              高级参数
+            </summary>
+            <div class="mt-4 space-y-4 pl-5">
+              <div>
+                <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">温度 (Temperature): {{ modelConfig.temperature }}</label>
+                <input
+                  type="range"
+                  v-model.number="modelConfig.temperature"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[#007aff]"
+                />
+              </div>
+              <div>
+                <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">最大输出长度: {{ modelConfig.maxTokens }}</label>
+                <input
+                  type="range"
+                  v-model.number="modelConfig.maxTokens"
+                  min="100"
+                  max="4000"
+                  step="100"
+                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[#007aff]"
+                />
+              </div>
+            </div>
+          </details>
+
+          <div class="pt-2">
+            <button
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              @click="saveModelConfig"
+            >
+              保存配置
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -125,6 +189,7 @@
 import logger from '@/utils/logger'
 import { ref, reactive, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
+import AppPagination from '../../components/AppPagination.vue'
 import api from '../../api'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
@@ -138,9 +203,13 @@ const completionChartRef = ref(null)
 const scoreDistChartRef = ref(null)
 
 function averageScoreClass(score) {
-  if (score >= 80) return '[color:#67C23A]'
-  if (score >= 60) return '[color:#E6A23C]'
-  return '[color:#F56C6C]'
+  if (score >= 80) return 'text-[#34c759] font-semibold'
+  if (score >= 60) return 'text-[#ff9500] font-semibold'
+  return 'text-[#ff3b30] font-semibold'
+}
+
+function handlePageChange(page) {
+  currentPage.value = page
 }
 
 const statistics = ref([
@@ -319,5 +388,3 @@ onBeforeUnmount(() => {
   scoreDistChart.value?.dispose()
 })
 </script>
-
-

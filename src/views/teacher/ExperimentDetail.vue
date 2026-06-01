@@ -1,344 +1,302 @@
 <template>
-  <div class="experiment-detail [padding:20px]">
+  <div class="p-5">
     <page-header
-        class="my-page-header [margin-bottom:20px]"
+      class="mb-5"
       title="实验详情"
       :description="experimentData.name || '加载中..'"
     >
-      <el-button @click="goBack">返回列表</el-button>
+      <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回列表</button>
     </page-header>
 
-    <div class="detail-content [background:#fff] [padding:20px] [border-radius:4px] [display:flex] [flex-direction:column] [gap:15px]" v-loading="loading">
-      <!-- 实验数据统计卡片 -->
-      <el-row :gutter="20" class="stat-row [margin-bottom:20px]">
-        <el-col :span="6">
-          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.totalStudents }}</div>
-            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">学生总数</div>
-          </el-card>
-        </el-col>
-
-        <el-col :span="6">
-          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.submittedCount }}</div>
-            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">已提交数量</div>
-          </el-card>
-        </el-col>
-
-        <el-col :span="6">
-          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value accent-blue [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ submissionStats.completionRate }}%</div>
-            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">完成率</div>
-          </el-card>
-        </el-col>
-
-        <el-col :span="6">
-          <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]" :class="getScoreClass(submissionStats.averageScore)">
-              {{ submissionStats.averageScore || '暂无' }}
-            </div>
-            <div class="stat-label [font-size:14px] [color:#999] [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">平均分</div>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 基本信息卡片 -->
-      <el-card class="detail-card [margin-bottom:20px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>基本信息</span>
-            <el-button type="primary" link @click="openEditDialog">编辑</el-button>
-          </div>
-        </template>
-
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="实验名称">{{ experimentData.name }}</el-descriptions-item>
-          <el-descriptions-item label="截止日期">{{ formatDate(experimentData.deadline) }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ formatDate(experimentData.createdTime) }}</el-descriptions-item>
-          <el-descriptions-item label="状态">
-            <el-tag :type="getStatusType(experimentData.status)">
-              {{ getStatusText(experimentData.status) }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="提交数">{{ submissionStats.submittedCount }}</el-descriptions-item>
-          <el-descriptions-item label="平均分">
-            {{ submissionStats.averageScore !== null ? submissionStats.averageScore : '暂无' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="关联班级" :span="2">
-            {{ experimentData.classes ? experimentData.classes.join('、') : '所有班级' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="创建者">{{ experimentData.createdBy || '当前教师' }}</el-descriptions-item>
-          <el-descriptions-item label="难度级别">
-            <el-rate
-              v-model="experimentData.difficulty"
-              disabled
-              show-score
-              text-color="#ff9900"
-            />
-          </el-descriptions-item>
-        </el-descriptions>
-      </el-card>
-
-      <!-- 实验要求卡片 -->
-      <el-card class="detail-card">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>实验要求</span>
-            <el-button type="primary" link @click="openEditContentDialog">编辑内容</el-button>
-          </div>
-        </template>
-
-        <el-empty description="实验要求暂未编辑" v-if="!experimentData.description">
-          <el-button type="primary" @click="openEditContentDialog">添加实验要求</el-button>
-        </el-empty>
-
-        <div v-else class="experiment-content">
-          <h3>实验描述</h3>
-          <p class="experimentDescription">{{ experimentData.description }}</p>
-
-          <h3>实验要求</h3>
-          <ul class="experimentRequest [padding-left:30px]">
-            <li v-for="(req, index) in experimentData.requirements" :key="index">
-              {{ req }}
-            </li>
-          </ul>
-
-          <h3 v-if="experimentData.attachments && experimentData.attachments.length">附件</h3>
-          <ul v-if="experimentData.attachments && experimentData.attachments.length">
-            <li v-for="(attachment, index) in experimentData.attachments" :key="index">
-              <el-link type="primary" :href="attachment.url" target="_blank">
-                {{ attachment.name }}
-              </el-link>
-            </li>
-          </ul>
+    <div v-if="loading" class="flex flex-col gap-4">
+      <div class="grid grid-cols-4 gap-5 max-[768px]:grid-cols-2">
+        <div v-for="i in 4" :key="i" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="h-7 w-16 mx-auto rounded-lg bg-[#f5f5f7] animate-pulse mb-2"></div>
+          <div class="h-4 w-12 mx-auto rounded bg-[#f5f5f7] animate-pulse"></div>
         </div>
-      </el-card>
-
-      <!-- 提交情况图表 -->
-      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
-        <el-col :span="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>提交情况统计</span>
-              </div>
-            </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="submissionChartRef"></div>
-          </el-card>
-        </el-col>
-
-        <el-col :span="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>成绩分布</span>
-              </div>
-            </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreChartRef"></div>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 学生提交列表 -->
-      <el-card class="detail-card">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>学生提交情况</span>
-            <div class="header-actions [display:flex] [gap:8px] [align-items:center]">
-              <el-input
-                v-model="searchKeyword"
-                placeholder="搜索学生姓名/班级"
-                prefix-icon="Search"
-                clearable
-                class="[width:220px] [margin-right:10px]"
-              />
-              <el-button type="primary" @click="viewAllSubmissions">查看全部</el-button>
-            </div>
-          </div>
-        </template>
-
-        <el-table
-          :data="filteredSubmissions"
-          class="[width:100%]"
-          border
-          stripe
-          v-loading="submissionsLoading"
-          max-height="500"
-        >
-          <el-table-column prop="studentName" label="学生姓名" width="120" sortable />
-          <el-table-column prop="class" label="班级" width="160" sortable />
-          <el-table-column prop="submitTime" label="提交时间" width="180" sortable>
-            <template #default="scope">
-              <span v-if="scope.row.submitTime">{{ formatDate(scope.row.submitTime) }}</span>
-              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未提交</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="得分" width="100" sortable>
-            <template #default="scope">
-              <span v-if="scope.row.score !== null && scope.row.score !== undefined"
-                    :class="getScoreClass(scope.row.score)">
-                {{ scope.row.score }}
-              </span>
-              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未评分</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="查重率" width="100" align="center">
-            <template #default="scope">
-              <el-tag
-                v-if="scope.row.plagiarismRate !== null && scope.row.plagiarismRate !== undefined"
-                :type="getPlagiarismRateType(scope.row.plagiarismRate)"
-                size="small"
-              >
-                {{ scope.row.plagiarismRate }}%
-              </el-tag>
-              <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未检测</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" width="100" align="center">
-            <template #default="scope">
-              <el-tag
-                :type="getSubmissionStatusType(scope.row.status)"
-                size="small"
-                effect="dark"
-              >
-                {{ getSubmissionStatusText(scope.row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
-            <template #default="scope">
-              <el-button
-                type="primary"
-                link
-                @click="viewSubmissionDetail(scope.row.id)"
-              >
-                查看详情
-              </el-button>
-              <el-button
-                type="success"
-                link
-                @click="gradeSubmission(scope.row)"
-                v-if="scope.row.status === 'submitted'"
-              >
-                评分
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <!-- 分页器-->
-        <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]" v-if="allSubmissions.length > pageSize">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="allSubmissions.length"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
+      </div>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="h-5 w-24 rounded bg-[#f5f5f7] animate-pulse mb-4"></div>
+        <div class="space-y-3">
+          <div class="h-4 w-full rounded bg-[#f5f5f7] animate-pulse"></div>
+          <div class="h-4 w-3/4 rounded bg-[#f5f5f7] animate-pulse"></div>
+          <div class="h-4 w-1/2 rounded bg-[#f5f5f7] animate-pulse"></div>
         </div>
-      </el-card>
+      </div>
     </div>
 
-    <!-- 编辑实验基本信息对话框-->
-    <el-dialog
-      v-model="editDialogVisible"
-      title="编辑实验"
-      width="500px"
-      destroy-on-close
-    >
-      <el-form :model="editForm" label-width="100px">
-        <el-form-item label="实验名称">
-          <el-input v-model="editForm.name" placeholder="请输入实验名称" />
-        </el-form-item>
+    <div v-else class="flex flex-col gap-5">
+      <!-- 实验数据统计卡片 -->
+      <div class="grid grid-cols-4 gap-5 max-[768px]:grid-cols-2">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
+          <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ submissionStats.totalStudents }}</div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">学生总数</div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
+          <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ submissionStats.submittedCount }}</div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">已提交数量</div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
+          <div class="text-[28px] font-bold text-[#007aff] mb-1">{{ submissionStats.completionRate }}%</div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">完成率</div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
+          <div class="text-[28px] font-bold mb-1" :class="getScoreClass(submissionStats.averageScore)">
+            {{ submissionStats.averageScore || '暂无' }}
+          </div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">平均分</div>
+        </div>
+      </div>
 
-        <el-form-item label="截止日期">
+      <!-- 基本信息卡片 -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">基本信息</span>
+          <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="openEditDialog">编辑</button>
+        </div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4 max-[768px]:grid-cols-1">
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">实验名称</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ experimentData.name }}</span>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">截止日期</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ formatDate(experimentData.deadline) }}</span>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">创建时间</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ formatDate(experimentData.createdTime) }}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">状态</span>
+            <span class="text-[12px] font-medium px-2.5 py-0.5 rounded-full" :class="getTagClass(experimentData.status)">
+              {{ getStatusText(experimentData.status) }}
+            </span>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">提交数</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ submissionStats.submittedCount }}</span>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">平均分</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ submissionStats.averageScore !== null ? submissionStats.averageScore : '暂无' }}</span>
+          </div>
+          <div class="flex items-baseline gap-3 col-span-2 max-[768px]:col-span-1">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">关联班级</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ experimentData.classes ? experimentData.classes.join('、') : '所有班级' }}</span>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">创建者</span>
+            <span class="text-[14px] text-[#1d1d1f]">{{ experimentData.createdBy || '当前教师' }}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[13px] text-[#6e6e73] shrink-0 w-[80px]">难度级别</span>
+            <el-rate v-model="experimentData.difficulty" disabled show-score text-color="#ff9900" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 实验要求卡片 -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">实验要求</span>
+          <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="openEditContentDialog">编辑内容</button>
+        </div>
+
+        <div v-if="!experimentData.description" class="flex flex-col items-center justify-center py-12 text-center">
+          <svg class="w-16 h-16 text-[#d2d2d7] mb-4" fill="none" viewBox="0 0 64 64"><rect x="12" y="16" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M20 28h24M20 34h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <p class="text-[14px] text-[#6e6e73] mb-4">实验要求暂未编辑</p>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="openEditContentDialog">添加实验要求</button>
+        </div>
+
+        <div v-else class="space-y-4">
+          <div>
+            <h3 class="text-[14px] font-semibold text-[#1d1d1f] mb-2">实验描述</h3>
+            <p class="text-[14px] text-[#424245] leading-relaxed">{{ experimentData.description }}</p>
+          </div>
+          <div>
+            <h3 class="text-[14px] font-semibold text-[#1d1d1f] mb-2">实验要求</h3>
+            <ul class="pl-5 space-y-1.5">
+              <li v-for="(req, index) in experimentData.requirements" :key="index" class="text-[14px] text-[#424245]">{{ req }}</li>
+            </ul>
+          </div>
+          <div v-if="experimentData.attachments && experimentData.attachments.length">
+            <h3 class="text-[14px] font-semibold text-[#1d1d1f] mb-2">附件</h3>
+            <ul class="space-y-1.5">
+              <li v-for="(attachment, index) in experimentData.attachments" :key="index">
+                <a :href="attachment.url" target="_blank" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors underline">{{ attachment.name }}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 提交情况图表 -->
+      <div class="grid grid-cols-2 gap-5 max-[768px]:grid-cols-1">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 h-[400px]">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">提交情况统计</span>
+          </div>
+          <div class="h-[300px] w-full" ref="submissionChartRef"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 h-[400px]">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">成绩分布</span>
+          </div>
+          <div class="h-[300px] w-full" ref="scoreChartRef"></div>
+        </div>
+      </div>
+
+      <!-- 学生提交列表 -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">学生提交情况</span>
+          <div class="flex gap-2 items-center">
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#aeaeb2]" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <input
+                v-model="searchKeyword"
+                placeholder="搜索学生姓名/班级"
+                class="w-[220px] h-10 pl-9 pr-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+              />
+            </div>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAllSubmissions">查看全部</button>
+          </div>
+        </div>
+
+        <div v-if="submissionsLoading" class="space-y-3">
+          <div v-for="i in 5" :key="i" class="h-12 rounded-lg bg-[#f5f5f7] animate-pulse"></div>
+        </div>
+
+        <div v-else-if="filteredSubmissions.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+          <svg class="w-16 h-16 text-[#d2d2d7] mb-4" fill="none" viewBox="0 0 64 64"><rect x="12" y="16" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M20 28h24M20 34h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <p class="text-[14px] text-[#6e6e73]">暂无提交记录</p>
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-black/[0.06]">
+                <th class="text-left py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">学生姓名</th>
+                <th class="text-left py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">班级</th>
+                <th class="text-left py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">提交时间</th>
+                <th class="text-left py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">得分</th>
+                <th class="text-center py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">查重率</th>
+                <th class="text-center py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">状态</th>
+                <th class="text-right py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in filteredSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-black/[0.02] transition-colors">
+                <td class="py-3 px-3 text-[14px] text-[#1d1d1f]">{{ row.studentName }}</td>
+                <td class="py-3 px-3 text-[14px] text-[#1d1d1f]">{{ row.class }}</td>
+                <td class="py-3 px-3 text-[14px] text-[#1d1d1f]">
+                  <span v-if="row.submitTime">{{ formatDate(row.submitTime) }}</span>
+                  <span v-else class="text-[13px] text-[#aeaeb2]">未提交</span>
+                </td>
+                <td class="py-3 px-3 text-[14px]">
+                  <span v-if="row.score !== null && row.score !== undefined" :class="getScoreClass(row.score)">{{ row.score }}</span>
+                  <span v-else class="text-[13px] text-[#aeaeb2]">未评分</span>
+                </td>
+                <td class="py-3 px-3 text-center">
+                  <span v-if="row.plagiarismRate !== null && row.plagiarismRate !== undefined"
+                    class="text-[12px] font-medium px-2.5 py-0.5 rounded-full"
+                    :class="getPlagiarismTagClass(row.plagiarismRate)">
+                    {{ row.plagiarismRate }}%
+                  </span>
+                  <span v-else class="text-[13px] text-[#aeaeb2]">未检测</span>
+                </td>
+                <td class="py-3 px-3 text-center">
+                  <span class="text-[12px] font-medium px-2.5 py-0.5 rounded-full"
+                    :class="getSubmissionTagClass(row.status)">
+                    {{ getSubmissionStatusText(row.status) }}
+                  </span>
+                </td>
+                <td class="py-3 px-3 text-right">
+                  <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none mr-3" @click="viewSubmissionDetail(row.id)">查看详情</button>
+                  <button v-if="row.status === 'submitted'" class="text-[13px] font-medium text-[#34c759] cursor-pointer hover:text-[#248a3d] transition-colors bg-transparent border-none" @click="gradeSubmission(row)">评分</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <AppPagination
+          v-if="allSubmissions.length > pageSize"
+          :current="currentPage"
+          :total="allSubmissions.length"
+          :page-size="pageSize"
+          @update:current="handleCurrentChange"
+        />
+      </div>
+
+    <!-- 编辑实验基本信息对话框 -->
+    <AppModal v-model="editDialogVisible" title="编辑实验" width="500px">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">实验名称</label>
+          <input v-model="editForm.name" placeholder="请输入实验名称" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">截止日期</label>
           <el-date-picker
             v-model="editForm.deadline"
             type="datetime"
             placeholder="选择截止日期"
             format="YYYY-MM-DD HH:mm"
             value-format="YYYY-MM-DD HH:mm:ss"
-            class="[width:100%]"
+            class="!w-full"
           />
-        </el-form-item>
-
-        <el-form-item label="状态">
-          <el-select v-model="editForm.status" placeholder="选择实验状态" class="[width:100%]">
-            <el-option label="草稿" value="draft" />
-            <el-option label="进行中" value="active" />
-            <el-option label="已截止" value="expired" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="关联班级">
-          <el-select
-            v-model="editForm.classes"
-            multiple
-            placeholder="选择关联班级"
-            class="[width:100%]"
-          >
-            <el-option
-              v-for="cls in classList"
-              :key="cls.id"
-              :label="cls.name"
-              :value="cls.id"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="难度级别">
-          <el-rate
-            v-model="editForm.difficulty"
-            show-score
-            text-color="#ff9900"
-          />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="editDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitEditForm">确定</el-button>
         </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">状态</label>
+          <select v-model="editForm.status" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer">
+            <option value="draft">草稿</option>
+            <option value="active">进行中</option>
+            <option value="expired">已截止</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">关联班级</label>
+          <select v-model="editForm.classes" multiple class="w-full min-h-[80px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <option v-for="cls in classList" :key="cls.id" :value="cls.id">{{ cls.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">难度级别</label>
+          <el-rate v-model="editForm.difficulty" show-score text-color="#ff9900" />
+        </div>
+      </div>
+      <template #footer>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="editDialogVisible = false">取消</button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitEditForm">确定</button>
       </template>
-    </el-dialog>
+    </AppModal>
 
-    <!-- 编辑实验内容对话框-->
-    <el-dialog
-      v-model="editContentDialogVisible"
-      title="编辑实验内容"
-      width="700px"
-      destroy-on-close
-    >
-      <el-form :model="contentForm" label-width="100px">
-        <el-form-item label="实验描述">
-          <el-input
+    <!-- 编辑实验内容对话框 -->
+    <AppModal v-model="editContentDialogVisible" title="编辑实验内容" width="700px">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">实验描述</label>
+          <textarea
             v-model="contentForm.description"
-            type="textarea"
-            :rows="5"
+            rows="5"
             placeholder="请输入实验描述"
-          />
-        </el-form-item>
-
-        <el-form-item label="实验要求">
-          <div v-for="(req, index) in contentForm.requirements" :key="index" class="requirement-item [display:flex] [align-items:center] [margin-bottom:10px]">
-            <el-input v-model="contentForm.requirements[index]" class="requirement-input [flex:1]" />
-            <el-button
-              type="danger"
-              circle
-              @click="removeRequirement(index)"
-              size="small"
-              class="requirement-delete [margin-left:10px]"
-            >
-              <el-icon><Delete /></el-icon>
-            </el-button>
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">实验要求</label>
+          <div v-for="(req, index) in contentForm.requirements" :key="index" class="flex items-center gap-2 mb-2.5">
+            <input v-model="contentForm.requirements[index]" class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <button class="w-8 h-8 rounded-full bg-[rgba(255,59,48,0.1)] text-[#ff3b30] flex items-center justify-center hover:bg-[rgba(255,59,48,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeRequirement(index)">
+              <Delete class="w-3.5 h-3.5" />
+            </button>
           </div>
-          <el-button type="primary" plain @click="addRequirement">添加要求</el-button>
-        </el-form-item>
-
-        <el-form-item label="附件">
+          <button class="h-[34px] px-4 rounded-[10px] text-[13px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addRequirement">添加要求</button>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">附件</label>
           <el-upload
             action="#"
             :auto-upload="false"
@@ -346,87 +304,75 @@
             :limit="5"
             :on-change="handleFileChange"
           >
-            <el-button type="primary">选择文件</el-button>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">选择文件</button>
             <template #tip>
-              <div class="el-upload__tip">可上传任意类型文件，单个文件不超过0MB</div>
+              <div class="text-[12px] text-[#aeaeb2] mt-2">可上传任意类型文件，单个文件不超过10MB</div>
             </template>
           </el-upload>
-
-          <div v-if="contentForm.attachments && contentForm.attachments.length" class="attachments-list [margin-top:10px]">
-            <div v-for="(file, index) in contentForm.attachments" :key="index" class="attachment-item [display:flex] [align-items:center] [margin-bottom:10px]">
-              <span>{{ file.name }}</span>
-              <el-button
-                type="danger"
-                size="small"
-                circle
-                @click="removeAttachment(index)"
-                class="attachment-delete [margin-left:10px]"
-              >
-                <el-icon><Delete /></el-icon>
-              </el-button>
+          <div v-if="contentForm.attachments && contentForm.attachments.length" class="mt-3 space-y-2">
+            <div v-for="(file, index) in contentForm.attachments" :key="index" class="flex items-center gap-2">
+              <span class="text-[14px] text-[#1d1d1f]">{{ file.name }}</span>
+              <button class="w-6 h-6 rounded-full bg-[rgba(255,59,48,0.1)] text-[#ff3b30] flex items-center justify-center hover:bg-[rgba(255,59,48,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeAttachment(index)">
+                <Delete class="w-3 h-3" />
+              </button>
             </div>
           </div>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="editContentDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitContentForm">确定</el-button>
         </div>
+      </div>
+      <template #footer>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="editContentDialogVisible = false">取消</button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitContentForm">确定</button>
       </template>
-    </el-dialog>
+    </AppModal>
 
-    <!-- 评分对话框-->
-    <el-dialog
-      v-model="gradeDialogVisible"
-      title="评分"
-      width="500px"
-      destroy-on-close
-    >
-      <el-form :model="gradeForm" label-width="100px">
-        <el-form-item label="学生姓名">
-          <span>{{ currentSubmission ? currentSubmission.studentName : '' }}</span>
-        </el-form-item>
-
-        <el-form-item label="得分">
-          <el-input-number
-            v-model="gradeForm.score"
-            :min="0"
-            :max="100"
-            :precision="1"
-            class="[width:180px]"
+    <!-- 评分对话框 -->
+    <AppModal v-model="gradeDialogVisible" title="评分" width="500px">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">学生姓名</label>
+          <span class="text-[14px] text-[#1d1d1f]">{{ currentSubmission ? currentSubmission.studentName : '' }}</span>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">得分</label>
+          <input
+            v-model.number="gradeForm.score"
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
-        </el-form-item>
-
-        <el-form-item label="查重率">
-          <el-input-number
-            v-model="gradeForm.plagiarismRate"
-            :min="0"
-            :max="100"
-            :precision="1"
-            class="[width:180px]"
-          />
-          <span class="rate-unit [margin-left:5px]">%</span>
-        </el-form-item>
-
-        <el-form-item label="AI评语">
-          <el-input
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">查重率</label>
+          <div class="flex items-center gap-2">
+            <input
+              v-model.number="gradeForm.plagiarismRate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            />
+            <span class="text-[14px] text-[#6e6e73]">%</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">AI评语</label>
+          <textarea
             v-model="gradeForm.aiComment"
-            type="textarea"
-            :rows="6"
+            rows="6"
             placeholder="输入AI助教评语"
-          />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="gradeDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitGrade">确定</el-button>
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+          ></textarea>
         </div>
+      </div>
+      <template #footer>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</button>
       </template>
-    </el-dialog>
+    </AppModal>
+    </div>
   </div>
 </template>
 
@@ -439,6 +385,8 @@ import * as echarts from 'echarts'
 import { Delete } from '@element-plus/icons-vue'
 import api from '../../api'
 import PageHeader from '../../components/PageHeader.vue'
+import AppModal from '../../components/AppModal.vue'
+import AppPagination from '../../components/AppPagination.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -481,7 +429,7 @@ const experimentData = ref({
   requirements: [],
   classes: [],
   createdBy: '',
-  difficulty: 3,  // 1-5的难度评级
+  difficulty: 3,
   attachments: []
 })
 
@@ -495,7 +443,6 @@ const searchKeyword = ref('')
 const filteredSubmissions = computed(() => {
   let result = [...allSubmissions.value]
 
-  // 按搜索关键词筛选
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
     result = result.filter(item => {
@@ -506,17 +453,11 @@ const filteredSubmissions = computed(() => {
     })
   }
 
-  // 分页
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return result.slice(start, end)
 })
 
-// 分页处理
-const handleSizeChange = (size) => {
-  pageSize.value = size
-  currentPage.value = 1
-}
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
@@ -576,24 +517,45 @@ const gradeForm = reactive({
   aiComment: ''
 })
 
+// Tag class helpers
+const getTagClass = (status) => {
+  const classMap = {
+    'active': 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    'draft': 'bg-black/5 text-[#6e6e73]',
+    'expired': 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+  }
+  return classMap[status] || 'bg-black/5 text-[#6e6e73]'
+}
+
+const getSubmissionTagClass = (status) => {
+  const classMap = {
+    'submitted': 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]',
+    'graded': 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    'rejected': 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    'not_started': 'bg-black/5 text-[#6e6e73]'
+  }
+  return classMap[status] || 'bg-black/5 text-[#6e6e73]'
+}
+
+const getPlagiarismTagClass = (rate) => {
+  if (rate >= 50) return 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+  if (rate >= 30) return 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]'
+  return 'bg-[rgba(52,199,89,0.12)] text-[#34c759]'
+}
+
 // 获取实验详情
 const loadExperimentDetail = async () => {
   loading.value = true
   try {
-    // 加载实验详情数据
     const response = await api.getTeacherExperimentList()
     logger.debug('API返回的实验列表数据', response)
 
     let experiments = []
-    // 处理不同的响应结构
     if (response && response.data && Array.isArray(response.data)) {
-      // 数据在response.data 数组中
       experiments = response.data
     } else if (response && Array.isArray(response)) {
-      // 响应本身就是数组
       experiments = response
     } else if (response && typeof response === 'object') {
-      // 处理新的数据结构，后端返回的是{data: [...], status: 'success', ...} 格式
       if (response.data && Array.isArray(response.data)) {
         experiments = response.data
       }
@@ -617,14 +579,11 @@ const loadExperimentDetail = async () => {
       ElMessage.warning(`未找到ID为${experimentId.value}的实验`)
     }
 
-    // 加载班级列表（用于编辑对话框）
     const classListData = await api.getClassList()
     classList.value = classListData
 
-    // 加载提交列表
     await loadSubmissions()
 
-    // 初始化图表
     nextTick(() => {
       initCharts()
     })
@@ -640,21 +599,18 @@ const loadExperimentDetail = async () => {
 const loadSubmissions = async () => {
   submissionsLoading.value = true
   try {
-    // 使用api.getAllStudentExperiments获取所有学生的所有实验数据
     const allStudentExperiments = await api.getAllStudentExperiments()
 
-    // 按实验ID过滤当前实验的提交记录
     const submissions = allStudentExperiments.filter(item =>
       item.experimentId === experimentId.value
     ).map(item => {
-      // 根据status确定状态，已提交但无分数为待批阅，有分数为已批阅
       let status = 'not_started'
       if (item.status === 'completed') {
         status = Number(item.score) > 0 ? 'graded' : 'submitted'
       }
 
       return {
-        id: `${item.studentId}-${item.experimentId}`, // 生成一个唯一标识
+        id: `${item.studentId}-${item.experimentId}`,
         experimentId: item.experimentId,
         experimentName: item.experimentName,
         studentId: normalizeStudentId(item.studentId),
@@ -668,8 +624,6 @@ const loadSubmissions = async () => {
     })
 
     allSubmissions.value = submissions
-
-    // 计算统计数据
     syncSubmissionStats(submissions)
   } catch (error) {
     logger.error('加载提交列表失败:', error)
@@ -688,17 +642,14 @@ const initCharts = () => {
   })
 }
 
-// 初始化提交情况图表
 const initSubmissionChart = () => {
   if (submissionChartRef.value) {
-    // 如果已存在图表实例，先销毁
     if (submissionChart) {
       submissionChart.dispose()
     }
 
     submissionChart = echarts.init(submissionChartRef.value)
 
-    // 计算提交状态统计
     const statusCounts = {
       submitted: allSubmissions.value.filter(sub => sub.status === 'submitted').length,
       graded: allSubmissions.value.filter(sub => sub.status === 'graded').length,
@@ -706,71 +657,40 @@ const initSubmissionChart = () => {
     }
 
     const option = {
-      title: {
-        text: '提交状态分布',
-        left: 'center'
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)'
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        data: ['未提交', '待批阅', '已批阅']
-      },
-      series: [
-        {
-          name: '提交状态',
-          type: 'pie',
-          radius: '60%',
-          center: ['50%', '50%'],
-          data: [
-            { value: statusCounts.notStarted, name: '未提交', itemStyle: {color: '#909399'} },
-            { value: statusCounts.submitted, name: '待批阅', itemStyle: {color: '#E6A23C'} },
-            { value: statusCounts.graded, name: '已批阅', itemStyle: {color: '#67C23A'} }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          },
-          label: {
-            formatter: '{b}: {c} ({d}%)'
-          }
-        }
-      ]
+      title: { text: '提交状态分布', left: 'center' },
+      tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
+      legend: { orient: 'vertical', left: 'left', data: ['未提交', '待批阅', '已批阅'] },
+      series: [{
+        name: '提交状态',
+        type: 'pie',
+        radius: '60%',
+        center: ['50%', '50%'],
+        data: [
+          { value: statusCounts.notStarted, name: '未提交', itemStyle: {color: '#909399'} },
+          { value: statusCounts.submitted, name: '待批阅', itemStyle: {color: '#E6A23C'} },
+          { value: statusCounts.graded, name: '已批阅', itemStyle: {color: '#67C23A'} }
+        ],
+        emphasis: {
+          itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+        },
+        label: { formatter: '{b}: {c} ({d}%)' }
+      }]
     }
 
     submissionChart.setOption(option)
-
-    // 窗口大小变化时重绘图表
-    window.addEventListener('resize', () => {
-      submissionChart && submissionChart.resize()
-    })
+    window.addEventListener('resize', () => { submissionChart && submissionChart.resize() })
   }
 }
 
-// 初始化成绩分布图表
 const initScoreChart = () => {
   if (scoreChartRef.value) {
-    // 如果已存在图表实例，先销毁
     if (scoreChart) {
       scoreChart.dispose()
     }
 
     scoreChart = echarts.init(scoreChartRef.value)
 
-    // 计算成绩分布
-    const scoreCounts = {
-      '90-100': 0,
-      '80-89': 0,
-      '70-79': 0,
-      '60-69': 0,
-      '<60': 0
-    }
+    const scoreCounts = { '90-100': 0, '80-89': 0, '70-79': 0, '60-69': 0, '<60': 0 }
 
     allSubmissions.value.forEach(sub => {
       if (sub.score !== null && sub.score !== undefined) {
@@ -783,55 +703,26 @@ const initScoreChart = () => {
     })
 
     const option = {
-      // title: {
-      //   text: '成绩分布',
-      //   left: 'center'
-      // },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      legend: {
-        data: ['学生数量'],
-        top: '20px'
-      },
-      grid: {
-        top: '25%',
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: ['<60', '60-69', '70-79', '80-89', '90-100']
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-        {
-          name: '学生数量',
-          type: 'bar',
-          data: [
-            { value: scoreCounts['<60'], itemStyle: {color: '#F56C6C'} },
-            { value: scoreCounts['60-69'], itemStyle: {color: '#E6A23C'} },
-            { value: scoreCounts['70-79'], itemStyle: {color: '#67C23A'} },
-            { value: scoreCounts['80-89'], itemStyle: {color: '#409EFF'} },
-            { value: scoreCounts['90-100'], itemStyle: {color: '#8E44AD'} }
-          ]
-        }
-      ]
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: { data: ['学生数量'], top: '20px' },
+      grid: { top: '25%', left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: { type: 'category', data: ['<60', '60-69', '70-79', '80-89', '90-100'] },
+      yAxis: { type: 'value' },
+      series: [{
+        name: '学生数量',
+        type: 'bar',
+        data: [
+          { value: scoreCounts['<60'], itemStyle: {color: '#F56C6C'} },
+          { value: scoreCounts['60-69'], itemStyle: {color: '#E6A23C'} },
+          { value: scoreCounts['70-79'], itemStyle: {color: '#67C23A'} },
+          { value: scoreCounts['80-89'], itemStyle: {color: '#409EFF'} },
+          { value: scoreCounts['90-100'], itemStyle: {color: '#8E44AD'} }
+        ]
+      }]
     }
 
     scoreChart.setOption(option)
-
-    // 窗口大小变化时重绘图表
-    window.addEventListener('resize', () => {
-      scoreChart && scoreChart.resize()
-    })
+    window.addEventListener('resize', () => { scoreChart && scoreChart.resize() })
   }
 }
 
@@ -842,17 +733,12 @@ const openEditDialog = () => {
   editForm.status = experimentData.value.status
   editForm.classes = experimentData.value.classes ? [...experimentData.value.classes] : []
   editForm.difficulty = experimentData.value.difficulty
-
   editDialogVisible.value = true
 }
 
 // 提交编辑表单
 const submitEditForm = async () => {
   try {
-    // 在实际应用中应该调用API
-    // const response = await api.updateExperiment(experimentId.value, editForm)
-
-    // 更新本地数据
     experimentData.value = {
       ...experimentData.value,
       name: editForm.name,
@@ -861,7 +747,6 @@ const submitEditForm = async () => {
       classes: editForm.classes,
       difficulty: editForm.difficulty
     }
-
     ElMessage.success('更新成功')
     editDialogVisible.value = false
   } catch (error) {
@@ -875,49 +760,36 @@ const openEditContentDialog = () => {
   contentForm.description = experimentData.value.description || ''
   contentForm.requirements = experimentData.value.requirements ? [...experimentData.value.requirements] : []
   contentForm.attachments = experimentData.value.attachments ? [...experimentData.value.attachments] : []
-
   editContentDialogVisible.value = true
 }
 
-// 添加要求
 const addRequirement = () => {
   contentForm.requirements.push('')
 }
 
-// 移除要求
 const removeRequirement = (index) => {
   contentForm.requirements.splice(index, 1)
 }
 
-// 处理文件上传
 const handleFileChange = (file) => {
-  // 在实际应用中应该上传到服务器
-  // 这里简单模拟
   contentForm.attachments.push({
     name: file.name,
     url: URL.createObjectURL(file.raw)
   })
 }
 
-// 移除附件
 const removeAttachment = (index) => {
   contentForm.attachments.splice(index, 1)
 }
 
-// 提交内容表单
 const submitContentForm = async () => {
   try {
-    // 在实际应用中应该调用API
-    // const response = await api.updateExperimentContent(experimentId.value, contentForm)
-
-    // 更新本地数据
     experimentData.value = {
       ...experimentData.value,
       description: contentForm.description,
       requirements: contentForm.requirements,
       attachments: contentForm.attachments
     }
-
     ElMessage.success('内容更新成功')
     editContentDialogVisible.value = false
   } catch (error) {
@@ -935,31 +807,26 @@ const gradeSubmission = (submission) => {
   gradeDialogVisible.value = true
 }
 
-// 提交评分
 const submitGrade = async () => {
   if (!currentSubmission.value) return
 
   try {
-    // 提取学生ID和实验ID（从复合ID中）
     const submissionId = currentSubmission.value.id
     const parsedSubmissionId = parseSubmissionCompositeId(submissionId)
     const studentId = parsedSubmissionId?.studentId
-    const experimentId = parsedSubmissionId?.experimentId
+    const expId = parsedSubmissionId?.experimentId
 
-    // 构建评分数据
     const gradeData = {
       ...gradeForm,
       studentId,
-      experimentId
+      experimentId: expId
     }
 
-    // 调用API
     await api.gradeSubmission(submissionId, gradeData)
 
     ElMessage.success('评分成功')
     gradeDialogVisible.value = false
 
-    // 更新本地数据
     const index = allSubmissions.value.findIndex(sub => sub.id === currentSubmission.value.id)
     if (index > -1) {
       allSubmissions.value[index] = {
@@ -968,11 +835,7 @@ const submitGrade = async () => {
         plagiarismRate: gradeForm.plagiarismRate,
         status: 'graded'
       }
-
-      // 重新计算统计数据
       syncSubmissionStats(allSubmissions.value)
-
-      // 更新图表
       initCharts()
     }
   } catch (error) {
@@ -983,59 +846,36 @@ const submitGrade = async () => {
 
 // 状态类型和文本
 const getStatusType = (status) => {
-  const typeMap = {
-    'active': 'success',
-    'draft': 'info',
-    'expired': 'danger'
-  }
+  const typeMap = { 'active': 'success', 'draft': 'info', 'expired': 'danger' }
   return typeMap[status] || 'info'
 }
 
 const getStatusText = (status) => {
-  const textMap = {
-    'active': '进行中',
-    'draft': '草稿',
-    'expired': '已截止'
-  }
+  const textMap = { 'active': '进行中', 'draft': '草稿', 'expired': '已截止' }
   return textMap[status] || '未知状态'
 }
 
-// 提交状态类型和文本
 const getSubmissionStatusType = (status) => {
-  const typeMap = {
-    'submitted': 'warning',
-    'graded': 'success',
-    'rejected': 'danger',
-    'not_started': 'info'
-  }
+  const typeMap = { 'submitted': 'warning', 'graded': 'success', 'rejected': 'danger', 'not_started': 'info' }
   return typeMap[status] || 'info'
 }
 
 const getSubmissionStatusText = (status) => {
-  const textMap = {
-    'submitted': '待批阅',
-    'graded': '已批阅',
-    'rejected': '已拒绝',
-    'not_started': '未提交'
-  }
+  const textMap = { 'submitted': '待批阅', 'graded': '已批阅', 'rejected': '已拒绝', 'not_started': '未提交' }
   return textMap[status] || '未知状态'
 }
 
-// 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
-
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-// 成绩样式 - 修复错误：确保该函数被正确定义并导出
 const getScoreClass = (score) => {
   if (score === undefined || score === null) return ''
   if (score >= 90) return 'score-excellent'
@@ -1044,7 +884,6 @@ const getScoreClass = (score) => {
   return 'score-fail'
 }
 
-// 根据查重率获取标签类型
 const getPlagiarismRateType = (rate) => {
   if (rate >= 50) return 'danger'
   if (rate >= 30) return 'warning'
@@ -1064,17 +903,9 @@ const viewSubmissionDetail = (id) => {
   router.push(`/teacher/submission-detail/${id}`)
 }
 
-// 清理图表
 const cleanupCharts = () => {
-  if (submissionChart) {
-    submissionChart.dispose()
-    submissionChart = null
-  }
-
-  if (scoreChart) {
-    scoreChart.dispose()
-    scoreChart = null
-  }
+  if (submissionChart) { submissionChart.dispose(); submissionChart = null }
+  if (scoreChart) { scoreChart.dispose(); scoreChart = null }
 }
 
 onMounted(() => {
@@ -1085,7 +916,6 @@ onBeforeUnmount(() => {
   cleanupCharts()
 })
 
-// 确保所有在模板中使用的函数都正确导出
 defineExpose({
   getScoreClass,
   getStatusType,
@@ -1097,4 +927,9 @@ defineExpose({
 })
 </script>
 
-
+<style scoped>
+.score-excellent { color: #8E44AD; font-weight: 600; }
+.score-good { color: #409EFF; font-weight: 600; }
+.score-pass { color: #67C23A; font-weight: 600; }
+.score-fail { color: #F56C6C; font-weight: 600; }
+</style>

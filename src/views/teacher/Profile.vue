@@ -1,114 +1,115 @@
 <template>
-  <div class="teacher-profile [height:100%]">
-    <page-header class="my-page-header [padding:20px]" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
+  <div class="h-full">
+    <page-header class="p-5" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
 
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-          <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#9aa0a6]">
-            <el-avatar :size="100" :src="avatarUrl" />
-            <h3>{{ displayName }}</h3>
-            <p>{{ roleText }}</p>
+    <div class="grid grid-cols-[1fr_2fr] gap-5 max-[768px]:grid-cols-1 px-5">
+      <!-- Left column: Profile card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 h-fit">
+        <div class="flex flex-col items-center pb-5 border-b border-[#f0f0f0]">
+          <img :src="avatarUrl" class="w-[100px] h-[100px] rounded-full object-cover border-2 border-black/[0.06]" alt="avatar" />
+          <h3 class="mt-2.5 mb-1 text-lg font-semibold">{{ displayName }}</h3>
+          <p class="m-0 text-sm text-[#aeaeb2]">{{ roleText }}</p>
+        </div>
+
+        <div class="mt-5">
+          <div class="flex justify-between mb-4 items-center">
+            <span class="text-xs font-semibold text-[#8092a6]">用户名</span>
+            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.username }}</span>
+          </div>
+          <div class="flex justify-between mb-4 items-center">
+            <span class="text-xs font-semibold text-[#8092a6]">角色</span>
+            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ roleText }}</span>
+          </div>
+          <div class="flex justify-between mb-4 items-center">
+            <span class="text-xs font-semibold text-[#8092a6]">工号/学号</span>
+            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.usernum || '未设置' }}</span>
+          </div>
+          <div class="flex justify-between mb-4 items-center">
+            <span class="text-xs font-semibold text-[#8092a6]">电子邮箱</span>
+            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.email || '未设置' }}</span>
+          </div>
+          <div class="flex justify-between mb-4 items-center">
+            <span class="text-xs font-semibold text-[#8092a6]">班级</span>
+            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.class || '未设置' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="flex flex-col gap-5">
+        <!-- PTA binding card -->
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-black/[0.06]">
+            <span class="font-semibold text-[#1d1d1f]">绑定 PTA 账号</span>
           </div>
 
-          <div class="profile-info [margin-top:20px]">
-            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户名</span>
-              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.username }}</span>
-            </div>
-            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">角色</span>
-              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ roleText }}</span>
-            </div>
-            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">工号/学号</span>
-              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.usernum || '未设置' }}</span>
-            </div>
-            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">电子邮箱</span>
-              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email || '未设置' }}</span>
-            </div>
-            <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#9aa0a6] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">班级</span>
-              <span class="info-value [color:#202124] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.class || '未设置' }}</span>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="16">
-        <el-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
-          <template #header>
-            <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>绑定 PTA 账号</span></div>
-          </template>
-
-          <div class="pta-hint [margin-bottom:12px] [font-size:13px] [line-height:1.7] [color:#5f6368]">
+          <p class="mb-3 text-[13px] leading-[1.7] text-[#6e6e73]">
             绑定后，PTA 数据同步会优先使用此账号登录；在同步页面临时输入的账号密码会覆盖本次任务。
-          </div>
+          </p>
 
-          <div v-if="hasBoundCredential" class="pta-bound [margin-bottom:16px] [padding:10px_12px] [border-radius:10px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
+          <div v-if="hasBoundCredential" class="mb-4 px-3 py-2.5 rounded-[10px] bg-[#e6f4ea] text-[#1e8e3e] text-[13px]">
             当前已绑定 PTA 账号：<strong>{{ ptaCredential.ptaUsername }}</strong>
           </div>
-          <div v-else class="pta-bound pta-bound--warning [margin-bottom:16px] [padding:10px_12px] [border-radius:10px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [background:#fef7e0] [color:#b26a00]">
+          <div v-else class="mb-4 px-3 py-2.5 rounded-[10px] bg-[#fef7e0] text-[#b26a00] text-[13px]">
             当前未绑定 PTA 账号。
           </div>
 
-          <el-form label-width="110px" class="pta-form [margin-top:4px]">
-            <el-form-item label="PTA 账号">
-              <el-input
-                v-model="ptaForm.ptaUsername"
-                placeholder="请输入教师自己的 PTA 登录账号"
-                clearable
-              />
-            </el-form-item>
-            <el-form-item label="PTA 密码">
-              <el-input
-                v-model="ptaForm.ptaPassword"
-                type="password"
-                show-password
-                placeholder="请输入 PTA 登录密码"
-                clearable
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="savingPtaCredential" @click="savePtaCredential">
-                保存绑定
-              </el-button>
-              <el-button :disabled="!hasBoundCredential" @click="clearPtaCredential">
-                解除绑定
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 账号</label>
+            <input v-model="ptaForm.ptaUsername" type="text" placeholder="请输入教师自己的 PTA 登录账号" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 密码</label>
+            <input v-model="ptaForm.ptaPassword" type="password" placeholder="请输入 PTA 登录密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          </div>
+          <div class="flex gap-3">
+            <button :disabled="savingPtaCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="savePtaCredential">
+              {{ savingPtaCredential ? '保存中...' : '保存绑定' }}
+            </button>
+            <button :disabled="!hasBoundCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="clearPtaCredential">
+              解除绑定
+            </button>
+          </div>
+        </div>
 
-        <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>修改密码</span></div>
-          </template>
+        <!-- Change password card -->
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-black/[0.06]">
+            <span class="font-semibold text-[#1d1d1f]">修改密码</span>
+          </div>
 
-          <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
-            <el-form-item label="当前密码" prop="oldPassword">
-              <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
-            </el-form-item>
-            <el-form-item label="新密码" prop="newPassword">
-              <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（至少6位）" />
-            </el-form-item>
-            <el-form-item label="确认新密码" prop="confirmPassword">
-              <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="changingPassword" @click="changePassword">修改密码</el-button>
-              <el-button @click="resetPasswordForm">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-col>
-    </el-row>
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">当前密码</label>
+            <input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.oldPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.oldPassword }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">新密码</label>
+            <input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.newPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.newPassword }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">确认新密码</label>
+            <input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.confirmPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.confirmPassword }}</p>
+          </div>
+          <div class="flex gap-3">
+            <button :disabled="changingPassword" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="changePassword">
+              {{ changingPassword ? '修改中...' : '修改密码' }}
+            </button>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordForm">
+              重置
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import { getUserInfo } from '../../constants/auth'
@@ -120,6 +121,7 @@ import {
   updateTeacherPtaCredentials
 } from '../../api/tap'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import { useFormValidation } from '../../composables/useFormValidation'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL_WITH_SLASH,
@@ -136,7 +138,6 @@ const roleText = computed(() => {
   return map[userInfo.value.role] || '用户'
 })
 
-const passwordFormRef = ref(null)
 const changingPassword = ref(false)
 const passwordForm = reactive({ oldPassword: '', newPassword: '', confirmPassword: '' })
 
@@ -152,22 +153,24 @@ const ptaForm = reactive({
 const savingPtaCredential = ref(false)
 const hasBoundCredential = computed(() => !!ptaCredential.bound)
 
-const validateConfirm = (_rule, value, callback) => {
-  if (value !== passwordForm.newPassword) callback(new Error('两次输入的密码不一致'))
-  else callback()
+const validateConfirm = (value) => {
+  if (value !== passwordForm.newPassword) return '两次输入的密码不一致'
+  return null
 }
 
 const passwordRules = {
-  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+  oldPassword: [{ required: true, message: '请输入当前密码' }],
   newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
+    { required: true, message: '请输入新密码' },
+    { min: 6, message: '密码长度不能小于6位' }
   ],
   confirmPassword: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
-    { validator: validateConfirm, trigger: 'blur' }
+    { required: true, message: '请确认新密码' },
+    { validator: validateConfirm }
   ]
 }
+
+const { errors: passwordErrors, validate: validatePasswordForm, resetFields: resetPasswordErrors } = useFormValidation(passwordRules)
 
 async function loadPtaCredential() {
   try {
@@ -243,39 +246,37 @@ async function clearPtaCredential() {
   }
 }
 
-const changePassword = () => {
-  passwordFormRef.value.validate(async (valid) => {
-    if (!valid) return
-    changingPassword.value = true
-    try {
-      const res = await apiClient.post('/api/user/password', {
-        oldPassword: passwordForm.oldPassword,
-        newPassword: passwordForm.newPassword
-      })
-      const data = res.data || res
-      if (data.success) {
-        ElMessage.success('密码修改成功')
-        resetPasswordForm()
-      } else {
-        ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
-      }
-    } catch (e) {
-      ElMessage.error(getFriendlyErrorMessage(e, '密码修改失败，请检查当前密码后重试'))
-    } finally {
-      changingPassword.value = false
+const changePassword = async () => {
+  if (!validatePasswordForm(passwordForm)) return
+  changingPassword.value = true
+  try {
+    const res = await apiClient.post('/api/user/password', {
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    const data = res.data || res
+    if (data.success) {
+      ElMessage.success('密码修改成功')
+      resetPasswordForm()
+    } else {
+      ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
     }
-  })
+  } catch (e) {
+    ElMessage.error(getFriendlyErrorMessage(e, '密码修改失败，请检查当前密码后重试'))
+  } finally {
+    changingPassword.value = false
+  }
 }
 
 const resetPasswordForm = () => {
   passwordForm.oldPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmPassword = ''
+  resetPasswordErrors()
 }
 
 onMounted(() => {
   loadPtaCredential()
 })
 </script>
-
 

@@ -1,85 +1,132 @@
 <template>
-  <div class="doc-center [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="min-h-full">
     <!-- 顶部横幅 -->
-    <div class="hero [display:flex] [align-items:center] [justify-content:space-between] [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:24px] [border:1px_solid_#dadce0]">
-      <div class="hero-text [&_h1]:[margin:0_0_6px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
-        <h1>文档中心</h1>
-        <p>上传、管理教学文档，一键翻译或 AI 精读</p>
+    <div class="flex items-center justify-between bg-white rounded-[16px] p-[28px_32px] mb-6 border border-black/[0.06]">
+      <div>
+        <h1 class="m-0 mb-1.5 text-[22px] font-normal text-[#1d1d1f]">文档中心</h1>
+        <p class="m-0 text-sm text-[#6e6e73]">上传、管理教学文档，一键翻译或 AI 精读</p>
       </div>
-      <div class="hero-actions [display:flex] [gap:10px] [&_.el-button--primary]:[border-radius:100px]">
-        <el-button type="primary" :icon="UploadFilled" @click="showUpload = true">上传文档</el-button>
-        <el-button :icon="Refresh" @click="loadDocs">刷新</el-button>
-        <el-button
-          type="danger"
-          plain
-          :icon="Delete"
-          :loading="clearingAll"
+      <div class="flex gap-2.5">
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+          @click="showUpload = true"
+        >
+          <UploadFilled class="w-4 h-4" />
+          上传文档
+        </button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+          @click="loadDocs"
+        >
+          <Refresh class="w-4 h-4" />
+          刷新
+        </button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           :disabled="docsLoading || docs.length === 0"
           @click="handleDeleteAll"
         >
+          <svg v-if="clearingAll" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
+          <Delete v-else class="w-4 h-4" />
           清空全部
-        </el-button>
+        </button>
       </div>
     </div>
 
     <!-- 上传抽屉 -->
-    <el-drawer v-model="showUpload" title="上传文档" size="480px" :close-on-click-modal="true">
-      <div class="upload-body [padding:0_4px]">
-        <el-form label-position="top">
-          <el-form-item label="文件夹名称">
-            <el-input v-model="folderName" placeholder="例如：数据结构课件" />
-          </el-form-item>
-        </el-form>
+    <AppDrawer v-model="showUpload" title="上传文档" size="450px">
+      <div class="px-1">
+        <!-- 文件夹名称 -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-2">文件夹名称</label>
+          <input
+            v-model="folderName"
+            placeholder="例如：数据结构课件"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
 
         <el-upload
           drag multiple :auto-upload="false"
           :on-change="handleFileChange" :file-list="fileList"
           :on-remove="handleFileRemove" accept=".pdf,.docx,.doc,.txt"
-          class="upload-dragger [margin-top:16px] [width:100%]"
+          class="mt-4 w-full [&_.el-upload]:!w-full [&_.el-upload-dragger]:!border-2 [&_.el-upload-dragger]:!border-dashed [&_.el-upload-dragger]:!border-[#007aff]/30 [&_.el-upload-dragger]:!rounded-[14px] [&_.el-upload-dragger]:!bg-[#f5f5f7] [&_.el-upload-dragger]:hover:!border-[#007aff]/60 [&_.el-upload-dragger]:hover:!bg-[#eef6ff]"
         >
-          <div class="upload-inner [text-align:center] [padding:28px_0]">
-            <el-icon :size="40" color="#409EFF"><UploadFilled /></el-icon>
-            <p class="upload-main-text [margin:10px_0_4px] [font-size:15px] [color:#202124]">拖拽文件到此处，或点击选择</p>
-            <p class="upload-hint [margin:0] [font-size:12px] [color:#5f6368]">支持 PDF、DOCX、DOC、TXT，单文件最大50 MB</p>
+          <div class="text-center py-7">
+            <UploadFilled class="w-10 h-10 text-[#007aff] mx-auto" />
+            <p class="mt-2.5 mb-1 text-[15px] text-[#1d1d1f]">拖拽文件到此处，或点击选择</p>
+            <p class="m-0 text-xs text-[#6e6e73]">支持 PDF、DOCX、DOC、TXT，单文件最大50 MB</p>
           </div>
         </el-upload>
 
-        <el-button
-          v-if="fileList.length > 0" type="primary" :loading="uploading"
-          class="upload-submit [width:100%] [margin-top:20px] [height:42px] [font-size:15px] [border-radius:100px]" @click="handleUpload"
+        <button
+          v-if="fileList.length > 0"
+          :disabled="uploading"
+          class="w-full mt-5 h-[42px] rounded-full text-[15px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          @click="handleUpload"
         >
+          <svg v-if="uploading" class="inline w-4 h-4 mr-1.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
           {{ uploading ? '上传中..' : `上传 ${fileList.length} 个文件` }}
-        </el-button>
-        <el-alert v-if="uploadError" :title="uploadError" type="error" show-icon class="[margin-top:12px]" />
+        </button>
+
+        <!-- 上传错误提示 -->
+        <div v-if="uploadError" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] mt-3">
+          <svg class="w-5 h-5 text-[#ff3b30] shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          <span class="text-sm text-[#ff3b30]">{{ uploadError }}</span>
+        </div>
       </div>
-    </el-drawer>
+    </AppDrawer>
 
     <!-- 文档列表 -->
-    <div class="doc-grid [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(320px,_1fr))] [gap:16px]" v-loading="docsLoading">
-      <el-empty v-if="docs.length === 0 && !docsLoading" description="暂无文档，点击上方「上传文档」开始" />
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4" v-loading="docsLoading">
+      <!-- 空状态 -->
+      <div v-if="docs.length === 0 && !docsLoading" class="col-span-full flex flex-col items-center justify-center py-20">
+        <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 64 64" fill="none">
+          <rect x="12" y="8" width="40" height="48" rx="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M22 24h20M22 32h20M22 40h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p class="text-sm text-[#6e6e73]">暂无文档，点击上方「上传文档」开始</p>
+      </div>
 
-      <div v-for="doc in docs" :key="doc.id" class="doc-card [display:flex] [align-items:center] [gap:14px] [background:#fff] [border-radius:16px] [padding:18px_20px] [border:1px_solid_#dadce0] [transition:all_.2s] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] hover:[transform:translateY(-1px)]">
-        <div class="doc-icon [width:48px] [height:48px] [border-radius:12px] [background:#e8f0fe] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]">
-          <span class="file-ext [color:#1a73e8] [font-size:11px] [font-weight:600] [letter-spacing:.5px]">{{ getExt(doc.filename) }}</span>
+      <!-- 文档卡片 -->
+      <div
+        v-for="doc in docs" :key="doc.id"
+        class="flex items-center gap-3.5 bg-white rounded-[16px] p-[18px_20px] border border-black/[0.06] transition-all hover:shadow-[0_1px_3px_rgba(60,64,67,0.15),0_4px_8px_rgba(60,64,67,0.08)] hover:-translate-y-px"
+      >
+        <div class="w-12 h-12 rounded-xl bg-[#e8f0fe] flex items-center justify-center shrink-0">
+          <span class="text-[#007aff] text-[11px] font-semibold tracking-wide">{{ getExt(doc.filename) }}</span>
         </div>
-        <div class="doc-info [flex:1] [min-width:0]">
-          <p class="doc-name [margin:0_0_4px] [font-size:14px] [font-weight:500] [color:#202124] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]" :title="doc.filename">{{ doc.filename }}</p>
-          <p class="doc-meta [margin:0] [font-size:12px] [color:#5f6368] [&_span_+_span]:[margin-left:2px]">
+        <div class="flex-1 min-w-0">
+          <p class="m-0 mb-1 text-sm font-medium text-[#1d1d1f] truncate" :title="doc.filename">{{ doc.filename }}</p>
+          <p class="m-0 text-xs text-[#6e6e73]">
             <span>{{ (doc.sizeBytes / 1024).toFixed(0) }} KB</span>
-            <span v-if="doc.language">· {{ doc.language }}</span>
+            <span v-if="doc.language"> · {{ doc.language }}</span>
           </p>
         </div>
-        <div class="doc-actions [display:flex] [gap:6px] [flex-shrink:0]">
-          <el-tooltip content="双语翻译" placement="top">
-            <el-button type="primary" :icon="Document" circle size="small" @click="goTranslate(doc.id)" />
-          </el-tooltip>
-          <el-tooltip content="AI 精读" placement="top">
-            <el-button type="success" :icon="MagicStick" circle size="small" @click="goSummary(doc.id)" />
-          </el-tooltip>
-          <el-tooltip content="删除" placement="top">
-            <el-button type="danger" :icon="Delete" circle size="small"
-              :loading="deleting === doc.id" @click="handleDelete(doc.id)" />
-          </el-tooltip>
+        <div class="flex gap-1.5 shrink-0">
+          <button
+            title="双语翻译"
+            class="w-8 h-8 rounded-full bg-[#007aff]/10 text-[#007aff] flex items-center justify-center hover:bg-[#007aff]/20 active:scale-90 transition-all cursor-pointer border-none"
+            @click="goTranslate(doc.id)"
+          >
+            <Document class="w-4 h-4" />
+          </button>
+          <button
+            title="AI 精读"
+            class="w-8 h-8 rounded-full bg-[#34c759]/10 text-[#34c759] flex items-center justify-center hover:bg-[#34c759]/20 active:scale-90 transition-all cursor-pointer border-none"
+            @click="goSummary(doc.id)"
+          >
+            <MagicStick class="w-4 h-4" />
+          </button>
+          <button
+            title="删除"
+            class="w-8 h-8 rounded-full bg-[#ff3b30]/10 text-[#ff3b30] flex items-center justify-center hover:bg-[#ff3b30]/20 active:scale-90 transition-all cursor-pointer border-none"
+            :disabled="deleting === doc.id"
+            @click="handleDelete(doc.id)"
+          >
+            <svg v-if="deleting === doc.id" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
+            <Delete v-else class="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -94,6 +141,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Refresh, Document, MagicStick, Delete } from '@element-plus/icons-vue'
 import { getDocuments, deleteDocument, deleteAllDocuments, createFolder, uploadFiles } from '../../api/tap'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
+import AppDrawer from '../../components/AppDrawer.vue'
 
 const router = useRouter()
 const showUpload = ref(false)
@@ -173,5 +221,3 @@ const goSummary = (docId) => router.push(`/teacher/summary-card?docId=${docId}`)
 
 onMounted(loadDocs)
 </script>
-
-

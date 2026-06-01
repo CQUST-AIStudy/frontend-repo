@@ -1,195 +1,211 @@
 <template>
-  <div class="submission-list [min-width:0] [min-height:100%] [padding:0_16px_20px] [background-color:#f5f7fa] max-[768px]:[padding:0_8px_16px]">
+  <div class="min-h-full px-4 pb-5 bg-[#f5f7fa] max-md:px-2 max-md:pb-4">
     <page-header
-      class="my-page-header [padding:24px_0] max-[768px]:[padding:16px_0]"
+      class="py-6 max-md:py-4"
       title="学生提交"
       :description="headerDescription"
     >
       <template v-if="experimentId">
-        <el-button @click="goBackToExperiment">返回实验详情</el-button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBackToExperiment">返回实验详情</button>
       </template>
     </page-header>
 
-    <el-card class="filter-card [margin-bottom:20px] [border-radius:8px] [overflow:hidden]" shadow="hover">
-      <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-        <h3 class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">筛选条件</h3>
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 mb-5">
+      <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+        <h3 class="text-[13px] font-semibold text-[#334155] m-0">筛选条件</h3>
       </div>
-      <el-form :inline="true" :model="filterForm" class="filter-form [display:flex] [flex-wrap:wrap] [gap:10px]">
-        <el-form-item v-if="!experimentId" label="实验">
-          <el-select
+      <div class="flex flex-wrap gap-3 items-end">
+        <div v-if="!experimentId" class="flex flex-col gap-1">
+          <label class="text-xs text-[#6e6e73]">实验</label>
+          <select
             v-model="filterForm.experimentId"
-            placeholder="请选择实验"
-            clearable
-            class="[width:220px]"
+            class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[220px]"
           >
-            <el-option
+            <option value="">请选择实验</option>
+            <option
               v-for="item in experimentOptions"
               :key="item.id"
-              :label="`${item.id}: ${item.name}`"
               :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
+            >{{ item.id }}: {{ item.name }}</option>
+          </select>
+        </div>
 
-        <el-form-item label="学生姓名">
-          <el-input
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-[#6e6e73]">学生姓名</label>
+          <input
             v-model="filterForm.studentName"
             placeholder="请输入学生姓名"
-            clearable
+            class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
-        </el-form-item>
+        </div>
 
-        <el-form-item label="状态">
-          <el-select
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-[#6e6e73]">状态</label>
+          <select
             v-model="filterForm.status"
-            placeholder="请选择状态"
-            clearable
-            class="[width:150px]"
+            class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[150px]"
           >
-            <el-option label="全部" value="" />
-            <el-option label="已提交" value="submitted" />
-            <el-option label="已评分" value="graded" />
-            <el-option label="已退回" value="rejected" />
-            <el-option label="未开始" value="not_started" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="applyFilter">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
-      <div class="table-operations [margin-bottom:16px] [display:flex] [justify-content:space-between] [align-items:center] [gap:10px]">
-        <div class="table-stats [display:flex] [flex-wrap:wrap] [gap:10px]">
-          <el-tag type="info" effect="plain">总数：{{ filteredSubmissions.length }}</el-tag>
-          <el-tag type="success" effect="plain">已评分：{{ getStatusCount('graded') }}</el-tag>
-          <el-tag type="warning" effect="plain">已提交：{{ getStatusCount('submitted') }}</el-tag>
-          <el-tag type="danger" effect="plain">未开始：{{ getStatusCount('not_started') }}</el-tag>
+            <option value="">全部</option>
+            <option value="submitted">已提交</option>
+            <option value="graded">已评分</option>
+            <option value="rejected">已退回</option>
+            <option value="not_started">未开始</option>
+          </select>
         </div>
 
-        <div class="table-actions [display:flex] [flex-wrap:wrap] [gap:8px]">
-          <el-button type="primary" size="small" @click="loadSubmissions">
-            <el-icon><Refresh /></el-icon>
+        <div class="flex gap-2 items-end">
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="applyFilter">查询</button>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetFilter">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 mb-5">
+      <div class="mb-4 flex justify-between items-center gap-2.5 flex-wrap">
+        <div class="flex flex-wrap gap-2.5">
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-black/5 text-[#6e6e73]">总数：{{ filteredSubmissions.length }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(52,199,89,0.12)] text-[#34c759]">已评分：{{ getStatusCount('graded') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,149,0,0.1)] text-[#ff9500]">已提交：{{ getStatusCount('submitted') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,59,48,0.1)] text-[#ff3b30]">未开始：{{ getStatusCount('not_started') }}</span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="loadSubmissions">
+            <Refresh class="w-4 h-4" />
             刷新
-          </el-button>
-          <el-button type="success" size="small" :disabled="!selectedRows.length" @click="batchGrade">
-            <el-icon><Edit /></el-icon>
+          </button>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#30d158] to-[#28a745] shadow-[0_2px_8px_rgba(40,167,69,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedRows.length" @click="batchGrade">
+            <Edit class="w-4 h-4" />
             批量评分
-          </el-button>
-          <el-button type="info" size="small" @click="exportData">
-            <el-icon><Download /></el-icon>
+          </button>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="exportData">
+            <Download class="w-4 h-4" />
             导出
-          </el-button>
+          </button>
         </div>
       </div>
 
-      <el-table
-        :data="pagedSubmissions"
-        border
-        stripe
-        highlight-current-row
-        v-loading="tableLoading"
-        class="[width:100%]"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55" />
-        <el-table-column v-if="!experimentId" prop="experimentId" label="实验 ID" width="110" />
-        <el-table-column
-          v-if="!experimentId"
-          prop="experimentName"
-          label="实验名称"
-          min-width="180"
-          show-overflow-tooltip
-        />
-        <el-table-column prop="studentName" label="学生姓名" width="140" />
-        <el-table-column prop="class" label="班级" min-width="120" show-overflow-tooltip />
-
-        <el-table-column prop="submitTime" label="提交时间" width="170" show-overflow-tooltip>
-          <template #default="{ row }">
-            <span v-if="hasRealSubmitTime(row)">{{ formatDate(row.submitTime) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="成绩" width="90" align="center">
-          <template #default="{ row }">
-            <span v-if="row.score !== null" class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]">{{ row.score }}</span>
-            <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">未评分</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="查重率" width="110" align="center">
-          <template #default="{ row }">
-            <el-tag v-if="row.plagiarismRate !== null" :type="getPlagiarismRateType(row.plagiarismRate)" size="small">
-              {{ row.plagiarismRate }}%
-            </el-tag>
-            <span v-else class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">暂无</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="状态" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" size="small" effect="dark">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column label="操作" width="170" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="viewSubmissionDetail(row.id)">详情</el-button>
-            <el-button v-if="row.status === 'submitted'" type="success" link @click="gradeSubmission(row)">评分</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="filteredSubmissions.length"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-
-    <el-dialog v-model="gradeDialogVisible" title="提交评分" width="500px">
-      <el-form :model="gradeForm" label-width="120px">
-        <el-form-item label="学生姓名">
-          <span>{{ currentSubmission ? currentSubmission.studentName : '' }}</span>
-        </el-form-item>
-
-        <el-form-item label="成绩">
-          <el-input-number v-model="gradeForm.score" :min="0" :max="100" :precision="1" />
-        </el-form-item>
-
-        <el-form-item label="查重率">
-          <el-input-number v-model="gradeForm.plagiarismRate" :min="0" :max="100" :precision="1" />
-          <span class="rate-unit [margin-left:5px]">%</span>
-        </el-form-item>
-
-        <el-form-item label="AI 评语">
-          <el-input
-            v-model="gradeForm.aiComment"
-            type="textarea"
-            :rows="6"
-            placeholder="请输入AI 评语"
-          />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="gradeDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitGrade">确定</el-button>
+      <div class="overflow-x-auto">
+        <table v-if="pagedSubmissions.length" class="w-full text-left text-[13px]">
+          <thead>
+            <tr class="border-b border-black/[0.06]">
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[55px]">
+                <input type="checkbox" class="cursor-pointer" @change="toggleSelectAll($event)" />
+              </th>
+              <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验 ID</th>
+              <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">学生姓名</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">班级</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">提交时间</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center">成绩</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center">查重率</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center">状态</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in pagedSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3">
+                <input type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="cursor-pointer" @change="toggleRowSelection(row, $event)" />
+              </td>
+              <td v-if="!experimentId" class="py-3 px-3">{{ row.experimentId }}</td>
+              <td v-if="!experimentId" class="py-3 px-3 max-w-[180px] truncate">{{ row.experimentName }}</td>
+              <td class="py-3 px-3">{{ row.studentName }}</td>
+              <td class="py-3 px-3 max-w-[120px] truncate">{{ row.class }}</td>
+              <td class="py-3 px-3">
+                <span v-if="hasRealSubmitTime(row)">{{ formatDate(row.submitTime) }}</span>
+              </td>
+              <td class="py-3 px-3 text-center">
+                <span v-if="row.score !== null" class="text-base font-bold text-[#007aff]">{{ row.score }}</span>
+                <span v-else class="text-[13px] text-[#aeaeb2]">未评分</span>
+              </td>
+              <td class="py-3 px-3 text-center">
+                <span v-if="row.plagiarismRate !== null" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="getPlagiarismRateTagClass(row.plagiarismRate)">
+                  {{ row.plagiarismRate }}%
+                </span>
+                <span v-else class="text-[13px] text-[#aeaeb2]">暂无</span>
+              </td>
+              <td class="py-3 px-3 text-center">
+                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="getStatusTagClass(row.status)">
+                  {{ getStatusText(row.status) }}
+                </span>
+              </td>
+              <td class="py-3 px-3">
+                <div class="flex gap-2">
+                  <button class="text-[#007aff] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</button>
+                  <button v-if="row.status === 'submitted'" class="text-[#34c759] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="py-12 text-center">
+          <div class="text-[40px] mb-3 opacity-40">📋</div>
+          <p class="text-[14px] text-[#aeaeb2]">暂无数据</p>
         </div>
-      </template>
-    </el-dialog>
+      </div>
+
+      <div class="mt-4 flex justify-end">
+        <AppPagination :current="currentPage" :total="filteredSubmissions.length" :page-size="pageSize" @update:current="handleCurrentChange" />
+      </div>
+    </div>
+
+    <!-- Grade Dialog -->
+    <div v-if="gradeDialogVisible" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="gradeDialogVisible = false"></div>
+      <div class="relative w-[500px] max-w-[90vw] rounded-[20px] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-6">
+        <h3 class="text-lg font-semibold text-[#1d1d1f] mb-5">提交评分</h3>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">学生姓名</label>
+            <span class="text-sm text-[#1d1d1f]">{{ currentSubmission ? currentSubmission.studentName : '' }}</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">成绩</label>
+            <input
+              v-model.number="gradeForm.score"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[120px]"
+            />
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">查重率</label>
+            <div class="flex items-center gap-1.5">
+              <input
+                v-model.number="gradeForm.plagiarismRate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[120px]"
+              />
+              <span class="text-sm text-[#6e6e73]">%</span>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0 pt-2.5">AI 评语</label>
+            <textarea
+              v-model="gradeForm.aiComment"
+              rows="6"
+              placeholder="请输入AI 评语"
+              class="flex-1 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2.5 mt-6">
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</button>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -201,6 +217,7 @@ import { ElMessage } from 'element-plus'
 import { Download, Edit, Refresh } from '@element-plus/icons-vue'
 import api from '../../api'
 import PageHeader from '../../components/PageHeader.vue'
+import AppPagination from '../../components/AppPagination.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -287,17 +304,24 @@ watch(experimentId, (id) => {
   currentPage.value = 1
 })
 
-const handleSizeChange = (size) => {
-  pageSize.value = size
-  currentPage.value = 1
-}
-
 const handleCurrentChange = (page) => {
   currentPage.value = page
 }
 
-const handleSelectionChange = (rows) => {
-  selectedRows.value = rows
+const toggleSelectAll = (event) => {
+  if (event.target.checked) {
+    selectedRows.value = [...pagedSubmissions.value]
+  } else {
+    selectedRows.value = []
+  }
+}
+
+const toggleRowSelection = (row, event) => {
+  if (event.target.checked) {
+    selectedRows.value = [...selectedRows.value, row]
+  } else {
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id)
+  }
 }
 
 const batchGrade = () => {
@@ -325,6 +349,16 @@ const getPlagiarismRateType = (rate) => {
   return 'success'
 }
 
+const getPlagiarismRateTagClass = (rate) => {
+  const type = getPlagiarismRateType(rate)
+  const classMap = {
+    success: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    warning: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+    danger: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+  }
+  return classMap[type] || 'bg-black/5 text-[#6e6e73]'
+}
+
 const getStatusType = (status) => {
   const typeMap = {
     submitted: 'warning',
@@ -333,6 +367,17 @@ const getStatusType = (status) => {
     not_started: 'info'
   }
   return typeMap[status] || 'info'
+}
+
+const getStatusTagClass = (status) => {
+  const type = getStatusType(status)
+  const classMap = {
+    success: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    warning: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+    danger: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    info: 'bg-black/5 text-[#6e6e73]'
+  }
+  return classMap[type] || 'bg-black/5 text-[#6e6e73]'
 }
 
 const getStatusText = (status) => {
@@ -538,5 +583,4 @@ onMounted(async () => {
   }
 })
 </script>
-
 

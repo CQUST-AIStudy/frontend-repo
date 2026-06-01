@@ -1,329 +1,190 @@
 <template>
-  <div class="teacher-layout [min-height:100vh] [min-height:100dvh] [overflow-x:hidden]">
-    <el-container class="layout-container [min-height:100vh] [min-height:100dvh]">
-      <el-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [overflow:hidden] [border-right:1px_solid_rgba(126,_157,_183,_0.14)] [background:linear-gradient(180deg,_rgba(12,_31,_50,_0.94),_rgba(16,_49,_77,_0.92)),_radial-gradient(circle_at_top_left,_rgba(44,_181,_160,_0.16),_transparent_32%)] [box-shadow:inset_-1px_0_0_rgba(255,_255,_255,_0.04)] [transition:width_0.28s_ease]">
-        <div class="logo-container [display:flex] [align-items:center] [gap:14px] [height:74px] [padding:0_18px] [border-bottom:1px_solid_rgba(255,_255,_255,_0.08)]">
-          <img src="../../assets/logo.png" alt="Logo" class="logo [width:42px] [height:42px] [border-radius:14px] [border:1px_solid_rgba(130,_220,_255,_0.18)] [box-shadow:0_10px_24px_rgba(10,_30,_50,_0.28)]" />
-          <transition name="fade-text">
-            <div v-if="!collapsed" class="brand-copy [display:flex] [flex-direction:column] [gap:2px]">
-              <span class="logo-kicker [color:rgba(173,_222,_255,_0.7)] [font-size:11px] [letter-spacing:0] [text-transform:uppercase]">教师工作台</span>
-              <span class="logo-title [color:#f3f8fc] [font-size:16px] [font-weight:700]">智能教学平台</span>
-            </div>
-          </transition>
-        </div>
-
-        <div class="menu-scroll-area [flex:1] [min-height:0] [overflow:hidden] [padding:10px_8px_16px] [&_.el-scrollbar]:[height:100%] [&_.el-scrollbar__wrap]:[overflow-x:hidden]">
-          <el-scrollbar>
-            <el-menu
-              :default-active="activeMenu"
-              class="layout-menu [border-right:none] ![background:transparent] [--el-menu-bg-color:transparent] [--el-menu-text-color:rgba(222,_236,_248,_0.7)] [--el-menu-active-color:#ffffff] [--el-menu-hover-bg-color:rgba(255,_255,_255,_0.08)] [--el-menu-hover-text-color:#ffffff] [padding:0] [&_.el-menu-item]:[height:46px] [&_.el-menu-item]:[line-height:46px] [&_.el-menu-item]:[margin:4px_0] [&_.el-menu-item]:[border-radius:16px] [&_.el-menu-item]:[font-size:13px] [&_.el-menu-item]:[transition:all_0.22s_ease] [&_.el-sub-menu__title]:[height:46px] [&_.el-sub-menu__title]:[line-height:46px] [&_.el-sub-menu__title]:[margin:4px_0] [&_.el-sub-menu__title]:[border-radius:16px] [&_.el-sub-menu__title]:[font-size:13px] [&_.el-sub-menu__title]:[transition:all_0.22s_ease] [&_.el-menu-item.is-active]:![background:linear-gradient(135deg,_rgba(20,_114,_219,_0.92),_rgba(43,_181,_160,_0.88))] [&_.el-menu-item.is-active]:[box-shadow:0_14px_26px_rgba(18,_112,_216,_0.2)] [&_.el-menu-item:hover]:![background:rgba(255,_255,_255,_0.08)] [&_.el-sub-menu__title:hover]:![background:rgba(255,_255,_255,_0.08)] [&_.el-sub-menu_.el-menu]:![background:transparent] [&_.el-sub-menu_.el-menu_.el-menu-item]:[margin-left:12px] [&_.el-sub-menu_.el-menu_.el-menu-item]:![padding-left:42px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[height:40px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[line-height:40px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[border-radius:14px] [&_.el-sub-menu_.el-menu_.el-menu-item]:[font-size:12px] [&_.el-icon]:[font-size:18px]"
-              :collapse="collapsed"
-              router
-              :collapse-transition="false"
-            >
-              <el-menu-item index="/teacher/dashboard">
-                <el-icon><HomeFilled /></el-icon>
-                <template #title>首页总览</template>
-              </el-menu-item>
-
-              <el-sub-menu index="class-group">
-                <template #title>
-                  <el-icon><UserFilled /></el-icon>
-                  <span>教学班管理</span>
-                </template>
-                <el-menu-item index="/teacher/class-list">教学班列表</el-menu-item>
-                <el-menu-item index="/teacher/class-analysis">教学班分析</el-menu-item>
-                <el-menu-item index="/teacher/class-profile">能力画像</el-menu-item>
-              </el-sub-menu>
-
-              <el-sub-menu index="teaching-group">
-                <template #title>
-                  <el-icon><Notebook /></el-icon>
-                  <span>实验教学</span>
-                </template>
-                <el-menu-item index="/teacher/experiments">实验列表</el-menu-item>
-                <el-menu-item index="/teacher/experiment-create">创建实验</el-menu-item>
-                <el-menu-item index="/teacher/submissions">学生提交</el-menu-item>
-                <el-menu-item index="/teacher/experiment-analytics">实验数据分析</el-menu-item>
-                <el-menu-item index="/teacher/data-sync">PTA 数据同步</el-menu-item>
-              </el-sub-menu>
-
-              <el-sub-menu index="grading-group">
-                <template #title>
-                  <el-icon><DocumentChecked /></el-icon>
-                  <span>AI 批改</span>
-                </template>
-                <el-menu-item index="/teacher/grading">批改中心</el-menu-item>
-                <el-menu-item index="/teacher/grading/rubrics">评分标准</el-menu-item>
-              </el-sub-menu>
-
-              <el-sub-menu index="rag-group">
-                <template #title>
-                  <el-icon><Collection /></el-icon>
-                  <span>课程知识库</span>
-                </template>
-                <el-menu-item index="/teacher/knowledge-base">空间与文档</el-menu-item>
-                <el-menu-item index="/teacher/rag-analytics">RAG 分析</el-menu-item>
-              </el-sub-menu>
-
-              <el-sub-menu index="ai-group">
-                <template #title>
-                  <el-icon><ChatDotRound /></el-icon>
-                  <span>AI 助教</span>
-                </template>
-                <el-menu-item index="/teacher/ai-chat">AI 对话</el-menu-item>
-                <el-menu-item index="/teacher/class-detailed-analysis">教学建议</el-menu-item>
-              </el-sub-menu>
-
-              <el-sub-menu index="tools-group">
-                <template #title>
-                  <el-icon><Briefcase /></el-icon>
-                  <span>教辅工具</span>
-                </template>
-                <el-menu-item index="/teacher/document-center">文档中心</el-menu-item>
-                <el-menu-item index="/teacher/bilingual-read">双语阅读</el-menu-item>
-                <el-menu-item index="/teacher/summary-card">AI 精读</el-menu-item>
-                <el-menu-item index="/teacher/ai-organize">智能整理</el-menu-item>
-              </el-sub-menu>
-
-              <el-menu-item
-                v-if="hasPermission(['view_course_classes', 'analyze_course_classes'])"
-                index="/teacher/course-analysis"
-              >
-                <el-icon><DataAnalysis /></el-icon>
-                <template #title>课程分析</template>
-              </el-menu-item>
-
-              <el-sub-menu v-if="hasPermission(['view_all_teachers'])" index="dept-group">
-                <template #title>
-                  <el-icon><OfficeBuilding /></el-icon>
-                  <span>院系管理</span>
-                </template>
-                <el-menu-item index="/teacher/department-teachers">教师管理</el-menu-item>
-                <el-menu-item v-if="hasPermission(['analyze_all_classes'])" index="/teacher/department-analytics">
-                  院系统计
-                </el-menu-item>
-                <el-menu-item v-if="hasPermission(['manage_teacher_ai'])" index="/teacher/teacher-ai-management">
-                  AI 管理
-                </el-menu-item>
-              </el-sub-menu>
-
-              <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
-
-              <el-menu-item index="/teacher/profile">
-                <el-icon><Setting /></el-icon>
-                <template #title>个人设置</template>
-              </el-menu-item>
-            </el-menu>
-          </el-scrollbar>
-        </div>
-      </el-aside>
-
-      <el-drawer
-        v-model="mobileMenuVisible"
-        direction="ltr"
-        size="300px"
-        :with-header="false"
-        class="layout-drawer"
-      >
-        <div class="layout-aside mobile-aside [width:100%] [border-right:none]">
-          <div class="logo-container">
-            <img src="../../assets/logo.png" alt="Logo" class="logo" />
-            <div class="brand-copy">
-              <span class="logo-kicker">教师工作台</span>
-              <span class="logo-title">智能教学平台</span>
-            </div>
+  <div class="flex min-h-screen min-h-dvh overflow-x-hidden bg-[#f5f5f7]">
+    <!-- Sidebar (Desktop) -->
+    <aside
+      v-if="!isMobile"
+      class="fixed inset-y-0 left-0 z-30 flex flex-col h-screen h-dvh overflow-hidden border-r border-black/[0.06] bg-[rgba(246,246,248,0.82)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+      :style="{ width: asideWidth }"
+    >
+      <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
+        <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm shrink-0" />
+        <transition name="fade-text">
+          <div v-if="!collapsed" class="flex flex-col gap-0.5 overflow-hidden">
+            <span class="text-[11px] font-medium text-[#8e8e93] uppercase tracking-wide">教师工作台</span>
+            <span class="text-base font-bold text-[#1d1d1f] tracking-tight whitespace-nowrap">智能教学平台</span>
           </div>
+        </transition>
+      </div>
 
-          <div class="menu-scroll-area">
-            <el-scrollbar>
-              <el-menu
-                :default-active="activeMenu"
-                class="layout-menu"
-                router
-                :collapse-transition="false"
-                @select="closeMobileMenu"
-              >
-                <el-menu-item index="/teacher/dashboard">
-                  <el-icon><HomeFilled /></el-icon>
-                  <template #title>首页总览</template>
-                </el-menu-item>
+      <nav class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-3">
+        <div class="space-y-0.5" :class="{ 'items-center': collapsed }">
+          <!-- Menu items rendered via menuItems data -->
+          <template v-for="item in visibleMenuItems" :key="item.path || item.group">
+            <!-- Single item -->
+            <router-link v-if="!item.children" :to="item.path" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== item.path }">
+              <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+              <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
+            </router-link>
 
-                <el-sub-menu index="class-group">
-                  <template #title>
-                    <el-icon><UserFilled /></el-icon>
-                    <span>教学班管理</span>
+            <!-- Group with children -->
+            <div v-else>
+              <button @click="toggleGroup(item.group)" class="nav-item group flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer hover:bg-black/[0.04] hover:text-[#1d1d1f]">
+                <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+                <span v-if="!collapsed" class="truncate flex-1 text-left">{{ item.label }}</span>
+                <svg v-if="!collapsed" class="w-3 h-3 shrink-0 text-[#aeaeb2] transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <transition name="submenu">
+                <div v-if="openGroups[item.group] && !collapsed" class="mt-0.5 ml-[30px] space-y-0.5 overflow-hidden">
+                  <template v-for="child in item.children" :key="child.path">
+                    <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="flex items-center h-[34px] px-3 rounded-lg text-[12px] text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.1)] !text-[#007aff] !font-medium': activeMenu === child.path, 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== child.path }">
+                      {{ child.label }}
+                    </router-link>
                   </template>
-                  <el-menu-item index="/teacher/class-list">教学班列表</el-menu-item>
-                  <el-menu-item index="/teacher/class-analysis">教学班分析</el-menu-item>
-                  <el-menu-item index="/teacher/class-profile">能力画像</el-menu-item>
-                </el-sub-menu>
-
-                <el-sub-menu index="teaching-group">
-                  <template #title>
-                    <el-icon><Notebook /></el-icon>
-                    <span>实验教学</span>
-                  </template>
-                  <el-menu-item index="/teacher/experiments">实验列表</el-menu-item>
-                  <el-menu-item index="/teacher/experiment-create">创建实验</el-menu-item>
-                  <el-menu-item index="/teacher/submissions">学生提交</el-menu-item>
-                  <el-menu-item index="/teacher/experiment-analytics">实验数据分析</el-menu-item>
-                  <el-menu-item index="/teacher/data-sync">PTA 数据同步</el-menu-item>
-                </el-sub-menu>
-
-                <el-sub-menu index="grading-group">
-                  <template #title>
-                    <el-icon><DocumentChecked /></el-icon>
-                    <span>AI 批改</span>
-                  </template>
-                  <el-menu-item index="/teacher/grading">批改中心</el-menu-item>
-                  <el-menu-item index="/teacher/grading/rubrics">评分标准</el-menu-item>
-                </el-sub-menu>
-
-                <el-sub-menu index="rag-group">
-                  <template #title>
-                    <el-icon><Collection /></el-icon>
-                    <span>课程知识库</span>
-                  </template>
-                  <el-menu-item index="/teacher/knowledge-base">空间与文档</el-menu-item>
-                  <el-menu-item index="/teacher/rag-analytics">RAG 分析</el-menu-item>
-                </el-sub-menu>
-
-                <el-sub-menu index="ai-group">
-                  <template #title>
-                    <el-icon><ChatDotRound /></el-icon>
-                    <span>AI 助教</span>
-                  </template>
-                  <el-menu-item index="/teacher/ai-chat">AI 对话</el-menu-item>
-                  <el-menu-item index="/teacher/class-detailed-analysis">教学建议</el-menu-item>
-                </el-sub-menu>
-
-                <el-sub-menu index="tools-group">
-                  <template #title>
-                    <el-icon><Briefcase /></el-icon>
-                    <span>教辅工具</span>
-                  </template>
-                  <el-menu-item index="/teacher/document-center">文档中心</el-menu-item>
-                  <el-menu-item index="/teacher/bilingual-read">双语阅读</el-menu-item>
-                  <el-menu-item index="/teacher/summary-card">AI 精读</el-menu-item>
-                  <el-menu-item index="/teacher/ai-organize">智能整理</el-menu-item>
-                </el-sub-menu>
-
-                <el-menu-item
-                  v-if="hasPermission(['view_course_classes', 'analyze_course_classes'])"
-                  index="/teacher/course-analysis"
-                >
-                  <el-icon><DataAnalysis /></el-icon>
-                  <template #title>课程分析</template>
-                </el-menu-item>
-
-                <el-sub-menu v-if="hasPermission(['view_all_teachers'])" index="dept-group">
-                  <template #title>
-                    <el-icon><OfficeBuilding /></el-icon>
-                    <span>院系管理</span>
-                  </template>
-                  <el-menu-item index="/teacher/department-teachers">教师管理</el-menu-item>
-                  <el-menu-item v-if="hasPermission(['analyze_all_classes'])" index="/teacher/department-analytics">
-                    院系统计
-                  </el-menu-item>
-                  <el-menu-item v-if="hasPermission(['manage_teacher_ai'])" index="/teacher/teacher-ai-management">
-                    AI 管理
-                  </el-menu-item>
-                </el-sub-menu>
-
-                <div class="menu-divider [height:1px] [background:rgba(255,255,255,0.06)] [margin:8px_12px] [background:rgba(255,_255,_255,_0.06)] [margin:10px_12px] [background:rgba(255,_255,_255,_0.08)]"></div>
-
-                <el-menu-item index="/teacher/profile">
-                  <el-icon><Setting /></el-icon>
-                  <template #title>个人设置</template>
-                </el-menu-item>
-              </el-menu>
-            </el-scrollbar>
-          </div>
-        </div>
-      </el-drawer>
-
-      <el-container class="layout-main [min-width:0] [background:#f8f9fa] [background:transparent]">
-        <el-header class="layout-header [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [padding:0_24px] [height:56px] [border-bottom:1px_solid_#dadce0] [gap:16px] [box-shadow:0_1px_2px_rgba(60,_64,_67,_0.1)] [min-height:56px] [gap:18px] [min-height:78px] [padding:0_28px] [border-bottom:1px_solid_rgba(126,_157,_183,_0.14)] [background:rgba(248,_251,_253,_0.72)] [backdrop-filter:blur(14px)]">
-          <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
-            <el-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
-              <MenuIcon v-if="isMobile" />
-              <Fold v-else-if="!collapsed" />
-              <Expand v-else />
-            </el-icon>
-
-            <div class="header-path [min-width:0] [padding:10px_14px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)]">
-              <el-breadcrumb separator="/">
-                <el-breadcrumb-item :to="{ path: '/teacher/dashboard' }">首页</el-breadcrumb-item>
-                <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="index">
-                  {{ item }}
-                </el-breadcrumb-item>
-              </el-breadcrumb>
-            </div>
-          </div>
-
-          <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
-            <div v-if="selectedClassName" class="class-indicator [display:inline-flex] [align-items:center] [gap:8px] [min-height:40px] [padding:0_14px] [border-radius:999px] [background:linear-gradient(135deg,_rgba(18,_112,_216,_0.12),_rgba(44,_181,_160,_0.1))] [color:#1270d8] [font-size:13px] [font-weight:700] [cursor:pointer] [max-width:min(280px,_32vw)]" @click="switchClass">
-              <el-icon><School /></el-icon>
-              <span>{{ selectedClassName }}</span>
-              <el-icon :size="12"><ArrowDown /></el-icon>
-            </div>
-
-            <span class="teacher-level-badge [min-height:34px] [padding:0_12px] [border-radius:999px] [display:inline-flex] [align-items:center] [font-size:12px] [font-weight:700]" :class="teacherLevelClass">{{ teacherLevelText }}</span>
-
-            <el-tooltip content="全屏" placement="bottom">
-              <el-icon class="header-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleFullScreen"><FullScreen /></el-icon>
-            </el-tooltip>
-
-            <el-dropdown trigger="click" @command="handleCommand">
-              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)] [flex-shrink:0]">
-                <el-avatar :size="34" :src="userInfo.avatar">
-                  <span>{{ (userInfo.name || '教').slice(0, 1) }}</span>
-                </el-avatar>
-                <div v-if="!isMobile && !collapsed" class="user-copy [display:flex] [flex-direction:column] [gap:2px]">
-                  <span class="username [font-size:14px] [color:#202124] [font-weight:500] [color:#16324a] [font-size:13px] [font-weight:700]">{{ userInfo.name || '教师用户' }}</span>
-                  <span class="user-subtitle [color:#7f92a6] [font-size:11px]">课程教学工作台</span>
                 </div>
-                <el-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:#8ca0b3]"><ArrowDown /></el-icon>
-              </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="switchClass">
-                    <el-icon><School /></el-icon>
-                    切换教学班
-                  </el-dropdown-item>
-                  <el-dropdown-item command="profile">
-                    <el-icon><Setting /></el-icon>
-                    个人信息
-                  </el-dropdown-item>
-                  <el-dropdown-item command="logout" divided>
-                    <el-icon><SwitchButton /></el-icon>
-                    退出登录
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              </transition>
+            </div>
+          </template>
+
+          <div class="h-px bg-black/[0.06] mx-3 my-2.5"></div>
+
+          <router-link to="/teacher/profile" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === '/teacher/profile', 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== '/teacher/profile' }">
+            <Setting class="w-[18px] h-[18px] shrink-0" />
+            <span v-if="!collapsed" class="truncate">个人设置</span>
+          </router-link>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Mobile Drawer Overlay -->
+    <Teleport to="body">
+      <transition name="drawer-fade">
+        <div v-if="mobileMenuVisible" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" @click="closeMobileMenu"></div>
+      </transition>
+      <transition name="drawer-slide">
+        <aside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[rgba(246,246,248,0.98)] backdrop-blur-[24px] shadow-2xl">
+          <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
+            <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm" />
+            <div class="flex flex-col gap-0.5">
+              <span class="text-[11px] font-medium text-[#8e8e93] uppercase tracking-wide">教师工作台</span>
+              <span class="text-base font-bold text-[#1d1d1f] tracking-tight">智能教学平台</span>
+            </div>
           </div>
-        </el-header>
+          <nav class="flex-1 overflow-y-auto px-2 py-3">
+            <div class="space-y-0.5">
+              <template v-for="item in visibleMenuItems" :key="item.path || item.group">
+                <router-link v-if="!item.children" :to="item.path" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] transition-all duration-150" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04]': activeMenu !== item.path }" @click="closeMobileMenu">
+                  <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+                  <span>{{ item.label }}</span>
+                </router-link>
+                <div v-else>
+                  <button @click="toggleGroup(item.group)" class="flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] hover:bg-black/[0.04]">
+                    <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+                    <span class="flex-1 text-left">{{ item.label }}</span>
+                    <svg class="w-3 h-3 text-[#aeaeb2] transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div v-if="openGroups[item.group]" class="ml-[30px] mt-0.5 space-y-0.5">
+                    <template v-for="child in item.children" :key="child.path">
+                      <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="flex items-center h-[34px] px-3 rounded-lg text-[12px] text-[#6e6e73]" :class="{ 'bg-[rgba(0,122,255,0.1)] !text-[#007aff] !font-medium': activeMenu === child.path, 'hover:bg-black/[0.04]': activeMenu !== child.path }" @click="closeMobileMenu">{{ child.label }}</router-link>
+                    </template>
+                  </div>
+                </div>
+              </template>
+              <div class="h-px bg-black/[0.06] mx-3 my-2.5"></div>
+              <router-link to="/teacher/profile" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73]" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === '/teacher/profile' }" @click="closeMobileMenu">
+                <Setting class="w-[18px] h-[18px] shrink-0" />
+                <span>个人设置</span>
+              </router-link>
+            </div>
+          </nav>
+        </aside>
+      </transition>
+    </Teleport>
 
-        <el-main class="layout-content [background:#f8f9fa] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
-          <router-view v-slot="{ Component }">
-            <transition name="page-slide" mode="out-in">
-              <component :is="Component" />
+    <!-- Main Area -->
+    <div class="flex flex-col flex-1 min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="{ marginLeft: isMobile ? '0' : asideWidth }">
+      <!-- Header -->
+      <header class="sticky top-0 z-20 flex items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
+        <div class="flex items-center gap-3.5 min-w-0">
+          <button @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff] shrink-0" title="切换导航">
+            <MenuIcon v-if="isMobile" />
+            <Fold v-else-if="!collapsed" />
+            <Expand v-else />
+          </button>
+
+          <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-white/60 border border-black/[0.06]">
+            <nav class="flex items-center gap-1.5 text-[13px] text-[#6e6e73] whitespace-nowrap overflow-hidden">
+              <router-link to="/teacher/dashboard" class="hover:text-[#007aff] transition-colors">首页</router-link>
+              <template v-for="(item, index) in breadcrumbs" :key="index">
+                <span class="text-[#aeaeb2]">/</span>
+                <span class="text-[#1d1d1f] font-medium truncate">{{ item }}</span>
+              </template>
+            </nav>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 min-w-0 shrink-0">
+          <button v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[rgba(0,122,255,0.08)] text-[#007aff] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[rgba(0,122,255,0.14)] max-w-[min(280px,32vw)]">
+            <School class="w-4 h-4 shrink-0" />
+            <span class="truncate">{{ selectedClassName }}</span>
+            <ArrowDown class="w-3 h-3 shrink-0" />
+          </button>
+
+          <span class="inline-flex items-center h-[30px] px-3 rounded-full text-[12px] font-bold" :class="teacherLevelClass">{{ teacherLevelText }}</span>
+
+          <button @click="toggleFullScreen" class="inline-flex items-center justify-center w-9 h-9 rounded-[10px] text-[#6e6e73] text-lg cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff]" title="全屏">
+            <FullScreen />
+          </button>
+
+          <!-- User Dropdown -->
+          <div class="relative" ref="dropdownRef">
+            <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-black/[0.06] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
+              <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                {{ (userInfo.name || '教').slice(0, 1) }}
+              </div>
+              <div v-if="!isMobile" class="flex flex-col gap-0.5">
+                <span class="text-[13px] font-semibold text-[#1d1d1f]">{{ userInfo.name || '教师用户' }}</span>
+                <span class="text-[11px] text-[#6e6e73]">课程教学工作台</span>
+              </div>
+              <ArrowDown class="w-3 h-3 text-[#aeaeb2]" />
+            </button>
+
+            <transition name="dropdown">
+              <div v-if="dropdownOpen" class="absolute right-0 top-full mt-2 w-[180px] py-1.5 rounded-xl bg-white/95 backdrop-blur-[20px] border border-black/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] z-50">
+                <button @click="handleCommand('switchClass')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
+                  <School class="w-4 h-4 text-[#6e6e73]" />切换教学班
+                </button>
+                <button @click="handleCommand('profile')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
+                  <Setting class="w-4 h-4 text-[#6e6e73]" />个人信息
+                </button>
+                <div class="h-px bg-black/[0.06] mx-3 my-1"></div>
+                <button @click="handleCommand('logout')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#ff3b30] hover:bg-[rgba(255,59,48,0.06)] transition-colors text-left">
+                  <SwitchButton class="w-4 h-4" />退出登录
+                </button>
+              </div>
             </transition>
-          </router-view>
-        </el-main>
+          </div>
+        </div>
+      </header>
 
-        <el-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
-          智能学情分析与个性化实验能力提升平台 · 教师工作空间
-        </el-footer>
-      </el-container>
-    </el-container>
+      <!-- Content -->
+      <main class="flex-1 min-w-0 min-h-[calc(100vh-120px)] min-h-[calc(100dvh-120px)] p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]">
+        <router-view v-slot="{ Component }">
+          <transition name="page-slide" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </main>
+
+      <!-- Footer -->
+      <footer class="text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
+        智能学情分析与个性化实验能力提升平台 · 教师工作空间
+      </footer>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
@@ -370,58 +231,148 @@ const selectedClassName = computed(() => userStore.selectedClass?.name || '')
 
 const teacherLevel = computed(() => userInfo.value?.level || 'normal')
 const teacherLevelText = computed(() => {
-  const map = {
-    department_head: '系主任',
-    course_leader: '课程负责人'
-  }
+  const map = { department_head: '系主任', course_leader: '课程负责人' }
   return map[teacherLevel.value] || '教师'
 })
-const teacherLevelClass = computed(() => `level-${teacherLevel.value}`)
-
-function hasPermission(permissions) {
-  const userPermissions = userInfo.value?.permissions || []
-  return permissions.some((permission) => userPermissions.includes(permission))
-}
+const teacherLevelClass = computed(() => ({
+  'bg-black/5 text-[#6e6e73]': teacherLevel.value === 'normal',
+  'bg-[rgba(0,122,255,0.1)] text-[#007aff]': teacherLevel.value === 'course_leader',
+  'bg-[rgba(52,199,89,0.1)] text-[#34c759]': teacherLevel.value === 'department_head'
+}))
 
 const activeMenu = computed(() => route.path)
 
+const openGroups = reactive({
+  class: false,
+  teaching: false,
+  grading: false,
+  rag: false,
+  ai: false,
+  tools: false,
+  dept: false
+})
+
+function toggleGroup(group) {
+  openGroups[group] = !openGroups[group]
+}
+
+const menuItems = [
+  { path: '/teacher/dashboard', icon: HomeFilled, label: '首页总览' },
+  {
+    group: 'class', icon: UserFilled, label: '教学班管理',
+    children: [
+      { path: '/teacher/class-list', label: '教学班列表' },
+      { path: '/teacher/class-analysis', label: '教学班分析' },
+      { path: '/teacher/class-profile', label: '能力画像' }
+    ]
+  },
+  {
+    group: 'teaching', icon: Notebook, label: '实验教学',
+    children: [
+      { path: '/teacher/experiments', label: '实验列表' },
+      { path: '/teacher/experiment-create', label: '创建实验' },
+      { path: '/teacher/submissions', label: '学生提交' },
+      { path: '/teacher/experiment-analytics', label: '实验数据分析' },
+      { path: '/teacher/data-sync', label: 'PTA 数据同步' }
+    ]
+  },
+  {
+    group: 'grading', icon: DocumentChecked, label: 'AI 批改',
+    children: [
+      { path: '/teacher/grading', label: '批改中心' },
+      { path: '/teacher/grading/rubrics', label: '评分标准' }
+    ]
+  },
+  {
+    group: 'rag', icon: Collection, label: '课程知识库',
+    children: [
+      { path: '/teacher/knowledge-base', label: '空间与文档' },
+      { path: '/teacher/rag-analytics', label: 'RAG 分析' }
+    ]
+  },
+  {
+    group: 'ai', icon: ChatDotRound, label: 'AI 助教',
+    children: [
+      { path: '/teacher/ai-chat', label: 'AI 对话' },
+      { path: '/teacher/class-detailed-analysis', label: '教学建议' }
+    ]
+  },
+  {
+    group: 'tools', icon: Briefcase, label: '教辅工具',
+    children: [
+      { path: '/teacher/document-center', label: '文档中心' },
+      { path: '/teacher/bilingual-read', label: '双语阅读' },
+      { path: '/teacher/summary-card', label: 'AI 精读' },
+      { path: '/teacher/ai-organize', label: '智能整理' }
+    ]
+  },
+  { path: '/teacher/course-analysis', icon: DataAnalysis, label: '课程分析', permission: ['view_course_classes', 'analyze_course_classes'] },
+  {
+    group: 'dept', icon: OfficeBuilding, label: '院系管理', permission: ['view_all_teachers'],
+    children: [
+      { path: '/teacher/department-teachers', label: '教师管理' },
+      { path: '/teacher/department-analytics', label: '院系统计', permission: ['analyze_all_classes'] },
+      { path: '/teacher/teacher-ai-management', label: 'AI 管理', permission: ['manage_teacher_ai'] }
+    ]
+  }
+]
+
+function hasPermission(permissions) {
+  const userPermissions = userInfo.value?.permissions || []
+  return permissions.some((p) => userPermissions.includes(p))
+}
+
+const visibleMenuItems = computed(() =>
+  menuItems.filter((item) => !item.permission || hasPermission(item.permission))
+)
+
 const breadcrumbs = computed(() => {
   const pathMap = {
-    dashboard: '首页总览',
-    experiments: '实验列表',
-    'experiment-detail': '实验详情',
-    'experiment-create': '创建实验',
-    submissions: '学生提交',
-    'submission-detail': '提交详情',
-    'class-list': '教学班列表',
-    'class-analysis': '教学班分析',
-    'class-profile': '能力画像',
-    profile: '个人设置',
-    'document-center': '文档中心',
-    'bilingual-read': '双语阅读',
-    'summary-card': 'AI 精读',
-    'ai-chat': 'AI 对话',
-    'ai-organize': '智能整理',
-    grading: 'AI 批改',
-    'knowledge-base': '课程知识库',
-    'rag-analytics': 'RAG 分析',
-    'course-analysis': '课程分析',
-    'department-teachers': '教师管理',
-    'department-analytics': '院系统计',
-    'teacher-ai-management': 'AI 管理',
-    'ai-recommendation': '教学建议',
-    'experiment-analytics': '实验数据分析',
-    'data-sync': 'PTA 数据同步'
+    dashboard: '首页总览', experiments: '实验列表', 'experiment-detail': '实验详情',
+    'experiment-create': '创建实验', submissions: '学生提交', 'submission-detail': '提交详情',
+    'class-list': '教学班列表', 'class-analysis': '教学班分析', 'class-profile': '能力画像',
+    profile: '个人设置', 'document-center': '文档中心', 'bilingual-read': '双语阅读',
+    'summary-card': 'AI 精读', 'ai-chat': 'AI 对话', 'ai-organize': '智能整理',
+    grading: 'AI 批改', 'knowledge-base': '课程知识库', 'rag-analytics': 'RAG 分析',
+    'course-analysis': '课程分析', 'department-teachers': '教师管理',
+    'department-analytics': '院系统计', 'teacher-ai-management': 'AI 管理',
+    'ai-recommendation': '教学建议', 'experiment-analytics': '实验数据分析', 'data-sync': 'PTA 数据同步'
   }
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'teacher' ? paths.slice(1).map((part) => pathMap[part] || part) : []
 })
 
-function toggleFullScreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen()
+const dropdownOpen = ref(false)
+const dropdownRef = ref(null)
+
+function onClickOutside(e) {
+  if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+    dropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', onClickOutside)
+
+  const canOpenWithoutClass = route.path === '/teacher/class-list' || route.path === '/teacher/profile'
+  if (!userStore.selectedClass && !canOpenWithoutClass) {
+    router.replace('/teacher/select-class')
     return
   }
+  if (userInfo.value.role && userInfo.value.role !== 'teacher') {
+    ElMessageBox.alert('当前账号没有教师权限，请重新登录。', '权限错误', {
+      confirmButtonText: '确定',
+      callback: () => { clearAuthStorage(); router.push('/login') }
+    })
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+})
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); return }
   document.exitFullscreen?.()
 }
 
@@ -431,45 +382,38 @@ function switchClass() {
 }
 
 function handleCommand(command) {
-  if (command === 'profile') {
-    router.push('/teacher/profile')
-    return
-  }
-  if (command === 'switchClass') {
-    switchClass()
-    return
-  }
+  dropdownOpen.value = false
+  if (command === 'profile') { router.push('/teacher/profile'); return }
+  if (command === 'switchClass') { switchClass(); return }
   if (command !== 'logout') return
-
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
+    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
   }).then(() => {
-    userStore.logout()
-    sessionStorage.clear()
-    clearAuthStorage()
-    router.push('/login')
+    userStore.logout(); sessionStorage.clear(); clearAuthStorage(); router.push('/login')
   }).catch(() => {})
 }
-
-onMounted(() => {
-  const canOpenWithoutClass = route.path === '/teacher/class-list' || route.path === '/teacher/profile'
-  if (!userStore.selectedClass && !canOpenWithoutClass) {
-    router.replace('/teacher/select-class')
-    return
-  }
-
-  if (userInfo.value.role && userInfo.value.role !== 'teacher') {
-    ElMessageBox.alert('当前账号没有教师权限，请重新登录。', '权限错误', {
-      confirmButtonText: '确定',
-      callback: () => {
-        clearAuthStorage()
-        router.push('/login')
-      }
-    })
-  }
-})
 </script>
 
+<style scoped>
+.fade-text-enter-active, .fade-text-leave-active { transition: opacity 0.2s; }
+.fade-text-enter-from, .fade-text-leave-to { opacity: 0; }
 
+.page-slide-enter-active, .page-slide-leave-active { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.page-slide-enter-from { opacity: 0; transform: translateY(8px); }
+.page-slide-leave-to { opacity: 0; transform: translateY(-4px); }
+
+.submenu-enter-active { transition: all 0.2s ease; max-height: 300px; }
+.submenu-leave-active { transition: all 0.15s ease; max-height: 300px; }
+.submenu-enter-from, .submenu-leave-to { opacity: 0; max-height: 0; }
+
+.drawer-fade-enter-active, .drawer-fade-leave-active { transition: opacity 0.25s; }
+.drawer-fade-enter-from, .drawer-fade-leave-to { opacity: 0; }
+
+.drawer-slide-enter-active { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.drawer-slide-leave-active { transition: transform 0.2s ease-in; }
+.drawer-slide-enter-from, .drawer-slide-leave-to { transform: translateX(-100%); }
+
+.dropdown-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.dropdown-leave-active { transition: all 0.15s ease-in; }
+.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-4px) scale(0.96); }
+</style>

@@ -1,266 +1,267 @@
 <template>
-  <div class="sync-panel [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="sync-panel">
     <page-header title="PTA 数据同步" description="管理 PTA 平台数据爬取、同步状态和 Cookie 维护" />
 
-    <el-alert v-if="cookieStatus === 'EXPIRED'" title="PTA Cookie 已过期"
-      description="可以在下方更新 Cookie，也可以直接输入教师自己的 PTA 账号密码，或先去个人资料中绑定 PTA 账号后再同步。"
-      type="error" show-icon :closable="false" class="[margin-bottom:16px]" />
-    <el-alert v-if="cookieStatus === 'UNKNOWN'" title="Cookie 状态未知"
-      description="爬虫服务可能未启动，或尚未检测到 Cookie。"
-      type="warning" show-icon :closable="false" class="[margin-bottom:16px]" />
+    <div v-if="cookieStatus === 'EXPIRED'" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] text-[13px] text-[#ff3b30] mb-4">
+      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <div>
+        <div class="font-semibold mb-0.5">PTA Cookie 已过期</div>
+        <div class="text-[12px] opacity-80">可以在下方更新 Cookie，也可以直接输入教师自己的 PTA 账号密码，或先去个人资料中绑定 PTA 账号后再同步。</div>
+      </div>
+    </div>
+    <div v-if="cookieStatus === 'UNKNOWN'" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)] text-[13px] text-[#ff9500] mb-4">
+      <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <div>
+        <div class="font-semibold mb-0.5">Cookie 状态未知</div>
+        <div class="text-[12px] opacity-80">爬虫服务可能未启动，或尚未检测到 Cookie。</div>
+      </div>
+    </div>
 
-    <el-row :gutter="16">
-      <el-col :span="14">
-        <el-card class="g-card [border-radius:12px] [border:1px_solid_#dadce0] [&_.el-card__header]:[font-size:14px] [&_.el-card__header]:[font-weight:600] [&_.el-card__header]:[color:#202124]">
-          <template #header><span>数据同步操作</span></template>
-          <div class="status-row [display:flex] [gap:24px] [align-items:center] [flex-wrap:wrap]">
-            <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
-              <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">当前教学班</span>
-              <el-tag v-if="selectedClassName" type="info" effect="plain" size="small">{{ selectedClassName }}</el-tag>
-              <el-tag v-else type="danger" effect="plain" size="small">未选择教学班</el-tag>
+    <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+      <!-- Left column -->
+      <div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="text-[14px] font-semibold text-[#1d1d1f] mb-5">数据同步操作</div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="text-[13px] text-[#6e6e73]">当前教学班</span>
+              <span v-if="selectedClassName" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[#f0f0f5] text-[#1d1d1f]">{{ selectedClassName }}</span>
+              <span v-else class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,59,48,0.08)] text-[#ff3b30]">未选择教学班</span>
             </div>
-            <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
-              <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">同步关键词</span>
-              <el-tag v-if="currentKeyword" type="primary" effect="plain" size="small">{{ currentKeyword }}</el-tag>
-              <el-tag v-else type="warning" effect="plain" size="small">未设置（请在班级管理中配置PTA关键词）</el-tag>
+            <div class="flex items-center gap-2">
+              <span class="text-[13px] text-[#6e6e73]">同步关键词</span>
+              <span v-if="currentKeyword" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(0,122,255,0.08)] text-[#007aff]">{{ currentKeyword }}</span>
+              <span v-else class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,149,0,0.08)] text-[#ff9500]">未设置（请在班级管理中配置PTA关键词）</span>
             </div>
-            <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
-              <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">Cookie</span>
-              <el-tag :type="cookieTagType" effect="dark" size="small">{{ cookieStatusText }}</el-tag>
+            <div class="flex items-center gap-2">
+              <span class="text-[13px] text-[#6e6e73]">Cookie</span>
+              <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="cookieStatus === 'OK' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : cookieStatus === 'EXPIRED' ? 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">{{ cookieStatusText }}</span>
             </div>
-            <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]">
-              <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">爬虫服务</span>
-              <el-tag :type="spiderAlive ? 'success' : 'danger'" effect="dark" size="small">
-                {{ spiderAlive ? '运行中' : '未启动' }}
-              </el-tag>
+            <div class="flex items-center gap-2">
+              <span class="text-[13px] text-[#6e6e73]">爬虫服务</span>
+              <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="spiderAlive ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'">{{ spiderAlive ? '运行中' : '未启动' }}</span>
             </div>
-            <div class="status-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [gap:8px]" v-if="lastSync">
-              <span class="status-label [color:#667085] [font-size:13px] [color:#5f6368]">上次更新</span>
-              <span class="status-val [font-size:13px] [color:#202124] [font-weight:500]">{{ lastSync }}</span>
-            </div>
-          </div>
-          <div v-if="cooldownInfo" class="cooldown-bar [display:flex] [gap:20px] [margin-top:12px] [flex-wrap:wrap]">
-            <div class="cooldown-item [display:flex] [align-items:center] [gap:6px] [font-size:12.5px]" v-for="(info, key) in cooldownInfo" :key="key">
-              <el-icon :color="info.allowed ? '#1e8e3e' : '#e37400'">
-                <CircleCheck v-if="info.allowed" /><Clock v-else />
-              </el-icon>
-              <span class="cooldown-label [color:#3c4043] [font-weight:500]">{{ {submissions:'提交记录',exports:'导出数据'}[key] }}</span>
-              <span v-if="info.allowed" class="cooldown-ok [color:#1e8e3e]">可执行</span>
-              <span v-else class="cooldown-wait [color:#e37400]">冷却中 {{ info.remaining_human }}（上次 {{ info.last_time }}）</span>
+            <div class="flex items-center gap-2" v-if="lastSync">
+              <span class="text-[13px] text-[#6e6e73]">上次更新</span>
+              <span class="text-[13px] text-[#1d1d1f] font-medium">{{ lastSync }}</span>
             </div>
           </div>
-          <el-divider />
-          <div class="force-row [display:flex] [align-items:center] [gap:12px] [margin-bottom:14px]">
-            <el-switch v-model="forceMode" active-text="强制更新" inactive-text="正常模式" />
-            <span class="force-hint [font-size:12px] [color:#d93025]" v-if="forceMode">跳过冷却限制，请谨慎使用以保护 PTA 平台</span>
-          </div>
-          <div class="credential-panel [margin-bottom:12px] [margin-bottom:14px] [padding:14px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed]">
-            <div class="credential-panel__header [display:flex] [flex-direction:column] [gap:4px] [margin-bottom:10px]">
-              <span class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">同步关键词</span>
-              <span class="action-desc [font-size:12px] [color:#5f6368]">可按当前班级临时覆盖 PTA 搜索关键词；提交同步时会同时保存到该班级配置。</span>
+          <div v-if="cooldownInfo" class="flex gap-5 mt-3 flex-wrap">
+            <div class="flex items-center gap-1.5 text-[12.5px]" v-for="(info, key) in cooldownInfo" :key="key">
+              <svg v-if="info.allowed" class="w-3.5 h-3.5 text-[#1e8e3e]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <svg v-else class="w-3.5 h-3.5 text-[#e37400]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+              <span class="text-[#1d1d1f] font-medium">{{ {submissions:'提交记录',exports:'导出数据'}[key] }}</span>
+              <span v-if="info.allowed" class="text-[#1e8e3e]">可执行</span>
+              <span v-else class="text-[#e37400]">冷却中 {{ info.remaining_human }}（上次 {{ info.last_time }}）</span>
             </div>
-            <el-input v-model="syncKeyword" placeholder="例如：计科25数据结构" clearable />
           </div>
-          <div class="credential-panel [margin-bottom:14px] [padding:14px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed]">
-            <div class="credential-panel__header [display:flex] [flex-direction:column] [gap:4px] [margin-bottom:10px]">
-              <span class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">PTA 账号凭据</span>
-              <span class="action-desc [font-size:12px] [color:#5f6368]">优先使用个人资料中已绑定的 PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前 Cookie 会话。</span>
+          <div class="h-px bg-black/[0.06] my-5"></div>
+          <div class="flex items-center gap-3 mb-3.5">
+            <button @click="forceMode = !forceMode" class="relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer border-none" :class="forceMode ? 'bg-[#007aff]' : 'bg-black/[0.12]'">
+              <span class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200" :class="forceMode ? 'translate-x-[18px]' : ''"></span>
+            </button>
+            <span class="text-[13px] text-[#1d1d1f]">{{ forceMode ? '强制更新' : '正常模式' }}</span>
+            <span class="text-[12px] text-[#d93025]" v-if="forceMode">跳过冷却限制，请谨慎使用以保护 PTA 平台</span>
+          </div>
+          <!-- Sync keyword panel -->
+          <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
+            <div class="flex flex-col gap-1 mb-2.5">
+              <span class="text-[14px] font-semibold text-[#1d1d1f]">同步关键词</span>
+              <span class="text-[12px] text-[#6e6e73]">可按当前班级临时覆盖 PTA 搜索关键词；提交同步时会同时保存到该班级配置。</span>
             </div>
-            <div v-if="hasBoundPtaCredentials" class="credential-tip [margin-bottom:10px] [font-size:12px] [color:#1e8e3e]">
+            <input v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          </div>
+          <!-- PTA credentials panel -->
+          <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
+            <div class="flex flex-col gap-1 mb-2.5">
+              <span class="text-[14px] font-semibold text-[#1d1d1f]">PTA 账号凭据</span>
+              <span class="text-[12px] text-[#6e6e73]">优先使用个人资料中已绑定的 PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前 Cookie 会话。</span>
+            </div>
+            <div v-if="hasBoundPtaCredentials" class="mb-2.5 text-[12px] text-[#1e8e3e]">
               已绑定 PTA 账号：{{ boundPtaUsername }}（留空时将默认用于本次同步）
             </div>
-            <div v-else class="credential-tip credential-tip--warning [margin-bottom:10px] [font-size:12px] [color:#1e8e3e] [color:#e37400]">
+            <div v-else class="mb-2.5 text-[12px] text-[#e37400]">
               当前未绑定 PTA 账号，本页可临时输入；留空时只会尝试现有 Cookie。
             </div>
-            <div class="credential-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:12px]">
-              <el-input v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" clearable />
-              <el-input
-                v-model="ptaPassword"
-                type="password"
-                show-password
-                placeholder="本次同步使用的 PTA 密码（可选）"
-                clearable
-              />
+            <div class="grid grid-cols-2 gap-3">
+              <input v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+              <input v-model="ptaPassword" :type="showPassword ? 'text' : 'password'" placeholder="本次同步使用的 PTA 密码（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             </div>
-            <div class="credential-actions [display:flex] [gap:10px] [margin-top:12px]">
-              <el-button size="small" type="primary" plain @click="submitTempCredential">提交临时账号密码</el-button>
-              <el-button size="small" @click="clearTempCredential">清空临时凭据</el-button>
+            <div class="flex gap-2.5 mt-3">
+              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitTempCredential">提交临时账号密码</button>
+              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearTempCredential">清空临时凭据</button>
             </div>
-            <div v-if="tempCredentialSubmitted" class="credential-tip [margin-bottom:10px] [font-size:12px] [color:#1e8e3e]">
+            <div v-if="tempCredentialSubmitted" class="mt-2.5 text-[12px] text-[#1e8e3e]">
               已提交临时 PTA 账号：{{ ptaUsername.trim() }}，本页后续同步将优先使用该账号。
             </div>
-            <div class="credential-tip credential-tip--plain [margin-bottom:10px] [font-size:12px] [color:#1e8e3e] [display:flex] [align-items:center] [gap:8px] [color:#44536b]">
+            <div class="mt-2.5 flex items-center gap-2 text-[12px] text-[#44536b]">
               本次预计使用：
-              <el-tag size="small" :type="credentialSourceTagType(plannedCredentialSource)">{{ credentialSourceText(plannedCredentialSource) }}</el-tag>
+              <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-bold" :class="credentialSourceBadgeClass(plannedCredentialSource)">{{ credentialSourceText(plannedCredentialSource) }}</span>
             </div>
           </div>
-          <div class="sync-actions [display:flex] [flex-direction:column] [gap:12px]">
-            <div class="sync-action-item [display:flex] [align-items:center] [justify-content:space-between] [padding:12px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="action-info [flex:1]">
-                <div class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">增量同步</div>
-                <div class="action-desc [font-size:12px] [color:#5f6368]">检测新题目集，爬取内容+提交+导出（仅新增）</div>
+          <!-- Sync actions -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+              <div class="flex-1">
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">增量同步</div>
+                <div class="text-[12px] text-[#6e6e73]">检测新题目集，爬取内容+提交+导出（仅新增）</div>
               </div>
-              <el-button type="primary" :loading="syncLoading === 'incremental'"
-                :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
-                开始同步
-              </el-button>
+              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
+                <span v-if="syncLoading === 'incremental'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span v-else>开始同步</span>
+              </button>
             </div>
-            <div class="sync-action-item [display:flex] [align-items:center] [justify-content:space-between] [padding:12px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="action-info [flex:1]">
-                <div class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">拉取提交记录</div>
-                <div class="action-desc [font-size:12px] [color:#5f6368]">拉取已有题目集的最新提交（轻量，冷却 4h）</div>
+            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+              <div class="flex-1">
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">拉取提交记录</div>
+                <div class="text-[12px] text-[#6e6e73]">拉取已有题目集的最新提交（轻量，冷却 4h）</div>
               </div>
-              <el-button type="success" :loading="syncLoading === 'submissions'"
-                :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
-                拉取提交
-              </el-button>
+              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
+                <span v-if="syncLoading === 'submissions'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span v-else>拉取提交</span>
+              </button>
             </div>
-            <div class="sync-action-item [display:flex] [align-items:center] [justify-content:space-between] [padding:12px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="action-info [flex:1]">
-                <div class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">刷新导出</div>
-                <div class="action-desc [font-size:12px] [color:#5f6368]">重新导出成绩单/答题卡/代码（较重，冷却 24h）</div>
+            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+              <div class="flex-1">
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">刷新导出</div>
+                <div class="text-[12px] text-[#6e6e73]">重新导出成绩单/答题卡/代码（较重，冷却 24h）</div>
               </div>
-              <el-button type="warning" :loading="syncLoading === 'refresh'"
-                :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
-                刷新导出
-              </el-button>
+              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
+                <span v-if="syncLoading === 'refresh'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span v-else>刷新导出</span>
+              </button>
             </div>
-            <div class="sync-action-item [display:flex] [align-items:center] [justify-content:space-between] [padding:12px_16px] [border-radius:10px] [background:#f8f9fa] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="action-info [flex:1]">
-                <div class="action-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:2px]">全量同步</div>
-                <div class="action-desc [font-size:12px] [color:#5f6368]">增量 + 提交 + 导出，耗时较长</div>
+            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+              <div class="flex-1">
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">全量同步</div>
+                <div class="text-[12px] text-[#6e6e73]">增量 + 提交 + 导出，耗时较长</div>
               </div>
-              <el-button type="danger" :loading="syncLoading === 'full'"
-                :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
-                全量同步
-              </el-button>
+              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
+                <span v-if="syncLoading === 'full'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span v-else>全量同步</span>
+              </button>
             </div>
           </div>
-          <!-- 当前任务进度 -->
-          <div v-if="currentTask" class="task-progress [margin-top:4px]">
-            <el-divider />
-            <div class="task-info [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px] [font-size:13px] [color:#202124]">
+          <!-- Task progress -->
+          <div v-if="currentTask" class="mt-4">
+            <div class="h-px bg-black/[0.06] my-5"></div>
+            <div class="flex items-center gap-2.5 mb-2 text-[13px] text-[#1d1d1f]">
               <span>任务 {{ currentTask.task_id }}</span>
-              <el-tag :type="taskTagType" size="small">{{ taskStatusText }}</el-tag>
-              <el-tag v-if="currentTask.credential_source || currentTask.credentialSource" size="small" effect="plain" :type="credentialSourceTagType(currentTask.credential_source || currentTask.credentialSource)">
-                {{ credentialSourceText(currentTask.credential_source || currentTask.credentialSource) }}
-              </el-tag>
-              <span v-if="currentTask.force" class="force-badge [font-size:11px] [color:#d93025] [background:#fce8e6] [padding:1px_6px] [border-radius:4px]">强制</span>
+              <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-bold" :class="taskBadgeClass">{{ taskStatusText }}</span>
+              <span v-if="currentTask.credential_source || currentTask.credentialSource" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-bold" :class="credentialSourceBadgeClass(currentTask.credential_source || currentTask.credentialSource)">{{ credentialSourceText(currentTask.credential_source || currentTask.credentialSource) }}</span>
+              <span v-if="currentTask.force" class="text-[11px] text-[#d93025] bg-[#fce8e6] px-1.5 py-0.5 rounded">强制</span>
             </div>
-            <el-progress v-if="currentTask.status === 'RUNNING'" :percentage="50" :indeterminate="true" status="warning" />
-            <div v-if="currentTask.status === 'SUCCESS'" class="task-result [font-size:13px] [color:#1e8e3e] [margin-top:6px]">
+            <div v-if="currentTask.status === 'RUNNING'" class="w-full h-1.5 rounded-full bg-black/[0.06] overflow-hidden">
+              <div class="h-full bg-[#ff9500] rounded-full animate-pulse w-1/2"></div>
+            </div>
+            <div v-if="currentTask.status === 'SUCCESS'" class="text-[13px] text-[#1e8e3e] mt-1.5">
               新增 {{ currentTask.new_sets_count }} 个题目集，
               刷新 {{ currentTask.refreshed_count }} 个，
               提交记录 {{ currentTask.submissions_count }} 条
             </div>
-            <div v-if="currentTask.skipped_cooldown && currentTask.skipped_cooldown.length" class="task-skipped [font-size:12px] [color:#e37400] [margin-top:4px]">
+            <div v-if="currentTask.skipped_cooldown && currentTask.skipped_cooldown.length" class="text-[12px] text-[#e37400] mt-1">
               跳过（冷却中）: {{ currentTask.skipped_cooldown.join('、') }}
             </div>
-            <div v-if="currentTask.error" class="task-error [font-size:13px] [color:#d93025] [margin-top:6px]">{{ currentTask.error }}</div>
+            <div v-if="currentTask.error" class="text-[13px] text-[#d93025] mt-1.5">{{ currentTask.error }}</div>
           </div>
-        </el-card>
+        </div>
 
-        <!-- 同步记录 -->
-        <el-card class="g-card [margin-top:16px]" v-if="taskHistory.length">
-          <template #header><span>最近同步记录</span></template>
-          <el-table :data="taskHistory" size="small" stripe max-height="240">
-            <el-table-column prop="task_id" label="任务ID" width="110" />
-            <el-table-column prop="keyword" label="关键词" width="100" />
-            <el-table-column prop="mode" label="模式" width="90">
-              <template #default="{ row }">
-                <el-tag size="small" :type="modeTagType(row.mode)">{{ modeCn(row.mode) }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="状态" width="80">
-              <template #default="{ row }">
-                <el-tag size="small" :type="row.status==='SUCCESS'?'success':row.status==='FAILED'?'danger':'warning'">
-                  {{ row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="来源" width="92">
-              <template #default="{ row }">
-                <el-tag size="small" effect="plain" :type="credentialSourceTagType(row.credential_source || row.credentialSource)">
-                  {{ credentialSourceText(row.credential_source || row.credentialSource) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="强制" width="50">
-              <template #default="{ row }">{{ row.force ? '是' : '' }}</template>
-            </el-table-column>
-            <el-table-column prop="created_at" label="创建时间" min-width="140" />
-          </el-table>
-        </el-card>
-      </el-col>
+        <!-- Task history -->
+        <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+          <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
+          <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
+            <table class="w-full text-[12px] border-collapse">
+              <thead>
+                <tr class="bg-[#f9f9fb]">
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">任务ID</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">关键词</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">模式</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">状态</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">来源</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">强制</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">创建时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in taskHistory" :key="row.task_id" class="border-b border-black/[0.04] last:border-b-0 hover:bg-[#f5f5f7]/60">
+                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.task_id }}</td>
+                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.keyword }}</td>
+                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></td>
+                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="row.status==='SUCCESS' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : row.status==='FAILED' ? 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">{{ row.status }}</span></td>
+                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></td>
+                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.force ? '是' : '' }}</td>
+                  <td class="px-3 py-2 text-[#6e6e73]">{{ row.created_at }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <!-- 右: Cookie 管理 -->
-      <el-col :span="10">
-        <el-card class="g-card">
-          <template #header><span>Cookie 管理</span></template>
-          <div class="cookie-help">
+      <!-- Right column: Cookie management -->
+      <div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">Cookie 管理</div>
+          <div class="text-[13px] text-[#6e6e73] mb-3">
             <p>当自动爬取因 Cookie 过期而失败时，可以手动更新 Cookie；如果教师有自己的 PTA 账号，也可以直接使用账号密码同步。</p>
-            <el-collapse>
-              <el-collapse-item title="如何获取 Cookie？">
-                <ol class="cookie-steps [margin-bottom:18px] [padding-left:18px] [font-size:12.5px] [color:#3c4043] [line-height:1.8]">
-                  <li>在浏览器中登录 <a href="https://pintia.cn" target="_blank">PTA 平台</a></li>
-                  <li>按 F12 打开开发者工具，切换到「应用」标签</li>
-                  <li>在左侧找到「Cookie」→「https://pintia.cn」</li>
-                  <li>找到 <code>PTASession</code>，复制其值</li>
-                  <li>或安装「EditThisCookie」扩展，导出全部 Cookie 为 JSON</li>
-                </ol>
-              </el-collapse-item>
-            </el-collapse>
           </div>
-          <el-divider />
-          <el-form label-position="top">
-            <el-form-item label="Cookie JSON">
-              <el-input v-model="cookieInput" type="textarea" :rows="8"
-                placeholder='粘贴 Cookie JSON 数组，格式如:
-[{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]' />
-            </el-form-item>
-            <el-button type="primary" :loading="cookieSubmitting" @click="submitCookieHandler"
-              :disabled="!cookieInput.trim()">
-              验证并保存 Cookie
-            </el-button>
-          </el-form>
-          <div v-if="cookieResult" class="cookie-result [margin-top:12px] [display:flex] [align-items:center] [gap:10px] [margin-top:14px] [gap:6px] [padding:10px_14px] [border-radius:8px] [font-size:13px] [&.valid]:[background:#e6f4ea] [&.valid]:[color:#1e8e3e] [&.invalid]:[background:#fce8e6] [&.invalid]:[color:#d93025]" :class="cookieResult.valid ? 'valid' : 'invalid'">
-            <el-icon v-if="cookieResult.valid"><CircleCheck /></el-icon>
-            <el-icon v-else><CircleClose /></el-icon>
+          <details class="mb-4 group">
+            <summary class="text-[13px] font-medium text-[#007aff] cursor-pointer select-none hover:underline">如何获取 Cookie？</summary>
+            <ol class="mt-2 pl-4 text-[12.5px] text-[#3c4043] leading-[1.8] list-decimal">
+              <li>在浏览器中登录 <a href="https://pintia.cn" target="_blank" class="text-[#007aff] hover:underline">PTA 平台</a></li>
+              <li>按 F12 打开开发者工具，切换到「应用」标签</li>
+              <li>在左侧找到「Cookie」→「https://pintia.cn」</li>
+              <li>找到 <code class="bg-[#f5f5f7] px-1 py-0.5 rounded text-[12px]">PTASession</code>，复制其值</li>
+              <li>或安装「EditThisCookie」扩展，导出全部 Cookie 为 JSON</li>
+            </ol>
+          </details>
+          <div class="h-px bg-black/[0.06] my-5"></div>
+          <div class="mb-3">
+            <label class="block text-[13px] font-medium text-[#1d1d1f] mb-2">Cookie JSON</label>
+            <textarea v-model="cookieInput" rows="8" placeholder='粘贴 Cookie JSON 数组，格式如:
+[{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]' class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"></textarea>
+          </div>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!cookieInput.trim() || cookieSubmitting" @click="submitCookieHandler">
+            <span v-if="cookieSubmitting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+            验证并保存 Cookie
+          </button>
+          <div v-if="cookieResult" class="mt-3.5 flex items-center gap-1.5 px-3.5 py-2.5 rounded-[8px] text-[13px]" :class="cookieResult.valid ? 'bg-[#e6f4ea] text-[#1e8e3e]' : 'bg-[#fce8e6] text-[#d93025]'">
+            <svg v-if="cookieResult.valid" class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <svg v-else class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
             <span>{{ cookieResult.message }}</span>
           </div>
-        </el-card>
+        </div>
 
-        <!-- 频率保护说明 -->
-        <el-card class="g-card [margin-top:16px]">
-          <template #header><span>频率保护策略</span></template>
-          <div class="freq-info [font-size:13px]">
-            <div class="freq-item [display:flex] [gap:10px] [padding:6px_0] [border-bottom:1px_solid_#f1f3f4] [&:last-of-type]:[border-bottom:none]">
-              <span class="freq-type [font-weight:600] [color:#202124] [min-width:70px]">题目内容</span>
-              <span class="freq-desc [color:#5f6368]">只爬一次，发布后不变</span>
+        <!-- Frequency protection info -->
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+          <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">频率保护策略</div>
+          <div class="text-[13px]">
+            <div class="flex gap-2.5 py-1.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f] min-w-[70px]">题目内容</span>
+              <span class="text-[#6e6e73]">只爬一次，发布后不变</span>
             </div>
-            <div class="freq-item [display:flex] [gap:10px] [padding:6px_0] [border-bottom:1px_solid_#f1f3f4] [&:last-of-type]:[border-bottom:none]">
-              <span class="freq-type [font-weight:600] [color:#202124] [min-width:70px]">提交记录</span>
-              <span class="freq-desc [color:#5f6368]">冷却 4 小时，拉取最新提交</span>
+            <div class="flex gap-2.5 py-1.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f] min-w-[70px]">提交记录</span>
+              <span class="text-[#6e6e73]">冷却 4 小时，拉取最新提交</span>
             </div>
-            <div class="freq-item [display:flex] [gap:10px] [padding:6px_0] [border-bottom:1px_solid_#f1f3f4] [&:last-of-type]:[border-bottom:none]">
-              <span class="freq-type [font-weight:600] [color:#202124] [min-width:70px]">导出数据</span>
-              <span class="freq-desc [color:#5f6368]">冷却 24 小时，重新导出成绩单/代码</span>
+            <div class="flex gap-2.5 py-1.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f] min-w-[70px]">导出数据</span>
+              <span class="text-[#6e6e73]">冷却 24 小时，重新导出成绩单/代码</span>
             </div>
-            <div class="freq-item [display:flex] [gap:10px] [padding:6px_0] [border-bottom:1px_solid_#f1f3f4] [&:last-of-type]:[border-bottom:none]">
-              <span class="freq-type [font-weight:600] [color:#202124] [min-width:70px]">API 限速</span>
-              <span class="freq-desc [color:#5f6368]">令牌桶 20 请求/分钟</span>
+            <div class="flex gap-2.5 py-1.5">
+              <span class="font-semibold text-[#1d1d1f] min-w-[70px]">API 限速</span>
+              <span class="text-[#6e6e73]">令牌桶 20 请求/分钟</span>
             </div>
-            <p class="freq-note [font-size:12px] [color:#e37400] [margin-top:8px]">开启「强制更新」可跳过冷却，但请谨慎使用。</p>
+            <p class="text-[12px] text-[#e37400] mt-2">开启「强制更新」可跳过冷却，但请谨慎使用。</p>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { CircleCheck, CircleClose, Clock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
 import {
@@ -272,6 +273,8 @@ import {
 import { useUserStore } from '../../store'
 import axios from 'axios'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+
+const showPassword = ref(false)
 
 function normalizeUrl(url) {
   return String(url || '').replace(/\/+$/, '')
@@ -291,6 +294,7 @@ const envSpiderUrl = (typeof process !== 'undefined' && process.env && process.e
   : ''
 const spiderUrl = ref(normalizeUrl(envSpiderUrl || '/spider'))
 const spiderHealthError = ref('')
+const spiderProbeEnabled = !!envSpiderUrl
 
 function buildSpiderCandidates() {
   const candidates = []
@@ -345,18 +349,16 @@ const boundPtaUsername = ref('')
 const hasBoundPtaCredentials = ref(false)
 let pollTimer = null
 
-const cookieTagType = computed(() => {
-  if (cookieStatus.value === 'OK') return 'success'
-  if (cookieStatus.value === 'EXPIRED') return 'danger'
-  return 'warning'
-})
 const cookieStatusText = computed(() => {
   return { OK: '正常', EXPIRED: '已过期', UNKNOWN: '未知' }[cookieStatus.value] || cookieStatus.value
 })
-const taskTagType = computed(() => {
-  if (!currentTask.value) return 'info'
+const taskBadgeClass = computed(() => {
+  if (!currentTask.value) return 'bg-[#f0f0f5] text-[#6e6e73]'
   const s = currentTask.value.status
-  return s === 'SUCCESS' ? 'success' : s === 'FAILED' ? 'danger' : s === 'RUNNING' ? 'warning' : 'info'
+  if (s === 'SUCCESS') return 'bg-[rgba(52,199,89,0.12)] text-[#34c759]'
+  if (s === 'FAILED') return 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+  if (s === 'RUNNING') return 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'
+  return 'bg-[#f0f0f5] text-[#6e6e73]'
 })
 const taskStatusText = computed(() => {
   if (!currentTask.value) return ''
@@ -364,17 +366,22 @@ const taskStatusText = computed(() => {
 })
 
 const modeCn = (m) => ({ incremental:'增量', submissions:'提交', refresh:'刷新', full:'全量' }[m] || m)
-const modeTagType = (m) => ({ full:'danger', refresh:'warning', submissions:'success', incremental:'primary' }[m] || '')
+const modeBadgeClass = (m) => ({
+  full: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+  refresh: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+  submissions: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+  incremental: 'bg-[rgba(0,122,255,0.08)] text-[#007aff]'
+}[m] || 'bg-[#f0f0f5] text-[#6e6e73]')
 const credentialSourceText = (source) => ({
   temporary: '临时账号',
   bound: '已绑定账号',
   cookie: 'Cookie'
 }[String(source || '').trim().toLowerCase()] || '未知来源')
-const credentialSourceTagType = (source) => ({
-  temporary: 'warning',
-  bound: 'success',
-  cookie: 'info'
-}[String(source || '').trim().toLowerCase()] || 'info')
+const credentialSourceBadgeClass = (source) => ({
+  temporary: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+  bound: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+  cookie: 'bg-[rgba(0,122,255,0.08)] text-[#007aff]'
+}[String(source || '').trim().toLowerCase()] || 'bg-[#f0f0f5] text-[#6e6e73]')
 const plannedCredentialSource = computed(() => {
   if (tempCredentialSubmitted.value && ptaUsername.value.trim() && ptaPassword.value) return 'temporary'
   if (hasBoundPtaCredentials.value) return 'bound'
@@ -382,6 +389,11 @@ const plannedCredentialSource = computed(() => {
 })
 
 async function probeSpiderHealth() {
+  if (!spiderProbeEnabled) {
+    spiderAlive.value = false
+    spiderHealthError.value = 'spider disabled'
+    return false
+  }
   spiderHealthError.value = ''
   for (const base of buildSpiderCandidates()) {
     try {
@@ -422,6 +434,10 @@ async function loadBoundCredentials() {
 }
 
 async function loadCooldown() {
+  if (!spiderAlive.value) {
+    cooldownInfo.value = null
+    return
+  }
   const keyword = syncKeyword.value.trim() || currentKeyword.value
   if (!selectedClassId.value) {
     ElMessage.warning('请先选择当前教学班')
@@ -434,6 +450,10 @@ async function loadCooldown() {
 }
 
 async function loadTaskHistory() {
+  if (!spiderAlive.value) {
+    taskHistory.value = []
+    return
+  }
   try {
     const r = await axios.get(spiderApi('/tasks'), { timeout: 5000 })
     taskHistory.value = r.data || []
@@ -464,11 +484,7 @@ async function triggerSync(mode) {
     ElMessage.warning('请先在班级管理中配置 PTA 同步关键词')
     return
   }
-  const alive = await probeSpiderHealth()
-  if (!alive) {
-    ElMessage.error(getFriendlyErrorMessage(spiderHealthError.value, '爬虫服务不可达，请检查服务是否已启动'))
-    return
-  }
+  await probeSpiderHealth()
 
   // 强制模式需二次确认
   if (forceMode.value) {
@@ -490,7 +506,7 @@ async function triggerSync(mode) {
     }
 
     if ((draftUsername || draftPassword) && !tempCredentialSubmitted.value) {
-      ElMessage.warning('若要使用临时 PTA 账号，请先点击“提交临时账号密码”')
+      ElMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
       return
     }
     const username = tempCredentialSubmitted.value ? draftUsername : ''
@@ -517,6 +533,18 @@ async function triggerSync(mode) {
         refreshed_count: 0, submissions_count: 0, error: null, skipped_cooldown: [], force: forceMode.value,
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value }
       pollTaskStatus(taskId)
+    } else {
+      currentTask.value = {
+        task_id: r?.taskId || `go-local-${Date.now()}`,
+        status: r?.status === 'FAILED' ? 'FAILED' : 'SUCCESS',
+        new_sets_count: 0,
+        refreshed_count: 0,
+        submissions_count: 0,
+        error: r?.error || null,
+        skipped_cooldown: [],
+        force: forceMode.value,
+        credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value
+      }
     }
     ElMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
   } catch (e) {
@@ -527,6 +555,7 @@ async function triggerSync(mode) {
 }
 
 function pollTaskStatus(taskId) {
+  if (!spiderAlive.value) return
   if (pollTimer) clearInterval(pollTimer)
   pollTimer = setInterval(async () => {
     try {
@@ -566,11 +595,11 @@ onMounted(() => {
   syncKeyword.value = currentKeyword.value
   clearTempCredential()
   setTimeout(() => clearTempCredential(), 300)
-  loadCookieStatus()
-  loadTaskHistory()
-  loadCooldown()
+  loadCookieStatus().then(() => {
+    loadTaskHistory()
+    loadCooldown()
+  })
   loadBoundCredentials()
-  probeSpiderHealth()
 })
 watch(currentKeyword, value => {
   syncKeyword.value = value || ''
@@ -582,5 +611,3 @@ watch([ptaUsername, ptaPassword], () => {
 })
 onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer) })
 </script>
-
-

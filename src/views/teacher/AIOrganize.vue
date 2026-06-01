@@ -1,38 +1,59 @@
 <template>
-  <div class="organize-page [min-height:100%]">
-    <div class="hero [background:linear-gradient(135deg,_#1a73e8_0%,_#4285f4_100%)] [border-radius:14px] [padding:28px_36px] [margin-bottom:24px] [color:#fff] [position:relative] [overflow:hidden]">
-      <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:24px] [&_h1]:[font-weight:700] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[opacity:0.9]">
-        <h1>AI 智能整理</h1>
-        <p>支持文档中心整理和隔离 ZIP 整理。ZIP 模式不会把文件写入文档中心，只返回整理后的结果包。</p>
+  <div class="min-h-full">
+    <!-- Hero -->
+    <div class="rounded-[14px] bg-gradient-to-br from-[#007aff] to-[#4285f4] px-9 py-7 mb-6 text-white relative overflow-hidden">
+      <div>
+        <h1 class="m-0 mb-1 text-2xl font-bold">AI 智能整理</h1>
+        <p class="m-0 text-sm opacity-90">支持文档中心整理和隔离 ZIP 整理。ZIP 模式不会把文件写入文档中心，只返回整理后的结果包。</p>
       </div>
     </div>
 
-    <div class="cards-row [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(420px,_1fr))] [gap:20px]">
-      <div class="card [background:#fff] [border-radius:16px] [padding:24px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,_0,_0,_0.04)]">
-        <div class="card-head [display:flex] [align-items:center] [gap:10px] [margin-bottom:10px] [&_h3]:[margin:0] [&_h3]:[font-size:17px] [&_h3]:[font-weight:600] [&_h3]:[color:#202124]">
-          <span class="card-icon [font-size:14px] [color:#1a73e8] [font-weight:700] [min-width:30px]">上传</span>
-          <h3>上传与提交</h3>
+    <!-- Cards Grid -->
+    <div class="grid grid-cols-[repeat(auto-fit,_minmax(420px,_1fr))] gap-5">
+      <!-- Upload Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center gap-2.5 mb-2.5">
+          <span class="text-sm text-[#007aff] font-bold min-w-[30px]">上传</span>
+          <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">上传与提交</h3>
         </div>
-        <p class="card-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px] [line-height:1.6]">
+        <p class="text-[#6e6e73] text-[13px] m-0 mb-4 leading-relaxed">
           多文件和目录模式沿用文档中心链路。ZIP 一键整理走隔离任务，不会写入文档中心。
         </p>
 
-        <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
-          <el-input v-model="folderName" placeholder="文件夹名称（可选）" class="[width:240px]" />
-          <el-radio-group v-model="uploadMode" size="small">
-            <el-radio-button label="files">多文件</el-radio-button>
-            <el-radio-button label="zip">隔离 ZIP</el-radio-button>
-            <el-radio-button label="dir">目录直传</el-radio-button>
-          </el-radio-group>
+        <div class="flex gap-2.5 items-center flex-wrap">
+          <input
+            v-model="folderName"
+            placeholder="文件夹名称（可选）"
+            class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+          <div class="flex rounded-[10px] overflow-hidden border border-black/10">
+            <button
+              v-for="mode in [{ key: 'files', label: '多文件' }, { key: 'zip', label: '隔离 ZIP' }, { key: 'dir', label: '目录直传' }]"
+              :key="mode.key"
+              class="h-[32px] px-3 text-xs font-medium border-none cursor-pointer transition-all"
+              :class="uploadMode === mode.key ? 'bg-[#007aff] text-white' : 'bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]'"
+              @click="uploadMode = mode.key"
+            >
+              {{ mode.label }}
+            </button>
+          </div>
         </div>
 
+        <!-- Files Mode -->
         <template v-if="uploadMode === 'files'">
-          <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap] [margin-top:12px]">
-            <el-button type="primary" :loading="creating" @click="createFolder">1. 创建文档中心文件夹</el-button>
-            <span v-if="currentFolderId" class="folder-tag [font-size:12px] [color:#1a73e8] [font-weight:500]">当前文件夹 #{{ currentFolderId }}</span>
+          <div class="flex gap-2.5 items-center flex-wrap mt-3">
+            <button
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              :disabled="creating"
+              @click="createFolder"
+            >
+              <span v-if="creating" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+              1. 创建文档中心文件夹
+            </button>
+            <span v-if="currentFolderId" class="text-xs text-[#007aff] font-medium">当前文件夹 #{{ currentFolderId }}</span>
           </div>
 
-          <div v-if="currentFolderId" class="upload-area [margin-top:14px]">
+          <div v-if="currentFolderId" class="mt-3.5">
             <el-upload
               ref="uploadRef"
               v-model:file-list="fileList"
@@ -41,32 +62,33 @@
               drag
               accept=".pdf,.docx,.doc,.pptx,.txt,.md,.csv,.zip"
             >
-              <div class="upload-hint [text-align:center] [padding:20px] [&_p]:[margin:4px_0] [&_p]:[color:#5f6368] [&_p]:[font-size:13px]">
-                <p>拖拽文件到此处，或点击选择</p>
-                <p class="upload-sub [font-size:12px] [color:#9aa0a6]">支持 PDF、DOCX、PPTX、TXT、ZIP 等格式</p>
+              <div class="text-center py-5">
+                <p class="m-1 text-[#6e6e73] text-[13px]">拖拽文件到此处，或点击选择</p>
+                <p class="text-xs text-[#aeaeb2]">支持 PDF、DOCX、PPTX、TXT、ZIP 等格式</p>
               </div>
             </el-upload>
-            <el-button
-              type="primary"
-              class="[margin-top:12px]"
-              :loading="submitLoading"
-              :disabled="fileList.length === 0"
+            <button
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              :disabled="fileList.length === 0 || submitLoading"
               @click="uploadAndSubmit"
             >
+              <span v-if="submitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               2. 上传并提交整理（{{ fileList.length }} 个文件）
-            </el-button>
+            </button>
           </div>
         </template>
 
+        <!-- ZIP Mode -->
         <template v-else-if="uploadMode === 'zip'">
-          <div class="upload-area">
-            <el-alert
-              type="success"
-              show-icon
-              :closable="false"
-              title="隔离 ZIP 模式"
-              description="上传的 ZIP 会直接进入临时整理任务，不会落到文档中心。"
-            />
+          <div class="mt-3">
+            <!-- Alert replacement -->
+            <div class="flex items-start gap-3 rounded-[12px] bg-[rgba(52,199,89,0.08)] border border-[rgba(52,199,89,0.2)] px-4 py-3 mb-3">
+              <svg class="w-5 h-5 text-[#34c759] shrink-0 mt-0.5" fill="none" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.7-5.3l5-5a.7.7 0 011 1l-5.5 5.5a.7.7 0 01-1 0l-2.5-2.5a.7.7 0 011-1l2 2z" fill="currentColor"/></svg>
+              <div>
+                <p class="m-0 text-sm font-medium text-[#1d1d1f]">隔离 ZIP 模式</p>
+                <p class="m-0 mt-0.5 text-xs text-[#6e6e73]">上传的 ZIP 会直接进入临时整理任务，不会落到文档中心。</p>
+              </div>
+            </div>
             <el-upload
               ref="zipUploadRef"
               v-model:file-list="zipFileList"
@@ -74,167 +96,231 @@
               :limit="1"
               drag
               accept=".zip"
-              class="[margin-top:12px]"
             >
-              <div class="upload-hint">
-                <p>拖拽一个 ZIP 到此处，或点击选择</p>
-                <p class="upload-sub">上传后直接创建隔离整理任务，完成后返回整理后的 ZIP</p>
+              <div class="text-center py-5">
+                <p class="m-1 text-[#6e6e73] text-[13px]">拖拽一个 ZIP 到此处，或点击选择</p>
+                <p class="text-xs text-[#aeaeb2]">上传后直接创建隔离整理任务，完成后返回整理后的 ZIP</p>
               </div>
             </el-upload>
-            <el-button
-              type="primary"
-              class="[margin-top:12px]"
-              :loading="zipSubmitLoading"
-              :disabled="zipFileList.length === 0"
+            <button
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              :disabled="zipFileList.length === 0 || zipSubmitLoading"
               @click="uploadZipAndSubmit"
             >
+              <span v-if="zipSubmitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               ZIP 一键上传并整理
-            </el-button>
+            </button>
           </div>
         </template>
 
+        <!-- Directory Mode -->
         <template v-else>
-          <div class="upload-area">
+          <div class="mt-3">
             <input
               ref="dirInputRef"
-              class="hidden-dir-input [display:none]"
+              class="hidden"
               type="file"
               webkitdirectory
               directory
               multiple
               @change="onDirectoryChange"
             />
-            <div class="inline-form">
-              <el-button @click="openDirectoryPicker">选择本地目录</el-button>
-              <span v-if="selectedDirName" class="folder-tag">已选择：{{ selectedDirName }}</span>
+            <div class="flex gap-2.5 items-center flex-wrap">
+              <button
+                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
+                @click="openDirectoryPicker"
+              >
+                选择本地目录
+              </button>
+              <span v-if="selectedDirName" class="text-xs text-[#007aff] font-medium">已选择：{{ selectedDirName }}</span>
             </div>
-            <p class="upload-sub [margin-top:8px]">
+            <p class="mt-2 text-xs text-[#aeaeb2]">
               已选 {{ dirFiles.length }} 个文件，保留原始目录结构上传到文档中心。
             </p>
-            <el-button
-              type="primary"
-              class="[margin-top:12px]"
-              :loading="dirSubmitLoading"
-              :disabled="dirFiles.length === 0"
+            <button
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              :disabled="dirFiles.length === 0 || dirSubmitLoading"
               @click="uploadDirectoryAndSubmit"
             >
+              <span v-if="dirSubmitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               目录直传并整理
-            </el-button>
+            </button>
           </div>
         </template>
       </div>
 
-      <div class="card">
-        <div class="card-head">
-          <span class="card-icon">任务</span>
-          <h3>整理进度</h3>
+      <!-- Progress Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center gap-2.5 mb-2.5">
+          <span class="text-sm text-[#007aff] font-bold min-w-[30px]">任务</span>
+          <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">整理进度</h3>
         </div>
 
-        <div v-if="!jobId" class="empty-hint [color:#9aa0a6] [font-size:14px] [text-align:center] [padding:40px_0]">提交任务后会在这里展示进度、结果和下载入口。</div>
+        <div v-if="!jobId" class="text-[#aeaeb2] text-sm text-center py-10">提交任务后会在这里展示进度、结果和下载入口。</div>
 
         <template v-else>
-          <div class="status-bar [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px] [flex-wrap:wrap]">
-            <el-tag :type="statusTypeC">{{ statusLabelC }}</el-tag>
-            <el-tag size="small" :type="currentJobKind === 'zip' ? 'success' : 'info'">
+          <!-- Status Tags -->
+          <div class="flex items-center gap-2.5 mb-2 flex-wrap">
+            <span
+              class="inline-flex items-center h-[22px] px-2 rounded-full text-xs font-medium"
+              :class="statusTagClass"
+            >{{ statusLabelC }}</span>
+            <span
+              class="inline-flex items-center h-[22px] px-2 rounded-full text-xs font-medium"
+              :class="currentJobKind === 'zip' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-black/5 text-[#6e6e73]'"
+            >
               {{ currentJobKind === 'zip' ? '隔离 ZIP' : '文档中心' }}
-            </el-tag>
-            <span v-if="jobData?.currentStep" class="step-label [font-size:13px] [color:#5f6368]">
+            </span>
+            <span v-if="jobData?.currentStep" class="text-[13px] text-[#6e6e73]">
               {{ stepLabels[jobData.currentStep] || jobData.currentStep }}
             </span>
           </div>
 
-          <el-progress
-            :percentage="jobData?.progress || 0"
-            :stroke-width="10"
-            :color="jobData?.status === 'FAILED' ? '#d93025' : '#1a73e8'"
-            class="[margin:12px_0]"
-          />
+          <!-- Progress Bar -->
+          <div class="my-3">
+            <div class="h-[10px] rounded-full bg-[#f5f5f7] overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-300"
+                :class="jobData?.status === 'FAILED' ? 'bg-[#d93025]' : 'bg-[#007aff]'"
+                :style="{ width: (jobData?.progress || 0) + '%' }"
+              ></div>
+            </div>
+          </div>
 
-          <p v-if="jobData?.stepDetail" class="step-detail [font-size:12px] [color:#5f6368] [margin:4px_0]">{{ jobData.stepDetail }}</p>
-          <p v-if="jobData?.errorMessage" class="error-msg [font-size:13px] [color:#d93025] [margin:8px_0]">{{ jobData.errorMessage }}</p>
+          <p v-if="jobData?.stepDetail" class="text-xs text-[#6e6e73] my-1">{{ jobData.stepDetail }}</p>
+          <p v-if="jobData?.errorMessage" class="text-[13px] text-[#d93025] my-2">{{ jobData.errorMessage }}</p>
 
+          <!-- Result Section -->
           <template v-if="jobData?.status === 'SUCCEEDED' && resultData">
-            <div class="result-summary [display:flex] [gap:24px] [margin:16px_0]">
-              <div class="stat [text-align:center]">
-                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.totalFiles || 0 }}</span>
-                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">文件</span>
+            <div class="flex gap-6 my-4">
+              <div class="text-center">
+                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.totalFiles || 0 }}</span>
+                <span class="text-[13px] text-[#6e6e73] mt-1">文件</span>
               </div>
-              <div class="stat [text-align:center]">
-                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.reviewCount || 0 }}</span>
-                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">待确认</span>
+              <div class="text-center">
+                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.reviewCount || 0 }}</span>
+                <span class="text-[13px] text-[#6e6e73] mt-1">待确认</span>
               </div>
-              <div class="stat [text-align:center]">
-                <span class="stat-num [display:block] [font-size:28px] [font-weight:700] [color:#1a73e8]">{{ resultData.duplicateCount || 0 }}</span>
-                <span class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">重复</span>
+              <div class="text-center">
+                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.duplicateCount || 0 }}</span>
+                <span class="text-[13px] text-[#6e6e73] mt-1">重复</span>
               </div>
             </div>
 
-            <p class="topic-line [font-size:14px] [color:#202124] [margin:8px_0] [font-weight:500]">主题：{{ resultData.folderTopic || '未识别' }}</p>
-            <div v-if="resultData.folderTags?.length" class="tag-row [display:flex] [gap:6px] [flex-wrap:wrap] [margin-bottom:12px]">
-              <el-tag v-for="tag in resultData.folderTags" :key="tag" size="small" type="info">{{ tag }}</el-tag>
+            <p class="text-sm text-[#1d1d1f] my-2 font-medium">主题：{{ resultData.folderTopic || '未识别' }}</p>
+            <div v-if="resultData.folderTags?.length" class="flex gap-1.5 flex-wrap mb-3">
+              <span
+                v-for="tag in resultData.folderTags"
+                :key="tag"
+                class="inline-flex items-center h-[22px] px-2 rounded-full text-xs font-medium bg-black/5 text-[#6e6e73]"
+              >{{ tag }}</span>
             </div>
 
-            <div v-if="resultData.files?.length" class="file-table-wrap [max-height:300px] [overflow:auto] [border:1px_solid_#e8eaed] [border-radius:10px] [margin-top:12px]">
-              <table class="file-table [width:100%] [border-collapse:collapse] [font-size:12px]">
+            <!-- File Table -->
+            <div v-if="resultData.files?.length" class="max-h-[300px] overflow-auto border border-black/[0.06] rounded-[10px] mt-3">
+              <table class="w-full border-collapse text-xs">
                 <thead>
-                  <tr>
-                    <th>原文件</th>
-                    <th>目标目录</th>
-                    <th>新文件名</th>
-                    <th>类型</th>
-                    <th>置信度</th>
-                    <th>状态</th>
+                  <tr class="bg-[#f5f5f7]">
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">原文件</th>
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">目标目录</th>
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">新文件名</th>
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">类型</th>
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">置信度</th>
+                    <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">状态</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(file, index) in resultData.files" :key="index" :class="{ 'review-row': file.reviewFlag }">
-                    <td class="fname">{{ file.originalName }}</td>
-                    <td>{{ file.targetFolder }}</td>
-                    <td class="fname">{{ file.newFilename }}</td>
-                    <td><el-tag size="small" :type="kindType(file.docKind)">{{ file.docKind || 'other' }}</el-tag></td>
-                    <td>{{ formatConfidence(file.confidence) }}</td>
-                    <td>
-                      <el-tag v-if="file.reviewFlag" size="small" type="warning">待确认</el-tag>
-                      <el-tag v-else-if="file.duplicateGroupId" size="small" type="info">重复</el-tag>
-                      <el-tag v-else size="small" type="success">完成</el-tag>
+                  <tr
+                    v-for="(file, index) in resultData.files"
+                    :key="index"
+                    class="border-t border-black/[0.04] hover:bg-[#f9f9fb] transition-colors"
+                    :class="{ 'bg-[rgba(255,149,0,0.04)]': file.reviewFlag }"
+                  >
+                    <td class="px-3 py-2 max-w-[140px] truncate">{{ file.originalName }}</td>
+                    <td class="px-3 py-2">{{ file.targetFolder }}</td>
+                    <td class="px-3 py-2 max-w-[140px] truncate">{{ file.newFilename }}</td>
+                    <td class="px-3 py-2">
+                      <span
+                        class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium"
+                        :class="kindTagClass(file.docKind)"
+                      >{{ file.docKind || 'other' }}</span>
+                    </td>
+                    <td class="px-3 py-2">{{ formatConfidence(file.confidence) }}</td>
+                    <td class="px-3 py-2">
+                      <span v-if="file.reviewFlag" class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(255,149,0,0.1)] text-[#ff9500]">待确认</span>
+                      <span v-else-if="file.duplicateGroupId" class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-black/5 text-[#6e6e73]">重复</span>
+                      <span v-else class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(52,199,89,0.12)] text-[#34c759]">完成</span>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <el-button type="primary" size="large" class="[margin-top:16px] [width:100%]" :loading="downloading" @click="downloadZip">
+            <button
+              class="mt-4 w-full h-[42px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              :disabled="downloading"
+              @click="downloadZip"
+            >
+              <span v-if="downloading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               下载整理结果 ZIP
-            </el-button>
+            </button>
           </template>
 
-          <div v-if="jobData?.status === 'FAILED'" class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
-            <el-button type="warning" :loading="retrying" @click="retryJob">重试</el-button>
+          <!-- Failed Action -->
+          <div v-if="jobData?.status === 'FAILED'" class="flex items-center gap-2 flex-wrap mt-3">
+            <button
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              :disabled="retrying"
+              @click="retryJob"
+            >
+              <span v-if="retrying" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+              重试
+            </button>
           </div>
         </template>
 
-        <div class="history-panel [margin-top:16px] [padding-top:12px] [border-top:1px_dashed_#d0d7de]">
-          <div class="history-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px] [font-size:13px] [color:#5f6368]">
+        <!-- History Panel -->
+        <div class="mt-4 pt-3 border-t border-dashed border-[#d0d7de]">
+          <div class="flex justify-between items-center mb-2 text-[13px] text-[#6e6e73]">
             <span>{{ uploadMode === 'zip' ? '隔离 ZIP 任务历史' : '文档中心整理历史' }}</span>
-            <el-button text size="small" :loading="historyLoading" @click="loadHistory">刷新</el-button>
+            <button
+              class="text-[13px] text-[#007aff] bg-transparent border-none cursor-pointer hover:underline"
+              :disabled="historyLoading"
+              @click="loadHistory"
+            >
+              <span v-if="historyLoading" class="inline-block w-3 h-3 border-2 border-[#007aff]/30 border-t-[#007aff] rounded-full animate-spin mr-1"></span>
+              刷新
+            </button>
           </div>
-          <div v-if="historyJobs.length === 0" class="history-empty [color:#9aa0a6] [font-size:12px] [padding:6px_0]">暂无历史任务</div>
-          <div v-else class="history-list [display:flex] [flex-direction:column] [gap:8px] [max-height:220px] [overflow:auto]">
-            <div v-for="job in historyJobs" :key="job.id" class="history-item [display:flex] [justify-content:space-between] [align-items:center] [border:1px_solid_#e8eaed] [border-radius:8px] [padding:8px] [gap:8px] [padding:10px_0]">
-              <div class="history-main">
-                <div class="history-title [font-size:12px] [color:#202124] [font-weight:600] [font-weight:500] [margin-bottom:5px]">
+          <div v-if="historyJobs.length === 0" class="text-[#aeaeb2] text-xs py-1.5">暂无历史任务</div>
+          <div v-else class="flex flex-col gap-2 max-h-[220px] overflow-auto">
+            <div
+              v-for="job in historyJobs"
+              :key="job.id"
+              class="flex justify-between items-center border border-black/[0.06] rounded-[8px] px-3 py-2.5 hover:bg-[#f9f9fb] transition-colors"
+            >
+              <div>
+                <div class="text-xs text-[#1d1d1f] font-medium mb-1">
                   #{{ job.id }} · {{ job.status }}
-                  <el-tag size="small" :type="job.jobKind === 'zip' ? 'success' : 'info'" class="[margin-left:6px]">
+                  <span
+                    class="inline-flex items-center h-[18px] px-1.5 rounded text-[10px] font-medium ml-1.5"
+                    :class="job.jobKind === 'zip' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-black/5 text-[#6e6e73]'"
+                  >
                     {{ job.jobKind === 'zip' ? 'ZIP' : '文档中心' }}
-                  </el-tag>
+                  </span>
                 </div>
-                <div class="history-sub [font-size:11px] [color:#80868b] [margin-top:2px]">{{ formatTime(job.createdAt) }}</div>
+                <div class="text-[11px] text-[#80868b]">{{ formatTime(job.createdAt) }}</div>
               </div>
-              <div class="history-actions [display:flex] [gap:6px] [margin-top:5px]">
-                <el-button size="small" @click="openHistoryJob(job)">查看</el-button>
-                <el-button size="small" type="primary" plain :disabled="!job.hasZip" @click="downloadHistoryZip(job)">
-                  ZIP
-                </el-button>
+              <div class="flex gap-1.5 mt-1">
+                <button
+                  class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
+                  @click="openHistoryJob(job)"
+                >查看</button>
+                <button
+                  class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed"
+                  :disabled="!job.hasZip"
+                  @click="downloadHistoryZip(job)"
+                >ZIP</button>
               </div>
             </div>
           </div>
@@ -247,6 +333,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+
 import {
   createFolder as apiCreateFolder,
   uploadFiles,
@@ -621,12 +708,12 @@ onMounted(async () => {
 
 onUnmounted(stopPolling)
 
-const statusTypeC = computed(() => {
+const statusTagClass = computed(() => {
   const status = jobData.value?.status
-  if (status === 'SUCCEEDED') return 'success'
-  if (status === 'FAILED') return 'danger'
-  if (status === 'RUNNING') return ''
-  return 'info'
+  if (status === 'SUCCEEDED') return 'bg-[rgba(52,199,89,0.12)] text-[#34c759]'
+  if (status === 'FAILED') return 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+  if (status === 'RUNNING') return 'bg-[rgba(0,122,255,0.1)] text-[#007aff]'
+  return 'bg-black/5 text-[#6e6e73]'
 })
 
 const statusLabelC = computed(() => {
@@ -640,17 +727,15 @@ const statusLabelC = computed(() => {
   return labels[jobData.value?.status] || jobData.value?.status || '-'
 })
 
-const kindType = (kind) => {
+const kindTagClass = (kind) => {
   const map = {
-    paper: '',
-    teaching: 'success',
-    code: 'warning',
-    data: 'info',
-    admin: 'info',
-    other: 'info',
+    paper: 'bg-[rgba(0,122,255,0.1)] text-[#007aff]',
+    teaching: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    code: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+    data: 'bg-black/5 text-[#6e6e73]',
+    admin: 'bg-black/5 text-[#6e6e73]',
+    other: 'bg-black/5 text-[#6e6e73]',
   }
-  return map[kind] || 'info'
+  return map[kind] || 'bg-black/5 text-[#6e6e73]'
 }
 </script>
-
-

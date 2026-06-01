@@ -1,122 +1,95 @@
 <template>
-  <div class="department-analytics [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
-    <page-header
-      class="my-page-header"
-      title="系部分析"
-      description="基于真实教学数据的系部统计分析"
-    />
+  <div class="min-w-0">
+    <page-header title="系部分析" description="基于真实教学数据的系部统计分析" />
 
-    <div class="analytics-content [display:flex] [flex-direction:column] [gap:20px]" v-loading="pageLoading">
+    <div class="flex flex-col gap-5" v-loading="pageLoading">
       <!-- 概览卡片 -->
-      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>教学概览</span></div>
-        </template>
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.experimentCount }}</div>
-              <div class="stat-title [font-size:13px] [color:#5f6368]">实验总数</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.classCount }}</div>
-              <div class="stat-title [font-size:13px] [color:#5f6368]">班级数量</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.studentCount }}</div>
-              <div class="stat-title [font-size:13px] [color:#5f6368]">学生总数</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-              <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ overview.avgScore }}</div>
-              <div class="stat-title [font-size:13px] [color:#5f6368]">平均分</div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">教学概览</span>
+        </div>
+        <div class="grid grid-cols-4 gap-5 max-[768px]:grid-cols-2 max-[480px]:grid-cols-1">
+          <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[10px] border border-black/[0.04]">
+            <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ overview.experimentCount }}</div>
+            <div class="text-[13px] text-[#6e6e73]">实验总数</div>
+          </div>
+          <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[10px] border border-black/[0.04]">
+            <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ overview.classCount }}</div>
+            <div class="text-[13px] text-[#6e6e73]">班级数量</div>
+          </div>
+          <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[10px] border border-black/[0.04]">
+            <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ overview.studentCount }}</div>
+            <div class="text-[13px] text-[#6e6e73]">学生总数</div>
+          </div>
+          <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[10px] border border-black/[0.04]">
+            <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ overview.avgScore }}</div>
+            <div class="text-[13px] text-[#6e6e73]">平均分</div>
+          </div>
+        </div>
+      </div>
 
-      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
-        <!-- 实验完成率排行-->
-        <el-col :span="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>实验完成率排行</span></div>
-            </template>
-            <div ref="completionChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
-          </el-card>
-        </el-col>
-        <!-- 成绩分布 -->
-        <el-col :span="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>全部学生成绩分布</span></div>
-            </template>
-            <div ref="gradeChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- 图表行 -->
+      <div class="grid grid-cols-2 gap-5 max-[768px]:grid-cols-1">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">实验完成率排行</span>
+          </div>
+          <div ref="completionChartRef" class="h-[300px] w-full"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">全部学生成绩分布</span>
+          </div>
+          <div ref="gradeChartRef" class="h-[300px] w-full"></div>
+        </div>
+      </div>
 
-      <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
-        <!-- 各实验平均分趋势 -->
-        <el-col :span="24">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验平均分趋势</span></div>
-            </template>
-            <div ref="trendChartRef" class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"></div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- 趋势图 -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">各实验平均分趋势</span>
+        </div>
+        <div ref="trendChartRef" class="h-[300px] w-full"></div>
+      </div>
 
       <!-- 低完成率实验预警 -->
-      <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>低完成率实验预警</span>
-            <el-button type="primary" size="small" @click="exportReport">导出报告</el-button>
-          </div>
-        </template>
-        <el-table :data="warningExperiments" class="[width:100%]" stripe>
-          <el-table-column prop="name" label="实验名称" min-width="200" show-overflow-tooltip />
-          <el-table-column label="完成率" width="120" align="center">
-            <template #default="scope">
-              <el-tag :type="scope.row.completionRate < 50 ? 'danger' : 'warning'" size="small">
-                {{ scope.row.completionRate }}%
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="提交数总数" width="120" align="center">
-            <template #default="scope">
-              {{ scope.row.submissionCount }} / {{ overview.studentCount }}
-            </template>
-          </el-table-column>
-          <el-table-column label="平均分" width="100" align="center">
-            <template #default="scope">
-              <span :class="averageScoreClass(scope.row.avgScore)">
-                {{ scope.row.avgScore }}
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column label="建议" min-width="200">
-            <template #default="scope">
-              <span v-if="scope.row.completionRate < 30" class="[color:#F56C6C]">
-                完成率极低，建议检查实验难度或延长截止时间
-              </span>
-              <span v-else-if="scope.row.completionRate < 50" class="[color:#E6A23C]">
-                完成率偏低，建议增加辅导答疑
-              </span>
-              <span v-else class="[color:#909399]">
-                完成率一般，可适当关注
-              </span>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">低完成率实验预警</span>
+          <button @click="exportReport" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">导出报告</button>
+        </div>
+        <table class="w-full text-left text-[13px]">
+          <thead>
+            <tr class="border-b border-black/[0.06]">
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl">实验名称</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center w-[100px]">完成率</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center w-[120px]">提交数/总数</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] text-center w-[100px]">平均分</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tr-xl">建议</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in warningExperiments" :key="row.name" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="row.completionRate < 50 ? 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">
+                  {{ row.completionRate }}%
+                </span>
+              </td>
+              <td class="py-3 px-3 text-center text-[#6e6e73]">{{ row.submissionCount }} / {{ overview.studentCount }}</td>
+              <td class="py-3 px-3 text-center" :class="row.avgScore < 60 ? 'text-[#ff3b30]' : 'text-[#1d1d1f]'">{{ row.avgScore }}</td>
+              <td class="py-3 px-3">
+                <span v-if="row.completionRate < 30" class="text-[#ff3b30]">完成率极低，建议检查实验难度或延长截止时间</span>
+                <span v-else-if="row.completionRate < 50" class="text-[#ff9500]">完成率偏低，建议增加辅导答疑</span>
+                <span v-else class="text-[#aeaeb2]">完成率一般，可适当关注</span>
+              </td>
+            </tr>
+            <tr v-if="!warningExperiments.length">
+              <td colspan="5" class="py-12 text-center text-[#aeaeb2] text-sm">暂无预警数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -129,8 +102,8 @@ import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import api from '../../api'
 
-function averageScoreClass(score) {
-  return score < 60 ? '[color:#F56C6C]' : '[color:#303133]'
+function averageScoreClass(score) { // eslint-disable-line no-unused-vars
+  return score < 60 ? 'text-[#ff3b30]' : 'text-[#1d1d1f]'
 }
 
 const pageLoading = ref(true)

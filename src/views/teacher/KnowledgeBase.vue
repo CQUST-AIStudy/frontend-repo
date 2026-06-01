@@ -1,322 +1,335 @@
 <template>
-  <div class="knowledge-base-container [padding:0] [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0]">
+  <div class="knowledge-base-container">
     <page-header title="课程知识库" description="管理课程资料、查看 RAG 处理状态，并进行课程问答" />
 
     <div v-if="!selectedSpace" class="space-list-view">
-      <div class="space-actions [margin-bottom:20px]">
-        <el-button type="primary" @click="showCreateDialog">
-          <el-icon><Plus /></el-icon>
+      <div class="mb-5">
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="showCreateDialog">
+          <Plus class="w-4 h-4" />
           创建课程空间
-        </el-button>
+        </button>
       </div>
 
-      <el-alert
+      <div
         v-if="currentClassName"
-        class="scope-alert [margin-bottom:20px] [border-radius:16px]"
-        type="info"
-        :closable="false"
-        show-icon
+        class="mb-5 rounded-[16px] border border-blue-200 bg-blue-50/80 p-4 flex items-start gap-3"
       >
-        <template #title>当前班级：{{ currentClassName }}</template>
-        <template #default>
-          <span v-if="hasClassScopedSpaces">当前仅展示绑定到该班级的课程空间，知识问答会按当前班级作用域执行。</span>
-          <span v-else>当前班级还没有专属课程空间，暂时展示你名下的全部课程空间。</span>
-        </template>
-      </el-alert>
-
-      <el-empty v-if="visibleSpaces.length === 0 && !loading" description="暂无课程空间，先创建一个再上传资料" />
-
-      <el-row :gutter="20" v-loading="loading">
-        <el-col v-for="space in visibleSpaces" :key="space.id" :span="8" class="space-col [margin-bottom:20px]">
-          <el-card class="space-card [cursor:pointer] [transition:transform_0.25s_ease,_box-shadow_0.25s_ease] [border-radius:16px] [border:1px_solid_#dadce0] hover:[transform:translateY(-3px)] hover:[box-shadow:0_10px_24px_rgba(0,_0,_0,_0.08)]" shadow="hover" @click="selectSpace(space)">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">{{ space.name }}</span>
-                <div class="card-header-actions [display:flex] [align-items:center] [gap:8px]">
-                  <el-tag size="small" :type="visibilityTagType(space.docVisibility)">
-                    {{ visibilityLabel(space.docVisibility) }}
-                  </el-tag>
-                  <el-dropdown @click.stop trigger="click">
-                    <el-icon class="card-more [cursor:pointer] [font-size:18px] [color:#9aa0a6]"><MoreFilled /></el-icon>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item @click="editSpace(space)">编辑</el-dropdown-item>
-                        <el-dropdown-item @click="confirmDeleteSpace(space)">删除</el-dropdown-item>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-                </div>
-              </div>
-            </template>
-
-            <div class="card-body">
-              <p v-if="space.term"><el-icon><Calendar /></el-icon>{{ space.term }}</p>
-              <p v-if="space.courseName"><el-icon><Reading /></el-icon>{{ space.courseName }}</p>
-              <p class="card-stats ![color:#6b7280]">模式：{{ modeLabel(space.defaultMode) }}</p>
-              <p v-if="space.docVisibility === 'class'" class="card-stats ![color:#6b7280]">
-                绑定班级：{{ (space.boundClassIds || []).length }}
-              </p>
-              <p class="card-stats ![color:#6b7280]">文档数：{{ space.docCount || 0 }}</p>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-    </div>
-
-    <div v-else class="space-detail-view">
-      <div class="detail-header [display:flex] [align-items:center] [gap:12px]">
-        <el-button @click="backToList">
-          <el-icon><ArrowLeft /></el-icon>
-          返回
-        </el-button>
-        <h2>{{ selectedSpace.name }}</h2>
-        <span v-if="selectedSpace.term" class="detail-meta [color:#5f6368] [font-size:14px] [background:#f1f3f4] [padding:2px_10px] [border-radius:999px]">{{ selectedSpace.term }}</span>
-        <el-tag size="small" :type="visibilityTagType(selectedSpace.docVisibility)">
-          {{ visibilityLabel(selectedSpace.docVisibility) }}
-        </el-tag>
+        <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+        <div>
+          <div class="font-medium text-[#1d1d1f] text-sm">当前班级：{{ currentClassName }}</div>
+          <div class="text-sm text-[#6e6e73] mt-1">
+            <span v-if="hasClassScopedSpaces">当前仅展示绑定到该班级的课程空间，知识问答会按当前班级作用域执行。</span>
+            <span v-else>当前班级还没有专属课程空间，暂时展示你名下的全部课程空间。</span>
+          </div>
+        </div>
       </div>
 
-      <el-tabs v-model="activeTab" class="detail-tabs [margin-top:16px]">
-        <el-tab-pane label="文档管理" name="docs">
-          <el-card class="section-card [margin-bottom:16px]">
-            <template #header>
-              <span>上传课程资料</span>
-            </template>
+      <div v-if="visibleSpaces.length === 0 && !loading" class="flex flex-col items-center justify-center py-16 text-[#6e6e73]">
+        <svg class="w-12 h-12 text-[#c3cad6] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+        <p class="text-sm">暂无课程空间，先创建一个再上传资料</p>
+      </div>
 
-            <el-upload
-              drag
-              multiple
-              :auto-upload="false"
-              :on-change="onFileChange"
-              :file-list="pendingFiles"
-              accept=".pdf,.docx,.txt,.md"
-            >
-              <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-              <div class="el-upload__text">拖拽文件到这里，或点击选择文件</div>
-              <template #tip>
-                <div class="el-upload__tip">支持 PDF、DOCX、TXT、Markdown，适合教材、讲义、参考资料</div>
-              </template>
-            </el-upload>
-
-            <div v-if="pendingFiles.length > 0" class="upload-actions [margin-top:12px] [display:flex] [justify-content:flex-end] [gap:8px]">
-              <el-select v-model="uploadDocType" class="doc-type-select [width:160px]">
-                <el-option label="教材" value="textbook" />
-                <el-option label="讲义" value="lecture" />
-                <el-option label="参考书" value="reference" />
-                <el-option label="习题集" value="exercise" />
-                <el-option label="其他" value="other" />
-              </el-select>
-              <el-button type="primary" @click="uploadFiles" :loading="uploading">
-                上传 {{ pendingFiles.length }} 个文件
-              </el-button>
-            </div>
-          </el-card>
-
-          <div class="doc-summary-grid [display:grid] [grid-template-columns:repeat(5,_minmax(0,_1fr))] [gap:12px] [margin-bottom:16px]">
-            <div class="doc-summary-card [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
-              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">文档总数</div>
-              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.total }}</div>
-            </div>
-            <div class="doc-summary-card success [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
-              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">已就绪</div>
-              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.ready }}</div>
-            </div>
-            <div class="doc-summary-card warning [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
-              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">处理中</div>
-              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.pending + docStatusSummary.processing }}</div>
-            </div>
-            <div class="doc-summary-card danger [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
-              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">失败</div>
-              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.failed }}</div>
-            </div>
-            <div class="doc-summary-card accent [padding:16px] [border-radius:14px] [background:linear-gradient(135deg,_#f8fafc,_#eef2ff)] [border:1px_solid_#dbe5f0] [&.success]:[background:linear-gradient(135deg,_#effaf3,_#dcfce7)] [&.warning]:[background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [&.danger]:[background:linear-gradient(135deg,_#fff1f2,_#ffe4e6)] [&.accent]:[background:linear-gradient(135deg,_#eef6ff,_#dbeafe)]">
-              <div class="doc-summary-label [font-size:13px] [color:#6b7280]">总分块</div>
-              <div class="doc-summary-value [margin-top:8px] [font-size:28px] [font-weight:700] [color:#111827]">{{ docStatusSummary.totalChunks }}</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" v-loading="loading">
+        <div v-for="space in visibleSpaces" :key="space.id"
+          class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-[3px] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+          @click="selectSpace(space)"
+        >
+          <div class="flex justify-between items-center gap-3 p-5 pb-3 border-b border-black/[0.06]">
+            <span class="font-semibold text-[16px] text-[#1d1d1f] truncate">{{ space.name }}</span>
+            <div class="flex items-center gap-2">
+              <span :class="visibilityBadgeClass(space.docVisibility)" class="text-xs px-2 py-0.5 rounded-full font-medium">
+                {{ visibilityLabel(space.docVisibility) }}
+              </span>
+              <div class="relative" @click.stop>
+                <button @click="toggleSpaceDropdown(space.id)" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent">
+                  <MoreFilled class="w-[18px] h-[18px] text-[#aeaeb2]" />
+                </button>
+                <div v-show="spaceDropdownId === space.id" class="absolute right-0 top-full mt-1 w-[120px] py-1 rounded-[12px] bg-white border border-black/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-10">
+                  <button @click="editSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">编辑</button>
+                  <button @click="confirmDeleteSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">删除</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <el-card class="section-card [margin-bottom:16px]">
-            <template #header>
-              <div class="doc-list-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
-                <span>文档处理结果</span>
-                <div class="doc-list-actions [display:flex] [align-items:center] [gap:8px]">
-                  <el-button link :loading="docsLoading" @click="loadDocuments">刷新</el-button>
-                  <el-button link :loading="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</el-button>
-                  <el-button type="warning" plain :loading="docActionLoading" @click="reprocessAllDocuments">
-                    全部重处理
-                  </el-button>
-                </div>
-              </div>
-            </template>
-
-            <el-empty v-if="documents.length === 0 && !docsLoading" description="暂无文档，请先上传课程资料" />
-
-            <el-table v-else :data="documents" v-loading="docsLoading" stripe>
-              <el-table-column prop="id" label="任务 ID" width="90" />
-              <el-table-column prop="documentId" label="文档 ID" width="90" />
-              <el-table-column prop="docType" label="类型" width="110">
-                <template #default="{ row }">{{ docTypeLabel(row.docType) }}</template>
-              </el-table-column>
-              <el-table-column label="状态" width="120">
-                <template #default="{ row }">
-                  <el-tag :type="statusTagType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="chunkCount" label="分块数" width="100" />
-              <el-table-column prop="createdAt" label="创建时间" min-width="180" />
-              <el-table-column label="错误信息" min-width="220">
-                <template #default="{ row }">
-                  <span v-if="row.errorMessage" class="error-message [color:#f56c6c] [background:#fef0f0] [padding:8px] [border-radius:4px] [margin:0] [color:#d93025] [font-size:12px]">{{ row.errorMessage }}</span>
-                  <span v-else class="muted-text [color:#9aa0a6]">-</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="130" fixed="right">
-                <template #default="{ row }">
-                  <el-button
-                    size="small"
-                    type="primary"
-                    link
-                    :loading="docRowLoadingId === row.id"
-                    @click="reprocessDocument(row)"
-                  >
-                    重处理
-                  </el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
-        </el-tab-pane>
-
-        <el-tab-pane label="知识问答" name="chat">
-          <div class="chat-container [display:flex] [flex-direction:column] [height:520px] [border:1px_solid_#dadce0] [border-radius:16px] [overflow:hidden]">
-            <div ref="chatMessagesRef" class="chat-messages [flex:1] [overflow-y:auto] [padding:16px] [background:#f8fafc]">
-              <div v-if="chatMessages.length === 0" class="chat-empty [text-align:center] [padding:64px_20px] [color:#6b7280]">
-                <el-icon class="chat-empty-icon [font-size:48px] [color:#c3cad6]"><ChatDotRound /></el-icon>
-                <p>向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
-                <div class="chat-suggestions [margin-top:16px] [display:flex] [flex-wrap:wrap] [gap:8px] [justify-content:center]">
-                  <el-button v-for="suggestion in suggestions" :key="suggestion" size="small" round @click="askQuestion(suggestion)">
-                    {{ suggestion }}
-                  </el-button>
-                </div>
-              </div>
-
-              <div v-for="(msg, idx) in chatMessages" :key="idx" :class="['chat-msg', msg.role]">
-                <div class="msg-bubble [max-width:80%] [padding:10px_14px] [border-radius:14px] [font-size:14px] [line-height:1.7]">
-                  <div v-if="msg.role === 'user'" class="msg-text">{{ msg.content }}</div>
-                  <div v-else class="msg-text" v-html="renderMarkdown(msg.content)"></div>
-                  <div v-if="msg.citations && msg.citations.length" class="msg-citations [margin-top:8px] [padding-top:8px] [border-top:1px_solid_#e8eaed]">
-                    <span class="citation-label [font-size:12px] [color:#6b7280] [margin-right:4px]">引用来源：</span>
-                    <el-tag v-for="citation in msg.citations" :key="citation.index" size="small" type="info" class="citation-tag [margin:2px]">
-                      [{{ citation.index }}] {{ citation.docName }} {{ citation.chapterPath }}
-                    </el-tag>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="chatLoading" class="chat-msg assistant [margin-bottom:12px] [display:flex] [&.user]:[justify-content:flex-end] [&.assistant]:[justify-content:flex-start]">
-                <div class="msg-bubble [max-width:80%] [padding:10px_14px] [border-radius:14px] [font-size:14px] [line-height:1.7]">
-                  <span class="typing-indicator [color:#6b7280] [font-style:italic]">AI 正在思考...</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="chat-input-area [display:flex] [gap:8px] [padding:12px] [background:#fff] [border-top:1px_solid_#e8eaed] [align-items:flex-end]">
-              <el-input
-                v-model="chatInput"
-                type="textarea"
-                :rows="2"
-                placeholder="输入问题，例如：什么是二叉搜索树？"
-                :disabled="chatLoading"
-                @keydown.enter.ctrl="sendChat"
-              />
-              <el-button type="primary" :loading="chatLoading" :disabled="!chatInput.trim()" @click="sendChat">
-                发送
-              </el-button>
-            </div>
+          <div class="p-5 pt-3 space-y-1.5 text-sm text-[#1d1d1f]">
+            <p v-if="space.term" class="flex items-center gap-2"><Calendar class="w-4 h-4 text-[#aeaeb2]" />{{ space.term }}</p>
+            <p v-if="space.courseName" class="flex items-center gap-2"><Reading class="w-4 h-4 text-[#aeaeb2]" />{{ space.courseName }}</p>
+            <p class="text-[#6b7280]">模式：{{ modeLabel(space.defaultMode) }}</p>
+            <p v-if="space.docVisibility === 'class'" class="text-[#6b7280]">绑定班级：{{ (space.boundClassIds || []).length }}</p>
+            <p class="text-[#6b7280]">文档数：{{ space.docCount || 0 }}</p>
           </div>
-        </el-tab-pane>
-
-        <el-tab-pane label="分块标注" name="annotations">
-          <el-card class="section-card [margin-bottom:16px]">
-            <template #header>
-              <div class="doc-list-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
-                <span>知识分块（{{ chunks.length }}）</span>
-                <el-button link :loading="chunksLoading" @click="loadChunksAndAnnotations">刷新</el-button>
-              </div>
-            </template>
-
-            <el-empty v-if="chunks.length === 0 && !chunksLoading" description="暂无分块数据，请先上传并处理文档" />
-
-            <div v-else class="chunk-list [max-height:520px] [overflow-y:auto]">
-              <div v-for="chunk in chunks" :key="chunk.id" class="chunk-item [padding:14px_4px] [border-bottom:1px_solid_#eef2f7]">
-                <div class="chunk-content">
-                  <span class="chunk-meta [font-size:12px] [color:#6b7280]">
-                    [{{ chunk.id }}]
-                    {{ chunk.chapterPath || '未分类' }}
-                    <template v-if="chunk.pageRange"> / {{ chunk.pageRange }}</template>
-                  </span>
-                  <p>{{ chunk.contentPreview || '' }}</p>
-                </div>
-                <div class="chunk-actions [display:flex] [gap:8px]">
-                  <el-button size="small" type="warning" @click="addAnnotation(chunk.id, 'important')">重点</el-button>
-                  <el-button size="small" type="danger" @click="addAnnotation(chunk.id, 'error_prone')">易错</el-button>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </el-tab-pane>
-      </el-tabs>
+        </div>
+      </div>
     </div>
+    <div v-else class="space-detail-view">
+      <div class="flex items-center gap-3 mb-4">
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="backToList">
+          <ArrowLeft class="w-4 h-4" />
+          返回
+        </button>
+        <h2 class="text-lg font-semibold text-[#1d1d1f]">{{ selectedSpace.name }}</h2>
+        <span v-if="selectedSpace.term" class="text-[#6e6e73] text-sm bg-[#f5f5f7] px-2.5 py-0.5 rounded-full">{{ selectedSpace.term }}</span>
+        <span :class="visibilityBadgeClass(selectedSpace.docVisibility)" class="text-xs px-2 py-0.5 rounded-full font-medium">
+          {{ visibilityLabel(selectedSpace.docVisibility) }}
+        </span>
+      </div>
 
-    <el-dialog v-model="dialogVisible" :title="editingSpace ? '编辑课程空间' : '创建课程空间'" width="520px">
-      <el-form :model="spaceForm" label-width="92px">
-        <el-form-item label="名称" required>
-          <el-input v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" />
-        </el-form-item>
-        <el-form-item label="学期">
-          <el-input v-model="spaceForm.term" placeholder="例如：2024-2025-2" />
-        </el-form-item>
-        <el-form-item label="课程名">
-          <el-input v-model="spaceForm.courseName" placeholder="例如：数据结构" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="spaceForm.description" type="textarea" :rows="2" />
-        </el-form-item>
-        <el-form-item label="可见范围">
-          <el-select v-model="spaceForm.docVisibility" class="full-width [width:100%]">
-            <el-option label="公开" value="public" />
-            <el-option label="班级可见" value="class" />
-            <el-option label="仅教师" value="private" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="spaceForm.docVisibility === 'class'" label="绑定班级">
-          <el-select v-model="spaceForm.classIds" multiple collapse-tags collapse-tags-tooltip class="full-width [width:100%]">
-            <el-option
-              v-for="cls in teacherClasses"
-              :key="cls.id"
-              :label="`${cls.name}${cls.courseName ? ' / ' + cls.courseName : ''}`"
-              :value="cls.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="默认模式">
-          <el-select v-model="spaceForm.defaultMode" class="full-width [width:100%]">
-            <el-option label="Strict" value="strict" />
-            <el-option label="Open" value="open" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="允许联网">
-          <el-switch v-model="spaceForm.allowWebSearch" />
-        </el-form-item>
-        <el-form-item label="要求引用">
-          <el-switch v-model="spaceForm.requireCitation" />
-        </el-form-item>
-      </el-form>
+      <!-- Custom Tabs -->
+      <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
+        <button v-for="tab in detailTabs" :key="tab.name" @click="activeTab = tab.name" class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none" :class="activeTab === tab.name ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] bg-transparent'">{{ tab.label }}</button>
+      </div>
+
+      <!-- Docs Tab -->
+      <div v-show="activeTab === 'docs'">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
+          <div class="font-semibold text-[15px] text-[#1d1d1f] mb-4">上传课程资料</div>
+
+          <el-upload
+            drag
+            multiple
+            :auto-upload="false"
+            :on-change="onFileChange"
+            :file-list="pendingFiles"
+            accept=".pdf,.docx,.txt,.md"
+          >
+            <UploadFilled class="w-8 h-8 text-[#c3cad6] mb-2" />
+            <div class="text-sm text-[#6e6e73]">拖拽文件到这里，或点击选择文件</div>
+            <template #tip>
+              <div class="text-xs text-[#aeaeb2] mt-2">支持 PDF、DOCX、TXT、Markdown，适合教材、讲义、参考资料</div>
+            </template>
+          </el-upload>
+
+          <div v-if="pendingFiles.length > 0" class="mt-3 flex justify-end gap-2 items-center">
+            <select v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[160px]">
+              <option value="textbook">教材</option>
+              <option value="lecture">讲义</option>
+              <option value="reference">参考书</option>
+              <option value="exercise">习题集</option>
+              <option value="other">其他</option>
+            </select>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="uploading" @click="uploadFiles">
+              {{ uploading ? '上传中...' : `上传 ${pendingFiles.length} 个文件` }}
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-5 gap-3 mb-4">
+          <div class="p-4 rounded-[14px] bg-gradient-to-br from-[#f8fafc] to-[#eef2ff] border border-[#dbe5f0]">
+            <div class="text-[13px] text-[#6b7280]">文档总数</div>
+            <div class="mt-2 text-[28px] font-bold text-[#111827]">{{ docStatusSummary.total }}</div>
+          </div>
+          <div class="p-4 rounded-[14px] bg-gradient-to-br from-[#effaf3] to-[#dcfce7] border border-[#bbf7d0]">
+            <div class="text-[13px] text-[#6b7280]">已就绪</div>
+            <div class="mt-2 text-[28px] font-bold text-[#111827]">{{ docStatusSummary.ready }}</div>
+          </div>
+          <div class="p-4 rounded-[14px] bg-gradient-to-br from-[#fff8eb] to-[#fef3c7] border border-[#fde68a]">
+            <div class="text-[13px] text-[#6b7280]">处理中</div>
+            <div class="mt-2 text-[28px] font-bold text-[#111827]">{{ docStatusSummary.pending + docStatusSummary.processing }}</div>
+          </div>
+          <div class="p-4 rounded-[14px] bg-gradient-to-br from-[#fff1f2] to-[#ffe4e6] border border-[#fecdd3]">
+            <div class="text-[13px] text-[#6b7280]">失败</div>
+            <div class="mt-2 text-[28px] font-bold text-[#111827]">{{ docStatusSummary.failed }}</div>
+          </div>
+          <div class="p-4 rounded-[14px] bg-gradient-to-br from-[#eef6ff] to-[#dbeafe] border border-[#bfdbfe]">
+            <div class="text-[13px] text-[#6b7280]">总分块</div>
+            <div class="mt-2 text-[28px] font-bold text-[#111827]">{{ docStatusSummary.totalChunks }}</div>
+          </div>
+        </div>
+
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
+          <div class="flex justify-between items-center gap-3 mb-4">
+            <span class="font-semibold text-[15px] text-[#1d1d1f]">文档处理结果</span>
+            <div class="flex items-center gap-2">
+              <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docsLoading" @click="loadDocuments">刷新</button>
+              <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</button>
+              <button class="h-[32px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" :disabled="docActionLoading" @click="reprocessAllDocuments">
+                全部重处理
+              </button>
+            </div>
+          </div>
+
+          <div v-if="documents.length === 0 && !docsLoading" class="flex flex-col items-center justify-center py-12 text-[#6e6e73]">
+            <svg class="w-10 h-10 text-[#c3cad6] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <p class="text-sm">暂无文档，请先上传课程资料</p>
+          </div>
+
+          <div v-else class="overflow-x-auto" v-loading="docsLoading">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-black/[0.06]">
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">任务 ID</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">文档 ID</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">类型</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">状态</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">分块数</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">创建时间</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">错误信息</th>
+                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in documents" :key="row.id" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
+                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.id }}</td>
+                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.documentId }}</td>
+                  <td class="py-3 px-2 text-[#1d1d1f]">{{ docTypeLabel(row.docType) }}</td>
+                  <td class="py-3 px-2">
+                    <span :class="statusBadgeClass(row.status)" class="text-xs px-2 py-0.5 rounded-full font-medium">{{ statusLabel(row.status) }}</span>
+                  </td>
+                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.chunkCount }}</td>
+                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.createdAt }}</td>
+                  <td class="py-3 px-2">
+                    <span v-if="row.errorMessage" class="text-xs text-[#d93025] bg-[#fef0f0] px-2 py-1 rounded">{{ row.errorMessage }}</span>
+                    <span v-else class="text-[#aeaeb2]">-</span>
+                  </td>
+                  <td class="py-3 px-2">
+                    <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id" @click="reprocessDocument(row)">
+                      {{ docRowLoadingId === row.id ? '处理中...' : '重处理' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Chat Tab -->
+      <div v-show="activeTab === 'chat'">
+        <div class="flex flex-col h-[520px] border border-black/[0.06] rounded-[16px] overflow-hidden">
+          <div ref="chatMessagesRef" class="flex-1 overflow-y-auto p-4 bg-[#f8fafc]">
+            <div v-if="chatMessages.length === 0" class="text-center py-16 text-[#6b7280]">
+              <ChatDotRound class="w-12 h-12 text-[#c3cad6] mx-auto mb-3" />
+              <p class="text-sm">向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
+              <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                <button v-for="suggestion in suggestions" :key="suggestion" @click="askQuestion(suggestion)" class="h-[30px] px-3 rounded-full text-xs font-medium text-[#1d1d1f] bg-white border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#f5f5f7] active:scale-[0.96] transition-all cursor-pointer">
+                  {{ suggestion }}
+                </button>
+              </div>
+            </div>
+
+            <div v-for="(msg, idx) in chatMessages" :key="idx" class="mb-3 flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
+              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm leading-[1.7]" :class="msg.role === 'user' ? 'bg-gradient-to-b from-[#3898ff] to-[#007aff] text-white' : 'bg-white border border-black/[0.06] text-[#1d1d1f]'">
+                <div v-if="msg.role === 'user'">{{ msg.content }}</div>
+                <div v-else v-html="renderMarkdown(msg.content)"></div>
+                <div v-if="msg.citations && msg.citations.length" class="mt-2 pt-2 border-t border-black/[0.06]">
+                  <span class="text-xs text-[#6b7280] mr-1">引用来源：</span>
+                  <span v-for="citation in msg.citations" :key="citation.index" class="inline-block text-xs bg-[#f0f5ff] text-[#007aff] px-1.5 py-0.5 rounded m-0.5">
+                    [{{ citation.index }}] {{ citation.docName }} {{ citation.chapterPath }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="chatLoading" class="mb-3 flex justify-start">
+              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm bg-white border border-black/[0.06]">
+                <span class="text-[#6b7280] italic">AI 正在思考...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2 p-3 bg-white border-t border-black/[0.06] items-end">
+            <textarea
+              v-model="chatInput"
+              rows="2"
+              placeholder="输入问题，例如：什么是二叉搜索树？"
+              :disabled="chatLoading"
+              @keydown.enter.ctrl="sendChat"
+              class="flex-1 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"
+            ></textarea>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
+              {{ chatLoading ? '发送中...' : '发送' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annotations Tab -->
+      <div v-show="activeTab === 'annotations'">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
+          <div class="flex justify-between items-center gap-3 mb-4">
+            <span class="font-semibold text-[15px] text-[#1d1d1f]">知识分块（{{ chunks.length }}）</span>
+            <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="chunksLoading" @click="loadChunksAndAnnotations">刷新</button>
+          </div>
+
+          <div v-if="chunks.length === 0 && !chunksLoading" class="flex flex-col items-center justify-center py-12 text-[#6e6e73]">
+            <svg class="w-10 h-10 text-[#c3cad6] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <p class="text-sm">暂无分块数据，请先上传并处理文档</p>
+          </div>
+
+          <div v-else class="max-h-[520px] overflow-y-auto">
+            <div v-for="chunk in chunks" :key="chunk.id" class="py-3.5 px-1 border-b border-[#eef2f7] last:border-b-0">
+              <div>
+                <span class="text-xs text-[#6b7280]">
+                  [{{ chunk.id }}]
+                  {{ chunk.chapterPath || '未分类' }}
+                  <template v-if="chunk.pageRange"> / {{ chunk.pageRange }}</template>
+                </span>
+                <p class="text-sm text-[#1d1d1f] mt-1">{{ chunk.contentPreview || '' }}</p>
+              </div>
+              <div class="flex gap-2 mt-2">
+                <button class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'important')">重点</button>
+                <button class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#ef4444] bg-[#fef2f2] border border-[#fecaca] hover:bg-[#fee2e2] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'error_prone')">易错</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Create/Edit Dialog -->
+    <AppModal v-model="dialogVisible" :title="editingSpace ? '编辑课程空间' : '创建课程空间'" width="520px">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称 <span class="text-[#ef4444]">*</span></label>
+          <input v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学期</label>
+          <input v-model="spaceForm.term" placeholder="例如：2024-2025-2" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名</label>
+          <input v-model="spaceForm.courseName" placeholder="例如：数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
+          <textarea v-model="spaceForm.description" rows="2" class="w-full px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">可见范围</label>
+          <select v-model="spaceForm.docVisibility" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <option value="public">公开</option>
+            <option value="class">班级可见</option>
+            <option value="private">仅教师</option>
+          </select>
+        </div>
+        <div v-if="spaceForm.docVisibility === 'class'">
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">绑定班级</label>
+          <select v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <option v-for="cls in teacherClasses" :key="cls.id" :value="cls.id">{{ cls.name }}{{ cls.courseName ? ' / ' + cls.courseName : '' }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">默认模式</label>
+          <select v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <option value="strict">Strict</option>
+            <option value="open">Open</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-6">
+          <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
+            <input type="checkbox" v-model="spaceForm.allowWebSearch" class="w-4 h-4 rounded accent-[#007aff]" />
+            允许联网
+          </label>
+          <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
+            <input type="checkbox" v-model="spaceForm.requireCitation" class="w-4 h-4 rounded accent-[#007aff]" />
+            要求引用
+          </label>
+        </div>
+      </div>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" :disabled="!spaceForm.name" @click="saveSpace">保存</el-button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="dialogVisible = false">取消</button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!spaceForm.name || saving" @click="saveSpace">{{ saving ? '保存中...' : '保存' }}</button>
       </template>
-    </el-dialog>
+    </AppModal>
   </div>
 </template>
 
@@ -325,6 +338,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Calendar, ChatDotRound, MoreFilled, Plus, Reading, UploadFilled } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
+import AppModal from '../../components/AppModal.vue'
 import { useUserStore } from '@/store'
 import {
   createAnnotation,
@@ -350,6 +364,13 @@ const loading = ref(false)
 const teacherClasses = ref([])
 const selectedSpace = ref(null)
 const activeTab = ref('docs')
+const spaceDropdownId = ref(null)
+
+const detailTabs = [
+  { name: 'docs', label: '文档管理' },
+  { name: 'chat', label: '知识问答' },
+  { name: 'annotations', label: '分块标注' },
+]
 
 const documents = ref([])
 const docsLoading = ref(false)
@@ -359,7 +380,6 @@ const docRowLoadingId = ref(null)
 const pendingFiles = ref([])
 const uploading = ref(false)
 const uploadDocType = ref('textbook')
-
 const chunks = ref([])
 const chunksLoading = ref(false)
 
@@ -421,23 +441,24 @@ function visibilityLabel(visibility) {
   return '仅教师'
 }
 
-function visibilityTagType(visibility) {
-  if (visibility === 'public') return 'success'
-  if (visibility === 'class') return 'warning'
-  return 'info'
+function visibilityBadgeClass(visibility) {
+  if (visibility === 'public') return 'bg-[#dcfce7] text-[#166534]'
+  if (visibility === 'class') return 'bg-[#fef3c7] text-[#92400e]'
+  return 'bg-[#e0e7ff] text-[#3730a3]'
 }
 
-function statusTagType(status) {
-  return {
-    READY: 'success',
-    completed: 'success',
-    PROCESSING: '',
-    processing: '',
-    PENDING: 'warning',
-    pending: 'warning',
-    FAILED: 'danger',
-    failed: 'danger',
-  }[status] || 'info'
+function statusBadgeClass(status) {
+  const map = {
+    READY: 'bg-[#dcfce7] text-[#166534]',
+    completed: 'bg-[#dcfce7] text-[#166534]',
+    PROCESSING: 'bg-[#e0e7ff] text-[#3730a3]',
+    processing: 'bg-[#e0e7ff] text-[#3730a3]',
+    PENDING: 'bg-[#fef3c7] text-[#92400e]',
+    pending: 'bg-[#fef3c7] text-[#92400e]',
+    FAILED: 'bg-[#fee2e2] text-[#991b1b]',
+    failed: 'bg-[#fee2e2] text-[#991b1b]',
+  }
+  return map[status] || 'bg-[#f3f4f6] text-[#374151]'
 }
 
 function statusLabel(status) {
@@ -464,12 +485,16 @@ function docTypeLabel(docType) {
   }[docType] || docType || '其他'
 }
 
+function toggleSpaceDropdown(id) {
+  spaceDropdownId.value = spaceDropdownId.value === id ? null : id
+}
+
 function renderMarkdown(text) {
   if (!text) return ''
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br>')
-    .replace(/\[(\d+)\]/g, '<sup class="[color:#1a73e8] [cursor:pointer]">[$1]</sup>')
+    .replace(/\[(\d+)\]/g, '<sup class="text-[#007aff] cursor-pointer">[$1]</sup>')
 }
 
 async function loadSpaces() {
@@ -557,7 +582,7 @@ async function saveSpace() {
 
 async function confirmDeleteSpace(space) {
   try {
-    await ElMessageBox.confirm(`确定删除“${space.name}”吗？`, '确认删除', { type: 'warning' })
+    await ElMessageBox.confirm(`确定删除"${space.name}"吗？`, '确认删除', { type: 'warning' })
     await deleteCourseSpace(space.id)
     ElMessage.success('课程空间已删除')
     if (selectedSpace.value?.id === space.id) {
@@ -779,5 +804,3 @@ onUnmounted(() => {
   if (refreshTimer) clearInterval(refreshTimer)
 })
 </script>
-
-

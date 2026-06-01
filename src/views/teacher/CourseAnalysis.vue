@@ -1,81 +1,79 @@
 <template>
-  <div class="course-analysis [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
-    <page-header
-      class="my-page-header"
-      title="课程分析"
-      description="基于真实数据的课程整体分析和AI教学建议"
-    />
+  <div class="min-w-0">
+    <page-header title="课程分析" description="基于真实数据的课程整体分析和AI教学建议" />
 
-    <div class="analysis-content [display:flex] [flex-direction:column] [gap:20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]" v-loading="pageLoading">
+    <div class="flex flex-col gap-5" v-loading="pageLoading">
       <!-- 总体概览 -->
-      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>课程总体情况</span></div>
-        </template>
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">班级数量</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ overview.classCount }}</div>
-              <div class="statistic-description [font-size:12px] [color:#9aa0a6]">共计{{ overview.classCount }}个教学班</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">学生总数</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ overview.studentCount }}</div>
-              <div class="statistic-description [font-size:12px] [color:#9aa0a6]">累计注册学生</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">实验平均完成率</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ overview.avgCompletionRate }}%</div>
-              <div class="statistic-description [font-size:12px] [color:#9aa0a6]">基于全部实验统计</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">课程平均分</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ overview.avgScore }}</div>
-              <div class="statistic-description [font-size:12px] [color:#9aa0a6]">已评分学生均分</div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">课程总体情况</span>
+        </div>
+        <div class="grid grid-cols-4 gap-5 max-[768px]:grid-cols-2 max-[480px]:grid-cols-1">
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73] mb-2">班级数量</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f]">{{ overview.classCount }}</div>
+            <div class="text-[12px] text-[#aeaeb2] mt-1">共计{{ overview.classCount }}个教学班</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73] mb-2">学生总数</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f]">{{ overview.studentCount }}</div>
+            <div class="text-[12px] text-[#aeaeb2] mt-1">累计注册学生</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73] mb-2">实验平均完成率</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f]">{{ overview.avgCompletionRate }}%</div>
+            <div class="text-[12px] text-[#aeaeb2] mt-1">基于全部实验统计</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73] mb-2">课程平均分</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f]">{{ overview.avgScore }}</div>
+            <div class="text-[12px] text-[#aeaeb2] mt-1">已评分学生均分</div>
+          </div>
+        </div>
+      </div>
 
       <!-- 班级对比 -->
-      <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>实验完成率对比</span></div>
-        </template>
-        <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="classComparisonChartRef"></div>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">实验完成率对比</span>
+        </div>
+        <div class="h-[320px] w-full" ref="classComparisonChartRef"></div>
+      </div>
 
       <!-- 实验成绩分布 -->
-      <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验成绩分布</span></div>
-        </template>
-        <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="experimentScoreChartRef"></div>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">各实验成绩分布</span>
+        </div>
+        <div class="h-[320px] w-full" ref="experimentScoreChartRef"></div>
+      </div>
 
       <!-- AI教学建议 -->
-      <el-card class="ai-recommendation-card">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>AI教学建议</span>
-            <el-button type="primary" size="small" :loading="aiLoading" @click="generateAIRecommendation">
-              {{ aiLoading ? '生成中..' : '生成教学建议' }}
-            </el-button>
-          </div>
-        </template>
-        <div class="ai-content [display:flex] [flex-direction:column] [gap:18px] [padding:10px_0]">
-          <div v-if="aiContent" class="ai-text [line-height:1.9] [color:#1f344c] [font-size:14px] [line-height:1.8] [color:#202124]" v-html="renderedAiContent"></div>
-          <div v-else-if="aiLoading"><el-skeleton :rows="8" animated /></div>
-          <el-empty v-else description="点击生成教学建议按钮获取AI分析结果" />
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">AI教学建议</span>
+          <button :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
+            {{ aiLoading ? '生成中..' : '生成教学建议' }}
+          </button>
         </div>
-      </el-card>
+        <div class="flex flex-col gap-4">
+          <div v-if="aiContent" class="prose prose-sm max-w-none text-[14px] leading-[1.8] text-[#1d1d1f]" v-html="renderedAiContent"></div>
+          <div v-else-if="aiLoading" class="space-y-3 py-4">
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[90%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[75%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[85%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[60%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[80%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[70%]"></div>
+            <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[50%]"></div>
+          </div>
+          <div v-else class="py-12 text-center">
+            <div class="text-[40px] mb-3 opacity-40">🤖</div>
+            <p class="text-[14px] text-[#aeaeb2]">点击生成教学建议按钮获取AI分析结果</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -344,5 +342,3 @@ onBeforeUnmount(() => {
   scoreChartInstance?.dispose()
 })
 </script>
-
-

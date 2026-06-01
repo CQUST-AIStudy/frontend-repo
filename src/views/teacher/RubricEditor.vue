@@ -1,62 +1,132 @@
 <template>
-  <div class="rubric-editor [padding:0] [&_.el-card]:[border-radius:12px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
-    <el-page-header @back="$router.back()" title="返回" content="评分标准管理" />
+  <div class="rubric-editor">
+    <!-- Page Header -->
+    <div class="flex items-center gap-3 mb-5">
+      <button @click="$router.back()" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none">
+        <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h1 class="text-[20px] font-semibold text-[#1d1d1f]">评分标准管理</h1>
+    </div>
 
-    <el-card class="[margin-top:16px]">
-      <template #header>
-        <div class="[display:flex] [justify-content:space-between] [align-items:center]">
-          <span>我的评分标准</span>
-          <div class="[display:flex] [gap:8px] [align-items:center]">
-            <el-button @click="pickTemplate" :loading="drafting">模板生成</el-button>
-            <el-button type="primary" @click="showCreate">+ 新建标准</el-button>
-          </div>
+    <!-- Rubrics Card -->
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div class="flex justify-between items-center mb-5">
+        <span class="text-[15px] font-medium text-[#1d1d1f]">我的评分标准</span>
+        <div class="flex gap-2 items-center">
+          <button @click="pickTemplate" :disabled="drafting"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed">
+            <span v-if="drafting" class="inline-flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round"/></svg>
+              生成中...
+            </span>
+            <span v-else>模板生成</span>
+          </button>
+          <button @click="showCreate"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+            + 新建标准
+          </button>
         </div>
-      </template>
-      <el-table :data="rubrics" v-loading="loading" stripe>
-        <el-table-column prop="name" label="名称" />
-        <el-table-column prop="subject" label="学科" width="150" />
-        <el-table-column label="维度数" width="80">
-          <template #default="{row}">{{ row.dimensions?.length || 0 }}</template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column label="操作" width="120">
-          <template #default="{row}">
-            <el-button link type="primary" @click="editRubric(row)">编辑</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-
-    <!-- Create/Edit Dialog -->
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑评分标准' : '新建评分标准'" width="700px">
-      <el-form :model="form" label-width="80px">
-        <el-form-item label="名称"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="学科"><el-input v-model="form.subject" /></el-form-item>
-        <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="2" /></el-form-item>
-        <el-form-item label="自定义提示">
-          <el-input v-model="form.customPrompt" type="textarea" :rows="3"
-            placeholder="输入自定义评分提示词，AI 评分时会参考此内容（如：重点关注代码注释质量、要求实验数据真实等）" />
-          <div class="[font-size:12px] [color:#9aa0a6] [margin-top:4px]">此提示词将作为 AI 评分的额外指导，影响所有维度的评分</div>
-        </el-form-item>
-      </el-form>
-
-      <h4 class="[margin:16px_0_8px]">评分维度 <el-tag :type="weightSum === 100 ? 'success' : 'danger'" size="small">权重合计: {{ weightSum }}%</el-tag></h4>
-
-      <div v-for="(dim, i) in form.dimensions" :key="i" class="[display:flex] [gap:8px] [margin-bottom:8px] [align-items:center]">
-        <el-input v-model="dim.name" placeholder="维度名称" class="[width:150px]" />
-        <el-input v-model="dim.description" placeholder="描述" class="[flex:1]" />
-        <el-input-number v-model="dim.maxScore" :min="1" :max="100" placeholder="满分" class="[width:100px]" />
-        <el-input-number v-model="dim.weight" :min="1" :max="100" placeholder="权重%" class="[width:100px]" />
-        <el-button type="danger" link @click="form.dimensions.splice(i, 1)">删除</el-button>
       </div>
-      <el-button @click="addDimension" type="dashed" class="[width:100%]">+ 添加维度</el-button>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <svg class="w-6 h-6 animate-spin text-[#007aff]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="12" stroke-linecap="round"/></svg>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="!rubrics.length" class="flex flex-col items-center justify-center py-16 text-[#86868b]">
+        <svg class="w-12 h-12 mb-3 text-[#d2d2d7]" viewBox="0 0 48 48" fill="none"><rect x="8" y="6" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 16h16M16 24h12M16 32h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <p class="text-sm">暂无评分标准</p>
+      </div>
+
+      <!-- Table -->
+      <div v-else class="overflow-x-auto rounded-[12px] border border-black/[0.04]">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-[#f5f5f7]/80">
+              <th class="text-left px-4 py-3 font-medium text-[#6e6e73]">名称</th>
+              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[150px]">学科</th>
+              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[80px]">维度数</th>
+              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[180px]">创建时间</th>
+              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[120px]">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in rubrics" :key="row.id" class="border-t border-black/[0.04] hover:bg-[#f5f5f7]/50 transition-colors">
+              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.name }}</td>
+              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.subject }}</td>
+              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.dimensions?.length || 0 }}</td>
+              <td class="px-4 py-3 text-[#6e6e73]">{{ row.createdAt }}</td>
+              <td class="px-4 py-3">
+                <button @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <AppModal v-model="dialogVisible" :title="editingId ? '编辑评分标准' : '新建评分标准'" width="700px">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称</label>
+          <input v-model="form.name" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学科</label>
+          <input v-model="form.subject" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
+          <textarea v-model="form.description" rows="2" class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">自定义提示</label>
+          <textarea v-model="form.customPrompt" rows="3" placeholder="输入自定义评分提示词，AI 评分时会参考此内容（如：重点关注代码注释质量、要求实验数据真实等）"
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+          <p class="text-xs text-[#aeaeb2] mt-1">此提示词将作为 AI 评分的额外指导，影响所有维度的评分</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mt-5 mb-2">
+        <h4 class="text-[15px] font-medium text-[#1d1d1f]">评分维度</h4>
+        <span :class="[
+          'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+          weightSum === 100 ? 'bg-[rgba(52,199,89,0.1)] text-[#34c759]' : 'bg-[rgba(255,59,48,0.08)] text-[#ff3b30]'
+        ]">权重合计: {{ weightSum }}%</span>
+      </div>
+
+      <div v-for="(dim, i) in form.dimensions" :key="i" class="flex gap-2 mb-2 items-center">
+        <input v-model="dim.name" placeholder="维度名称"
+          class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        <input v-model="dim.description" placeholder="描述"
+          class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        <input v-model.number="dim.maxScore" type="number" min="1" max="100" placeholder="满分"
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        <input v-model.number="dim.weight" type="number" min="1" max="100" placeholder="权重%"
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+        <button @click="form.dimensions.splice(i, 1)"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</button>
+      </div>
+      <button @click="addDimension"
+        class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</button>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveRubric" :disabled="weightSum !== 100" :loading="saving">保存</el-button>
+        <button @click="dialogVisible = false"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">取消</button>
+        <button @click="saveRubric" :disabled="weightSum !== 100 || saving"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+          <span v-if="saving" class="inline-flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round"/></svg>
+            保存中...
+          </span>
+          <span v-else>保存</span>
+        </button>
       </template>
-    </el-dialog>
-    <input ref="templateInput" type="file" accept=".pdf,.docx,.doc" class="[display:none]" @change="onTemplatePicked" />
+    </AppModal>
+
+    <input ref="templateInput" type="file" accept=".pdf,.docx,.doc" class="hidden" @change="onTemplatePicked" />
   </div>
 </template>
 
@@ -64,6 +134,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getRubrics, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
+import AppModal from '../../components/AppModal.vue'
 
 const rubrics = ref([])
 const loading = ref(false)
@@ -165,5 +236,3 @@ async function saveRubric() {
 
 onMounted(loadRubrics)
 </script>
-
-

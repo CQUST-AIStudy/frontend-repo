@@ -1,99 +1,109 @@
 <template>
-  <div class="department-teachers [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
+  <div class="department-teachers">
     <page-header
       class="my-page-header"
       title="系部教师"
       description="教师管理和教学数据概览"
     />
 
-    <div class="teachers-content [display:flex] [flex-direction:column] [gap:20px]">
+    <div class="flex flex-col gap-5">
       <!-- 教师统计信息 -->
-      <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>教师队伍概况</span></div>
-        </template>
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">教师总数</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ teachers.length }}</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">管理班级数</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ totalClasses }}</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">学生总数</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ totalStudents }}</div>
-            </div>
-          </el-col>
-          <el-col :span="6">
-            <div class="statistic-item [text-align:center] [padding:20px_0]">
-              <div class="statistic-title [font-size:13px] [color:#5f6368]">实验总数</div>
-              <div class="statistic-value [font-size:28px] [font-weight:700] [color:#202124] [margin:10px_0]">{{ totalExperiments }}</div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">教师队伍概况</span>
+        </div>
+        <div class="grid grid-cols-4 gap-5">
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73]">教师总数</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f] my-2.5">{{ teachers.length }}</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73]">管理班级数</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f] my-2.5">{{ totalClasses }}</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73]">学生总数</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f] my-2.5">{{ totalStudents }}</div>
+          </div>
+          <div class="text-center py-5">
+            <div class="text-[13px] text-[#6e6e73]">实验总数</div>
+            <div class="text-[28px] font-bold text-[#1d1d1f] my-2.5">{{ totalExperiments }}</div>
+          </div>
+        </div>
+      </div>
 
       <!-- 教师列表 -->
-      <el-card class="teachers-card">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>教师列表</span>
-            <el-input
-              v-model="searchQuery"
-              placeholder="搜索教师姓名"
-              prefix-icon="Search"
-              clearable
-              class="[width:220px]"
-            />
-          </div>
-        </template>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">教师列表</span>
+          <input
+            v-model="searchQuery"
+            placeholder="搜索教师姓名"
+            class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
 
-        <el-table :data="filteredTeachers" class="[width:100%]" v-loading="loading" stripe>
-          <el-table-column prop="name" label="姓名" width="120" />
-          <el-table-column prop="username" label="用户名" width="140" />
-          <el-table-column label="管理班级">
-            <template #default="scope">
-              <el-tag
-                v-for="cls in scope.row.classes"
-                :key="cls.id"
-                class="course-tag [margin-right:5px] [margin-bottom:5px]"
-                type="info"
-                effect="plain"
-              >{{ cls.name }}</el-tag>
-              <span v-if="!scope.row.classes?.length" class="text-muted [color:#9aa0a6] [font-size:13px] [color:#909399]">暂无班级</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="学生数" width="100" align="center">
-            <template #default="scope">
-              {{ scope.row.studentCount || 0 }}
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="120">
-            <template #default="scope">
-              <el-button size="small" type="primary" link @click="viewTeacherClasses(scope.row)">查看班级</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+        <div v-if="loading" class="flex items-center justify-center py-12 text-[13px] text-[#6e6e73]">加载中...</div>
+        <table v-else class="w-full text-left text-[13px]">
+          <thead>
+            <tr class="border-b border-black/[0.06]">
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[120px]">姓名</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[140px]">用户名</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">管理班级</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px] text-center">学生数</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[120px]">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="teacher in filteredTeachers" :key="teacher.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3">{{ teacher.name }}</td>
+              <td class="py-3 px-3">{{ teacher.username }}</td>
+              <td class="py-3 px-3">
+                <div class="flex flex-wrap gap-1.5">
+                  <span v-for="cls in teacher.classes" :key="cls.id" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff]">{{ cls.name }}</span>
+                  <span v-if="!teacher.classes?.length" class="text-[13px] text-[#aeaeb2]">暂无班级</span>
+                </div>
+              </td>
+              <td class="py-3 px-3 text-center">{{ teacher.studentCount || 0 }}</td>
+              <td class="py-3 px-3">
+                <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewTeacherClasses(teacher)">查看班级</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- 教师班级详情弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="'教师班级 - ' + selectedTeacher?.name" width="60%">
-      <el-table :data="selectedTeacher?.classes || []" stripe>
-        <el-table-column prop="name" label="班级名称" />
-        <el-table-column prop="classCode" label="班级代码" width="140" />
-        <el-table-column prop="studentCount" label="学生数" width="100" />
-        <el-table-column prop="courseName" label="课程" width="140" />
-        <el-table-column prop="grade" label="年级" width="100" />
-      </el-table>
-    </el-dialog>
+    <div v-if="dialogVisible" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="dialogVisible = false"></div>
+      <div class="relative w-[60%] max-h-[80vh] rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 overflow-auto">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">教师班级 - {{ selectedTeacher?.name }}</span>
+          <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="dialogVisible = false">关闭</button>
+        </div>
+        <table class="w-full text-left text-[13px]">
+          <thead>
+            <tr class="border-b border-black/[0.06]">
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">班级名称</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[140px]">班级代码</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">学生数</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[140px]">课程</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">年级</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="cls in (selectedTeacher?.classes || [])" :key="cls.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3">{{ cls.name }}</td>
+              <td class="py-3 px-3">{{ cls.classCode }}</td>
+              <td class="py-3 px-3">{{ cls.studentCount }}</td>
+              <td class="py-3 px-3">{{ cls.courseName }}</td>
+              <td class="py-3 px-3">{{ cls.grade }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -188,5 +198,3 @@ onMounted(() => {
   loadExperimentCount()
 })
 </script>
-
-

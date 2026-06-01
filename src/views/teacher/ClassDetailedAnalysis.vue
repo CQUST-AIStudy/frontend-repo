@@ -1,418 +1,416 @@
 <template>
-  <div class="class-detailed-analysis [height:100%]">
+  <div class="h-full">
     <page-header
-        class="my-page-header [padding:20px]"
+        class="p-5"
         :title="showDetailedAnalysis ? '班级详细分析' : '班级分析'"
         :description="showDetailedAnalysis ? `${currentClassName} - 学习情况与能力趋势` : '查看班级学生的学习情况和能力趋势'"
     >
-      <el-button v-if="showDetailedAnalysis" @click="backToWelcome">返回班级列表</el-button>
+      <button v-if="showDetailedAnalysis" @click="backToWelcome"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+        返回班级列表
+      </button>
     </page-header>
 
-    <div class="analysis-content [padding:0_20px_20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
+    <div class="px-5 pb-5 bg-[#f5f7fa] rounded-[4px] leading-relaxed">
       <!-- 欢迎页面 - 未选择班级时显示-->
-      <div v-if="!showDetailedAnalysis && !loading" class="welcome-page [margin:0_0_30px_0]">
-        <el-row :gutter="20">
-          <el-col :span="24">
-            <el-card class="welcome-card [margin-bottom:30px]">
-              <template #header>
-                <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-weight:600] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                  <span>班级教学分析平台</span>
+      <div v-if="!showDetailedAnalysis && !loading" class="mb-8">
+        <div class="grid grid-cols-1 gap-5">
+          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+            <div class="flex justify-between items-center font-semibold gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+              <span>班级教学分析平台</span>
+            </div>
+            <div class="text-center py-5">
+              <DataAnalysis class="w-20 h-20 text-[#007aff] mx-auto mb-5" />
+              <h2 class="text-xl font-semibold text-[#1d1d1f] mb-2">欢迎使用班级详细分析工具</h2>
+              <p class="text-[#6e6e73] text-sm">这个工具可以帮助您深入了解班级学生的学习情况，发现潜在问题，并提供AI辅助的教学建议。</p>
+              <div class="flex flex-wrap justify-center gap-8 mt-8">
+                <div class="flex items-start gap-4 text-left max-w-[300px]">
+                  <DataAnalysis class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">班级整体分析</h3>
+                    <p class="text-xs text-[#6e6e73]">查看班级实验完成率、分数分布等关键指标</p>
+                  </div>
                 </div>
-              </template>
-              <div class="welcome-content [text-align:center] [padding:20px]">
-                <el-icon class="welcome-icon [font-size:80px] [color:#409EFF] [margin-bottom:20px]"><DataAnalysis /></el-icon>
-                <h2>欢迎使用班级详细分析工具</h2>
-                <p>这个工具可以帮助您深入了解班级学生的学习情况，发现潜在问题，并提供AI辅助的教学建议。</p>
-                <div class="feature-list [display:flex] [flex-wrap:wrap] [justify-content:center] [gap:30px] [margin-top:30px]">
-                  <div class="feature-item [display:flex] [align-items:flex-start] [gap:15px] [text-align:left] [max-width:300px]">
-                    <el-icon><DataAnalysis /></el-icon>
-                    <div class="feature-text">
-                      <h3>班级整体分析</h3>
-                      <p>查看班级实验完成率、分数分布等关键指标</p>
-                    </div>
+                <div class="flex items-start gap-4 text-left max-w-[300px]">
+                  <User class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">学生个体分析</h3>
+                    <p class="text-xs text-[#6e6e73]">查看每位学生的学习态度、能力水平和潜在问题</p>
                   </div>
-                  <div class="feature-item [display:flex] [align-items:flex-start] [gap:15px] [text-align:left] [max-width:300px]">
-                    <el-icon><User /></el-icon>
-                    <div class="feature-text">
-                      <h3>学生个体分析</h3>
-                      <p>查看每位学生的学习态度、能力水平和潜在问题</p>
-                    </div>
-                  </div>
-                  <div class="feature-item [display:flex] [align-items:flex-start] [gap:15px] [text-align:left] [max-width:300px]">
-                    <el-icon><ChatDotRound /></el-icon>
-                    <div class="feature-text">
-                      <h3>AI教学建议</h3>
-                      <p>获取针对班级情况的个性化教学建议和改进方向</p>
-                    </div>
+                </div>
+                <div class="flex items-start gap-4 text-left max-w-[300px]">
+                  <ChatDotRound class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">AI教学建议</h3>
+                    <p class="text-xs text-[#6e6e73]">获取针对班级情况的个性化教学建议和改进方向</p>
                   </div>
                 </div>
               </div>
-            </el-card>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20" class="class-selection [margin-top:20px]">
-          <el-col :span="24">
-            <h2 class="selection-title [text-align:center] [margin-bottom:30px] [color:#303133] [font-size:22px]">请选择要分析的班级</h2>
-            <div class="selection-toolbar [display:flex] [justify-content:center] [gap:15px] [margin-bottom:20px]">
-              <el-input
-                  v-model="classSearchText"
-                  placeholder="搜索班级名称/课程"
-                  prefix-icon="Search"
-                  clearable
-                  class="[width:250px]"
-              />
-              <el-select v-model="classSortOption" placeholder="排序方式" class="[width:150px]">
-                <el-option label="按名称排序" value="name" />
-                <el-option label="按学生数量排序" value="studentCount" />
-                <el-option label="按学期排序" value="semester" />
-              </el-select>
             </div>
-          </el-col>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <h2 class="text-center mb-8 text-[#303133] text-[22px] font-semibold">请选择要分析的班级</h2>
+          <div class="flex justify-center gap-4 mb-5">
+            <input
+                v-model="classSearchText"
+                placeholder="搜索班级名称/课程"
+                class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            />
+            <select v-model="classSortOption"
+              class="w-[150px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
+              <option value="name">按名称排序</option>
+              <option value="studentCount">按学生数量排序</option>
+              <option value="semester">按学期排序</option>
+            </select>
+          </div>
 
           <template v-if="filteredClasses.length">
-            <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="classItem in filteredClasses" :key="classItem.id" class="class-card-col [margin-bottom:20px]">
-              <el-card class="class-card [height:100%] [cursor:pointer] [transition:all_0.3s] [border:2px_solid_transparent] hover:[transform:translateY(-5px)] hover:[border-color:#409EFF] hover:[box-shadow:0_10px_15px_rgba(0,_0,_0,_0.1)] [width:100%] [min-height:380px] [display:flex] [flex-direction:column] [border:1px_solid_#dce5f0] [border-radius:24px] [background:radial-gradient(circle_at_top_right,_rgba(26,_115,_232,_0.08),_transparent_30%),_linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] [box-shadow:0_14px_36px_rgba(38,_61,_89,_0.07)]" shadow="hover" @click="viewDetailedAnalysis(classItem)">
-                <div class="class-card-content [display:flex] [flex-direction:column] [height:100%]">
-                  <h3>{{ classItem.name }}</h3>
-                  <div class="class-info [flex-grow:1] [margin-bottom:15px]">
-                    <p><strong>学生数量:</strong> {{ classItem.studentCount }}人</p>
-                    <p><strong>课程:</strong> {{ classItem.courseName || '数据结构' }}</p>
-                    <p><strong>学期:</strong> {{ classItem.semester || '2023-2024' }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              <div v-for="classItem in filteredClasses" :key="classItem.id"
+                class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(0,122,255,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                @click="viewDetailedAnalysis(classItem)">
+                <div class="flex flex-col h-full">
+                  <h3 class="text-base font-semibold text-[#1d1d1f] mb-3">{{ classItem.name }}</h3>
+                  <div class="flex-grow mb-4 space-y-2 text-sm text-[#6e6e73]">
+                    <p><strong class="text-[#1d1d1f]">学生数量:</strong> {{ classItem.studentCount }}人</p>
+                    <p><strong class="text-[#1d1d1f]">课程:</strong> {{ classItem.courseName || '数据结构' }}</p>
+                    <p><strong class="text-[#1d1d1f]">学期:</strong> {{ classItem.semester || '2023-2024' }}</p>
                   </div>
-                  <div class="card-actions [display:flex] [justify-content:space-between] [gap:10px] [margin-top:auto] [flex-wrap:wrap] [padding-top:6px]">
-                    <el-button type="primary" @click.stop="viewDetailedAnalysis(classItem)">详细分析</el-button>
-                    <el-button type="info" @click.stop="quickViewAnalysis(classItem)">快速分析</el-button>
+                  <div class="flex justify-between gap-2.5 mt-auto pt-1.5 flex-wrap">
+                    <button @click.stop="viewDetailedAnalysis(classItem)"
+                      class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                      详细分析
+                    </button>
+                    <button @click.stop="quickViewAnalysis(classItem)"
+                      class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+                      快速分析
+                    </button>
                   </div>
                 </div>
-              </el-card>
-            </el-col>
+              </div>
+            </div>
           </template>
 
-          <el-col :span="24" v-if="!filteredClasses.length && !loading">
-            <el-empty description="未找到匹配的班级" />
-          </el-col>
-        </el-row>
+          <div v-if="!filteredClasses.length && !loading" class="flex flex-col items-center justify-center py-16 text-[#6e6e73]">
+            <svg class="w-16 h-16 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+            <p class="text-sm">未找到匹配的班级</p>
+          </div>
+        </div>
       </div>
 
       <!-- 班级列表 -->
-      <el-card v-if="showDetailedAnalysis" class="class-list-card [margin-bottom:20px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>我的教学班</span>
-            <el-button type="primary" @click="refreshClassList">刷新</el-button>
+      <div v-if="showDetailedAnalysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="font-semibold text-[#1d1d1f]">我的教学班</span>
+          <button @click="refreshClassList"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+            刷新
+          </button>
+        </div>
+
+        <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
+          <div class="w-full space-y-4">
+            <div v-for="i in 5" :key="i" class="h-5 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 8) + '%' }"></div>
           </div>
-        </template>
-
-        <div v-if="loading" class="loading-container [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
-          <el-skeleton class="[width:100%]" :rows="5" animated />
         </div>
 
-        <div v-else-if="!classList.length" class="empty-data [padding:40px_0] [display:flex] [justify-content:center] [align-items:center]">
-          <el-empty description="暂无教学班级" />
+        <div v-else-if="!classList.length" class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
+          <svg class="w-16 h-16 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+          <p class="text-sm">暂无教学班级</p>
         </div>
 
-        <el-table v-else :data="classList" class="[width:100%]" @row-click="handleClassRowClick">
-          <el-table-column prop="name" label="班级名称" />
-          <el-table-column prop="studentCount" label="学生人数" width="120" />
-          <el-table-column prop="courseName" label="课程" width="180" />
-          <el-table-column prop="semester" label="学期" width="120" />
-          <el-table-column label="操作" width="200" fixed="right">
-            <template #default="scope">
-              <el-button type="primary" link @click.stop="quickViewAnalysis(scope.row)">快速分析</el-button>
-              <el-button type="primary" link @click.stop="viewDetailedAnalysis(scope.row)">详细分析</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-black/[0.06]">
+                <th class="text-left py-3 px-4 font-medium text-[#6e6e73]">班级名称</th>
+                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学生人数</th>
+                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[180px]">课程</th>
+                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学期</th>
+                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in classList" :key="row.id"
+                class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors cursor-pointer"
+                @click="handleClassRowClick(row)">
+                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.name }}</td>
+                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.studentCount }}</td>
+                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.courseName }}</td>
+                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.semester }}</td>
+                <td class="py-3 px-4">
+                  <button @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</button>
+                  <button @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <!-- 班级详细分析 -->
-      <el-card v-if="showDetailedAnalysis" class="detailed-analysis-card [margin-bottom:20px]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>{{ currentClassName }} 详细分析</span>
-            <el-button type="primary" @click="backToWelcome">返回班级列表</el-button>
+      <div v-if="showDetailedAnalysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+        <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="font-semibold text-[#1d1d1f]">{{ currentClassName }} 详细分析</span>
+          <button @click="backToWelcome"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+            返回班级列表
+          </button>
+        </div>
+
+        <!-- 班级选择 / 分析设置 -->
+        <div class="rounded-[16px] border border-black/[0.06] bg-white/80 p-5 mb-5">
+          <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+            <span class="font-medium text-[#1d1d1f] text-sm">分析设置</span>
           </div>
-        </template>
-
-        <!-- 班级选择 -->
-        <el-card class="filter-card [margin-bottom:20px] [border-radius:8px] [overflow:hidden]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-              <span>分析设置</span>
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+              <label class="text-sm text-[#6e6e73] whitespace-nowrap">实验</label>
+              <select v-model="filterForm.experimentId" @change="handleClassChange"
+                class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
+                <option value="">所有实验</option>
+                <option v-for="item in experimentList" :key="item.id" :value="item.id">{{ item.name }}</option>
+              </select>
             </div>
-          </template>
-
-          <el-form :model="filterForm" label-width="80px" label-position="left" inline>
-            <el-form-item label="实验">
-              <el-select
-                  v-model="filterForm.experimentId"
-                  placeholder="所有实验"
-                  class="[width:220px]"
-                  @change="handleClassChange"
-              >
-                <el-option label="所有实验" value="" />
-                <el-option
-                    v-for="item in experimentList"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="搜索">
-              <el-input
-                  v-model="filterForm.search"
-                  placeholder="搜索学生姓名/学号"
-                  prefix-icon="Search"
-                  clearable
-                  class="[width:200px]"
-                  @input="filterStudents"
+            <div class="flex items-center gap-2">
+              <label class="text-sm text-[#6e6e73] whitespace-nowrap">搜索</label>
+              <input v-model="filterForm.search" @input="filterStudents"
+                placeholder="搜索学生姓名/学号"
+                class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
               />
-            </el-form-item>
-          </el-form>
-        </el-card>
+            </div>
+          </div>
+        </div>
 
         <!-- 加载中状态-->
-        <div v-if="loading" class="loading-container [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
-          <el-skeleton class="[width:100%]" :rows="10" animated />
+        <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
+          <div class="w-full space-y-4">
+            <div v-for="i in 10" :key="i" class="h-4 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (95 - i * 5) + '%' }"></div>
+          </div>
         </div>
 
         <!-- 班级总览 -->
         <template v-else-if="classData">
-          <el-row :gutter="20" class="overview-row [margin-bottom:20px]">
-            <el-col :span="6">
-              <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-                <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ classData.studentCount }}</div>
-                <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">学生总数</div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="6">
-              <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-                <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ experimentCompletionRate }}%</div>
-                <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">实验完成率</div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="6">
-              <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-                <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ classData.averageScore || '暂无' }}</div>
-                <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">平均分</div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="6">
-              <el-card class="stat-card [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [border:1px_solid_#dadce0] [flex:1] [min-width:180px] [padding:18px]">
-                <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ riskStudentCount }}</div>
-<!--                <div class="stat-value [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [color:#202124] [margin-bottom:5px]">{{ riskStudentCount }}</div>-->
-                <div class="stat-label [font-size:12px] [color:#5f6368] [margin-top:10px] [color:#606266] [font-size:13px] [margin-top:4px]">需关注学生</div>
-              </el-card>
-            </el-col>
-          </el-row>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-5">
+            <div class="rounded-[16px] border border-black/[0.06] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] p-5 text-center">
+              <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ classData.studentCount }}</div>
+              <div class="text-[13px] text-[#6e6e73]">学生总数</div>
+            </div>
+            <div class="rounded-[16px] border border-black/[0.06] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] p-5 text-center">
+              <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ experimentCompletionRate }}%</div>
+              <div class="text-[13px] text-[#6e6e73]">实验完成率</div>
+            </div>
+            <div class="rounded-[16px] border border-black/[0.06] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] p-5 text-center">
+              <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ classData.averageScore || '暂无' }}</div>
+              <div class="text-[13px] text-[#6e6e73]">平均分</div>
+            </div>
+            <div class="rounded-[16px] border border-black/[0.06] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] p-5 text-center">
+              <div class="text-[28px] font-bold text-[#1d1d1f] mb-1">{{ riskStudentCount }}</div>
+              <div class="text-[13px] text-[#6e6e73]">需关注学生</div>
+            </div>
+          </div>
 
           <!-- 学生能力分布 -->
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>班级能力分布</span>
-              </div>
-            </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="abilityDistributionRef"></div>
-          </el-card>
+          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+            <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f]">班级能力分布</span>
+            </div>
+            <div class="h-[320px] w-full" ref="abilityDistributionRef"></div>
+          </div>
 
           <!-- 学生列表 -->
-          <el-card class="students-card [margin-bottom:20px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>学生列表</span>
-                <div>
-                  <el-button type="primary" @click="exportStudentData">导出数据</el-button>
-                </div>
-              </div>
-            </template>
-
-            <div v-if="!filteredStudents.length" class="empty-data [padding:40px_0] [display:flex] [justify-content:center] [align-items:center]">
-              <el-empty description="暂无学生数据" />
+          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+            <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f]">学生列表</span>
+              <button @click="exportStudentData"
+                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                导出数据
+              </button>
             </div>
 
-            <el-table v-else :data="filteredStudents" :max-height="500" class="[width:100%]">
-              <el-table-column type="expand">
-                <template #default="props">
-                  <div class="student-detail-expand [display:flex] [flex-wrap:wrap] [padding:20px] [gap:20px]">
-                    <!-- 学生能力雷达图-->
-                    <div class="student-radar-chart [width:300px] [height:300px]" ref="studentRadarRefs" :data-student-id="props.row.id"></div>
+            <div v-if="!filteredStudents.length" class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
+              <svg class="w-16 h-16 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <p class="text-sm">暂无学生数据</p>
+            </div>
 
-                    <!-- 学生实验完成情况 -->
-                    <div class="student-experiments [flex:1] [min-width:300px]">
-                      <h4>实验完成情况</h4>
-                      <el-progress
-                          v-for="(exp, index) in props.row.experiments"
-                          :key="index"
-                          :percentage="exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0"
-                          :status="exp.status === 'completed' ? 'success' : exp.status === 'in_progress' ? 'warning' : 'exception'"
-                          :stroke-width="15"
-                          class="experiment-progress [margin-bottom:12px]"
-                      >
-                        <template #default>
-                          <span class="progress-text [margin-left:10px] [font-size:13px] [font-size:12px] [color:#9aa0a6] [margin-top:4px] [display:block]">
-                            {{ exp.name }} - {{ exp.status === 'completed' ? '已完成' : exp.status === 'in_progress' ? '进行中' : '未开始' }}
-                            {{ exp.score ? `(${exp.score}分)` : '' }}
-                          </span>
-                        </template>
-                      </el-progress>
-                    </div>
-                  </div>
-                </template>
-              </el-table-column>
-
-              <el-table-column prop="id" label="学号" width="120" />
-              <el-table-column prop="name" label="姓名" width="120" />
-              <el-table-column label="实验完成率" width="200">
-                <template #default="scope">
-                  <el-progress
-                      :percentage="scope.row.completionRate"
-                      :color="getProgressColor(scope.row.completionRate)"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column prop="averageScore" label="平均分" width="100" />
-              <el-table-column label="能力趋势" width="120">
-                <template #default="scope">
-                  <el-tag
-                      :type="scope.row.trend === 'up' ? 'success' : scope.row.trend === 'down' ? 'danger' : 'info'"
-                  >
-                    {{ scope.row.trend === 'up' ? '上升' : scope.row.trend === 'down' ? '下降' : '稳定' }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="风险程度" width="120">
-                <template #default="scope">
-                  <el-tag
-                      :type="getRiskLevel(scope.row).type"
-                  >
-                    {{ getRiskLevel(scope.row).text }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" fixed="right" width="200">
-                <template #default="scope">
-                  <el-button type="primary" link @click="viewStudentDetail(scope.row)">查看详情</el-button>
-                  <el-button type="primary" link @click="viewStudentReports(scope.row)">查看报告</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
+            <div v-else class="overflow-x-auto max-h-[500px] overflow-y-auto">
+              <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-white z-10">
+                  <tr class="border-b border-black/[0.06]">
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[50px]"></th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学号</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">姓名</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">实验完成率</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[100px]">平均分</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">能力趋势</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">风险程度</th>
+                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="student in filteredStudents" :key="student.id">
+                    <tr class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors">
+                      <td class="py-3 px-4">
+                        <button @click="toggleStudentExpand(student.id)" class="w-6 h-6 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.08] transition-colors cursor-pointer border-none">
+                          <svg class="w-3 h-3 text-[#6e6e73] transition-transform" :class="expandedStudents.has(student.id) ? 'rotate-90' : ''" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                      </td>
+                      <td class="py-3 px-4 text-[#1d1d1f]">{{ student.id }}</td>
+                      <td class="py-3 px-4 text-[#1d1d1f] font-medium">{{ student.name }}</td>
+                      <td class="py-3 px-4">
+                        <div class="flex items-center gap-2">
+                          <div class="flex-1 h-2 bg-[#f5f5f7] rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all" :style="{ width: student.completionRate + '%', backgroundColor: getProgressColor(student.completionRate) }"></div>
+                          </div>
+                          <span class="text-xs text-[#6e6e73] w-10 text-right">{{ student.completionRate }}%</span>
+                        </div>
+                      </td>
+                      <td class="py-3 px-4 text-[#1d1d1f]">{{ student.averageScore }}</td>
+                      <td class="py-3 px-4">
+                        <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-xs font-medium"
+                          :class="student.trend === 'up' ? 'bg-[#e8f8ef] text-[#1a7f37]' : student.trend === 'down' ? 'bg-[#ffeef0] text-[#d1242f]' : 'bg-[#f0f0f5] text-[#6e6e73]'">
+                          {{ student.trend === 'up' ? '上升' : student.trend === 'down' ? '下降' : '稳定' }}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4">
+                        <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-xs font-medium"
+                          :class="getRiskLevel(student).type === 'danger' ? 'bg-[#ffeef0] text-[#d1242f]' : getRiskLevel(student).type === 'warning' ? 'bg-[#fff8e1] text-[#b45309]' : getRiskLevel(student).type === 'info' ? 'bg-[#f0f0f5] text-[#6e6e73]' : 'bg-[#e8f8ef] text-[#1a7f37]'">
+                          {{ getRiskLevel(student).text }}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4">
+                        <button @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</button>
+                        <button @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</button>
+                      </td>
+                    </tr>
+                    <!-- Expanded row -->
+                    <tr v-if="expandedStudents.has(student.id)">
+                      <td colspan="8" class="p-0">
+                        <div class="flex flex-wrap p-5 gap-5 bg-[#fafafa] border-b border-black/[0.04]">
+                          <div class="w-[300px] h-[300px]" ref="studentRadarRefs" :data-student-id="student.id"></div>
+                          <div class="flex-1 min-w-[300px]">
+                            <h4 class="text-sm font-semibold text-[#1d1d1f] mb-3">实验完成情况</h4>
+                            <div v-for="(exp, index) in student.experiments" :key="index" class="mb-3">
+                              <div class="flex items-center gap-3">
+                                <div class="flex-1">
+                                  <div class="h-[15px] bg-[#f5f5f7] rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all"
+                                      :style="{ width: (exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0) + '%' }"
+                                      :class="exp.status === 'completed' ? 'bg-[#34c759]' : exp.status === 'in_progress' ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <span class="text-xs text-[#aeaeb2] mt-1 block">
+                                {{ exp.name }} - {{ exp.status === 'completed' ? '已完成' : exp.status === 'in_progress' ? '进行中' : '未开始' }}
+                                {{ exp.score ? `(${exp.score}分)` : '' }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           <!-- AI教学建议 -->
-          <el-card class="ai-advice-card [margin-bottom:20px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>AI教学建议</span>
-                <el-button type="primary" size="small" :loading="aiAdviceLoading" @click="generateClassTeachingAdvice">
-                  {{ aiAdviceLoading ? '生成中..' : '生成建议' }}
-                </el-button>
-              </div>
-            </template>
+          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+            <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
+              <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
+              <button @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
+                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                {{ aiAdviceLoading ? '生成中..' : '生成建议' }}
+              </button>
+            </div>
 
-            <div class="ai-advice-content [padding:5px_10px]">
-              <div class="ai-advice-header [display:flex] [align-items:center] [gap:15px] [margin-bottom:15px]">
-                <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-                <div class="ai-advice-title">
-                  <h3>教学建议</h3>
-                  <p>针对{{ currentClassName }}的个性化教学建议</p>
+            <div class="px-1 py-1">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-[#1d1d1f]">教学建议</h3>
+                  <p class="text-xs text-[#6e6e73]">针对{{ currentClassName }}的个性化教学建议</p>
                 </div>
               </div>
 
-              <el-divider />
+              <div class="h-px bg-black/[0.06] my-4"></div>
 
-              <el-alert
-                  v-if="aiAdviceError"
-                  :title="aiAdviceError"
-                  type="warning"
-                  show-icon
-                  :closable="false"
-                  class="[margin-bottom:16px]"
-              />
-              <el-skeleton v-if="aiAdviceLoading" :rows="8" animated />
-              <div v-else-if="aiAdviceContent" class="ai-advice-markdown [color:#303133] [line-height:1.7]" v-html="renderedAiAdvice"></div>
-              <el-empty v-else description="点击生成建议，基于当前班级真实数据生成教学建议" />
+              <div v-if="aiAdviceError" class="flex items-start gap-3 p-4 rounded-[12px] bg-[#fff8e1] border border-[#ffcc02]/20 mb-4">
+                <svg class="w-5 h-5 text-[#b45309] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                <p class="text-sm text-[#b45309]">{{ aiAdviceError }}</p>
+              </div>
+
+              <div v-if="aiAdviceLoading" class="space-y-3">
+                <div v-for="i in 8" :key="i" class="h-4 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 5) + '%' }"></div>
+              </div>
+              <div v-else-if="aiAdviceContent" class="prose prose-sm max-w-none text-[#303133] leading-[1.7]" v-html="renderedAiAdvice"></div>
+              <div v-else class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
+                <svg class="w-16 h-16 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                <p class="text-sm">点击生成建议，基于当前班级真实数据生成教学建议</p>
+              </div>
             </div>
-          </el-card>
+          </div>
         </template>
 
         <!-- 未加载班级数据时提示 -->
-        <div v-else class="empty-class [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
-          <el-empty description="请选择班级查看详细分析" :image-size="200">
-            <template #description>
-              <p>您可以从上方选择一个班级进行详细分析</p>
-            </template>
-          </el-empty>
+        <div v-else class="flex flex-col items-center justify-center min-h-[400px] w-full text-[#6e6e73]">
+          <svg class="w-20 h-20 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <p class="text-sm">您可以从上方选择一个班级进行详细分析</p>
         </div>
-      </el-card>
+      </div>
 
-      <!-- 快速分析弹窗-->
-      <el-dialog
-          v-model="quickAnalysisVisible"
-          title="班级快速分析"
-          width="70%"
-          destroy-on-close
-      >
-        <div v-if="quickAnalysisLoading" class="loading-container [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
-          <el-skeleton class="[width:100%]" :rows="5" animated />
+      <!-- 快速分析弹窗 -->
+      <AppModal v-model="quickAnalysisVisible" title="班级快速分析" width="70%">
+        <div v-if="quickAnalysisLoading" class="flex justify-center items-center min-h-[400px] w-full">
+          <div class="w-full space-y-4">
+            <div v-for="i in 5" :key="i" class="h-5 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 8) + '%' }"></div>
+          </div>
         </div>
 
         <div v-else-if="quickAnalysisData">
-          <div class="quick-analysis-header [margin-bottom:20px]">
-            <h3>{{ quickAnalysisData.className }} 快速分析</h3>
-            <p>学生总数: {{ quickAnalysisData.studentCount }} | 实验完成率 {{ quickAnalysisData.completionRate }}%</p>
+          <div class="mb-5">
+            <h3 class="text-base font-semibold text-[#1d1d1f] mb-1">{{ quickAnalysisData.className }} 快速分析</h3>
+            <p class="text-sm text-[#6e6e73]">学生总数: {{ quickAnalysisData.studentCount }} | 实验完成率 {{ quickAnalysisData.completionRate }}%</p>
           </div>
 
-          <el-divider />
+          <div class="h-px bg-black/[0.06] my-4"></div>
 
-          <div class="quick-analysis-content">
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <div class="quick-chart-container [height:300px] [margin-bottom:20px]" ref="quickChartRef"></div>
-              </el-col>
-              <el-col :span="12">
-                <div class="quick-analysis-summary">
-                  <h4>分析摘要</h4>
-                  <p>{{ quickAnalysisData.summary }}</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="h-[300px] mb-5" ref="quickChartRef"></div>
+            <div>
+              <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">分析摘要</h4>
+              <p class="text-sm text-[#6e6e73] mb-4">{{ quickAnalysisData.summary }}</p>
 
-                  <h4>主要问题</h4>
-                  <ul>
-                    <li v-for="(issue, index) in quickAnalysisData.issues" :key="index">
-                      {{ issue }}
-                    </li>
-                  </ul>
+              <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">主要问题</h4>
+              <ul class="list-disc list-inside text-sm text-[#6e6e73] mb-4 space-y-1">
+                <li v-for="(issue, index) in quickAnalysisData.issues" :key="index">{{ issue }}</li>
+              </ul>
 
-                  <h4>建议措施</h4>
-                  <ul>
-                    <li v-for="(suggestion, index) in quickAnalysisData.suggestions" :key="index">
-                      {{ suggestion }}
-                    </li>
-                  </ul>
-                </div>
-              </el-col>
-            </el-row>
+              <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">建议措施</h4>
+              <ul class="list-disc list-inside text-sm text-[#6e6e73] space-y-1">
+                <li v-for="(suggestion, index) in quickAnalysisData.suggestions" :key="index">{{ suggestion }}</li>
+              </ul>
+            </div>
           </div>
         </div>
 
         <template #footer>
-          <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-            <el-button @click="quickAnalysisVisible = false">关闭</el-button>
-            <el-button
-                type="primary"
-                @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)"
-                :disabled="!quickAnalysisData"
-            >
-              查看详细分析
-            </el-button>
-          </div>
+          <button @click="quickAnalysisVisible = false"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+            关闭
+          </button>
+          <button @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)" :disabled="!quickAnalysisData"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+            查看详细分析
+          </button>
         </template>
-      </el-dialog>
+      </AppModal>
     </div>
   </div>
 </template>
@@ -429,6 +427,7 @@ import DOMPurify from 'dompurify'
 import api from '../../api'
 import {buildStructuredPrompt, chatSend} from '../../api/tap'
 import PageHeader from '../../components/PageHeader.vue'
+import AppModal from '../../components/AppModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -441,6 +440,22 @@ const abilityDistributionRef = ref(null)
 const studentRadarRefs = ref([])
 let abilityChart = null
 const studentRadarCharts = {}
+
+// 展开的学生行
+const expandedStudents = ref(new Set())
+const toggleStudentExpand = (studentId) => {
+  const newSet = new Set(expandedStudents.value)
+  if (newSet.has(studentId)) {
+    newSet.delete(studentId)
+  } else {
+    newSet.add(studentId)
+    // 延迟初始化雷达图
+    nextTick(() => {
+      setTimeout(() => initStudentRadarCharts(), 200)
+    })
+  }
+  expandedStudents.value = newSet
+}
 
 // 快速分析相关
 const quickAnalysisVisible = ref(false)
@@ -468,7 +483,6 @@ const classSortOption = ref('name')
 
 // 过滤和排序后的班级列表
 const filteredClasses = computed(() => {
-  // 先过滤
   let result = [...classList.value]
   if (classSearchText.value) {
     const searchText = classSearchText.value.toLowerCase()
@@ -479,7 +493,6 @@ const filteredClasses = computed(() => {
     )
   }
 
-  // 再排序
   if (classSortOption.value === 'name') {
     result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
   } else if (classSortOption.value === 'studentCount') {
@@ -551,7 +564,6 @@ const updateAiAdvice = () => {
     (downTrend > 0 ? `有${downTrend}名学生成绩呈下降趋势。` : '整体趋势稳定。') +
     (lowCompletion.length > 0 ? `${lowCompletion.length}名学生完成率低于60%，需要重点关注。` : '')
 
-  // 找出需要关注的学生
   const riskStudents = students
     .filter(s => s.completionRate < 60 || s.averageScore < 60 || s.trend === 'down')
     .sort((a, b) => a.completionRate - b.completionRate)
@@ -565,7 +577,6 @@ const updateAiAdvice = () => {
     return { name: s.name, reason: reasons.join('，') || '综合表现需关注' }
   })
 
-  // 生成教学建议
   const advice = []
   if (avgCompletion < 80) advice.push('实验完成率偏低，建议加强实验提交的督促，可设置阶段性检查点')
   if (avgScore < 75) advice.push('班级平均分有提升空间，建议增加课堂练习和知识点回顾')
@@ -813,15 +824,12 @@ const quickViewAnalysis = async (classInfo) => {
   quickAnalysisData.value = null
 
   try {
-    // 获取真实班级分析数据
     const analysisData = await api.getClassAnalysis(classInfo.id)
 
-    // 获取学生实验数据来计算完成率
     let completionRate = analysisData?.completionRate || 0
     let studentCount = analysisData?.studentCount || classInfo.studentCount || 0
     let avgScore = analysisData?.averageScore || 0
 
-    // 基于真实数据生成分析摘要
     const issues = []
     const suggestions = []
 
@@ -834,7 +842,6 @@ const quickViewAnalysis = async (classInfo) => {
       suggestions.push('针对薄弱知识点增加课堂讲解和练习')
     }
 
-    // 分析分数分布
     const dist = analysisData?.scoreDistribution || {}
     if ((dist['<60'] || 0) > 0) {
       issues.push(`有${dist['<60']}人次成绩不及格，需要重点关注`)
@@ -862,7 +869,6 @@ const quickViewAnalysis = async (classInfo) => {
       scoreDistribution: dist
     }
 
-    // 初始化快速分析图表
     nextTick(() => {
       initQuickAnalysisChart()
     })
@@ -884,17 +890,15 @@ const initQuickAnalysisChart = () => {
 
     quickChart = echarts.init(quickChartRef.value)
 
-    // 使用真实分数分布数据
     const dist = quickAnalysisData.value?.scoreDistribution || {}
     const pieData = [
       {value: dist['90-100'] || 0, name: '优秀(90-100)'},
       {value: dist['80-89'] || 0, name: '良好(80-89)'},
       {value: dist['70-79'] || 0, name: '及格(70-79)'},
-      {value: dist['60-69'] || 0, name: '一般60-69)'},
-      {value: dist['<60'] || 0, name: '不及格<60)'}
+      {value: dist['60-69'] || 0, name: '一般(60-69)'},
+      {value: dist['<60'] || 0, name: '不及格(<60)'}
     ].filter(d => d.value > 0)
 
-    // 如果没有数据，显示一个占位
     if (pieData.length === 0) {
       pieData.push({value: 1, name: '暂无数据'})
     }
@@ -931,14 +935,12 @@ const initQuickAnalysisChart = () => {
 
     quickChart.setOption(option)
 
-    // 使用debounce优化resize事件处理
     const debouncedResize = debounce(() => {
       if (quickChart) {
         quickChart.resize()
       }
     }, 100)
 
-    // 监听窗口大小变化
     window.addEventListener('resize', debouncedResize)
   }
 }
@@ -950,16 +952,12 @@ const viewDetailedAnalysis = (classInfo) => {
   showDetailedAnalysis.value = true
   filterForm.classId = classInfo.id
 
-  // 更新URL，使用正确的路由名称
   const newRoute = router.resolve({
     name: 'ClassDetailedAnalysis',
     params: {classId: classInfo.id}
   })
 
-  // 使用 router.push 而不是直接操作history API
   router.push(newRoute)
-
-  // 加载班级数据
   loadClassData()
 }
 
@@ -986,14 +984,12 @@ const loadClassData = async () => {
   aiAdviceError.value = '';
 
   try {
-    // 确保先按当前班级加载实验列表
     try {
       await loadExperimentList();
     } catch (err) {
       logger.error('加载实验列表失败', err);
     }
 
-    // 获取班级基本信息
     try {
       const data = await api.getClassAnalysis(filterForm.classId)
       classData.value = data
@@ -1008,17 +1004,11 @@ const loadClassData = async () => {
       };
     }
 
-    // 模拟获取学生列表数据
     await loadStudentData()
-
-    // 过滤学生
     filterStudents()
-
-    // 更新AI建议
     updateAiAdvice()
     generateClassTeachingAdvice()
 
-    // 初始化图表
     nextTick(() => {
       initCharts()
     })
@@ -1033,7 +1023,6 @@ const loadClassData = async () => {
 // 加载学生数据
 const loadStudentData = async () => {
   try {
-    // 获取学生实验数据
     let allStudentExperiments = [];
     try {
       allStudentExperiments = await api.getAllStudentExperiments({ classId: filterForm.classId });
@@ -1052,7 +1041,6 @@ const loadStudentData = async () => {
 
     logger.debug('开始处理API返回的数据，数据条数:', allStudentExperiments.length);
 
-    // 从真实数据中提取所有不同的实验，构建动态实验模板
     const experimentMap = {};
     allStudentExperiments.forEach(exp => {
       if (exp.experimentId && !experimentMap[exp.experimentId]) {
@@ -1065,17 +1053,14 @@ const loadStudentData = async () => {
     const allExperimentTemplate = Object.values(experimentMap).sort((a, b) => a.id - b.id);
     logger.debug('从数据中提取的实验模板', allExperimentTemplate);
 
-    // 提取所有不同的学生ID
     const studentIds = [...new Set(allStudentExperiments.map(exp => exp.studentId))];
     logger.debug('检测到的不同学生ID:', studentIds);
 
-    // 按学生ID分组
     const studentGroups = {};
     studentIds.forEach(id => {
       studentGroups[id] = allStudentExperiments.filter(exp => exp.studentId === id);
     });
 
-    // 为每个学生创建完整的学生对象
     const students = [];
 
     for (const studentId of studentIds) {
@@ -1085,7 +1070,6 @@ const loadStudentData = async () => {
       const firstExp = studentExps[0];
       const name = firstExp.studentName || `学生${studentId}`;
 
-      // 基于动态实验模板创建该学生的实验列表
       const studentExperiments = allExperimentTemplate.map(tmpl => ({
         id: tmpl.id,
         name: tmpl.name,
@@ -1101,7 +1085,6 @@ const loadStudentData = async () => {
         plagiarismRate: null
       }));
 
-      // 用真实数据更新实验状态
       studentExps.forEach(exp => {
         const idx = studentExperiments.findIndex(e => e.id === exp.experimentId);
         if (idx !== -1) {
@@ -1137,17 +1120,14 @@ const loadStudentData = async () => {
         }
       });
 
-      // 计算完成率
       const completedCount = studentExperiments.filter(e => e.status === 'completed').length;
       const completionRate = studentExperiments.length > 0
         ? Math.round((completedCount / studentExperiments.length) * 100) : 0;
 
-      // 计算平均分
       const scoredExps = studentExperiments.filter(e => e.score > 0);
       const averageScore = scoredExps.length > 0
         ? Math.round(scoredExps.reduce((sum, e) => sum + e.score, 0) / scoredExps.length) : 0;
 
-      // 基于真实数据生成能力评估
       const baseAbility = Math.min(100, 40 + (completionRate * 0.3) + (averageScore * 0.3));
       const abilities = {
         dataStructure: Math.min(100, Math.round(baseAbility + (averageScore > 80 ? 10 : 0))),
@@ -1157,7 +1137,6 @@ const loadStudentData = async () => {
         teamwork: Math.min(100, Math.round(baseAbility + (completionRate > 70 ? 8 : 0)))
       };
 
-      // 基于真实提交数据计算趋势
       let trend = 'stable';
       const recentExps = studentExps
         .filter(e => e.submitTime && e.score > 0)
@@ -1203,7 +1182,6 @@ const filterStudents = () => {
 
   let result = [...studentList.value]
 
-  // 按实验过滤
   if (filterForm.experimentId) {
     result = result.filter(student => {
       const targetExp = student.experiments.find(exp => exp.id.toString() === filterForm.experimentId.toString())
@@ -1211,7 +1189,6 @@ const filterStudents = () => {
     })
   }
 
-  // 按搜索文本过滤
   if (filterForm.search) {
     const searchText = filterForm.search.toLowerCase()
     result = result.filter(student =>
@@ -1223,7 +1200,7 @@ const filterStudents = () => {
   filteredStudents.value = result
 }
 
-// 添加debounce函数帮助限制频繁调用
+// debounce函数
 const debounce = (fn, delay) => {
   let timer = null
   return function () {
@@ -1237,17 +1214,13 @@ const debounce = (fn, delay) => {
   }
 }
 
-// 修改初始化图表
+// 初始化图表
 const initCharts = () => {
-  // 使用更长的延迟确保DOM已完全渲染且可见
   setTimeout(() => {
     try {
-      // 初始化能力分布图表
       if (abilityDistributionRef.value) {
         initAbilityDistributionChart()
       }
-
-      // 进一步延迟初始化学生雷达图
       setTimeout(() => {
         try {
           initStudentRadarCharts()
@@ -1269,14 +1242,12 @@ const initAbilityDistributionChart = () => {
       return
     }
 
-    // 检查容器尺寸
     const container = abilityDistributionRef.value
     if (container.offsetHeight === 0 || container.offsetWidth === 0) {
-      logger.warn('图表容器尺寸为，无法初始化图表')
+      logger.warn('图表容器尺寸为0，无法初始化图表')
       return
     }
 
-    // 如果已存在图表实例，先销毁
     if (abilityChart) {
       try {
         window.removeEventListener('resize', abilityChart.resize);
@@ -1286,7 +1257,6 @@ const initAbilityDistributionChart = () => {
       }
     }
 
-    // 创建新图表实例
     try {
       abilityChart = echarts.init(container)
     } catch (e) {
@@ -1294,7 +1264,6 @@ const initAbilityDistributionChart = () => {
       return
     }
 
-    // 收集学生能力数据
     const dataStructureScores = studentList.value.map(s => s.abilities.dataStructure)
     const algorithmScores = studentList.value.map(s => s.abilities.algorithm)
     const programmingScores = studentList.value.map(s => s.abilities.programming)
@@ -1308,9 +1277,7 @@ const initAbilityDistributionChart = () => {
       },
       tooltip: {
         trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
+        axisPointer: { type: 'shadow' }
       },
       legend: {
         data: ['优秀', '良好', '及格', '不及格'],
@@ -1332,12 +1299,8 @@ const initAbilityDistributionChart = () => {
       },
       series: [
         {
-          name: '优秀',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
+          name: '优秀', type: 'bar', stack: 'total',
+          emphasis: { focus: 'series' },
           data: [
             dataStructureScores.filter(s => s >= 90).length,
             algorithmScores.filter(s => s >= 90).length,
@@ -1348,12 +1311,8 @@ const initAbilityDistributionChart = () => {
           itemStyle: {color: '#67C23A'}
         },
         {
-          name: '良好',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
+          name: '良好', type: 'bar', stack: 'total',
+          emphasis: { focus: 'series' },
           data: [
             dataStructureScores.filter(s => s >= 75 && s < 90).length,
             algorithmScores.filter(s => s >= 75 && s < 90).length,
@@ -1364,12 +1323,8 @@ const initAbilityDistributionChart = () => {
           itemStyle: {color: '#409EFF'}
         },
         {
-          name: '及格',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
+          name: '及格', type: 'bar', stack: 'total',
+          emphasis: { focus: 'series' },
           data: [
             dataStructureScores.filter(s => s >= 60 && s < 75).length,
             algorithmScores.filter(s => s >= 60 && s < 75).length,
@@ -1380,12 +1335,8 @@ const initAbilityDistributionChart = () => {
           itemStyle: {color: '#E6A23C'}
         },
         {
-          name: '不及格',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
+          name: '不及格', type: 'bar', stack: 'total',
+          emphasis: { focus: 'series' },
           data: [
             dataStructureScores.filter(s => s < 60).length,
             algorithmScores.filter(s => s < 60).length,
@@ -1398,10 +1349,8 @@ const initAbilityDistributionChart = () => {
       ]
     }
 
-    // 设置图表选项
     abilityChart.setOption(option)
 
-    // 使用debounce优化resize事件处理
     const debouncedResize = debounce(() => {
       if (abilityChart && !abilityChart.isDisposed() && container.offsetWidth > 0 && container.offsetHeight > 0) {
         try {
@@ -1412,10 +1361,7 @@ const initAbilityDistributionChart = () => {
       }
     }, 200)
 
-    // 移除可能已存在的事件监听
     window.removeEventListener('resize', debouncedResize)
-
-    // 添加新的事件监听
     window.addEventListener('resize', debouncedResize)
   } catch (error) {
     logger.error('初始化能力分布图表失败', error)
@@ -1425,7 +1371,6 @@ const initAbilityDistributionChart = () => {
 // 初始化学生雷达图
 const initStudentRadarCharts = () => {
   try {
-    // 清除之前的图表
     Object.values(studentRadarCharts).forEach(chart => {
       try {
         if (chart && !chart.isDisposed()) {
@@ -1437,13 +1382,11 @@ const initStudentRadarCharts = () => {
       }
     })
 
-    // 清空存储的图表对象
     Object.keys(studentRadarCharts).forEach(key => {
       delete studentRadarCharts[key]
     })
 
-    // 获取所有雷达图容器
-    const radarElements = document.querySelectorAll('.student-radar-chart')
+    const radarElements = document.querySelectorAll('[data-student-id]')
     radarElements.forEach(el => {
       const studentId = el.getAttribute('data-student-id')
       if (!studentId) return
@@ -1451,7 +1394,6 @@ const initStudentRadarCharts = () => {
       const student = studentList.value.find(s => s.id === studentId)
       if (!student) return
 
-      // 检查容器尺寸
       if (el.offsetHeight === 0 || el.offsetWidth === 0) {
         return
       }
@@ -1464,9 +1406,7 @@ const initStudentRadarCharts = () => {
             text: '能力雷达图',
             left: 'center',
             top: 10,
-            textStyle: {
-              fontSize: 14
-            }
+            textStyle: { fontSize: 14 }
           },
           radar: {
             indicator: [
@@ -1490,9 +1430,7 @@ const initStudentRadarCharts = () => {
                   student.abilities.teamwork
                 ],
                 name: '能力值',
-                areaStyle: {
-                  color: 'rgba(64, 158, 255, 0.6)'
-                }
+                areaStyle: { color: 'rgba(64, 158, 255, 0.6)' }
               }
             ]
           }]
@@ -1505,7 +1443,6 @@ const initStudentRadarCharts = () => {
       }
     })
 
-    // 使用debounce优化resize事件处理
     const debouncedRadarResize = debounce(() => {
       Object.entries(studentRadarCharts).forEach(([studentId, chart]) => {
         try {
@@ -1518,10 +1455,7 @@ const initStudentRadarCharts = () => {
       })
     }, 200)
 
-    // 移除可能已存在的事件监听
     window.removeEventListener('resize', debouncedRadarResize)
-
-    // 添加新的事件监听
     window.addEventListener('resize', debouncedRadarResize)
   } catch (error) {
     logger.error('初始化学生雷达图整体失败:', error)
@@ -1541,15 +1475,12 @@ const getRiskLevel = (student) => {
   if (student.completionRate < 50 || student.averageScore < 50) {
     return {type: 'danger', text: '高风险'}
   }
-
   if (student.completionRate < 70 || student.averageScore < 60 || student.trend === 'down') {
     return {type: 'warning', text: '中风险'}
   }
-
   if (student.completionRate < 80 || student.averageScore < 70) {
     return {type: 'info', text: '低风险'}
   }
-
   return {type: 'success', text: '无风险'}
 }
 
@@ -1567,14 +1498,12 @@ const viewStudentDetail = (student) => {
 
 // 查看学生报告
 const viewStudentReports = (student) => {
-  // 获取该学生已完成的实验
   const completedExperiments = student.experiments.filter(e => e.status === 'completed')
   if (completedExperiments.length === 0) {
     ElMessage.warning('该学生暂无已完成的实验报告')
     return
   }
 
-  // 跳转到提交详情页查看报告
   router.push({
     name: 'SubmissionDetail',
     params: {id: student.id},
@@ -1596,7 +1525,6 @@ const exportStudentData = () => {
 onUnmounted(() => {
   logger.debug('组件卸载，清理图表实例和事件监听')
 
-  // 清理主图表
   if (abilityChart) {
     try {
       window.removeEventListener('resize', abilityChart.resize);
@@ -1607,7 +1535,6 @@ onUnmounted(() => {
     abilityChart = null
   }
 
-  // 清理所有学生雷达图
   Object.entries(studentRadarCharts).forEach(([id, chart]) => {
     if (chart) {
       try {
@@ -1619,12 +1546,10 @@ onUnmounted(() => {
     }
   })
 
-  // 清空雷达图存储
   Object.keys(studentRadarCharts).forEach(key => {
     delete studentRadarCharts[key]
   })
 
-  // 清理快速分析图表
   if (quickChart) {
     try {
       window.removeEventListener('resize', quickChart.resize);
@@ -1635,22 +1560,16 @@ onUnmounted(() => {
     quickChart = null
   }
 
-  // 移除所有可能添加的resize事件监听器
-  const noop = () => {
-  }
+  const noop = () => {}
   window.removeEventListener('resize', noop)
 })
 
 // 检查路由参数是否有班级ID
 const classIdFromRoute = computed(() => {
-  // 适配两种路由参数格式
   return route.params.classId || route.params.id || route.query.classId || route.query.id
 })
 
 onMounted(() => {
-  // 先加载班级列表  loadClassList()
-
-  // 只有当路由中明确指定了班级ID时才自动加载该班级的详细分析
   const idFromRoute = classIdFromRoute.value
   if (idFromRoute) {
     logger.debug('从路由获取班级ID:', idFromRoute)
@@ -1665,11 +1584,8 @@ const backToWelcome = () => {
   showDetailedAnalysis.value = false
   classData.value = null
 
-  // 使用 router.push 而非直接操作 history API
   router.push({
     name: 'ClassList'
   })
 }
 </script>
-
-

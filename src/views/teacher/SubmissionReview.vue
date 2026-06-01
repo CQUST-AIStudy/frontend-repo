@@ -1,141 +1,250 @@
 <template>
-  <div class="submission-review [min-height:100%]">
-    <el-page-header @back="$router.back()" title="返回" :content="`评阅: ${detail?.studentName || ''}`" />
+  <div class="min-h-full">
+    <!-- Page Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <button
+        @click="$router.back()"
+        class="h-[38px] w-[38px] rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <span class="text-[15px] text-[#6e6e73]">返回</span>
+      <span class="text-[#d1d1d6] mx-1">/</span>
+      <span class="text-[17px] font-semibold text-[#1d1d1f]">评阅: {{ detail?.studentName || '' }}</span>
+    </div>
 
-    <div v-if="detail" class="review-content [margin-top:20px]">
-      <div class="score-banner [display:flex] [align-items:center] [justify-content:space-between] [gap:24px] [padding:24px_32px] [border-radius:18px] [margin-bottom:24px] [background:linear-gradient(135deg,_#f0fdf4,_#dcfce7)] [border:1px_solid_#bbf7d0] [&.level-ok]:[background:linear-gradient(135deg,_#fffbeb,_#fef3c7)] [&.level-ok]:[border-color:#fde68a] [&.level-low]:[background:linear-gradient(135deg,_#fef2f2,_#fecaca)] [&.level-low]:[border-color:#fca5a5]" :class="scoreLevel">
-        <div class="score-main [display:flex] [align-items:baseline] [gap:8px]">
-          <span class="score-value [font-size:36px] [font-weight:700] [color:#15803d]">{{ formatScore(detail.totalScore, '暂无') }}</span>
-          <span class="score-label [color:#5f6368]">总分</span>
+    <div v-if="detail" class="mt-5">
+      <!-- Score Banner -->
+      <div
+        class="flex items-center justify-between gap-6 p-6 px-8 rounded-[18px] mb-6 border"
+        :class="{
+          'bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] border-[#bbf7d0]': scoreLevel === 'level-good' || scoreLevel === '',
+          'bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] border-[#fde68a]': scoreLevel === 'level-ok',
+          'bg-gradient-to-br from-[#fef2f2] to-[#fecaca] border-[#fca5a5]': scoreLevel === 'level-low'
+        }"
+      >
+        <div class="flex items-baseline gap-2">
+          <span class="text-4xl font-bold text-[#15803d]">{{ formatScore(detail.totalScore, '暂无') }}</span>
+          <span class="text-[#6e6e73]">总分</span>
         </div>
-        <div class="score-info [color:#5f6368] [display:flex] [align-items:center] [gap:12px] [font-size:14px]">
+        <div class="text-[#6e6e73] flex items-center gap-3 text-sm">
           <span>学生: {{ detail.studentName }}</span>
           <span v-if="detail.className">| {{ detail.className }}</span>
-          <el-tag :type="statusTag(detail.status)" effect="light" round size="small">
+          <span
+            class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
+            :class="{
+              'bg-[rgba(52,199,89,0.12)] text-[#34c759]': statusTag(detail.status) === 'success',
+              'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': statusTag(detail.status) === 'warning',
+              'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': statusTag(detail.status) === 'danger',
+              'bg-black/5 text-[#6e6e73]': statusTag(detail.status) === 'info'
+            }"
+          >
             {{ statusText(detail.status) }}
-          </el-tag>
+          </span>
         </div>
       </div>
 
-      <div class="review-card [background:#fff] [border-radius:18px] [padding:20px_24px] [margin-bottom:24px] [border:1px_solid_#dadce0]">
-        <div class="review-card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [margin-bottom:8px]">
-          <span class="review-title [font-weight:600] [color:#202124]">教师总评</span>
-          <div class="review-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
-            <el-button size="small" type="success" plain @click="downloadReport" :loading="downloadingReport"
-              :disabled="!detail?.hasDownloadableReport">
-              下载批注报告
-            </el-button>
-            <el-button size="small" type="primary" plain @click="generateReview" :loading="generatingReview">
-              AI 生成总评
-            </el-button>
-            <el-button size="small" @click="saveReview" :loading="savingReview" :disabled="!reviewEdited">
-              保存总评
-            </el-button>
-            <el-button
-              size="small"
-              type="danger"
-              plain
-              @click="publishReport"
-              :loading="publishingReport"
+      <!-- Review Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6">
+        <div class="flex justify-between items-center gap-4 mb-2">
+          <span class="font-semibold text-[#1d1d1f]">教师总评</span>
+          <div class="flex gap-2 flex-wrap">
+            <button
+              @click="downloadReport"
+              :disabled="downloadingReport || !detail?.hasDownloadableReport"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#34c759] bg-[rgba(52,199,89,0.08)] hover:bg-[rgba(52,199,89,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              <span v-if="downloadingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              下载批注报告
+            </button>
+            <button
+              @click="generateReview"
+              :disabled="generatingReview"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="generatingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              AI 生成总评
+            </button>
+            <button
+              @click="saveReview"
+              :disabled="!reviewEdited || savingReview"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="savingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              保存总评
+            </button>
+            <button
+              @click="publishReport"
+              :disabled="publishingReport"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               一键导入学生报告
-            </el-button>
+            </button>
           </div>
         </div>
-        <p class="review-hint [margin:0_0_12px] [font-size:13px] [line-height:1.6] [color:#5f6368]">
+        <p class="m-0 mb-3 text-[13px] leading-relaxed text-[#6e6e73]">
           导入后会把当前总分和教师总评写入学生实验报告，学生端导出的 Word 会显示红色手写评语。
         </p>
-        <p class="review-hint [margin:0_0_12px] [font-size:13px] [line-height:1.6] [color:#5f6368]" v-if="detail?.hasDownloadableReport">
+        <p class="m-0 mb-3 text-[13px] leading-relaxed text-[#6e6e73]" v-if="detail?.hasDownloadableReport">
           当前已生成 {{ preferredReportLabel }}，可直接下载查看。
         </p>
-        <el-input
+        <textarea
           v-model="finalReview"
-          type="textarea"
-          :rows="5"
-          placeholder="点击“AI 生成总评”自动生成，或直接手动编辑教师总评。"
+          rows="5"
+          placeholder="点击 AI 生成总评 自动生成，或直接手动编辑教师总评。"
           @input="reviewEdited = true"
-        />
+          class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[120px]"
+        ></textarea>
       </div>
 
-      <el-row :gutter="20">
-        <el-col :span="14">
-          <div class="section-title [font-size:16px] [font-weight:600] [color:#202124] [margin-bottom:16px] [padding-bottom:8px] [border-bottom:2px_solid_#dadce0] [margin-bottom:12px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [margin:0] [font-weight:500] [color:#303133]">评分维度</div>
+      <!-- Main Grid: Scores + Evidence -->
+      <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
+        <!-- Left: Score Dimensions -->
+        <div>
+          <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">评分维度</div>
           <div
             v-for="score in detail.scores"
             :key="score.dimensionId"
-            class="score-card [background:#fff] [border-radius:16px] [margin-bottom:12px] [border:1px_solid_#dadce0] [overflow:hidden] [transition:box-shadow_0.2s_ease,_transform_0.2s_ease] hover:[box-shadow:0_8px_20px_rgba(0,_0,_0,_0.06)] hover:[transform:translateY(-1px)] [&.need-evidence]:[border-left:3px_solid_#f59e0b]"
-            :class="{ 'need-evidence': score.status === 'NEED_MORE_EVIDENCE' }"
+            class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-3 overflow-hidden transition-all duration-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:-translate-y-px"
+            :class="{ 'border-l-[3px] border-l-[#f59e0b]': score.status === 'NEED_MORE_EVIDENCE' }"
           >
-            <div class="score-card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] [padding:14px_20px] [background:#f8f9fa] [border-bottom:1px_solid_#f1f3f4]">
-              <span class="dim-name [font-weight:600] [color:#202124] [font-size:16px] [font-weight:700] [color:#303133]">{{ getDimName(score.dimensionId) }}</span>
-              <div class="dim-score [display:flex] [align-items:center] [gap:6px]">
-                <el-tag v-if="score.status === 'NEED_MORE_EVIDENCE'" type="warning" size="small" effect="light">
+            <div class="flex justify-between items-center gap-4 px-5 py-3.5 bg-[#f9f9f9] border-b border-black/[0.06]">
+              <span class="font-bold text-[#1d1d1f] text-base">{{ getDimName(score.dimensionId) }}</span>
+              <div class="flex items-center gap-1.5">
+                <span
+                  v-if="score.status === 'NEED_MORE_EVIDENCE'"
+                  class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,149,0,0.1)] text-[#ff9500]"
+                >
                   证据不足
-                </el-tag>
-                <span class="dim-value [font-size:20px] [font-weight:700] [color:#202124]">{{ score.score ?? '暂无' }}</span>
-                <span class="dim-max [color:#9aa0a6]">/ {{ score.maxScore }}</span>
-                <span class="dim-weight [color:#9aa0a6] [font-size:12px]">({{ score.weight }}%)</span>
+                </span>
+                <span class="text-xl font-bold text-[#1d1d1f]">{{ score.score ?? '暂无' }}</span>
+                <span class="text-[#aeaeb2]">/ {{ score.maxScore }}</span>
+                <span class="text-[#aeaeb2] text-xs">({{ score.weight }}%)</span>
               </div>
             </div>
-            <div class="score-card-body [padding:16px_20px]">
-              <div v-if="score.comment" class="ai-comment [margin-bottom:12px] [margin-top:20px]">
-                <div class="comment-label [display:flex] [align-items:center] [gap:4px] [font-size:12px] [color:#1a73e8] [font-weight:600] [margin-bottom:6px]">
-                  <el-icon><ChatDotRound /></el-icon>
+            <div class="px-5 py-4">
+              <div v-if="score.comment" class="mb-3 mt-2">
+                <div class="flex items-center gap-1 text-xs text-[#007aff] font-semibold mb-1.5">
+                  <ChatDotRound class="w-3.5 h-3.5" />
                   <span>AI 评语</span>
                 </div>
-                <p class="comment-text [font-size:14px] [line-height:1.7] [color:#3c4043] [margin:0] [padding:10px_14px] [background:#f8f9fa] [border-radius:10px] [border-left:3px_solid_#1a73e8]">{{ score.comment }}</p>
+                <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[#007aff]">{{ score.comment }}</p>
               </div>
-              <div v-else class="no-comment [color:#9aa0a6] [font-size:13px] [margin-bottom:12px]">暂无评语</div>
-              <el-button size="small" type="primary" plain @click="startOverride(score)">
-                <el-icon><Edit /></el-icon>
+              <div v-else class="text-[#aeaeb2] text-[13px] mb-3">暂无评语</div>
+              <button
+                @click="startOverride(score)"
+                class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+              >
+                <Edit class="w-3.5 h-3.5" />
                 <span>修改评分</span>
-              </el-button>
+              </button>
             </div>
           </div>
-        </el-col>
+        </div>
 
-        <el-col :span="10">
-          <div class="section-title [font-size:16px] [font-weight:600] [color:#202124] [margin-bottom:16px] [padding-bottom:8px] [border-bottom:2px_solid_#dadce0] [margin-bottom:12px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [margin:0] [font-weight:500] [color:#303133]">证据材料 ({{ detail.evidenceBlocks?.length || 0 }})</div>
-          <div class="evidence-list [display:flex] [flex-direction:column] [gap:10px]">
-            <div v-for="eb in detail.evidenceBlocks" :key="eb.evidenceId" class="evidence-card [background:#fff] [border-radius:12px] [padding:14px] [border:1px_solid_#dadce0]">
-              <div class="evidence-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [margin-bottom:8px]">
-                <el-tag size="small" effect="plain">{{ eb.evidenceId }}</el-tag>
-                <div class="evidence-meta [display:flex] [align-items:center] [gap:8px]">
-                  <el-tag size="small" :type="kindType(eb.kind)" effect="light">{{ kindLabel(eb.kind) }}</el-tag>
-                  <span class="page-num [font-size:12px] [color:#5f6368]">页 {{ eb.page }}</span>
+        <!-- Right: Evidence -->
+        <div>
+          <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">证据材料 ({{ detail.evidenceBlocks?.length || 0 }})</div>
+          <div class="flex flex-col gap-2.5">
+            <div v-for="eb in detail.evidenceBlocks" :key="eb.evidenceId" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-3.5">
+              <div class="flex justify-between items-center gap-3 mb-2">
+                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-black/5 text-[#6e6e73]">{{ eb.evidenceId }}</span>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
+                    :class="{
+                      'bg-black/5 text-[#6e6e73]': kindType(eb.kind) === '' || kindType(eb.kind) === 'info',
+                      'bg-[rgba(52,199,89,0.12)] text-[#34c759]': kindType(eb.kind) === 'success',
+                      'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': kindType(eb.kind) === 'warning',
+                      'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger'
+                    }"
+                  >{{ kindLabel(eb.kind) }}</span>
+                  <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
                 </div>
               </div>
-              <pre class="evidence-content [margin:0] [white-space:pre-wrap] [word-break:break-word] [font-size:13px] [line-height:1.6] [color:#202124] [background:#f8f9fa] [border-radius:10px] [padding:12px]">{{ (eb.content || '').slice(0, 500) }}</pre>
-              <div v-if="eb.confidence" class="confidence [font-size:12px] [color:#5f6368]">
+              <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ (eb.content || '').slice(0, 500) }}</pre>
+              <div v-if="eb.confidence" class="text-xs text-[#6e6e73] mt-2">
                 置信度 {{ (eb.confidence * 100).toFixed(1) }}%
               </div>
             </div>
-            <el-empty v-if="!detail.evidenceBlocks?.length" description="暂无证据材料" :image-size="60" />
+            <!-- Empty State -->
+            <div v-if="!detail.evidenceBlocks?.length" class="flex flex-col items-center justify-center py-12 text-[#aeaeb2]">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <span class="text-sm">暂无证据材料</span>
+            </div>
           </div>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
     </div>
 
-    <el-dialog v-model="overrideVisible" title="修改评分" width="500px" :close-on-click-modal="false">
-      <el-form :model="overrideForm" label-width="80px">
-        <el-form-item label="新分数">
-          <el-input-number v-model="overrideForm.newScore" :min="0" :max="overrideForm.maxScore" :step="0.5" />
-          <span class="field-suffix [margin-left:8px] [color:#9aa0a6]">/ {{ overrideForm.maxScore }}</span>
-        </el-form-item>
-        <el-form-item label="新评语">
-          <el-input v-model="overrideForm.newComment" type="textarea" :rows="3" placeholder="输入修改后的评语" />
-        </el-form-item>
-        <el-form-item label="修改原因">
-          <el-input v-model="overrideForm.reason" type="textarea" :rows="2" placeholder="说明修改原因" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="overrideVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitOverride" :loading="overriding">确认修改</el-button>
-      </template>
-    </el-dialog>
+    <!-- Override Dialog (modal) -->
+    <Teleport to="body">
+      <div v-if="overrideVisible" class="fixed inset-0 z-[9999] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="overrideVisible = false"></div>
+        <div class="relative w-[500px] max-w-[90vw] rounded-[20px] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.2)] p-6 animate-[modalIn_0.2s_ease]">
+          <h3 class="text-lg font-semibold text-[#1d1d1f] m-0 mb-5">修改评分</h3>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <label class="w-[70px] text-sm text-[#6e6e73] shrink-0">新分数</label>
+              <input
+                v-model.number="overrideForm.newScore"
+                type="number"
+                :min="0"
+                :max="overrideForm.maxScore"
+                step="0.5"
+                class="w-[120px] h-[38px] px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+              />
+              <span class="text-[#aeaeb2] text-sm">/ {{ overrideForm.maxScore }}</span>
+            </div>
+            <div class="flex gap-3">
+              <label class="w-[70px] text-sm text-[#6e6e73] shrink-0 pt-2.5">新评语</label>
+              <textarea
+                v-model="overrideForm.newComment"
+                rows="3"
+                placeholder="输入修改后的评语"
+                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"
+              ></textarea>
+            </div>
+            <div class="flex gap-3">
+              <label class="w-[70px] text-sm text-[#6e6e73] shrink-0 pt-2.5">修改原因</label>
+              <textarea
+                v-model="overrideForm.reason"
+                rows="2"
+                placeholder="说明修改原因"
+                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[60px]"
+              ></textarea>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button
+              @click="overrideVisible = false"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
+            >取消</button>
+            <button
+              @click="submitOverride"
+              :disabled="overriding"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+            >
+              <span v-if="overriding" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              确认修改
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
-    <div v-if="loading" v-loading="true" class="[height:200px]" />
+    <!-- Loading State -->
+    <div v-if="loading" class="h-[200px] flex items-center justify-center">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-8 h-8 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+        <span class="text-sm text-[#6e6e73]">加载中...</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -351,5 +460,3 @@ async function loadDetail() {
 
 onMounted(loadDetail)
 </script>
-
-

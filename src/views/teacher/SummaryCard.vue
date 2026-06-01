@@ -1,81 +1,108 @@
 <template>
-  <div class="summary-page [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="min-h-full">
     <!-- 顶部 -->
-    <div class="hero [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:24px] [border:1px_solid_#dadce0] [display:flex] [align-items:center]">
-      <div class="hero-inner [display:flex] [align-items:center] [gap:16px]">
-        <div class="hero-icon [font-size:36px]">📖</div>
-        <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
-          <h1>AI 精读卡片</h1>
-          <p>支持 arXiv、DOI、粘贴文本、本地文档，一键生成结构化精读</p>
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6 flex items-center">
+      <div class="flex items-center gap-4">
+        <div class="text-4xl">📖</div>
+        <div>
+          <h1 class="m-0 mb-1 text-[22px] font-normal text-[#1d1d1f]">AI 精读卡片</h1>
+          <p class="m-0 text-sm text-[#6e6e73]">支持 arXiv、DOI、粘贴文本、本地文档，一键生成结构化精读</p>
         </div>
       </div>
     </div>
 
     <!-- Tab 切换 -->
-    <div class="tab-bar [display:flex] [gap:0] [margin-bottom:20px] [border-bottom:1px_solid_#dadce0]">
+    <div class="flex gap-0 mb-5 border-b border-black/[0.06]">
       <div v-for="t in tabs" :key="t.key"
-        :class="['tab-item', { active: activeTab === t.key }]"
+        :class="[
+          'flex items-center gap-2 px-4 py-3 text-sm cursor-pointer transition-all border-b-2',
+          activeTab === t.key
+            ? 'border-[#007aff] text-[#007aff] font-medium'
+            : 'border-transparent text-[#6e6e73] hover:text-[#1d1d1f]'
+        ]"
         @click="activeTab = t.key">
-        <span class="tab-icon [font-size:16px]">{{ t.icon }}</span>
+        <span class="text-base">{{ t.icon }}</span>
         <span>{{ t.label }}</span>
       </div>
     </div>
 
     <!-- arXiv -->
-    <div v-if="activeTab === 'arxiv'" class="panel [background:#fff] [border-radius:16px] [padding:24px_28px] [border:1px_solid_#dadce0]">
-      <p class="panel-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px]">输入 arXiv ID，自动抓取论文全文并生成精读卡（首次抓取可能需要30-60 秒）</p>
-      <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
-        <el-input v-model="arxivId" placeholder="例如：706.03762" class="form-input [flex:1] [min-width:200px]"
-          @keydown.enter="genArxiv(false)" clearable />
-        <el-button type="primary" :loading="arxivLoading" :disabled="!arxivId.trim()" @click="genArxiv(false)">
+    <div v-if="activeTab === 'arxiv'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <p class="text-[#6e6e73] text-[13px] m-0 mb-4">输入 arXiv ID，自动抓取论文全文并生成精读卡（首次抓取可能需要30-60 秒）</p>
+      <div class="flex gap-2.5 items-center flex-wrap">
+        <input v-model="arxivId" placeholder="例如：706.03762"
+          class="flex-1 min-w-[200px] w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          @keydown.enter="genArxiv(false)" />
+        <button :disabled="!arxivId.trim() || arxivLoading"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          @click="genArxiv(false)">
           {{ arxivLoading ? '正在抓取论文...' : '生成' }}
-        </el-button>
-        <el-button :loading="arxivLoading" :disabled="!arxivId.trim()" @click="genArxiv(true)">重新生成</el-button>
+        </button>
+        <button :disabled="!arxivId.trim() || arxivLoading"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="genArxiv(true)">重新生成</button>
       </div>
-      <div v-if="arxivLoading" class="loading-hint [display:flex] [align-items:center] [gap:8px] [margin-top:16px] [padding:12px_16px] [background:#e8f0fe] [border-radius:8px] [color:#1a73e8] [font-size:13px] [gap:10px] [padding:20px] [color:#8a9cb0]">
-        <el-icon class="is-loading"><Loading /></el-icon>
+      <div v-if="arxivLoading" class="flex items-center gap-2.5 mt-4 p-4 bg-[rgba(0,122,255,0.06)] rounded-[12px] text-[13px] text-[#007aff]">
+        <Loading class="w-4 h-4 animate-spin" />
         <span>正在从arXiv 抓取论文并生成精读，请耐心等待...</span>
       </div>
       <ResultBlock v-if="arxivResult" :result="arxivResult" :meta="arxivMeta" />
     </div>
 
     <!-- DOI -->
-    <div v-if="activeTab === 'doi'" class="panel [background:#fff] [border-radius:16px] [padding:24px_28px] [border:1px_solid_#dadce0]">
-      <p class="panel-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px]">输入论文 DOI，通过 Crossref 获取元数据并生成精读卡</p>
-      <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
-        <el-input v-model="doi" placeholder="例如：0.1145/3292500.3330919" class="form-input [flex:1] [min-width:200px]"
-          @keydown.enter="genDoi" clearable />
-        <el-button type="primary" :loading="doiLoading" :disabled="!doi.trim()" @click="genDoi">生成</el-button>
+    <div v-if="activeTab === 'doi'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <p class="text-[#6e6e73] text-[13px] m-0 mb-4">输入论文 DOI，通过 Crossref 获取元数据并生成精读卡</p>
+      <div class="flex gap-2.5 items-center flex-wrap">
+        <input v-model="doi" placeholder="例如：0.1145/3292500.3330919"
+          class="flex-1 min-w-[200px] w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          @keydown.enter="genDoi" />
+        <button :disabled="!doi.trim() || doiLoading"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          @click="genDoi">生成</button>
       </div>
       <ResultBlock v-if="doiResult" :result="doiResult" :meta="doiMeta" />
     </div>
 
     <!-- 粘贴文本 -->
-    <div v-if="activeTab === 'freetext'" class="panel [background:#fff] [border-radius:16px] [padding:24px_28px] [border:1px_solid_#dadce0]">
-      <p class="panel-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px]">粘贴论文标题和摘要，快速生成精读卡</p>
-      <el-input v-model="ftTitle" placeholder="论文标题" class="[margin-bottom:12px]" clearable />
-      <el-input v-model="ftText" type="textarea" :rows="5" placeholder="粘贴摘要或正文内容.." />
-      <el-button type="primary" :loading="ftLoading" :disabled="!ftTitle.trim() || !ftText.trim()"
-        class="[margin-top:14px]" @click="genFreeText">生成精读卡</el-button>
+    <div v-if="activeTab === 'freetext'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <p class="text-[#6e6e73] text-[13px] m-0 mb-4">粘贴论文标题和摘要，快速生成精读卡</p>
+      <input v-model="ftTitle" placeholder="论文标题"
+        class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm mb-3" />
+      <textarea v-model="ftText" rows="5" placeholder="粘贴摘要或正文内容.."
+        class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"></textarea>
+      <button :disabled="!ftTitle.trim() || !ftText.trim() || ftLoading"
+        class="mt-3.5 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        @click="genFreeText">生成精读卡</button>
       <ResultBlock v-if="ftResult" :result="ftResult" :meta="ftMeta" />
     </div>
 
     <!-- 文档精读 -->
-    <div v-if="activeTab === 'doc'" class="panel [background:#fff] [border-radius:16px] [padding:24px_28px] [border:1px_solid_#dadce0]">
-      <p class="panel-desc [color:#5f6368] [font-size:13px] [margin:0_0_16px]">对已上传的本地文档生成精读卡</p>
-      <div class="inline-form [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
-        <el-select v-model="docId" placeholder="选择文档" :loading="docsLoading" filterable class="form-input [flex:1] [min-width:200px]">
-          <el-option v-for="d in docs" :key="d.id" :value="String(d.id)"
-            :label="`${d.filename} (${(d.sizeBytes/1024).toFixed(0)} KB)`" />
-        </el-select>
-        <el-button type="primary" :loading="docLoading" :disabled="!docId" @click="genDoc(false)">生成</el-button>
-        <el-button :loading="docLoading" :disabled="!docId" @click="genDoc(true)">重新生成</el-button>
+    <div v-if="activeTab === 'doc'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <p class="text-[#6e6e73] text-[13px] m-0 mb-4">对已上传的本地文档生成精读卡</p>
+      <div class="flex gap-2.5 items-center flex-wrap">
+        <select v-model="docId"
+          class="flex-1 min-w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer">
+          <option value="" disabled>选择文档</option>
+          <option v-for="d in docs" :key="d.id" :value="String(d.id)">
+            {{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)
+          </option>
+        </select>
+        <button :disabled="!docId || docLoading"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          @click="genDoc(false)">生成</button>
+        <button :disabled="!docId || docLoading"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="genDoc(true)">重新生成</button>
       </div>
       <ResultBlock v-if="docResult" :result="docResult" :meta="docMeta" />
     </div>
 
-    <el-alert v-if="error" :title="error" type="error" show-icon closable
-      class="[margin-top:16px]" @close="error = ''" />
+    <div v-if="error" class="flex items-center gap-3 p-4 rounded-[12px] bg-[rgba(255,59,48,0.08)] text-[13px] text-[#ff3b30] mt-4">
+      <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+      <span class="flex-1">{{ error }}</span>
+      <button class="text-[#ff3b30] hover:text-[#d62d25] cursor-pointer bg-transparent border-none text-lg leading-none"
+        @click="error = ''">&times;</button>
+    </div>
   </div>
 </template>
 

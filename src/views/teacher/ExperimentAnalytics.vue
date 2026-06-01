@@ -1,233 +1,253 @@
 <template>
-  <div class="exp-analytics [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="exp-analytics">
     <page-header
       title="实验数据分析"
       description="基于 PTA 成绩单的多维分析，包括分数分布、题目得分率、难度系数与区分度。"
     />
 
-    <div class="selector-bar [display:flex] [gap:12px] [align-items:center] [margin-bottom:12px] [flex-wrap:wrap] max-[768px]:[align-items:stretch] max-[768px]:[&_>_*]:![width:100%]">
-      <el-select
-        v-if="classPrefixes.length > 1"
-        v-model="selectedClass"
-        placeholder="选择班级前缀"
-        clearable
-        class="[width:180px]"
-        @change="onClassChange"
-      >
-        <el-option label="全部实验" value="" />
-        <el-option
-          v-for="prefix in classPrefixes"
-          :key="prefix"
-          :label="prefix"
-          :value="prefix"
-        />
-      </el-select>
+    <div class="flex gap-3 items-center mb-3 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
+      <div v-if="classPrefixes.length > 1" class="relative w-[180px] max-[768px]:!w-full">
+        <select
+          v-model="selectedClass"
+          class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
+          @change="onClassChange"
+        >
+          <option value="">全部实验</option>
+          <option
+            v-for="prefix in classPrefixes"
+            :key="prefix"
+            :value="prefix"
+          >{{ prefix }}</option>
+        </select>
+        <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
 
-      <el-select
-        v-model="selectedExp"
-        placeholder="选择实验"
-        filterable
-        clearable
-        class="[width:360px]"
-        @change="loadAnalytics"
-      >
-        <el-option
-          v-for="exp in experiments"
-          :key="exp.experimentId"
-          :label="exp.name"
-          :value="exp.experimentId"
-        />
-      </el-select>
+      <div class="relative w-[360px] max-[768px]:!w-full">
+        <select
+          v-model="selectedExp"
+          class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
+          @change="loadAnalytics"
+        >
+          <option :value="null" disabled>选择实验</option>
+          <option
+            v-for="exp in experiments"
+            :key="exp.experimentId"
+            :value="exp.experimentId"
+          >{{ exp.name }}</option>
+        </select>
+        <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
 
-      <el-button type="primary" plain @click="toggleComparison">
+      <button
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+        @click="toggleComparison"
+      >
         {{ showComparison ? '返回单实验分析' : '实验横向对比' }}
-      </el-button>
+      </button>
 
-      <el-tag type="info" size="small" class="count-tag [margin-left:auto] max-[768px]:[margin-left:0]">
+      <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff] ml-auto max-[768px]:ml-0">
         {{ activeClassLabel }} / {{ experiments.length }} 个实验
-      </el-tag>
+      </span>
     </div>
 
-    <el-alert
+    <!-- Error alert -->
+    <div
       v-if="errorMessage"
-      type="error"
-      :closable="false"
-      show-icon
-      class="fallback-alert [margin-bottom:12px]"
-      :title="errorMessage"
-    />
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] mb-3"
+    >
+      <svg class="w-5 h-5 text-[#ff3b30] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+      <span class="text-sm text-[#ff3b30]">{{ errorMessage }}</span>
+    </div>
 
-    <el-alert
+    <!-- Warning alert -->
+    <div
       v-if="filterFallback"
-      type="warning"
-      :closable="false"
-      show-icon
-      class="fallback-alert [margin-bottom:12px]"
-      title="当前教学班没有匹配到实验前缀，已自动切换为全部实验。"
-    />
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)] mb-3"
+    >
+      <svg class="w-5 h-5 text-[#ff9500] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <span class="text-sm text-[#ff9500]">当前教学班没有匹配到实验前缀，已自动切换为全部实验。</span>
+    </div>
 
-    <el-alert
+    <!-- Info alert (scope) -->
+    <div
       v-if="scopeDescription && !showComparison"
-      type="info"
-      :closable="false"
-      show-icon
-      class="scope-alert [margin-bottom:12px]"
-      :title="scopeTitle"
-      :description="scopeDescription"
-    />
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(0,122,255,0.2)] bg-[rgba(0,122,255,0.06)] mb-3"
+    >
+      <svg class="w-5 h-5 text-[#007aff] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+      <div>
+        <p class="text-sm font-medium text-[#007aff]">{{ scopeTitle }}</p>
+        <p class="text-xs text-[#007aff]/80 mt-0.5">{{ scopeDescription }}</p>
+      </div>
+    </div>
 
     <template v-if="showComparison">
-      <el-card class="g-card [border-radius:8px] [border:1px_solid_#dadce0] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:12px] [&_.el-table_td]:[color:#202124]" v-loading="compLoading">
-        <template #header>
-          <span>实验横向对比</span>
-        </template>
-        <div v-if="comparisonItems.length" ref="compChartRef" class="[height:340px]"></div>
-        <el-empty v-else-if="!compLoading" description="暂无可对比的实验数据" />
-      </el-card>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6" v-loading="compLoading">
+        <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">实验横向对比</div>
+        <div v-if="comparisonItems.length" ref="compChartRef" class="h-[340px]"></div>
+        <div v-else-if="!compLoading" class="py-12 text-center text-[#aeaeb2] text-sm">暂无可对比的实验数据</div>
+      </div>
     </template>
 
     <template v-else-if="data && data.overview && selectedExp">
-      <div class="kpi-grid [display:grid] [grid-template-columns:repeat(10,_minmax(0,_1fr))] [gap:8px]">
-        <div v-for="item in kpiItems" :key="item.label" class="kpi [background:#fff] [border-radius:8px] [padding:10px_8px] [text-align:center] [border:1px_solid_#e8eaed] [transition:box-shadow_0.2s] hover:[box-shadow:0_2px_8px_rgba(0,_0,_0,_0.08)]">
-          <div class="kpi-val [font-size:20px] [font-weight:700] [line-height:1.2]" :class="kpiValueClass(item)">{{ item.value }}</div>
-          <div class="kpi-label [font-size:11px] [color:#5f6368] [margin-top:2px]">{{ item.label }}</div>
+      <div class="grid grid-cols-10 gap-2 max-[768px]:grid-cols-5 max-[480px]:grid-cols-2">
+        <div v-for="item in kpiItems" :key="item.label" class="bg-white rounded-[12px] p-[10px_8px] text-center border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+          <div class="text-[20px] font-bold leading-tight" :class="kpiValueClass(item)">{{ item.value }}</div>
+          <div class="text-[11px] text-[#6e6e73] mt-0.5">{{ item.label }}</div>
         </div>
       </div>
 
-      <el-card class="g-card compact [margin-top:12px] [font-size:12px]">
-        <template #header>
-          <span>PTA 概览统计</span>
-        </template>
+      <!-- PTA Overview Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-3">
+        <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">PTA 概览统计</div>
 
-        <div class="pta-stats-wrapper [overflow-x:auto]">
-          <table class="pta-table [width:100%] [border-collapse:collapse] [font-size:12px] [text-align:center]">
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-[12px] text-center">
             <thead>
               <tr>
-                <th class="pta-th-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">统计项</th>
-                <th>总人数</th>
-                <th>已提交</th>
-                <th>有成绩</th>
-                <th>最高分</th>
-                <th>最低分</th>
-                <th>平均分</th>
-                <th>中位数</th>
-                <th>高位平均</th>
-                <th>低位平均</th>
-                <th>难度系数</th>
-                <th>区分度</th>
+                <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">统计项</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">总人数</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">已提交</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">有成绩</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">最高分</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">最低分</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">平均分</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">中位数</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">高位平均</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">低位平均</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">难度系数</th>
+                <th class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">区分度</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">数值</td>
-                <td>{{ safeNumber(data.overview.totalStudents) }}</td>
-                <td>{{ safeNumber(data.overview.submittedCount) }}</td>
-                <td>{{ safeNumber(data.overview.scoredCount) }}</td>
-                <td>{{ safeNumber(data.overview.maxScore) }}</td>
-                <td>{{ safeNumber(data.overview.minScore) }}</td>
-                <td>{{ safeNumber(data.overview.avgScore) }}</td>
-                <td>{{ safeNumber(data.overview.median) }}</td>
-                <td>{{ safeNumber(data.overview.topAvg) }}</td>
-                <td>{{ safeNumber(data.overview.bottomAvg) }}</td>
-                <td :class="difficultyClass">{{ safeNumber(data.overview.difficulty) }}</td>
-                <td :class="discriminationClass">{{ safeNumber(data.overview.discrimination) }}</td>
+                <td class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2">数值</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.totalStudents) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.submittedCount) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.scoredCount) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.maxScore) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.minScore) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.avgScore) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.median) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.topAvg) }}</td>
+                <td class="py-2 px-2 text-[#1d1d1f]">{{ safeNumber(data.overview.bottomAvg) }}</td>
+                <td class="py-2 px-2" :class="difficultyClass">{{ safeNumber(data.overview.difficulty) }}</td>
+                <td class="py-2 px-2" :class="discriminationClass">{{ safeNumber(data.overview.discrimination) }}</td>
               </tr>
             </tbody>
           </table>
 
-          <table class="pta-table [margin-top:12px] [width:100%] [border-collapse:collapse] [font-size:12px] [text-align:center]">
+          <table class="w-full border-collapse text-[12px] text-center mt-3">
             <thead>
               <tr>
-                <th class="pta-th-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">分数段</th>
-                <th v-for="segment in scoreSegments" :key="segment.label">{{ segment.label }}</th>
+                <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">分数段</th>
+                <th v-for="segment in scoreSegments" :key="segment.label" class="py-2 px-2 text-[#6e6e73] font-medium border-b border-black/[0.06]">{{ segment.label }}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">人数</td>
-                <td v-for="segment in scoreSegments" :key="`count-${segment.label}`">
+                <td class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2">人数</td>
+                <td v-for="segment in scoreSegments" :key="`count-${segment.label}`" class="py-2 px-2 text-[#1d1d1f]">
                   {{ segment.count }}
                 </td>
               </tr>
               <tr>
-                <td class="pta-td-title [background:#f1f3f4] [font-weight:600] [color:#202124] [min-width:72px]">比例</td>
-                <td v-for="segment in scoreSegments" :key="`percent-${segment.label}`">
+                <td class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2">比例</td>
+                <td v-for="segment in scoreSegments" :key="`percent-${segment.label}`" class="py-2 px-2 text-[#1d1d1f]">
                   {{ segment.percent }}
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <div class="pta-notes [display:flex] [gap:24px] [margin-top:8px] [font-size:11px] [color:#5f6368] [flex-wrap:wrap]">
+          <div class="flex gap-6 mt-2 text-[11px] text-[#6e6e73] flex-wrap">
             <span>难度系数 = 1 - 平均分/ 满分，数值越大说明整体得分越低。</span>
             <span>区分度= (高位平均 - 低位平均) / 满分，通常大于 0.30 说明区分效果较好。</span>
           </div>
         </div>
-      </el-card>
+      </div>
 
-      <el-row :gutter="16" class="[margin-top:12px]">
-        <el-col :xs="24" :sm="24" :md="12">
-          <el-card class="g-card compact [font-size:12px]">
-            <template #header>
-              <span>分数分布</span>
-            </template>
-            <div ref="distChartRef" class="[height:260px]"></div>
-          </el-card>
-        </el-col>
-        <el-col :xs="24" :sm="24" :md="12">
-          <el-card class="g-card compact [font-size:12px]">
-            <template #header>
-              <span>每题得分率</span>
-            </template>
-            <div v-if="problemAccuracy.length" ref="accChartRef" class="[height:260px]"></div>
-            <el-empty v-else description="暂无题目维度数据" />
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- Charts row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">分数分布</div>
+          <div ref="distChartRef" class="h-[260px]"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">每题得分率</div>
+          <div v-if="problemAccuracy.length" ref="accChartRef" class="h-[260px]"></div>
+          <div v-else class="py-12 text-center text-[#aeaeb2] text-sm">暂无题目维度数据</div>
+        </div>
+      </div>
 
-      <el-card class="g-card compact [margin-top:12px] [font-size:12px]">
-        <template #header>
-          <span>题目明细</span>
-        </template>
-        <el-table :data="problemAccuracy" size="small" stripe max-height="320">
-          <el-table-column prop="label" label="题号" width="90" />
-          <el-table-column prop="type" label="题目" min-width="180" show-overflow-tooltip />
-          <el-table-column prop="fullScore" label="满分" width="80" align="center" />
-          <el-table-column prop="avgScore" label="均分" width="80" align="center" />
-          <el-table-column label="得分率" min-width="180">
-            <template #default="{ row }">
-              <el-progress
-                :percentage="toPercent(row.accuracyRate)"
-                :color="accColor(toPercent(row.accuracyRate))"
-                :stroke-width="12"
-                :text-inside="true"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column prop="fullMarkCount" label="满分人数" width="90" align="center" />
-          <el-table-column prop="zeroCount" label="零分人数" width="90" align="center" />
-          <el-table-column label="平均得分率" width="110" align="center">
-            <template #default="{ row }">
-              {{ row.fullScore > 0 ? `${toPercent((row.avgScore / row.fullScore) * 100)}%` : '-' }}
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
+      <!-- Problem detail table -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-3">
+        <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">题目明细</div>
+        <div class="overflow-x-auto max-h-[320px] overflow-y-auto">
+          <table class="w-full text-left text-[12px] border-collapse">
+            <thead class="sticky top-0 z-10">
+              <tr class="border-b border-black/[0.06]">
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[90px]">题号</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] min-w-[180px]">题目</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[80px] text-center">满分</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[80px] text-center">均分</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] min-w-[180px]">得分率</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[90px] text-center">满分人数</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[90px] text-center">零分人数</th>
+                <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[110px] text-center">平均得分率</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in problemAccuracy" :key="row.label" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+                <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.label }}</td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] truncate max-w-[240px]" :title="row.type">{{ row.type }}</td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] text-center">{{ row.fullScore }}</td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] text-center">{{ row.avgScore }}</td>
+                <td class="py-2.5 px-3">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-3 bg-[#f5f5f7] rounded-full overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all"
+                        :style="{ width: toPercent(row.accuracyRate) + '%', backgroundColor: accColor(toPercent(row.accuracyRate)) }"
+                      ></div>
+                    </div>
+                    <span class="text-[11px] text-[#6e6e73] w-[38px] text-right">{{ toPercent(row.accuracyRate) }}%</span>
+                  </div>
+                </td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] text-center">{{ row.fullMarkCount }}</td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] text-center">{{ row.zeroCount }}</td>
+                <td class="py-2.5 px-3 text-[#1d1d1f] text-center">
+                  {{ row.fullScore > 0 ? `${toPercent((row.avgScore / row.fullScore) * 100)}%` : '-' }}
+                </td>
+              </tr>
+              <tr v-if="!problemAccuracy.length">
+                <td colspan="8" class="py-12 text-center text-[#aeaeb2] text-sm">暂无题目明细数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </template>
 
-    <div v-else-if="loading" class="loading-wrap [padding:40px]">
-      <el-skeleton :rows="6" animated />
+    <div v-else-if="loading" class="p-10 flex items-center justify-center">
+      <div class="animate-pulse flex flex-col gap-3 w-full">
+        <div class="h-4 bg-[#f5f5f7] rounded w-3/4"></div>
+        <div class="h-4 bg-[#f5f5f7] rounded w-1/2"></div>
+        <div class="h-4 bg-[#f5f5f7] rounded w-5/6"></div>
+        <div class="h-4 bg-[#f5f5f7] rounded w-2/3"></div>
+        <div class="h-4 bg-[#f5f5f7] rounded w-4/5"></div>
+        <div class="h-4 bg-[#f5f5f7] rounded w-1/3"></div>
+      </div>
     </div>
 
-    <el-empty
+    <div
       v-else-if="experiments.length"
-      description="请选择一个实验查看分析结果"
-    />
+      class="py-12 text-center text-[#aeaeb2] text-sm"
+    >请选择一个实验查看分析结果</div>
 
-    <el-empty
+    <div
       v-else
-      description="当前没有可分析的实验数据"
-    />
+      class="py-12 text-center text-[#aeaeb2] text-sm"
+    >当前没有可分析的实验数据</div>
   </div>
 </template>
 
@@ -328,11 +348,11 @@ const kpiItems = computed(() => {
   if (!overview) return []
 
   return [
-    { label: '总人数', value: safeNumber(overview.totalStudents), color: '#1a73e8' },
-    { label: '已提交', value: safeNumber(overview.submittedCount), color: '#1a73e8' },
+    { label: '总人数', value: safeNumber(overview.totalStudents), color: '#007aff' },
+    { label: '已提交', value: safeNumber(overview.submittedCount), color: '#007aff' },
     { label: '最高分', value: safeNumber(overview.maxScore), color: '#1e8e3e' },
     { label: '最低分', value: safeNumber(overview.minScore), color: '#d93025' },
-    { label: '平均分', value: safeNumber(overview.avgScore), color: '#1a73e8' },
+    { label: '平均分', value: safeNumber(overview.avgScore), color: '#007aff' },
     { label: '中位数', value: safeNumber(overview.median) },
     { label: '高位平均', value: safeNumber(overview.topAvg), color: '#1e8e3e' },
     { label: '低位平均', value: safeNumber(overview.bottomAvg), color: '#e37400' },
@@ -354,11 +374,11 @@ const kpiItems = computed(() => {
 })
 
 function kpiValueClass(item) {
-  if (item.color === '#1a73e8') return '[color:#1a73e8]'
+  if (item.color === '#007aff') return '[color:#007aff]'
   if (item.color === '#1e8e3e') return '[color:#1e8e3e]'
   if (item.color === '#d93025') return '[color:#d93025]'
   if (item.color === '#e37400') return '[color:#e37400]'
-  return '[color:#202124]'
+  return '[color:#1d1d1f]'
 }
 
 const scoreSegments = computed(() => {
@@ -426,7 +446,7 @@ function toPercent(value) {
 
 function accColor(rate) {
   if (rate >= 80) return '#1e8e3e'
-  if (rate >= 60) return '#1a73e8'
+  if (rate >= 60) return '#007aff'
   if (rate >= 40) return '#e37400'
   return '#d93025'
 }
@@ -605,7 +625,7 @@ function renderDistChart() {
       data: values.map((value, index) => ({
         value,
         itemStyle: {
-          color: index <= 1 ? '#1e8e3e' : index <= 3 ? '#1a73e8' : index <= 4 ? '#e37400' : '#d93025',
+          color: index <= 1 ? '#1e8e3e' : index <= 3 ? '#007aff' : index <= 4 ? '#e37400' : '#d93025',
           borderRadius: [3, 3, 0, 0],
         },
       })),
@@ -697,7 +717,7 @@ function renderComparisonChart() {
         type: 'bar',
         data: comparisonItems.value.map(item => Number(item.avgScore || 0)),
         barWidth: '30%',
-        itemStyle: { color: '#1a73e8', borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: '#007aff', borderRadius: [3, 3, 0, 0] },
       },
       {
         name: '难度系数',
@@ -752,5 +772,3 @@ onBeforeUnmount(() => {
   disposeCharts()
 })
 </script>
-
-

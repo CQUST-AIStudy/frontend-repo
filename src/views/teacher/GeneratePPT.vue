@@ -1,50 +1,68 @@
 <template>
-  <div class="generate-ppt [display:flex] [flex-direction:column] [gap:20px]">
+  <div class="flex flex-col gap-5">
     <page-header
       title="生成教学 PPT"
       description="根据课程主题、知识点和难度要求，快速生成可直接整理成课件的教学大纲。"
     />
 
-    <div class="page-layout [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] [align-items:start] max-[1080px]:[grid-template-columns:1fr]">
-      <el-card class="form-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [font-weight:600] [color:#1d3557] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>生成配置</span>
+    <div class="grid grid-cols-[minmax(320px,420px)_minmax(0,1fr)] gap-5 items-start max-[1080px]:grid-cols-1">
+      <!-- Form Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-start gap-4 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="font-semibold text-[#1d1d1f]">生成配置</span>
+        </div>
+
+        <form @submit.prevent="generatePPT" class="flex flex-col gap-5">
+          <!-- PPT 主题 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">PPT 主题</label>
+            <input
+              v-model="pptForm.title"
+              type="text"
+              placeholder="例如：二叉树的遍历与应用"
+              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            />
+            <span v-if="errors.title" class="text-[12px] text-red-500">{{ errors.title }}</span>
           </div>
-        </template>
 
-        <el-form ref="pptFormRef" :model="pptForm" :rules="pptRules" label-position="top">
-          <el-form-item label="PPT 主题" prop="title">
-            <el-input v-model="pptForm.title" placeholder="例如：二叉树的遍历与应用" />
-          </el-form-item>
+          <!-- 课件类型 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">课件类型</label>
+            <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04]">
+              <label
+                v-for="opt in typeOptions"
+                :key="opt.value"
+                class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer flex items-center"
+                :class="pptForm.type === opt.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] hover:text-[#1d1d1f]'"
+              >
+                <input type="radio" v-model="pptForm.type" :value="opt.value" class="sr-only" />
+                {{ opt.label }}
+              </label>
+            </div>
+            <span v-if="errors.type" class="text-[12px] text-red-500">{{ errors.type }}</span>
+          </div>
 
-          <el-form-item label="课件类型" prop="type">
-            <el-radio-group v-model="pptForm.type">
-              <el-radio label="lecture">课堂讲授</el-radio>
-              <el-radio label="review">复习梳理</el-radio>
-              <el-radio label="lab">实验指导</el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="知识点" prop="topics">
-            <el-select
+          <!-- 知识点 (multi-select) -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">知识点</label>
+            <select
               v-model="pptForm.topics"
               multiple
-              collapse-tags
-              collapse-tags-tooltip
-              placeholder="选择本次 PPT 需要覆盖的知识点"
-              class="[width:100%]"
+              class="h-[120px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none cursor-pointer focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all"
             >
-              <el-option
+              <option
                 v-for="item in knowledgeTopics"
                 :key="item.value"
-                :label="item.label"
                 :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
+              >{{ item.label }}</option>
+            </select>
+            <span class="text-[11px] text-[#86868b]">按住 Ctrl/Cmd 可多选</span>
+            <span v-if="errors.topics" class="text-[12px] text-red-500">{{ errors.topics }}</span>
+          </div>
 
-          <el-form-item label="内容难度" prop="difficulty">
+          <!-- 内容难度 (KEEP el-slider) -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">内容难度</label>
             <el-slider
               v-model="pptForm.difficulty"
               :step="1"
@@ -53,71 +71,104 @@
               :marks="difficultyMarks"
               show-stops
             />
-          </el-form-item>
+          </div>
 
-          <el-form-item label="内容模块" prop="includes">
-            <el-checkbox-group v-model="pptForm.includes">
-              <el-checkbox label="theory">理论讲解</el-checkbox>
-              <el-checkbox label="examples">示例代码</el-checkbox>
-              <el-checkbox label="exercises">课堂练习</el-checkbox>
-              <el-checkbox label="applications">应用场景</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
+          <!-- 内容模块 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">内容模块</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label
+                v-for="mod in moduleOptions"
+                :key="mod.value"
+                class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]"
+              >
+                <input type="checkbox" v-model="pptForm.includes" :value="mod.value" class="w-4 h-4 rounded accent-[#007aff]" />
+                <span class="text-[13px] text-[#1d1d1f]">{{ mod.label }}</span>
+              </label>
+            </div>
+          </div>
 
-          <el-form-item label="补充说明">
-            <el-input
+          <!-- 补充说明 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#1d1d1f]">补充说明</label>
+            <textarea
               v-model="pptForm.notes"
-              type="textarea"
-              :rows="4"
+              rows="4"
               placeholder="例如：偏向实验课、需要突出易错点、希望加入课堂讨论问题。"
-            />
-          </el-form-item>
+              class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+            ></textarea>
+          </div>
 
-          <div class="form-actions [display:flex] [align-items:center] [gap:14px] [flex-wrap:wrap] [gap:12px]">
-            <el-button type="primary" :loading="generating" @click="generatePPT">
+          <!-- Actions -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <button
+              type="submit"
+              :disabled="generating"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100"
+            >
               {{ generating ? '正在生成...' : '生成 PPT 大纲' }}
-            </el-button>
-            <el-button @click="resetForm">重置</el-button>
+            </button>
+            <button
+              type="button"
+              @click="resetForm"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#ededf0] active:scale-[0.96] transition-all cursor-pointer border border-black/[0.06]"
+            >
+              重置
+            </button>
           </div>
-        </el-form>
-      </el-card>
+        </form>
+      </div>
 
-      <el-card class="preview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
-        <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-            <span>内容预览</span>
-            <el-button type="primary" plain :disabled="!previewSlides.length" @click="downloadPPT">
-              下载文本
-            </el-button>
-          </div>
-        </template>
-
-        <div v-if="generating" class="loading-state [display:flex] [align-items:center] [gap:10px] [padding:18px_2px] [color:#48607c]">
-          <el-icon class="is-loading" :size="22"><Loading /></el-icon>
-          <span>AI 正在生成课件内容，请稍候。</span>
+      <!-- Preview Card -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex items-center justify-between gap-4 mb-4 pb-2.5 border-b border-black/[0.06]">
+          <span class="font-semibold text-[#1d1d1f]">内容预览</span>
+          <button
+            type="button"
+            :disabled="!previewSlides.length"
+            @click="downloadPPT"
+            class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.12)] active:scale-[0.96] transition-all cursor-pointer border border-[rgba(0,122,255,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            下载文本
+          </button>
         </div>
 
-        <div v-else-if="previewSlides.length" class="slides-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(260px,_1fr))] [gap:16px]">
+        <!-- Loading state -->
+        <div v-if="generating" class="flex items-center gap-2.5 py-4 text-[#6e6e73]">
+          <svg class="w-5 h-5 animate-spin text-[#007aff]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-sm">AI 正在生成课件内容，请稍候。</span>
+        </div>
+
+        <!-- Slides grid -->
+        <div v-else-if="previewSlides.length" class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
           <article
             v-for="(slide, index) in previewSlides"
             :key="`${slide.title}-${index}`"
-            class="slide-card [overflow:hidden] [border:1px_solid_#dbe5ef] [border-radius:18px] [background:linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)]"
-            :class="{ 'slide-card--title': slide.isTitle }"
+            class="overflow-hidden border border-black/[0.06] rounded-[14px] bg-gradient-to-b from-white to-[#f9fafb]"
           >
-            <header class="slide-card__header [padding:10px_14px] [border-bottom:1px_solid_#e6edf5] [font-size:13px] [color:#68809c]">第 {{ index + 1 }} 页</header>
-            <div class="slide-card__body [padding:18px]">
-              <h3>{{ slide.title }}</h3>
-              <p v-if="slide.isTitle" class="slide-card__subtitle [margin:0] [color:#5f7690]">{{ pptTypeText }}</p>
-              <div v-else-if="slide.isCode" class="code-block [overflow:auto] [border-radius:14px] [background:#10233b] [color:#f8fbff] [padding:14px]">
-                <pre><code>{{ slide.content }}</code></pre>
+            <header class="px-3.5 py-2.5 border-b border-black/[0.04] text-[12px] text-[#86868b] font-medium">第 {{ index + 1 }} 页</header>
+            <div class="p-4">
+              <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-2">{{ slide.title }}</h3>
+              <p v-if="slide.isTitle" class="m-0 text-[13px] text-[#6e6e73]">{{ pptTypeText }}</p>
+              <div v-else-if="slide.isCode" class="overflow-auto rounded-[10px] bg-[#1d1d1f] text-[#f5f5f7] p-3.5">
+                <pre class="m-0 text-[12px] leading-relaxed"><code>{{ slide.content }}</code></pre>
               </div>
-              <div v-else class="slide-card__content [color:#31465f] [line-height:1.8]" v-html="formatSlideContent(slide.content)"></div>
+              <div v-else class="text-[13px] text-[#424245] leading-[1.8]" v-html="formatSlideContent(slide.content)"></div>
             </div>
           </article>
         </div>
 
-        <el-empty v-else description="生成后将在这里显示 PPT 大纲预览" />
-      </el-card>
+        <!-- Empty state -->
+        <div v-else class="flex flex-col items-center justify-center py-12 text-center">
+          <svg class="w-12 h-12 text-[#d2d2d7] mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+          </svg>
+          <p class="text-[13px] text-[#86868b]">生成后将在这里显示 PPT 大纲预览</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -125,11 +176,10 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { chatSend } from '../../api/tap'
+import { useFormValidation } from '../../composables/useFormValidation'
 
-const pptFormRef = ref(null)
 const generating = ref(false)
 const previewSlides = ref([])
 
@@ -144,15 +194,29 @@ const pptForm = reactive({
 
 const pptRules = {
   title: [
-    { required: true, message: '请输入 PPT 主题', trigger: 'blur' },
-    { min: 2, max: 50, message: '主题长度保持在 2 到 50 个字符之间', trigger: 'blur' }
+    { required: true, message: '请输入 PPT 主题' },
+    { min: 2, max: 50, message: '主题长度保持在 2 到 50 个字符之间' }
   ],
-  type: [{ required: true, message: '请选择课件类型', trigger: 'change' }],
+  type: [{ required: true, message: '请选择课件类型' }],
   topics: [
-    { required: true, message: '请至少选择一个知识点', trigger: 'change' },
-    { type: 'array', min: 1, message: '请至少选择一个知识点', trigger: 'change' }
+    { required: true, message: '请至少选择一个知识点', validator: (val) => (!val || val.length === 0) ? '请至少选择一个知识点' : null }
   ]
 }
+
+const { errors, validate, resetFields } = useFormValidation(pptRules)
+
+const typeOptions = [
+  { value: 'lecture', label: '课堂讲授' },
+  { value: 'review', label: '复习梳理' },
+  { value: 'lab', label: '实验指导' }
+]
+
+const moduleOptions = [
+  { value: 'theory', label: '理论讲解' },
+  { value: 'examples', label: '示例代码' },
+  { value: 'exercises', label: '课堂练习' },
+  { value: 'applications', label: '应用场景' }
+]
 
 const difficultyMarks = {
   1: '入门',
@@ -206,7 +270,7 @@ function buildPrompt() {
   }).join('、')
 
   return [
-    `请为我生成一份“${pptForm.title}”的数据结构课程 ${pptTypeText.value} PPT 大纲。`,
+    `请为我生成一份"${pptForm.title}"的数据结构课程 ${pptTypeText.value} PPT 大纲。`,
     `知识点：${selectedTopics.value.join('、')}`,
     `难度：${difficultyText.value}`,
     `需包含：${includesText}`,
@@ -251,7 +315,7 @@ function formatSlideContent(content) {
 }
 
 async function generatePPT() {
-  const valid = await pptFormRef.value?.validate().catch(() => false)
+  const valid = validate(pptForm)
   if (!valid) {
     ElMessage.error('请先完善表单信息')
     return
@@ -286,7 +350,13 @@ async function generatePPT() {
 }
 
 function resetForm() {
-  pptFormRef.value?.resetFields()
+  pptForm.title = ''
+  pptForm.type = 'lecture'
+  pptForm.topics = []
+  pptForm.difficulty = 3
+  pptForm.includes = ['theory', 'examples']
+  pptForm.notes = ''
+  resetFields()
   previewSlides.value = []
 }
 
@@ -305,5 +375,3 @@ function downloadPPT() {
   URL.revokeObjectURL(link.href)
 }
 </script>
-
-

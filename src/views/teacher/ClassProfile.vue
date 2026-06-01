@@ -1,107 +1,145 @@
 <template>
-  <div class="class-profile [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:1px_solid_#dadce0] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
-    <div v-if="loading"><el-skeleton :rows="10" animated /></div>
-    <el-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
+  <div class="space-y-4">
+    <!-- Loading state -->
+    <div v-if="loading" class="flex items-center justify-center py-20">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-8 h-8 border-[3px] border-black/10 border-t-[#007aff] rounded-full animate-spin"></div>
+        <span class="text-[13px] text-[#6e6e73]">加载中...</span>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="errorMsg" class="rounded-[14px] bg-[#fff3cd] border border-[#ffecb5] p-4 flex items-center gap-3">
+      <svg class="w-5 h-5 text-[#ff9500] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+      <span class="text-[13px] text-[#86650a]">{{ errorMsg }}</span>
+    </div>
+
     <template v-else>
-      <!-- 概览 -->
-      <el-row :gutter="16">
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [padding:20px_0] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value [font-size:28px] [font-weight:700] [color:#202124] [&.good]:[color:#22c55e] [&.warn]:[color:#f59e0b] [&.danger]:[color:#ef4444] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ data.totalStudents }}</div>
-            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:4px] [font-size:12px] [margin-top:10px] [color:#606266]">学生总数</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [padding:20px_0] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value good [font-size:28px] [font-weight:700] [color:#202124] [&.good]:[color:#22c55e] [&.warn]:[color:#f59e0b] [&.danger]:[color:#ef4444] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ tierCount('A') }}</div>
-            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:4px] [font-size:12px] [margin-top:10px] [color:#606266]">优秀 (≥0)</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [padding:20px_0] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value warn [font-size:28px] [font-weight:700] [color:#202124] [&.good]:[color:#22c55e] [&.warn]:[color:#f59e0b] [&.danger]:[color:#ef4444] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ tierCount('B') }}</div>
-            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:4px] [font-size:12px] [margin-top:10px] [color:#606266]">中等 (40-69)</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [padding:20px_0] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
-            <div class="stat-value danger [font-size:28px] [font-weight:700] [color:#202124] [&.good]:[color:#22c55e] [&.warn]:[color:#f59e0b] [&.danger]:[color:#ef4444] [font-size:24px] [font-weight:bold] [color:#409EFF] [margin-bottom:5px]">{{ tierCount('C') }}</div>
-            <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:4px] [font-size:12px] [margin-top:10px] [color:#606266]">需关注 (&lt;40)</div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- Overview stat cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+          <div class="text-[24px] font-bold text-[#007aff] mb-1">{{ data.totalStudents }}</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">学生总数</div>
+        </div>
+        <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+          <div class="text-[24px] font-bold text-[#34c759] mb-1">{{ tierCount('A') }}</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">优秀 (≥70)</div>
+        </div>
+        <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+          <div class="text-[24px] font-bold text-[#ff9500] mb-1">{{ tierCount('B') }}</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">中等 (40-69)</div>
+        </div>
+        <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+          <div class="text-[24px] font-bold text-[#ff3b30] mb-1">{{ tierCount('C') }}</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">需关注 (&lt;40)</div>
+        </div>
+      </div>
 
-      <el-row :gutter="16" class="[margin-top:16px]">
-        <!-- 维度柱状图-->
-        <el-col :span="12">
-          <el-card shadow="hover">
-            <template #header><span>班级各维度平均分</span></template>
-            <div ref="barChartRef" class="[height:350px]"></div>
-          </el-card>
-        </el-col>
-        <!-- 薄弱排行 -->
-        <el-col :span="12">
-          <el-card shadow="hover">
-            <template #header><span>薄弱维度排行</span></template>
-            <el-table :data="data.weakRanking" stripe size="small">
-              <el-table-column prop="dimension" label="维度" width="100" />
-              <el-table-column prop="avgScore" label="班级均分" width="90" />
-              <el-table-column prop="weakCount" label="低分人数" width="90" />
-              <el-table-column label="低分占比">
-                <template #default="{ row }">
-                  <el-progress :percentage="row.weakRatio" :color="row.weakRatio > 30 ? '#F56C6C' : '#E6A23C'" :stroke-width="10" />
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
-        </el-col>
-      </el-row>
+      <!-- Charts row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Bar chart card -->
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">班级各维度平均分</h3>
+          <div ref="barChartRef" class="h-[350px]"></div>
+        </div>
+        <!-- Weak ranking table card -->
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">薄弱维度排行</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[13px]">
+              <thead>
+                <tr class="border-b border-black/[0.06]">
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">维度</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">班级均分</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">低分人数</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">低分占比</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in data.weakRanking" :key="idx" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
+                  <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.dimension }}</td>
+                  <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.avgScore }}</td>
+                  <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.weakCount }}</td>
+                  <td class="py-2.5 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
+                        <div class="h-full rounded-full transition-all" :style="{ width: row.weakRatio + '%' }" :class="row.weakRatio > 30 ? 'bg-[#ff3b30]' : 'bg-[#ff9500]'"></div>
+                      </div>
+                      <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ row.weakRatio }}%</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <!-- ABC分层 -->
-      <el-card shadow="hover" class="[margin-top:16px]">
-        <template #header><span>学生分层 (ABC)</span></template>
-        <el-tabs>
-          <el-tab-pane v-for="(tier, key) in data.tiers" :key="key"
-                       :label="key + ' - ' + tier.label + ' (' + tier.count + '人'">
-            <el-table :data="tier.students" stripe size="small" max-height="400">
-              <el-table-column prop="studentId" label="学号" width="120" />
-              <el-table-column prop="studentName" label="姓名" width="100" />
-              <el-table-column label="综合分">
-                <template #default="{ row }">
-                  <el-progress :percentage="Math.round(row.overallScore)"
-                               :color="row.overallScore >= 70 ? '#67C23A' : row.overallScore >= 40 ? '#E6A23C' : '#F56C6C'"
-                               :stroke-width="10" />
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="100">
-                <template #default="{ row }">
-                  <el-button type="primary" link size="small" @click="viewStudent(row.studentId)">查看画像</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-        </el-tabs>
-      </el-card>
+      <!-- ABC Tier section -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">学生分层 (ABC)</h3>
+        <!-- Custom tabs -->
+        <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
+          <button v-for="(tier, key) in data.tiers" :key="key" @click="activeTab = key"
+            class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none"
+            :class="activeTab === key ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] hover:text-[#1d1d1f]'">
+            {{ key }} - {{ tier.label }} ({{ tier.count }}人)
+          </button>
+        </div>
+        <!-- Tab panels -->
+        <div v-for="(tier, key) in data.tiers" :key="key" v-show="activeTab === key">
+          <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
+            <table class="w-full text-[13px]">
+              <thead class="sticky top-0 bg-white z-10">
+                <tr class="border-b border-black/[0.06]">
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">学号</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">姓名</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">综合分</th>
+                  <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in tier.students" :key="idx" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
+                  <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.studentId }}</td>
+                  <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.studentName }}</td>
+                  <td class="py-2.5 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-full max-w-[120px] h-2 rounded-full bg-black/[0.06] overflow-hidden">
+                        <div class="h-full rounded-full transition-all" :style="{ width: Math.round(row.overallScore) + '%' }" :class="row.overallScore >= 70 ? 'bg-[#34c759]' : row.overallScore >= 40 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"></div>
+                      </div>
+                      <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ Math.round(row.overallScore) }}</span>
+                    </div>
+                  </td>
+                  <td class="py-2.5 px-3">
+                    <button @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </template>
 
-    <!-- 学生画像弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="80%" top="5vh" destroy-on-close>
-      <div v-if="dialogLoading"><el-skeleton :rows="6" animated /></div>
+    <!-- Student profile modal -->
+    <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="80%">
+      <div v-if="dialogLoading" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-3">
+          <div class="w-8 h-8 border-[3px] border-black/10 border-t-[#007aff] rounded-full animate-spin"></div>
+          <span class="text-[13px] text-[#6e6e73]">加载中...</span>
+        </div>
+      </div>
       <template v-else>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <div ref="dialogRadarRef" class="[height:300px]"></div>
-          </el-col>
-          <el-col :span="12">
-            <div ref="dialogTrendRef" class="[height:300px]"></div>
-          </el-col>
-        </el-row>
-        <div v-if="dialogProfile.feedback" class="feedback-text [margin-top:12px] [font-size:14px] [line-height:1.8] [background:linear-gradient(135deg,_#f0fdf4,_#dcfce7)] [padding:14px_16px] [border-radius:10px] [border-left:4px_solid_#22c55e]">{{ dialogProfile.feedback }}</div>
-        <div v-if="dialogProfile.patterns?.length" class="[margin-top:12px]">
-          <el-tag v-for="p in dialogProfile.patterns" :key="p.tag" class="[margin-right:8px]">{{ p.tag }}: {{ p.description }}</el-tag>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div ref="dialogRadarRef" class="h-[300px]"></div>
+          <div ref="dialogTrendRef" class="h-[300px]"></div>
+        </div>
+        <div v-if="dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#34c759]">{{ dialogProfile.feedback }}</div>
+        <div v-if="dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
+          <span v-for="p in dialogProfile.patterns" :key="p.tag" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[#007aff]/10 text-[#007aff]">{{ p.tag }}: {{ p.description }}</span>
         </div>
       </template>
-    </el-dialog>
+    </AppModal>
   </div>
 </template>
 
@@ -112,6 +150,7 @@ import * as echarts from 'echarts'
 import axios from 'axios'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import AppModal from '../../components/AppModal.vue'
 
 const API_BASE = API_BASE_URL
 const loading = ref(true)
@@ -119,8 +158,9 @@ const errorMsg = ref('')
 const data = ref({})
 const barChartRef = ref(null)
 let barChartInst = null
+const activeTab = ref('A')
 
-// 弹窗
+// Dialog state
 const dialogVisible = ref(false)
 const dialogLoading = ref(false)
 const dialogStudentName = ref('')
@@ -156,7 +196,6 @@ async function fetchData() {
       dimensionAvg: d.dimensionAvg
     })
     await nextTick()
-    // 延迟一帧确保DOM 已渲染
     setTimeout(() => renderBar(), 100)
   } catch (e) {
     errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
@@ -251,5 +290,3 @@ onBeforeUnmount(() => {
   barChartInst?.dispose()
 })
 </script>
-
-

@@ -1,340 +1,492 @@
 <template>
-  <div class="class-list [min-width:0] [min-height:100%] [overflow-y:auto] [&_.el-button--primary]:[border-radius:999px] [&_.el-dialog]:[max-width:calc(100vw_-_24px)] [&_.el-table]:[width:100%]">
+  <div class="min-h-full overflow-y-auto">
     <page-header
-      class="my-page-header [margin-bottom:10px]"
+      class="mb-3"
       title="班级管理"
       description="管理教学班级、学生信息与 PTA 同步设置，首屏卡片会根据内容自动伸展。"
     >
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon>
+      <button
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+        @click="openCreateDialog"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         新增班级
-      </el-button>
+      </button>
     </page-header>
 
-    <el-alert
+    <!-- Cookie expired alert -->
+    <div
       v-if="cookieStatus === 'EXPIRED'"
-      class="cookie-alert [margin-bottom:18px] [border-radius:18px]"
-      title="PTA 登录凭证已过期"
-      type="warning"
-      :closable="false"
-      show-icon
+      class="mb-5 rounded-[18px] bg-[#fef7e0] border border-[#f5d76e]/40 p-4 flex items-center gap-3"
     >
-      <template #default>
-        <div class="cookie-alert__content [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [flex-wrap:wrap] [font-size:13px] [line-height:1.7]">
-          <span>系统自动登录失败。可以手动更新Cookie，也可以在“个人资料”绑定PTA 账号，或在发起同步时临时输入账号密码。</span>
-          <el-button type="warning" size="small" @click="openCookieDialog">更新 Cookie</el-button>
-        </div>
-      </template>
-    </el-alert>
-
-    <div class="class-cards [padding-bottom:24px]" v-loading="loading">
-      <el-empty v-if="classes.length === 0 && !loading" description="暂无班级，点击上方按钮创建">
-        <el-button type="primary" @click="openCreateDialog">创建第一个班级</el-button>
-      </el-empty>
-
-      <el-row v-else :gutter="20" class="class-grid [display:flex] [flex-wrap:wrap] [min-width:0]">
-        <el-col
-          v-for="cls in classes"
-          :key="cls.id"
-          :xs="24"
-          :sm="24"
-          :md="24"
-          :lg="12"
-          :xl="12"
-          class="class-grid__item [display:flex] [margin-bottom:20px]"
-        >
-          <el-card shadow="hover" class="class-card [height:100%] [cursor:pointer] [transition:all_0.3s] [border:2px_solid_transparent] hover:[transform:translateY(-5px)] hover:[border-color:#409EFF] hover:[box-shadow:0_10px_15px_rgba(0,_0,_0,_0.1)] [width:100%] [min-height:380px] [display:flex] [flex-direction:column] [border:1px_solid_#dce5f0] [border-radius:24px] [background:radial-gradient(circle_at_top_right,_rgba(26,_115,_232,_0.08),_transparent_30%),_linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] [box-shadow:0_14px_36px_rgba(38,_61,_89,_0.07)]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <div class="card-header__main [min-width:0] [flex:1]">
-                  <h3 class="class-name [margin:0] [font-size:26px] [line-height:1.2] [color:#16314a] [word-break:break-word]">{{ displayClassName(cls) }}</h3>
-                  <div class="class-meta [display:flex] [flex-wrap:wrap] [gap:8px] [margin-top:12px]">
-                    <span class="meta-pill [display:inline-flex] [align-items:center] [padding:6px_12px] [border-radius:999px] [background:rgba(18,_112,_216,_0.1)] [color:#1860b7] [font-size:12px] [font-weight:600]">{{ displayGrade(cls) }}</span>
-                    <span class="meta-pill meta-pill--soft [display:inline-flex] [align-items:center] [padding:6px_12px] [border-radius:999px] [background:rgba(18,_112,_216,_0.1)] [color:#1860b7] [font-size:12px] [font-weight:600] [background:rgba(126,_157,_183,_0.12)] [color:#5c7188]">{{ studentCountValue(cls) }} 人</span>
-                  </div>
-                </div>
-                <el-dropdown trigger="click">
-                  <el-icon class="card-menu [cursor:pointer] [color:#71839a] [font-size:18px]"><MoreFilled /></el-icon>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="editClass(cls)">编辑班级</el-dropdown-item>
-                      <el-dropdown-item @click="manageStudents(cls)">学生管理</el-dropdown-item>
-                      <el-dropdown-item divided @click="confirmDelete(cls)" class="[color:#f56c6c]">
-                        删除班级
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-            </template>
-
-            <div class="class-summary [display:flex] [flex-wrap:wrap] [gap:12px]">
-              <div class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]">
-                <span class="summary-chip__label [color:#8091a5] [font-size:12px] [white-space:nowrap]">班级号</span>
-                <strong>{{ displayClassCode(cls) }}</strong>
-                <el-button link size="small" @click="copyCode(displayClassCode(cls))">复制</el-button>
-              </div>
-              <div class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" v-if="hasPtaConfig(cls)">
-                <span class="summary-chip__label [color:#8091a5] [font-size:12px] [white-space:nowrap]">PTA 同步</span>
-                <el-tag size="small" :type="syncTagType(cls.syncStatus)" effect="plain">
-                  {{ syncStatusText(cls.syncStatus) }}
-                </el-tag>
-                <span v-if="cls.lastSyncAt" class="summary-chip__time [font-size:12px] [color:#8b9bae]">{{ formatTime(cls.lastSyncAt) }}</span>
-              </div>
-            </div>
-
-            <div class="info-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:14px]">
-              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
-                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">加入密码</span>
-                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayJoinPassword(cls) }}</span>
-              </div>
-              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
-                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">课程</span>
-                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayCourseName(cls) }}</span>
-              </div>
-              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
-                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">描述</span>
-                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayDescription(cls) }}</span>
-              </div>
-              <div class="info-block [display:flex] [flex-direction:column] [gap:8px] [padding:14px_16px] [border-radius:18px] [background:rgba(255,_255,_255,_0.78)] [border:1px_solid_#e8eef6] [min-height:108px]">
-                <span class="info-label [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">同步关键词</span>
-                <span class="info-value [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ displayPtaKeyword(cls) }}</span>
-              </div>
-            </div>
-
-            <div class="card-actions [display:flex] [justify-content:space-between] [gap:10px] [margin-top:auto] [flex-wrap:wrap] [padding-top:6px]">
-              <el-button type="primary" @click="enterClassSpace(cls)">进入教学班</el-button>
-              <el-button @click="manageStudents(cls)">学生管理</el-button>
-              <el-button
-                type="success"
-                plain
-                :loading="importingMap[cls.id]"
-                @click="importStudentsForClass(cls)"
-              >
-                导入 PTA 学生
-              </el-button>
-              <el-button @click="viewAnalysis(cls)">班级分析</el-button>
-              <el-button
-                v-if="hasPtaConfig(cls)"
-                type="warning"
-                plain
-                :loading="syncingMap[cls.id]"
-                :disabled="cls.syncStatus === 'RUNNING'"
-                @click="openSyncDialog(cls)"
-              >
-                {{ cls.syncStatus === 'RUNNING' ? '同步中..' : '立即同步' }}
-              </el-button>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <svg class="w-5 h-5 text-[#b26a00] shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+      <div class="flex-1 flex items-center justify-between gap-3 flex-wrap text-[13px] leading-relaxed text-[#7a5200]">
+        <span>PTA 登录凭证已过期。系统自动登录失败。可以手动更新Cookie，也可以在"个人资料"绑定PTA 账号，或在发起同步时临时输入账号密码。</span>
+        <button
+          class="h-[32px] px-4 rounded-[10px] text-xs font-medium text-[#7a5200] bg-[#f5d76e]/30 hover:bg-[#f5d76e]/50 active:scale-[0.96] transition-all cursor-pointer border border-[#f5d76e]/60"
+          @click="openCookieDialog"
+        >更新 Cookie</button>
+      </div>
     </div>
 
-    <el-dialog
-      v-model="classDialogVisible"
-      :title="editingClass ? '编辑班级' : '新增班级'"
-      width="520px"
-      destroy-on-close
-    >
-      <el-form :model="classForm" :rules="classRules" ref="classFormRef" label-width="90px">
-        <el-form-item label="班级名称" prop="name">
-          <el-input v-model="classForm.name" placeholder="例如：计算机科学与技术23 级1 班" />
-        </el-form-item>
-        <el-form-item label="班级号" prop="classCode" v-if="!editingClass">
-          <el-input v-model="classForm.classCode" placeholder="唯一标识，例如CS2023-01">
-            <template #append>
-              <el-button @click="generateCode">随机生成</el-button>
-            </template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="加入密码" prop="joinPassword">
-          <el-input v-model="classForm.joinPassword" placeholder="学生加入班级时需要输入" show-password />
-        </el-form-item>
-        <el-form-item label="年级">
-          <el-select v-model="classForm.grade" placeholder="选择年级" clearable class="[width:100%]">
-            <el-option v-for="y in gradeOptions" :key="y" :label="`${y} 级`" :value="y" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="课程名称">
-          <el-input v-model="classForm.courseName" placeholder="例如：数据结构" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="classForm.description" type="textarea" :rows="3" placeholder="可选，用于补充班级说明" />
-        </el-form-item>
+    <!-- Class cards area -->
+    <div class="pb-6 relative">
+      <!-- Loading overlay -->
+      <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-[20px] z-10">
+        <div class="w-8 h-8 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+      </div>
 
-        <el-divider content-position="left">PTA 数据同步</el-divider>
+      <!-- Empty state -->
+      <div v-if="classes.length === 0 && !loading" class="flex flex-col items-center justify-center py-20 text-center">
+        <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 24 24" fill="none"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <p class="text-[#86868b] text-sm mb-4">暂无班级，点击上方按钮创建</p>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+          @click="openCreateDialog"
+        >创建第一个班级</button>
+      </div>
 
-        <el-form-item label="PTA 关键词">
-          <el-input
+      <!-- Class grid -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div
+          v-for="cls in classes"
+          :key="cls.id"
+          class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 flex flex-col min-h-[380px] hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] transition-all"
+        >
+          <!-- Card header -->
+          <div class="flex justify-between items-start gap-3 mb-4 pb-3 border-b border-black/[0.06]">
+            <div class="min-w-0 flex-1">
+              <h3 class="m-0 text-[22px] leading-tight font-semibold text-[#1d1d1f] break-words">{{ displayClassName(cls) }}</h3>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-[#007aff]/10 text-[#007aff] text-xs font-semibold">{{ displayGrade(cls) }}</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-[#7e9db7]/12 text-[#5c7188] text-xs font-semibold">{{ studentCountValue(cls) }} 人</span>
+              </div>
+            </div>
+            <!-- Dropdown menu -->
+            <div :ref="el => setDropdownRef(cls.id, el)" class="relative">
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
+                @click.stop="toggleDropdown(cls.id)"
+              >
+                <svg class="w-5 h-5 text-[#71839a]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+              </button>
+              <Transition name="dropdown">
+                <div
+                  v-if="openDropdownId === cls.id"
+                  class="absolute right-0 top-full mt-1 w-36 bg-white/95 backdrop-blur-xl rounded-[12px] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.1)] border border-black/[0.06] py-1 z-50 overflow-hidden"
+                >
+                  <button class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="editClass(cls); closeDropdown()">编辑班级</button>
+                  <button class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="manageStudents(cls); closeDropdown()">学生管理</button>
+                  <div class="h-px bg-black/[0.06] my-1"></div>
+                  <button class="w-full text-left px-4 py-2 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/5 transition-colors cursor-pointer border-none bg-transparent" @click="confirmDelete(cls); closeDropdown()">删除班级</button>
+                </div>
+              </Transition>
+            </div>
+          </div>
+
+          <!-- Summary chips -->
+          <div class="flex flex-wrap gap-3 mb-4">
+            <div class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
+              <span class="text-[#8091a5] text-xs whitespace-nowrap">班级号</span>
+              <strong>{{ displayClassCode(cls) }}</strong>
+              <button class="text-[#007aff] text-xs hover:underline cursor-pointer border-none bg-transparent p-0" @click="copyCode(displayClassCode(cls))">复制</button>
+            </div>
+            <div v-if="hasPtaConfig(cls)" class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
+              <span class="text-[#8091a5] text-xs whitespace-nowrap">PTA 同步</span>
+              <span :class="syncTagClasses(cls.syncStatus)">{{ syncStatusText(cls.syncStatus) }}</span>
+              <span v-if="cls.lastSyncAt" class="text-xs text-[#8b9bae]">{{ formatTime(cls.lastSyncAt) }}</span>
+            </div>
+          </div>
+
+          <!-- Info grid -->
+          <div class="grid grid-cols-2 gap-3.5 mb-4">
+            <div class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/80 border border-[#e8eef6] min-h-[100px]">
+              <span class="text-xs font-semibold text-[#8092a6]">加入密码</span>
+              <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayJoinPassword(cls) }}</span>
+            </div>
+            <div class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/80 border border-[#e8eef6] min-h-[100px]">
+              <span class="text-xs font-semibold text-[#8092a6]">课程</span>
+              <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayCourseName(cls) }}</span>
+            </div>
+            <div class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/80 border border-[#e8eef6] min-h-[100px]">
+              <span class="text-xs font-semibold text-[#8092a6]">描述</span>
+              <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayDescription(cls) }}</span>
+            </div>
+            <div class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/80 border border-[#e8eef6] min-h-[100px]">
+              <span class="text-xs font-semibold text-[#8092a6]">同步关键词</span>
+              <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayPtaKeyword(cls) }}</span>
+            </div>
+          </div>
+
+          <!-- Card actions -->
+          <div class="flex justify-between gap-2.5 mt-auto flex-wrap pt-1.5">
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="enterClassSpace(cls)">进入教学班</button>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="manageStudents(cls)">学生管理</button>
+            <button
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#34a853] bg-[#e6f4ea] hover:bg-[#d4edda] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+              :disabled="importingMap[cls.id]"
+              @click="importStudentsForClass(cls)"
+            >
+              <span v-if="importingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#34a853]/30 border-t-[#34a853] rounded-full animate-spin"></span>导入中...</span>
+              <span v-else>导入 PTA 学生</span>
+            </button>
+            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAnalysis(cls)">班级分析</button>
+            <button
+              v-if="hasPtaConfig(cls)"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#b26a00] bg-[#fef7e0] hover:bg-[#fdf0c8] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+              :disabled="syncingMap[cls.id] || cls.syncStatus === 'RUNNING'"
+              @click="openSyncDialog(cls)"
+            >
+              <span v-if="syncingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#b26a00]/30 border-t-[#b26a00] rounded-full animate-spin"></span>同步中..</span>
+              <span v-else>{{ cls.syncStatus === 'RUNNING' ? '同步中..' : '立即同步' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialog 1: Create/Edit Class -->
+    <AppModal v-model="classDialogVisible" :title="editingClass ? '编辑班级' : '新增班级'" width="520px">
+      <div class="space-y-4">
+        <!-- Name -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级名称 <span class="text-[#ff3b30]">*</span></label>
+          <input
+            v-model="classForm.name"
+            placeholder="例如：计算机科学与技术23 级1 班"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+          <p v-if="errors.name" class="mt-1 text-xs text-[#ff3b30]">{{ errors.name }}</p>
+        </div>
+        <!-- Class code -->
+        <div v-if="!editingClass">
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级号 <span class="text-[#ff3b30]">*</span></label>
+          <div class="flex gap-2">
+            <input
+              v-model="classForm.classCode"
+              placeholder="唯一标识，例如CS2023-01"
+              class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            />
+            <button class="h-10 px-4 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="generateCode">随机生成</button>
+          </div>
+          <p v-if="errors.classCode" class="mt-1 text-xs text-[#ff3b30]">{{ errors.classCode }}</p>
+        </div>
+        <!-- Join password -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">加入密码 <span class="text-[#ff3b30]">*</span></label>
+          <input
+            v-model="classForm.joinPassword"
+            type="password"
+            placeholder="学生加入班级时需要输入"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+          <p v-if="errors.joinPassword" class="mt-1 text-xs text-[#ff3b30]">{{ errors.joinPassword }}</p>
+        </div>
+        <!-- Grade -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">年级</label>
+          <select
+            v-model="classForm.grade"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+          >
+            <option value="">选择年级</option>
+            <option v-for="y in gradeOptions" :key="y" :value="y">{{ y }} 级</option>
+          </select>
+        </div>
+        <!-- Course name -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名称</label>
+          <input
+            v-model="classForm.courseName"
+            placeholder="例如：数据结构"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
+          <textarea
+            v-model="classForm.description"
+            rows="3"
+            placeholder="可选，用于补充班级说明"
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+          ></textarea>
+        </div>
+
+        <!-- PTA divider -->
+        <div class="flex items-center gap-3 pt-2">
+          <span class="text-sm font-medium text-[#86868b]">PTA 数据同步</span>
+          <div class="flex-1 h-px bg-black/[0.06]"></div>
+        </div>
+
+        <!-- PTA keyword -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 关键词</label>
+          <input
             v-model="classForm.ptaKeyword"
             placeholder="例如：计科23 数据结构"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
-          <div class="form-help [margin-top:6px] [font-size:12px] [color:#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</div>
-        </el-form-item>
-        <el-form-item label="定时同步">
-          <el-switch v-model="classForm.syncEnabled" :disabled="!classForm.ptaKeyword.trim()" />
-          <span class="switch-hint [margin-left:10px] [font-size:13px] [color:#7b8ba0]">
+          <p class="mt-1.5 text-xs text-[#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</p>
+        </div>
+        <!-- Sync toggle -->
+        <div class="flex items-center gap-3">
+          <label class="text-sm font-medium text-[#1d1d1f]">定时同步</label>
+          <button
+            type="button"
+            :class="[
+              'relative w-[44px] h-[26px] rounded-full transition-colors cursor-pointer border-none',
+              classForm.syncEnabled && classForm.ptaKeyword.trim() ? 'bg-[#34c759]' : 'bg-[#e5e5ea]'
+            ]"
+            :disabled="!classForm.ptaKeyword.trim()"
+            @click="classForm.syncEnabled = !classForm.syncEnabled"
+          >
+            <span :class="['absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform', classForm.syncEnabled && classForm.ptaKeyword.trim() ? 'left-[21px]' : 'left-[3px]']"></span>
+          </button>
+          <span class="text-[13px] text-[#7b8ba0]">
             {{ classForm.syncEnabled ? '已开启，每天凌晨自动同步一次。' : '关闭' }}
           </span>
-        </el-form-item>
-      </el-form>
+        </div>
+      </div>
       <template #footer>
-        <el-button @click="classDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitClassForm" :loading="submitting">确认</el-button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="classDialogVisible = false">取消</button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          :disabled="submitting"
+          @click="submitClassForm"
+        >
+          <span v-if="submitting" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>提交中</span>
+          <span v-else>确认</span>
+        </button>
       </template>
-    </el-dialog>
+    </AppModal>
 
-    <el-dialog
-      v-model="studentDialogVisible"
-      :title="`学生管理 - ${displayClassName(currentClass || {})}`"
-      width="720px"
-      destroy-on-close
-    >
-      <div class="student-toolbar [display:flex] [justify-content:space-between] [gap:12px] [margin-bottom:14px]">
-        <el-input v-model="studentSearch" placeholder="搜索姓名或学号" clearable class="student-toolbar__search [width:100%] [max-width:260px]" />
-        <el-button type="primary" size="small" @click="openAddStudentDialog">添加学生</el-button>
-      </div>
-      <el-table :data="filteredStudents" stripe size="small" v-loading="studentsLoading" max-height="420">
-        <el-table-column type="index" label="#" width="56" />
-        <el-table-column prop="studentNum" label="学号" width="160" />
-        <el-table-column prop="studentName" label="姓名" width="140" />
-        <el-table-column prop="joinedAt" label="加入时间" min-width="180">
-          <template #default="{ row }">{{ formatTime(row.joinedAt) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="90">
-          <template #default="{ row }">
-            <el-button type="danger" link size="small" @click="confirmRemoveStudent(row)">移除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="student-count [margin-top:14px] [font-size:13px] [color:#7f90a4]">共{{ students.length }} 名学生</div>
-    </el-dialog>
-
-    <el-dialog v-model="addStudentVisible" title="添加学生" width="400px" append-to-body>
-      <el-form :model="addStudentForm" label-width="60px">
-        <el-form-item label="姓名">
-          <el-input v-model="addStudentForm.studentName" placeholder="学生姓名" />
-        </el-form-item>
-        <el-form-item label="学号">
-          <el-input v-model="addStudentForm.studentNum" placeholder="选填" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="addStudentVisible = false">取消</el-button>
-        <el-button type="primary" @click="doAddStudent" :loading="addingStudent">确认</el-button>
-      </template>
-    </el-dialog>
-
-    <el-dialog v-model="syncDialogVisible" title="PTA 同步账号" width="480px" destroy-on-close>
-      <el-alert
-        type="info"
-        :closable="false"
-        class="cookie-helper [margin-bottom:16px] [border-radius:14px]"
-        title="优先使用个人资料中已绑定的PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前Cookie 会话。"
-      />
-      <div v-if="hasBoundPtaCredentials" class="sync-dialog__bound [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
-        已绑定PTA 账号：{{ boundPtaUsername }}（留空时将默认用于本次同步）
-      </div>
-      <div v-else class="sync-dialog__bound sync-dialog__bound--warning [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [background:#fef7e0] [color:#b26a00]">
-        当前未绑定PTA 账号；若本次留空，则只会尝试现有 Cookie。
-      </div>
-      <el-form :model="syncForm" label-width="90px" autocomplete="off">
-        <el-form-item label="同步关键词">
-          <el-input v-model="syncForm.ptaKeyword" autocomplete="off" name="pta-sync-keyword" placeholder="例如：计科5数据结构" clearable />
-        </el-form-item>
-        <el-form-item label="PTA 账号">
-          <el-input v-model="syncForm.ptaUsername" autocomplete="off" name="pta-sync-username" placeholder="本次同步使用的PTA 账号（可选）" clearable />
-        </el-form-item>
-        <el-form-item label="PTA 密码">
-          <el-input
-            v-model="syncForm.ptaPassword"
-            autocomplete="new-password"
-            name="pta-sync-password"
-            type="password"
-            show-password
-            placeholder="本次同步使用的PTA 密码（可选）"
-            clearable
+    <!-- Dialog 2: Student Management -->
+    <AppModal v-model="studentDialogVisible" :title="`学生管理 - ${displayClassName(currentClass || {})}`" width="720px">
+      <div>
+        <div class="flex justify-between gap-3 mb-4">
+          <input
+            v-model="studentSearch"
+            placeholder="搜索姓名或学号"
+            class="w-full max-w-[260px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
-        </el-form-item>
-      </el-form>
-      <div class="sync-dialog__actions [display:flex] [gap:8px] [margin-top:4px]">
-        <el-button size="small" type="primary" plain @click="submitSyncTempCredential">提交临时账号密码</el-button>
-        <el-button size="small" @click="clearSyncTempCredential">清空临时凭据</el-button>
+          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="openAddStudentDialog">添加学生</button>
+        </div>
+
+        <!-- Student table -->
+        <div class="relative overflow-auto max-h-[420px] rounded-[12px] border border-black/[0.06]">
+          <div v-if="studentsLoading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-10">
+            <div class="w-6 h-6 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+          </div>
+          <table class="w-full text-sm border-collapse">
+            <thead class="sticky top-0 bg-[#f5f5f7]/95 backdrop-blur-sm">
+              <tr>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-14">#</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-40">学号</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-36">姓名</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs">加入时间</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-20">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in filteredStudents" :key="row.id" class="border-t border-black/[0.04] hover:bg-[#f5f5f7]/50 transition-colors">
+                <td class="px-4 py-3 text-[#86868b]">{{ idx + 1 }}</td>
+                <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentNum }}</td>
+                <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentName }}</td>
+                <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
+                <td class="px-4 py-3">
+                  <button class="text-[#ff3b30] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</button>
+                </td>
+              </tr>
+              <tr v-if="filteredStudents.length === 0 && !studentsLoading">
+                <td colspan="5" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-3.5 text-[13px] text-[#7f90a4]">共{{ students.length }} 名学生</p>
       </div>
-      <div v-if="syncTempCredentialSubmitted" class="sync-dialog__bound [margin:12px_0_16px] [padding:10px_12px] [border-radius:12px] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px]">
-        已提交临时PTA 账号：{{ syncForm.ptaUsername.trim() }}，本次同步将优先使用该账号。
-      </div>
-      <div class="sync-dialog__source [display:flex] [align-items:center] [gap:8px] [margin:12px_0_4px] [color:#44536b] [font-size:13px]">
-        <span>本次预计使用：</span>
-        <el-tag size="small" effect="plain" :type="credentialSourceTagType(plannedSyncCredentialSource)">{{ credentialSourceText(plannedSyncCredentialSource) }}</el-tag>
+    </AppModal>
+
+    <!-- Dialog 3: Add Student -->
+    <AppModal v-model="addStudentVisible" title="添加学生" width="400px">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">姓名</label>
+          <input
+            v-model="addStudentForm.studentName"
+            placeholder="学生姓名"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学号</label>
+          <input
+            v-model="addStudentForm.studentNum"
+            placeholder="选填"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
       </div>
       <template #footer>
-        <el-button @click="syncDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="syncDialogClass ? syncingMap[syncDialogClass.id] : false" @click="triggerSyncForClass">
-          开始同步
-        </el-button>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addStudentVisible = false">取消</button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          :disabled="addingStudent"
+          @click="doAddStudent"
+        >
+          <span v-if="addingStudent" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>添加中</span>
+          <span v-else>确认</span>
+        </button>
       </template>
-    </el-dialog>
+    </AppModal>
 
-    <el-dialog v-model="cookieDialogVisible" title="手动更新 PTA Cookie" width="600px" destroy-on-close>
-      <el-steps :active="1" simple class="cookie-steps [margin-bottom:18px] [padding-left:18px] [font-size:12.5px] [color:#3c4043] [line-height:1.8]">
-        <el-step title="获取 Cookie" />
-        <el-step title="粘贴到下方" />
-        <el-step title="验证生效" />
-      </el-steps>
+    <!-- Dialog 4: PTA Sync -->
+    <AppModal v-model="syncDialogVisible" title="PTA 同步账号" width="480px">
+      <div class="space-y-4">
+        <!-- Info alert -->
+        <div class="rounded-[14px] bg-[#e8f4fd] border border-[#b8dcf5]/50 p-3.5 text-[13px] text-[#1a6dab] leading-relaxed">
+          优先使用个人资料中已绑定的PTA 账号；这里临时填写的账号密码只覆盖本次同步。若未绑定且这里留空，则只尝试当前Cookie 会话。
+        </div>
 
-      <el-alert type="info" :closable="false" class="cookie-helper [margin-bottom:16px] [border-radius:14px]">
-        <template #title>
-          <span class="cookie-helper__title [font-weight:600]">获取步骤</span>
-        </template>
-        <template #default>
-          <ol class="cookie-helper__list [margin:8px_0_0] [padding-left:18px] [color:#4d6077] [line-height:1.8]">
-            <li>打开 <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer">pintia.cn</a> 并登录。</li>
-            <li>按`F12` 打开开发者工具，切换到`Application`。</li>
-            <li>在左侧找到`Cookies`，选择 `https://pintia.cn`。</li>
+        <!-- Bound status -->
+        <div v-if="hasBoundPtaCredentials" class="rounded-[12px] bg-[#e6f4ea] p-3 text-[13px] text-[#1e8e3e]">
+          已绑定PTA 账号：{{ boundPtaUsername }}（留空时将默认用于本次同步）
+        </div>
+        <div v-else class="rounded-[12px] bg-[#fef7e0] p-3 text-[13px] text-[#b26a00]">
+          当前未绑定PTA 账号；若本次留空，则只会尝试现有 Cookie。
+        </div>
+
+        <!-- Sync keyword -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">同步关键词</label>
+          <input
+            v-model="syncForm.ptaKeyword"
+            autocomplete="off"
+            placeholder="例如：计科5数据结构"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
+        <!-- PTA username -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 账号</label>
+          <input
+            v-model="syncForm.ptaUsername"
+            autocomplete="off"
+            placeholder="本次同步使用的PTA 账号（可选）"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
+        <!-- PTA password -->
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 密码</label>
+          <input
+            v-model="syncForm.ptaPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="本次同步使用的PTA 密码（可选）"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+          />
+        </div>
+
+        <!-- Temp credential actions -->
+        <div class="flex gap-2">
+          <button class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#007aff] bg-[#007aff]/10 hover:bg-[#007aff]/15 active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitSyncTempCredential">提交临时账号密码</button>
+          <button class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearSyncTempCredential">清空临时凭据</button>
+        </div>
+
+        <div v-if="syncTempCredentialSubmitted" class="rounded-[12px] bg-[#e6f4ea] p-3 text-[13px] text-[#1e8e3e]">
+          已提交临时PTA 账号：{{ syncForm.ptaUsername.trim() }}，本次同步将优先使用该账号。
+        </div>
+
+        <!-- Credential source -->
+        <div class="flex items-center gap-2 text-[13px] text-[#44536b]">
+          <span>本次预计使用：</span>
+          <span :class="credentialSourceClasses(plannedSyncCredentialSource)">{{ credentialSourceText(plannedSyncCredentialSource) }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="syncDialogVisible = false">取消</button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          :disabled="syncDialogClass ? syncingMap[syncDialogClass.id] : false"
+          @click="triggerSyncForClass"
+        >
+          <span v-if="syncDialogClass && syncingMap[syncDialogClass.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>同步中</span>
+          <span v-else>开始同步</span>
+        </button>
+      </template>
+    </AppModal>
+
+    <!-- Dialog 5: Cookie Update -->
+    <AppModal v-model="cookieDialogVisible" title="手动更新 PTA Cookie" width="600px">
+      <div class="space-y-4">
+        <!-- Steps indicator -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#007aff] text-white text-xs font-semibold flex items-center justify-center">1</span>
+            <span class="text-sm font-medium text-[#1d1d1f]">获取 Cookie</span>
+          </div>
+          <div class="flex-1 h-px bg-black/[0.08] mx-3"></div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#007aff] text-white text-xs font-semibold flex items-center justify-center">2</span>
+            <span class="text-sm font-medium text-[#1d1d1f]">粘贴到下方</span>
+          </div>
+          <div class="flex-1 h-px bg-black/[0.08] mx-3"></div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#e5e5ea] text-[#86868b] text-xs font-semibold flex items-center justify-center">3</span>
+            <span class="text-sm text-[#86868b]">验证生效</span>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="rounded-[14px] bg-[#e8f4fd] border border-[#b8dcf5]/50 p-4">
+          <p class="font-semibold text-sm text-[#1a6dab] mb-2">获取步骤</p>
+          <ol class="list-decimal pl-5 text-[13px] text-[#4d6077] leading-relaxed space-y-1">
+            <li>打开 <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer" class="text-[#007aff] hover:underline">pintia.cn</a> 并登录。</li>
+            <li>按 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">F12</code> 打开开发者工具，切换到 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">Application</code>。</li>
+            <li>在左侧找到 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">Cookies</code>，选择 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">https://pintia.cn</code>。</li>
             <li>复制导出的Cookie JSON，粘贴到下方输入框。</li>
           </ol>
-        </template>
-      </el-alert>
+        </div>
 
-      <el-input
-        v-model="cookieInput"
-        type="textarea"
-        :rows="8"
-        placeholder='粘贴 Cookie JSON，例如：[{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]'
-        class="cookie-textarea"
-      />
+        <!-- Cookie textarea -->
+        <textarea
+          v-model="cookieInput"
+          rows="8"
+          placeholder='粘贴 Cookie JSON，例如：[{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]'
+          class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y font-mono"
+        ></textarea>
 
-      <div v-if="cookieSubmitResult" class="cookie-result [margin-top:12px] [display:flex] [align-items:center] [gap:10px] [margin-top:14px] [gap:6px] [padding:10px_14px] [border-radius:8px] [font-size:13px] [&.valid]:[background:#e6f4ea] [&.valid]:[color:#1e8e3e] [&.invalid]:[background:#fce8e6] [&.invalid]:[color:#d93025]">
-        <el-alert
-          :title="cookieSubmitResult.message"
-          :type="cookieSubmitResult.valid ? 'success' : 'error'"
-          :closable="false"
-          show-icon
-        />
+        <!-- Result -->
+        <div v-if="cookieSubmitResult" :class="['rounded-[12px] p-3 text-[13px] flex items-center gap-2', cookieSubmitResult.valid ? 'bg-[#e6f4ea] text-[#1e8e3e]' : 'bg-[#fce8e6] text-[#d93025]']">
+          <svg v-if="cookieSubmitResult.valid" class="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+          <svg v-else class="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
+          {{ cookieSubmitResult.message }}
+        </div>
       </div>
-
       <template #footer>
-        <el-button @click="cookieDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
+        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="cookieDialogVisible = false">取消</button>
+        <button
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          :disabled="cookieSubmitting || !cookieInput.trim()"
           @click="submitCookieForm"
-          :loading="cookieSubmitting"
-          :disabled="!cookieInput.trim()"
         >
-          验证并保存
-        </el-button>
+          <span v-if="cookieSubmitting" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>验证中</span>
+          <span v-else>验证并保存</span>
+        </button>
       </template>
-    </el-dialog>
+    </AppModal>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MoreFilled, Plus } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
+import AppModal from '../../components/AppModal.vue'
+import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
 import {
   addClassStudent,
@@ -362,7 +514,6 @@ const gradeOptions = ['2022', '2023', '2024', '2025', '2026', '2027']
 const classDialogVisible = ref(false)
 const editingClass = ref(null)
 const submitting = ref(false)
-const classFormRef = ref(null)
 const classForm = reactive({
   name: '',
   classCode: '',
@@ -374,10 +525,11 @@ const classForm = reactive({
   syncEnabled: false
 })
 const classRules = {
-  name: [{ required: true, message: '请输入班级名称', trigger: 'blur' }],
-  classCode: [{ required: true, message: '请输入班级号', trigger: 'blur' }],
-  joinPassword: [{ required: true, message: '请设置加入密码', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入班级名称' }],
+  classCode: [{ required: true, message: '请输入班级号' }],
+  joinPassword: [{ required: true, message: '请设置加入密码' }]
 }
+const { errors, validate, resetFields } = useFormValidation(classRules)
 
 const syncingMap = reactive({})
 const importingMap = reactive({})
@@ -403,6 +555,33 @@ const syncForm = reactive({ ptaKeyword: '', ptaUsername: '', ptaPassword: '' })
 const syncTempCredentialSubmitted = ref(false)
 const boundPtaUsername = ref('')
 const hasBoundPtaCredentials = ref(false)
+
+// Dropdown state
+const openDropdownId = ref(null)
+const dropdownRefs = new Map()
+
+const setDropdownRef = (id, el) => {
+  if (el) {
+    dropdownRefs.set(id, el)
+  } else {
+    dropdownRefs.delete(id)
+  }
+}
+
+const toggleDropdown = (id) => {
+  openDropdownId.value = openDropdownId.value === id ? null : id
+}
+const closeDropdown = () => {
+  openDropdownId.value = null
+}
+const handleOutsideClick = (e) => {
+  const dropdownEl = dropdownRefs.get(openDropdownId.value)
+  if (openDropdownId.value && (!dropdownEl || !dropdownEl.contains(e.target))) {
+    closeDropdown()
+  }
+}
+onMounted(() => document.addEventListener('click', handleOutsideClick))
+onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
 
 const extract = (res) => res?.data ?? res
 
@@ -452,6 +631,27 @@ const toSelectedClass = (cls) => ({
   ptaKeyword: cls.ptaKeyword || cls.name || ''
 })
 
+// Sync tag styling
+const syncTagClasses = (status) => {
+  const map = {
+    SUCCESS: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#e6f4ea] text-[#1e8e3e]',
+    RUNNING: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#fef7e0] text-[#b26a00]',
+    FAILED: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#fce8e6] text-[#d93025]',
+    IDLE: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f5f5f7] text-[#86868b]'
+  }
+  return map[status] || map.IDLE
+}
+
+// Credential source styling
+const credentialSourceClasses = (source) => {
+  const map = {
+    temporary: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#fef7e0] text-[#b26a00]',
+    bound: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#e6f4ea] text-[#1e8e3e]',
+    cookie: 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#e8f4fd] text-[#1a6dab]'
+  }
+  return map[String(source || '').trim().toLowerCase()] || map.cookie
+}
+
 const loadClasses = async () => {
   loading.value = true
   try {
@@ -476,6 +676,7 @@ const openCreateDialog = () => {
     ptaKeyword: '',
     syncEnabled: false
   })
+  resetFields()
   classDialogVisible.value = true
 }
 
@@ -491,6 +692,7 @@ const editClass = (cls) => {
     ptaKeyword: cleanText(cls.ptaKeyword, ''),
     syncEnabled: !!cls.syncEnabled
   })
+  resetFields()
   classDialogVisible.value = true
 }
 
@@ -499,8 +701,7 @@ const generateCode = () => {
 }
 
 const submitClassForm = async () => {
-  const valid = await classFormRef.value?.validate().catch(() => false)
-  if (!valid) return
+  if (!validate(classForm)) return
 
   submitting.value = true
   try {
@@ -547,7 +748,7 @@ const submitClassForm = async () => {
 
 const confirmDelete = (cls) => {
   ElMessageBox.confirm(
-      `确定删除班级“${displayClassName(cls)}”？此操作不可恢复，班级内学生关系也会一并删除。`,
+      `确定删除班级"${displayClassName(cls)}"？此操作不可恢复，班级内学生关系也会一并删除。`,
     '警告',
     {
       confirmButtonText: '确定删除',
@@ -586,16 +787,6 @@ const viewAnalysis = (cls) => {
   router.push(`/teacher/class-detailed-analysis/${cls.id}`)
 }
 
-const syncTagType = (status) => {
-  const tagMap = {
-    SUCCESS: 'success',
-    RUNNING: 'warning',
-    FAILED: 'danger',
-    IDLE: 'info'
-  }
-  return tagMap[status] || 'info'
-}
-
 const syncStatusText = (status) => {
   const textMap = {
     SUCCESS: '已同步',
@@ -611,12 +802,6 @@ const credentialSourceText = (source) => ({
   bound: '已绑定账号',
   cookie: 'Cookie'
 }[String(source || '').trim().toLowerCase()] || '未知来源')
-
-const credentialSourceTagType = (source) => ({
-  temporary: 'warning',
-  bound: 'success',
-  cookie: 'info'
-}[String(source || '').trim().toLowerCase()] || 'info')
 
 const plannedSyncCredentialSource = computed(() => {
   if (syncTempCredentialSubmitted.value && syncForm.ptaUsername.trim() && syncForm.ptaPassword) return 'temporary'
@@ -656,7 +841,7 @@ const triggerSyncForClass = async () => {
     return
   }
   if ((draftUsername || draftPassword) && !syncTempCredentialSubmitted.value) {
-    ElMessage.warning('若要使用临时 PTA 账号，请先点击“提交临时账号密码”')
+    ElMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
     return
   }
   const username = syncTempCredentialSubmitted.value ? draftUsername : ''
@@ -750,7 +935,7 @@ const doAddStudent = async () => {
 }
 
 const confirmRemoveStudent = (row) => {
-  ElMessageBox.confirm(`确定移除学生“${row.studentName}”吗？`, '提示', {
+  ElMessageBox.confirm(`确定移除学生"${row.studentName}"吗？`, '提示', {
     confirmButtonText: '移除',
     cancelButtonText: '取消',
     type: 'warning'
@@ -843,3 +1028,12 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
 })
 </script>
 
+<style scoped>
+.dropdown-enter-active, .dropdown-leave-active {
+  transition: all 0.15s ease;
+}
+.dropdown-enter-from, .dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.95);
+}
+</style>

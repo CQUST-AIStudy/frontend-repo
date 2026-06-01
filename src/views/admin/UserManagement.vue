@@ -205,7 +205,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../../components/PageHeader.vue'
 import api from '../../api'
 
-const userManagementReady = false
+const userManagementReady = true
 const showReadOnlyNotice = () => {
   ElMessage.warning('用户管理真实后端尚未接通，当前页面仅保留只读展示。')
 }
@@ -336,11 +336,11 @@ const filteredUsers = computed(() => {
   let result = [...users.value]
 
   if (filterForm.id) {
-    result = result.filter(user => user.id.includes(filterForm.id))
+    result = result.filter(user => String(user.id).includes(filterForm.id))
   }
 
   if (filterForm.name) {
-    result = result.filter(user => user.name.includes(filterForm.name))
+    result = result.filter(user => String(user.name || '').includes(filterForm.name))
   }
 
   if (filterForm.role) {
@@ -351,6 +351,38 @@ const filteredUsers = computed(() => {
 })
 
 // 加载班级列表
+const normalizeUsers = (payload) => {
+  const list = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.users)
+      ? payload.users
+      : Array.isArray(payload)
+        ? payload
+        : []
+
+  return list.map(user => ({
+    ...user,
+    id: String(user.id ?? user.usernum ?? user.username ?? ''),
+    name: user.name || user.displayName || user.username || user.usernum || '',
+    class: user.class || user.className || '',
+    phone: user.phone || '',
+    status: user.status || 'active',
+    avatar: user.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+  }))
+}
+
+const loadUsers = async () => {
+  try {
+    const response = await api.getUsers()
+    const nextUsers = normalizeUsers(response)
+    if (nextUsers.length > 0) {
+      users.value = nextUsers
+    }
+  } catch (error) {
+    logger.error('加载用户列表失败:', error)
+  }
+}
+
 const loadClassList = async () => {
   try {
     const classes = await api.getClassList()
@@ -458,39 +490,28 @@ const saveUser = () => {
     showReadOnlyNotice()
     return
   }
-  userFormRef.value.validate((valid) => {
+  userFormRef.value.validate(async (valid) => {
     if (!valid) return
 
-    if (dialogType.value === 'add') {
-      // 模拟添加用户
-      const newUser = {
+    try {
+      const payload = {
         ...userForm,
-        id: `${userForm.role.charAt(0).toUpperCase()}${Date.now().toString().slice(-7)}`,
-        avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        status: 'active'
+        usernum: userForm.id || userForm.usernum || '',
+        className: userForm.class || ''
       }
-      users.value.unshift(newUser)
-      ElMessage.success('添加用户成功')
-    } else {
-      // 模拟更新用户
-      const index = users.value.findIndex(u => u.id === currentUserId.value)
-      if (index > -1) {
-        users.value[index] = {
-          ...users.value[index],
-          name: userForm.name,
-          email: userForm.email,
-          phone: userForm.phone,
-          role: userForm.role,
-          class: userForm.class,
-          grade: userForm.grade,
-          department: userForm.department,
-          title: userForm.title
-        }
+      if (dialogType.value === 'add') {
+        await api.addUser(payload)
+        ElMessage.success('添加用户成功')
+      } else {
+        await api.updateUser(currentUserId.value, payload)
         ElMessage.success('更新用户成功')
       }
+      await loadUsers()
+      userDialogVisible.value = false
+    } catch (error) {
+      logger.error('保存用户失败:', error)
+      ElMessage.error('保存用户失败')
     }
-
-    userDialogVisible.value = false
   })
 }
 
@@ -507,7 +528,7 @@ const resetPassword = (user) => {
 }
 
 // 确认重置密码
-const confirmResetPassword = () => {
+const confirmResetPassword = async () => {
   if (!userManagementReady) {
     showReadOnlyNotice()
     return
@@ -522,8 +543,15 @@ const confirmResetPassword = () => {
     return
   }
 
-  ElMessage.success('密码重置成功')
-  resetPasswordDialogVisible.value = false
+  try {
+    await api.updateUser(resetPasswordForm.userId, { password: resetPasswordForm.password })
+    ElMessage.success('密码重置成功')
+    resetPasswordDialogVisible.value = false
+    await loadUsers()
+  } catch (error) {
+    logger.error('重置密码失败:', error)
+    ElMessage.error('重置密码失败')
+  }
 }
 
 // 删除用户
@@ -540,11 +568,14 @@ const deleteUser = (user) => {
       cancelButtonText: '取消',
       type: 'warning'
     }
-  ).then(() => {
-    const index = users.value.findIndex(u => u.id === user.id)
-    if (index > -1) {
-      users.value.splice(index, 1)
+  ).then(async () => {
+    try {
+      await api.deleteUser(user.id)
+      await loadUsers()
       ElMessage.success('删除用户成功')
+    } catch (error) {
+      logger.error('删除用户失败:', error)
+      ElMessage.error('删除用户失败')
     }
   }).catch(() => {
     // 取消删除
@@ -552,6 +583,7 @@ const deleteUser = (user) => {
 }
 
 onMounted(() => {
+  loadUsers()
   loadClassList()
 })
 </script>

@@ -1,134 +1,114 @@
 <template>
-  <div class="teaching-analysis [height:100%] [padding:0_20px_20px]">
+  <div class="min-w-0">
     <page-header title="我的教学分析" description="个人教学数据可视化分析">
-      <el-button type="primary" @click="refreshData">刷新数据</el-button>
+      <button @click="refreshData" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">刷新数据</button>
     </page-header>
-    
-    <div v-if="loading" class="loading-container [padding:20px] [min-height:400px] [display:flex] [justify-content:center] [align-items:center] [width:100%]">
-      <el-skeleton class="[width:100%]" :rows="10" animated />
+
+    <div v-if="loading" class="space-y-4 py-6">
+      <div class="grid grid-cols-3 gap-5 max-[768px]:grid-cols-1">
+        <div v-for="i in 3" :key="i" class="h-[100px] rounded-[16px] bg-black/[0.03] animate-pulse"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-5 max-[768px]:grid-cols-1">
+        <div v-for="i in 4" :key="i" class="h-[380px] rounded-[20px] bg-black/[0.03] animate-pulse"></div>
+      </div>
     </div>
 
-    <div v-else class="analysis-content [display:flex] [flex-direction:column] [gap:15px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
+    <div v-else class="flex flex-col gap-5">
       <!-- 教学概览卡片 -->
-      <el-row :gutter="20" class="info-summary [margin-top:20px] [margin-bottom:10px]">
-        <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
-            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-user"></i></div>
-            <div class="summary-info [margin-left:15px]">
-              <div class="summary-title [font-size:13px] [color:#909399]">教授班级</div>
-              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.classCounts || 0 }}班</div>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
-            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-files"></i></div>
-            <div class="summary-info [margin-left:15px]">
-              <div class="summary-title [font-size:13px] [color:#909399]">实验数量</div>
-              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.experimentCounts || 0 }}个</div>
-            </div>
-        </el-card>
-        </el-col>
-        <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-          <el-card shadow="hover" class="summary-card [display:flex] [align-items:center] [padding:15px] [height:100px] max-[768px]:[margin-bottom:15px]">
-            <div class="summary-icon [font-size:24px] [width:60px] [height:60px] [border-radius:50%] [background-color:#f2f6fc] [display:flex] [justify-content:center] [align-items:center] [color:#409EFF]"><i class="el-icon-collection"></i></div>
-            <div class="summary-info [margin-left:15px]">
-              <div class="summary-title [font-size:13px] [color:#909399]">学生提交</div>
-              <div class="summary-value [font-size:22px] [font-weight:600] [margin-top:5px]">{{ teachingData.submissionCounts || 0 }}份</div>
+      <div class="grid grid-cols-3 gap-5 max-[768px]:grid-cols-1">
+        <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(0,122,255,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#007aff]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] text-[#6e6e73]">教授班级</div>
+            <div class="text-[22px] font-semibold text-[#1d1d1f] mt-1">{{ teachingData.classCounts || 0 }}班</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(52,199,89,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#34c759]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] text-[#6e6e73]">实验数量</div>
+            <div class="text-[22px] font-semibold text-[#1d1d1f] mt-1">{{ teachingData.experimentCounts || 0 }}个</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(255,149,0,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#ff9500]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] text-[#6e6e73]">学生提交</div>
+            <div class="text-[22px] font-semibold text-[#1d1d1f] mt-1">{{ teachingData.submissionCounts || 0 }}份</div>
+          </div>
+        </div>
       </div>
-          </el-card>
-        </el-col>
-      </el-row>
-      
-      <!-- 分析图表和数据-->
-      <el-row :gutter="20">
-        <!-- 年级学生分布 -->
-        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card [margin-bottom:15px] [margin-bottom:20px] [height:400px]">
-            <template #header>
-              <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-size:14px] [font-weight:600] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>年级学生分布</span>
-                <el-tooltip content="不同年级学生的人数分布情况" placement="top">
-                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
-                </el-tooltip>
-              </div>
-            </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="gradeDistributionRef"></div>
-          </el-card>
-        </el-col>
-      
-        <!-- 实验完成情况 -->
-        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-              <span>实验完成情况</span>
-                <el-tooltip content="各个实验的学生完成率" placement="top">
-                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
-                </el-tooltip>
-            </div>
-          </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="experimentCompletionRef"></div>
-        </el-card>
-        </el-col>
-      </el-row>
 
-      <el-row :gutter="20">
-        <!-- 成绩趋势 -->
-        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>成绩趋势分析</span>
-                <el-tooltip content="不同班级的成绩变化趋势" placement="top">
-                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
-                </el-tooltip>
-            </div>
-          </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="scoreTrendRef"></div>
-        </el-card>
-        </el-col>
-        
-        <!-- 学生能力雷达图-->
-        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <el-card class="chart-card [margin-bottom:20px] [height:400px]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>学生能力分析</span>
-                <el-tooltip content="学生在各个能力维度的表现情况" placement="top">
-                  <i class="el-icon-question [margin-left:5px] [font-size:14px] [color:#909399]"></i>
-                </el-tooltip>
-            </div>
-          </template>
-            <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]" ref="studentAbilityRef"></div>
-        </el-card>
-        </el-col>
-      </el-row>
-        
+      <!-- 图表 2x2 -->
+      <div class="grid grid-cols-2 gap-5 max-[768px]:grid-cols-1">
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">年级学生分布</span>
+            <span class="text-[12px] text-[#aeaeb2]" title="不同年级学生的人数分布情况">?</span>
+          </div>
+          <div class="h-[280px] w-full" ref="gradeDistributionRef"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">实验完成情况</span>
+            <span class="text-[12px] text-[#aeaeb2]" title="各个实验的学生完成率">?</span>
+          </div>
+          <div class="h-[280px] w-full" ref="experimentCompletionRef"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">成绩趋势分析</span>
+            <span class="text-[12px] text-[#aeaeb2]" title="不同班级的成绩变化趋势">?</span>
+          </div>
+          <div class="h-[280px] w-full" ref="scoreTrendRef"></div>
+        </div>
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+            <span class="text-[15px] font-semibold text-[#1d1d1f]">学生能力分析</span>
+            <span class="text-[12px] text-[#aeaeb2]" title="学生在各个能力维度的表现情况">?</span>
+          </div>
+          <div class="h-[280px] w-full" ref="studentAbilityRef"></div>
+        </div>
+      </div>
+
       <!-- 班级列表 -->
-      <el-row :gutter="20">
-        <el-col :span="24">
-          <el-card class="table-card [margin-bottom:20px] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-                <span>我的班级</span>
-                <el-button type="text" @click="goToClassList">查看所有</el-button>
-            </div>
-          </template>
-            <el-table :data="teachingData.classes || []" class="[width:100%]" v-loading="loading">
-              <el-table-column prop="id" label="班级ID" width="120" />
-              <el-table-column prop="name" label="班级名称" />
-              <el-table-column prop="grade" label="年级" width="120" />
-              <el-table-column prop="studentCount" label="学生数量" width="120" />
-              <el-table-column label="操作" width="180">
-              <template #default="scope">
-                  <el-button type="text" @click="viewClassAnalysis(scope.row)">查看分析</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-        </el-col>
-      </el-row>
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
+          <span class="text-[15px] font-semibold text-[#1d1d1f]">我的班级</span>
+          <button @click="goToClassList" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors cursor-pointer bg-transparent border-none">查看所有</button>
+        </div>
+        <table class="w-full text-left text-[13px]" v-loading="loading">
+          <thead>
+            <tr class="border-b border-black/[0.06]">
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl w-[100px]">班级ID</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">班级名称</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">年级</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">学生数量</th>
+              <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tr-xl w-[100px]">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in (teachingData.classes || [])" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3 text-[#6e6e73]">{{ row.id }}</td>
+              <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
+              <td class="py-3 px-3 text-[#6e6e73]">{{ row.grade }}</td>
+              <td class="py-3 px-3 text-[#1d1d1f]">{{ row.studentCount }}</td>
+              <td class="py-3 px-3">
+                <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors" @click="viewClassAnalysis(row)">查看分析</a>
+              </td>
+            </tr>
+            <tr v-if="!(teachingData.classes || []).length">
+              <td colspan="5" class="py-12 text-center text-[#aeaeb2] text-sm">暂无班级数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -239,6 +219,7 @@ const fetchTeachingData = async () => {
       else if (eName.includes('哈希') || eName.includes('hash')) dimMap['哈希'].push(isAc)
       else dimMap['综合'].push(isAc)
     })
+
     const studentAbilities = Object.entries(dimMap)
       .filter(([, arr]) => arr.length > 0)
       .map(([name, arr]) => ({
@@ -276,25 +257,25 @@ const initCharts = () => {
     logger.error('图表容器未找到')
     return
   }
-  
+
   // 清理已有图表
   if (gradeDistributionChart) gradeDistributionChart.dispose()
   if (experimentCompletionChart) experimentCompletionChart.dispose()
   if (scoreTrendChart) scoreTrendChart.dispose()
   if (studentAbilityChart) studentAbilityChart.dispose()
-  
+
   // 年级分布图表
   initGradeDistributionChart()
-  
+
   // 实验完成情况
   initExperimentCompletionChart()
-  
+
   // 成绩趋势
   initScoreTrendChart()
-  
+
   // 学生能力雷达图
   initStudentAbilityChart()
-  
+
   // 窗口大小变化时调整图表大小
   window.addEventListener('resize', resizeCharts)
 }
@@ -302,7 +283,7 @@ const initCharts = () => {
 // 年级分布图表
 const initGradeDistributionChart = () => {
   if (!teachingData.value.gradeDistribution) return
-  
+
   gradeDistributionChart = echarts.init(gradeDistributionRef.value)
   const option = {
     tooltip: {
@@ -356,7 +337,7 @@ const initGradeDistributionChart = () => {
 // 实验完成情况图表
 const initExperimentCompletionChart = () => {
   if (!teachingData.value.experimentCompletion) return
-  
+
   experimentCompletionChart = echarts.init(experimentCompletionRef.value)
   const option = {
     tooltip: {
@@ -395,7 +376,7 @@ const initExperimentCompletionChart = () => {
         data: teachingData.value.experimentCompletion.map(item => ({
           value: item.completion,
         itemStyle: {
-            color: item.completion >= 80 ? '#67C23A' : 
+            color: item.completion >= 80 ? '#67C23A' :
                   item.completion >= 60 ? '#409EFF' : '#F56C6C'
         }
         })),
@@ -413,13 +394,13 @@ const initExperimentCompletionChart = () => {
 // 成绩趋势图表
 const initScoreTrendChart = () => {
   if (!teachingData.value.scoreTrend) return
-  
+
   scoreTrendChart = echarts.init(scoreTrendRef.value)
-  
+
   // 从数据中提取班级和时间点
   const classes = Object.keys(teachingData.value.scoreTrend[0]).filter(key => key !== 'time')
   const times = teachingData.value.scoreTrend.map(item => item.time)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis'
@@ -459,16 +440,16 @@ const initScoreTrendChart = () => {
       data: teachingData.value.scoreTrend.map(item => item[className])
         }))
       }
-  
+
   scoreTrendChart.setOption(option)
 }
 
 // 学生能力雷达图
 const initStudentAbilityChart = () => {
   if (!teachingData.value.studentAbilities) return
-  
+
   studentAbilityChart = echarts.init(studentAbilityRef.value)
-  
+
   const abilities = teachingData.value.studentAbilities
   const option = {
     tooltip: {},
@@ -495,7 +476,7 @@ const initStudentAbilityChart = () => {
       }
     ]
   }
-  
+
   studentAbilityChart.setOption(option)
 }
 
@@ -526,5 +507,4 @@ onMounted(() => {
   fetchTeachingData()
 })
 </script>
-
 

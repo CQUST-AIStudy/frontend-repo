@@ -17,14 +17,13 @@
           <span class="meta-label [font-size:12px] [color:#6a7792]">当前状态</span>
           <strong>{{ loading ? 'AI 生成中' : '可继续提问' }}</strong>
         </div>
-        <el-button
-          class="clear-btn [min-height:88px] [border-radius:20px] [border:1px_solid_rgba(104,_124,_155,_0.18)] [background:rgba(255,_255,_255,_0.74)] [backdrop-filter:blur(12px)] [grid-column:span_2] [color:#38517c]"
-          plain
+        <button
+          class="clear-btn [min-height:88px] [border-radius:20px] [border:1px_solid_rgba(104,_124,_155,_0.18)] [background:rgba(255,_255,_255,_0.74)] [backdrop-filter:blur(12px)] [grid-column:span_2] [color:#38517c] [cursor:pointer] [transition:all_0.2s] [font-size:14px] [font-weight:500] hover:[background:rgba(255,_255,_255,_0.9)] hover:[border-color:rgba(104,_124,_155,_0.3)] disabled:[opacity:0.4] disabled:[cursor:not-allowed]"
           :disabled="loading || !messages.length"
           @click="clearConversation"
         >
           清空会话
-        </el-button>
+        </button>
       </div>
     </section>
 
@@ -139,26 +138,25 @@
         </div>
 
         <div class="composer-box [padding:16px] [border-radius:24px] [background:rgba(255,_255,_255,_0.9)] [border:1px_solid_rgba(128,_147,_176,_0.18)] [box-shadow:0_18px_34px_rgba(84,_106,_138,_0.1)]">
-          <el-input
+          <textarea
             v-model="draft"
-            type="textarea"
-            :rows="1"
-            :autosize="{ minRows: 1, maxRows: 5 }"
-            resize="none"
-            placeholder="输入教学问题，例如：帮我给“图的遍历”设计一个 20 分钟课堂讲解结构。"
+            rows="1"
+            class="composer-textarea w-full resize-none border-none bg-transparent text-[15px] outline-none"
+            :placeholder="composerPlaceholder"
             @keydown="onKeyDown"
-          />
+            @input="autoResize"
+            ref="textareaRef"
+          ></textarea>
           <div class="composer-actions [display:flex] [justify-content:space-between] [align-items:center] [gap:14px] [padding-top:12px] [border-top:1px_solid_rgba(128,_147,_176,_0.14)]">
             <span class="composer-hint [font-size:12px] [color:#71829a]">Enter 发送，Shift+Enter 换行</span>
-            <el-button
-              type="primary"
-              round
-              :loading="loading"
-              :disabled="!draft.trim()"
+            <button
+              type="button"
+              :disabled="!draft.trim() || loading"
               @click="send"
+              class="h-[38px] px-5 rounded-full text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none"
             >
-              发送问题
-            </el-button>
+              {{ loading ? '生成中...' : '发送问题' }}
+            </button>
           </div>
         </div>
       </div>
@@ -185,10 +183,19 @@ const store = useTeacherAiChatStore()
 const { messages, draft, loading } = storeToRefs(store)
 
 const messagesRef = ref(null)
+const textareaRef = ref(null)
+const composerPlaceholder = '输入教学问题，例如：帮我给「图的遍历」设计一个 20 分钟课堂讲解结构。'
+
+function autoResize() {
+  const el = textareaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px'
+}
 
 const suggestions = [
-  '帮我设计一个“二叉树遍历”实验课的提问链路',
-  '帮我生成“栈和队列”课堂讲解提纲',
+  '帮我设计一个"二叉树遍历"实验课的提问链路',
+  '帮我生成"栈和队列"课堂讲解提纲',
   '帮我检索最近的 Transformer 教学应用论文',
   '帮我润色一段给学生的实验反馈'
 ]

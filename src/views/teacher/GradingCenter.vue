@@ -1,137 +1,171 @@
 <template>
-  <div class="grading-center [min-height:100%] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="grading-center min-h-full">
     <!-- Hero -->
-    <div class="hero [background:#fff] [border-radius:16px] [padding:28px_32px] [margin-bottom:20px] [border:1px_solid_#dadce0] [display:flex] [align-items:center] [gap:16px]">
-      <div class="hero-inner [display:flex] [align-items:center] [gap:16px]">
-        <div class="hero-icon [font-size:36px]">📝</div>
-        <div class="hero-text [&_h1]:[margin:0_0_4px] [&_h1]:[font-size:22px] [&_h1]:[font-weight:400] [&_h1]:[color:#202124] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#5f6368]">
-          <h1>AI 批改中心</h1>
-          <p>上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
+    <div class="bg-white rounded-2xl py-7 px-8 mb-5 border border-black/[0.06] flex items-center gap-4">
+      <div class="flex items-center gap-4">
+        <div class="text-4xl">📝</div>
+        <div>
+          <h1 class="m-0 mb-1 text-[22px] font-normal text-[#1d1d1f]">AI 批改中心</h1>
+          <p class="m-0 text-sm text-[#6e6e73]">上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
         </div>
       </div>
     </div>
 
     <!-- Create Task Card -->
-    <div class="card [background:#fff] [border-radius:16px] [margin-bottom:20px] [border:1px_solid_#dadce0] [overflow:hidden] [&_.el-table]:[--el-table-border-color:#f1f3f4] [&_.el-table]:[--el-table-header-bg-color:#f8f9fa] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:13px] [&_.el-table_td]:[color:#202124] [&_.el-button--primary]:[border-radius:100px]">
-      <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [padding:16px_24px] [border-bottom:1px_solid_#e8eaed] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-        <span class="card-title [font-size:15px] [font-weight:500] [color:#202124] [font-weight:600] [font-size:16px]">创建批改任务</span>
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-5 overflow-hidden">
+      <div class="flex justify-between items-start gap-3 px-6 py-4 border-b border-black/[0.06]">
+        <span class="text-base font-semibold text-[#1d1d1f]">创建批改任务</span>
       </div>
-      <div class="card-body [padding:20px_24px]">
-        <el-form :model="createForm" label-width="100px">
-          <el-row :gutter="16">
-            <el-col :span="8">
-              <el-form-item label="评分标准">
-                <el-select v-model="createForm.rubricId" placeholder="选择评分标准" class="[width:100%]">
-                  <el-option v-for="r in rubrics" :key="r.id" :label="r.name" :value="r.id" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="实验ID">
-                <el-input v-model="createForm.experimentId" placeholder="可选" clearable />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="班级ID">
-                <el-input v-model="createForm.classId" placeholder="可选" clearable />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="教师署名">
-                <el-input v-model="createForm.teacherSignature" maxlength="32" show-word-limit placeholder="例如：张老师" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="16">
-            <el-col :span="16">
-              <el-form-item label="期望分数区间">
-                <el-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
-                  :marks="{ 0: '0', 75: '75', 90: '90', 99: '99', 100: '100' }"
-                  class="[padding:0_12px]" />
-                <div class="[font-size:12px] [color:#9aa0a6] [margin-top:4px]">
-                  大多数学生的成绩应落在此区间内（{{ createForm.scoreRange[0] }} - {{ createForm.scoreRange[1] }}分），允许个别异常值
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="上传PDF">
-            <el-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
-                       accept=".pdf,.docx,.doc" multiple drag :file-list="fileList" :on-remove="onFileRemove">
-              <el-icon class="[font-size:40px] [color:#9aa0a6]"><UploadFilled /></el-icon>
-              <div class="[color:#5f6368] [margin-top:8px]">拖拽 PDF 文件到此处，或点击上传（最多200 份）</div>
-            </el-upload>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="submitTask" :loading="submitting"
-                       :disabled="!createForm.rubricId || fileList.length === 0">
-              开始批改({{ fileList.length }} 件)
-            </el-button>
-            <el-button @click="$router.push('/teacher/grading/rubrics')">管理评分标准</el-button>
-          </el-form-item>
-        </el-form>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5 mb-5">
+          <!-- 评分标准 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#6e6e73]">评分标准</label>
+            <select v-model="createForm.rubricId"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f]">
+              <option value="" disabled selected>选择评分标准</option>
+              <option v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</option>
+            </select>
+          </div>
+          <!-- 实验ID -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#6e6e73]">实验ID</label>
+            <input v-model="createForm.experimentId" placeholder="可选"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
+          </div>
+          <!-- 班级ID -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#6e6e73]">班级ID</label>
+            <input v-model="createForm.classId" placeholder="可选"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
+          </div>
+          <!-- 教师署名 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-[#6e6e73]">教师署名</label>
+            <input v-model="createForm.teacherSignature" maxlength="32" placeholder="例如：张老师"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
+          </div>
+        </div>
+
+        <!-- 期望分数区间 -->
+        <div class="mb-5">
+          <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">期望分数区间</label>
+          <div class="max-w-[600px] px-3">
+            <el-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
+              :marks="{ 0: '0', 75: '75', 90: '90', 99: '99', 100: '100' }" />
+          </div>
+          <div class="text-xs text-[#aeaeb2] mt-1">
+            大多数学生的成绩应落在此区间内（{{ createForm.scoreRange[0] }} - {{ createForm.scoreRange[1] }}分），允许个别异常值
+          </div>
+        </div>
+
+        <!-- 上传PDF -->
+        <div class="mb-5">
+          <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">上传PDF</label>
+          <el-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
+                     accept=".pdf,.docx,.doc" multiple drag :file-list="fileList" :on-remove="onFileRemove">
+            <UploadFilled class="text-[40px] text-[#aeaeb2]" />
+            <div class="text-[#6e6e73] mt-2">拖拽 PDF 文件到此处，或点击上传（最多200 份）</div>
+          </el-upload>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3">
+          <button @click="submitTask"
+            :disabled="submitting || !createForm.rubricId || fileList.length === 0"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+            <span v-if="submitting" class="inline-flex items-center gap-1.5">
+              <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              处理中...
+            </span>
+            <span v-else>开始批改({{ fileList.length }} 件)</span>
+          </button>
+          <button @click="$router.push('/teacher/grading/rubrics')"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+            管理评分标准
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Task List -->
-    <div class="card [background:#fff] [border-radius:16px] [margin-bottom:20px] [border:1px_solid_#dadce0] [overflow:hidden] [&_.el-table]:[--el-table-border-color:#f1f3f4] [&_.el-table]:[--el-table-header-bg-color:#f8f9fa] [&_.el-table_th]:[font-weight:500] [&_.el-table_th]:[color:#5f6368] [&_.el-table_th]:[font-size:12px] [&_.el-table_td]:[font-size:13px] [&_.el-table_td]:[color:#202124] [&_.el-button--primary]:[border-radius:100px]">
-      <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [padding:16px_24px] [border-bottom:1px_solid_#e8eaed] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-        <span class="card-title [font-size:15px] [font-weight:500] [color:#202124] [font-weight:600] [font-size:16px]">批改任务列表</span>
-        <el-button @click="loadTasks" :loading="loading" link type="primary">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-5 overflow-hidden">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-black/[0.06]">
+        <span class="text-base font-semibold text-[#1d1d1f]">批改任务列表</span>
+        <button @click="loadTasks"
+          class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none inline-flex items-center gap-1">
+          <Refresh class="w-4 h-4" /> 刷新
+        </button>
       </div>
-      <div class="card-body [padding:20px_24px]">
-        <el-table :data="tasks" v-loading="loading" stripe class="[width:100%]"
-          :header-cell-style="{ background: '#f8f9fa', color: '#202124', fontWeight: 600 }">
-          <el-table-column prop="taskId" label="ID" width="70" />
-          <el-table-column label="状态" width="120">
-            <template #default="{row}">
-              <el-tag :type="statusType(row.status)" effect="light" round>
-                {{ statusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="进度" width="220">
-            <template #default="{row}">
-              <el-progress
-                :percentage="row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0"
-                :status="row.failedCount > 0 ? 'exception' : row.status === 'COMPLETED' ? 'success' : ''"
-                :stroke-width="8" />
-              <span class="progress-text [margin-left:10px] [font-size:13px] [font-size:12px] [color:#9aa0a6] [margin-top:4px] [display:block]">
-                {{ row.completedCount }}/{{ row.totalCount }} 完成
-                <span v-if="row.failedCount > 0" class="[color:#ef4444]">，{{ row.failedCount }} 失败</span>
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="createdAt" label="创建时间" width="180">
-            <template #default="{row}">
-              <span class="time-text [font-size:13px] [color:#5f6368]">{{ formatTime(row.createdAt) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" min-width="250">
-            <template #default="{row}">
-              <el-button link type="primary" @click="$router.push(`/teacher/grading/detail/${row.taskId}`)">
-                查看详情
-              </el-button>
-              <el-button link type="warning" v-if="row.failedCount > 0" @click="retryTask(row.taskId)">
-                重试失败
-              </el-button>
-              <el-button link type="success" v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)">
-                导出报告
-              </el-button>
-              <el-popconfirm title="确定删除此批改任务？删除后不可恢复" @confirm="deleteTask(row.taskId)"
-                :disabled="row.status === 'PROCESSING'">
-                <template #reference>
-                  <el-button link type="danger" :disabled="row.status === 'PROCESSING'">删除</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
+      <div class="p-6">
+        <!-- Loading state -->
+        <div v-if="loading" class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-6 w-6 text-[#007aff]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </div>
 
-        <el-empty v-if="!loading && tasks.length === 0" description="暂无批改任务">
-          <template #image><div class="[font-size:48px]">📋</div></template>
-        </el-empty>
+        <!-- Table -->
+        <div v-else-if="tasks.length > 0" class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-black/[0.06]">
+                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9] rounded-tl-lg">ID</th>
+                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">状态</th>
+                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">进度</th>
+                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">创建时间</th>
+                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9] rounded-tr-lg">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in tasks" :key="row.taskId" class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/50 transition-colors">
+                <td class="py-3 px-3 text-[13px] text-[#1d1d1f]">{{ row.taskId }}</td>
+                <td class="py-3 px-3">
+                  <span :class="statusTagClass(row.status)" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold">
+                    {{ statusText(row.status) }}
+                  </span>
+                </td>
+                <td class="py-3 px-3 min-w-[180px]">
+                  <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-300"
+                      :style="{ width: (row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0) + '%' }"
+                      :class="row.failedCount > 0 ? 'bg-gradient-to-r from-[#ff6259] to-[#ff3b30]' : row.status === 'COMPLETED' ? 'bg-gradient-to-r from-[#30d158] to-[#28cd41]' : 'bg-gradient-to-r from-[#3898ff] to-[#007aff]'">
+                    </div>
+                  </div>
+                  <span class="text-xs text-[#aeaeb2] mt-1 block">
+                    {{ row.completedCount }}/{{ row.totalCount }} 完成
+                    <span v-if="row.failedCount > 0" class="text-[#ef4444]">，{{ row.failedCount }} 失败</span>
+                  </span>
+                </td>
+                <td class="py-3 px-3 text-[13px] text-[#6e6e73]">{{ formatTime(row.createdAt) }}</td>
+                <td class="py-3 px-3">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <button @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
+                      class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
+                      查看详情
+                    </button>
+                    <button v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
+                      class="text-[13px] font-medium text-[#ff9500] cursor-pointer hover:text-[#cc7700] transition-colors bg-transparent border-none">
+                      重试失败
+                    </button>
+                    <button v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
+                      class="text-[13px] font-medium text-[#30d158] cursor-pointer hover:text-[#1fa840] transition-colors bg-transparent border-none">
+                      导出报告
+                    </button>
+                    <button @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
+                      class="text-[13px] font-medium text-[#ff3b30] cursor-pointer hover:text-[#cc2f26] transition-colors bg-transparent border-none disabled:opacity-40 disabled:cursor-not-allowed">
+                      删除
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state -->
+        <div v-else class="flex flex-col items-center justify-center py-16">
+          <div class="text-5xl mb-3">📋</div>
+          <p class="text-sm text-[#aeaeb2]">暂无批改任务</p>
+        </div>
       </div>
     </div>
   </div>
@@ -140,7 +174,7 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, onMounted, onUnmounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Refresh } from '@element-plus/icons-vue'
 import { getRubrics, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
 
@@ -152,8 +186,15 @@ const fileList = ref([])
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99] })
 let refreshTimer = null
 
-function statusType(s) {
-  return { PENDING: 'info', PROCESSING: 'warning', COMPLETED: 'success', FAILED: 'danger' }[s] || 'info'
+
+function statusTagClass(s) {
+  const map = {
+    PENDING: 'bg-[#f5f5f7] text-[#6e6e73]',
+    PROCESSING: 'bg-[#fff3e0] text-[#ff9500]',
+    COMPLETED: 'bg-[#e8f8ed] text-[#30d158]',
+    FAILED: 'bg-[#ffeeed] text-[#ff3b30]'
+  }
+  return map[s] || 'bg-[#f5f5f7] text-[#6e6e73]'
 }
 
 function statusText(s) {
@@ -167,6 +208,19 @@ function formatTime(t) {
 
 function onFileChange(_, list) { fileList.value = list }
 function onFileRemove(_, list) { fileList.value = list }
+
+async function confirmDeleteTask(id) {
+  try {
+    await ElMessageBox.confirm('确定删除此批改任务？删除后不可恢复', '确认删除', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    deleteTask(id)
+  } catch {
+    // user cancelled
+  }
+}
 
 async function submitTask() {
   submitting.value = true
@@ -248,5 +302,3 @@ onMounted(async () => {
 
 onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
 </script>
-
-
