@@ -1,9 +1,16 @@
 <template>
   <Teleport to="body">
-    <Transition name="drawer">
+    <Transition
+      enter-active-class="transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] [&_.drawer-backdrop]:transition-opacity [&_.drawer-backdrop]:duration-300 [&_.drawer-panel]:transition-transform [&_.drawer-panel]:duration-300 [&_.drawer-panel]:ease-[cubic-bezier(0.4,0,0.2,1)]"
+      :enter-from-class="drawerHiddenClass"
+      enter-to-class="opacity-100 [&_.drawer-panel]:translate-x-0"
+      leave-active-class="transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] [&_.drawer-backdrop]:transition-opacity [&_.drawer-backdrop]:duration-300 [&_.drawer-panel]:transition-transform [&_.drawer-panel]:duration-300 [&_.drawer-panel]:ease-[cubic-bezier(0.4,0,0.2,1)]"
+      leave-from-class="opacity-100 [&_.drawer-panel]:translate-x-0"
+      :leave-to-class="drawerHiddenClass"
+    >
       <div v-if="modelValue" class="fixed inset-0 z-[2000]">
         <div class="fixed inset-0 bg-black/30 backdrop-blur-sm drawer-backdrop" @mousedown="handleBackdropClick"></div>
-        <div class="fixed inset-y-0 flex flex-col bg-white shadow-[0_0_60px_rgba(0,0,0,0.12)] drawer-panel" :class="positionClass" :style="sizeStyle">
+        <div class="fixed inset-y-0 flex w-[var(--drawer-size)] flex-col bg-white shadow-[0_0_60px_rgba(0,0,0,0.12)] drawer-panel" :class="positionClass" :style="sizeStyle">
           <div v-if="title || $slots.header" class="flex items-center justify-between h-[64px] px-6 border-b border-black/[0.06] shrink-0">
             <slot name="header">
               <h2 class="text-[16px] font-semibold text-[#1d1d1f]">{{ title }}</h2>
@@ -38,7 +45,12 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'close'])
 
 const positionClass = computed(() => props.direction === 'left' ? 'left-0' : 'right-0')
-const sizeStyle = computed(() => ({ width: props.size }))
+const drawerHiddenClass = computed(() =>
+  props.direction === 'left'
+    ? 'opacity-0 [&_.drawer-panel]:-translate-x-full'
+    : 'opacity-0 [&_.drawer-panel]:translate-x-full'
+)
+const sizeStyle = computed(() => ({ '--drawer-size': props.size }))
 
 function close() {
   emit('update:modelValue', false)
@@ -49,21 +61,3 @@ function handleBackdropClick() {
   if (props.closeOnClickModal) close()
 }
 </script>
-
-<style scoped>
-.drawer-enter-active, .drawer-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.drawer-enter-active .drawer-backdrop, .drawer-leave-active .drawer-backdrop {
-  transition: opacity 0.3s;
-}
-.drawer-enter-active .drawer-panel, .drawer-leave-active .drawer-panel {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.drawer-enter-from, .drawer-leave-to {
-  opacity: 0;
-}
-.drawer-enter-from .drawer-panel, .drawer-leave-to .drawer-panel {
-  transform: translateX(100%);
-}
-</style>

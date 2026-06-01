@@ -2858,13 +2858,16 @@
   }
 }
 
-/* Tailwind CSS 4 visual hardening: keep late, outside layers, to override migrated utilities. */
-:root {
-  --app-layout-header: #ffffff;
-  --app-layout-main: #f5f5f7;
-  --app-sidebar-bg: rgba(246, 246, 248, 0.82);
+/* Tailwind CSS 4 visual hardening: keep late in source order and inside Tailwind layers. */
+@layer base {
+  :root {
+    --app-layout-header: #ffffff;
+    --app-layout-main: #f5f5f7;
+    --app-sidebar-bg: rgba(246, 246, 248, 0.82);
+  }
 }
 
+@layer components {
 .app-shell {
   color: var(--app-text);
   background: #f5f5f7;
@@ -3505,4 +3508,5 @@
   .user-management .table-card .el-card__body {
     padding: 12px !important;
   }
+}
 }

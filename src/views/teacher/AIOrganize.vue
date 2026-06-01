@@ -180,9 +180,9 @@
           <div class="my-3">
             <div class="h-[10px] rounded-full bg-[#f5f5f7] overflow-hidden">
               <div
-                class="h-full rounded-full transition-all duration-300"
+                class="h-full w-[var(--progress-width)] rounded-full transition-all duration-300"
                 :class="jobData?.status === 'FAILED' ? 'bg-[#d93025]' : 'bg-[#007aff]'"
-                :style="{ width: (jobData?.progress || 0) + '%' }"
+                :style="progressWidthStyle(jobData?.progress || 0)"
               ></div>
             </div>
           </div>
@@ -726,6 +726,8 @@ const statusLabelC = computed(() => {
   }
   return labels[jobData.value?.status] || jobData.value?.status || '-'
 })
+
+const progressWidthStyle = (value) => ({ '--progress-width': `${value}%` })
 
 const kindTagClass = (kind) => {
   const map = {

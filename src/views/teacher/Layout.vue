@@ -3,12 +3,19 @@
     <!-- Sidebar (Desktop) -->
     <aside
       v-if="!isMobile"
-      class="fixed inset-y-0 left-0 z-30 flex flex-col h-screen h-dvh overflow-hidden border-r border-black/[0.06] bg-[rgba(246,246,248,0.82)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-      :style="{ width: asideWidth }"
+      class="fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-black/[0.06] bg-[rgba(246,246,248,0.82)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+      :style="asideStyle"
     >
       <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
         <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm shrink-0" />
-        <transition name="fade-text">
+        <transition
+          enter-active-class="transition-opacity duration-200"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition-opacity duration-200"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
           <div v-if="!collapsed" class="flex flex-col gap-0.5 overflow-hidden">
             <span class="text-[11px] font-medium text-[#8e8e93] uppercase tracking-wide">教师工作台</span>
             <span class="text-base font-bold text-[#1d1d1f] tracking-tight whitespace-nowrap">智能教学平台</span>
@@ -33,7 +40,14 @@
                 <span v-if="!collapsed" class="truncate flex-1 text-left">{{ item.label }}</span>
                 <svg v-if="!collapsed" class="w-3 h-3 shrink-0 text-[#aeaeb2] transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
-              <transition name="submenu">
+              <transition
+                enter-active-class="max-h-[300px] overflow-hidden transition-all duration-200 ease-out"
+                enter-from-class="max-h-0 opacity-0"
+                enter-to-class="max-h-[300px] opacity-100"
+                leave-active-class="max-h-[300px] overflow-hidden transition-all duration-150 ease-in"
+                leave-from-class="max-h-[300px] opacity-100"
+                leave-to-class="max-h-0 opacity-0"
+              >
                 <div v-if="openGroups[item.group] && !collapsed" class="mt-0.5 ml-[30px] space-y-0.5 overflow-hidden">
                   <template v-for="child in item.children" :key="child.path">
                     <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="flex items-center h-[34px] px-3 rounded-lg text-[12px] text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.1)] !text-[#007aff] !font-medium': activeMenu === child.path, 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== child.path }">
@@ -57,10 +71,24 @@
 
     <!-- Mobile Drawer Overlay -->
     <Teleport to="body">
-      <transition name="drawer-fade">
+      <transition
+        enter-active-class="transition-opacity duration-[250ms]"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-[250ms]"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
         <div v-if="mobileMenuVisible" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" @click="closeMobileMenu"></div>
       </transition>
-      <transition name="drawer-slide">
+      <transition
+        enter-active-class="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        enter-from-class="-translate-x-full"
+        enter-to-class="translate-x-0"
+        leave-active-class="transition-transform duration-200 ease-in"
+        leave-from-class="translate-x-0"
+        leave-to-class="-translate-x-full"
+      >
         <aside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[rgba(246,246,248,0.98)] backdrop-blur-[24px] shadow-2xl">
           <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
             <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm" />
@@ -101,7 +129,7 @@
     </Teleport>
 
     <!-- Main Area -->
-    <div class="flex flex-col flex-1 min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="{ marginLeft: isMobile ? '0' : asideWidth }">
+    <div class="ml-[var(--teacher-main-margin)] flex flex-col flex-1 min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
       <!-- Header -->
       <header class="sticky top-0 z-20 flex items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
@@ -148,7 +176,14 @@
               <ArrowDown class="w-3 h-3 text-[#aeaeb2]" />
             </button>
 
-            <transition name="dropdown">
+            <transition
+              enter-active-class="transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              enter-from-class="-translate-y-1 scale-[0.96] opacity-0"
+              enter-to-class="translate-y-0 scale-100 opacity-100"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="translate-y-0 scale-100 opacity-100"
+              leave-to-class="-translate-y-1 scale-[0.96] opacity-0"
+            >
               <div v-if="dropdownOpen" class="absolute right-0 top-full mt-2 w-[180px] py-1.5 rounded-xl bg-white/95 backdrop-blur-[20px] border border-black/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] z-50">
                 <button @click="handleCommand('switchClass')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
                   <School class="w-4 h-4 text-[#6e6e73]" />切换教学班
@@ -169,7 +204,15 @@
       <!-- Content -->
       <main class="flex-1 min-w-0 min-h-[calc(100vh-120px)] min-h-[calc(100dvh-120px)] p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]">
         <router-view v-slot="{ Component }">
-          <transition name="page-slide" mode="out-in">
+          <transition
+            mode="out-in"
+            enter-active-class="transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+            enter-from-class="translate-y-2 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="-translate-y-1 opacity-0"
+          >
             <component :is="Component" />
           </transition>
         </router-view>
@@ -239,6 +282,8 @@ const teacherLevelClass = computed(() => ({
   'bg-[rgba(0,122,255,0.1)] text-[#007aff]': teacherLevel.value === 'course_leader',
   'bg-[rgba(52,199,89,0.1)] text-[#34c759]': teacherLevel.value === 'department_head'
 }))
+const asideStyle = computed(() => ({ '--teacher-aside-width': asideWidth.value }))
+const mainStyle = computed(() => ({ '--teacher-main-margin': isMobile.value ? '0px' : asideWidth.value }))
 
 const activeMenu = computed(() => route.path)
 
@@ -393,27 +438,3 @@ function handleCommand(command) {
   }).catch(() => {})
 }
 </script>
-
-<style scoped>
-.fade-text-enter-active, .fade-text-leave-active { transition: opacity 0.2s; }
-.fade-text-enter-from, .fade-text-leave-to { opacity: 0; }
-
-.page-slide-enter-active, .page-slide-leave-active { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-.page-slide-enter-from { opacity: 0; transform: translateY(8px); }
-.page-slide-leave-to { opacity: 0; transform: translateY(-4px); }
-
-.submenu-enter-active { transition: all 0.2s ease; max-height: 300px; }
-.submenu-leave-active { transition: all 0.15s ease; max-height: 300px; }
-.submenu-enter-from, .submenu-leave-to { opacity: 0; max-height: 0; }
-
-.drawer-fade-enter-active, .drawer-fade-leave-active { transition: opacity 0.25s; }
-.drawer-fade-enter-from, .drawer-fade-leave-to { opacity: 0; }
-
-.drawer-slide-enter-active { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-.drawer-slide-leave-active { transition: transform 0.2s ease-in; }
-.drawer-slide-enter-from, .drawer-slide-leave-to { transform: translateX(-100%); }
-
-.dropdown-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-.dropdown-leave-active { transition: all 0.15s ease-in; }
-.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-4px) scale(0.96); }
-</style>

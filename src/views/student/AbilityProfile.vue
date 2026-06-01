@@ -125,7 +125,7 @@
                   <span class="leaf-score [font-size:14px] [font-weight:700]" :class="masteryColorClass(c.mastery)">{{ c.mastery }}分</span>
                 </div>
                 <div class="leaf-bar [height:6px] [background:#f0f0f0] [border-radius:3px] [overflow:hidden]">
-                  <div class="leaf-bar-fill [height:100%] [border-radius:3px] [transition:width_.6s_ease]" :class="masteryGradientClass(c.mastery)" :style="{ width: c.mastery + '%' }"></div>
+                  <div class="leaf-bar-fill h-full w-[var(--progress-width)] rounded-[3px] transition-[width] duration-[600ms] ease-[ease]" :class="masteryGradientClass(c.mastery)" :style="progressWidthStyle(c.mastery)"></div>
                 </div>
                 <div class="leaf-bottom [display:flex] [gap:12px] [font-size:11px] [color:#909399] [margin-top:6px]" v-if="c.totalSubmissions">
                   <span>提交{{ c.totalSubmissions }}</span>
@@ -205,6 +205,9 @@ function masteryGradientClass(v) {
   if (v >= 70) return '[background:linear-gradient(90deg,#95d475,#67C23A)]'
   if (v >= 40) return '[background:linear-gradient(90deg,#eebe77,#E6A23C)]'
   return '[background:linear-gradient(90deg,#fab6b6,#F56C6C)]'
+}
+function progressWidthStyle(value) {
+  return { '--progress-width': `${value}%` }
 }
 function levelTagType(l) { return l === 'good' ? 'success' : l === 'medium' ? 'warning' : 'danger' }
 function patternClass(tag) {

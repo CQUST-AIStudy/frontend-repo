@@ -614,37 +614,47 @@ const splitAiRemarksToQuestions = () => {
   });
 };
 
-const generateCommentImage = async (question) => {
-  const viewportWidth = window.innerWidth;
-  const imageWidth = Math.min(viewportWidth * 0.15, 500);
+const createCommentPreviewElement = (comment, imageWidth) => {
   const commentContainer = document.createElement('div');
-  commentContainer.className = 'teacher-comment-preview';
-  commentContainer.style.width = `${imageWidth}px`;
-  commentContainer.style.backgroundColor = '#ffffff';
-  commentContainer.style.position = 'absolute';
-  commentContainer.style.left = '-9999px';
-  commentContainer.style.top = '-9999px';
-  commentContainer.innerHTML = `
-    <div style="padding:15px;border:1px solid #ddd;background:#f9f9f9;width:100%;box-sizing:border-box">
-      <h3 style="margin-top:0;color:red;font-size:16px;border-bottom:1px solid #eee;padding-bottom:8px">
-        教师评语：
-      </h3>
-      <div style="color:red;line-height:1.5;font-size:14px;white-space:pre-wrap">
-        ${question.comment.replace(/\n/g, '<br>')}
-      </div>
-    </div>
-  `;
+  commentContainer.className = 'teacher-comment-preview absolute -left-[9999px] -top-[9999px] w-[var(--comment-preview-width)] bg-white';
+  commentContainer.style.setProperty('--comment-preview-width', `${imageWidth}px`);
+
+  const panel = document.createElement('div');
+  panel.className = 'box-border w-full border border-[#ddd] bg-[#f9f9f9] p-[15px]';
+
+  const title = document.createElement('h3');
+  title.className = 'mb-[1em] mt-0 border-b border-[#eee] pb-2 text-[16px] text-red-600';
+  title.textContent = '\u6559\u5e08\u8bc4\u8bed\uff1a';
+
+  const body = document.createElement('div');
+  body.className = 'whitespace-pre-wrap text-[14px] leading-[1.5] text-red-600';
+  body.textContent = comment || '';
+
+  panel.append(title, body);
+  commentContainer.appendChild(panel);
+  return commentContainer;
+};
+
+const captureCommentPreview = async (commentContainer, imageWidth, logging) => {
   await ensureFontsLoaded();
   document.body.appendChild(commentContainer);
   const canvas = await html2canvas(commentContainer, {
-    backgroundColor: '#ffffff',
+    ['backgroundColor']: '#ffffff',
     scale: 2,
-    logging: false,
+    logging,
     useCORS: true,
-    width: imageWidth,
+    ['width']: imageWidth,
     timeout: 1000
   });
   document.body.removeChild(commentContainer);
+  return canvas;
+};
+
+const generateCommentImage = async (question) => {
+  const viewportWidth = window.innerWidth;
+  const imageWidth = Math.min(viewportWidth * 0.15, 500);
+  const commentContainer = createCommentPreviewElement(question.comment, imageWidth);
+  const canvas = await captureCommentPreview(commentContainer, imageWidth, false);
   question.commentImage = canvas.toDataURL('image/png', 1.0);
   question.commentImageWidth = imageWidth;
 };
@@ -661,39 +671,8 @@ const saveQuestionComment = async (index) => {
 
     const viewportWidth = window.innerWidth;
     const imageWidth = Math.min(viewportWidth * 0.1, 500);
-
-    const commentContainer = document.createElement('div');
-    commentContainer.className = 'teacher-comment-preview';
-    commentContainer.style.width = `${imageWidth}px`;
-    commentContainer.style.backgroundColor = '#ffffff';
-    commentContainer.style.position = 'absolute';
-    commentContainer.style.left = '-9999px';
-    commentContainer.style.top = '-9999px';
-
-    commentContainer.innerHTML = `
-  <div style="padding:15px;border:1px solid #ddd;background:#f9f9f9;width:100%;box-sizing:border-box">
-    <h3 style="margin-top:0;color:red;font-size:16px;border-bottom:1px solid #eee;padding-bottom:8px">
-      教师评语：
-    </h3>
-    <div style="color:red;line-height:1.5;font-size:14px;white-space:pre-wrap">
-      ${question.comment.replace(/\n/g, '<br>')}
-    </div>
-  </div>
-`;
-
-    await ensureFontsLoaded();
-    document.body.appendChild(commentContainer);
-
-    const canvas = await html2canvas(commentContainer, {
-      backgroundColor: '#ffffff',
-      scale: 2,
-      logging: true,
-      useCORS: true,
-      width: imageWidth,
-      timeout: 1000
-    });
-
-    document.body.removeChild(commentContainer);
+    const commentContainer = createCommentPreviewElement(question.comment, imageWidth);
+    const canvas = await captureCommentPreview(commentContainer, imageWidth, true);
 
     const imageDataUrl = canvas.toDataURL('image/png', 1.0);
     question.commentImage = imageDataUrl;

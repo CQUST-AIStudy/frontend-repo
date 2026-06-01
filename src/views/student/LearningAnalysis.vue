@@ -80,7 +80,7 @@
               <div class="pct-item [display:flex] [align-items:center] [gap:10px]" v-for="exp in classData.experiments" :key="exp.experimentId">
                 <div class="pct-name [width:90px] [font-size:11px] [color:#5f6368] [text-align:right] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [flex-shrink:0]" :title="exp.name">{{ shortName(exp.name) }}</div>
                 <div class="pct-bar-wrap [flex:1] [height:18px] [background:#f1f3f4] [border-radius:9px] [position:relative] [overflow:hidden]">
-                  <div class="pct-bar [height:100%] [border-radius:9px] [transition:width_0.6s_ease] [min-width:2px]" :class="pctColorClass(exp.percentile)" :style="{ width: exp.percentile + '%' }"></div>
+                  <div class="pct-bar h-full min-w-0.5 w-[var(--progress-width)] rounded-[9px] transition-[width] duration-[600ms] ease-[ease]" :class="pctColorClass(exp.percentile)" :style="progressWidthStyle(exp.percentile)"></div>
                   <span class="pct-label [position:absolute] [right:8px] [top:50%] [transform:translateY(-50%)] [font-size:10px] [font-weight:500] [color:#202124]">超过{{ exp.percentile }}%</span>
                 </div>
               </div>
@@ -222,6 +222,10 @@ function pctColorClass(p) {
   if (p >= 50) return '[background:#1a73e8]'
   if (p >= 25) return '[background:#e37400]'
   return '[background:#d93025]'
+}
+
+function progressWidthStyle(value) {
+  return { '--progress-width': `${value}%` }
 }
 
 const overviewCards = computed(() => {
