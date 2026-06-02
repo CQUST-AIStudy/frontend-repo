@@ -878,10 +878,10 @@ const formatDate = (dateString) => {
 
 const getScoreClass = (score) => {
   if (score === undefined || score === null) return ''
-  if (score >= 90) return 'score-excellent'
-  if (score >= 80) return 'score-good'
-  if (score >= 60) return 'score-pass'
-  return 'score-fail'
+  if (score >= 90) return 'font-semibold text-[#8E44AD]'
+  if (score >= 80) return 'font-semibold text-[#409EFF]'
+  if (score >= 60) return 'font-semibold text-[#67C23A]'
+  return 'font-semibold text-[#F56C6C]'
 }
 
 const getPlagiarismRateType = (rate) => {
@@ -926,10 +926,3 @@ defineExpose({
   formatDate
 })
 </script>
-
-<style scoped>
-.score-excellent { color: #8E44AD; font-weight: 600; }
-.score-good { color: #409EFF; font-weight: 600; }
-.score-pass { color: #67C23A; font-weight: 600; }
-.score-fail { color: #F56C6C; font-weight: 600; }
-</style>

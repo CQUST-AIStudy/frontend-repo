@@ -70,7 +70,14 @@
               >
                 <svg class="w-5 h-5 text-[#71839a]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
               </button>
-              <Transition name="dropdown">
+              <Transition
+                enter-active-class="transition-all duration-150 ease-out"
+                enter-from-class="-translate-y-1 scale-95 opacity-0"
+                enter-to-class="translate-y-0 scale-100 opacity-100"
+                leave-active-class="transition-all duration-150 ease-in"
+                leave-from-class="translate-y-0 scale-100 opacity-100"
+                leave-to-class="-translate-y-1 scale-95 opacity-0"
+              >
                 <div
                   v-if="openDropdownId === cls.id"
                   class="absolute right-0 top-full mt-1 w-36 bg-white/95 backdrop-blur-xl rounded-[12px] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.1)] border border-black/[0.06] py-1 z-50 overflow-hidden"
@@ -1027,13 +1034,3 @@ watch(() => [syncForm.ptaUsername, syncForm.ptaPassword], () => {
   }
 })
 </script>
-
-<style scoped>
-.dropdown-enter-active, .dropdown-leave-active {
-  transition: all 0.15s ease;
-}
-.dropdown-enter-from, .dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-4px) scale(0.95);
-}
-</style>

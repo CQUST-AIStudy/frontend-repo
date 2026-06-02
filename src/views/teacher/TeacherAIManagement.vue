@@ -91,9 +91,9 @@
                   <div class="flex items-center gap-2">
                     <div class="flex-1 h-2 bg-black/[0.04] rounded-full overflow-hidden">
                       <div
-                        class="h-full rounded-full transition-all"
+                        class="h-full w-[var(--progress-width)] rounded-full transition-all"
                         :class="row.completionRate >= 80 ? 'bg-[#34c759]' : row.completionRate >= 50 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"
-                        :style="{ width: row.completionRate + '%' }"
+                        :style="progressWidthStyle(row.completionRate)"
                       ></div>
                     </div>
                     <span class="text-xs text-[#6e6e73] w-9 text-right">{{ row.completionRate }}%</span>
@@ -206,6 +206,10 @@ function averageScoreClass(score) {
   if (score >= 80) return 'text-[#34c759] font-semibold'
   if (score >= 60) return 'text-[#ff9500] font-semibold'
   return 'text-[#ff3b30] font-semibold'
+}
+
+function progressWidthStyle(value) {
+  return { '--progress-width': `${value}%` }
 }
 
 function handlePageChange(page) {

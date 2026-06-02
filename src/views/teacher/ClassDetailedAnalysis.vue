@@ -112,7 +112,7 @@
 
         <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
           <div class="w-full space-y-4">
-            <div v-for="i in 5" :key="i" class="h-5 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 8) + '%' }"></div>
+            <div v-for="i in 5" :key="i" class="h-5 w-[var(--progress-width)] bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="progressWidthStyle(90 - i * 8)"></div>
           </div>
         </div>
 
@@ -187,7 +187,7 @@
         <!-- 加载中状态-->
         <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
           <div class="w-full space-y-4">
-            <div v-for="i in 10" :key="i" class="h-4 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (95 - i * 5) + '%' }"></div>
+            <div v-for="i in 10" :key="i" class="h-4 w-[var(--progress-width)] bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="progressWidthStyle(95 - i * 5)"></div>
           </div>
         </div>
 
@@ -262,7 +262,7 @@
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
                           <div class="flex-1 h-2 bg-[#f5f5f7] rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all" :style="{ width: student.completionRate + '%', backgroundColor: getProgressColor(student.completionRate) }"></div>
+                            <div class="h-full w-[var(--progress-width)] rounded-full bg-[var(--progress-color)] transition-all" :style="progressBarStyle(student.completionRate)"></div>
                           </div>
                           <span class="text-xs text-[#6e6e73] w-10 text-right">{{ student.completionRate }}%</span>
                         </div>
@@ -296,8 +296,8 @@
                               <div class="flex items-center gap-3">
                                 <div class="flex-1">
                                   <div class="h-[15px] bg-[#f5f5f7] rounded-full overflow-hidden">
-                                    <div class="h-full rounded-full transition-all"
-                                      :style="{ width: (exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0) + '%' }"
+                                    <div class="h-full w-[var(--progress-width)] rounded-full transition-all"
+                                      :style="progressWidthStyle(exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0)"
                                       :class="exp.status === 'completed' ? 'bg-[#34c759]' : exp.status === 'in_progress' ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'">
                                     </div>
                                   </div>
@@ -347,7 +347,7 @@
               </div>
 
               <div v-if="aiAdviceLoading" class="space-y-3">
-                <div v-for="i in 8" :key="i" class="h-4 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 5) + '%' }"></div>
+                <div v-for="i in 8" :key="i" class="h-4 w-[var(--progress-width)] bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="progressWidthStyle(90 - i * 5)"></div>
               </div>
               <div v-else-if="aiAdviceContent" class="prose prose-sm max-w-none text-[#303133] leading-[1.7]" v-html="renderedAiAdvice"></div>
               <div v-else class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
@@ -369,7 +369,7 @@
       <AppModal v-model="quickAnalysisVisible" title="班级快速分析" width="70%">
         <div v-if="quickAnalysisLoading" class="flex justify-center items-center min-h-[400px] w-full">
           <div class="w-full space-y-4">
-            <div v-for="i in 5" :key="i" class="h-5 bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="{ width: (90 - i * 8) + '%' }"></div>
+            <div v-for="i in 5" :key="i" class="h-5 w-[var(--progress-width)] bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="progressWidthStyle(90 - i * 8)"></div>
           </div>
         </div>
 
@@ -1469,6 +1469,12 @@ const getProgressColor = (percentage) => {
   if (percentage >= 40) return '#E6A23C'
   return '#F56C6C'
 }
+
+const progressWidthStyle = (percentage) => ({ '--progress-width': `${percentage}%` })
+const progressBarStyle = (percentage) => ({
+  '--progress-width': `${percentage}%`,
+  '--progress-color': getProgressColor(percentage)
+})
 
 // 获取风险等级
 const getRiskLevel = (student) => {

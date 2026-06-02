@@ -206,8 +206,8 @@
                   <div class="flex items-center gap-2">
                     <div class="flex-1 h-3 bg-[#f5f5f7] rounded-full overflow-hidden">
                       <div
-                        class="h-full rounded-full transition-all"
-                        :style="{ width: toPercent(row.accuracyRate) + '%', backgroundColor: accColor(toPercent(row.accuracyRate)) }"
+                        class="h-full w-[var(--progress-width)] rounded-full bg-[var(--progress-color)] transition-all"
+                        :style="accuracyBarStyle(toPercent(row.accuracyRate))"
                       ></div>
                     </div>
                     <span class="text-[11px] text-[#6e6e73] w-[38px] text-right">{{ toPercent(row.accuracyRate) }}%</span>
@@ -449,6 +449,13 @@ function accColor(rate) {
   if (rate >= 60) return '#007aff'
   if (rate >= 40) return '#e37400'
   return '#d93025'
+}
+
+function accuracyBarStyle(rate) {
+  return {
+    '--progress-width': `${rate}%`,
+    '--progress-color': accColor(rate),
+  }
 }
 
 function resolveInitialClassPrefix(prefixes) {

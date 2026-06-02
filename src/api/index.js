@@ -30,7 +30,7 @@ import {
 axios.defaults.withCredentials = true;
 
 
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = process.env.NODE_ENV === 'development' && process.env.VUE_APP_USE_MOCK_DATA === 'true';
 const apiClient = axios.create({
   baseURL: API_BASE_URL_WITH_SLASH,
   timeout: 30000,
@@ -197,18 +197,21 @@ export default {
 
       try {
 
-        if (username === 'student' && password === 'password123') {
+        if (['student', 'student1'].includes(username) && password === 'password123') {
           userInfo = {
             id: 'S2023001',
+            username,
+            usernum: 'S2023001',
             name: '张三',
             role: 'student',
             avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
           }
           token = 'student_token_xxx'
 
-        } else if (username === 'teacher' && password === 'password123') {
+        } else if (['teacher', 'teacher1'].includes(username) && password === 'password123') {
           userInfo = {
             id: 'T2023001',
+            username,
             name: '李教授',
             role: 'teacher',
             level: teacherLevel || 'normal',
@@ -217,9 +220,10 @@ export default {
           }
           token = 'teacher_token_xxx'
 
-        } else if (username === 'admin' && password === 'password123') {
+        } else if (['admin', 'admin1'].includes(username) && password === 'password123') {
           userInfo = {
             id: 'A2023001',
+            username,
             name: '管理员',
             role: 'admin',
             avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'

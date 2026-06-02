@@ -125,8 +125,8 @@
                 </td>
                 <td class="py-3 px-3 min-w-[180px]">
                   <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                    <div class="h-full rounded-full transition-all duration-300"
-                      :style="{ width: (row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0) + '%' }"
+                    <div class="h-full w-[var(--progress-width)] rounded-full transition-all duration-300"
+                      :style="progressWidthStyle(row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0)"
                       :class="row.failedCount > 0 ? 'bg-gradient-to-r from-[#ff6259] to-[#ff3b30]' : row.status === 'COMPLETED' ? 'bg-gradient-to-r from-[#30d158] to-[#28cd41]' : 'bg-gradient-to-r from-[#3898ff] to-[#007aff]'">
                     </div>
                   </div>
@@ -199,6 +199,10 @@ function statusTagClass(s) {
 
 function statusText(s) {
   return { PENDING: '等待中', PROCESSING: '处理中', COMPLETED: '已完成', FAILED: '失败' }[s] || s
+}
+
+function progressWidthStyle(value) {
+  return { '--progress-width': `${value}%` }
 }
 
 function formatTime(t) {

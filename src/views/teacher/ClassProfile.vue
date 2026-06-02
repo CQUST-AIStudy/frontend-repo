@@ -63,7 +63,7 @@
                   <td class="py-2.5 px-3">
                     <div class="flex items-center gap-2">
                       <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                        <div class="h-full rounded-full transition-all" :style="{ width: row.weakRatio + '%' }" :class="row.weakRatio > 30 ? 'bg-[#ff3b30]' : 'bg-[#ff9500]'"></div>
+                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(row.weakRatio)" :class="row.weakRatio > 30 ? 'bg-[#ff3b30]' : 'bg-[#ff9500]'"></div>
                       </div>
                       <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ row.weakRatio }}%</span>
                     </div>
@@ -105,7 +105,7 @@
                   <td class="py-2.5 px-3">
                     <div class="flex items-center gap-2">
                       <div class="w-full max-w-[120px] h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                        <div class="h-full rounded-full transition-all" :style="{ width: Math.round(row.overallScore) + '%' }" :class="row.overallScore >= 70 ? 'bg-[#34c759]' : row.overallScore >= 40 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"></div>
+                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(Math.round(row.overallScore))" :class="row.overallScore >= 70 ? 'bg-[#34c759]' : row.overallScore >= 40 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"></div>
                       </div>
                       <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ Math.round(row.overallScore) }}</span>
                     </div>
@@ -180,6 +180,10 @@ function getDimensionScoreScale(values) {
 function dimensionScoreColor(value, scale) {
   const percent = scale === 10 ? (value / 10) * 100 : value
   return percent >= 70 ? '#67C23A' : percent >= 40 ? '#E6A23C' : '#F56C6C'
+}
+
+function progressWidthStyle(value) {
+  return { '--progress-width': `${value}%` }
 }
 
 async function fetchData() {

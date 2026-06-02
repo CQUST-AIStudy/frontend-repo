@@ -47,6 +47,8 @@ test-results/
 playwright-report/
 cypress/screenshots/
 cypress/videos/
+.edge-profile-login-check/
+login-check.png
 
 # Local Codex config
 .claude/settings.local.json
