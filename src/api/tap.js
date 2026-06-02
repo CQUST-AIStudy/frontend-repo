@@ -8,9 +8,11 @@ import {
   setTapUser,
 } from '../constants/auth'
 import { API_BASE_URL } from '../config/runtime'
+import { getMockTeachingClasses } from '../mock/teachingClasses'
 import { createFriendlyError, getFriendlyErrorMessage } from '../utils/errorMessage'
 
 const TAP_BASE = API_BASE_URL
+const USE_MOCK_DATA = process.env.NODE_ENV === 'development' && process.env.VUE_APP_USE_MOCK_DATA === 'true'
 
 const tapClient = axios.create({
   baseURL: TAP_BASE,
@@ -527,6 +529,9 @@ export function publishSubmissionReport(submissionId) {
 
 
 export function getTeachingClasses() {
+  if (USE_MOCK_DATA) {
+    return getMockTeachingClasses()
+  }
   return tapClient.get('/api/classes')
 }
 
