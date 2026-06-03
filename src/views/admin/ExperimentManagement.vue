@@ -1,15 +1,15 @@
 <template>
   <div class="experiment-management [min-width:0] [min-height:100%] [&_.ui-table]:[width:100%]">
     <UiPageHeader
-        class="my-page-header [padding:20px] max-[768px]:[padding:0]"
+        class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="实验管理"
       description="管理系统中的所有实验"
     />
 
     <div class="experiment-management-content [display:flex] [flex-direction:column] [gap:20px]">
-      <ui-card>
+      <ui-card class="[margin-bottom:20px]">
         <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [flex-wrap:wrap] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [flex-wrap:wrap]">
             <span>实验列表</span>
             <ui-button type="primary" @click="openCreateDialog">添加实验</ui-button>
           </div>

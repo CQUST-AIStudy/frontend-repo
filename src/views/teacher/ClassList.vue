@@ -63,13 +63,17 @@
               </div>
             </div>
             <!-- Dropdown menu -->
-            <div :ref="el => setDropdownRef(cls.id, el)" class="relative">
-              <UiButton
-                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
+            <div :ref="el => setDropdownRef(cls.id, el)" class="relative shrink-0">
+              <button
+                type="button"
+                aria-label="班级操作"
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15"
                 @click.stop="toggleDropdown(cls.id)"
               >
-                <svg class="w-5 h-5 text-[#71839a]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-              </UiButton>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 6.5h.01M12 12h.01M12 17.5h.01" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
               <Transition
                 enter-active-class="transition-all duration-150 ease-out"
                 enter-from-class="-translate-y-1 scale-95 opacity-0"

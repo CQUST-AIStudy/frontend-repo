@@ -1,14 +1,14 @@
 <template>
   <div class="admin-dashboard [min-height:100%] [min-width:0] [color:#1f2937]">
     <UiPageHeader
-      class="my-page-header [padding:20px_20px_0] max-[768px]:[padding-left:0] max-[768px]:[padding-right:0]"
+      class="my-page-header [margin-bottom:24px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="管理员控制台"
       description="统一查看 API 资源、PTA 爬虫状态和教师侧数据更新情况"
     />
 
     <ui-skeleton v-if="loading" :rows="12" animated />
 
-    <div v-else class="dashboard-body [display:flex] [flex-direction:column] [gap:20px] [min-width:0] max-[640px]:[gap:14px]">
+    <div v-else class="dashboard-body [display:flex] [flex-direction:column] [gap:24px] [min-width:0] max-[640px]:[gap:14px]">
       <section class="hero-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1280px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[768px]:[grid-template-columns:1fr]">
         <ui-card class="hero-card hero-card-ai [border:none] [overflow:hidden] ![background:linear-gradient(135deg,_#16324f,_#2b6f91)] ![color:#f8fafc] ![box-shadow:0_16px_36px_rgba(22,_50,_79,_0.18)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[flex-direction:column] [&_.ui-card__body]:[gap:12px] [&_.ui-card__body]:[min-height:150px] max-[640px]:[&_.ui-card__body]:[min-height:auto] max-[640px]:[&_.ui-card__body]:[padding:18px]" shadow="hover">
           <div class="hero-label [font-size:14px] [font-weight:600] [color:#dbeafe]">今日 AI 请求</div>
@@ -273,7 +273,7 @@
                 />
               </ui-form-item>
             </ui-form>
-            <ui-button type="primary" :loading="cookieSubmitting" :disabled="!cookieInput.trim()" @click="submitCookieForm">
+            <ui-button class="[margin-top:14px]" type="primary" :loading="cookieSubmitting" :disabled="!cookieInput.trim()" @click="submitCookieForm">
               验证并保存 Cookie
             </ui-button>
             <div v-if="cookieResult" class="cookie-result [margin-top:12px] [display:flex] [align-items:center] [gap:10px] [margin-top:14px] [gap:6px] [padding:10px_14px] [border-radius:8px] [font-size:13px] [&.valid]:[background:#e6f4ea] [&.valid]:[color:#1e8e3e] [&.invalid]:[background:#fce8e6] [&.invalid]:[color:#d93025]">

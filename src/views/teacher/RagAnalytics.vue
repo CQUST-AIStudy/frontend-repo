@@ -1,9 +1,17 @@
 <template>
   <div class="rag-analytics-container [height:100%] [overflow-y:auto] [&_.ui-card]:[border-radius:16px] [&_.ui-card]:[border:0.5px_solid_rgba(0,_0,_0,_0.06)] [&_.ui-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
+    <header class="[padding:18px_20px_18px]">
+      <h1 class="[margin:0] [font-size:24px] [line-height:1.25] [font-weight:700] [color:#111827] [letter-spacing:0]">
+        RAG 运营面板
+      </h1>
+      <p class="[margin:6px_0_0] [font-size:13px] [line-height:1.6] [color:#64748b]">
+        课程知识库问答质量监控与分析
+      </p>
+    </header>
     <UiPageHeader class="my-page-header [padding:0]" title="RAG 运营面板" description="课程知识库问答质量监控与分析" />
 
     <div class="[padding:0_20px_10px]">
-      <ui-select v-model="selectedSpaceId" placeholder="选择课程空间" class="[width:300px]" @change="loadAll">
+      <ui-select v-model="selectedSpaceId" placeholder="选择课程空间" class="[width:360px] max-[640px]:[width:100%]" @change="loadAll">
         <ui-option v-for="cs in courseSpaces" :key="cs.id" :label="cs.name" :value="cs.id" />
       </ui-select>
     </div>
@@ -162,7 +170,7 @@ const loadAll = async () => {
     feedbackStats.value = extract(fb) || { thumbsUp: 0, thumbsDown: 0, total: 0 }
     resourceGaps.value = extract(rg) || []
   } catch (e) {
-    uiMessage.error('加载分析数据失败: ' + e.message)
+    uiMessage.error('加载分析数据失败，请稍后重试或检查课程空间配置')
   } finally {
     loading.value = false
   }
@@ -178,4 +186,9 @@ onMounted(async () => {
 })
 </script>
 
+<style scoped>
+.my-page-header {
+  display: none !important;
+}
+</style>
 

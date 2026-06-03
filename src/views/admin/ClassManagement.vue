@@ -1,7 +1,7 @@
 <template>
   <div class="class-management [min-width:0] [min-height:100%]">
     <UiPageHeader
-        class="my-page-header [padding:20px] max-[768px]:[padding:0]"
+        class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
         title="班级管理"
         description="管理系统中的班级信息"
     >
@@ -31,7 +31,7 @@
       </ui-form>
     </ui-card>
 
-    <ui-card class="table-card [margin-bottom:20px] [overflow-x:auto] [&_.ui-table]:[width:100%] [margin-bottom:15px] [border-radius:8px] [overflow:hidden] [padding:10px]">
+    <ui-card class="table-card [margin-bottom:20px] [overflow-x:auto] [&_.ui-table]:[width:100%] [border-radius:8px] [overflow:hidden] [padding:10px]">
       <ui-table :data="filteredClasses" class="[width:100%]" border>
         <ui-table-column prop="id" label="班级ID" width="120"/>
         <ui-table-column prop="name" label="班级名称" min-width="180"/>

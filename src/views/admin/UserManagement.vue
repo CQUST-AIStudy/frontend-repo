@@ -1,7 +1,7 @@
 <template>
-  <div class="user-management">
+  <div class="user-management [min-width:0] [min-height:100%]">
     <UiPageHeader
-      class="my-page-header"
+      class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="用户管理"
       description="管理系统用户，包括学生、教师和管理员"
     >
@@ -18,7 +18,7 @@
       show-icon
     />
 
-    <ui-card class="filter-card">
+    <ui-card class="filter-card [margin-bottom:20px]">
       <ui-form :inline="true" :model="filterForm" class="filter-form">
         <ui-form-item label="用户ID">
           <ui-input v-model="filterForm.id" placeholder="输入用户ID" clearable />
@@ -46,7 +46,7 @@
       </ui-form>
     </ui-card>
 
-    <ui-card class="table-card">
+    <ui-card class="table-card [margin-bottom:20px]">
       <div class="user-table-wrap">
         <ui-table :data="filteredUsers" border>
           <ui-table-column prop="id" label="用户ID" width="120" />

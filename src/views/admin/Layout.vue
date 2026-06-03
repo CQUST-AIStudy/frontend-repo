@@ -114,8 +114,7 @@
           <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
             <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
-              <Fold v-else-if="!collapsed" />
-              <Expand v-else />
+              <Fold v-else />
             </ui-icon>
             <ui-breadcrumb separator="/">
               <ui-breadcrumb-item :to="{ path: '/admin/dashboard' }">首页</ui-breadcrumb-item>
@@ -133,12 +132,6 @@
                   <WarningFilled />
                 </ui-icon>
               </ui-badge>
-            </ui-tooltip>
-
-            <ui-tooltip content="全屏" placement="bottom">
-              <ui-icon class="header-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleFullScreen">
-                <FullScreen />
-              </ui-icon>
             </ui-tooltip>
 
             <ui-dropdown class="[z-index:2200]" trigger="click" @command="handleCommand">
@@ -186,7 +179,7 @@ import { messageBox } from '@/services/feedback'
 import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
-  Setting, Fold, Expand, FullScreen, ArrowDown, SwitchButton, WarningFilled,
+  Setting, Fold, ArrowDown, SwitchButton, WarningFilled,
   Menu as MenuIcon
 } from '@/components/ui/icons'
 import { getPtaCookieStatus } from '../../api/tap'
@@ -220,11 +213,6 @@ const breadcrumbs = computed(() => {
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'admin' ? paths.slice(1).map(p => pathMap[p.split('/')[0]] || p) : []
 })
-
-const toggleFullScreen = () => {
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen()
-  else document.exitFullscreen?.()
-}
 
 const handleCommand = (cmd) => {
   if (cmd === 'profile') router.push('/admin/profile')

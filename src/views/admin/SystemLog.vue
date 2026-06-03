@@ -1,37 +1,37 @@
 <template>
-  <div class="system-log [height:100%]">
+  <div class="system-log [min-width:0] [min-height:100%]">
     <UiPageHeader
-        class="my-page-header [padding:20px]"
+        class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="系统日志"
       description="系统操作和事件记录"
     />
 
     <div class="system-log-content [display:flex] [flex-direction:column] [gap:20px]">
-      <ui-card>
+      <ui-card class="[margin-bottom:20px]">
         <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] max-[900px]:[align-items:flex-start] max-[900px]:[flex-direction:column]">
             <div class="left">
               <span>日志列表</span>
             </div>
-            <div class="right [display:flex] [gap:10px] [align-items:center]">
+            <div class="right [display:flex] [gap:12px] [align-items:center] [justify-content:flex-end] [flex-wrap:nowrap] max-[900px]:[width:100%] max-[900px]:[justify-content:flex-start] max-[900px]:[flex-wrap:wrap]">
               <ui-input
                 placeholder="搜索日志内容"
                 v-model="searchKeyword"
-                class="search-input [width:200px] [width:250px]"
+                class="search-input log-search-input max-[900px]:[width:100%]"
                 clearable
               >
                 <template #prefix>
                   <ui-icon><Search /></ui-icon>
                 </template>
               </ui-input>
-              <ui-select v-model="logLevel" placeholder="日志级别" clearable class="level-select [width:120px]">
+              <ui-select v-model="logLevel" placeholder="日志级别" clearable class="level-select [width:160px] max-[900px]:[width:100%]">
                 <ui-option label="全部" value="" />
                 <ui-option label="信息" value="INFO" />
                 <ui-option label="警告" value="WARNING" />
                 <ui-option label="错误" value="ERROR" />
               </ui-select>
-              <ui-button type="danger" @click="clearLogs">清空日志</ui-button>
-              <ui-button type="primary" @click="exportLogs">导出日志</ui-button>
+              <ui-button type="danger" class="[min-width:96px] [padding:0_16px] [white-space:nowrap]" @click="clearLogs">清空日志</ui-button>
+              <ui-button type="primary" class="[min-width:96px] [padding:0_16px] [white-space:nowrap]" @click="exportLogs">导出日志</ui-button>
             </div>
           </div>
         </template>
@@ -344,5 +344,23 @@ onMounted(() => {
   }, 500)
 })
 </script>
+
+<style scoped>
+.log-search-input {
+  width: 220px;
+  transition: width 0.2s ease;
+}
+
+.log-search-input:focus-within {
+  width: 360px;
+}
+
+@media (max-width: 900px) {
+  .log-search-input,
+  .log-search-input:focus-within {
+    width: 100%;
+  }
+}
+</style>
 
 

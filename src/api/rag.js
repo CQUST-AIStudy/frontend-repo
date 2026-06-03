@@ -16,11 +16,23 @@ async function readErrorMessage(response, fallback) {
       const payload = await response.json()
       return payload?.message || payload?.detail || fallback
     }
+    if (!contentType.includes('text/plain') && !contentType.includes('text/html')) {
+      return fallback
+    }
     const text = await response.text()
-    return text || fallback
+    return normalizeReadableErrorText(text) || fallback
   } catch {
     return fallback
   }
+}
+
+function normalizeReadableErrorText(text) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!value) return ''
+  if (value.length > 240) return ''
+  if (/^<(!doctype|html)/i.test(value)) return ''
+  if (/(\uFFFD|�PNG|%PDF-|IDAT|IEND|JFIF|Exif)/i.test(value)) return ''
+  return value
 }
 
 async function request(path, options = {}) {

@@ -1,81 +1,81 @@
 <template>
-  <div class="student-profile [height:100%]">
+  <div class="student-profile [height:100%] [min-height:0]">
     <UiPageHeader
-      class="my-page-header [margin-bottom:8px]"
+      class="my-page-header [margin-bottom:12px] ![padding:14px_18px] ![border-radius:16px] [&_.ui-page-header]:[min-height:0]"
       title="个人信息"
       description="查看当前登录学生的基本信息、学习概况与账户安全设置。"
     />
 
     <loading-state :loading="loading">
-      <div class="profile-layout [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] max-[1080px]:[grid-template-columns:1fr]">
-        <section class="profile-main [display:flex] [flex-direction:column] [gap:20px]">
-          <ui-card class="profile-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-            <div class="profile-card__top [display:flex] [align-items:center] [gap:18px] [margin-bottom:20px] max-[640px]:[flex-direction:column] max-[640px]:[align-items:flex-start]">
-              <ui-avatar :size="88" class="profile-card__avatar [background:linear-gradient(135deg,_#1f7ae0,_#45b2ff)] [color:#fff] [font-size:28px] [font-weight:700]">
+      <div class="profile-layout [display:grid] [grid-template-columns:minmax(320px,_400px)_minmax(0,_1fr)] [gap:16px] [min-height:0] max-[1080px]:[grid-template-columns:1fr]">
+        <section class="profile-main [display:flex] [flex-direction:column] [gap:14px] [min-height:0]">
+          <ui-card class="profile-card [border-radius:18px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)] [&_.ui-card__body]:![padding:18px_20px]">
+            <div class="profile-card__top [display:flex] [align-items:center] [gap:16px] [margin-bottom:14px] max-[640px]:[flex-direction:column] max-[640px]:[align-items:flex-start]">
+              <ui-avatar :size="72" class="profile-card__avatar [background:linear-gradient(135deg,_#1f7ae0,_#45b2ff)] [color:#fff] [font-size:24px] [font-weight:700]">
                 {{ avatarText }}
               </ui-avatar>
-              <div class="profile-card__meta [&_h2]:[margin:0] [&_h2]:[font-size:28px] [&_h2]:[color:#173153] [&_p]:[margin:8px_0_0] [&_p]:[color:#64809b]">
+              <div class="profile-card__meta [min-width:0] [&_h2]:[margin:0] [&_h2]:[font-size:24px] [&_h2]:[line-height:1.2] [&_h2]:[color:#173153] [&_p]:[margin:5px_0_0] [&_p]:[color:#64809b]">
                 <h2>{{ displayName }}</h2>
                 <p>{{ className || '未绑定教学班' }}</p>
-                <div class="profile-tags [display:flex] [gap:8px] [flex-wrap:wrap] [margin-top:14px]">
+                <div class="profile-tags [display:flex] [gap:8px] [flex-wrap:wrap] [margin-top:10px]">
                   <ui-tag effect="plain" type="primary">学生</ui-tag>
                   <ui-tag effect="plain" type="success">{{ gradeText }}</ui-tag>
                 </div>
               </div>
             </div>
 
-            <div class="profile-info [display:grid] [gap:12px]">
-              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+            <div class="profile-info [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:10px] max-[640px]:[grid-template-columns:1fr]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:10px] [min-height:58px] [padding:10px_12px] [border-radius:12px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
                 <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户名</span>
                 <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.username || '-' }}</span>
               </div>
-              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:10px] [min-height:58px] [padding:10px_12px] [border-radius:12px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
                 <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">学号</span>
                 <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ studentId || '-' }}</span>
               </div>
-              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:10px] [min-height:58px] [padding:10px_12px] [border-radius:12px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
                 <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">班级</span>
                 <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ className || '-' }}</span>
               </div>
-              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:10px] [min-height:58px] [padding:10px_12px] [border-radius:12px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
                 <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">邮箱</span>
                 <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.email || '未设置' }}</span>
               </div>
-              <div class="info-item [display:flex] [justify-content:space-between] [gap:16px] [padding:12px_14px] [border-radius:14px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
+              <div class="info-item [display:flex] [justify-content:space-between] [gap:10px] [min-height:58px] [padding:10px_12px] [border-radius:12px] [background:#f7fbff] max-[640px]:[flex-direction:column] [align-items:center]">
                 <span class="info-label [color:#6b8198] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">手机号</span>
                 <span class="info-value [color:#173153] [font-weight:600] [text-align:right] [word-break:break-word] max-[640px]:[text-align:left] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7]">{{ currentUser.phone || '未设置' }}</span>
               </div>
             </div>
 
-            <div class="profile-actions [display:flex] [gap:12px] [flex-wrap:wrap] [margin-top:20px]">
+            <div class="profile-actions [display:flex] [gap:10px] [flex-wrap:wrap] [margin-top:14px] [&_.ui-button]:![min-height:34px] [&_.ui-button]:![padding:7px_14px]">
               <ui-button type="primary" @click="openProfileDialog">更新展示信息</ui-button>
               <ui-button @click="openPasswordDialog">修改密码</ui-button>
             </div>
           </ui-card>
 
-          <ui-card class="security-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="security-card [border-radius:18px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)] [&_.ui-card__header]:![padding:14px_18px_10px] [&_.ui-card__body]:![padding:14px_18px_16px]">
             <template #header>
               <div class="card-header [font-weight:700] [color:#1c3554] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>账户设置</span>
               </div>
             </template>
 
-            <div class="setting-list [display:flex] [flex-direction:column] [gap:16px]">
-              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
+            <div class="setting-list [display:flex] [flex-direction:column] [gap:8px]">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [padding:8px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0] [&_strong]:[display:block] [&_strong]:[font-size:14px] [&_strong]:[line-height:1.4] [&_p]:[margin:3px_0_0] [&_p]:[font-size:12px] [&_p]:[line-height:1.45] [&_p]:[color:#64809b]">
                 <div>
                   <strong>系统通知</strong>
                   <p>接收实验发布、截止时间和课堂更新提醒。</p>
                 </div>
                 <ui-switch v-model="settings.notifications" />
               </div>
-              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [padding:8px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0] [&_strong]:[display:block] [&_strong]:[font-size:14px] [&_strong]:[line-height:1.4] [&_p]:[margin:3px_0_0] [&_p]:[font-size:12px] [&_p]:[line-height:1.45] [&_p]:[color:#64809b]">
                 <div>
                   <strong>截止提醒</strong>
                   <p>在实验截止前推送提醒，避免漏交。</p>
                 </div>
                 <ui-switch v-model="settings.deadlineReminder" />
               </div>
-              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
+              <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [padding:8px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0] [&_strong]:[display:block] [&_strong]:[font-size:14px] [&_strong]:[line-height:1.4] [&_p]:[margin:3px_0_0] [&_p]:[font-size:12px] [&_p]:[line-height:1.45] [&_p]:[color:#64809b]">
                 <div>
                   <strong>AI 反馈提示</strong>
                   <p>实验报告生成评语和学习建议时同步提醒。</p>
@@ -86,42 +86,42 @@
           </ui-card>
         </section>
 
-        <section class="profile-side [display:flex] [flex-direction:column] [gap:20px]">
-          <ui-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+        <section class="profile-side [display:flex] [flex-direction:column] [gap:14px] [min-height:0]">
+          <ui-card class="overview-card [border-radius:18px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)] [&_.ui-card__header]:![padding:14px_20px_10px] [&_.ui-card__body]:![padding:14px_20px_18px]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>学习概况</span>
               </div>
             </template>
 
-            <div class="overview-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:14px]">
-              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+            <div class="overview-grid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:12px]">
+              <div class="overview-item [min-height:88px] [padding:14px_16px] [border-radius:14px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)] [&_span]:[display:block] [&_span]:[font-size:13px] [&_span]:[color:#64809b] [&_strong]:[display:block] [&_strong]:[margin-top:10px] [&_strong]:[font-size:28px] [&_strong]:[line-height:1] [&_strong]:[color:#173153]">
                 <span>实验总数</span>
                 <strong>{{ stats.totalExperiments }}</strong>
               </div>
-              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+              <div class="overview-item [min-height:88px] [padding:14px_16px] [border-radius:14px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)] [&_span]:[display:block] [&_span]:[font-size:13px] [&_span]:[color:#64809b] [&_strong]:[display:block] [&_strong]:[margin-top:10px] [&_strong]:[font-size:28px] [&_strong]:[line-height:1] [&_strong]:[color:#173153]">
                 <span>已完成</span>
                 <strong>{{ stats.completedExperiments }}</strong>
               </div>
-              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+              <div class="overview-item [min-height:88px] [padding:14px_16px] [border-radius:14px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)] [&_span]:[display:block] [&_span]:[font-size:13px] [&_span]:[color:#64809b] [&_strong]:[display:block] [&_strong]:[margin-top:10px] [&_strong]:[font-size:28px] [&_strong]:[line-height:1] [&_strong]:[color:#173153]">
                 <span>平均成绩</span>
                 <strong>{{ stats.averageScore }}</strong>
               </div>
-              <div class="overview-item [padding:18px_16px] [border-radius:16px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)]">
+              <div class="overview-item [min-height:88px] [padding:14px_16px] [border-radius:14px] [background:linear-gradient(180deg,_#f7fbff_0%,_#eef6ff_100%)] [&_span]:[display:block] [&_span]:[font-size:13px] [&_span]:[color:#64809b] [&_strong]:[display:block] [&_strong]:[margin-top:10px] [&_strong]:[font-size:28px] [&_strong]:[line-height:1] [&_strong]:[color:#173153]">
                 <span>进行中</span>
                 <strong>{{ stats.inProgressExperiments }}</strong>
               </div>
             </div>
           </ui-card>
 
-          <ui-card class="activity-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="activity-card [min-height:0] [border-radius:18px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)] [&_.ui-card__header]:![padding:14px_20px_10px] [&_.ui-card__body]:![padding:12px_20px_16px]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>最近动态</span>
               </div>
             </template>
 
-            <ui-timeline>
+            <ui-timeline class="[max-height:360px] [overflow-y:auto] [padding-right:6px] [&_.ui-timeline-item]:[padding-bottom:2px]">
               <ui-timeline-item
                 v-for="item in activityList"
                 :key="`${item.title}-${item.time}`"

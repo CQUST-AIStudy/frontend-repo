@@ -1,12 +1,12 @@
 <template>
-  <div class="admin-profile [height:100%]">
+  <div class="admin-profile [min-width:0] [min-height:100%]">
     <UiPageHeader
-        class="my-page-header [padding:20px]"
+        class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="个人信息"
       description="查看和编辑您的个人信息"
     />
 
-    <ui-row :gutter="20">
+    <ui-row :gutter="20" class="[margin-bottom:20px]">
       <ui-col :span="8">
         <ui-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
           <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#909399]">
@@ -42,7 +42,7 @@
       <ui-col :span="16">
         <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <span>修改个人信息</span>
             </div>
           </template>
@@ -71,9 +71,9 @@
           </ui-form>
         </ui-card>
 
-        <ui-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
+        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <span>修改密码</span>
             </div>
           </template>

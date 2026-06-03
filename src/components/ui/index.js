@@ -1,4 +1,4 @@
-import { Teleport, Transition, computed, defineComponent, h, inject, onMounted, onUnmounted, provide, reactive, ref, resolveComponent } from 'vue'
+import { Teleport, Transition, computed, defineComponent, h, inject, nextTick, onMounted, onUnmounted, provide, reactive, ref, resolveComponent } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const radioGroupKey = Symbol('ui-radio-group')
@@ -722,7 +722,7 @@ export const UiInputNumber = defineComponent({
 
 export const UiOption = defineComponent({
   name: 'UiOption',
-  props: { label: [String, Number], value: [String, Number, Boolean] },
+  props: { label: [String, Number], value: [String, Number, Boolean], disabled: Boolean },
   setup() {
     return () => null
   }
@@ -731,36 +731,292 @@ export const UiOption = defineComponent({
 export const UiSelect = defineComponent({
   name: 'UiSelect',
   props: {
-    modelValue: [String, Number, Boolean],
+    modelValue: [String, Number, Boolean, Array],
     placeholder: String,
     clearable: Boolean,
     disabled: Boolean
   },
   emits: ['update:modelValue', 'change'],
   setup(props, { attrs, emit, slots }) {
-    const options = computed(() => flattenVNodes(slots.default?.()).filter((node) => node?.type?.name === 'UiOption').map((node) => {
+    const buttonRef = ref(null)
+    const panelRef = ref(null)
+    const open = ref(false)
+    const highlightedIndex = ref(-1)
+    const panelStyle = ref({})
+
+    const isMultiple = computed(() => attrs.multiple !== undefined && attrs.multiple !== false)
+    const optionText = (node) => {
+      if (typeof node?.children?.default === 'function') {
+        return flattenVNodes(node.children.default()).map(getVNodeText).join('').trim()
+      }
+      return getVNodeText(node).trim()
+    }
+    const hasValueProp = (props) => Object.prototype.hasOwnProperty.call(props, 'value')
+    const isSameValue = (left, right) => {
+      if (left === right) return true
+      if (left === null || left === undefined || right === null || right === undefined) return false
+      return String(left) === String(right)
+    }
+    const isEmptySelectValue = (value) => value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)
+    const userOptions = computed(() => flattenVNodes(slots.default?.()).filter((node) => node?.type?.name === 'UiOption').map((node, index) => {
       const vnodeProps = toKebabProps(node.props || {})
+      const text = optionText(node)
+      const label = vnodeProps.label ?? text
       return {
-        label: vnodeProps.label ?? getVNodeText(node),
-        value: vnodeProps.value ?? vnodeProps.label ?? getVNodeText(node)
+        key: `${index}-${String(hasValueProp(vnodeProps) ? vnodeProps.value : label)}`,
+        label,
+        value: hasValueProp(vnodeProps) ? vnodeProps.value : (vnodeProps.label ?? text),
+        disabled: vnodeProps.disabled === '' || vnodeProps.disabled === true
       }
     }))
-    const update = (event) => {
-      const selected = options.value.find((option) => String(option.value) === event.target.value)
-      const value = selected ? selected.value : event.target.value
+    const options = computed(() => {
+      if (isMultiple.value || !props.placeholder) return userOptions.value
+      return [
+        {
+          key: '__placeholder',
+          label: props.placeholder,
+          value: '',
+          disabled: !props.clearable,
+          placeholder: true
+        },
+        ...userOptions.value
+      ]
+    })
+    const selectedOptions = computed(() => {
+      if (isMultiple.value) {
+        const values = Array.isArray(props.modelValue) ? props.modelValue : []
+        return userOptions.value.filter((option) => values.some((value) => isSameValue(value, option.value)))
+      }
+      return userOptions.value.filter((option) => isSameValue(option.value, props.modelValue))
+    })
+    const emptyOptionLabel = computed(() => {
+      const option = userOptions.value.find((item) => isEmptySelectValue(item.value))
+      return option?.label
+    })
+    const selectedLabel = computed(() => {
+      if (!isMultiple.value && isEmptySelectValue(props.modelValue)) return props.placeholder || emptyOptionLabel.value || ''
+      if (!selectedOptions.value.length) return props.placeholder || ''
+      return selectedOptions.value.map((option) => String(option.label ?? '')).join(', ')
+    })
+    const hasSelection = computed(() => isMultiple.value ? selectedOptions.value.length > 0 : !isEmptySelectValue(props.modelValue))
+    const selectedIndex = computed(() => {
+      if (isMultiple.value) {
+        const values = Array.isArray(props.modelValue) ? props.modelValue : []
+        return options.value.findIndex((option) => values.some((value) => isSameValue(value, option.value)))
+      }
+      return options.value.findIndex((option) => isSameValue(option.value, props.modelValue))
+    })
+    const firstEnabledIndex = () => options.value.findIndex((option) => !option.disabled)
+    const updatePanelPosition = () => {
+      const trigger = buttonRef.value
+      if (!trigger) return
+      const rect = trigger.getBoundingClientRect()
+      const gap = 4
+      const viewportPadding = 8
+      const below = window.innerHeight - rect.bottom - viewportPadding
+      const above = rect.top - viewportPadding
+      const placeAbove = below < 160 && above > below
+      const available = Math.max(120, (placeAbove ? above : below) - gap)
+      const maxHeight = Math.min(280, available)
+      const left = Math.min(Math.max(viewportPadding, rect.left), Math.max(viewportPadding, window.innerWidth - rect.width - viewportPadding))
+      panelStyle.value = {
+        left: `${left}px`,
+        top: `${placeAbove ? Math.max(viewportPadding, rect.top - gap - maxHeight) : rect.bottom + gap}px`,
+        width: `${rect.width}px`,
+        maxHeight: `${maxHeight}px`
+      }
+    }
+    const scrollHighlightedIntoView = () => {
+      nextTick(() => {
+        panelRef.value?.querySelector(`[data-index="${highlightedIndex.value}"]`)?.scrollIntoView({ block: 'nearest' })
+      })
+    }
+    const openPanel = () => {
+      if (props.disabled) return
+      highlightedIndex.value = selectedIndex.value >= 0 ? selectedIndex.value : firstEnabledIndex()
+      open.value = true
+      nextTick(() => {
+        updatePanelPosition()
+        scrollHighlightedIntoView()
+      })
+    }
+    const closePanel = () => {
+      open.value = false
+    }
+    const togglePanel = () => {
+      if (open.value) closePanel()
+      else openPanel()
+    }
+    const emitValue = (value) => {
       emit('update:modelValue', value)
       emit('change', value)
     }
-    return () => h('select', {
-      ...attrs,
-      value: props.modelValue ?? '',
-      disabled: props.disabled,
-      class: cls(inputBase, 'appearance-none pr-9', attrs.class),
-      onChange: update
-    }, [
-      props.placeholder && h('option', { value: '', disabled: !props.clearable }, props.placeholder),
-      options.value.map((option) => h('option', { key: String(option.value), value: String(option.value) }, option.label))
-    ])
+    const selectOption = (option) => {
+      if (!option || option.disabled) return
+      if (isMultiple.value) {
+        const current = Array.isArray(props.modelValue) ? [...props.modelValue] : []
+        const exists = current.some((value) => isSameValue(value, option.value))
+        emitValue(exists ? current.filter((value) => !isSameValue(value, option.value)) : [...current, option.value])
+        nextTick(scrollHighlightedIntoView)
+        return
+      }
+      emitValue(option.value)
+      closePanel()
+      nextTick(() => buttonRef.value?.focus())
+    }
+    const moveHighlight = (step) => {
+      const available = options.value
+      if (!available.length) return
+      let nextIndex = highlightedIndex.value
+      for (let offset = 0; offset < available.length; offset += 1) {
+        nextIndex = (nextIndex + step + available.length) % available.length
+        if (!available[nextIndex]?.disabled) {
+          highlightedIndex.value = nextIndex
+          scrollHighlightedIntoView()
+          return
+        }
+      }
+    }
+    const handleTriggerClick = (event) => {
+      if (typeof attrs.onClick === 'function') attrs.onClick(event)
+      togglePanel()
+    }
+    const handleKeydown = (event) => {
+      if (typeof attrs.onKeydown === 'function') attrs.onKeydown(event)
+      if (props.disabled) return
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault()
+        event.stopPropagation()
+        if (!open.value) openPanel()
+        else moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        event.stopPropagation()
+        if (!open.value) openPanel()
+        else selectOption(options.value[highlightedIndex.value])
+      } else if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        closePanel()
+      } else if (event.key === 'Tab') {
+        closePanel()
+      }
+    }
+    const handleOutsideMouseDown = (event) => {
+      if (!open.value) return
+      if (buttonRef.value?.contains(event.target) || panelRef.value?.contains(event.target)) return
+      closePanel()
+    }
+    const handleDocumentKeydown = (event) => {
+      if (open.value && event.key === 'Escape') closePanel()
+    }
+    const handleViewportChange = () => {
+      if (open.value) updatePanelPosition()
+    }
+
+    onMounted(() => {
+      document.addEventListener('mousedown', handleOutsideMouseDown)
+      document.addEventListener('keydown', handleDocumentKeydown)
+      window.addEventListener('resize', handleViewportChange)
+      window.addEventListener('scroll', handleViewportChange, true)
+    })
+    onUnmounted(() => {
+      document.removeEventListener('mousedown', handleOutsideMouseDown)
+      document.removeEventListener('keydown', handleDocumentKeydown)
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
+    })
+
+    return () => {
+      const triggerAttrs = { ...attrs }
+      const triggerClass = triggerAttrs.class
+      const triggerStyle = triggerAttrs.style
+      delete triggerAttrs.class
+      delete triggerAttrs.style
+      delete triggerAttrs.multiple
+      delete triggerAttrs.onClick
+      delete triggerAttrs.onKeydown
+      const triggerId = triggerAttrs.id
+      return [
+        h('button', {
+          ...triggerAttrs,
+          ref: buttonRef,
+          type: 'button',
+          disabled: props.disabled,
+          title: selectedLabel.value,
+          role: 'combobox',
+          'aria-haspopup': 'listbox',
+          'aria-expanded': open.value ? 'true' : 'false',
+          'aria-controls': triggerId ? `${triggerId}-listbox` : undefined,
+          style: triggerStyle,
+          class: cls(
+            'ui-select inline-flex !h-10 !min-h-10 max-w-full min-w-[160px] items-center justify-between gap-2 rounded-[10px] border border-[#d9e2ec] !bg-white !px-3.5 !py-0 text-left text-[14px] leading-none text-[#1d1d1f] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors duration-150 focus:outline-none focus-visible:border-[#007aff] focus-visible:ring-4 focus-visible:ring-[#007aff]/15 disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#94a3b8]',
+            triggerClass
+          ),
+          onClick: handleTriggerClick,
+          onKeydown: handleKeydown
+        }, [
+          h('span', {
+            class: cls(
+              'min-w-0 flex-1 truncate whitespace-nowrap',
+              !hasSelection.value && 'text-[#94a3b8]'
+            )
+          }, selectedLabel.value || props.placeholder || ''),
+          h('span', {
+            class: cls(
+              'pointer-events-none relative h-4 w-4 shrink-0 text-[#64748b] transition-transform',
+              open.value && 'rotate-180'
+            ),
+            'aria-hidden': 'true'
+          }, [
+            h('svg', { viewBox: '0 0 20 20', fill: 'currentColor', class: 'h-4 w-4' }, [
+              h('path', { 'fill-rule': 'evenodd', d: 'M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z', 'clip-rule': 'evenodd' })
+            ])
+          ])
+        ]),
+        h(Teleport, { to: 'body' }, [
+          open.value && h('div', {
+            ref: panelRef,
+            id: triggerId ? `${triggerId}-listbox` : undefined,
+            role: 'listbox',
+            'aria-multiselectable': isMultiple.value ? 'true' : undefined,
+            class: 'ui-select__panel fixed z-[4000] overflow-y-auto rounded-lg border border-[#d9e2ec] bg-white py-1 shadow-[0_14px_32px_rgba(15,23,42,0.16)]',
+            style: panelStyle.value,
+            onKeydown: handleKeydown
+          }, options.value.length
+            ? options.value.map((option, index) => {
+              const selected = isMultiple.value
+                ? selectedOptions.value.some((item) => isSameValue(item.value, option.value))
+                : isSameValue(option.value, props.modelValue)
+              return h('button', {
+                key: option.key,
+                type: 'button',
+                role: 'option',
+                disabled: option.disabled,
+                'aria-selected': selected ? 'true' : 'false',
+                'data-index': index,
+                class: cls(
+                  'flex h-9 w-full items-center gap-2 px-3 text-left text-[13px] leading-none transition-colors',
+                  option.disabled
+                    ? 'cursor-not-allowed text-[#cbd5e1]'
+                    : 'cursor-pointer text-[#334155] hover:bg-[#f8fafc] hover:text-[#0f172a]',
+                  highlightedIndex.value === index && !option.disabled && 'bg-[#f8fafc] text-[#0f172a]',
+                  selected && 'bg-[#e8f2ff] font-medium text-[#0056b3]'
+                ),
+                onMousedown: (event) => event.preventDefault(),
+                onMouseenter: () => {
+                  if (!option.disabled) highlightedIndex.value = index
+                },
+                onClick: () => selectOption(option)
+              }, [
+                h('span', { class: 'min-w-0 flex-1 truncate whitespace-nowrap' }, String(option.label ?? '')),
+                selected && h('span', { class: 'h-1.5 w-1.5 shrink-0 rounded-full bg-[#007aff]', 'aria-hidden': 'true' })
+              ])
+            })
+            : h('div', { class: 'px-3 py-2 text-[13px] text-[#94a3b8]' }, '暂无选项'))
+        ])
+      ]
+    }
   }
 })
 
@@ -1279,11 +1535,38 @@ export const UiLink = defineComponent({
 
 export const UiPageHeader = defineComponent({
   name: 'UiPageHeader',
-  props: { title: String, content: String },
+  props: { title: String, content: String, showBack: Boolean },
   emits: ['back'],
   setup(props, { attrs, emit, slots }) {
+    if (!props.showBack) {
+      return () => h('div', { ...attrs, class: cls('ui-page-header flex items-center gap-3', attrs.class) }, [
+        h('div', { class: 'min-w-0' }, [
+          h('div', { class: 'text-[18px] font-semibold text-[#0f172a]' }, slots.content?.() || props.content || props.title),
+          slots.default?.()
+        ])
+      ])
+    }
+
     return () => h('div', { ...attrs, class: cls('ui-page-header flex items-center gap-3', attrs.class) }, [
-      h('button', { type: 'button', class: 'flex h-8 w-8 items-center justify-center rounded-lg text-[#007aff] hover:bg-[#e8f2ff]', onClick: () => emit('back') }, '←'),
+      h('button', {
+        type: 'button',
+        class: 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#007aff] transition-colors hover:bg-[#e8f2ff]',
+        'aria-label': 'Back',
+        onClick: () => emit('back')
+      }, [
+        h('svg', {
+          class: 'h-4 w-4',
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: 'currentColor',
+          'stroke-width': 2,
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          'aria-hidden': 'true'
+        }, [
+          h('path', { d: 'M14 6l-6 6 6 6' })
+        ])
+      ]),
       h('div', { class: 'min-w-0' }, [
         h('div', { class: 'text-[18px] font-semibold text-[#0f172a]' }, slots.content?.() || props.content || props.title),
         slots.default?.()
