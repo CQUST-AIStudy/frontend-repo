@@ -5,7 +5,7 @@
       description="基于 PTA 成绩单的多维分析，包括分数分布、题目得分率、难度系数与区分度。"
     />
 
-    <div class="flex gap-3 items-center mb-3 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
+    <div class="mt-4 flex gap-3 items-center mb-8 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
       <div v-if="classPrefixes.length > 1" class="relative w-[180px] max-[768px]:!w-full">
         <UiSelect
           v-model="selectedClass"

@@ -603,6 +603,15 @@ export function getStudentExperimentDetail(studentId, experimentId) {
   return tapClient.get(`/api/analytics/student/${studentId}/experiments/${experimentId}`)
 }
 
+// ========== Ability Profile ==========
+export function getClassProfile() {
+  return tapClient.get('/api/profile/class', { timeout: 30000 })
+}
+
+export function getStudentProfile(studentId) {
+  return tapClient.get(`/api/profile/student/${encodeURIComponent(studentId)}`, { timeout: 30000 })
+}
+
 export function getPtaCookieStatus() {
   return tapClient.get('/api/pta-cookie/status')
 }

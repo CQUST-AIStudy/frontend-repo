@@ -14,56 +14,36 @@
     <div class="px-5 pb-5 bg-[#f5f7fa] rounded-[4px] leading-relaxed">
       <!-- 欢迎页面 - 未选择班级时显示-->
       <div v-if="!showDetailedAnalysis && !loading" class="mb-8">
-        <div class="grid grid-cols-1 gap-5">
-          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
-            <div class="flex justify-between items-center font-semibold gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
-              <span>班级教学分析平台</span>
-            </div>
-            <div class="text-center py-5">
-              <DataAnalysis class="w-20 h-20 text-[#007aff] mx-auto mb-5" />
-              <h2 class="text-xl font-semibold text-[#1d1d1f] mb-2">欢迎使用班级详细分析工具</h2>
-              <p class="text-[#6e6e73] text-sm">这个工具可以帮助您深入了解班级学生的学习情况，发现潜在问题，并提供AI辅助的教学建议。</p>
-              <div class="flex flex-wrap justify-center gap-8 mt-8">
-                <div class="flex items-start gap-4 text-left max-w-[300px]">
-                  <DataAnalysis class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
-                  <div>
-                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">班级整体分析</h3>
-                    <p class="text-xs text-[#6e6e73]">查看班级实验完成率、分数分布等关键指标</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-4 text-left max-w-[300px]">
-                  <User class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
-                  <div>
-                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">学生个体分析</h3>
-                    <p class="text-xs text-[#6e6e73]">查看每位学生的学习态度、能力水平和潜在问题</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-4 text-left max-w-[300px]">
-                  <ChatDotRound class="w-6 h-6 text-[#007aff] shrink-0 mt-0.5" />
-                  <div>
-                    <h3 class="text-sm font-semibold text-[#1d1d1f] mb-1">AI教学建议</h3>
-                    <p class="text-xs text-[#6e6e73]">获取针对班级情况的个性化教学建议和改进方向</p>
-                  </div>
-                </div>
+        <div class="rounded-xl border border-black/[0.06] bg-white/95 px-4 py-3 shadow-[0_1px_4px_rgba(15,23,42,0.05)]">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex min-w-0 items-center gap-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#007aff]/10 text-[#007aff]">
+                <DataAnalysis class="h-5 w-5" />
+              </div>
+              <div class="min-w-0">
+                <h2 class="text-[16px] font-semibold leading-6 text-[#1d1d1f]">班级教学分析平台</h2>
+                <p class="truncate text-[13px] leading-5 text-[#6e6e73]">选择教学班级后查看学习情况、能力趋势和AI教学建议</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-5">
-          <h2 class="text-center mb-8 text-[#303133] text-[22px] font-semibold">请选择要分析的班级</h2>
-          <div class="flex justify-center gap-4 mb-5">
-            <UiInput
+        <div class="mt-4">
+          <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-[20px] font-semibold text-[#303133]">请选择要分析的班级</h2>
+            <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <UiInput
                 v-model="classSearchText"
                 placeholder="搜索班级名称/课程"
-                class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
-            />
-            <UiSelect v-model="classSortOption"
-              class="w-[150px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
-              <UiOption value="name">按名称排序</UiOption>
-              <UiOption value="studentCount">按学生数量排序</UiOption>
-              <UiOption value="semester">按学期排序</UiOption>
-            </UiSelect>
+                class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm sm:w-[320px]"
+              />
+              <UiSelect v-model="classSortOption"
+                class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer sm:w-[150px]">
+                <UiOption value="name">按名称排序</UiOption>
+                <UiOption value="studentCount">按学生数量排序</UiOption>
+                <UiOption value="semester">按学期排序</UiOption>
+              </UiSelect>
+            </div>
           </div>
 
           <template v-if="filteredClasses.length">
@@ -421,7 +401,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
-import {DataAnalysis, User, ChatDotRound} from '@/components/ui/icons'
+import {DataAnalysis} from '@/components/ui/icons'
 import {marked} from 'marked'
 import DOMPurify from 'dompurify'
 import api from '../../api'

@@ -4,7 +4,7 @@
       <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="createExperiment">创建实验</UiButton>
     </UiPageHeader>
 
-    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] p-5 min-w-0 overflow-x-auto max-[640px]:p-4 max-[640px]:rounded-2xl">
+    <div class="mt-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] p-5 min-w-0 overflow-x-auto max-[640px]:p-4 max-[640px]:rounded-2xl">
       <UiTable class="w-full text-left text-[13px]">
         <thead>
           <tr class="border-b border-black/[0.06]">
@@ -75,3 +75,9 @@ const viewSubmissions = id => router.push(`/teacher/submissions/${id}`)
 
 onMounted(loadExperiments)
 </script>
+
+<style scoped>
+.min-w-0 :deep(.ui-page-header .ui-button) {
+  margin-top: 1rem;
+}
+</style>

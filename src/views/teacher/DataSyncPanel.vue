@@ -56,12 +56,36 @@
             </div>
           </div>
           <div class="h-px bg-black/[0.06] my-5"></div>
-          <div class="flex items-center gap-3 mb-3.5">
-            <UiButton @click="forceMode = !forceMode" class="relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer border-none" :class="forceMode ? 'bg-[#007aff]' : 'bg-black/[0.12]'">
-              <span class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200" :class="forceMode ? 'translate-x-[18px]' : ''"></span>
-            </UiButton>
-            <span class="text-[13px] text-[#1d1d1f]">{{ forceMode ? '强制更新' : '正常模式' }}</span>
-            <span class="text-[12px] text-[#d93025]" v-if="forceMode">跳过冷却限制，请谨慎使用以保护 PTA 平台</span>
+          <div class="mb-3.5 rounded-[12px] border border-black/[0.06] bg-[#f9f9f9] px-4 py-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <div class="text-[14px] font-semibold leading-5 text-[#1d1d1f]">同步模式</div>
+                <div class="text-[12px] leading-5 text-[#6e6e73]">正常模式遵守冷却保护，强制更新会跳过冷却限制。</div>
+              </div>
+              <div class="inline-flex h-9 w-full rounded-[10px] bg-[#edf1f7] p-1 text-[12px] font-semibold sm:w-auto" role="group" aria-label="同步模式切换">
+                <button
+                  type="button"
+                  class="h-7 flex-1 rounded-[8px] px-3 transition-all sm:flex-none sm:min-w-[82px]"
+                  :class="!forceMode ? 'bg-white text-[#007aff] shadow-[0_1px_3px_rgba(15,23,42,0.12)]' : 'text-[#64748b] hover:text-[#1d1d1f]'"
+                  :aria-pressed="!forceMode"
+                  @click="forceMode = false"
+                >
+                  正常模式
+                </button>
+                <button
+                  type="button"
+                  class="h-7 flex-1 rounded-[8px] px-3 transition-all sm:flex-none sm:min-w-[82px]"
+                  :class="forceMode ? 'bg-[#fff1f0] text-[#d93025] shadow-[0_1px_3px_rgba(217,48,37,0.12)]' : 'text-[#64748b] hover:text-[#d93025]'"
+                  :aria-pressed="forceMode"
+                  @click="forceMode = true"
+                >
+                  强制更新
+                </button>
+              </div>
+            </div>
+            <div v-if="forceMode" class="mt-2 rounded-[8px] bg-[#fff4e6] px-3 py-2 text-[12px] leading-5 text-[#d93025]">
+              已开启强制更新：将跳过冷却限制，请谨慎使用以保护 PTA 平台。
+            </div>
           </div>
           <!-- Sync keyword panel -->
           <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">

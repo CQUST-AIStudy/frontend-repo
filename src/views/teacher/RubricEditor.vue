@@ -2,9 +2,6 @@
   <div class="rubric-editor">
     <!-- Page Header -->
     <div class="flex items-center gap-3 mb-5">
-      <UiButton @click="$router.back()" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none">
-        <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </UiButton>
       <h1 class="text-[20px] font-semibold text-[#1d1d1f]">评分标准管理</h1>
     </div>
 

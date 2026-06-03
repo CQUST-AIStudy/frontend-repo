@@ -15,9 +15,17 @@
             <slot name="header">
               <h2 class="text-[17px] font-semibold text-[#1d1d1f] tracking-tight">{{ title }}</h2>
             </slot>
-            <UiButton v-if="showClose" type="button" @click="close" class="w-[30px] h-[30px] rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer">
-              <svg class="w-3.5 h-3.5 text-[#6e6e73]" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </UiButton>
+            <button
+              v-if="showClose"
+              type="button"
+              aria-label="关闭弹窗"
+              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15"
+              @click="close"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
           </div>
           <div class="px-7 py-5">
             <slot></slot>

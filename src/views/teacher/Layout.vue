@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen min-h-dvh overflow-x-hidden bg-[#f5f5f7]">
+  <div class="flex h-screen h-dvh overflow-hidden bg-[#f5f5f7]">
     <!-- Sidebar (Desktop) -->
     <UiAside
       v-if="!isMobile"
@@ -153,9 +153,9 @@
     </Teleport>
 
     <!-- Main Area -->
-    <div class="ml-[var(--teacher-main-margin)] flex flex-col flex-1 min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
+    <div class="ml-[var(--teacher-main-margin)] flex h-screen h-dvh flex-col flex-1 min-w-0 overflow-hidden transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
       <!-- Header -->
-      <UiHeader class="sticky top-0 z-20 flex items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
+      <UiHeader class="sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
           <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff] shrink-0" title="切换导航">
             <MenuIcon v-if="isMobile" />
@@ -221,7 +221,12 @@
       </UiHeader>
 
       <!-- Content -->
-      <UiMain class="flex-1 min-w-0 min-h-[calc(100vh-120px)] min-h-[calc(100dvh-120px)] p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]">
+      <UiMain
+        class="flex-1 min-w-0 min-h-0 p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]"
+        :class="{
+          '!box-border !h-[calc(100vh-64px)] !h-[calc(100dvh-64px)] !min-h-0 !overflow-hidden !p-4': isAiChatPage
+        }"
+      >
         <router-view v-slot="{ Component }">
           <transition
             mode="out-in"
@@ -238,7 +243,7 @@
       </UiMain>
 
       <!-- Footer -->
-      <UiFooter class="text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
+      <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
         智能学情分析与个性化实验能力提升平台 · 教师工作空间
       </UiFooter>
     </div>
@@ -303,6 +308,7 @@ const asideStyle = computed(() => ({ '--teacher-aside-width': asideWidth.value }
 const mainStyle = computed(() => ({ '--teacher-main-margin': isMobile.value ? '0px' : asideWidth.value }))
 
 const activeMenu = computed(() => route.path)
+const isAiChatPage = computed(() => route.path === '/teacher/ai-chat')
 
 const menuItems = [
   { path: '/teacher/dashboard', icon: HomeFilled, label: '首页总览' },
