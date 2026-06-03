@@ -2,6 +2,12 @@
 node_modules/
 .pnp/
 .pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # Build outputs
 dist/
@@ -9,16 +15,23 @@ dist-ssr/
 build/
 coverage/
 .nyc_output/
+report.html
+stats.html
+stats.json
+bundle-report.html
 
 # Caches and temporary files
 node_modules/.cache/
 .cache/
 .parcel-cache/
+.npm/
+.pnpm-store/
 .temp/
 .tmp/
 tmp/
 temp/
 .vite/
+.vuepress/dist/
 *.tsbuildinfo
 .eslintcache
 .stylelintcache
@@ -32,12 +45,15 @@ pnpm-debug.log*
 lerna-debug.log*
 dev-server*.log
 static-server*.log
+*.local.log
 
 # Environment files
 .env
 .env.*
 !.env.example
 !.env.template
+!.env.development.example
+!.env.production.example
 
 # Local editor / IDE files
 .idea/
@@ -63,6 +79,8 @@ cypress/screenshots/
 cypress/videos/
 .edge-profile-login-check/
 login-check.png
+screenshots/
+artifacts/
 
 # Local AI assistant config
 .claude/
@@ -72,3 +90,7 @@ login-check.png
 # HBuilderX / uni-app artifacts
 unpackage/
 !/unpackage/res/
+
+# Local diagnostics
+test-startprocess.txt
+where-npm.txt
