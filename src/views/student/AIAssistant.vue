@@ -1,89 +1,137 @@
 <template>
-  <div class="ai-assistant-page [display:flex] [gap:16px] [height:100%] [padding:16px] [background:#f5f7fa] max-[900px]:[flex-direction:column]">
-    <div class="sidebar [width:260px] [flex-shrink:0] [display:flex] [flex-direction:column] [gap:12px] [padding:12px] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] max-[900px]:[width:100%]">
-      <h3>AI 学习助手</h3>
-
-      <ui-select
-        v-model="selectedCourseSpaceId"
-        placeholder="选择课程空间（可选）"
-        clearable
-        class="[width:100%]"
-      >
-        <ui-option
-          v-for="item in courseSpaces"
-          :key="item.id"
-          :label="buildCourseSpaceLabel(item)"
-          :value="item.id"
-        />
-      </ui-select>
-
-      <div v-if="selectedCourseSpaceId" class="mode-row [display:flex] [flex-direction:column] [gap:8px]">
-        <ui-switch
-          v-model="isOpenMode"
-          active-text="开放模式"
-          inactive-text="严格模式"
-          size="small"
-        />
-        <p class="mode-hint [margin:0] [color:#909399] [font-size:12px] [line-height:1.5]">
-          严格模式只依据课程资料回答。开放模式在课程覆盖不足时允许补充联网检索。
-        </p>
-        <div class="space-summary [padding:8px_10px] [background:#f5f7fa] [border-radius:8px] [font-size:12px] [color:#606266] [line-height:1.5]">
-          当前空间：{{ buildCourseSpaceLabel(selectedCourseSpace) }}
-        </div>
-      </div>
-
-      <div v-else class="empty-space-tip [display:flex] [flex-direction:column] [gap:8px] [padding:12px] [background:#fff8e8] [border:1px_solid_#f5d28b] [border-radius:10px] [&_p]:[margin:0] [&_p]:[color:#8c6d1f] [&_p]:[font-size:12px] [&_p]:[line-height:1.6]">
-        <div class="empty-space-title [font-size:14px] [font-weight:600] [color:#7a4f01]">还没有可用的课程空间</div>
-        <p>你可以先加入教学班，解锁班级授权的课程知识库；也可以先使用普通聊天模式。</p>
-        <ui-button size="small" @click="goClassJoin">去加入教学班</ui-button>
-      </div>
-
-      <div class="quick-list [display:flex] [flex-direction:column] [gap:4px]">
-        <ui-button
-          v-for="q in quickPrompts"
-          :key="q.label"
-          text
-          @click="useQuickPrompt(q.prompt)"
-        >
-          {{ q.label }}
-        </ui-button>
-      </div>
-    </div>
-
-    <div class="chat-panel [flex:1] [display:flex] [flex-direction:column] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] [overflow:hidden]">
+  <div class="flex h-full min-h-0 bg-[#f5f7fa] p-3 max-[640px]:p-2">
+    <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#e6eaf0] bg-white">
       <ui-alert
         v-if="assistantNotice"
-        class="assistant-alert [margin:12px_12px_0]"
+        class="m-3 mb-0"
         type="warning"
         :closable="false"
         :title="assistantNotice"
         show-icon
       />
 
-      <div ref="chatContainer" class="messages [flex:1] [overflow-y:auto] [padding:16px]">
-        <div v-for="(message, index) in messages" :key="index" :class="['msg', message.role]">
-          <div class="meta">
-            <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
-            <span>{{ message.time }}</span>
+      <div
+        ref="chatContainer"
+        class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 max-[640px]:px-3"
+      >
+        <div
+          v-if="showPromptSuggestions"
+          class="mx-auto flex min-h-full w-full max-w-[820px] flex-1 flex-col items-center justify-center gap-6 py-8 text-center"
+        >
+          <div class="flex flex-col gap-2">
+            <h2 class="m-0 text-[24px] font-bold leading-tight text-[#1d1d1f] max-[640px]:text-[21px]">
+              AI 学习助手
+            </h2>
+            <p class="m-0 max-w-[680px] text-[14px] leading-7 text-[#6e6e73]">
+              选择一个提示词开始，或直接输入你的数据结构问题。已授权课程空间会用于带引用的 RAG 问答。
+            </p>
           </div>
-          <div class="body" v-html="formatMessage(message.content)" />
 
-          <div v-if="message.citations && message.citations.length" class="citations [margin-top:8px] [display:flex] [flex-direction:column] [gap:4px] [font-size:12px] [color:#606266]">
-            <div v-for="cite in message.citations" :key="`${index}-${cite.index}`" class="citation-item [line-height:1.5]">
-              [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
-              <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
-              <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
+          <div class="grid w-full grid-cols-2 gap-3 max-[640px]:grid-cols-1">
+            <button
+              v-for="q in quickPrompts"
+              :key="q.label"
+              type="button"
+              class="group flex min-h-[88px] flex-col items-start justify-between rounded-[12px] border border-[#e6eaf0] bg-[#fbfdff] px-4 py-3 text-left transition-all duration-150 hover:-translate-y-[1px] hover:border-[#007aff]/40 hover:bg-[#f4f9ff] hover:shadow-[0_10px_24px_rgba(22,48,79,0.08)]"
+              @click="useQuickPrompt(q.prompt)"
+            >
+              <span class="text-[15px] font-semibold text-[#1d1d1f] group-hover:text-[#007aff]">
+                {{ q.label }}
+              </span>
+              <span class="mt-2 line-clamp-2 text-[12px] leading-5 text-[#6e6e73]">
+                {{ q.prompt }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-for="(message, index) in visibleMessages"
+          :key="message.id || index"
+          class="flex min-w-0"
+          :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+        >
+          <div
+            class="min-w-0 max-w-[min(760px,78%)] rounded-[12px] px-3 py-2 text-[14px] leading-[1.65] max-[640px]:max-w-[92%]"
+            :class="message.role === 'user'
+              ? 'rounded-tr-[4px] bg-[#007aff] text-white'
+              : 'rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] text-[#202124]'"
+          >
+            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
+              <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
+              <span>{{ message.time }}</span>
+            </div>
+            <div
+              class="[overflow-wrap:anywhere] [&_code]:rounded-[4px] [&_code]:bg-[rgba(15,23,42,0.08)] [&_code]:px-1 [&_code]:py-[1px] [&_code]:font-mono [&_code]:text-[0.92em] [&_li]:my-0.5 [&_ol]:my-1.5 [&_ol]:pl-5 [&_p]:mb-1.5 [&_p]:mt-0 [&_p:last-child]:mb-0 [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-[8px] [&_pre]:bg-[rgba(15,23,42,0.08)] [&_pre]:p-2.5 [&_ul]:my-1.5 [&_ul]:pl-5"
+              :class="message.role === 'user' ? '[&_code]:bg-[rgba(255,255,255,0.18)] [&_pre]:bg-[rgba(255,255,255,0.18)]' : ''"
+              v-html="formatMessage(message.content)"
+            />
+
+            <div
+              v-if="message.citations && message.citations.length"
+              class="mt-2 flex flex-col gap-1 border-t border-[rgba(126,157,183,0.2)] pt-2 text-[12px] leading-5 text-[#606266]"
+            >
+              <div v-for="cite in message.citations" :key="`${index}-${cite.index}`">
+                [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
+                <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
+                <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div v-if="isTyping" class="msg ai [margin-bottom:12px] [&_.meta]:[display:flex] [&_.meta]:[justify-content:space-between] [&_.meta]:[color:#909399] [&_.meta]:[font-size:12px] [&_.meta]:[margin-bottom:4px] [&_.body]:[padding:10px] [&_.body]:[border-radius:8px] [&_.body]:[line-height:1.7]">
-          <div class="meta"><span>AI 助手</span><span>正在生成...</span></div>
-          <div class="body">...</div>
+        <div v-if="showTypingHint" class="flex min-w-0 justify-start">
+          <div class="min-w-[126px] rounded-[12px] rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] px-3 py-2 text-[14px] leading-[1.65] text-[#202124]">
+            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
+              <span>AI 助手</span>
+              <span>正在生成</span>
+            </div>
+            <div class="inline-flex items-center gap-1" aria-label="正在生成">
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3]"></span>
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:120ms]"></span>
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:240ms]"></span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="input-area [border-top:1px_solid_#e6eaf0] [padding:12px]">
+      <div class="input-area flex flex-none flex-col gap-2 border-t border-[#e6eaf0] bg-white p-3">
+        <div class="flex min-w-0 items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch">
+          <div class="flex min-w-0 flex-wrap items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch">
+            <ui-select
+              v-model="selectedCourseSpaceId"
+              placeholder="选择课程空间（可选）"
+              clearable
+              class="w-[280px] max-[760px]:w-full"
+            >
+              <ui-option
+                v-for="item in courseSpaces"
+                :key="item.id"
+                :label="buildCourseSpaceLabel(item)"
+                :value="item.id"
+              />
+            </ui-select>
+
+            <div class="flex min-h-9 items-center gap-2 rounded-[10px] bg-[#f5f7fa] px-3 text-[12px] text-[#6e6e73]">
+              <ui-tooltip :content="modeTooltip">
+                <span class="inline-flex cursor-help items-center">
+                  <ui-switch
+                    v-model="isOpenMode"
+                    active-text="开放"
+                    inactive-text="严格"
+                    size="small"
+                  />
+                </span>
+              </ui-tooltip>
+              <span class="whitespace-nowrap">{{ currentModeText }}</span>
+            </div>
+          </div>
+
+          <span class="min-w-0 truncate text-[12px] text-[#909399]">
+            {{ selectedCourseSpaceId ? `当前空间：${buildCourseSpaceLabel(selectedCourseSpace)}` : '未选择课程空间时使用普通聊天' }}
+          </span>
+        </div>
+
         <ui-input
           v-model="userInput"
           type="textarea"
@@ -92,7 +140,8 @@
           placeholder="输入你的问题，按 Ctrl + Enter 发送"
           @keyup.enter.ctrl="sendMessage"
         />
-        <div class="actions [margin-top:8px] [display:flex] [justify-content:space-between] [align-items:center] [color:#909399] [font-size:12px]">
+
+        <div class="flex items-center justify-between gap-3 text-[12px] text-[#909399] max-[640px]:items-stretch max-[640px]:flex-col">
           <span>{{ selectedCourseSpaceId ? '当前为 RAG 问答模式' : '当前为普通聊天模式' }}</span>
           <ui-button
             type="primary"
@@ -104,12 +153,11 @@
           </ui-button>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import DOMPurify from 'dompurify'
@@ -117,7 +165,6 @@ import { marked } from 'marked'
 import { buildApiUrl } from '../../config/runtime'
 import { getKnowledgeBases, normalizeSourcesForDisplay, streamRagChat } from '../../api/rag'
 
-const router = useRouter()
 const userInput = ref('')
 const messages = ref([])
 const isTyping = ref(false)
@@ -136,6 +183,33 @@ const quickPrompts = [
 
 const selectedCourseSpace = computed(() => {
   return courseSpaces.value.find((item) => item.id === selectedCourseSpaceId.value) || null
+})
+
+const visibleMessages = computed(() => {
+  return messages.value.filter((message) => {
+    return message.role !== 'ai' || message.content || message.citations?.length
+  })
+})
+
+const showPromptSuggestions = computed(() => {
+  return !isTyping.value && !messages.value.some((message) => message.role === 'user')
+})
+
+const showTypingHint = computed(() => {
+  const lastMessage = messages.value[messages.value.length - 1]
+  return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
+})
+
+const currentModeText = computed(() => {
+  if (!selectedCourseSpaceId.value) return '普通聊天'
+  return isOpenMode.value ? 'RAG 开放模式' : 'RAG 严格模式'
+})
+
+const modeTooltip = computed(() => {
+  if (!selectedCourseSpaceId.value) return '未选择课程空间时使用普通聊天；选择课程空间后可切换 RAG 严格/开放模式。'
+  return isOpenMode.value
+    ? '开放模式：课程资料不足时允许补充联网检索。'
+    : '严格模式：只依据课程资料回答。'
 })
 
 function formatMessage(content) {
@@ -191,22 +265,22 @@ async function readErrorMessage(response) {
 function formatAssistantError(message, isRagMode) {
   const raw = String(message || '')
   if (raw.includes('OPENAI_API_KEY') || raw.includes('AI service is not configured')) {
-    return 'AI chat is not configured on the backend yet. Set OPENAI_API_KEY before using this entry.'
+    return '后端 AI 服务暂未配置，请先设置 OPENAI_API_KEY。'
   }
   if (raw.includes('course space')) {
-    return 'No accessible course space is available for RAG chat right now.'
+    return '当前没有可访问的课程空间，暂时无法使用 RAG 问答。'
   }
   if (raw.includes('401')) {
     return isRagMode
-      ? 'RAG chat is unavailable because the current login session is invalid.'
-      : 'AI chat is unavailable because the current login session is invalid.'
+      ? '当前登录状态无效，RAG 问答暂不可用。'
+      : '当前登录状态无效，AI 聊天暂不可用。'
   }
   if (raw.includes('403')) {
     return isRagMode
-      ? 'RAG chat is unavailable because the current account has no permission to use this course space.'
-      : 'AI chat is unavailable because the current account has no permission.'
+      ? '当前账号无权使用该课程空间，RAG 问答暂不可用。'
+      : '当前账号无权使用 AI 聊天。'
   }
-  return isRagMode ? 'RAG chat is temporarily unavailable.' : 'AI chat is temporarily unavailable.'
+  return isRagMode ? 'RAG 问答暂时不可用。' : 'AI 聊天暂时不可用。'
 }
 
 async function sendMessage() {
@@ -297,19 +371,7 @@ function useQuickPrompt(prompt) {
   })
 }
 
-function goClassJoin() {
-  router.push('/student/class-join')
-}
-
 onMounted(() => {
   fetchCourseSpaces()
-  messages.value.push({
-    role: 'ai',
-    content: '你好，我是你的数据结构 AI 学习助手。已授权的课程空间会自动用于带引用的 RAG 问答；如果暂时没有课程空间，你仍然可以先进行普通聊天。',
-    time: new Date().toLocaleTimeString(),
-    citations: []
-  })
 })
 </script>
-
-
