@@ -7,21 +7,21 @@
         <p class="m-0 text-sm text-[#6e6e73]">上传、管理教学文档，一键翻译或 AI 精读</p>
       </div>
       <div class="flex gap-2.5">
-        <button
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
           @click="showUpload = true"
         >
           <UploadFilled class="w-4 h-4" />
           上传文档
-        </button>
-        <button
+        </UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
           @click="loadDocs"
         >
           <Refresh class="w-4 h-4" />
           刷新
-        </button>
-        <button
+        </UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           :disabled="docsLoading || docs.length === 0"
           @click="handleDeleteAll"
@@ -29,7 +29,7 @@
           <svg v-if="clearingAll" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
           <Delete v-else class="w-4 h-4" />
           清空全部
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -39,27 +39,27 @@
         <!-- 文件夹名称 -->
         <div class="mb-5">
           <label class="block text-sm font-medium text-[#1d1d1f] mb-2">文件夹名称</label>
-          <input
+          <UiInput
             v-model="folderName"
             placeholder="例如：数据结构课件"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
         </div>
 
-        <el-upload
+        <ui-upload
           drag multiple :auto-upload="false"
           :on-change="handleFileChange" :file-list="fileList"
           :on-remove="handleFileRemove" accept=".pdf,.docx,.doc,.txt"
-          class="mt-4 w-full [&_.el-upload]:!w-full [&_.el-upload-dragger]:!border-2 [&_.el-upload-dragger]:!border-dashed [&_.el-upload-dragger]:!border-[#007aff]/30 [&_.el-upload-dragger]:!rounded-[14px] [&_.el-upload-dragger]:!bg-[#f5f5f7] [&_.el-upload-dragger]:hover:!border-[#007aff]/60 [&_.el-upload-dragger]:hover:!bg-[#eef6ff]"
+          class="mt-4 w-full [&_.ui-upload]:!w-full [&_.ui-upload-dragger]:!border-2 [&_.ui-upload-dragger]:!border-dashed [&_.ui-upload-dragger]:!border-[#007aff]/30 [&_.ui-upload-dragger]:!rounded-[14px] [&_.ui-upload-dragger]:!bg-[#f5f5f7] [&_.ui-upload-dragger]:hover:!border-[#007aff]/60 [&_.ui-upload-dragger]:hover:!bg-[#eef6ff]"
         >
           <div class="text-center py-7">
             <UploadFilled class="w-10 h-10 text-[#007aff] mx-auto" />
             <p class="mt-2.5 mb-1 text-[15px] text-[#1d1d1f]">拖拽文件到此处，或点击选择</p>
             <p class="m-0 text-xs text-[#6e6e73]">支持 PDF、DOCX、DOC、TXT，单文件最大50 MB</p>
           </div>
-        </el-upload>
+        </ui-upload>
 
-        <button
+        <UiButton
           v-if="fileList.length > 0"
           :disabled="uploading"
           class="w-full mt-5 h-[42px] rounded-full text-[15px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
@@ -67,7 +67,7 @@
         >
           <svg v-if="uploading" class="inline w-4 h-4 mr-1.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
           {{ uploading ? '上传中..' : `上传 ${fileList.length} 个文件` }}
-        </button>
+        </UiButton>
 
         <!-- 上传错误提示 -->
         <div v-if="uploadError" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] mt-3">
@@ -78,7 +78,7 @@
     </AppDrawer>
 
     <!-- 文档列表 -->
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4" v-loading="docsLoading">
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4" :aria-busy="docsLoading">
       <!-- 空状态 -->
       <div v-if="docs.length === 0 && !docsLoading" class="col-span-full flex flex-col items-center justify-center py-20">
         <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 64 64" fill="none">
@@ -104,21 +104,21 @@
           </p>
         </div>
         <div class="flex gap-1.5 shrink-0">
-          <button
+          <UiButton
             title="双语翻译"
             class="w-8 h-8 rounded-full bg-[#007aff]/10 text-[#007aff] flex items-center justify-center hover:bg-[#007aff]/20 active:scale-90 transition-all cursor-pointer border-none"
             @click="goTranslate(doc.id)"
           >
             <Document class="w-4 h-4" />
-          </button>
-          <button
+          </UiButton>
+          <UiButton
             title="AI 精读"
             class="w-8 h-8 rounded-full bg-[#34c759]/10 text-[#34c759] flex items-center justify-center hover:bg-[#34c759]/20 active:scale-90 transition-all cursor-pointer border-none"
             @click="goSummary(doc.id)"
           >
             <MagicStick class="w-4 h-4" />
-          </button>
-          <button
+          </UiButton>
+          <UiButton
             title="删除"
             class="w-8 h-8 rounded-full bg-[#ff3b30]/10 text-[#ff3b30] flex items-center justify-center hover:bg-[#ff3b30]/20 active:scale-90 transition-all cursor-pointer border-none"
             :disabled="deleting === doc.id"
@@ -126,7 +126,7 @@
           >
             <svg v-if="deleting === doc.id" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
             <Delete v-else class="w-4 h-4" />
-          </button>
+          </UiButton>
         </div>
       </div>
     </div>
@@ -134,11 +134,11 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { UploadFilled, Refresh, Document, MagicStick, Delete } from '@element-plus/icons-vue'
+import { onMounted, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { UploadFilled, Refresh, Document, MagicStick, Delete } from '@/components/ui/icons'
 import { getDocuments, deleteDocument, deleteAllDocuments, createFolder, uploadFiles } from '../../api/tap'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 import AppDrawer from '../../components/AppDrawer.vue'
@@ -176,7 +176,7 @@ const handleUpload = async () => {
     const folderId = folderRes?.data?.id ?? folderRes?.id
     if (!folderId) throw new Error('创建文件夹失败')
     await uploadFiles(folderId, fileList.value.map(f => f.raw || f))
-    ElMessage.success('上传成功')
+    uiMessage.success('上传成功')
     fileList.value = []; showUpload.value = false; loadDocs()
   } catch (e) { uploadError.value = getFriendlyErrorMessage(e, '文件上传失败，请稍后重试') }
   uploading.value = false
@@ -185,17 +185,17 @@ const handleUpload = async () => {
 // 删除
 const deleting = ref(null)
 const handleDelete = async (id) => {
-  try { await ElMessageBox.confirm('确定删除该文档？', '提示', { type: 'warning' }) } catch { return }
+  try { await messageBox.confirm('确定删除该文档？', '提示', { type: 'warning' }) } catch { return }
   deleting.value = id
-  try { await deleteDocument(id); ElMessage.success('删除成功'); loadDocs() }
-  catch (e) { ElMessage.error(getFriendlyErrorMessage(e, '删除失败，请稍后重试')) }
+  try { await deleteDocument(id); uiMessage.success('删除成功'); loadDocs() }
+  catch (e) { uiMessage.error(getFriendlyErrorMessage(e, '删除失败，请稍后重试')) }
   deleting.value = null
 }
 
 const clearingAll = ref(false)
 const handleDeleteAll = async () => {
   try {
-    await ElMessageBox.confirm('确定清空文档中心全部文档？该操作不可恢复。', '提示', { type: 'warning' })
+    await messageBox.confirm('确定清空文档中心全部文档？该操作不可恢复。', '提示', { type: 'warning' })
   } catch {
     return
   }
@@ -205,10 +205,10 @@ const handleDeleteAll = async () => {
     const res = await deleteAllDocuments()
     const data = res?.data ?? res ?? {}
     const deletedCount = Number(data.deletedCount ?? 0)
-    ElMessage.success(`已清空${deletedCount} 个文档`)
+    uiMessage.success(`已清空${deletedCount} 个文档`)
     await loadDocs()
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '清空失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '清空失败，请稍后重试'))
   } finally {
     clearingAll.value = false
   }

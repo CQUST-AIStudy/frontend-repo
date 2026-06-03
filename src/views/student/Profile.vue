@@ -1,6 +1,6 @@
 <template>
   <div class="student-profile [height:100%]">
-    <page-header
+    <UiPageHeader
       class="my-page-header [margin-bottom:8px]"
       title="个人信息"
       description="查看当前登录学生的基本信息、学习概况与账户安全设置。"
@@ -9,17 +9,17 @@
     <loading-state :loading="loading">
       <div class="profile-layout [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] max-[1080px]:[grid-template-columns:1fr]">
         <section class="profile-main [display:flex] [flex-direction:column] [gap:20px]">
-          <el-card class="profile-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="profile-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <div class="profile-card__top [display:flex] [align-items:center] [gap:18px] [margin-bottom:20px] max-[640px]:[flex-direction:column] max-[640px]:[align-items:flex-start]">
-              <el-avatar :size="88" class="profile-card__avatar [background:linear-gradient(135deg,_#1f7ae0,_#45b2ff)] [color:#fff] [font-size:28px] [font-weight:700]">
+              <ui-avatar :size="88" class="profile-card__avatar [background:linear-gradient(135deg,_#1f7ae0,_#45b2ff)] [color:#fff] [font-size:28px] [font-weight:700]">
                 {{ avatarText }}
-              </el-avatar>
+              </ui-avatar>
               <div class="profile-card__meta [&_h2]:[margin:0] [&_h2]:[font-size:28px] [&_h2]:[color:#173153] [&_p]:[margin:8px_0_0] [&_p]:[color:#64809b]">
                 <h2>{{ displayName }}</h2>
                 <p>{{ className || '未绑定教学班' }}</p>
                 <div class="profile-tags [display:flex] [gap:8px] [flex-wrap:wrap] [margin-top:14px]">
-                  <el-tag effect="plain" type="primary">学生</el-tag>
-                  <el-tag effect="plain" type="success">{{ gradeText }}</el-tag>
+                  <ui-tag effect="plain" type="primary">学生</ui-tag>
+                  <ui-tag effect="plain" type="success">{{ gradeText }}</ui-tag>
                 </div>
               </div>
             </div>
@@ -48,12 +48,12 @@
             </div>
 
             <div class="profile-actions [display:flex] [gap:12px] [flex-wrap:wrap] [margin-top:20px]">
-              <el-button type="primary" @click="openProfileDialog">更新展示信息</el-button>
-              <el-button @click="openPasswordDialog">修改密码</el-button>
+              <ui-button type="primary" @click="openProfileDialog">更新展示信息</ui-button>
+              <ui-button @click="openPasswordDialog">修改密码</ui-button>
             </div>
-          </el-card>
+          </ui-card>
 
-          <el-card class="security-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="security-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
               <div class="card-header [font-weight:700] [color:#1c3554] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>账户设置</span>
@@ -66,28 +66,28 @@
                   <strong>系统通知</strong>
                   <p>接收实验发布、截止时间和课堂更新提醒。</p>
                 </div>
-                <el-switch v-model="settings.notifications" />
+                <ui-switch v-model="settings.notifications" />
               </div>
               <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
                 <div>
                   <strong>截止提醒</strong>
                   <p>在实验截止前推送提醒，避免漏交。</p>
                 </div>
-                <el-switch v-model="settings.deadlineReminder" />
+                <ui-switch v-model="settings.deadlineReminder" />
               </div>
               <div class="setting-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:14px_0] [border-bottom:1px_solid_#edf2f7] last:[border-bottom:none] last:[padding-bottom:0]">
                 <div>
                   <strong>AI 反馈提示</strong>
                   <p>实验报告生成评语和学习建议时同步提醒。</p>
                 </div>
-                <el-switch v-model="settings.aiFeedback" />
+                <ui-switch v-model="settings.aiFeedback" />
               </div>
             </div>
-          </el-card>
+          </ui-card>
         </section>
 
         <section class="profile-side [display:flex] [flex-direction:column] [gap:20px]">
-          <el-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="overview-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>学习概况</span>
@@ -112,17 +112,17 @@
                 <strong>{{ stats.inProgressExperiments }}</strong>
               </div>
             </div>
-          </el-card>
+          </ui-card>
 
-          <el-card class="activity-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+          <ui-card class="activity-card [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <span>最近动态</span>
               </div>
             </template>
 
-            <el-timeline>
-              <el-timeline-item
+            <ui-timeline>
+              <ui-timeline-item
                 v-for="item in activityList"
                 :key="`${item.title}-${item.time}`"
                 :timestamp="item.time"
@@ -130,58 +130,57 @@
               >
                 <h4 class="activity-title [margin:0_0_6px] [color:#173153] [font-size:15px]">{{ item.title }}</h4>
                 <p class="activity-content [margin:0] [color:#607792] [line-height:1.6]">{{ item.content }}</p>
-              </el-timeline-item>
-            </el-timeline>
-          </el-card>
+              </ui-timeline-item>
+            </ui-timeline>
+          </ui-card>
         </section>
       </div>
     </loading-state>
 
-    <el-dialog v-model="profileDialogVisible" title="更新展示信息" width="480px">
-      <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="90px">
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="profileForm.name" placeholder="请输入展示姓名" />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
-        </el-form-item>
-      </el-form>
+    <ui-dialog v-model="profileDialogVisible" title="更新展示信息" width="480px">
+      <ui-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="90px">
+        <ui-form-item label="姓名" prop="name">
+          <ui-input v-model="profileForm.name" placeholder="请输入展示姓名" />
+        </ui-form-item>
+        <ui-form-item label="邮箱" prop="email">
+          <ui-input v-model="profileForm.email" placeholder="请输入邮箱" />
+        </ui-form-item>
+        <ui-form-item label="手机号" prop="phone">
+          <ui-input v-model="profileForm.phone" placeholder="请输入手机号" />
+        </ui-form-item>
+      </ui-form>
 
       <template #footer>
-        <el-button @click="profileDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveProfile">保存</el-button>
+        <ui-button @click="profileDialogVisible = false">取消</ui-button>
+        <ui-button type="primary" @click="saveProfile">保存</ui-button>
       </template>
-    </el-dialog>
+    </ui-dialog>
 
-    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="480px">
-      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
-        <el-form-item label="当前密码" prop="oldPassword">
-          <el-input v-model="passwordForm.oldPassword" type="password" show-password />
-        </el-form-item>
-        <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="passwordForm.newPassword" type="password" show-password />
-        </el-form-item>
-        <el-form-item label="确认新密码" prop="confirmPassword">
-          <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
-        </el-form-item>
-      </el-form>
+    <ui-dialog v-model="passwordDialogVisible" title="修改密码" width="480px">
+      <ui-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
+        <ui-form-item label="当前密码" prop="oldPassword">
+          <ui-input v-model="passwordForm.oldPassword" type="password" show-password />
+        </ui-form-item>
+        <ui-form-item label="新密码" prop="newPassword">
+          <ui-input v-model="passwordForm.newPassword" type="password" show-password />
+        </ui-form-item>
+        <ui-form-item label="确认新密码" prop="confirmPassword">
+          <ui-input v-model="passwordForm.confirmPassword" type="password" show-password />
+        </ui-form-item>
+      </ui-form>
 
       <template #footer>
-        <el-button @click="passwordDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submittingPassword" @click="changePassword">确认修改</el-button>
+        <ui-button @click="passwordDialogVisible = false">取消</ui-button>
+        <ui-button type="primary" :loading="submittingPassword" @click="changePassword">确认修改</ui-button>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 import LoadingState from '../../components/LoadingState.vue'
 import { useUserStore } from '../../store'
 import api from '../../api'
@@ -292,7 +291,7 @@ async function saveProfile() {
   })
 
   profileDialogVisible.value = false
-  ElMessage.success('展示信息已更新')
+  uiMessage.success('展示信息已更新')
 }
 
 function openPasswordDialog() {
@@ -318,13 +317,13 @@ async function changePassword() {
     const data = res?.data || res
     if (data?.success) {
       passwordDialogVisible.value = false
-      ElMessage.success('密码修改成功，请使用新密码重新登录')
+      uiMessage.success('密码修改成功，请使用新密码重新登录')
       return
     }
 
-    ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
+    uiMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
   } catch (error) {
-    ElMessage.error(getFriendlyErrorMessage(error, '密码修改失败，请检查当前密码后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, '密码修改失败，请检查当前密码后重试'))
   } finally {
     submittingPassword.value = false
   }

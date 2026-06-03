@@ -1,11 +1,11 @@
 <template>
   <div class="h-full">
-    <page-header class="p-5" title="学生提交详情" :description="`${studentName} 的实验提交`">
-      <button @click="goBack" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer flex items-center gap-2">
+    <UiPageHeader class="p-5" title="学生提交详情" :description="`${studentName} 的实验提交`">
+      <UiButton @click="goBack" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer flex items-center gap-2">
         <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
         返回提交列表
-      </button>
-    </page-header>
+      </UiButton>
+    </UiPageHeader>
 
     <div class="flex flex-col gap-5 relative" :class="{ 'opacity-50 pointer-events-none': loading }">
       <!-- Loading overlay -->
@@ -70,10 +70,10 @@
           <!-- 操作按钮卡片 -->
           <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
             <div class="flex flex-col gap-3">
-              <button @click="openGradeDialog" class="w-full h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center gap-2">
+              <UiButton @click="openGradeDialog" class="w-full h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/></svg>
                 {{ submission.status === 'graded' ? '重新评分' : '评分' }}
-              </button>
+              </UiButton>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
           <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 min-h-[80vh] mb-[50px]">
             <!-- Custom Tabs -->
             <div class="flex items-center gap-1 p-1 bg-black/[0.04] rounded-[10px] w-fit mb-6">
-              <button
+              <UiButton
                 v-for="tab in mainTabs"
                 :key="tab.name"
                 @click="activeTab = tab.name"
@@ -91,7 +91,7 @@
                 :class="activeTab === tab.name ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
               >
                 {{ tab.label }}
-              </button>
+              </UiButton>
             </div>
 
             <!-- 代码 Tab -->
@@ -99,21 +99,21 @@
               <div class="flex justify-between items-center mb-4 pb-3 border-b border-black/[0.06]">
                 <h3 class="text-base font-semibold text-[#1d1d1f] m-0">实验代码</h3>
                 <div class="flex gap-2 flex-wrap">
-                  <button @click="copyCode" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#6e6e73] bg-black/[0.04] border-none hover:bg-black/[0.08] active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
+                  <UiButton @click="copyCode" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#6e6e73] bg-black/[0.04] border-none hover:bg-black/[0.08] active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
                     <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z"/><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z"/></svg>
                     复制代码
-                  </button>
+                  </UiButton>
                   <div class="relative" ref="fileDropdownRef">
-                    <button @click="fileDropdownOpen = !fileDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
+                    <UiButton @click="fileDropdownOpen = !fileDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
                       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5z"/></svg>
                       文件操作
                       <svg class="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
-                    </button>
+                    </UiButton>
                     <div v-show="fileDropdownOpen" class="absolute right-0 top-full mt-1 bg-white rounded-[10px] shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-black/[0.06] py-1 z-20 min-w-[140px]">
-                      <button @click="downloadCode; fileDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
+                      <UiButton @click="downloadCode; fileDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
                         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>
                         下载代码
-                      </button>
+                      </UiButton>
                     </div>
                   </div>
                 </div>
@@ -124,18 +124,18 @@
                 <!-- Question sub-tabs (left position) -->
                 <div class="flex border border-black/[0.06] rounded-xl overflow-hidden mb-5">
                   <div class="flex flex-col border-r border-black/[0.06] bg-[#f9f9fb] min-w-[100px]">
-                    <button
+                    <UiButton
                       @click="activeQuestionTab = 'full'"
                       class="px-4 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer transition-all"
                       :class="activeQuestionTab === 'full' ? 'bg-white text-[#007aff] shadow-[inset_3px_0_0_#007aff]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
-                    >完整源码</button>
-                    <button
+                    >完整源码</UiButton>
+                    <UiButton
                       v-for="(question, index) in parsedQuestions"
                       :key="index"
                       @click="activeQuestionTab = String(index)"
                       class="px-4 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer transition-all"
                       :class="activeQuestionTab === String(index) ? 'bg-white text-[#007aff] shadow-[inset_3px_0_0_#007aff]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
-                    >第{{ question.number }}题</button>
+                    >第{{ question.number }}题</UiButton>
                   </div>
                   <div class="flex-1 p-4 overflow-auto">
                     <!-- Full source panel -->
@@ -167,7 +167,7 @@
                           class="w-full px-4 py-3 rounded-[10px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] placeholder-[#aeaeb2] resize-y focus:outline-none focus:ring-2 focus:ring-[#007aff]/20 focus:border-[#007aff] transition-all"
                         ></textarea>
                         <div class="flex justify-end mt-2">
-                          <button
+                          <UiButton
                             @click="saveQuestionComment(index)"
                             :disabled="question.saving"
                             class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -177,7 +177,7 @@
                               保存中...
                             </span>
                             <span v-else>保存评语</span>
-                          </button>
+                          </UiButton>
                         </div>
                       </div>
                     </div>
@@ -210,20 +210,20 @@
                 <h3 class="text-base font-semibold text-[#1d1d1f] m-0">实验报告</h3>
                 <div class="flex gap-2 mt-0">
                   <div class="relative" ref="reportDropdownRef">
-                    <button @click="reportDropdownOpen = !reportDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
+                    <UiButton @click="reportDropdownOpen = !reportDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
                       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>
                       下载报告
                       <svg class="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
-                    </button>
+                    </UiButton>
                     <div v-show="reportDropdownOpen" class="absolute right-0 top-full mt-1 bg-white rounded-[10px] shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-black/[0.06] py-1 z-20 min-w-[160px]">
-                      <button @click="downloadWordDoc(); reportDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
+                      <UiButton @click="downloadWordDoc(); reportDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
                         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="currentColor"><path d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5z"/></svg>
                         下载 Word 文档
-                      </button>
-                      <button @click="downloadPDF(); reportDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
+                      </UiButton>
+                      <UiButton @click="downloadPDF(); reportDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
                         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="currentColor"><path d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5z"/></svg>
                         下载 PDF 文档
-                      </button>
+                      </UiButton>
                     </div>
                   </div>
                 </div>
@@ -318,13 +318,13 @@
                   <h4 class="text-sm font-semibold text-[#1d1d1f] mb-3">学习建议</h4>
                   <div v-if="learningRecommendations.length > 0" class="flex flex-col gap-2">
                     <div v-for="(rec, index) in learningRecommendations" :key="index" class="border border-black/[0.06] rounded-xl overflow-hidden">
-                      <button
+                      <UiButton
                         @click="rec.expanded = !rec.expanded"
                         class="w-full px-4 py-3 flex items-center justify-between bg-[#f9f9fb] hover:bg-[#f0f0f5] transition-colors cursor-pointer border-none text-left"
                       >
                         <span class="text-[13px] font-medium text-[#1d1d1f]">{{ rec.title }}</span>
                         <svg class="w-4 h-4 text-[#6e6e73] transition-transform" :class="{ 'rotate-180': rec.expanded }" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-                      </button>
+                      </UiButton>
                       <div v-show="rec.expanded" class="px-4 py-3">
                         <p class="text-sm text-[#424245] m-0">{{ rec.content }}</p>
                         <div v-if="rec.resources && rec.resources.length" class="mt-3">
@@ -361,7 +361,7 @@
 
           <span class="text-sm text-[#6e6e73]">上机成绩得分</span>
           <div class="flex items-center gap-2">
-            <input
+            <UiInput
               type="number"
               v-model.number="gradeForm.score"
               :min="0"
@@ -373,8 +373,8 @@
         </div>
       </div>
       <template #footer>
-        <button @click="gradeDialogVisible = false" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-black/[0.04] border-none hover:bg-black/[0.08] active:scale-[0.96] transition-all cursor-pointer">取消</button>
-        <button @click="submitGrade" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">提交评分</button>
+        <UiButton @click="gradeDialogVisible = false" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-black/[0.04] border-none hover:bg-black/[0.08] active:scale-[0.96] transition-all cursor-pointer">取消</UiButton>
+        <UiButton @click="submitGrade" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">提交评分</UiButton>
       </template>
     </AppModal>
 
@@ -392,12 +392,11 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElLoading } from 'element-plus'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage, loading as uiLoading } from '@/services/feedback'
 import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
 import AppModal from '../../components/AppModal.vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -679,10 +678,10 @@ const saveQuestionComment = async (index) => {
     question.commentImageWidth = imageWidth;
 
     updateReportWithComments();
-      ElMessage.success(`第${question.number}题评语保存成功`);
+      uiMessage.success(`第${question.number}题评语保存成功`);
   } catch (error) {
     logger.error('保存评语失败:', error);
-      ElMessage.error(`第${question.number}题评语保存失败 ${error.message}`);
+      uiMessage.error(`第${question.number}题评语保存失败 ${error.message}`);
   } finally {
     question.saving = false;
   }
@@ -1046,10 +1045,10 @@ const submitGrade = async () => {
     }
 
     gradeDialogVisible.value = false
-    ElMessage.success('评分成功')
+    uiMessage.success('评分成功')
   } catch (error) {
     logger.error('评分失败:', error)
-    ElMessage.error('评分失败，请稍后重试')
+    uiMessage.error('评分失败，请稍后重试')
   }
 }
 
@@ -1106,10 +1105,10 @@ const handleReportDataUpdate = (newData) => {
 const copyCode = () => {
   navigator.clipboard.writeText(submission.value.code)
       .then(() => {
-        ElMessage.success('代码已复制到剪贴板')
+        uiMessage.success('代码已复制到剪贴板')
       })
       .catch(() => {
-        ElMessage.error('复制失败，请手动复制')
+        uiMessage.error('复制失败，请手动复制')
       })
 }
 
@@ -1124,7 +1123,7 @@ const downloadCode = () => {
 
 const downloadWordDoc = async () => {
   if (!reportData.value) {
-    ElMessage.warning('没有报告数据可下载')
+    uiMessage.warning('没有报告数据可下载')
     return
   }
 
@@ -1147,16 +1146,16 @@ const downloadWordDoc = async () => {
     const fileName = `${submission.value.studentId}_${submission.value.studentName}_${submission.value.experimentName}.docx`
     DocxGenerator.downloadReport(blob, fileName)
 
-    ElMessage.success('Word文档下载成功')
+    uiMessage.success('Word文档下载成功')
   } catch (error) {
     logger.error('生成Word文档失败:', error)
-    ElMessage.error('生成Word文档失败，请稍后重试')
+    uiMessage.error('生成Word文档失败，请稍后重试')
   }
 }
 
 const downloadPDF = async () => {
   try {
-    const loadingInstance = ElLoading.service({
+    const loadingInstance = uiLoading.service({
       lock: true,
       text: 'PDF生成中，请稍候..',
       background: 'rgba(0, 0, 0, 0.7)'
@@ -1192,12 +1191,12 @@ const downloadPDF = async () => {
     link.download = fileName;
     link.click();
 
-    ElMessage.success('PDF文档下载成功');
+    uiMessage.success('PDF文档下载成功');
   } catch (error) {
     logger.error('生成PDF文档失败:', error);
-    ElMessage.error('生成PDF文档失败，请稍后重试');
+    uiMessage.error('生成PDF文档失败，请稍后重试');
 
-    const loadingInstance = ElLoading.service();
+    const loadingInstance = uiLoading.service();
     loadingInstance.close();
   }
 }

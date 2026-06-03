@@ -17,13 +17,13 @@
           <span class="meta-label [font-size:12px] [color:#6a7792]">当前状态</span>
           <strong>{{ loading ? 'AI 生成中' : '可继续提问' }}</strong>
         </div>
-        <button
+        <UiButton
           class="clear-btn [min-height:88px] [border-radius:20px] [border:1px_solid_rgba(104,_124,_155,_0.18)] [background:rgba(255,_255,_255,_0.74)] [backdrop-filter:blur(12px)] [grid-column:span_2] [color:#38517c] [cursor:pointer] [transition:all_0.2s] [font-size:14px] [font-weight:500] hover:[background:rgba(255,_255,_255,_0.9)] hover:[border-color:rgba(104,_124,_155,_0.3)] disabled:[opacity:0.4] disabled:[cursor:not-allowed]"
           :disabled="loading || !messages.length"
           @click="clearConversation"
         >
           清空会话
-        </button>
+        </UiButton>
       </div>
     </section>
 
@@ -111,7 +111,7 @@
             <p>例如课程讲解、实验设计、知识点串讲、论文资料检索或答疑措辞优化。</p>
           </div>
           <div class="suggestion-grid [width:min(920px,_100%)] [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [gap:14px]">
-            <button
+            <UiButton
               v-for="item in suggestions"
               :key="item"
               type="button"
@@ -119,14 +119,14 @@
               @click="applySuggestion(item)"
             >
               {{ item }}
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
 
       <div class="composer-panel [position:relative] [z-index:1] [padding:0_24px_24px]">
         <div class="quick-strip [display:flex] [flex-wrap:wrap] [gap:10px] [padding:0_4px_14px]">
-          <button
+          <UiButton
             v-for="item in suggestions"
             :key="`quick-${item}`"
             type="button"
@@ -134,7 +134,7 @@
             @click="applySuggestion(item)"
           >
             {{ item }}
-          </button>
+          </UiButton>
         </div>
 
         <div class="composer-box [padding:16px] [border-radius:24px] [background:rgba(255,_255,_255,_0.9)] [border:1px_solid_rgba(128,_147,_176,_0.18)] [box-shadow:0_18px_34px_rgba(84,_106,_138,_0.1)]">
@@ -149,14 +149,14 @@
           ></textarea>
           <div class="composer-actions [display:flex] [justify-content:space-between] [align-items:center] [gap:14px] [padding-top:12px] [border-top:1px_solid_rgba(128,_147,_176,_0.14)]">
             <span class="composer-hint [font-size:12px] [color:#71829a]">Enter 发送，Shift+Enter 换行</span>
-            <button
+            <UiButton
               type="button"
               :disabled="!draft.trim() || loading"
               @click="send"
               class="h-[38px] px-5 rounded-full text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none"
             >
               {{ loading ? '生成中...' : '发送问题' }}
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -165,11 +165,11 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
-import { ElMessageBox } from 'element-plus'
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { messageBox } from '@/services/feedback'
 import { useTeacherAiChatStore } from '../../store/teacherAiChat'
 
 const md = new MarkdownIt({
@@ -221,7 +221,7 @@ function applySuggestion(text) {
 
 async function clearConversation() {
   try {
-    await ElMessageBox.confirm('清空当前 AI 对话记录？', '提示', {
+    await messageBox.confirm('清空当前 AI 对话记录？', '提示', {
       confirmButtonText: '清空',
       cancelButtonText: '取消',
       type: 'warning'

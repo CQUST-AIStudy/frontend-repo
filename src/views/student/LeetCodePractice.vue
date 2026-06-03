@@ -5,13 +5,13 @@
       <div class="problem-header [display:flex] [justify-content:space-between] [align-items:flex-start] [margin-bottom:20px] [padding-bottom:16px] [border-bottom:1px_solid_#eee]">
         <div class="problem-title [&_h2]:[margin:0_0_8px_0] [&_h2]:[color:#333] [&_h2]:[font-size:24px]">
           <h2>{{ problem.problemCode }} {{ problem.title }}</h2>
-          <el-tag :type="difficultyType" size="large">{{ problem.difficulty }}</el-tag>
+          <ui-tag :type="difficultyType" size="large">{{ problem.difficulty }}</ui-tag>
         </div>
         <div class="problem-actions [display:flex] [gap:8px]">
-          <el-button @click="showSolution = !showSolution" type="info" plain>
+          <ui-button @click="showSolution = !showSolution" type="info" plain>
             {{ showSolution ? '隐藏题解' : '查看题解' }}
-          </el-button>
-          <el-button @click="resetCode" type="warning" plain>重置代码</el-button>
+          </ui-button>
+          <ui-button @click="resetCode" type="warning" plain>重置代码</ui-button>
         </div>
       </div>
 
@@ -55,11 +55,11 @@
       </div>
 
       <!-- 官方题解 -->
-      <el-collapse v-if="showSolution" class="solution-section [margin-top:20px]">
-        <el-collapse-item name="solution">
+      <ui-collapse v-if="showSolution" class="solution-section [margin-top:20px]">
+        <ui-collapse-item name="solution">
           <template #title>
             <div class="solution-title [display:flex] [align-items:center] [gap:8px] [font-weight:600] [color:#409eff]">
-              <el-icon><Document /></el-icon>
+              <ui-icon><Document /></ui-icon>
               <span>官方题解</span>
             </div>
           </template>
@@ -71,16 +71,16 @@
             
             <div class="solution-code" v-if="parsedSolution.code">
               <h4>参考代码</h4>
-              <el-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
-                <el-tab-pane 
+              <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
+                <ui-tab-pane 
                   v-for="(codeBlock, lang) in parsedSolution.code" 
                   :key="lang"
                   :label="getLanguageLabel(lang)" 
                   :name="lang"
                 >
                   <pre class="solution-code-block [background:#2d3748] [color:#e2e8f0] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.5] [margin:0]"><code>{{ codeBlock }}</code></pre>
-                </el-tab-pane>
-              </el-tabs>
+                </ui-tab-pane>
+              </ui-tabs>
             </div>
 
             <div class="solution-complexity" v-if="parsedSolution.complexity">
@@ -88,29 +88,29 @@
               <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="parsedSolution.complexity"></div>
             </div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
+        </ui-collapse-item>
+      </ui-collapse>
     </div>
 
     <!-- 代码编辑区域 -->
     <div class="code-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [display:flex] [flex-direction:column] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)]">
       <div class="code-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_#eee] [margin-bottom:15px] [padding-right:10px]">
         <div class="language-selector">
-          <el-select v-model="selectedLanguage" @change="onLanguageChange">
-            <el-option label="Java" value="java" />
-            <el-option label="Python" value="python" />
-            <el-option label="C" value="c" />
-            <el-option label="C++" value="cpp" />
-            <el-option label="JavaScript" value="javascript" />
-          </el-select>
+          <ui-select v-model="selectedLanguage" @change="onLanguageChange">
+            <ui-option label="Java" value="java" />
+            <ui-option label="Python" value="python" />
+            <ui-option label="C" value="c" />
+            <ui-option label="C++" value="cpp" />
+            <ui-option label="JavaScript" value="javascript" />
+          </ui-select>
         </div>
         <div class="code-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
-          <el-button @click="runCode" :loading="running" type="primary" plain>
+          <ui-button @click="runCode" :loading="running" type="primary" plain>
             运行代码
-          </el-button>
-          <el-button @click="submitCode" :loading="submitting" type="success">
+          </ui-button>
+          <ui-button @click="submitCode" :loading="submitting" type="success">
             提交解答
-          </el-button>
+          </ui-button>
         </div>
       </div>
 
@@ -129,32 +129,32 @@
 
       <!-- 测试用例输入 -->
       <div class="test-input [margin-top:16px] [height:200px]">
-        <el-tabs v-model="activeTab">
-          <el-tab-pane label="测试用例" name="testcase">
-            <el-input
+        <ui-tabs v-model="activeTab">
+          <ui-tab-pane label="测试用例" name="testcase">
+            <ui-input
               v-model="testInput"
               type="textarea"
               :rows="4"
               placeholder="输入测试用例，每行一个..."
             />
-          </el-tab-pane>
-          <el-tab-pane label="运行结果" name="result" v-if="runResult">
+          </ui-tab-pane>
+          <ui-tab-pane label="运行结果" name="result" v-if="runResult">
             <div class="run-result [padding:12px]">
               <div class="result-status [display:flex] [align-items:center] [gap:8px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#67c23a] [&.error]:[color:#f56c6c]" :class="runResult.status">
-                <el-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></el-icon>
+                <ui-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></ui-icon>
                 {{ runResult.status === 'success' ? '运行成功' : '运行失败' }}
               </div>
               <div class="result-content">
                 <pre>{{ runResult.output }}</pre>
               </div>
             </div>
-          </el-tab-pane>
-        </el-tabs>
+          </ui-tab-pane>
+        </ui-tabs>
       </div>
     </div>
 
     <!-- 提交结果弹窗 -->
-    <el-dialog
+    <ui-dialog
       v-model="showSubmitResult"
       title="提交结果"
       width="80%"
@@ -163,7 +163,7 @@
       <div v-if="submitResult" class="submit-result [max-height:70vh] [overflow-y:auto]">
         <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
           <div class="status [display:flex] [align-items:center] [gap:8px] [font-size:18px] [font-weight:bold] [&.accepted]:[color:#67c23a] [&.rejected]:[color:#f56c6c]" :class="submitResult.status">
-            <el-icon><Check v-if="submitResult.accepted" /><Close v-else /></el-icon>
+            <ui-icon><Check v-if="submitResult.accepted" /><Close v-else /></ui-icon>
             {{ submitResult.status === 'unavailable' ? '评测暂不可用' : (submitResult.accepted ? '通过' : '未通过') }}
           </div>
           <div class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]" v-if="submitResult.score !== null && submitResult.score !== undefined">
@@ -179,50 +179,50 @@
 
         <!-- 执行详情 -->
         <div class="execution-details [margin:20px_0]" v-if="submitResult.details">
-          <el-descriptions title="执行详情" :column="2" border>
-            <el-descriptions-item label="执行时间">
+          <ui-descriptions title="执行详情" :column="2" border>
+            <ui-descriptions-item label="执行时间">
               {{ submitResult.details.runtime || '暂无' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="内存消耗">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="内存消耗">
               {{ submitResult.details.memory || '暂无' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="通过用例">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="通过用例">
               {{ submitResult.details.passedCases || 0 }} / {{ submitResult.details.totalCases || 0 }}
-            </el-descriptions-item>
-            <el-descriptions-item label="错误信息" v-if="submitResult.details.error">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="错误信息" v-if="submitResult.details.error">
               <pre class="error-message [color:#f56c6c] [background:#fef0f0] [padding:8px] [border-radius:4px] [margin:0] [color:#d93025] [font-size:12px]">{{ submitResult.details.error }}</pre>
-            </el-descriptions-item>
-          </el-descriptions>
+            </ui-descriptions-item>
+          </ui-descriptions>
         </div>
 
         <!-- 技能提升建议 -->
         <div class="skill-suggestions [margin:20px_0]" v-if="submitResult.skillSuggestions">
           <h3>技能提升建议</h3>
-          <el-tag
+          <ui-tag
             v-for="suggestion in submitResult.skillSuggestions"
             :key="suggestion"
             class="suggestion-tag [margin:4px_8px_4px_0]"
             type="info"
           >
             {{ suggestion }}
-          </el-tag>
+          </ui-tag>
         </div>
       </div>
 
       <template #footer>
-        <el-button @click="showSubmitResult = false">关闭</el-button>
-        <el-button type="primary" @click="continuePractice">继续练习</el-button>
+        <ui-button @click="showSubmitResult = false">关闭</ui-button>
+        <ui-button type="primary" @click="continuePractice">继续练习</ui-button>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Close, Document } from '@element-plus/icons-vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { Check, Close, Document } from '@/components/ui/icons'
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
@@ -405,19 +405,19 @@ function getLanguageLabel(lang) {
 }
 
 function resetCode() {
-  ElMessageBox.confirm('确定要重置代码吗？未保存的修改将会丢失。', '重置代码', {
+  messageBox.confirm('确定要重置代码吗？未保存的修改将会丢失。', '重置代码', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
     code.value = codeTemplates[selectedLanguage.value] || ''
-    ElMessage.success('代码已重置')
+    uiMessage.success('代码已重置')
   }).catch(() => {})
 }
 
 async function runCode() {
   if (!code.value.trim()) {
-    ElMessage.warning('请先编写代码')
+    uiMessage.warning('请先编写代码')
     return
   }
 
@@ -435,12 +435,12 @@ async function runCode() {
       activeTab.value = 'result'
 
       if (response.data.status === 'success') {
-        ElMessage.success('代码运行成功')
+        uiMessage.success('代码运行成功')
       } else {
-        ElMessage.error('代码运行失败')
+        uiMessage.error('代码运行失败')
       }
     } else {
-      ElMessage.error('运行失败: ' + (response.message || '未知错误'))
+      uiMessage.error('运行失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
     logger.error('运行代码失败:', error)
@@ -452,7 +452,7 @@ async function runCode() {
       errorMessage += ': ' + error.message
     }
     
-    ElMessage.error(errorMessage)
+    uiMessage.error(errorMessage)
   } finally {
     running.value = false
   }
@@ -460,7 +460,7 @@ async function runCode() {
 
 async function submitCode() {
   if (!code.value.trim()) {
-    ElMessage.warning('请先编写代码')
+    uiMessage.warning('请先编写代码')
     return
   }
 
@@ -482,15 +482,15 @@ async function submitCode() {
       recordTrainingReview(!!response.data.accepted)
 
       if (response.data.status === 'unavailable') {
-        ElMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
+        uiMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
       } else if (response.data.accepted) {
         markProblemCompleted(problem.value.id)
-        ElMessage.success('答案通过')
+        uiMessage.success('答案通过')
       } else {
-        ElMessage.error('答案未通过，请查看详细反馈')
+        uiMessage.error('答案未通过，请查看详细反馈')
       }
     } else {
-      ElMessage.error('提交失败: ' + (response.message || '未知错误'))
+      uiMessage.error('提交失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
     logger.error('提交代码失败:', error)
@@ -503,7 +503,7 @@ async function submitCode() {
       errorMessage += ': ' + error.message
     }
     
-    ElMessage.error(errorMessage)
+    uiMessage.error(errorMessage)
   } finally {
     submitting.value = false
   }
@@ -517,7 +517,7 @@ function continuePractice() {
 async function loadProblem() {
   const problemId = route.params.id
   if (!problemId) {
-    ElMessage.error('题目ID不存在')
+    uiMessage.error('题目ID不存在')
     router.push('/student/practice')
     return
   }
@@ -538,7 +538,7 @@ async function loadProblem() {
     }
   } catch (error) {
     logger.error('加载题目失败:', error)
-    ElMessage.error('加载题目失败')
+    uiMessage.error('加载题目失败')
     router.push('/student/practice')
   }
 }

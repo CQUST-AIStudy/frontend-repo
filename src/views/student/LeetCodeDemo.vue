@@ -1,29 +1,29 @@
 <template>
   <div class="leetcode-demo [padding:20px]">
-    <page-header title="LeetCode功能演示" description="测试代码提交和AI批改功能" />
+    <UiPageHeader title="LeetCode功能演示" description="测试代码提交和AI批改功能" />
     
-    <el-card class="demo-card [margin-bottom:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
+    <ui-card class="demo-card [margin-bottom:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
       <h3>🧪 功能测试</h3>
       
-      <el-space direction="vertical" size="large" class="[width:100%]">
-        <el-button @click="testAIFeedback" type="primary" size="large">
+      <ui-space direction="vertical" size="large" class="[width:100%]">
+        <ui-button @click="testAIFeedback" type="primary" size="large">
           测试AI批改反馈
-        </el-button>
+        </ui-button>
         
-        <el-button @click="testSubmitCode" type="success" size="large" :loading="testing">
+        <ui-button @click="testSubmitCode" type="success" size="large" :loading="testing">
           测试代码提交
-        </el-button>
-      </el-space>
-    </el-card>
+        </ui-button>
+      </ui-space>
+    </ui-card>
 
     <!-- AI反馈演示 -->
-    <el-card v-if="showDemo" class="feedback-demo [margin-top:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
+    <ui-card v-if="showDemo" class="feedback-demo [margin-top:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
       <h3>🤖 AI批改反馈演示</h3>
       
       <div class="demo-result [max-height:70vh] [overflow-y:auto]">
         <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
           <div class="status accepted [display:flex] [align-items:center] [gap:8px] [font-size:18px] [font-weight:bold] [&.accepted]:[color:#67c23a] [&.rejected]:[color:#f56c6c]">
-            <el-icon><Check /></el-icon>
+            <ui-icon><Check /></ui-icon>
             通过
           </div>
           <div class="score [font-size:16px] [font-weight:bold] [color:#409eff] [color:#f56c6c] [font-weight:700]">
@@ -39,38 +39,37 @@
 
         <!-- 执行详情 -->
         <div class="execution-details [margin:20px_0]">
-          <el-descriptions title="执行详情" :column="2" border>
-            <el-descriptions-item label="执行时间">120ms</el-descriptions-item>
-            <el-descriptions-item label="内存消耗">暂无</el-descriptions-item>
-            <el-descriptions-item label="通过用例">3 / 3</el-descriptions-item>
-          </el-descriptions>
+          <ui-descriptions title="执行详情" :column="2" border>
+            <ui-descriptions-item label="执行时间">120ms</ui-descriptions-item>
+            <ui-descriptions-item label="内存消耗">暂无</ui-descriptions-item>
+            <ui-descriptions-item label="通过用例">3 / 3</ui-descriptions-item>
+          </ui-descriptions>
         </div>
 
         <!-- 技能提升建议-->
         <div class="skill-suggestions [margin:20px_0] [&_h4]:[margin-bottom:12px] [&_h4]:[color:#333]">
           <h4>技能提升建议</h4>
-          <el-tag
+          <ui-tag
             v-for="suggestion in skillSuggestions"
             :key="suggestion"
             class="suggestion-tag [margin:4px_8px_4px_0]"
             type="info"
           >
             {{ suggestion }}
-          </el-tag>
+          </ui-tag>
         </div>
       </div>
-    </el-card>
+    </ui-card>
   </div>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Check } from '@element-plus/icons-vue'
+import { message as uiMessage } from '@/services/feedback'
+import { Check } from '@/components/ui/icons'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import PageHeader from '@/components/PageHeader.vue'
 import { testAIFeedback as getTestFeedback } from '@/utils/testLeetCode'
 
 const showDemo = ref(false)
@@ -106,7 +105,7 @@ const renderedFeedback = computed(() => {
 
 function testAIFeedback() {
   showDemo.value = true
-  ElMessage.success('AI批改反馈演示已显示')
+  uiMessage.success('AI批改反馈演示已显示')
   
   // 调用测试工具
   const result = getTestFeedback()
@@ -118,21 +117,21 @@ async function testSubmitCode() {
   
   try {
     // 模拟提交过程
-    ElMessage.info('正在提交代码...')
+    uiMessage.info('正在提交代码...')
     
     await new Promise(resolve => setTimeout(resolve, 2000))
     
     // 模拟AI批改过程
-    ElMessage.info('AI正在批改中..')
+    uiMessage.info('AI正在批改中..')
     
     await new Promise(resolve => setTimeout(resolve, 3000))
     
     // 显示结果
     showDemo.value = true
-    ElMessage.success('代码提交成功，AI批改完成！')
+    uiMessage.success('代码提交成功，AI批改完成！')
     
   } catch (error) {
-    ElMessage.error('测试失败: ' + error.message)
+    uiMessage.error('测试失败: ' + error.message)
   } finally {
     testing.value = false
   }

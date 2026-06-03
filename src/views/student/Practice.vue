@@ -1,30 +1,30 @@
 <template>
   <div class="practice-container [height:100%]">
-    <page-header class="my-page-header [padding:20px]" title="推荐练习" description="根据您的学习情况和技能掌握程度AI推荐的练习内容" />
+    <UiPageHeader class="my-page-header [padding:20px]" title="推荐练习" description="根据您的学习情况和技能掌握程度AI推荐的练习内容" />
 
     <loading-state :loading="loading">
       <div class="practice-content [height:100%]">
-        <el-row :gutter="20">
-          <el-col :span="18">
+        <ui-row :gutter="20">
+          <ui-col :span="18">
             <div class="practice-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_#dadce0]">
               <div class="header-tabs">
-                <el-radio-group v-model="activeTab" size="large">
-                  <el-radio-button label="recommended">为我推荐</el-radio-button>
-                </el-radio-group>
+                <ui-radio-group v-model="activeTab" size="large">
+                  <ui-radio-button label="recommended">为我推荐</ui-radio-button>
+                </ui-radio-group>
               </div>
 
-              <div class="header-filter [display:flex] [align-items:center] [gap:10px] [&_.el-select]:[width:150px]">
-                <el-select v-model="filterDifficulty" placeholder="难度筛选" clearable class="[width:150px]">
-                  <el-option label="简单" value="easy" />
-                  <el-option label="中等" value="medium" />
-                  <el-option label="困难" value="hard" />
-                </el-select>
+              <div class="header-filter [display:flex] [align-items:center] [gap:10px] [&_.ui-select]:[width:150px]">
+                <ui-select v-model="filterDifficulty" placeholder="难度筛选" clearable class="[width:150px]">
+                  <ui-option label="简单" value="easy" />
+                  <ui-option label="中等" value="medium" />
+                  <ui-option label="困难" value="hard" />
+                </ui-select>
               </div>
             </div>
 
             <div class="practice-list [margin-bottom:20px] [display:flex] [flex-direction:column] [gap:12px]">
-              <el-empty v-if="filteredPractices.length === 0" description="没有找到符合条件的练习题目" />
-              <el-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card [margin-bottom:15px] [cursor:pointer] [transition:all_0.3s] [border-left:3px_solid_transparent] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] hover:[transform:translateY(-2px)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [background:#fff] [text-align:left] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0]"
+              <ui-empty v-if="filteredPractices.length === 0" description="没有找到符合条件的练习题目" />
+              <ui-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card [margin-bottom:15px] [cursor:pointer] [transition:all_0.3s] [border-left:3px_solid_transparent] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] hover:[transform:translateY(-2px)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [background:#fff] [text-align:left] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0]"
                 :class="{ 'selected': selectedPractice?.id === practice.id || selectedPractice?.number === practice.number }" 
                 @click="selectPractice(practice)">
                 <div v-if="practice.type === 'introduction'" class="introduction-card [padding:10px]">
@@ -45,13 +45,13 @@
 
                   <div class="practice-info [display:flex] [justify-content:flex-end] [align-items:center]">
                     <span class="practice-number [font-size:14px] [color:#909399] [margin-right:10px] [margin-left:10px]" v-if="practice.number">题目 {{practice.number}}</span>
-                    <el-tag size="small" :type="difficultyType(practice.difficulty)">
+                    <ui-tag size="small" :type="difficultyType(practice.difficulty)">
                       {{ getDifficultyText(practice.difficulty) }}
-                    </el-tag>
-                    <el-tag v-if="practice.estimatedMinutes" size="small" effect="plain" class="[margin-left:8px]">
+                    </ui-tag>
+                    <ui-tag v-if="practice.estimatedMinutes" size="small" effect="plain" class="[margin-left:8px]">
                       约{{ practice.estimatedMinutes }} 分钟
-                    </el-tag>
-                    <el-button
+                    </ui-tag>
+                    <ui-button
                       v-if="isTrackableRecommendation(practice)"
                       text
                       type="warning"
@@ -59,24 +59,24 @@
                       class="[margin-left:10px]"
                     >
                       不感兴趣
-                    </el-button>
-                    <el-button type="primary" size="small" @click.stop="startProblem(practice)"
+                    </ui-button>
+                    <ui-button type="primary" size="small" @click.stop="startProblem(practice)"
                       class="[margin-left:10px]">
                       开始解答
-                    </el-button>
+                    </ui-button>
                   </div>
                 </div>
-              </el-card>
+              </ui-card>
             </div>
 
             <div class="pagination-container [display:flex] [justify-content:center] [margin-top:20px] [margin-bottom:20px] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
-              <el-pagination background layout="prev, pager, next" :total="filteredPractices.length"
+              <ui-pagination background layout="prev, pager, next" :total="filteredPractices.length"
                 :page-size="pageSize" :current-page="currentPage" @current-change="handlePageChange" />
             </div>
-          </el-col>
+          </ui-col>
 
-          <el-col :span="6">
-            <div class="practice-detail [display:flex] [flex-direction:column] [gap:20px] [height:100%]">              <el-card v-if="selectedPractice" class="detail-card [margin-bottom:15px]">
+          <ui-col :span="6">
+            <div class="practice-detail [display:flex] [flex-direction:column] [gap:20px] [height:100%]">              <ui-card v-if="selectedPractice" class="detail-card [margin-bottom:15px]">
                 <template #header>
                   <div class="detail-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[font-size:18px] [&_h3]:[font-weight:600] [&_h3]:[color:#202124] [gap:12px]">
                     <h3>{{ selectedPractice.title || selectedPractice.name }}</h3>
@@ -102,28 +102,28 @@
                       预计用时 {{ selectedPractice.estimatedMinutes }} 分钟
                     </div>
                     <div class="detail-actions [display:flex] [gap:10px] [margin-top:10px]" v-if="canStartPractice(selectedPractice)">
-                      <el-button
+                      <ui-button
                         v-if="isTrackableRecommendation(selectedPractice)"
                         type="warning"
                         plain
                         @click="handleDislike(selectedPractice)"
                       >
                         不感兴趣
-                      </el-button>
-                      <el-button type="primary" @click="startProblem(selectedPractice)">开始解答</el-button>
+                      </ui-button>
+                      <ui-button type="primary" @click="startProblem(selectedPractice)">开始解答</ui-button>
                     </div>
                   </div>
                 </div>
-              </el-card>
+              </ui-card>
 
-              <el-card v-else class="empty-detail [display:flex] [align-items:center] [justify-content:center] [height:300px]">
+              <ui-card v-else class="empty-detail [display:flex] [align-items:center] [justify-content:center] [height:300px]">
                 <div class="empty-detail-content [text-align:center] [color:#9aa0a6]">
-                  <el-icon><Select /></el-icon>
+                  <ui-icon><Select /></ui-icon>
                   <p>请从左侧选择一道题目</p>
                 </div>
-              </el-card>
+              </ui-card>
 
-              <el-card class="stats-card [margin-top:auto] [margin-bottom:15px]">
+              <ui-card class="stats-card [margin-top:auto] [margin-bottom:15px]">
                 <template #header>
                   <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                     <span>我的练习统计</span>
@@ -146,25 +146,25 @@
                       <span>整体进度</span>
                       <span>{{ completionRate }}%</span>
                     </div>
-                    <el-progress :percentage="completionRate" />
+                    <ui-progress :percentage="completionRate" />
                   </div>
                 </div>
-              </el-card>
+              </ui-card>
             </div>
-          </el-col>
-        </el-row>
+          </ui-col>
+        </ui-row>
       </div>
     </loading-state>    <!-- 题目详情对话框-->
-    <el-dialog v-model="detailDialogVisible" title="题目详情" width="60%" :destroy-on-close="true">
+    <ui-dialog v-model="detailDialogVisible" title="题目详情" width="60%" :destroy-on-close="true">
       <div class="practice-detail-dialog [padding:0_20px]" v-if="selectedPractice">
         <div class="detail-header-dialog [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_#dadce0]">
           <h2>{{ selectedPractice.title || selectedPractice.name }}</h2>
           <div class="practice-number" v-if="selectedPractice.number">
             题目 #{{ selectedPractice.number }}
           </div>
-          <el-tag :type="difficultyType(selectedPractice.difficulty)" class="difficulty-tag [font-size:14px] [padding:6px_12px]">
+          <ui-tag :type="difficultyType(selectedPractice.difficulty)" class="difficulty-tag [font-size:14px] [padding:6px_12px]">
             {{ getDifficultyText(selectedPractice.difficulty) }}
-          </el-tag>
+          </ui-tag>
         </div>
 
         <div class="detail-section [margin-bottom:25px]" v-if="selectedPractice.type === 'introduction'">
@@ -172,25 +172,22 @@
         </div>
 
         <div class="detail-actions-dialog [display:flex] [gap:10px] [margin-top:20px] [justify-content:flex-end]" v-if="canStartPractice(selectedPractice)">
-          <el-button type="primary" @click="startProblem(selectedPractice)">开始解题</el-button>
-          <el-button @click="detailDialogVisible = false">关闭</el-button>
+          <ui-button type="primary" @click="startProblem(selectedPractice)">开始解题</ui-button>
+          <ui-button @click="detailDialogVisible = false">关闭</ui-button>
         </div>
         <div class="detail-actions-dialog [display:flex] [gap:10px] [margin-top:20px] [justify-content:flex-end]" v-else>
-          <el-button @click="detailDialogVisible = false">关闭</el-button>
+          <ui-button @click="detailDialogVisible = false">关闭</ui-button>
         </div>
       </div>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
+import { useLearningStore } from '@/store'
+import { computed, onMounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
-import { ref, computed, onMounted, watch } from 'vue'
-import { Select } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
-import LoadingState from '../../components/LoadingState.vue'
-import { useLearningStore } from '../../store'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import { useRouter } from 'vue-router'
 import api from '@/api'
 
@@ -309,14 +306,11 @@ const startProblem = (practice) => {
     if (externalUrl) {
       window.open(externalUrl, '_blank')
     } else {
-      ElMessage.warning('该题目暂不支持在线练习')
+      uiMessage.warning('该题目暂不支持在线练习')
     }
   }
 
-  ElMessage({
-    message: `开始解答题目 ${currentPractice.title || currentPractice.name}`,
-    type: 'success'
-  })
+  uiMessage.success(`开始解答题目 ${currentPractice.title || currentPractice.name}`)
 }
 
 const getPracticeProblemId = (practice) => {
@@ -409,7 +403,7 @@ const handleDislike = async (practice) => {
   const ok = await recordRecommendationFeedback(practice, 'dislike')
   if (ok) {
     markPracticeAsDismissed(practice)
-    ElMessage.success('已降低该题后续推荐优先级')
+    uiMessage.success('已降低该题后续推荐优先级')
   }
 }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="g-dashboard [min-width:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
-    <page-header title="首页" description="欢迎使用数据结构课程AI辅助系统" />
+    <UiPageHeader title="首页" description="欢迎使用数据结构课程AI辅助系统" />
 
     <loading-state :loading="loading">
       <div class="g-content [display:flex] [flex-direction:column] [gap:20px] [min-width:0] max-[640px]:[gap:14px]">
@@ -8,7 +8,7 @@
         <div class="g-stat-row [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1180px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[640px]:[grid-template-columns:1fr]">
           <div class="g-stat-card [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#e5e5e7] [display:flex] [align-items:center] [gap:16px] [transition:box-shadow_0.2s,_transform_0.2s] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] hover:[transform:translateY(-1px)] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]" v-for="s in statCards" :key="s.label">
             <div class="g-stat-icon [width:44px] [height:44px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="statIconClass(s)">
-              <el-icon :size="20"><component :is="s.icon" /></el-icon>
+              <ui-icon :size="20"><component :is="s.icon" /></ui-icon>
             </div>
             <div class="g-stat-body">
               <div class="g-stat-label [font-size:12px] [color:#6e6e73] [margin-bottom:4px]">{{ s.label }}</div>
@@ -38,7 +38,7 @@
           <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#1d1d1f] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]"><span>AI 辅助学习中心</span></div>
           <div class="g-feature-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:12px] max-[1180px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[640px]:[grid-template-columns:1fr]">
             <div class="g-feature-item [display:flex] [align-items:center] [gap:12px] [padding:16px] [border-radius:12px] [border:1px_solid_#f5f5f7] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:#d1d1d6] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.1)]" v-for="f in features" :key="f.path" @click="nav(f.path)">
-              <el-icon class="g-feature-icon [color:#007aff] [flex-shrink:0]" :size="24"><component :is="f.icon" /></el-icon>
+              <ui-icon class="g-feature-icon [color:#007aff] [flex-shrink:0]" :size="24"><component :is="f.icon" /></ui-icon>
               <div>
                 <div class="g-feature-title [font-size:13px] [font-weight:500] [color:#1d1d1f]">{{ f.title }}</div>
                 <div class="g-feature-desc [font-size:11px] [color:#6e6e73] [margin-top:2px]">{{ f.desc }}</div>
@@ -65,7 +65,7 @@
                     <span v-if="e.deadline" class="g-exp-date [font-size:11px] [color:#aeaeb2]">截止: {{ e.deadline }}</span>
                   </div>
                 </div>
-                <el-icon class="g-exp-arrow [color:#aeaeb2] [flex-shrink:0]"><ArrowRight /></el-icon>
+                <ui-icon class="g-exp-arrow [color:#aeaeb2] [flex-shrink:0]"><ArrowRight /></ui-icon>
               </div>
               <div v-if="!recentExperiments.length" class="g-empty-hint [text-align:center] [padding:24px_0] [font-size:13px] [color:#aeaeb2]">暂无实验数据</div>
             </div>
@@ -81,7 +81,7 @@
             </div>
             <div v-else class="g-empty-hint [text-align:center] [padding:24px_0] [font-size:13px] [color:#aeaeb2]">暂无数据</div>
             <div class="g-weak-action [margin-top:16px] [text-align:center]">
-              <button class="g-pill-btn [background:#fff] [border:1px_solid_#e5e5e7] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#007aff] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:#007aff]" @click="nav('/student/weakness-training')">去专项训练</button>
+              <UiButton class="g-pill-btn [background:#fff] [border:1px_solid_#e5e5e7] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#007aff] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:#007aff]" @click="nav('/student/weakness-training')">去专项训练</UiButton>
             </div>
           </div>
         </div>
@@ -94,8 +94,7 @@
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
-import { Notebook, TrendCharts, Finished, Collection, Document, DataAnalysis, ChatDotRound, ArrowRight } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
+import { Notebook, TrendCharts, Finished, Collection, Document, DataAnalysis, ChatDotRound, ArrowRight } from '@/components/ui/icons'
 import LoadingState from '../../components/LoadingState.vue'
 import { useExperimentStore } from '../../store'
 import * as echarts from 'echarts'

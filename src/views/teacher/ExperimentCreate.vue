@@ -1,25 +1,25 @@
 <template>
   <div class="h-full">
-    <page-header
+    <UiPageHeader
       class="p-5"
       title="创建实验"
       description="创建新的数据结构实验任务"
     >
-      <button
+      <UiButton
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
         @click="goBack"
       >
         返回列表
-      </button>
-    </page-header>
+      </UiButton>
+    </UiPageHeader>
 
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
-      <form @submit.prevent="submitForm" class="space-y-6">
+      <UiForm @submit.prevent="submitForm" class="space-y-6">
         <!-- 实验名称 -->
         <div class="flex items-start gap-4">
           <label class="w-[100px] text-sm text-[#1d1d1f] pt-2.5 text-right shrink-0">实验名称</label>
           <div class="flex-1">
-            <input
+            <UiInput
               v-model="formData.name"
               type="text"
               placeholder="请输入实验名称"
@@ -34,7 +34,7 @@
         <div class="flex items-start gap-4">
           <label class="w-[100px] text-sm text-[#1d1d1f] pt-2.5 text-right shrink-0">截止日期</label>
           <div class="flex-1">
-            <el-date-picker
+            <ui-date-picker
               v-model="formData.deadline"
               type="datetime"
               placeholder="选择截止日期"
@@ -65,27 +65,27 @@
           <label class="w-[100px] text-sm text-[#1d1d1f] pt-2.5 text-right shrink-0">实验要求</label>
           <div class="flex-1 flex flex-col gap-2.5">
             <div v-for="(req, index) in formData.requirements" :key="index" class="flex items-center gap-2.5">
-              <input
+              <UiInput
                 v-model="formData.requirements[index]"
                 type="text"
                 placeholder="请输入实验要求"
                 class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
               />
-              <button
+              <UiButton
                 type="button"
                 class="text-sm text-red-500 hover:text-red-600 cursor-pointer bg-transparent border-none transition-colors"
                 @click="removeRequirement(index)"
               >
                 删除
-              </button>
+              </UiButton>
             </div>
-            <button
+            <UiButton
               type="button"
               class="self-start text-sm text-[#007aff] hover:text-[#3898ff] cursor-pointer bg-transparent border-none transition-colors"
               @click="addRequirement"
             >
               + 添加要求
-            </button>
+            </UiButton>
           </div>
         </div>
 
@@ -100,7 +100,7 @@
                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm cursor-pointer transition-all"
                 :class="formData.classes.includes(item.id) ? 'bg-[#007aff]/10 text-[#007aff] shadow-[inset_0_0_0_1px_rgba(0,122,255,0.3)]' : 'bg-white text-[#1d1d1f] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] hover:bg-[#e8e8ed]'"
               >
-                <input
+                <UiInput
                   type="checkbox"
                   :value="item.id"
                   v-model="formData.classes"
@@ -118,7 +118,7 @@
           <label class="w-[100px] text-sm text-[#1d1d1f] pt-2.5 text-right shrink-0">状态</label>
           <div class="flex-1 flex items-center gap-6 pt-2">
             <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-[#1d1d1f]">
-              <input
+              <UiInput
                 type="radio"
                 v-model="formData.status"
                 value="draft"
@@ -127,7 +127,7 @@
               保存为草稿
             </label>
             <label class="inline-flex items-center gap-2 cursor-pointer text-sm text-[#1d1d1f]">
-              <input
+              <UiInput
                 type="radio"
                 v-model="formData.status"
                 value="active"
@@ -140,32 +140,31 @@
 
         <!-- 操作按钮 -->
         <div class="flex items-center gap-4 pl-[116px]">
-          <button
+          <UiButton
             type="submit"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
           >
             创建实验
-          </button>
-          <button
+          </UiButton>
+          <UiButton
             type="button"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
             @click="resetForm"
           >
             重置
-          </button>
+          </UiButton>
         </div>
-      </form>
+      </UiForm>
     </div>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { onMounted, reactive, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
 import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 
 const router = useRouter()
@@ -222,12 +221,12 @@ const submitForm = async () => {
   try {
     const result = await api.createExperiment(formData)
     if (result.success) {
-      ElMessage.success('实验创建成功')
+      uiMessage.success('实验创建成功')
       router.push('/teacher/experiments')
     }
   } catch (error) {
     logger.error('创建实验失败:', error)
-    ElMessage.error('创建实验失败，请稍后重试')
+    uiMessage.error('创建实验失败，请稍后重试')
   }
 }
 

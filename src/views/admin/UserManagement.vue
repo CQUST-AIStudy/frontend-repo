@@ -1,14 +1,14 @@
 <template>
   <div class="user-management">
-    <page-header
+    <UiPageHeader
       class="my-page-header"
       title="用户管理"
       description="管理系统用户，包括学生、教师和管理员"
     >
-      <el-button type="primary" :disabled="!userManagementReady" @click="showAddUserDialog">添加用户</el-button>
-    </page-header>
+      <ui-button type="primary" :disabled="!userManagementReady" @click="showAddUserDialog">添加用户</ui-button>
+    </UiPageHeader>
 
-    <el-alert
+    <ui-alert
       v-if="!userManagementReady"
       class="read-only-alert [margin-bottom:20px]"
       type="warning"
@@ -18,61 +18,61 @@
       show-icon
     />
 
-    <el-card class="filter-card">
-      <el-form :inline="true" :model="filterForm" class="filter-form">
-        <el-form-item label="用户ID">
-          <el-input v-model="filterForm.id" placeholder="输入用户ID" clearable />
-        </el-form-item>
+    <ui-card class="filter-card">
+      <ui-form :inline="true" :model="filterForm" class="filter-form">
+        <ui-form-item label="用户ID">
+          <ui-input v-model="filterForm.id" placeholder="输入用户ID" clearable />
+        </ui-form-item>
 
-        <el-form-item label="用户名">
-          <el-input v-model="filterForm.name" placeholder="输入用户名" clearable />
-        </el-form-item>
+        <ui-form-item label="用户名">
+          <ui-input v-model="filterForm.name" placeholder="输入用户名" clearable />
+        </ui-form-item>
 
-        <el-form-item label="角色">
-          <el-select v-model="filterForm.role" placeholder="选择角色" clearable>
-            <el-option label="全部" value="" />
-            <el-option label="学生" value="student" />
-            <el-option label="教师" value="teacher" />
-            <el-option label="管理员" value="admin" />
-          </el-select>
-        </el-form-item>
+        <ui-form-item label="角色">
+          <ui-select v-model="filterForm.role" placeholder="选择角色" clearable>
+            <ui-option label="全部" value="" />
+            <ui-option label="学生" value="student" />
+            <ui-option label="教师" value="teacher" />
+            <ui-option label="管理员" value="admin" />
+          </ui-select>
+        </ui-form-item>
 
-        <el-form-item class="filter-actions-item">
+        <ui-form-item class="filter-actions-item">
           <div class="filter-actions">
-            <el-button type="primary" @click="applyFilter">查询</el-button>
-            <el-button @click="resetFilter">重置</el-button>
+            <ui-button type="primary" @click="applyFilter">查询</ui-button>
+            <ui-button @click="resetFilter">重置</ui-button>
           </div>
-        </el-form-item>
-      </el-form>
-    </el-card>
+        </ui-form-item>
+      </ui-form>
+    </ui-card>
 
-    <el-card class="table-card">
+    <ui-card class="table-card">
       <div class="user-table-wrap">
-        <el-table :data="filteredUsers" border>
-          <el-table-column prop="id" label="用户ID" width="120" />
-          <el-table-column label="用户信息" min-width="220">
+        <ui-table :data="filteredUsers" border>
+          <ui-table-column prop="id" label="用户ID" width="120" />
+          <ui-table-column label="用户信息" min-width="220">
             <template #default="scope">
               <div class="user-cell">
-                <el-avatar :size="32" :src="scope.row.avatar" />
+                <ui-avatar :size="32" :src="scope.row.avatar" />
                 <div class="user-cell__details">
                   <div class="user-cell__name">{{ scope.row.name }}</div>
                   <div class="user-cell__extra">{{ scope.row.role === 'student' ? scope.row.class : scope.row.department }}</div>
                 </div>
               </div>
             </template>
-          </el-table-column>
-          <el-table-column prop="email" label="邮箱" min-width="180" />
-          <el-table-column prop="phone" label="电话" width="150" />
-          <el-table-column label="角色" width="100">
+          </ui-table-column>
+          <ui-table-column prop="email" label="邮箱" min-width="180" />
+          <ui-table-column prop="phone" label="电话" width="150" />
+          <ui-table-column label="角色" width="100">
             <template #default="scope">
-              <el-tag :type="getRoleType(scope.row.role)">
+              <ui-tag :type="getRoleType(scope.row.role)">
                 {{ getRoleText(scope.row.role) }}
-              </el-tag>
+              </ui-tag>
             </template>
-          </el-table-column>
-          <el-table-column label="状态" width="100">
+          </ui-table-column>
+          <ui-table-column label="状态" width="100">
             <template #default="scope">
-              <el-switch
+              <ui-switch
                 v-model="scope.row.status"
                 :active-value="'active'"
                 :inactive-value="'inactive'"
@@ -80,21 +80,21 @@
                 @change="handleStatusChange(scope.row)"
               />
             </template>
-          </el-table-column>
-          <el-table-column label="操作" width="190">
+          </ui-table-column>
+          <ui-table-column label="操作" width="190">
             <template #default="scope">
               <div class="table-actions">
-                <el-button type="primary" link :disabled="!userManagementReady" @click="editUser(scope.row)">编辑</el-button>
-                <el-button type="primary" link :disabled="!userManagementReady" @click="resetPassword(scope.row)">重置密码</el-button>
-                <el-button type="danger" link :disabled="!userManagementReady" @click="deleteUser(scope.row)">删除</el-button>
+                <ui-button type="primary" link :disabled="!userManagementReady" @click="editUser(scope.row)">编辑</ui-button>
+                <ui-button type="primary" link :disabled="!userManagementReady" @click="resetPassword(scope.row)">重置密码</ui-button>
+                <ui-button type="danger" link :disabled="!userManagementReady" @click="deleteUser(scope.row)">删除</ui-button>
               </div>
             </template>
-          </el-table-column>
-        </el-table>
+          </ui-table-column>
+        </ui-table>
       </div>
 
       <div class="pagination-container">
-        <el-pagination
+        <ui-pagination
           background
           layout="total, sizes, prev, pager, next, jumper"
           :total="totalUsers"
@@ -105,109 +105,108 @@
           @current-change="handleCurrentChange"
         />
       </div>
-    </el-card>
+    </ui-card>
 
     <!-- 添加/编辑用户对话框-->
-    <el-dialog
+    <ui-dialog
       v-model="userDialogVisible"
       :title="dialogType === 'add' ? '添加用户' : '编辑用户'"
       width="500px"
     >
-      <el-form ref="userFormRef" :model="userForm" :rules="userRules" label-width="100px">
-        <el-form-item label="用户名" prop="name">
-          <el-input v-model="userForm.name" />
-        </el-form-item>
+      <ui-form ref="userFormRef" :model="userForm" :rules="userRules" label-width="100px">
+        <ui-form-item label="用户名" prop="name">
+          <ui-input v-model="userForm.name" />
+        </ui-form-item>
 
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" placeholder="选择角色" class="[width:100%]">
-            <el-option label="学生" value="student" />
-            <el-option label="教师" value="teacher" />
-            <el-option label="管理员" value="admin" />
-          </el-select>
-        </el-form-item>
+        <ui-form-item label="角色" prop="role">
+          <ui-select v-model="userForm.role" placeholder="选择角色" class="[width:100%]">
+            <ui-option label="学生" value="student" />
+            <ui-option label="教师" value="teacher" />
+            <ui-option label="管理员" value="admin" />
+          </ui-select>
+        </ui-form-item>
 
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="userForm.email" />
-        </el-form-item>
+        <ui-form-item label="邮箱" prop="email">
+          <ui-input v-model="userForm.email" />
+        </ui-form-item>
 
-        <el-form-item label="电话" prop="phone">
-          <el-input v-model="userForm.phone" />
-        </el-form-item>
+        <ui-form-item label="电话" prop="phone">
+          <ui-input v-model="userForm.phone" />
+        </ui-form-item>
 
         <template v-if="userForm.role === 'student'">
-          <el-form-item label="班级" prop="class">
-            <el-select v-model="userForm.class" placeholder="选择班级" class="[width:100%]">
-              <el-option
+          <ui-form-item label="班级" prop="class">
+            <ui-select v-model="userForm.class" placeholder="选择班级" class="[width:100%]">
+              <ui-option
                 v-for="item in classList"
                 :key="item.id"
                 :label="item.name"
                 :value="item.name"
               />
-            </el-select>
-          </el-form-item>
+            </ui-select>
+          </ui-form-item>
 
-          <el-form-item label="年级" prop="grade">
-            <el-input v-model="userForm.grade" />
-          </el-form-item>
+          <ui-form-item label="年级" prop="grade">
+            <ui-input v-model="userForm.grade" />
+          </ui-form-item>
         </template>
 
         <template v-else>
-          <el-form-item label="部门" prop="department">
-            <el-input v-model="userForm.department" />
-          </el-form-item>
+          <ui-form-item label="部门" prop="department">
+            <ui-input v-model="userForm.department" />
+          </ui-form-item>
 
           <template v-if="userForm.role === 'teacher'">
-            <el-form-item label="职称" prop="title">
-              <el-input v-model="userForm.title" />
-            </el-form-item>
+            <ui-form-item label="职称" prop="title">
+              <ui-input v-model="userForm.title" />
+            </ui-form-item>
           </template>
         </template>
 
-        <el-form-item v-if="dialogType === 'add'" label="密码" prop="password">
-          <el-input v-model="userForm.password" type="password" show-password />
-        </el-form-item>
-      </el-form>
+        <ui-form-item v-if="dialogType === 'add'" label="密码" prop="password">
+          <ui-input v-model="userForm.password" type="password" show-password />
+        </ui-form-item>
+      </ui-form>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="userDialogVisible = false">取消</el-button>
-          <el-button type="primary" :disabled="!userManagementReady" @click="saveUser">确定</el-button>
+          <ui-button @click="userDialogVisible = false">取消</ui-button>
+          <ui-button type="primary" :disabled="!userManagementReady" @click="saveUser">确定</ui-button>
         </div>
       </template>
-    </el-dialog>
+    </ui-dialog>
 
     <!-- 重置密码对话框-->
-    <el-dialog v-model="resetPasswordDialogVisible" title="重置密码" width="400px">
-      <el-form ref="resetPasswordFormRef" :model="resetPasswordForm" label-width="100px">
-        <el-form-item label="新密码" prop="password">
-          <el-input v-model="resetPasswordForm.password" type="password" show-password />
-        </el-form-item>
+    <ui-dialog v-model="resetPasswordDialogVisible" title="重置密码" width="400px">
+      <ui-form ref="resetPasswordFormRef" :model="resetPasswordForm" label-width="100px">
+        <ui-form-item label="新密码" prop="password">
+          <ui-input v-model="resetPasswordForm.password" type="password" show-password />
+        </ui-form-item>
 
-        <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="resetPasswordForm.confirmPassword" type="password" show-password />
-        </el-form-item>
-      </el-form>
+        <ui-form-item label="确认密码" prop="confirmPassword">
+          <ui-input v-model="resetPasswordForm.confirmPassword" type="password" show-password />
+        </ui-form-item>
+      </ui-form>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="resetPasswordDialogVisible = false">取消</el-button>
-          <el-button type="primary" :disabled="!userManagementReady" @click="confirmResetPassword">确定</el-button>
+          <ui-button @click="resetPasswordDialogVisible = false">取消</ui-button>
+          <ui-button type="primary" :disabled="!userManagementReady" @click="confirmResetPassword">确定</ui-button>
         </div>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import api from '../../api'
 
 const userManagementReady = true
 const showReadOnlyNotice = () => {
-  ElMessage.warning('用户管理真实后端尚未接通，当前页面仅保留只读展示。')
+  uiMessage.warning('用户管理真实后端尚未接通，当前页面仅保留只读展示。')
 }
 
 // 表格数据
@@ -440,7 +439,7 @@ const handleStatusChange = (user) => {
     return
   }
   const status = user.status === 'active' ? '启用' : '禁用'
-  ElMessage.success(`已${status}用户 ${user.name}`)
+  uiMessage.success(`已${status}用户 ${user.name}`)
 }
 
 // 添加用户
@@ -501,16 +500,16 @@ const saveUser = () => {
       }
       if (dialogType.value === 'add') {
         await api.addUser(payload)
-        ElMessage.success('添加用户成功')
+        uiMessage.success('添加用户成功')
       } else {
         await api.updateUser(currentUserId.value, payload)
-        ElMessage.success('更新用户成功')
+        uiMessage.success('更新用户成功')
       }
       await loadUsers()
       userDialogVisible.value = false
     } catch (error) {
       logger.error('保存用户失败:', error)
-      ElMessage.error('保存用户失败')
+      uiMessage.error('保存用户失败')
     }
   })
 }
@@ -534,23 +533,23 @@ const confirmResetPassword = async () => {
     return
   }
   if (!resetPasswordForm.password) {
-    ElMessage.warning('请输入新密码')
+    uiMessage.warning('请输入新密码')
     return
   }
 
   if (resetPasswordForm.password !== resetPasswordForm.confirmPassword) {
-    ElMessage.warning('两次输入的密码不一致')
+    uiMessage.warning('两次输入的密码不一致')
     return
   }
 
   try {
     await api.updateUser(resetPasswordForm.userId, { password: resetPasswordForm.password })
-    ElMessage.success('密码重置成功')
+    uiMessage.success('密码重置成功')
     resetPasswordDialogVisible.value = false
     await loadUsers()
   } catch (error) {
     logger.error('重置密码失败:', error)
-    ElMessage.error('重置密码失败')
+    uiMessage.error('重置密码失败')
   }
 }
 
@@ -560,7 +559,7 @@ const deleteUser = (user) => {
     showReadOnlyNotice()
     return
   }
-  ElMessageBox.confirm(
+  messageBox.confirm(
     `确定要删除用户${user.name} 吗？此操作不可恢复。`,
     '警告',
     {
@@ -572,10 +571,10 @@ const deleteUser = (user) => {
     try {
       await api.deleteUser(user.id)
       await loadUsers()
-      ElMessage.success('删除用户成功')
+      uiMessage.success('删除用户成功')
     } catch (error) {
       logger.error('删除用户失败:', error)
-      ElMessage.error('删除用户失败')
+      uiMessage.error('删除用户失败')
     }
   }).catch(() => {
     // 取消删除

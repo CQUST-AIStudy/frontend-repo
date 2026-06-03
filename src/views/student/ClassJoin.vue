@@ -1,55 +1,55 @@
 <template>
   <div class="class-join-page [display:flex] [flex-direction:column] [gap:20px]">
-    <page-header
+    <UiPageHeader
       title="教学班"
       description="加入教学班后，AI 学习助手会自动解锁该班级可访问的课程知识库和 RAG 问答空间。"
     />
 
     <div class="class-join-grid [display:grid] [grid-template-columns:minmax(320px,_420px)_minmax(0,_1fr)] [gap:20px] max-[960px]:[grid-template-columns:1fr]">
-      <el-card class="join-card [border-radius:16px]" shadow="hover">
+      <ui-card class="join-card [border-radius:16px]" shadow="hover">
         <template #header>
           <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>加入新班级</span>
           </div>
         </template>
 
-        <el-form label-position="top">
-          <el-form-item label="班级号">
-            <el-input v-model="joinForm.classCode" placeholder="例如：CS2025-01" />
-          </el-form-item>
-          <el-form-item label="加入密码">
-            <el-input
+        <ui-form label-position="top">
+          <ui-form-item label="班级号">
+            <ui-input v-model="joinForm.classCode" placeholder="例如：CS2025-01" />
+          </ui-form-item>
+          <ui-form-item label="加入密码">
+            <ui-input
               v-model="joinForm.password"
               type="password"
               show-password
               placeholder="输入教师提供的加入密码"
             />
-          </el-form-item>
-        </el-form>
+          </ui-form-item>
+        </ui-form>
 
         <div class="join-actions [display:flex] [gap:12px]">
-          <el-button type="primary" :loading="joining" :disabled="!canSubmit" @click="submitJoin">
+          <ui-button type="primary" :loading="joining" :disabled="!canSubmit" @click="submitJoin">
             加入班级
-          </el-button>
-          <el-button @click="goAssistant">前往 AI 助手</el-button>
+          </ui-button>
+          <ui-button @click="goAssistant">前往 AI 助手</ui-button>
         </div>
 
         <div class="join-tip [margin-top:12px] [color:#909399] [font-size:13px] [line-height:1.6]">
           加入成功后，AI 助手会自动展示你当前教学班有权限访问的课程空间。
         </div>
-      </el-card>
+      </ui-card>
 
-      <el-card class="joined-card [border-radius:16px]" shadow="hover">
+      <ui-card class="joined-card [border-radius:16px]" shadow="hover">
         <template #header>
           <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>已加入班级</span>
-            <el-button link :loading="loading" @click="loadJoinedClasses">刷新</el-button>
+            <ui-button link :loading="loading" @click="loadJoinedClasses">刷新</ui-button>
           </div>
         </template>
 
-        <el-empty v-if="!loading && joinedClasses.length === 0" description="你还没有加入任何教学班" />
+        <ui-empty v-if="!loading && joinedClasses.length === 0" description="你还没有加入任何教学班" />
 
-        <div v-else v-loading="loading" class="joined-list [display:flex] [flex-direction:column] [gap:12px] [min-height:120px]">
+        <div v-else :aria-busy="loading" class="joined-list [display:flex] [flex-direction:column] [gap:12px] [min-height:120px]">
           <div v-for="item in joinedClasses" :key="item.id" class="joined-item [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [padding:16px] [border:1px_solid_#ebeef5] [border-radius:12px] [background:#fcfcfd]">
             <div class="joined-main [display:flex] [flex-direction:column] [gap:6px]">
               <div class="joined-title [color:#303133] [font-size:15px] [font-weight:600]">{{ item.name }}</div>
@@ -60,20 +60,19 @@
               </div>
             </div>
             <div class="joined-side">
-              <el-button size="small" @click="goAssistant">去问 AI</el-button>
+              <ui-button size="small" @click="goAssistant">去问 AI</ui-button>
             </div>
           </div>
         </div>
-      </el-card>
+      </ui-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 import { buildApiUrl } from '../../config/runtime'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
@@ -100,7 +99,7 @@ async function loadJoinedClasses() {
     const data = await response.json()
     joinedClasses.value = Array.isArray(data) ? data : data?.data || []
   } catch (error) {
-    ElMessage.error(getFriendlyErrorMessage(error, '加载已加入班级失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, '加载已加入班级失败，请稍后重试'))
   } finally {
     loading.value = false
   }
@@ -123,12 +122,12 @@ async function submitJoin() {
     if (!response.ok) {
       throw new Error(payload?.message || `HTTP ${response.status}`)
     }
-    ElMessage.success('加入班级成功')
+    uiMessage.success('加入班级成功')
     joinForm.classCode = ''
     joinForm.password = ''
     await loadJoinedClasses()
   } catch (error) {
-    ElMessage.error(getFriendlyErrorMessage(error, '加入班级失败，请检查班级码或密码后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, '加入班级失败，请检查班级码或密码后重试'))
   } finally {
     joining.value = false
   }

@@ -1,8 +1,8 @@
 <template>
   <div class="min-w-0">
-    <page-header title="课程分析" description="基于真实数据的课程整体分析和AI教学建议" />
+    <UiPageHeader title="课程分析" description="基于真实数据的课程整体分析和AI教学建议" />
 
-    <div class="flex flex-col gap-5" v-loading="pageLoading">
+    <div class="flex flex-col gap-5" :aria-busy="pageLoading">
       <!-- 总体概览 -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
@@ -52,9 +52,9 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">AI教学建议</span>
-          <button :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
+          <UiButton :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
             {{ aiLoading ? '生成中..' : '生成教学建议' }}
-          </button>
+          </UiButton>
         </div>
         <div class="flex flex-col gap-4">
           <div v-if="aiContent" class="prose prose-sm max-w-none text-[14px] leading-[1.8] text-[#1d1d1f]" v-html="renderedAiContent"></div>
@@ -79,10 +79,9 @@
 </template>
 
 <script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage } from '@/services/feedback'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import * as echarts from 'echarts'
 import { marked } from 'marked'
@@ -325,7 +324,7 @@ const generateAIRecommendation = async () => {
     logger.error('生成AI建议失败:', e)
     const message = e?.message || '请检查后端服务是否正常运行。'
     aiContent.value = `生成 AI 建议失败：${message}`
-    ElMessage.warning(message)
+    uiMessage.warning(message)
   } finally {
     aiLoading.value = false
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="sync-panel">
-    <page-header title="PTA 数据同步" description="管理 PTA 平台数据爬取、同步状态和 Cookie 维护" />
+    <UiPageHeader title="PTA 数据同步" description="管理 PTA 平台数据爬取、同步状态和 Cookie 维护" />
 
     <div v-if="cookieStatus === 'EXPIRED'" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] text-[13px] text-[#ff3b30] mb-4">
       <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -57,9 +57,9 @@
           </div>
           <div class="h-px bg-black/[0.06] my-5"></div>
           <div class="flex items-center gap-3 mb-3.5">
-            <button @click="forceMode = !forceMode" class="relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer border-none" :class="forceMode ? 'bg-[#007aff]' : 'bg-black/[0.12]'">
+            <UiButton @click="forceMode = !forceMode" class="relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer border-none" :class="forceMode ? 'bg-[#007aff]' : 'bg-black/[0.12]'">
               <span class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200" :class="forceMode ? 'translate-x-[18px]' : ''"></span>
-            </button>
+            </UiButton>
             <span class="text-[13px] text-[#1d1d1f]">{{ forceMode ? '强制更新' : '正常模式' }}</span>
             <span class="text-[12px] text-[#d93025]" v-if="forceMode">跳过冷却限制，请谨慎使用以保护 PTA 平台</span>
           </div>
@@ -69,7 +69,7 @@
               <span class="text-[14px] font-semibold text-[#1d1d1f]">同步关键词</span>
               <span class="text-[12px] text-[#6e6e73]">可按当前班级临时覆盖 PTA 搜索关键词；提交同步时会同时保存到该班级配置。</span>
             </div>
-            <input v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
           </div>
           <!-- PTA credentials panel -->
           <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
@@ -84,12 +84,12 @@
               当前未绑定 PTA 账号，本页可临时输入；留空时只会尝试现有 Cookie。
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <input v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-              <input v-model="ptaPassword" :type="showPassword ? 'text' : 'password'" placeholder="本次同步使用的 PTA 密码（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+              <UiInput v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+              <UiInput v-model="ptaPassword" :type="showPassword ? 'text' : 'password'" placeholder="本次同步使用的 PTA 密码（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             </div>
             <div class="flex gap-2.5 mt-3">
-              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitTempCredential">提交临时账号密码</button>
-              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearTempCredential">清空临时凭据</button>
+              <UiButton class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitTempCredential">提交临时账号密码</UiButton>
+              <UiButton class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearTempCredential">清空临时凭据</UiButton>
             </div>
             <div v-if="tempCredentialSubmitted" class="mt-2.5 text-[12px] text-[#1e8e3e]">
               已提交临时 PTA 账号：{{ ptaUsername.trim() }}，本页后续同步将优先使用该账号。
@@ -106,40 +106,40 @@
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">增量同步</div>
                 <div class="text-[12px] text-[#6e6e73]">检测新题目集，爬取内容+提交+导出（仅新增）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
                 <span v-if="syncLoading === 'incremental'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>开始同步</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">拉取提交记录</div>
                 <div class="text-[12px] text-[#6e6e73]">拉取已有题目集的最新提交（轻量，冷却 4h）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
                 <span v-if="syncLoading === 'submissions'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>拉取提交</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">刷新导出</div>
                 <div class="text-[12px] text-[#6e6e73]">重新导出成绩单/答题卡/代码（较重，冷却 24h）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
                 <span v-if="syncLoading === 'refresh'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>刷新导出</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">全量同步</div>
                 <div class="text-[12px] text-[#6e6e73]">增量 + 提交 + 导出，耗时较长</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
                 <span v-if="syncLoading === 'full'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>全量同步</span>
-              </button>
+              </UiButton>
             </div>
           </div>
           <!-- Task progress -->
@@ -170,7 +170,7 @@
         <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
           <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
-            <table class="w-full text-[12px] border-collapse">
+            <UiTable class="w-full text-[12px] border-collapse">
               <thead>
                 <tr class="bg-[#f9f9fb]">
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">任务ID</th>
@@ -193,7 +193,7 @@
                   <td class="px-3 py-2 text-[#6e6e73]">{{ row.created_at }}</td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>
@@ -221,10 +221,10 @@
             <textarea v-model="cookieInput" rows="8" placeholder='粘贴 Cookie JSON 数组，格式如:
 [{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]' class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"></textarea>
           </div>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!cookieInput.trim() || cookieSubmitting" @click="submitCookieHandler">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!cookieInput.trim() || cookieSubmitting" @click="submitCookieHandler">
             <span v-if="cookieSubmitting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
             验证并保存 Cookie
-          </button>
+          </UiButton>
           <div v-if="cookieResult" class="mt-3.5 flex items-center gap-1.5 px-3.5 py-2.5 rounded-[8px] text-[13px]" :class="cookieResult.valid ? 'bg-[#e6f4ea] text-[#1e8e3e]' : 'bg-[#fce8e6] text-[#d93025]'">
             <svg v-if="cookieResult.valid" class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
             <svg v-else class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
@@ -261,9 +261,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   getPtaCookieStatus,
   getTeacherPtaCredentials,
@@ -440,7 +439,7 @@ async function loadCooldown() {
   }
   const keyword = syncKeyword.value.trim() || currentKeyword.value
   if (!selectedClassId.value) {
-    ElMessage.warning('请先选择当前教学班')
+    uiMessage.warning('请先选择当前教学班')
     return
   }
   try {
@@ -464,11 +463,11 @@ function submitTempCredential() {
   const username = ptaUsername.value.trim()
   const password = ptaPassword.value
   if (!username || !password) {
-    ElMessage.warning('请先输入完整的临时 PTA 账号和密码，再点击提交')
+    uiMessage.warning('请先输入完整的临时 PTA 账号和密码，再点击提交')
     return
   }
   tempCredentialSubmitted.value = true
-  ElMessage.success(`已提交临时 PTA 账号：${username}`)
+  uiMessage.success(`已提交临时 PTA 账号：${username}`)
 }
 
 function clearTempCredential() {
@@ -481,7 +480,7 @@ async function triggerSync(mode) {
   const keyword = syncKeyword.value.trim() || currentKeyword.value
   if (!selectedClassId.value || !keyword) return
   if (!keyword || !String(keyword).trim()) {
-    ElMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
     return
   }
   await probeSpiderHealth()
@@ -489,7 +488,7 @@ async function triggerSync(mode) {
   // 强制模式需二次确认
   if (forceMode.value) {
     try {
-      await ElMessageBox.confirm(
+      await messageBox.confirm(
         '强制更新将跳过冷却时间限制，频繁请求可能影响 PTA 平台。确定继续？',
         '强制更新确认', { confirmButtonText: '确定强制', cancelButtonText: '取消', type: 'warning' }
       )
@@ -501,12 +500,12 @@ async function triggerSync(mode) {
     const draftUsername = ptaUsername.value.trim()
     const draftPassword = ptaPassword.value
     if ((draftUsername && !draftPassword) || (!draftUsername && draftPassword)) {
-      ElMessage.warning('若要临时使用 PTA 账号同步，请同时填写账号和密码')
+      uiMessage.warning('若要临时使用 PTA 账号同步，请同时填写账号和密码')
       return
     }
 
     if ((draftUsername || draftPassword) && !tempCredentialSubmitted.value) {
-      ElMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
+      uiMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
       return
     }
     const username = tempCredentialSubmitted.value ? draftUsername : ''
@@ -522,7 +521,7 @@ async function triggerSync(mode) {
 
     // 冷却拦截
     if (r?.blocked) {
-      ElMessage.warning(getFriendlyResponseMessage(r, '同步任务暂时无法提交，请稍后重试'))
+      uiMessage.warning(getFriendlyResponseMessage(r, '同步任务暂时无法提交，请稍后重试'))
       syncLoading.value = ''
       return
     }
@@ -546,9 +545,9 @@ async function triggerSync(mode) {
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value
       }
     }
-    ElMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
+    uiMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '同步任务提交失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '同步任务提交失败，请稍后重试'))
   } finally {
     syncLoading.value = ''
   }
@@ -566,8 +565,8 @@ function pollTaskStatus(taskId) {
         pollTimer = null
         loadTaskHistory()
         loadCooldown()
-        if (r.data.status === 'SUCCESS') ElMessage.success('数据同步完成')
-        else ElMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
+        if (r.data.status === 'SUCCESS') uiMessage.success('数据同步完成')
+        else uiMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
       }
     } catch { /* ignore */ }
   }, 3000)
@@ -582,7 +581,7 @@ async function submitCookieHandler() {
     cookieResult.value = { valid: d?.valid, message: getFriendlyResponseMessage(d, d?.valid ? 'Cookie 有效' : 'Cookie 无效，请重新提交') }
     if (d?.valid) {
       cookieStatus.value = 'OK'
-      ElMessage.success('Cookie 更新成功')
+      uiMessage.success('Cookie 更新成功')
     }
   } catch (e) {
     cookieResult.value = { valid: false, message: getFriendlyErrorMessage(e, 'Cookie 提交失败，请稍后重试') }

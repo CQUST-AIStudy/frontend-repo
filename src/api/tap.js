@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import {
   clearTapAuth,
   getTapToken,
@@ -159,7 +159,7 @@ tapClient.interceptors.response.use(
         // fall through to clear auth and surface the original 401
       }
       clearTapAuth()
-      ElMessage.warning('教辅平台登录已过期，请重新登录')
+      uiMessage.warning('教辅平台登录已过期，请重新登录')
     } else if (status === 401 && isAuthRequest) {
       clearTapAuth()
     }

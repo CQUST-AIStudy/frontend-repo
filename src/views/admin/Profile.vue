@@ -1,16 +1,16 @@
 <template>
   <div class="admin-profile [height:100%]">
-    <page-header
+    <UiPageHeader
         class="my-page-header [padding:20px]"
       title="个人信息"
       description="查看和编辑您的个人信息"
     />
 
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
+    <ui-row :gutter="20">
+      <ui-col :span="8">
+        <ui-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
           <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#909399]">
-            <el-avatar :size="100" :src="userInfo.avatar" />
+            <ui-avatar :size="100" :src="userInfo.avatar" />
             <h3>{{ userInfo.name }}</h3>
             <p>{{ userInfo.role === 'admin' ? '系统管理员' : '未知角色' }}</p>
           </div>
@@ -36,76 +36,75 @@
               <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone }}</span>
             </div>
           </div>
-        </el-card>
-      </el-col>
+        </ui-card>
+      </ui-col>
 
-      <el-col :span="16">
-        <el-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
+      <ui-col :span="16">
+        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
             <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>修改个人信息</span>
             </div>
           </template>
 
-          <el-form ref="formRef" :model="form" label-width="100px">
-            <el-form-item label="用户名">
-              <el-input v-model="form.name" />
-            </el-form-item>
+          <ui-form ref="formRef" :model="form" label-width="100px">
+            <ui-form-item label="用户名">
+              <ui-input v-model="form.name" />
+            </ui-form-item>
 
-            <el-form-item label="电子邮箱">
-              <el-input v-model="form.email" />
-            </el-form-item>
+            <ui-form-item label="电子邮箱">
+              <ui-input v-model="form.email" />
+            </ui-form-item>
 
-            <el-form-item label="联系电话">
-              <el-input v-model="form.phone" />
-            </el-form-item>
+            <ui-form-item label="联系电话">
+              <ui-input v-model="form.phone" />
+            </ui-form-item>
 
-            <el-form-item label="部门">
-              <el-input v-model="form.department" />
-            </el-form-item>
+            <ui-form-item label="部门">
+              <ui-input v-model="form.department" />
+            </ui-form-item>
 
-            <el-form-item>
-              <el-button type="primary" @click="saveProfile">保存修改</el-button>
-              <el-button @click="resetForm">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
+            <ui-form-item>
+              <ui-button type="primary" @click="saveProfile">保存修改</ui-button>
+              <ui-button @click="resetForm">重置</ui-button>
+            </ui-form-item>
+          </ui-form>
+        </ui-card>
 
-        <el-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
+        <ui-card class="form-card [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
           <template #header>
             <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <span>修改密码</span>
             </div>
           </template>
 
-          <el-form ref="passwordFormRef" :model="passwordForm" label-width="100px">
-            <el-form-item label="当前密码">
-              <el-input v-model="passwordForm.currentPassword" type="password" show-password />
-            </el-form-item>
+          <ui-form ref="passwordFormRef" :model="passwordForm" label-width="100px">
+            <ui-form-item label="当前密码">
+              <ui-input v-model="passwordForm.currentPassword" type="password" show-password />
+            </ui-form-item>
 
-            <el-form-item label="新密码">
-              <el-input v-model="passwordForm.newPassword" type="password" show-password />
-            </el-form-item>
+            <ui-form-item label="新密码">
+              <ui-input v-model="passwordForm.newPassword" type="password" show-password />
+            </ui-form-item>
 
-            <el-form-item label="确认新密码">
-              <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
-            </el-form-item>
+            <ui-form-item label="确认新密码">
+              <ui-input v-model="passwordForm.confirmPassword" type="password" show-password />
+            </ui-form-item>
 
-            <el-form-item>
-              <el-button type="primary" @click="changePassword">修改密码</el-button>
-              <el-button @click="resetPasswordForm">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-col>
-    </el-row>
+            <ui-form-item>
+              <ui-button type="primary" @click="changePassword">修改密码</ui-button>
+              <ui-button @click="resetPasswordForm">重置</ui-button>
+            </ui-form-item>
+          </ui-form>
+        </ui-card>
+      </ui-col>
+    </ui-row>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 
 // 获取用户信息
 const userInfo = computed(() => {
@@ -153,7 +152,7 @@ const passwordForm = reactive({
 // 保存个人信息
 const saveProfile = () => {
   // 模拟保存操作
-  ElMessage.success('个人信息已更新')
+  uiMessage.success('个人信息已更新')
 
   // 更新本地存储的用户信息
   const updatedInfo = {
@@ -177,22 +176,22 @@ const resetForm = () => {
 // 修改密码
 const changePassword = () => {
   if (!passwordForm.currentPassword) {
-    ElMessage.warning('请输入当前密码')
+    uiMessage.warning('请输入当前密码')
     return
   }
 
   if (!passwordForm.newPassword) {
-    ElMessage.warning('请输入新密码')
+    uiMessage.warning('请输入新密码')
     return
   }
 
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    ElMessage.warning('两次输入的新密码不一致')
+    uiMessage.warning('两次输入的新密码不一致')
     return
   }
 
   // 模拟修改密码操作
-  ElMessage.success('密码已成功修改')
+  uiMessage.success('密码已成功修改')
   resetPasswordForm()
 }
 

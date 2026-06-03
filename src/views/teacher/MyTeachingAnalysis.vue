@@ -1,8 +1,8 @@
 <template>
   <div class="min-w-0">
-    <page-header title="我的教学分析" description="个人教学数据可视化分析">
-      <button @click="refreshData" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">刷新数据</button>
-    </page-header>
+    <UiPageHeader title="我的教学分析" description="个人教学数据可视化分析">
+      <UiButton @click="refreshData" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">刷新数据</UiButton>
+    </UiPageHeader>
 
     <div v-if="loading" class="space-y-4 py-6">
       <div class="grid grid-cols-3 gap-5 max-[768px]:grid-cols-1">
@@ -81,9 +81,9 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
         <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">我的班级</span>
-          <button @click="goToClassList" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors cursor-pointer bg-transparent border-none">查看所有</button>
+          <UiButton @click="goToClassList" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors cursor-pointer bg-transparent border-none">查看所有</UiButton>
         </div>
-        <table class="w-full text-left text-[13px]" v-loading="loading">
+        <UiTable class="w-full text-left text-[13px]" :aria-busy="loading">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl w-[100px]">班级ID</th>
@@ -107,7 +107,7 @@
               <td colspan="5" class="py-12 text-center text-[#aeaeb2] text-sm">暂无班级数据</td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
   </div>
@@ -118,7 +118,6 @@ import logger from '@/utils/logger'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import PageHeader from '../../components/PageHeader.vue'
 import api from '../../api'
 
 const router = useRouter()
@@ -507,4 +506,3 @@ onMounted(() => {
   fetchTeachingData()
 })
 </script>
-

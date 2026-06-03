@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen min-h-dvh overflow-x-hidden bg-[#f5f5f7]">
     <!-- Sidebar (Desktop) -->
-    <aside
+    <UiAside
       v-if="!isMobile"
       class="fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-black/[0.06] bg-[rgba(246,246,248,0.82)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
       :style="asideStyle"
@@ -35,11 +35,11 @@
 
             <!-- Group with children -->
             <div v-else>
-              <button @click="toggleGroup(item.group)" class="nav-item group flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer hover:bg-black/[0.04] hover:text-[#1d1d1f]">
+              <UiButton @click="toggleGroup(item.group)" class="nav-item group flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer hover:bg-black/[0.04] hover:text-[#1d1d1f]">
                 <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
                 <span v-if="!collapsed" class="truncate flex-1 text-left">{{ item.label }}</span>
                 <svg v-if="!collapsed" class="w-3 h-3 shrink-0 text-[#aeaeb2] transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
+              </UiButton>
               <transition
                 enter-active-class="max-h-[300px] overflow-hidden transition-all duration-200 ease-out"
                 enter-from-class="max-h-0 opacity-0"
@@ -67,7 +67,7 @@
           </router-link>
         </div>
       </nav>
-    </aside>
+    </UiAside>
 
     <!-- Mobile Drawer Overlay -->
     <Teleport to="body">
@@ -89,7 +89,7 @@
         leave-from-class="translate-x-0"
         leave-to-class="-translate-x-full"
       >
-        <aside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[rgba(246,246,248,0.98)] backdrop-blur-[24px] shadow-2xl">
+        <UiAside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[rgba(246,246,248,0.98)] backdrop-blur-[24px] shadow-2xl">
           <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
             <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm" />
             <div class="flex flex-col gap-0.5">
@@ -105,11 +105,11 @@
                   <span>{{ item.label }}</span>
                 </router-link>
                 <div v-else>
-                  <button @click="toggleGroup(item.group)" class="flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] hover:bg-black/[0.04]">
+                  <UiButton @click="toggleGroup(item.group)" class="flex items-center gap-2.5 w-full h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] hover:bg-black/[0.04]">
                     <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
                     <span class="flex-1 text-left">{{ item.label }}</span>
                     <svg class="w-3 h-3 text-[#aeaeb2] transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
+                  </UiButton>
                   <div v-if="openGroups[item.group]" class="ml-[30px] mt-0.5 space-y-0.5">
                     <template v-for="child in item.children" :key="child.path">
                       <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="flex items-center h-[34px] px-3 rounded-lg text-[12px] text-[#6e6e73]" :class="{ 'bg-[rgba(0,122,255,0.1)] !text-[#007aff] !font-medium': activeMenu === child.path, 'hover:bg-black/[0.04]': activeMenu !== child.path }" @click="closeMobileMenu">{{ child.label }}</router-link>
@@ -124,20 +124,20 @@
               </router-link>
             </div>
           </nav>
-        </aside>
+        </UiAside>
       </transition>
     </Teleport>
 
     <!-- Main Area -->
     <div class="ml-[var(--teacher-main-margin)] flex flex-col flex-1 min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
       <!-- Header -->
-      <header class="sticky top-0 z-20 flex items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
+      <UiHeader class="sticky top-0 z-20 flex items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
-          <button @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff] shrink-0" title="切换导航">
+          <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff] shrink-0" title="切换导航">
             <MenuIcon v-if="isMobile" />
             <Fold v-else-if="!collapsed" />
             <Expand v-else />
-          </button>
+          </UiButton>
 
           <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-white/60 border border-black/[0.06]">
             <nav class="flex items-center gap-1.5 text-[13px] text-[#6e6e73] whitespace-nowrap overflow-hidden">
@@ -151,21 +151,21 @@
         </div>
 
         <div class="flex items-center gap-3 min-w-0 shrink-0">
-          <button v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[rgba(0,122,255,0.08)] text-[#007aff] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[rgba(0,122,255,0.14)] max-w-[min(280px,32vw)]">
+          <UiButton v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[rgba(0,122,255,0.08)] text-[#007aff] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[rgba(0,122,255,0.14)] max-w-[min(280px,32vw)]">
             <School class="w-4 h-4 shrink-0" />
             <span class="truncate">{{ selectedClassName }}</span>
             <ArrowDown class="w-3 h-3 shrink-0" />
-          </button>
+          </UiButton>
 
           <span class="inline-flex items-center h-[30px] px-3 rounded-full text-[12px] font-bold" :class="teacherLevelClass">{{ teacherLevelText }}</span>
 
-          <button @click="toggleFullScreen" class="inline-flex items-center justify-center w-9 h-9 rounded-[10px] text-[#6e6e73] text-lg cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff]" title="全屏">
+          <UiButton @click="toggleFullScreen" class="inline-flex items-center justify-center w-9 h-9 rounded-[10px] text-[#6e6e73] text-lg cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff]" title="全屏">
             <FullScreen />
-          </button>
+          </UiButton>
 
           <!-- User Dropdown -->
           <div class="relative" ref="dropdownRef">
-            <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-black/[0.06] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
+            <UiButton @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-black/[0.06] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
               <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center text-white text-sm font-semibold shrink-0">
                 {{ (userInfo.name || '教').slice(0, 1) }}
               </div>
@@ -174,7 +174,7 @@
                 <span class="text-[11px] text-[#6e6e73]">课程教学工作台</span>
               </div>
               <ArrowDown class="w-3 h-3 text-[#aeaeb2]" />
-            </button>
+            </UiButton>
 
             <transition
               enter-active-class="transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
@@ -185,24 +185,24 @@
               leave-to-class="-translate-y-1 scale-[0.96] opacity-0"
             >
               <div v-if="dropdownOpen" class="absolute right-0 top-full mt-2 w-[180px] py-1.5 rounded-xl bg-white/95 backdrop-blur-[20px] border border-black/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] z-50">
-                <button @click="handleCommand('switchClass')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
+                <UiButton @click="handleCommand('switchClass')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
                   <School class="w-4 h-4 text-[#6e6e73]" />切换教学班
-                </button>
-                <button @click="handleCommand('profile')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
+                </UiButton>
+                <UiButton @click="handleCommand('profile')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors text-left">
                   <Setting class="w-4 h-4 text-[#6e6e73]" />个人信息
-                </button>
+                </UiButton>
                 <div class="h-px bg-black/[0.06] mx-3 my-1"></div>
-                <button @click="handleCommand('logout')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#ff3b30] hover:bg-[rgba(255,59,48,0.06)] transition-colors text-left">
+                <UiButton @click="handleCommand('logout')" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#ff3b30] hover:bg-[rgba(255,59,48,0.06)] transition-colors text-left">
                   <SwitchButton class="w-4 h-4" />退出登录
-                </button>
+                </UiButton>
               </div>
             </transition>
           </div>
         </div>
-      </header>
+      </UiHeader>
 
       <!-- Content -->
-      <main class="flex-1 min-w-0 min-h-[calc(100vh-120px)] min-h-[calc(100dvh-120px)] p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]">
+      <UiMain class="flex-1 min-w-0 min-h-[calc(100vh-120px)] min-h-[calc(100dvh-120px)] p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]">
         <router-view v-slot="{ Component }">
           <transition
             mode="out-in"
@@ -216,20 +216,20 @@
             <component :is="Component" />
           </transition>
         </router-view>
-      </main>
+      </UiMain>
 
       <!-- Footer -->
-      <footer class="text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
+      <UiFooter class="text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
         智能学情分析与个性化实验能力提升平台 · 教师工作空间
-      </footer>
+      </UiFooter>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessageBox } from 'element-plus'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { messageBox } from '@/services/feedback'
 import {
   ArrowDown,
   Briefcase,
@@ -248,7 +248,7 @@ import {
   Setting,
   SwitchButton,
   UserFilled
-} from '@element-plus/icons-vue'
+} from '@/components/ui/icons'
 import { useUserStore } from '../../store'
 import { clearAuthStorage } from '../../constants/auth'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
@@ -405,7 +405,7 @@ onMounted(() => {
     return
   }
   if (userInfo.value.role && userInfo.value.role !== 'teacher') {
-    ElMessageBox.alert('当前账号没有教师权限，请重新登录。', '权限错误', {
+    messageBox.alert('当前账号没有教师权限，请重新登录。', '权限错误', {
       confirmButtonText: '确定',
       callback: () => { clearAuthStorage(); router.push('/login') }
     })
@@ -431,7 +431,7 @@ function handleCommand(command) {
   if (command === 'profile') { router.push('/teacher/profile'); return }
   if (command === 'switchClass') { switchClass(); return }
   if (command !== 'logout') return
-  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+  messageBox.confirm('确定要退出登录吗？', '提示', {
     confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
   }).then(() => {
     userStore.logout(); sessionStorage.clear(); clearAuthStorage(); router.push('/login')

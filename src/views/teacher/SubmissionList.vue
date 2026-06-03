@@ -1,14 +1,14 @@
 <template>
   <div class="min-h-full px-4 pb-5 bg-[#f5f7fa] max-md:px-2 max-md:pb-4">
-    <page-header
+    <UiPageHeader
       class="py-6 max-md:py-4"
       title="学生提交"
       :description="headerDescription"
     >
       <template v-if="experimentId">
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBackToExperiment">返回实验详情</button>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBackToExperiment">返回实验详情</UiButton>
       </template>
-    </page-header>
+    </UiPageHeader>
 
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 mb-5">
       <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
@@ -17,22 +17,22 @@
       <div class="flex flex-wrap gap-3 items-end">
         <div v-if="!experimentId" class="flex flex-col gap-1">
           <label class="text-xs text-[#6e6e73]">实验</label>
-          <select
+          <UiSelect
             v-model="filterForm.experimentId"
             class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[220px]"
           >
-            <option value="">请选择实验</option>
-            <option
+            <UiOption value="">请选择实验</UiOption>
+            <UiOption
               v-for="item in experimentOptions"
               :key="item.id"
               :value="item.id"
-            >{{ item.id }}: {{ item.name }}</option>
-          </select>
+            >{{ item.id }}: {{ item.name }}</UiOption>
+          </UiSelect>
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-xs text-[#6e6e73]">学生姓名</label>
-          <input
+          <UiInput
             v-model="filterForm.studentName"
             placeholder="请输入学生姓名"
             class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -41,21 +41,21 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-xs text-[#6e6e73]">状态</label>
-          <select
+          <UiSelect
             v-model="filterForm.status"
             class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[150px]"
           >
-            <option value="">全部</option>
-            <option value="submitted">已提交</option>
-            <option value="graded">已评分</option>
-            <option value="rejected">已退回</option>
-            <option value="not_started">未开始</option>
-          </select>
+            <UiOption value="">全部</UiOption>
+            <UiOption value="submitted">已提交</UiOption>
+            <UiOption value="graded">已评分</UiOption>
+            <UiOption value="rejected">已退回</UiOption>
+            <UiOption value="not_started">未开始</UiOption>
+          </UiSelect>
         </div>
 
         <div class="flex gap-2 items-end">
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="applyFilter">查询</button>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetFilter">重置</button>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="applyFilter">查询</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetFilter">重置</UiButton>
         </div>
       </div>
     </div>
@@ -70,27 +70,27 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="loadSubmissions">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="loadSubmissions">
             <Refresh class="w-4 h-4" />
             刷新
-          </button>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#30d158] to-[#28a745] shadow-[0_2px_8px_rgba(40,167,69,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedRows.length" @click="batchGrade">
+          </UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#30d158] to-[#28a745] shadow-[0_2px_8px_rgba(40,167,69,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedRows.length" @click="batchGrade">
             <Edit class="w-4 h-4" />
             批量评分
-          </button>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="exportData">
+          </UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="exportData">
             <Download class="w-4 h-4" />
             导出
-          </button>
+          </UiButton>
         </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table v-if="pagedSubmissions.length" class="w-full text-left text-[13px]">
+        <UiTable v-if="pagedSubmissions.length" class="w-full text-left text-[13px]">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[55px]">
-                <input type="checkbox" class="cursor-pointer" @change="toggleSelectAll($event)" />
+                <UiInput type="checkbox" class="cursor-pointer" @change="toggleSelectAll($event)" />
               </th>
               <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验 ID</th>
               <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
@@ -106,7 +106,7 @@
           <tbody>
             <tr v-for="row in pagedSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
               <td class="py-3 px-3">
-                <input type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="cursor-pointer" @change="toggleRowSelection(row, $event)" />
+                <UiInput type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="cursor-pointer" @change="toggleRowSelection(row, $event)" />
               </td>
               <td v-if="!experimentId" class="py-3 px-3">{{ row.experimentId }}</td>
               <td v-if="!experimentId" class="py-3 px-3 max-w-[180px] truncate">{{ row.experimentName }}</td>
@@ -132,13 +132,13 @@
               </td>
               <td class="py-3 px-3">
                 <div class="flex gap-2">
-                  <button class="text-[#007aff] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</button>
-                  <button v-if="row.status === 'submitted'" class="text-[#34c759] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</button>
+                  <UiButton class="text-[#007aff] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</UiButton>
+                  <UiButton v-if="row.status === 'submitted'" class="text-[#34c759] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</UiButton>
                 </div>
               </td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
         <div v-else class="py-12 text-center">
           <div class="text-[40px] mb-3 opacity-40">📋</div>
           <p class="text-[14px] text-[#aeaeb2]">暂无数据</p>
@@ -164,7 +164,7 @@
 
           <div class="flex items-center gap-3">
             <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">成绩</label>
-            <input
+            <UiInput
               v-model.number="gradeForm.score"
               type="number"
               min="0"
@@ -177,7 +177,7 @@
           <div class="flex items-center gap-3">
             <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">查重率</label>
             <div class="flex items-center gap-1.5">
-              <input
+              <UiInput
                 v-model.number="gradeForm.plagiarismRate"
                 type="number"
                 min="0"
@@ -201,8 +201,8 @@
         </div>
 
         <div class="flex justify-end gap-2.5 mt-6">
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</button>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</button>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</UiButton>
         </div>
       </div>
     </div>
@@ -210,13 +210,12 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Download, Edit, Refresh } from '@element-plus/icons-vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import { Download, Edit, Refresh } from '@/components/ui/icons'
 import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
 import AppPagination from '../../components/AppPagination.vue'
 
 const route = useRoute()
@@ -325,7 +324,7 @@ const toggleRowSelection = (row, event) => {
 }
 
 const batchGrade = () => {
-  ElMessage.info('批量评分功能暂未实现。')
+  uiMessage.info('批量评分功能暂未实现。')
 }
 
 const formatDate = (dateString) => {
@@ -445,7 +444,7 @@ const loadSubmissions = async () => {
     }
   } catch (error) {
     logger.error('加载学生提交失败:', error)
-    ElMessage.error(`加载学生提交失败：${error?.message || '未知错误'}`)
+    uiMessage.error(`加载学生提交失败：${error?.message || '未知错误'}`)
   } finally {
     tableLoading.value = false
   }
@@ -508,7 +507,7 @@ const submitGrade = async () => {
     }
 
     await api.gradeSubmission(submissionId, gradeData)
-    ElMessage.success('评分提交成功。')
+    uiMessage.success('评分提交成功。')
     gradeDialogVisible.value = false
 
     const index = submissions.value.findIndex((sub) => sub.id === submissionId)
@@ -522,7 +521,7 @@ const submitGrade = async () => {
     }
   } catch (error) {
     logger.error('提交评分失败:', error)
-    ElMessage.error('提交评分失败，请重试。')
+    uiMessage.error('提交评分失败，请重试。')
   }
 }
 
@@ -573,7 +572,7 @@ const exportData = () => {
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  ElMessage.success('导出成功。')
+  uiMessage.success('导出成功。')
 }
 
 onMounted(async () => {
@@ -583,4 +582,3 @@ onMounted(async () => {
   }
 })
 </script>
-

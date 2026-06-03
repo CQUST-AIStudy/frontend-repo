@@ -1,32 +1,32 @@
 <template>
-  <div class="rag-analytics-container [height:100%] [overflow-y:auto] [&_.el-card]:[border-radius:16px] [&_.el-card]:[border:0.5px_solid_rgba(0,_0,_0,_0.06)] [&_.el-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
-    <page-header class="my-page-header [padding:0]" title="RAG 运营面板" description="课程知识库问答质量监控与分析" />
+  <div class="rag-analytics-container [height:100%] [overflow-y:auto] [&_.ui-card]:[border-radius:16px] [&_.ui-card]:[border:0.5px_solid_rgba(0,_0,_0,_0.06)] [&_.ui-card]:[box-shadow:0_1px_3px_rgba(0,0,0,0.04)]">
+    <UiPageHeader class="my-page-header [padding:0]" title="RAG 运营面板" description="课程知识库问答质量监控与分析" />
 
     <div class="[padding:0_20px_10px]">
-      <el-select v-model="selectedSpaceId" placeholder="选择课程空间" class="[width:300px]" @change="loadAll">
-        <el-option v-for="cs in courseSpaces" :key="cs.id" :label="cs.name" :value="cs.id" />
-      </el-select>
+      <ui-select v-model="selectedSpaceId" placeholder="选择课程空间" class="[width:300px]" @change="loadAll">
+        <ui-option v-for="cs in courseSpaces" :key="cs.id" :label="cs.name" :value="cs.id" />
+      </ui-select>
     </div>
 
-    <div v-if="selectedSpaceId" class="analytics-content [min-height:400px]" v-loading="loading">
+    <div v-if="selectedSpaceId" class="analytics-content [min-height:400px]" :aria-busy="loading">
       <!-- 统计卡片 -->
-      <el-row :gutter="16" class="[padding:0_20px_16px]">
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+      <ui-row :gutter="16" class="[padding:0_20px_16px]">
+        <ui-col :span="6">
+          <ui-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-label [font-size:13px] [color:#6e6e73] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">命中率</div>
             <div class="stat-value [font-size:28px] [font-weight:700] [color:#1d1d1f] [font-size:24px] [font-weight:bold] [color:#007aff] [margin-bottom:5px]">{{ (hitRate * 100).toFixed(1) }}%</div>
             <div class="stat-desc [font-size:12px] [color:#aeaeb2] [margin-top:6px]">coverage > 0.4 的比例</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+          </ui-card>
+        </ui-col>
+        <ui-col :span="6">
+          <ui-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-label [font-size:13px] [color:#6e6e73] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">联网触发率</div>
             <div class="stat-value [font-size:28px] [font-weight:700] [color:#1d1d1f] [font-size:24px] [font-weight:bold] [color:#007aff] [margin-bottom:5px]">{{ (webTriggerRate * 100).toFixed(1) }}%</div>
             <div class="stat-desc [font-size:12px] [color:#aeaeb2] [margin-top:6px]">触发联网兜底的比例</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card feedback-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+          </ui-card>
+        </ui-col>
+        <ui-col :span="6">
+          <ui-card shadow="hover" class="stat-card feedback-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-label [font-size:13px] [color:#6e6e73] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">用户反馈</div>
             <div class="stat-value [font-size:28px] [font-weight:700] [color:#1d1d1f] [font-size:24px] [font-weight:bold] [color:#007aff] [margin-bottom:5px]">
               <span class="[color:#67c23a]">👍 {{ feedbackStats.thumbsUp }}</span>
@@ -34,31 +34,31 @@
               <span class="[color:#f56c6c]">👎 {{ feedbackStats.thumbsDown }}</span>
             </div>
             <div class="stat-desc [font-size:12px] [color:#aeaeb2] [margin-top:6px]">全{{ feedbackStats.total }} 次问答</div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+          </ui-card>
+        </ui-col>
+        <ui-col :span="6">
+          <ui-card shadow="hover" class="stat-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-label [font-size:13px] [color:#6e6e73] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">满意率</div>
             <div class="stat-value [font-size:28px] [font-weight:700] [color:#1d1d1f] [font-size:24px] [font-weight:bold] [color:#007aff] [margin-bottom:5px]">{{ satisfactionRate }}%</div>
             <div class="stat-desc [font-size:12px] [color:#aeaeb2] [margin-top:6px]">点赞 / (点赞+踩</div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </ui-card>
+        </ui-col>
+      </ui-row>
 
       <!-- 问题热榜 + 资料缺口 -->
-      <el-row :gutter="16" class="[padding:0_20px_16px]">
-        <el-col :span="14">
-          <el-card shadow="hover">
+      <ui-row :gutter="16" class="[padding:0_20px_16px]">
+        <ui-col :span="14">
+          <ui-card shadow="hover">
             <template #header><span>🔥 问题热榜 TOP 20</span></template>
-            <el-table :data="hotQuestions" stripe size="small" max-height="360">
-              <el-table-column type="index" label="#" width="50" />
-              <el-table-column prop="query" label="问题" show-overflow-tooltip />
-              <el-table-column prop="count" label="提问次数" width="100" sortable />
-            </el-table>
-          </el-card>
-        </el-col>
-        <el-col :span="10">
-          <el-card shadow="hover">
+            <ui-table :data="hotQuestions" stripe size="small" max-height="360">
+              <ui-table-column type="index" label="#" width="50" />
+              <ui-table-column prop="query" label="问题" show-overflow-tooltip />
+              <ui-table-column prop="count" label="提问次数" width="100" sortable />
+            </ui-table>
+          </ui-card>
+        </ui-col>
+        <ui-col :span="10">
+          <ui-card shadow="hover">
             <template #header><span>⚠️ 资料缺口提示</span></template>
             <div v-if="resourceGaps.length === 0" class="[text-align:center] [color:#aeaeb2] [padding:40px_0]">
               暂无资料缺口，知识库覆盖良好 🎉
@@ -67,33 +67,33 @@
               <div v-for="(gap, idx) in resourceGaps" :key="idx" class="gap-item [padding:10px_0] [border-bottom:1px_solid_#f5f5f7] last:[border-bottom:none]">
                 <div class="gap-query [font-size:14px] [color:#1d1d1f] [margin-bottom:6px]">{{ gap.query }}</div>
                 <div class="gap-meta [display:flex] [gap:8px]">
-                  <el-tag size="small" type="danger">提问 {{ gap.count }} 次</el-tag>
-                  <el-tag size="small" type="warning">平均覆盖 {{ (gap.avgCoverage * 100).toFixed(0) }}%</el-tag>
+                  <ui-tag size="small" type="danger">提问 {{ gap.count }} 次</ui-tag>
+                  <ui-tag size="small" type="warning">平均覆盖 {{ (gap.avgCoverage * 100).toFixed(0) }}%</ui-tag>
                 </div>
               </div>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </ui-card>
+        </ui-col>
+      </ui-row>
 
       <!-- 引用覆盖率-->
-      <el-row :gutter="16" class="[padding:0_20px_16px]">
-        <el-col :span="24">
-          <el-card shadow="hover">
+      <ui-row :gutter="16" class="[padding:0_20px_16px]">
+        <ui-col :span="24">
+          <ui-card shadow="hover">
             <template #header><span>📚 文档引用频次</span></template>
-            <el-table :data="citationList" stripe size="small" max-height="300">
-              <el-table-column type="index" label="#" width="50" />
-              <el-table-column prop="docName" label="文档名称" show-overflow-tooltip />
-              <el-table-column prop="count" label="被引用次数" width="120" sortable />
-              <el-table-column label="引用占比" width="200">
+            <ui-table :data="citationList" stripe size="small" max-height="300">
+              <ui-table-column type="index" label="#" width="50" />
+              <ui-table-column prop="docName" label="文档名称" show-overflow-tooltip />
+              <ui-table-column prop="count" label="被引用次数" width="120" sortable />
+              <ui-table-column label="引用占比" width="200">
                 <template #default="{ row }">
-                  <el-progress :percentage="row.percentage" :stroke-width="14" :text-inside="true" />
+                  <ui-progress :percentage="row.percentage" :stroke-width="14" :text-inside="true" />
                 </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
-        </el-col>
-      </el-row>
+              </ui-table-column>
+            </ui-table>
+          </ui-card>
+        </ui-col>
+      </ui-row>
     </div>
 
     <div v-else class="[text-align:center] [padding:80px_0] [color:#aeaeb2]">
@@ -103,10 +103,9 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, computed, onMounted } from 'vue'
-import PageHeader from '../../components/PageHeader.vue'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import {
   getCourseSpaces,
   getHotQuestions,
@@ -163,7 +162,7 @@ const loadAll = async () => {
     feedbackStats.value = extract(fb) || { thumbsUp: 0, thumbsDown: 0, total: 0 }
     resourceGaps.value = extract(rg) || []
   } catch (e) {
-    ElMessage.error('加载分析数据失败: ' + e.message)
+    uiMessage.error('加载分析数据失败: ' + e.message)
   } finally {
     loading.value = false
   }

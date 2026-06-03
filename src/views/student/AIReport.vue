@@ -1,110 +1,110 @@
 <template>
   <div class="ai-report-container [height:100%]">
-    <page-header class="my-page-header [padding:20px]" title="AI实验报告生成中心" description="通过AI快速生成专业的数据结构实验报告" />
+    <UiPageHeader class="my-page-header [padding:20px]" title="AI实验报告生成中心" description="通过AI快速生成专业的数据结构实验报告" />
 
     <div class="report-content [margin-top:20px] [padding-bottom:60px]">
-      <el-row :gutter="20">
+      <ui-row :gutter="20">
         <!-- 左侧实验列表 -->
-        <el-col :span="8">
-          <el-card class="experiments-card [height:80vh] [display:flex] [flex-direction:column]">
+        <ui-col :span="8">
+          <ui-card class="experiments-card [height:80vh] [display:flex] [flex-direction:column]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <h3>我的实验列表</h3>
-                <el-input v-model="searchQuery" placeholder="搜索实验" clearable prefix-icon="Search" size="small" />
+                <ui-input v-model="searchQuery" placeholder="搜索实验" clearable prefix-icon="Search" size="small" />
               </div>
             </template>
 
             <div class="experiment-list [height:65vh] [flex:1] [overflow-y:auto] [margin-top:10px]">
               <loading-state :loading="experimentStore.loading">
-                <el-empty v-if="filteredExperiments.length === 0" description="没有找到实验"></el-empty>
+                <ui-empty v-if="filteredExperiments.length === 0" description="没有找到实验"></ui-empty>
 
                 <div v-else class="experiment-items [display:flex] [flex-direction:column] [gap:12px]">
-                  <el-card v-for="experiment in filteredExperiments" :key="experiment.id" class="experiment-item [cursor:pointer] [transition:all_0.3s] [margin-bottom:0] [border-left:3px_solid_transparent] [border-radius:16px] hover:[transform:translateY(-2px)] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe]"
+                  <ui-card v-for="experiment in filteredExperiments" :key="experiment.id" class="experiment-item [cursor:pointer] [transition:all_0.3s] [margin-bottom:0] [border-left:3px_solid_transparent] [border-radius:16px] hover:[transform:translateY(-2px)] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe]"
                            :class="{ selected: selectedExperiment && selectedExperiment.id === experiment.id }"
                            @click="selectExperiment(experiment)">
                     <div class="experiment-item-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:10px]">
                       <span class="experiment-name [font-weight:500] [font-size:15px] [color:#202124]">{{ experiment.name }}</span>
-                      <el-tag :type="getStatusType(experiment.status)">
+                      <ui-tag :type="getStatusType(experiment.status)">
                         {{ getStatusText(experiment.status) }}
-                      </el-tag>
+                      </ui-tag>
                     </div>
 
                     <div class="experiment-item-info [font-size:13px] [color:#5f6368]">
                       <div class="info-row [display:flex] [align-items:center] [margin-bottom:5px]">
-                        <el-icon>
+                        <ui-icon>
                           <Timer />
-                        </el-icon>
+                        </ui-icon>
                         <span>截止日期：{{ experiment.deadline }}</span>
                       </div>
 
                       <div class="info-row [display:flex] [align-items:center] [margin-bottom:5px]">
-                        <el-icon>
+                        <ui-icon>
                           <Calendar />
-                        </el-icon>
+                        </ui-icon>
                         <span>提交时间：{{ experiment.submitTime || '未提交' }}</span>
                       </div>
 
                       <div class="info-row report-status [display:flex] [align-items:center] [margin-bottom:5px]">
                         <template v-if="experiment.report">
-                          <el-icon class="success-icon">
+                          <ui-icon class="success-icon">
                             <DocumentChecked />
-                          </el-icon>
+                          </ui-icon>
                           <span>已生成报告</span>
                         </template>
                         <template v-else>
-                          <el-icon class="warning-icon">
+                          <ui-icon class="warning-icon">
                             <Warning />
-                          </el-icon>
+                          </ui-icon>
                           <span>未生成报告</span>
                         </template>
                       </div>
                     </div>
-                  </el-card>
+                  </ui-card>
                 </div>
               </loading-state>
             </div>
-          </el-card>
-        </el-col>
+          </ui-card>
+        </ui-col>
 
         <!-- 右侧报告生成与预览-->
-        <el-col :span="16">
-          <el-card class="report-card" v-if="selectedExperiment">
+        <ui-col :span="16">
+          <ui-card class="report-card" v-if="selectedExperiment">
             <template #header>
               <div class="report-card-header [display:flex] [justify-content:space-between] [align-items:center]">
                 <div class="title-info [display:flex] [align-items:center]">
                   <h3>{{ selectedExperiment.name }}</h3>
-                  <el-tag :type="getStatusType(selectedExperiment.status)">
+                  <ui-tag :type="getStatusType(selectedExperiment.status)">
                     {{ getStatusText(selectedExperiment.status) }}
-                  </el-tag>
+                  </ui-tag>
                 </div>
 
                 <div class="header-actions [display:flex] [gap:8px] [align-items:center]" v-if="selectedExperiment.status === 'completed'">
-                  <el-button type="success" @click="viewReport" v-if="selectedExperiment.report">
-                    <el-icon>
+                  <ui-button type="success" @click="viewReport" v-if="selectedExperiment.report">
+                    <ui-icon>
                       <View />
-                    </el-icon>
+                    </ui-icon>
                     查看报告
-                  </el-button>
-                  <el-button type="primary" :loading="experimentStore.generatingReport"
+                  </ui-button>
+                  <ui-button type="primary" :loading="experimentStore.generatingReport"
                              :disabled="experimentStore.generatingReport" @click="generateReport">
-                    <el-icon>
+                    <ui-icon>
                       <MagicStick />
-                    </el-icon>
+                    </ui-icon>
                     {{ selectedExperiment.report ? '重新生成报告' : '生成AI报告' }}
-                  </el-button>
+                  </ui-button>
 
-                  <!-- <el-button v-if="selectedExperiment.report" type="warning" @click="downloadReport">
-                    <el-icon>
+                  <!-- <ui-button v-if="selectedExperiment.report" type="warning" @click="downloadReport">
+                    <ui-icon>
                       <Download />
-                    </el-icon>
+                    </ui-icon>
                     下载报告
-                  </el-button> -->
+                  </ui-button> -->
 
-                  <el-button type="primary" @click="generateWordDoc">
-                    <el-icon>
+                  <ui-button type="primary" @click="generateWordDoc">
+                    <ui-icon>
                       <Download />
-                    </el-icon>下载Word文档
-                  </el-button>
+                    </ui-icon>下载Word文档
+                  </ui-button>
 
 
                 </div>
@@ -113,99 +113,99 @@
 
             <loading-state :loading="loading">
               <div v-if="selectedExperiment.status !== 'completed'" class="incomplete-experiment">
-                <el-empty description="请先完成实验，再生成报告">
+                <ui-empty description="请先完成实验，再生成报告">
                   <template #image>
-                    <el-icon class="incomplete-icon [font-size:60px] [color:#909399]">
+                    <ui-icon class="incomplete-icon [font-size:60px] [color:#909399]">
                       <WarningFilled />
-                    </el-icon>
+                    </ui-icon>
                   </template>
-                  <el-button type="primary" @click="$router.push('/student/experiments')">前往实验页面</el-button>
-                </el-empty>
+                  <ui-button type="primary" @click="$router.push('/student/experiments')">前往实验页面</ui-button>
+                </ui-empty>
               </div>
 
               <div v-else-if="!selectedExperiment.report && !isReportViewVisible" class="no-report [text-align:center] [padding:30px_20px]">
                 <div class="ai-feature [margin-bottom:30px]">
-                  <el-icon class="ai-feature-icon [font-size:60px] [color:#1a73e8] [margin-bottom:20px]">
+                  <ui-icon class="ai-feature-icon [font-size:60px] [color:#1a73e8] [margin-bottom:20px]">
                     <MagicStick />
-                  </el-icon>
+                  </ui-icon>
                   <h2>AI实验报告智能生成</h2>
                   <p>基于您的实验代码和数据，AI可以快速生成一份完整的专业报告</p>
                 </div>
 
                 <div class="report-benefits [display:flex] [justify-content:space-around] [margin:40px_0] [flex-wrap:wrap]">
                   <div class="benefit-item [flex:1] [min-width:200px] [max-width:250px] [margin:0_10px_20px] [padding:20px] [border-radius:16px] [text-align:center] [background:#f8f9fa] [border:1px_solid_#dadce0]">
-                    <el-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
+                    <ui-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
                       <Stopwatch />
-                    </el-icon>
+                    </ui-icon>
                     <h3>节省时间</h3>
                     <p>几秒钟内完成报告，专注于学习的关键部分</p>
                   </div>
                   <div class="benefit-item [flex:1] [min-width:200px] [max-width:250px] [margin:0_10px_20px] [padding:20px] [border-radius:16px] [text-align:center] [background:#f8f9fa] [border:1px_solid_#dadce0]">
-                    <el-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
+                    <ui-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
                       <DataLine />
-                    </el-icon>
+                    </ui-icon>
                     <h3>专业分析</h3>
                     <p>智能分析代码，提供算法复杂度评估</p>
                   </div>
                   <div class="benefit-item [flex:1] [min-width:200px] [max-width:250px] [margin:0_10px_20px] [padding:20px] [border-radius:16px] [text-align:center] [background:#f8f9fa] [border:1px_solid_#dadce0]">
-                    <el-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
+                    <ui-icon class="benefit-icon [font-size:40px] [color:#1a73e8] [margin-bottom:15px]">
                       <Reading />
-                    </el-icon>
+                    </ui-icon>
                     <h3>规范格式</h3>
                     <p>标准格式，包含所有必要章节，可自定义修改</p>
                   </div>
                 </div>
 
                 <div class="generate-action [margin-top:30px]">
-                  <el-button type="primary" size="large" :loading="experimentStore.generatingReport"
+                  <ui-button type="primary" size="large" :loading="experimentStore.generatingReport"
                              :disabled="experimentStore.generatingReport" @click="generateReport">
-                    <el-icon>
+                    <ui-icon>
                       <MagicStick />
-                    </el-icon>
+                    </ui-icon>
                     开始生成AI报告
-                  </el-button>
+                  </ui-button>
                 </div>
               </div>
 
               <!-- 使用 ReportGenerator 组件 -->
               <div v-else-if="isReportViewVisible && selectedExperiment.report" class="report-view [padding:0]">
                 <div class="view-header [padding:0_0_20px_0] [display:flex] [justify-content:flex-start]">
-                  <el-button type="info" @click="closeReportView">
-                    <el-icon>
+                  <ui-button type="info" @click="closeReportView">
+                    <ui-icon>
                       <Back />
-                    </el-icon>
+                    </ui-icon>
                     返回
-                  </el-button>
+                  </ui-button>
                 </div>
 
                 <report-generator :report-data="reportData" @update:report-data="handleReportDataUpdate"/>
               </div>
 
               <div v-else class="experiment-details [margin-top:20px]">
-                <el-descriptions title="实验信息" :column="2" border>
-                  <el-descriptions-item label="实验状态">
-                    <el-tag :type="getStatusType(selectedExperiment.status)">
+                <ui-descriptions title="实验信息" :column="2" border>
+                  <ui-descriptions-item label="实验状态">
+                    <ui-tag :type="getStatusType(selectedExperiment.status)">
                       {{ getStatusText(selectedExperiment.status) }}
-                    </el-tag>
-                  </el-descriptions-item>
+                    </ui-tag>
+                  </ui-descriptions-item>
 
-                  <el-descriptions-item label="实验得分">
+                  <ui-descriptions-item label="实验得分">
                     <span class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]">{{ selectedExperiment.score || '暂无' }}</span>
-                  </el-descriptions-item>
+                  </ui-descriptions-item>
 
-                  <el-descriptions-item label="截止日期">
+                  <ui-descriptions-item label="截止日期">
                     {{ selectedExperiment.deadline }}
-                  </el-descriptions-item>
+                  </ui-descriptions-item>
 
-                  <el-descriptions-item label="提交时间">
+                  <ui-descriptions-item label="提交时间">
                     {{ selectedExperiment.submitTime || '未提交' }}
-                  </el-descriptions-item>
+                  </ui-descriptions-item>
 
-                  <el-descriptions-item label="查重率" :span="2">
-                    <el-progress :percentage="selectedExperiment.plagiarismRate || 0"
-                                 :color="getPlagiarismColor(selectedExperiment.plagiarismRate)"></el-progress>
-                  </el-descriptions-item>
-                </el-descriptions>
+                  <ui-descriptions-item label="查重率" :span="2">
+                    <ui-progress :percentage="selectedExperiment.plagiarismRate || 0"
+                                 :color="getPlagiarismColor(selectedExperiment.plagiarismRate)"></ui-progress>
+                  </ui-descriptions-item>
+                </ui-descriptions>
 
                 <div class="experiment-code [margin-top:20px]" v-if="selectedExperiment.code">
                   <h3>实验代码</h3>
@@ -218,83 +218,80 @@
                 </div>
 
                 <div class="report-actions [display:flex] [gap:10px] [margin-top:25px]">
-<!--                  <el-button type="primary" :loading="experimentStore.generatingReport"-->
+<!--                  <ui-button type="primary" :loading="experimentStore.generatingReport"-->
 <!--                             :disabled="experimentStore.generatingReport" @click="generateReport">-->
-<!--                    <el-icon>-->
+<!--                    <ui-icon>-->
 <!--                      <Magic />-->
-<!--                    </el-icon>-->
+<!--                    </ui-icon>-->
 <!--                    {{ selectedExperiment.report ? '重新生成报告' : '生成AI报告' }}-->
-<!--                  </el-button>-->
+<!--                  </ui-button>-->
 
-<!--                  <el-button type="success" @click="viewReport" v-if="selectedExperiment.report">-->
-<!--                    <el-icon>-->
+<!--                  <ui-button type="success" @click="viewReport" v-if="selectedExperiment.report">-->
+<!--                    <ui-icon>-->
 <!--                      <View />-->
-<!--                    </el-icon>-->
+<!--                    </ui-icon>-->
 <!--                    查看报告-->
-<!--                  </el-button>-->
+<!--                  </ui-button>-->
                 </div>
               </div>
             </loading-state>
-          </el-card>
+          </ui-card>
 
-          <el-empty v-else description="请选择一个实验">
+          <ui-empty v-else description="请选择一个实验">
             <template #image>
-              <el-icon class="empty-icon [font-size:60px] [color:#909399]"><Select /></el-icon>
+              <ui-icon class="empty-icon [font-size:60px] [color:#909399]"><Select /></ui-icon>
             </template>
-          </el-empty>
-        </el-col>
-      </el-row>
+          </ui-empty>
+        </ui-col>
+      </ui-row>
     </div>
 
     <!-- 心得体会输入对话框-->
-    <el-dialog v-model="showExperienceDialog" title="填写实验信息" width="600px">
+    <ui-dialog v-model="showExperienceDialog" title="填写实验信息" width="600px">
       <div class="experience-dialog-content [padding:10px]">
 
-        <el-form :model="experienceForm" label-width="100px">
-          <el-form-item label="实验机房名称">
-            <el-input v-model="labRoomName" placeholder="请输入实验机房名称，例如：计算机学院机房A101"></el-input>
-          </el-form-item>
+        <ui-form :model="experienceForm" label-width="100px">
+          <ui-form-item label="实验机房名称">
+            <ui-input v-model="labRoomName" placeholder="请输入实验机房名称，例如：计算机学院机房A101"></ui-input>
+          </ui-form-item>
 
-          <el-form-item label="上机时间">
-            <el-date-picker v-model="labTime" type="datetime" placeholder="请选择上机时间" format="YYYY-MM-DD"
-                            value-format="YYYY-MM-DD" class="[width:100%]"></el-date-picker>
-          </el-form-item>
+          <ui-form-item label="上机时间">
+            <ui-date-picker v-model="labTime" type="datetime" placeholder="请选择上机时间" format="YYYY-MM-DD"
+                            value-format="YYYY-MM-DD" class="[width:100%]"></ui-date-picker>
+          </ui-form-item>
 
-          <el-form-item label="实验心得体会">
-            <el-input v-model="experienceContent" type="textarea" :rows="8" placeholder="请在此输入您的实验心得体会.."
-                      resize="none"></el-input>
+          <ui-form-item label="实验心得体会">
+            <ui-input v-model="experienceContent" type="textarea" :rows="8" placeholder="请在此输入您的实验心得体会.."
+                      resize="none"></ui-input>
             <div class="experience-tips [display:flex] [align-items:center] [margin-top:8px] [color:#909399] [font-size:13px]">
-              <el-icon>
+              <ui-icon>
                 <ChatLineRound />
-              </el-icon>
+              </ui-icon>
               <span>可以包括对实验过程的思考、遇到的困难及解决方法、对知识点的理解等内容</span>
             </div>
-          </el-form-item>
-        </el-form>
+          </ui-form-item>
+        </ui-form>
       </div>
 
       <template #footer>
         <span class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="cancelExperienceInput">取消</el-button>
-          <el-button type="primary" @click="submitExperienceAndGenerateReport">提交并生成报告</el-button>
+          <ui-button @click="cancelExperienceInput">取消</ui-button>
+          <ui-button type="primary" @click="submitExperienceAndGenerateReport">提交并生成报告</ui-button>
         </span>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
+import { useExperimentStore, useUserStore } from '@/store'
+import { computed, onMounted, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, computed, onMounted } from 'vue'
-import { useExperimentStore, useUserStore } from '../../store'
-import PageHeader from '../../components/PageHeader.vue'
-import LoadingState from '../../components/LoadingState.vue'
-import ReportGenerator from '../../components/ReportGenerator.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   MagicStick, View, Download, Timer, Calendar, DocumentChecked, Warning,
   WarningFilled, Stopwatch, DataLine, Reading, Back, Select, ChatLineRound
-} from '@element-plus/icons-vue'
+} from '@/components/ui/icons'
 import { DocxGenerator } from '../../utils/docxGenerator'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -469,7 +466,7 @@ const selectExperiment = (experiment) => {
 // 生成报告
 const generateReport = async () => {
   if (!selectedExperiment.value || selectedExperiment.value.status !== 'completed') {
-    ElMessage.warning('请先完成实验')
+    uiMessage.warning('请先完成实验')
     return
   }
 
@@ -501,7 +498,7 @@ const generateReport = async () => {
 
 // 取消填写心得体会
 const cancelExperienceInput = () => {
-  ElMessageBox.confirm('确定要取消填写心得体会吗？', '提示', {
+  messageBox.confirm('确定要取消填写心得体会吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '返回填写',
     type: 'warning'
@@ -516,12 +513,12 @@ const cancelExperienceInput = () => {
 // 提交心得体会并生成报告
 const submitExperienceAndGenerateReport = async () => {
   if (!experienceContent.value.trim()) {
-    ElMessage.warning('请填写实验心得体会')
+    uiMessage.warning('请填写实验心得体会')
     return
   }
 
   if (!tempUserData.value) {
-    ElMessage.error('数据异常，请重试')
+    uiMessage.error('数据异常，请重试')
     showExperienceDialog.value = false
     return
   }
@@ -564,14 +561,14 @@ const submitExperienceAndGenerateReport = async () => {
       // 准备报告数据
       prepareReportData()
 
-      ElMessage.success('AI报告生成成功！')
+      uiMessage.success('AI报告生成成功！')
       isReportViewVisible.value = true
     } else {
-      ElMessage.error(result.message || '生成报告失败1，请稍后重试')
+      uiMessage.error(result.message || '生成报告失败1，请稍后重试')
       logger.error('生成报告失败:', result)
     }
   } catch (error) {
-    ElMessage.error('生成报告失败2，请稍后再试')
+    uiMessage.error('生成报告失败2，请稍后再试')
     logger.error('生成报告异常:', error)
   } finally {
     loading.value = false
@@ -582,7 +579,7 @@ const submitExperienceAndGenerateReport = async () => {
 // 查看报告
 const viewReport = () => {
   if (!selectedExperiment.value || !selectedExperiment.value.report) {
-    ElMessage.warning('没有找到报告内容')
+    uiMessage.warning('没有找到报告内容')
     return
   }
 
@@ -741,12 +738,12 @@ const handleReportDataUpdate = (newData) => {
 // // 下载报告
 // const downloadReport = async () => {
 //   if (!selectedExperiment.value || !selectedExperiment.value.report) {
-//     ElMessage.warning('没有找到报告内容')
+//     uiMessage.warning('没有找到报告内容')
 //     return
 //   }
 
 //   // 显示格式选择对话框
-//   ElMessageBox.confirm(
+//   messageBox.confirm(
 //     '请选择导出格式',
 //     '导出报告',
 //     {
@@ -767,10 +764,10 @@ const handleReportDataUpdate = (newData) => {
 //       const blob = await docxGenerator.generateStandardReport(reportData.value)
 
 //       DocxGenerator.downloadReport(blob, `${selectedExperiment.value.name}-实验报告.docx`)
-//       ElMessage.success('报告下载成功')
+//       uiMessage.success('报告下载成功')
 //     } catch (error) {
 //       logger.error('生成Word报告失败:', error)
-//       ElMessage.error('生成Word报告失败，请稍后再试')
+//       uiMessage.error('生成Word报告失败，请稍后再试')
 //     }
 //   }).catch(action => {
 //     if (action === 'cancel') {
@@ -782,7 +779,7 @@ const handleReportDataUpdate = (newData) => {
 //       document.body.appendChild(link)
 //       link.click()
 //       document.body.removeChild(link)
-//       ElMessage.success('报告下载成功')
+//       uiMessage.success('报告下载成功')
 //     }
 //   })
 // }
@@ -810,10 +807,10 @@ const generateWordDoc = async () => {
     const blob = await docxGenerator.generateStandardReport(reportData.value)
 
     DocxGenerator.downloadReport(blob, `${userStore.userInfo.id || "学号"}_${userStore.userInfo.name || "姓名"}_${selectedExperiment.value.name || '数据结构实验'}.docx`)
-    ElMessage.success('报告生成成功！')
+    uiMessage.success('报告生成成功！')
   } catch (error) {
     logger.error('生成报告时发生错误', error)
-    ElMessage.error('报告生成失败，请稍后重试！')
+    uiMessage.error('报告生成失败，请稍后重试！')
   }
 }
 </script>

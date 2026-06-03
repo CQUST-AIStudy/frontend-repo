@@ -1,17 +1,17 @@
 <template>
   <div v-if="totalPages > 1" class="flex items-center justify-center gap-1.5 mt-5">
-    <button @click="goTo(current - 1)" :disabled="current <= 1" :class="[paginationButtonClass, { 'opacity-40 cursor-not-allowed': current <= 1 }]">
+    <UiButton @click="goTo(current - 1)" :disabled="current <= 1" :class="[paginationButtonClass, { 'opacity-40 cursor-not-allowed': current <= 1 }]">
       <svg class="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
+    </UiButton>
     <template v-for="page in visiblePages" :key="page">
       <span v-if="page === '...'" class="w-[34px] h-[34px] flex items-center justify-center text-[#aeaeb2] text-sm">...</span>
-      <button v-else @click="goTo(page)" :class="[paginationButtonClass, page === current ? 'bg-[#007aff] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]' : '']">
+      <UiButton v-else @click="goTo(page)" :class="[paginationButtonClass, page === current ? 'bg-[#007aff] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]' : '']">
         {{ page }}
-      </button>
+      </UiButton>
     </template>
-    <button @click="goTo(current + 1)" :disabled="current >= totalPages" :class="[paginationButtonClass, { 'opacity-40 cursor-not-allowed': current >= totalPages }]">
+    <UiButton @click="goTo(current + 1)" :disabled="current >= totalPages" :class="[paginationButtonClass, { 'opacity-40 cursor-not-allowed': current >= totalPages }]">
       <svg class="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
+    </UiButton>
   </div>
 </template>
 

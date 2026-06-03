@@ -1,24 +1,24 @@
 <template>
   <div class="g-page [min-width:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
-    <page-header title="实验列表" description="数据结构课程所有实验项目" />
+    <UiPageHeader title="实验列表" description="数据结构课程所有实验项目" />
 
     <loading-state :loading="loading">
       <div class="g-content [display:flex] [flex-direction:column] [gap:20px] [min-width:0] max-[640px]:[gap:14px]">
         <!-- 标签页-->
         <div class="g-tabs [display:flex] [gap:0] [border-bottom:1px_solid_#dadce0] [margin-bottom:4px] max-[640px]:[overflow-x:auto]">
-          <button v-for="t in tabs" :key="t.key" class="g-tab [background:none] [border:none] [padding:10px_20px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] max-[640px]:[flex:1] max-[640px]:[min-width:96px] max-[640px]:[padding-inline:12px] max-[640px]:[white-space:nowrap]" :class="{ active: activeTab === t.key }"
+          <UiButton v-for="t in tabs" :key="t.key" class="g-tab [background:none] [border:none] [padding:10px_20px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] max-[640px]:[flex:1] max-[640px]:[min-width:96px] max-[640px]:[padding-inline:12px] max-[640px]:[white-space:nowrap]" :class="{ active: activeTab === t.key }"
                   @click="activeTab = t.key">
             {{ t.label }} ({{ t.count }})
-          </button>
+          </UiButton>
         </div>
 
         <experiment-tab-content :experiments="filteredExperiments" />
 
         <!-- 底部：日历+ 统计 -->
         <div class="g-bottom-row [display:grid] [grid-template-columns:minmax(0,_2fr)_minmax(280px,_1fr)] [gap:16px] max-[960px]:[grid-template-columns:1fr]">
-          <div class="g-card g-card-wide [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#dadce0] [min-width:0] [&_.el-calendar-table_td.is-today_.cal-day]:[color:#fff] [&_.el-calendar-table_td.is-today_.cal-day]:[background:#1a73e8] [&_.el-calendar-table_td.is-today_.cal-day]:[border-radius:50%] [&_.el-calendar-table_td.is-today_.cal-day]:[width:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[height:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[line-height:24px] [&_.el-calendar-table_td.is-today_.cal-day]:[text-align:center] [&_.el-calendar__header]:[padding:12px_16px] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]">
+          <div class="g-card g-card-wide [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#dadce0] [min-width:0] [&_.ui-calendar-table_td.is-today_.cal-day]:[color:#fff] [&_.ui-calendar-table_td.is-today_.cal-day]:[background:#1a73e8] [&_.ui-calendar-table_td.is-today_.cal-day]:[border-radius:50%] [&_.ui-calendar-table_td.is-today_.cal-day]:[width:24px] [&_.ui-calendar-table_td.is-today_.cal-day]:[height:24px] [&_.ui-calendar-table_td.is-today_.cal-day]:[line-height:24px] [&_.ui-calendar-table_td.is-today_.cal-day]:[text-align:center] [&_.ui-calendar__header]:[padding:12px_16px] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]">
             <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#202124] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]"><span>实验安排日历</span></div>
-            <el-calendar v-model="calendarValue">
+            <ui-calendar v-model="calendarValue">
               <template #date-cell="{ data }">
                 <div class="cal-cell [height:100%] [display:flex] [flex-direction:column] [align-items:center] [justify-content:center]" :class="{ 'has-exp': hasExperimentOnDate(data.day) }">
                   <div class="cal-day [font-size:14px]">{{ data.day.split('-')[2] }}</div>
@@ -27,7 +27,7 @@
                   </div>
                 </div>
               </template>
-            </el-calendar>
+            </ui-calendar>
           </div>
           <div class="g-card g-card-narrow [min-width:0]">
             <div class="g-card-head"><span>完成情况</span></div>
@@ -51,7 +51,6 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import PageHeader from '../../components/PageHeader.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import ExperimentTabContent from './components/ExperimentTabContent.vue'
 import { useExperimentStore } from '../../store'

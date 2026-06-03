@@ -1,45 +1,45 @@
 <template>
-  <div class="experiment-management [min-width:0] [min-height:100%] [&_.el-table]:[width:100%]">
-    <page-header
+  <div class="experiment-management [min-width:0] [min-height:100%] [&_.ui-table]:[width:100%]">
+    <UiPageHeader
         class="my-page-header [padding:20px] max-[768px]:[padding:0]"
       title="实验管理"
       description="管理系统中的所有实验"
     />
 
     <div class="experiment-management-content [display:flex] [flex-direction:column] [gap:20px]">
-      <el-card>
+      <ui-card>
         <template #header>
           <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [flex-wrap:wrap] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
             <span>实验列表</span>
-            <el-button type="primary" @click="openCreateDialog">添加实验</el-button>
+            <ui-button type="primary" @click="openCreateDialog">添加实验</ui-button>
           </div>
         </template>
 
-        <el-table :data="experimentList" v-loading="loading" border class="[width:100%]">
-          <el-table-column prop="id" label="ID" width="80" />
-          <el-table-column prop="title" label="标题" min-width="200" />
-          <el-table-column prop="className" label="所属班级" width="150" />
-          <el-table-column prop="teacherName" label="创建教师" width="120" />
-          <el-table-column prop="deadline" label="截止日期" width="180" />
-          <el-table-column prop="submissionCount" label="提交数" width="100" />
-          <el-table-column label="状态" width="100">
+        <ui-table :data="experimentList" :aria-busy="loading" border class="[width:100%]">
+          <ui-table-column prop="id" label="ID" width="80" />
+          <ui-table-column prop="title" label="标题" min-width="200" />
+          <ui-table-column prop="className" label="所属班级" width="150" />
+          <ui-table-column prop="teacherName" label="创建教师" width="120" />
+          <ui-table-column prop="deadline" label="截止日期" width="180" />
+          <ui-table-column prop="submissionCount" label="提交数" width="100" />
+          <ui-table-column label="状态" width="100">
             <template #default="scope">
-              <el-tag :type="getStatusType(scope.row.status)">
+              <ui-tag :type="getStatusType(scope.row.status)">
                 {{ getStatusText(scope.row.status) }}
-              </el-tag>
+              </ui-tag>
             </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          </ui-table-column>
+          <ui-table-column label="操作" width="180" fixed="right">
             <template #default="scope">
-              <el-button type="primary" link @click="viewExperiment(scope.row)">查看</el-button>
-              <el-button type="warning" link @click="editExperiment(scope.row)">编辑</el-button>
-              <el-button type="danger" link @click="confirmDelete(scope.row)">删除</el-button>
+              <ui-button type="primary" link @click="viewExperiment(scope.row)">查看</ui-button>
+              <ui-button type="warning" link @click="editExperiment(scope.row)">编辑</ui-button>
+              <ui-button type="danger" link @click="confirmDelete(scope.row)">删除</ui-button>
             </template>
-          </el-table-column>
-        </el-table>
+          </ui-table-column>
+        </ui-table>
 
         <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
-          <el-pagination
+          <ui-pagination
             background
             layout="total, sizes, prev, pager, next, jumper"
             :total="total"
@@ -49,58 +49,57 @@
             @current-change="handleCurrentChange"
           />
         </div>
-      </el-card>
+      </ui-card>
     </div>
 
     <!-- 创建实验对话框-->
-    <el-dialog v-model="createDialogVisible" title="添加实验" width="50%">
-      <el-form :model="experimentForm" :rules="rules" ref="experimentFormRef" label-width="100px">
-        <el-form-item label="实验标题" prop="title">
-          <el-input v-model="experimentForm.title" placeholder="请输入实验标题"></el-input>
-        </el-form-item>
-        <el-form-item label="所属班级" prop="classId">
-          <el-select v-model="experimentForm.classId" placeholder="请选择班级" class="[width:100%]">
-            <el-option
+    <ui-dialog v-model="createDialogVisible" title="添加实验" width="50%">
+      <ui-form :model="experimentForm" :rules="rules" ref="experimentFormRef" label-width="100px">
+        <ui-form-item label="实验标题" prop="title">
+          <ui-input v-model="experimentForm.title" placeholder="请输入实验标题"></ui-input>
+        </ui-form-item>
+        <ui-form-item label="所属班级" prop="classId">
+          <ui-select v-model="experimentForm.classId" placeholder="请选择班级" class="[width:100%]">
+            <ui-option
               v-for="item in classList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="截止日期" prop="deadline">
-          <el-date-picker
+            ></ui-option>
+          </ui-select>
+        </ui-form-item>
+        <ui-form-item label="截止日期" prop="deadline">
+          <ui-date-picker
             v-model="experimentForm.deadline"
             type="datetime"
             placeholder="选择截止日期"
             format="YYYY-MM-DD HH:mm"
             class="[width:100%]"
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item label="实验描述" prop="description">
-          <el-input
+          ></ui-date-picker>
+        </ui-form-item>
+        <ui-form-item label="实验描述" prop="description">
+          <ui-input
             v-model="experimentForm.description"
             type="textarea"
             rows="4"
             placeholder="请输入实验描述"
-          ></el-input>
-        </el-form-item>
-      </el-form>
+          ></ui-input>
+        </ui-form-item>
+      </ui-form>
       <template #footer>
         <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="createDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitExperiment" :loading="submitLoading">确认</el-button>
+          <ui-button @click="createDialogVisible = false">取消</ui-button>
+          <ui-button type="primary" @click="submitExperiment" :loading="submitLoading">确认</ui-button>
         </div>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
+import { onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import api from '../../api'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
@@ -165,7 +164,7 @@ const loadExperimentList = async () => {
     logger.debug('处理后的实验列表:', experimentList.value)
   } catch (error) {
     logger.error('加载实验列表失败:', error)
-    ElMessage.error(getFriendlyErrorMessage(error, '加载实验列表失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, '加载实验列表失败，请稍后重试'))
     experimentList.value = []
   } finally {
     loading.value = false
@@ -233,7 +232,7 @@ const openCreateDialog = () => {
 
 // 查看实验
 const viewExperiment = (row) => {
-  ElMessage.info(`查看实验: ${row.title}`)
+  uiMessage.info(`查看实验: ${row.title}`)
 }
 
 // 编辑实验
@@ -248,7 +247,7 @@ const editExperiment = (row) => {
 
 // 确认删除
 const confirmDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除实验"${row.title}"吗？此操作不可逆`, '警告', {
+  messageBox.confirm(`确定要删除实验"${row.title}"吗？此操作不可逆`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
@@ -256,7 +255,7 @@ const confirmDelete = (row) => {
     // 模拟删除
     setTimeout(() => {
       experimentList.value = experimentList.value.filter(item => item.id !== row.id)
-      ElMessage.success('删除成功!')
+      uiMessage.success('删除成功!')
     }, 500)
   }).catch(() => {})
 }
@@ -284,7 +283,7 @@ const submitExperiment = () => {
             deadline: experimentForm.deadline
           }
         }
-        ElMessage.success('更新成功!')
+        uiMessage.success('更新成功!')
       } else {
         // 创建
         const classItem = classList.value.find(c => c.id === experimentForm.classId)
@@ -297,7 +296,7 @@ const submitExperiment = () => {
           submissionCount: 0,
           status: 'draft'
         })
-        ElMessage.success('创建成功!')
+        uiMessage.success('创建成功!')
       }
     }, 1000)
   })

@@ -21,28 +21,28 @@
           <!-- 评分标准 -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#6e6e73]">评分标准</label>
-            <select v-model="createForm.rubricId"
+            <UiSelect v-model="createForm.rubricId"
               class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f]">
-              <option value="" disabled selected>选择评分标准</option>
-              <option v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</option>
-            </select>
+              <UiOption value="" disabled selected>选择评分标准</UiOption>
+              <UiOption v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</UiOption>
+            </UiSelect>
           </div>
           <!-- 实验ID -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#6e6e73]">实验ID</label>
-            <input v-model="createForm.experimentId" placeholder="可选"
+            <UiInput v-model="createForm.experimentId" placeholder="可选"
               class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
           </div>
           <!-- 班级ID -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#6e6e73]">班级ID</label>
-            <input v-model="createForm.classId" placeholder="可选"
+            <UiInput v-model="createForm.classId" placeholder="可选"
               class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
           </div>
           <!-- 教师署名 -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#6e6e73]">教师署名</label>
-            <input v-model="createForm.teacherSignature" maxlength="32" placeholder="例如：张老师"
+            <UiInput v-model="createForm.teacherSignature" maxlength="32" placeholder="例如：张老师"
               class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
           </div>
         </div>
@@ -51,7 +51,7 @@
         <div class="mb-5">
           <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">期望分数区间</label>
           <div class="max-w-[600px] px-3">
-            <el-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
+            <ui-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
               :marks="{ 0: '0', 75: '75', 90: '90', 99: '99', 100: '100' }" />
           </div>
           <div class="text-xs text-[#aeaeb2] mt-1">
@@ -62,16 +62,16 @@
         <!-- 上传PDF -->
         <div class="mb-5">
           <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">上传PDF</label>
-          <el-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
+          <ui-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
                      accept=".pdf,.docx,.doc" multiple drag :file-list="fileList" :on-remove="onFileRemove">
             <UploadFilled class="text-[40px] text-[#aeaeb2]" />
             <div class="text-[#6e6e73] mt-2">拖拽 PDF 文件到此处，或点击上传（最多200 份）</div>
-          </el-upload>
+          </ui-upload>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center gap-3">
-          <button @click="submitTask"
+          <UiButton @click="submitTask"
             :disabled="submitting || !createForm.rubricId || fileList.length === 0"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
             <span v-if="submitting" class="inline-flex items-center gap-1.5">
@@ -79,11 +79,11 @@
               处理中...
             </span>
             <span v-else>开始批改({{ fileList.length }} 件)</span>
-          </button>
-          <button @click="$router.push('/teacher/grading/rubrics')"
+          </UiButton>
+          <UiButton @click="$router.push('/teacher/grading/rubrics')"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
             管理评分标准
-          </button>
+          </UiButton>
         </div>
       </div>
     </div>
@@ -92,10 +92,10 @@
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-5 overflow-hidden">
       <div class="flex justify-between items-center px-6 py-4 border-b border-black/[0.06]">
         <span class="text-base font-semibold text-[#1d1d1f]">批改任务列表</span>
-        <button @click="loadTasks"
+        <UiButton @click="loadTasks"
           class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none inline-flex items-center gap-1">
           <Refresh class="w-4 h-4" /> 刷新
-        </button>
+        </UiButton>
       </div>
       <div class="p-6">
         <!-- Loading state -->
@@ -105,7 +105,7 @@
 
         <!-- Table -->
         <div v-else-if="tasks.length > 0" class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <UiTable class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9] rounded-tl-lg">ID</th>
@@ -138,27 +138,27 @@
                 <td class="py-3 px-3 text-[13px] text-[#6e6e73]">{{ formatTime(row.createdAt) }}</td>
                 <td class="py-3 px-3">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <button @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
+                    <UiButton @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
                       class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
                       查看详情
-                    </button>
-                    <button v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
+                    </UiButton>
+                    <UiButton v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
                       class="text-[13px] font-medium text-[#ff9500] cursor-pointer hover:text-[#cc7700] transition-colors bg-transparent border-none">
                       重试失败
-                    </button>
-                    <button v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
+                    </UiButton>
+                    <UiButton v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
                       class="text-[13px] font-medium text-[#30d158] cursor-pointer hover:text-[#1fa840] transition-colors bg-transparent border-none">
                       导出报告
-                    </button>
-                    <button @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
+                    </UiButton>
+                    <UiButton @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
                       class="text-[13px] font-medium text-[#ff3b30] cursor-pointer hover:text-[#cc2f26] transition-colors bg-transparent border-none disabled:opacity-40 disabled:cursor-not-allowed">
                       删除
-                    </button>
+                    </UiButton>
                   </div>
                 </td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
 
         <!-- Empty state -->
@@ -172,10 +172,10 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, onMounted, onUnmounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { UploadFilled, Refresh } from '@element-plus/icons-vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { UploadFilled, Refresh } from '@/components/ui/icons'
 import { getRubrics, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
 
 const rubrics = ref([])
@@ -215,7 +215,7 @@ function onFileRemove(_, list) { fileList.value = list }
 
 async function confirmDeleteTask(id) {
   try {
-    await ElMessageBox.confirm('确定删除此批改任务？删除后不可恢复', '确认删除', {
+    await messageBox.confirm('确定删除此批改任务？删除后不可恢复', '确认删除', {
       confirmButtonText: '删除',
       cancelButtonText: '取消',
       type: 'warning'
@@ -240,11 +240,11 @@ async function submitTask() {
       fd.append('scoreRangeMax', createForm.value.scoreRange[1])
     }
     await createGradingTask(fd)
-    ElMessage.success('批改任务已创建，AI 正在处理中..')
+    uiMessage.success('批改任务已创建，AI 正在处理中..')
     fileList.value = []
     createForm.value.teacherSignature = ''
     loadTasks()
-  } catch (e) { ElMessage.error('创建失败: ' + e.message) }
+  } catch (e) { uiMessage.error('创建失败: ' + e.message) }
   submitting.value = false
 }
 
@@ -254,24 +254,24 @@ async function loadTasks() {
     const res = await getGradingTasks()
     const data = res?.data ?? res
     tasks.value = data?.content || (Array.isArray(data) ? data : [])
-  } catch (e) { ElMessage.error('加载任务列表失败: ' + e.message) }
+  } catch (e) { uiMessage.error('加载任务列表失败: ' + e.message) }
   loading.value = false
 }
 
 async function retryTask(id) {
   try {
     await retryGradingTask(id)
-    ElMessage.success('重试已发起')
+    uiMessage.success('重试已发起')
     loadTasks()
-  } catch (e) { ElMessage.error(e.message) }
+  } catch (e) { uiMessage.error(e.message) }
 }
 
 async function deleteTask(id) {
   try {
     await deleteGradingTask(id)
-    ElMessage.success('任务已删除')
+    uiMessage.success('任务已删除')
     loadTasks()
-  } catch (e) { ElMessage.error('删除失败: ' + e.message) }
+  } catch (e) { uiMessage.error('删除失败: ' + e.message) }
 }
 
 async function exportTask(id) {
@@ -285,10 +285,10 @@ async function exportTask(id) {
   } catch (e) {
     const message = String(e?.message || '')
     if (message.includes('Report not yet generated') || message.includes('404')) {
-      ElMessage.warning('当前批改报告尚未生成，暂时无法导出 ZIP。')
+      uiMessage.warning('当前批改报告尚未生成，暂时无法导出 ZIP。')
       return
     }
-    ElMessage.error(message || '导出失败')
+    uiMessage.error(message || '导出失败')
   }
 }
 

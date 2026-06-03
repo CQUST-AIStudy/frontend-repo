@@ -1,17 +1,25 @@
 # Dependencies
 node_modules/
+.pnp/
+.pnp.*
 
 # Build outputs
 dist/
+dist-ssr/
 build/
 coverage/
+.nyc_output/
 
-# Caches
+# Caches and temporary files
 node_modules/.cache/
 .cache/
+.parcel-cache/
 .temp/
+.tmp/
 tmp/
+temp/
 .vite/
+*.tsbuildinfo
 .eslintcache
 .stylelintcache
 
@@ -34,11 +42,17 @@ static-server*.log
 # Local editor / IDE files
 .idea/
 .vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 *.swp
 *.swo
 
 # OS files
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
 desktop.ini
 
@@ -50,9 +64,10 @@ cypress/videos/
 .edge-profile-login-check/
 login-check.png
 
-# Local Codex config
-.claude/settings.local.json
-.claude
+# Local AI assistant config
+.claude/
+.codex/
+.agents/
 
 # HBuilderX / uni-app artifacts
 unpackage/

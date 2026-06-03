@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-5">
-    <page-header
+    <UiPageHeader
       class="my-page-header"
       title="教师AI能力管理"
       description="查看教师与学生的AI功能使用概况"
@@ -11,13 +11,13 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">AI使用概览</span>
-          <button
+          <UiButton
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
             @click="refreshData"
             :disabled="loading"
           >
             {{ loading ? '加载中...' : '刷新数据' }}
-          </button>
+          </UiButton>
         </div>
 
         <div class="flex flex-wrap gap-4 mb-5">
@@ -47,7 +47,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">学生实验数据</span>
-          <input
+          <UiInput
             v-model="searchQuery"
             placeholder="搜索学生姓名或学号"
             class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -59,7 +59,7 @@
         </div>
 
         <div v-else class="overflow-x-auto rounded-[12px] border border-black/[0.06]">
-          <table class="w-full text-sm border-collapse">
+          <UiTable class="w-full text-sm border-collapse">
             <thead>
               <tr class="bg-[#f5f5f7]/80">
                 <th class="px-3 py-2.5 text-left text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide">学号</th>
@@ -108,7 +108,7 @@
                 <td class="px-3 py-2.5 text-[#1d1d1f]">{{ row.lowestScore }}</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
 
         <div class="mt-4 flex justify-end">
@@ -130,13 +130,13 @@
         <div class="space-y-5 max-w-xl">
           <div>
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">AI助手模型</label>
-            <select
+            <UiSelect
               v-model="modelConfig.model"
               class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
             >
-              <option value="deepseek-chat">DeepSeek Chat (当前)</option>
-              <option value="deepseek-coder">DeepSeek Coder</option>
-            </select>
+              <UiOption value="deepseek-chat">DeepSeek Chat (当前)</UiOption>
+              <UiOption value="deepseek-coder">DeepSeek Coder</UiOption>
+            </UiSelect>
           </div>
 
           <!-- 高级参数折叠 -->
@@ -148,7 +148,7 @@
             <div class="mt-4 space-y-4 pl-5">
               <div>
                 <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">温度 (Temperature): {{ modelConfig.temperature }}</label>
-                <input
+                <UiInput
                   type="range"
                   v-model.number="modelConfig.temperature"
                   min="0"
@@ -159,7 +159,7 @@
               </div>
               <div>
                 <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">最大输出长度: {{ modelConfig.maxTokens }}</label>
-                <input
+                <UiInput
                   type="range"
                   v-model.number="modelConfig.maxTokens"
                   min="100"
@@ -172,12 +172,12 @@
           </details>
 
           <div class="pt-2">
-            <button
+            <UiButton
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               @click="saveModelConfig"
             >
               保存配置
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -186,13 +186,11 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, reactive, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
-import PageHeader from '../../components/PageHeader.vue'
-import AppPagination from '../../components/AppPagination.vue'
-import api from '../../api'
 import * as echarts from 'echarts'
-import { ElMessage } from 'element-plus'
+import api from '@/api'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
 
 const loading = ref(false)
 const searchQuery = ref('')
@@ -309,7 +307,7 @@ const refreshData = async () => {
     renderScoreDistChart(allScored)
   } catch (e) {
     logger.error('加载数据失败:', e)
-    ElMessage.error('加载数据失败: ' + (e.message || ''))
+    uiMessage.error('加载数据失败: ' + (e.message || ''))
   } finally {
     loading.value = false
   }
@@ -377,7 +375,7 @@ const handleResize = () => {
 
 const saveModelConfig = () => {
   localStorage.setItem('ai_model_config', JSON.stringify(modelConfig))
-  ElMessage.success('AI模型配置已保存')
+  uiMessage.success('AI模型配置已保存')
 }
 
 onMounted(() => {
