@@ -1,15 +1,15 @@
 <template>
   <div class="h-full">
-    <page-header
+    <UiPageHeader
         class="p-5"
         :title="showDetailedAnalysis ? '班级详细分析' : '班级分析'"
         :description="showDetailedAnalysis ? `${currentClassName} - 学习情况与能力趋势` : '查看班级学生的学习情况和能力趋势'"
     >
-      <button v-if="showDetailedAnalysis" @click="backToWelcome"
+      <UiButton v-if="showDetailedAnalysis" @click="backToWelcome"
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
         返回班级列表
-      </button>
-    </page-header>
+      </UiButton>
+    </UiPageHeader>
 
     <div class="px-5 pb-5 bg-[#f5f7fa] rounded-[4px] leading-relaxed">
       <!-- 欢迎页面 - 未选择班级时显示-->
@@ -53,17 +53,17 @@
         <div class="mt-5">
           <h2 class="text-center mb-8 text-[#303133] text-[22px] font-semibold">请选择要分析的班级</h2>
           <div class="flex justify-center gap-4 mb-5">
-            <input
+            <UiInput
                 v-model="classSearchText"
                 placeholder="搜索班级名称/课程"
                 class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
             />
-            <select v-model="classSortOption"
+            <UiSelect v-model="classSortOption"
               class="w-[150px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
-              <option value="name">按名称排序</option>
-              <option value="studentCount">按学生数量排序</option>
-              <option value="semester">按学期排序</option>
-            </select>
+              <UiOption value="name">按名称排序</UiOption>
+              <UiOption value="studentCount">按学生数量排序</UiOption>
+              <UiOption value="semester">按学期排序</UiOption>
+            </UiSelect>
           </div>
 
           <template v-if="filteredClasses.length">
@@ -79,14 +79,14 @@
                     <p><strong class="text-[#1d1d1f]">学期:</strong> {{ classItem.semester || '2023-2024' }}</p>
                   </div>
                   <div class="flex justify-between gap-2.5 mt-auto pt-1.5 flex-wrap">
-                    <button @click.stop="viewDetailedAnalysis(classItem)"
+                    <UiButton @click.stop="viewDetailedAnalysis(classItem)"
                       class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                       详细分析
-                    </button>
-                    <button @click.stop="quickViewAnalysis(classItem)"
+                    </UiButton>
+                    <UiButton @click.stop="quickViewAnalysis(classItem)"
                       class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
                       快速分析
-                    </button>
+                    </UiButton>
                   </div>
                 </div>
               </div>
@@ -104,10 +104,10 @@
       <div v-if="showDetailedAnalysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">我的教学班</span>
-          <button @click="refreshClassList"
+          <UiButton @click="refreshClassList"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             刷新
-          </button>
+          </UiButton>
         </div>
 
         <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
@@ -122,7 +122,7 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <table class="w-full text-sm">
+          <UiTable class="w-full text-sm">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="text-left py-3 px-4 font-medium text-[#6e6e73]">班级名称</th>
@@ -141,12 +141,12 @@
                 <td class="py-3 px-4 text-[#1d1d1f]">{{ row.courseName }}</td>
                 <td class="py-3 px-4 text-[#1d1d1f]">{{ row.semester }}</td>
                 <td class="py-3 px-4">
-                  <button @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</button>
-                  <button @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</button>
+                  <UiButton @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</UiButton>
+                  <UiButton @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</UiButton>
                 </td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
       </div>
 
@@ -154,10 +154,10 @@
       <div v-if="showDetailedAnalysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">{{ currentClassName }} 详细分析</span>
-          <button @click="backToWelcome"
+          <UiButton @click="backToWelcome"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             返回班级列表
-          </button>
+          </UiButton>
         </div>
 
         <!-- 班级选择 / 分析设置 -->
@@ -168,15 +168,15 @@
           <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">实验</label>
-              <select v-model="filterForm.experimentId" @change="handleClassChange"
+              <UiSelect v-model="filterForm.experimentId" @change="handleClassChange"
                 class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
-                <option value="">所有实验</option>
-                <option v-for="item in experimentList" :key="item.id" :value="item.id">{{ item.name }}</option>
-              </select>
+                <UiOption value="">所有实验</UiOption>
+                <UiOption v-for="item in experimentList" :key="item.id" :value="item.id">{{ item.name }}</UiOption>
+              </UiSelect>
             </div>
             <div class="flex items-center gap-2">
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">搜索</label>
-              <input v-model="filterForm.search" @input="filterStudents"
+              <UiInput v-model="filterForm.search" @input="filterStudents"
                 placeholder="搜索学生姓名/学号"
                 class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
               />
@@ -224,10 +224,10 @@
           <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">学生列表</span>
-              <button @click="exportStudentData"
+              <UiButton @click="exportStudentData"
                 class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                 导出数据
-              </button>
+              </UiButton>
             </div>
 
             <div v-if="!filteredStudents.length" class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
@@ -236,7 +236,7 @@
             </div>
 
             <div v-else class="overflow-x-auto max-h-[500px] overflow-y-auto">
-              <table class="w-full text-sm">
+              <UiTable class="w-full text-sm">
                 <thead class="sticky top-0 bg-white z-10">
                   <tr class="border-b border-black/[0.06]">
                     <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[50px]"></th>
@@ -253,9 +253,9 @@
                   <template v-for="student in filteredStudents" :key="student.id">
                     <tr class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors">
                       <td class="py-3 px-4">
-                        <button @click="toggleStudentExpand(student.id)" class="w-6 h-6 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.08] transition-colors cursor-pointer border-none">
+                        <UiButton @click="toggleStudentExpand(student.id)" class="w-6 h-6 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.08] transition-colors cursor-pointer border-none">
                           <svg class="w-3 h-3 text-[#6e6e73] transition-transform" :class="expandedStudents.has(student.id) ? 'rotate-90' : ''" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
+                        </UiButton>
                       </td>
                       <td class="py-3 px-4 text-[#1d1d1f]">{{ student.id }}</td>
                       <td class="py-3 px-4 text-[#1d1d1f] font-medium">{{ student.name }}</td>
@@ -281,8 +281,8 @@
                         </span>
                       </td>
                       <td class="py-3 px-4">
-                        <button @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</button>
-                        <button @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</button>
+                        <UiButton @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</UiButton>
+                        <UiButton @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</UiButton>
                       </td>
                     </tr>
                     <!-- Expanded row -->
@@ -314,7 +314,7 @@
                     </tr>
                   </template>
                 </tbody>
-              </table>
+              </UiTable>
             </div>
           </div>
 
@@ -322,10 +322,10 @@
           <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
-              <button @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
+              <UiButton @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
                 class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
                 {{ aiAdviceLoading ? '生成中..' : '生成建议' }}
-              </button>
+              </UiButton>
             </div>
 
             <div class="px-1 py-1">
@@ -401,14 +401,14 @@
         </div>
 
         <template #footer>
-          <button @click="quickAnalysisVisible = false"
+          <UiButton @click="quickAnalysisVisible = false"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
             关闭
-          </button>
-          <button @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)" :disabled="!quickAnalysisData"
+          </UiButton>
+          <UiButton @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)" :disabled="!quickAnalysisData"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
             查看详细分析
-          </button>
+          </UiButton>
         </template>
       </AppModal>
     </div>
@@ -416,17 +416,16 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import {ref, reactive, computed, onMounted, nextTick, onUnmounted} from 'vue'
-import {useRouter, useRoute} from 'vue-router'
 import * as echarts from 'echarts'
-import {ElMessage} from 'element-plus'
-import {DataAnalysis, User, ChatDotRound} from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import {DataAnalysis, User, ChatDotRound} from '@/components/ui/icons'
 import {marked} from 'marked'
 import DOMPurify from 'dompurify'
 import api from '../../api'
 import {buildStructuredPrompt, chatSend} from '../../api/tap'
-import PageHeader from '../../components/PageHeader.vue'
 import AppModal from '../../components/AppModal.vue'
 
 const router = useRouter()
@@ -761,7 +760,7 @@ const generateClassTeachingAdvice = async () => {
   } catch (error) {
     logger.error('生成班级教学建议失败:', error)
     aiAdviceError.value = `AI 教学建议生成失败：${error?.message || '请检查后端AI 服务配置'}`
-    ElMessage.warning(aiAdviceError.value)
+    uiMessage.warning(aiAdviceError.value)
   } finally {
     aiAdviceLoading.value = false
   }
@@ -775,7 +774,7 @@ const loadClassList = async () => {
     classList.value = data
   } catch (error) {
     logger.error('加载班级列表失败:', error)
-    ElMessage.error('加载班级列表失败')
+    uiMessage.error('加载班级列表失败')
   } finally {
     loading.value = false
   }
@@ -874,7 +873,7 @@ const quickViewAnalysis = async (classInfo) => {
     })
   } catch (error) {
     logger.error('获取快速分析数据失败', error)
-    ElMessage.error('获取快速分析数据失败')
+    uiMessage.error('获取快速分析数据失败')
   } finally {
     quickAnalysisLoading.value = false
   }
@@ -1014,7 +1013,7 @@ const loadClassData = async () => {
     })
   } catch (error) {
     logger.error('加载班级数据失败:', error)
-    ElMessage.error('加载班级数据失败: ' + (error.message || '未知错误'))
+    uiMessage.error('加载班级数据失败: ' + (error.message || '未知错误'))
   } finally {
     loading.value = false
   }
@@ -1167,7 +1166,7 @@ const loadStudentData = async () => {
 
   } catch (error) {
     logger.error('加载学生数据失败:', error);
-    ElMessage.error('加载学生数据失败: ' + (error.message || '未知错误'));
+    uiMessage.error('加载学生数据失败: ' + (error.message || '未知错误'));
     studentList.value = [];
     return [];
   }
@@ -1506,7 +1505,7 @@ const viewStudentDetail = (student) => {
 const viewStudentReports = (student) => {
   const completedExperiments = student.experiments.filter(e => e.status === 'completed')
   if (completedExperiments.length === 0) {
-    ElMessage.warning('该学生暂无已完成的实验报告')
+    uiMessage.warning('该学生暂无已完成的实验报告')
     return
   }
 
@@ -1524,7 +1523,7 @@ const viewStudentReports = (student) => {
 
 // 导出学生数据
 const exportStudentData = () => {
-  ElMessage.success('学生数据已导出')
+  uiMessage.success('学生数据已导出')
 }
 
 // 在组件卸载时清理图表和事件监听

@@ -2,9 +2,9 @@
   <div class="rubric-editor">
     <!-- Page Header -->
     <div class="flex items-center gap-3 mb-5">
-      <button @click="$router.back()" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none">
+      <UiButton @click="$router.back()" class="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none">
         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+      </UiButton>
       <h1 class="text-[20px] font-semibold text-[#1d1d1f]">评分标准管理</h1>
     </div>
 
@@ -13,18 +13,18 @@
       <div class="flex justify-between items-center mb-5">
         <span class="text-[15px] font-medium text-[#1d1d1f]">我的评分标准</span>
         <div class="flex gap-2 items-center">
-          <button @click="pickTemplate" :disabled="drafting"
+          <UiButton @click="pickTemplate" :disabled="drafting"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed">
             <span v-if="drafting" class="inline-flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round"/></svg>
               生成中...
             </span>
             <span v-else>模板生成</span>
-          </button>
-          <button @click="showCreate"
+          </UiButton>
+          <UiButton @click="showCreate"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             + 新建标准
-          </button>
+          </UiButton>
         </div>
       </div>
 
@@ -41,7 +41,7 @@
 
       <!-- Table -->
       <div v-else class="overflow-x-auto rounded-[12px] border border-black/[0.04]">
-        <table class="w-full text-sm">
+        <UiTable class="w-full text-sm">
           <thead>
             <tr class="bg-[#f5f5f7]/80">
               <th class="text-left px-4 py-3 font-medium text-[#6e6e73]">名称</th>
@@ -58,11 +58,11 @@
               <td class="px-4 py-3 text-[#1d1d1f]">{{ row.dimensions?.length || 0 }}</td>
               <td class="px-4 py-3 text-[#6e6e73]">{{ row.createdAt }}</td>
               <td class="px-4 py-3">
-                <button @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</button>
+                <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
               </td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
 
@@ -71,11 +71,11 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称</label>
-          <input v-model="form.name" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="form.name" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学科</label>
-          <input v-model="form.subject" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="form.subject" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
@@ -98,41 +98,41 @@
       </div>
 
       <div v-for="(dim, i) in form.dimensions" :key="i" class="flex gap-2 mb-2 items-center">
-        <input v-model="dim.name" placeholder="维度名称"
+        <UiInput v-model="dim.name" placeholder="维度名称"
           class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-        <input v-model="dim.description" placeholder="描述"
+        <UiInput v-model="dim.description" placeholder="描述"
           class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-        <input v-model.number="dim.maxScore" type="number" min="1" max="100" placeholder="满分"
+        <UiInput v-model.number="dim.maxScore" type="number" min="1" max="100" placeholder="满分"
           class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-        <input v-model.number="dim.weight" type="number" min="1" max="100" placeholder="权重%"
+        <UiInput v-model.number="dim.weight" type="number" min="1" max="100" placeholder="权重%"
           class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-        <button @click="form.dimensions.splice(i, 1)"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</button>
+        <UiButton @click="form.dimensions.splice(i, 1)"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</UiButton>
       </div>
-      <button @click="addDimension"
-        class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</button>
+      <UiButton @click="addDimension"
+        class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</UiButton>
 
       <template #footer>
-        <button @click="dialogVisible = false"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">取消</button>
-        <button @click="saveRubric" :disabled="weightSum !== 100 || saving"
+        <UiButton @click="dialogVisible = false"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">取消</UiButton>
+        <UiButton @click="saveRubric" :disabled="weightSum !== 100 || saving"
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
           <span v-if="saving" class="inline-flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round"/></svg>
             保存中...
           </span>
           <span v-else>保存</span>
-        </button>
+        </UiButton>
       </template>
     </AppModal>
 
-    <input ref="templateInput" type="file" accept=".pdf,.docx,.doc" class="hidden" @change="onTemplatePicked" />
+    <UiInput ref="templateInput" type="file" accept=".pdf,.docx,.doc" class="hidden" @change="onTemplatePicked" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 import { getRubrics, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
 import AppModal from '../../components/AppModal.vue'
 
@@ -153,7 +153,7 @@ async function loadRubrics() {
   try {
     const res = await getRubrics()
     rubrics.value = res?.data || []
-  } catch (e) { ElMessage.error(e.message) }
+  } catch (e) { uiMessage.error(e.message) }
   loading.value = false
 }
 
@@ -192,9 +192,9 @@ async function onTemplatePicked(event) {
       }))
     }
     dialogVisible.value = true
-    ElMessage.success('已根据模板生成评分标准草案')
+    uiMessage.success('已根据模板生成评分标准草案')
   } catch (e) {
-    ElMessage.error(e.message || '模板生成失败')
+    uiMessage.error(e.message || '模板生成失败')
   } finally {
     drafting.value = false
     if (event?.target) event.target.value = ''
@@ -211,7 +211,7 @@ async function editRubric(row) {
       dimensions: (r.dimensions || []).map(d => ({ name: d.name, description: d.description, maxScore: d.maxScore, weight: d.weight }))
     }
     dialogVisible.value = true
-  } catch (e) { ElMessage.error(e.message) }
+  } catch (e) { uiMessage.error(e.message) }
 }
 
 function addDimension() {
@@ -223,14 +223,14 @@ async function saveRubric() {
   try {
     if (editingId.value) {
       await updateRubric(editingId.value, form.value)
-      ElMessage.success('更新成功')
+      uiMessage.success('更新成功')
     } else {
       await createRubric(form.value)
-      ElMessage.success('创建成功')
+      uiMessage.success('创建成功')
     }
     dialogVisible.value = false
     loadRubrics()
-  } catch (e) { ElMessage.error(e.message) }
+  } catch (e) { uiMessage.error(e.message) }
   saving.value = false
 }
 

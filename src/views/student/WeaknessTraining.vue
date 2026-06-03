@@ -1,36 +1,36 @@
 <template>
   <div class="page [display:flex] [flex-direction:column] [gap:20px]">
-    <page-header title="错题本与专项训练" description="把薄弱点转成回炉计划、专项题单和掌握度回升记录。">
-      <el-button plain @click="goPractice">推荐练习</el-button>
-      <el-button type="primary" :loading="loading" @click="loadPageData">刷新数据</el-button>
-    </page-header>
+    <UiPageHeader title="错题本与专项训练" description="把薄弱点转成回炉计划、专项题单和掌握度回升记录。">
+      <ui-button plain @click="goPractice">推荐练习</ui-button>
+      <ui-button type="primary" :loading="loading" @click="loadPageData">刷新数据</ui-button>
+    </UiPageHeader>
 
     <loading-state :loading="loading">
       <div v-if="weaknessCards.length" class="content [display:flex] [flex-direction:column] [gap:20px]">
         <div class="summary-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1200px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[760px]:[grid-template-columns:1fr]">
-          <el-card v-for="item in summaryCards" :key="item.label" class="summary-card [&_.el-card__body]:[display:flex] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[padding:18px]" shadow="hover">
+          <ui-card v-for="item in summaryCards" :key="item.label" class="summary-card [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[padding:18px]" shadow="hover">
             <div class="summary-icon [width:44px] [height:44px] [border-radius:14px] [display:flex] [align-items:center] [justify-content:center]" :class="summaryIconClass(item)">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <ui-icon><component :is="item.icon" /></ui-icon>
             </div>
             <div>
               <div class="summary-value [font-size:24px] [font-weight:700] [color:#0f172a]">{{ item.value }}</div>
               <div class="summary-label [color:#475569] [font-size:13px]">{{ item.label }}</div>
               <div class="summary-tip [color:#64748b] [font-size:12px]">{{ item.tip }}</div>
             </div>
-          </el-card>
+          </ui-card>
         </div>
 
         <div class="main-grid [display:grid] [grid-template-columns:minmax(320px,_360px)_minmax(0,_1fr)] [gap:20px] max-[1200px]:[grid-template-columns:1fr]">
-          <el-card class="panel [border-radius:20px] [border:1px_solid_#e7edf4]" shadow="hover">
+          <ui-card class="panel [border-radius:20px] [border:1px_solid_#e7edf4]" shadow="hover">
             <template #header>
               <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                 <span>薄弱点总览</span>
-                <el-tag type="danger" effect="plain">{{ weaknessCards.length }} 个</el-tag>
+                <ui-tag type="danger" effect="plain">{{ weaknessCards.length }} 个</ui-tag>
               </div>
             </template>
 
             <div class="weakness-list [display:flex] [flex-direction:column] [gap:12px]">
-              <button
+              <UiButton
                 v-for="item in weaknessCards"
                 :key="item.experimentId"
                 class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]"
@@ -42,22 +42,22 @@
                     <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ item.experimentName }}</div>
                     <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ item.dimension }} · 掌握度{{ item.mastery }} 分</div>
                   </div>
-                  <el-tag :type="item.estimatedMastery >= 70 ? 'success' : item.estimatedMastery >= 50 ? 'warning' : 'danger'">
+                  <ui-tag :type="item.estimatedMastery >= 70 ? 'success' : item.estimatedMastery >= 50 ? 'warning' : 'danger'">
                     估算 {{ item.estimatedMastery }}
-                  </el-tag>
+                  </ui-tag>
                 </div>
-                <el-progress :percentage="item.planProgress" :stroke-width="10" />
+                <ui-progress :percentage="item.planProgress" :stroke-width="10" />
                 <div class="meta-line [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:10px] [color:#64748b] [font-size:12px]">
                   <span>计划 {{ item.completedCount }}/{{ item.targetCount || item.recommendedPracticeCount }}</span>
                   <span>错题 {{ item.weakQuestionCount }}</span>
                   <span>回炉 {{ item.acceptedReviewCount }}</span>
                 </div>
-              </button>
+              </UiButton>
             </div>
 
             <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">最近回炉记录</div>
-            <el-timeline v-if="recentReviewRecords.length">
-              <el-timeline-item
+            <ui-timeline v-if="recentReviewRecords.length">
+              <ui-timeline-item
                 v-for="record in recentReviewRecords"
                 :key="record.id"
                 :type="record.accepted ? 'success' : 'warning'"
@@ -65,13 +65,13 @@
               >
                 <div class="title small [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ record.problemTitle }}</div>
                 <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ record.dimension || '专项训练' }} · {{ record.accepted ? '通过提交' : '已尝试' }}</div>
-              </el-timeline-item>
-            </el-timeline>
-            <el-empty v-else description="还没有回炉记录" :image-size="68" />
-          </el-card>
+              </ui-timeline-item>
+            </ui-timeline>
+            <ui-empty v-else description="还没有回炉记录" :image-size="68" />
+          </ui-card>
 
           <div v-if="selectedWeakness" class="detail-column [display:flex] [flex-direction:column] [gap:20px]">
-            <el-card class="panel" shadow="hover">
+            <ui-card class="panel" shadow="hover">
               <template #header>
                 <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <div>
@@ -79,10 +79,10 @@
                     <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ selectedWeakness.dimension }} · {{ selectedWeakness.evidenceSummary }}</div>
                   </div>
                   <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
-                    <el-button plain @click="resetPlan(selectedWeakness)">重置计划</el-button>
-                    <el-button type="primary" @click="buildPlan(selectedWeakness)">
+                    <ui-button plain @click="resetPlan(selectedWeakness)">重置计划</ui-button>
+                    <ui-button type="primary" @click="buildPlan(selectedWeakness)">
                       {{ selectedWeakness.hasPlan ? '更新计划' : '生成计划' }}
-                    </el-button>
+                    </ui-button>
                   </div>
                 </div>
               </template>
@@ -116,7 +116,7 @@
               </div>
 
               <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">专项训练说明</div>
-              <el-input
+              <ui-input
                 v-model="selectedPlanNote"
                 type="textarea"
                 :rows="3"
@@ -124,13 +124,13 @@
                 placeholder="记录本次专项训练要重点修正的问题。"
                 @blur="savePlanNote(selectedWeakness)"
               />
-            </el-card>
+            </ui-card>
 
-            <el-card class="panel" shadow="hover">
+            <ui-card class="panel" shadow="hover">
               <template #header>
                 <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <span>专项题单</span>
-                  <el-button type="primary" plain @click="startNextProblem(selectedWeakness)">开始下一题</el-button>
+                  <ui-button type="primary" plain @click="startNextProblem(selectedWeakness)">开始下一题</ui-button>
                 </div>
               </template>
 
@@ -144,8 +144,8 @@
                   <div class="card-row [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                     <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ practice.displayTitle }}</div>
                     <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
-                      <el-tag size="small" :type="tagTypeForSource(practice.sourceKind)">{{ sourceLabel(practice.sourceKind) }}</el-tag>
-                      <el-tag size="small" effect="plain">{{ difficultyLabel(practice.difficulty) }}</el-tag>
+                      <ui-tag size="small" :type="tagTypeForSource(practice.sourceKind)">{{ sourceLabel(practice.sourceKind) }}</ui-tag>
+                      <ui-tag size="small" effect="plain">{{ difficultyLabel(practice.difficulty) }}</ui-tag>
                     </div>
                   </div>
                   <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ practice.reasonText }}</div>
@@ -156,27 +156,27 @@
                     <span v-if="practice.estimatedMinutes">建议 {{ practice.estimatedMinutes }} 分钟</span>
                   </div>
                   <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
-                    <el-button
+                    <ui-button
                       size="small"
                       :type="isInPlan(selectedWeakness, practice.problemId) ? 'warning' : 'info'"
                       plain
                       @click="toggleProblemInPlan(selectedWeakness, practice.problemId)"
                     >
                       {{ isInPlan(selectedWeakness, practice.problemId) ? '移出计划' : '加入计划' }}
-                    </el-button>
-                    <el-button type="primary" size="small" @click="startProblem(selectedWeakness, practice)">开始回炉</el-button>
+                    </ui-button>
+                    <ui-button type="primary" size="small" @click="startProblem(selectedWeakness, practice)">开始回炉</ui-button>
                   </div>
                 </div>
               </div>
-            </el-card>
+            </ui-card>
 
-            <el-card class="panel" shadow="hover">
+            <ui-card class="panel" shadow="hover">
               <template #header>
                 <div class="panel-head [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                   <span>掌握度回升记录</span>
-                  <el-tag :type="selectedWeakness.estimatedMastery >= 70 ? 'success' : 'warning'">
+                  <ui-tag :type="selectedWeakness.estimatedMastery >= 70 ? 'success' : 'warning'">
                     估算 {{ selectedWeakness.estimatedMastery }} 分
-                  </el-tag>
+                  </ui-tag>
                 </div>
               </template>
 
@@ -189,31 +189,30 @@
                   <strong class="recovery-score [color:#1d4ed8] [white-space:nowrap]">{{ record.estimatedMastery }} 分</strong>
                 </div>
               </div>
-              <el-empty v-else description="完成专项题提交后，这里会开始累计。" :image-size="68" />
-            </el-card>
+              <ui-empty v-else description="完成专项题提交后，这里会开始累计。" :image-size="68" />
+            </ui-card>
           </div>
         </div>
       </div>
 
-      <el-empty
+      <ui-empty
         v-else
         description="当前还没有可用的薄弱点数据。先完成实验和练习，再回来生成专项训练。"
         :image-size="96"
       >
-        <el-button type="primary" @click="goPractice">去练习</el-button>
-      </el-empty>
+        <ui-button type="primary" @click="goPractice">去练习</ui-button>
+      </ui-empty>
     </loading-state>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { DataAnalysis, Finished, List as ListIcon, TrendCharts } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
+import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import { DataAnalysis, Finished, List as ListIcon, TrendCharts } from '@/components/ui/icons'
 import LoadingState from '../../components/LoadingState.vue'
 import { useLearningStore } from '../../store'
 import { getCurrentStudentId, getUserInfo } from '../../constants/auth'
@@ -466,13 +465,13 @@ function buildPlan(weakness) {
   })
   persistTrainingState(nextState)
   selectedWeaknessId.value = weakness.experimentId
-  ElMessage.success('专项训练计划已更新')
+  uiMessage.success('专项训练计划已更新')
 }
 
 function resetPlan(weakness) {
   persistTrainingState(removeWeaknessTrainingPlan(trainingState.value, weakness.experimentId))
   selectedPlanNote.value = ''
-  ElMessage.success('已重置该薄弱点的专项计划')
+  uiMessage.success('已重置该薄弱点的专项计划')
 }
 
 function toggleProblemInPlan(weakness, problemId) {
@@ -509,7 +508,7 @@ function savePlanNote(weakness) {
 function startProblem(weakness, practice) {
   const mode = getPracticeLaunchMode(practice)
   if (!practice?.problemId || mode !== 'leetcode') {
-    ElMessage.warning('该专项练习题当前未关联到力扣题库')
+    uiMessage.warning('该专项练习题当前未关联到力扣题库')
     return
   }
   if (!trainingState.value.plans?.[weakness.experimentId]) {
@@ -530,7 +529,7 @@ function startNextProblem(weakness) {
   const nextPractice = weakness.practicePool.find(practice => isInPlan(weakness, practice.problemId) && !isProblemCompleted(practice.problemId, weakness))
     || weakness.practicePool.find(practice => !isProblemCompleted(practice.problemId, weakness))
   if (!nextPractice) {
-    ElMessage.success('这个专项计划里的题目已经完成，可以切换到下一个薄弱点。')
+    uiMessage.success('这个专项计划里的题目已经完成，可以切换到下一个薄弱点。')
     return
   }
   startProblem(weakness, nextPractice)
@@ -588,7 +587,7 @@ async function loadPageData() {
     }
   } catch (error) {
     logger.error('加载专项训练数据失败:', error)
-    ElMessage.error('加载专项训练数据失败')
+    uiMessage.error('加载专项训练数据失败')
   } finally {
     loading.value = false
   }

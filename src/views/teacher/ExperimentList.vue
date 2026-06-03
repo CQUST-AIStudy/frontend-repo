@@ -1,11 +1,11 @@
 <template>
   <div class="min-w-0">
-    <page-header title="实验列表" description="管理和查看您创建的所有实验">
-      <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="createExperiment">创建实验</button>
-    </page-header>
+    <UiPageHeader title="实验列表" description="管理和查看您创建的所有实验">
+      <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="createExperiment">创建实验</UiButton>
+    </UiPageHeader>
 
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] p-5 min-w-0 overflow-x-auto max-[640px]:p-4 max-[640px]:rounded-2xl">
-      <table class="w-full text-left text-[13px]">
+      <UiTable class="w-full text-left text-[13px]">
         <thead>
           <tr class="border-b border-black/[0.06]">
             <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl w-[70px]">ID</th>
@@ -36,7 +36,7 @@
             <td colspan="7" class="py-12 text-center text-[#aeaeb2] text-sm">暂无实验数据</td>
           </tr>
         </tbody>
-      </table>
+      </UiTable>
     </div>
   </div>
 </template>
@@ -46,7 +46,6 @@ import logger from '@/utils/logger'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
 
 const router = useRouter()
 const experiments = ref([])

@@ -2,14 +2,14 @@
   <div class="min-h-full">
     <!-- Page Header -->
     <div class="flex items-center gap-3 mb-5">
-      <button
+      <UiButton
         @click="router.push('/teacher/grading')"
         class="w-[34px] h-[34px] rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none"
       >
         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="none">
           <path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </button>
+      </UiButton>
       <span class="text-[13px] text-[#6e6e73]">返回</span>
       <span class="text-[15px] font-semibold text-[#1d1d1f]">批改任务 #{{ taskId }}</span>
     </div>
@@ -38,46 +38,46 @@
       <div class="min-w-[280px] flex flex-col gap-2">
         <span class="text-[13px] text-[#6e6e73]">教师署名</span>
         <div class="flex items-center gap-2.5">
-          <input
+          <UiInput
             v-model="signatureDraft"
             maxlength="32"
             placeholder="例如：张老师"
             class="flex-1 h-[38px] px-3 rounded-[10px] border border-black/[0.08] bg-white text-[14px] text-[#1d1d1f] placeholder:text-[#aeaeb2] outline-none focus:border-[#007aff] focus:ring-2 focus:ring-[rgba(0,122,255,0.15)] transition-all"
           />
-          <button
+          <UiButton
             :disabled="signatureSaving"
             @click="saveSignature"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer"
           >
             <span v-if="signatureSaving" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
             保存署名
-          </button>
+          </UiButton>
         </div>
       </div>
       <div class="flex-1" />
-      <button
+      <UiButton
         :disabled="annotating || submissions.length === 0"
         @click="doBatchAnnotate"
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] border border-[rgba(255,59,48,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span v-if="annotating" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
         生成红笔批改报告
-      </button>
-      <button
+      </UiButton>
+      <UiButton
         :disabled="exportingAnnotated || submissions.length === 0"
         @click="doBatchExportAnnotated"
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff9500] bg-[rgba(255,149,0,0.08)] border border-[rgba(255,149,0,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span v-if="exportingAnnotated" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
         导出 AI 批改报告 ZIP
-      </button>
-      <button
+      </UiButton>
+      <UiButton
         :disabled="submissions.length === 0"
         @click="showExportDialog"
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
       >
         导出 Excel
-      </button>
+      </UiButton>
     </div>
 
     <!-- Submissions Card -->
@@ -85,13 +85,13 @@
       <div class="flex items-center justify-between gap-4 px-5 pt-[18px] pb-[10px] border-b border-black/[0.06]">
         <span class="text-[16px] font-semibold text-[#1d1d1f]">提交列表</span>
         <div class="flex items-center bg-black/[0.04] rounded-[10px] p-0.5">
-          <button
+          <UiButton
             v-for="opt in filterOptions"
             :key="opt.value"
             @click="statusFilter = opt.value"
             class="h-[30px] px-3 rounded-[8px] text-[12px] font-medium transition-all cursor-pointer border-none"
             :class="statusFilter === opt.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
-          >{{ opt.label }}</button>
+          >{{ opt.label }}</UiButton>
         </div>
       </div>
 
@@ -120,7 +120,7 @@
 
         <!-- Table -->
         <div v-else class="overflow-x-auto">
-          <table class="w-full text-left text-[13px]">
+          <UiTable class="w-full text-left text-[13px]">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-lg">ID</th>
@@ -159,10 +159,10 @@
                   <span v-else class="text-[#aeaeb2]">暂无</span>
                 </td>
                 <td class="py-3 px-3 whitespace-nowrap">
-                  <button v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#34c759] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
+                  <UiButton v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#34c759] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
                     下载报告
-                  </button>
-                  <button
+                  </UiButton>
+                  <UiButton
                     v-if="row.status === 'FAILED'"
                     :disabled="retryingSubmissionId === row.submissionId"
                     @click="retrySubmission(row)"
@@ -170,14 +170,14 @@
                   >
                     <span v-if="retryingSubmissionId === row.submissionId" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1"></span>
                     重试
-                  </button>
-                  <button @click="router.push(`/teacher/grading/submission/${row.submissionId}`)" class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
+                  </UiButton>
+                  <UiButton @click="router.push(`/teacher/grading/submission/${row.submissionId}`)" class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
                     查看详情
-                  </button>
+                  </UiButton>
                 </td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
       </div>
     </div>
@@ -188,7 +188,7 @@
         <div class="flex items-center gap-2">
           <span class="text-[14px] font-medium text-[#1d1d1f] w-[90px]">选择学生</span>
           <label class="flex items-center gap-1.5 cursor-pointer text-[13px] text-[#1d1d1f]">
-            <input type="checkbox" v-model="exportSelectAll" @change="toggleSelectAll(exportSelectAll)" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="exportSelectAll" @change="toggleSelectAll(exportSelectAll)" class="w-4 h-4 rounded accent-[#007aff]" />
             全选
           </label>
         </div>
@@ -198,7 +198,7 @@
             :key="sub.submissionId"
             class="flex items-center gap-2 py-1.5 cursor-pointer text-[13px] text-[#1d1d1f] hover:bg-black/[0.02] rounded px-1"
           >
-            <input type="checkbox" :value="sub.submissionId" v-model="exportSelected" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" :value="sub.submissionId" v-model="exportSelected" class="w-4 h-4 rounded accent-[#007aff]" />
             <span>{{ sub.studentName || '未知学生' }}</span>
             <span class="text-[#aeaeb2]">{{ sub.className || '' }}</span>
             <span class="ml-2 text-[#6e6e73]">{{ sub.totalScore != null ? `${formatScore(sub.totalScore)}分` : '-' }}</span>
@@ -206,36 +206,36 @@
         </div>
         <div class="flex items-center gap-2">
           <span class="text-[14px] font-medium text-[#1d1d1f] w-[90px]">包含总评</span>
-          <button
+          <UiButton
             @click="exportIncludeComments = !exportIncludeComments"
             class="relative w-[44px] h-[24px] rounded-full transition-colors cursor-pointer border-none"
             :class="exportIncludeComments ? 'bg-[#34c759]' : 'bg-black/[0.12]'"
           >
             <span class="absolute top-[2px] w-[20px] h-[20px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.15)] transition-all" :class="exportIncludeComments ? 'left-[22px]' : 'left-[2px]'"></span>
-          </button>
+          </UiButton>
         </div>
       </div>
       <template #footer>
-        <button @click="exportVisible = false" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer">
+        <UiButton @click="exportVisible = false" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer">
           取消
-        </button>
-        <button
+        </UiButton>
+        <UiButton
           :disabled="exporting || exportSelected.length === 0"
           @click="doExport"
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="exporting" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
           导出
-        </button>
+        </UiButton>
       </template>
     </AppModal>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 import AppModal from '../../components/AppModal.vue'
 import {
   batchGenerateAnnotatedReports,
@@ -355,9 +355,9 @@ async function doExport() {
     a.click()
     URL.revokeObjectURL(url)
     exportVisible.value = false
-    ElMessage.success('导出成功')
+    uiMessage.success('导出成功')
   } catch (error) {
-    ElMessage.error(`导出失败: ${error.message}`)
+    uiMessage.error(`导出失败: ${error.message}`)
   } finally {
     exporting.value = false
   }
@@ -376,10 +376,10 @@ async function saveSignature() {
     const nextSignature = data?.teacherSignature || normalizedSignature(signatureDraft.value)
     signatureDraft.value = nextSignature
     task.value = { ...task.value, teacherSignature: nextSignature }
-    ElMessage.success('教师署名已保存')
+    uiMessage.success('教师署名已保存')
     return nextSignature
   } catch (error) {
-    ElMessage.error(`保存教师署名失败: ${error.message}`)
+    uiMessage.error(`保存教师署名失败: ${error.message}`)
     throw error
   } finally {
     signatureSaving.value = false
@@ -400,13 +400,13 @@ async function doBatchAnnotate() {
     await ensureSignatureSaved()
     const res = await batchGenerateAnnotatedReports(taskId)
     const data = res?.data || res
-    ElMessage.success(`批改报告处理完成：共${data.total || 0}份，新生成${data.generated || 0}份，刷新${data.refreshed || 0}份，跳过${data.skipped || 0}份`)
+    uiMessage.success(`批改报告处理完成：共${data.total || 0}份，新生成${data.generated || 0}份，刷新${data.refreshed || 0}份，跳过${data.skipped || 0}份`)
     if (data.errors && data.errors.length > 0) {
-      ElMessage.warning(`${data.errors.length}份生成失败，请查看后端返回信息`)
+      uiMessage.warning(`${data.errors.length}份生成失败，请查看后端返回信息`)
     }
     await loadDetail()
   } catch (error) {
-    ElMessage.error(`生成批改报告失败: ${error.message}`)
+    uiMessage.error(`生成批改报告失败: ${error.message}`)
   } finally {
     annotating.value = false
   }
@@ -424,9 +424,9 @@ async function doBatchExportAnnotated() {
     a.download = `AI批改报告-任务${taskId}.zip`
     a.click()
     URL.revokeObjectURL(url)
-    ElMessage.success('批改报告 ZIP 导出成功')
+    uiMessage.success('批改报告 ZIP 导出成功')
   } catch (error) {
-    ElMessage.error(`导出失败: ${error.message}`)
+    uiMessage.error(`导出失败: ${error.message}`)
   } finally {
     exportingAnnotated.value = false
   }
@@ -443,7 +443,7 @@ async function downloadReport(row) {
     a.click()
     URL.revokeObjectURL(url)
   } catch (error) {
-    ElMessage.error(`下载失败: ${error.message}`)
+    uiMessage.error(`下载失败: ${error.message}`)
   }
 }
 
@@ -451,10 +451,10 @@ async function retrySubmission(row) {
   retryingSubmissionId.value = row.submissionId
   try {
     await retryGradingSubmission(row.submissionId)
-    ElMessage.success('已提交重试任务')
+    uiMessage.success('已提交重试任务')
     await loadDetail()
   } catch (error) {
-    ElMessage.error(`重试失败: ${error.message}`)
+    uiMessage.error(`重试失败: ${error.message}`)
   } finally {
     retryingSubmissionId.value = null
   }
@@ -482,7 +482,7 @@ async function loadDetail() {
     signatureDraft.value = data?.teacherSignature || ''
     submissions.value = data.submissions || []
   } catch (error) {
-    ElMessage.error(error.message)
+    uiMessage.error(error.message)
   } finally {
     loading.value = false
   }

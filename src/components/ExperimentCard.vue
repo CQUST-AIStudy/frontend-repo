@@ -6,7 +6,7 @@
         <span class="g-chip [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [white-space:nowrap]" :class="'c-' + experiment.status">{{ statusText }}</span>
       </div>
       <div class="g-exp-deadline [display:flex] [align-items:center] [gap:4px] [font-size:13px] [color:#6e6e73] [margin-bottom:8px]">
-        <el-icon><Clock /></el-icon>
+        <ui-icon><Clock /></ui-icon>
         <span>截止: {{ experiment.deadline }}</span>
       </div>
       <div v-if="experiment.status === 'completed'" class="g-exp-extra [display:flex] [flex-wrap:wrap] [gap:12px] [font-size:12px] [color:#6e6e73] [margin-bottom:8px] [&_b]:[color:#007aff]">
@@ -23,7 +23,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Clock } from '@element-plus/icons-vue'
+import { Clock } from '@/components/ui/icons'
 
 const props = defineProps({ experiment: { type: Object, required: true } })
 

@@ -32,19 +32,19 @@
         <div v-else class="py-16 text-center">
           <div class="text-[48px] mb-4 opacity-40">📚</div>
           <p class="text-[15px] text-[#aeaeb2] mb-5">你还没有创建任何教学班</p>
-          <button @click="goCreateClass" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+          <UiButton @click="goCreateClass" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             去创建教学班
-          </button>
+          </UiButton>
         </div>
       </template>
 
       <div class="flex gap-3 flex-wrap">
-        <button v-if="classList.length" :disabled="!selected" @click="confirmSelect" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100">
+        <UiButton v-if="classList.length" :disabled="!selected" @click="confirmSelect" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100">
           进入当前教学班
-        </button>
-        <button v-if="classList.length" @click="goCreateClass" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+        </UiButton>
+        <UiButton v-if="classList.length" @click="goCreateClass" class="flex-1 h-[44px] px-6 rounded-[12px] text-[15px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
           新建教学班
-        </button>
+        </UiButton>
       </div>
     </div>
   </div>
@@ -54,7 +54,7 @@
 import logger from '@/utils/logger'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { CircleCheckFilled, Loading } from '@element-plus/icons-vue'
+import { CircleCheckFilled, Loading } from '@/components/ui/icons'
 import { useUserStore } from '../../store'
 import { getTeachingClasses } from '../../api/tap'
 

@@ -2,14 +2,14 @@
   <div class="min-h-full">
     <!-- Page Header -->
     <div class="flex items-center gap-3 mb-6">
-      <button
+      <UiButton
         @click="$router.back()"
         class="h-[38px] w-[38px] rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-      </button>
+      </UiButton>
       <span class="text-[15px] text-[#6e6e73]">返回</span>
       <span class="text-[#d1d1d6] mx-1">/</span>
       <span class="text-[17px] font-semibold text-[#1d1d1f]">评阅: {{ detail?.studentName || '' }}</span>
@@ -51,38 +51,38 @@
         <div class="flex justify-between items-center gap-4 mb-2">
           <span class="font-semibold text-[#1d1d1f]">教师总评</span>
           <div class="flex gap-2 flex-wrap">
-            <button
+            <UiButton
               @click="downloadReport"
               :disabled="downloadingReport || !detail?.hasDownloadableReport"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#34c759] bg-[rgba(52,199,89,0.08)] hover:bg-[rgba(52,199,89,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="downloadingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               下载批注报告
-            </button>
-            <button
+            </UiButton>
+            <UiButton
               @click="generateReview"
               :disabled="generatingReview"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="generatingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               AI 生成总评
-            </button>
-            <button
+            </UiButton>
+            <UiButton
               @click="saveReview"
               :disabled="!reviewEdited || savingReview"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="savingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               保存总评
-            </button>
-            <button
+            </UiButton>
+            <UiButton
               @click="publishReport"
               :disabled="publishingReport"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               一键导入学生报告
-            </button>
+            </UiButton>
           </div>
         </div>
         <p class="m-0 mb-3 text-[13px] leading-relaxed text-[#6e6e73]">
@@ -134,13 +134,13 @@
                 <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[#007aff]">{{ score.comment }}</p>
               </div>
               <div v-else class="text-[#aeaeb2] text-[13px] mb-3">暂无评语</div>
-              <button
+              <UiButton
                 @click="startOverride(score)"
                 class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
               >
                 <Edit class="w-3.5 h-3.5" />
                 <span>修改评分</span>
-              </button>
+              </UiButton>
             </div>
           </div>
         </div>
@@ -191,7 +191,7 @@
           <div class="space-y-4">
             <div class="flex items-center gap-3">
               <label class="w-[70px] text-sm text-[#6e6e73] shrink-0">新分数</label>
-              <input
+              <UiInput
                 v-model.number="overrideForm.newScore"
                 type="number"
                 :min="0"
@@ -221,18 +221,18 @@
             </div>
           </div>
           <div class="flex justify-end gap-3 mt-6">
-            <button
+            <UiButton
               @click="overrideVisible = false"
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
-            >取消</button>
-            <button
+            >取消</UiButton>
+            <UiButton
               @click="submitOverride"
               :disabled="overriding"
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
             >
               <span v-if="overriding" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span>
               确认修改
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -249,10 +249,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { ChatDotRound, Edit } from '@element-plus/icons-vue'
+import { computed, onMounted, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
+import { ChatDotRound, Edit } from '@/components/ui/icons'
 import {
   downloadSubmissionReport,
   generateFinalReview,
@@ -347,11 +347,11 @@ async function submitOverride() {
       newComment: overrideForm.value.newComment,
       reason: overrideForm.value.reason,
     })
-    ElMessage.success('评分已修改')
+    uiMessage.success('评分已修改')
     overrideVisible.value = false
     await loadDetail()
   } catch (error) {
-    ElMessage.error(error.message)
+    uiMessage.error(error.message)
   } finally {
     overriding.value = false
   }
@@ -364,9 +364,9 @@ async function generateReview() {
     const data = res?.data || res
     finalReview.value = data?.finalReviewComment || data?.data?.finalReviewComment || ''
     reviewEdited.value = false
-    ElMessage.success('总评已生成')
+    uiMessage.success('总评已生成')
   } catch (error) {
-    ElMessage.error(`生成总评失败: ${error.message}`)
+    uiMessage.error(`生成总评失败: ${error.message}`)
   } finally {
     generatingReview.value = false
   }
@@ -377,9 +377,9 @@ async function saveReview() {
   try {
     await saveFinalReview(subId, finalReview.value)
     reviewEdited.value = false
-    ElMessage.success('总评已保存')
+    uiMessage.success('总评已保存')
   } catch (error) {
-    ElMessage.error(`保存失败: ${error.message}`)
+    uiMessage.error(`保存失败: ${error.message}`)
   } finally {
     savingReview.value = false
   }
@@ -394,9 +394,9 @@ async function publishReport() {
     }
     await publishSubmissionReport(subId)
     await loadDetail()
-    ElMessage.success('已导入学生报告，学生端可直接查看和导出')
+    uiMessage.success('已导入学生报告，学生端可直接查看和导出')
   } catch (error) {
-    ElMessage.error(`导入失败: ${error.message}`)
+    uiMessage.error(`导入失败: ${error.message}`)
   } finally {
     publishingReport.value = false
   }
@@ -404,7 +404,7 @@ async function publishReport() {
 
 async function downloadReport() {
   if (!detail.value?.hasDownloadableReport) {
-    ElMessage.warning('当前还没有可下载的批注报告')
+    uiMessage.warning('当前还没有可下载的批注报告')
     return
   }
   downloadingReport.value = true
@@ -419,7 +419,7 @@ async function downloadReport() {
     a.click()
     URL.revokeObjectURL(url)
   } catch (error) {
-    ElMessage.error(`下载失败: ${error.message}`)
+    uiMessage.error(`下载失败: ${error.message}`)
   } finally {
     downloadingReport.value = false
   }
@@ -452,7 +452,7 @@ async function loadDetail() {
       }
     }
   } catch (error) {
-    ElMessage.error(error.message)
+    uiMessage.error(error.message)
   } finally {
     loading.value = false
   }

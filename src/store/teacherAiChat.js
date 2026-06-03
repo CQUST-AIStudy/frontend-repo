@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import { chatSend, chatStreamSend, validateChatMessage } from '../api/tap'
 import { getFriendlyErrorMessage } from '../utils/errorMessage'
 
@@ -118,7 +118,7 @@ export const useTeacherAiChatStore = defineStore('teacherAiChat', {
 
       const validation = validateChatMessage(rawMessage, { fieldName: '消息' })
       if (!validation.valid) {
-        ElMessage.warning(validation.message)
+        uiMessage.warning(validation.message)
         return
       }
       const message = validation.value

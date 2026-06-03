@@ -1,5 +1,5 @@
 import logger from '@/utils/logger'
-import { ElMessage, ElLoading } from 'element-plus';
+import { message as uiMessage, loading } from '@/services/feedback'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from './errorMessage';
 
 /**
@@ -14,7 +14,7 @@ export async function withLoading(promiseFn, options = {}) {
     background: 'rgba(0, 0, 0, 0.7)'
   };
   
-  const loadingInstance = ElLoading.service({
+  const loadingInstance = loading.service({
     ...defaultOptions,
     ...options
   });
@@ -44,7 +44,7 @@ export function handleApiResponse(response, options = {}) {
   
   if (response && response.success) {
     if (showSuccessMessage) {
-      ElMessage.success(response.message || successMessage);
+      uiMessage.success(response.message || successMessage);
     }
     
     if (onSuccess && typeof onSuccess === 'function') {
@@ -56,7 +56,7 @@ export function handleApiResponse(response, options = {}) {
     const errorMsg = getFriendlyResponseMessage(response, '操作失败，请稍后重试');
     
     if (showErrorMessage) {
-      ElMessage.error(errorMsg);
+      uiMessage.error(errorMsg);
     }
     
     if (onError && typeof onError === 'function') {
@@ -77,7 +77,7 @@ export function handleError(error, fallbackMessage = '发生错误', callback = 
   const errorMessage = getFriendlyErrorMessage(error, fallbackMessage);
   
   // 显示错误提示
-  ElMessage.error(errorMessage);
+  uiMessage.error(errorMessage);
   
   if (process.env.NODE_ENV === 'development') {
     logger.error('Error details:', error);

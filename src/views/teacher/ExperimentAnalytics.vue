@@ -1,49 +1,49 @@
 <template>
   <div class="exp-analytics">
-    <page-header
+    <UiPageHeader
       title="实验数据分析"
       description="基于 PTA 成绩单的多维分析，包括分数分布、题目得分率、难度系数与区分度。"
     />
 
     <div class="flex gap-3 items-center mb-3 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
       <div v-if="classPrefixes.length > 1" class="relative w-[180px] max-[768px]:!w-full">
-        <select
+        <UiSelect
           v-model="selectedClass"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
           @change="onClassChange"
         >
-          <option value="">全部实验</option>
-          <option
+          <UiOption value="">全部实验</UiOption>
+          <UiOption
             v-for="prefix in classPrefixes"
             :key="prefix"
             :value="prefix"
-          >{{ prefix }}</option>
-        </select>
+          >{{ prefix }}</UiOption>
+        </UiSelect>
         <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
       </div>
 
       <div class="relative w-[360px] max-[768px]:!w-full">
-        <select
+        <UiSelect
           v-model="selectedExp"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
           @change="loadAnalytics"
         >
-          <option :value="null" disabled>选择实验</option>
-          <option
+          <UiOption :value="null" disabled>选择实验</UiOption>
+          <UiOption
             v-for="exp in experiments"
             :key="exp.experimentId"
             :value="exp.experimentId"
-          >{{ exp.name }}</option>
-        </select>
+          >{{ exp.name }}</UiOption>
+        </UiSelect>
         <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
       </div>
 
-      <button
+      <UiButton
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
         @click="toggleComparison"
       >
         {{ showComparison ? '返回单实验分析' : '实验横向对比' }}
-      </button>
+      </UiButton>
 
       <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff] ml-auto max-[768px]:ml-0">
         {{ activeClassLabel }} / {{ experiments.length }} 个实验
@@ -81,7 +81,7 @@
     </div>
 
     <template v-if="showComparison">
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6" v-loading="compLoading">
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6" :aria-busy="compLoading">
         <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">实验横向对比</div>
         <div v-if="comparisonItems.length" ref="compChartRef" class="h-[340px]"></div>
         <div v-else-if="!compLoading" class="py-12 text-center text-[#aeaeb2] text-sm">暂无可对比的实验数据</div>
@@ -101,7 +101,7 @@
         <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">PTA 概览统计</div>
 
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse text-[12px] text-center">
+          <UiTable class="w-full border-collapse text-[12px] text-center">
             <thead>
               <tr>
                 <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">统计项</th>
@@ -134,9 +134,9 @@
                 <td class="py-2 px-2" :class="discriminationClass">{{ safeNumber(data.overview.discrimination) }}</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
 
-          <table class="w-full border-collapse text-[12px] text-center mt-3">
+          <UiTable class="w-full border-collapse text-[12px] text-center mt-3">
             <thead>
               <tr>
                 <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">分数段</th>
@@ -157,7 +157,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
 
           <div class="flex gap-6 mt-2 text-[11px] text-[#6e6e73] flex-wrap">
             <span>难度系数 = 1 - 平均分/ 满分，数值越大说明整体得分越低。</span>
@@ -183,7 +183,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-3">
         <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">题目明细</div>
         <div class="overflow-x-auto max-h-[320px] overflow-y-auto">
-          <table class="w-full text-left text-[12px] border-collapse">
+          <UiTable class="w-full text-left text-[12px] border-collapse">
             <thead class="sticky top-0 z-10">
               <tr class="border-b border-black/[0.06]">
                 <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[90px]">题号</th>
@@ -223,7 +223,7 @@
                 <td colspan="8" class="py-12 text-center text-[#aeaeb2] text-sm">暂无题目明细数据</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
       </div>
     </template>
@@ -255,7 +255,6 @@
 import logger from '@/utils/logger'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as echarts from 'echarts'
-import PageHeader from '../../components/PageHeader.vue'
 import {
   getAnalyticsExperiments,
   getClassPrefixes,

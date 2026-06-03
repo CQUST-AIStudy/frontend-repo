@@ -46,7 +46,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">薄弱维度排行</h3>
           <div class="overflow-x-auto">
-            <table class="w-full text-[13px]">
+            <UiTable class="w-full text-[13px]">
               <thead>
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">维度</th>
@@ -70,7 +70,7 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>
@@ -80,16 +80,16 @@
         <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">学生分层 (ABC)</h3>
         <!-- Custom tabs -->
         <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
-          <button v-for="(tier, key) in data.tiers" :key="key" @click="activeTab = key"
+          <UiButton v-for="(tier, key) in data.tiers" :key="key" @click="activeTab = key"
             class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none"
             :class="activeTab === key ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] hover:text-[#1d1d1f]'">
             {{ key }} - {{ tier.label }} ({{ tier.count }}人)
-          </button>
+          </UiButton>
         </div>
         <!-- Tab panels -->
         <div v-for="(tier, key) in data.tiers" :key="key" v-show="activeTab === key">
           <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <table class="w-full text-[13px]">
+            <UiTable class="w-full text-[13px]">
               <thead class="sticky top-0 bg-white z-10">
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">学号</th>
@@ -111,11 +111,11 @@
                     </div>
                   </td>
                   <td class="py-2.5 px-3">
-                    <button @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</button>
+                    <UiButton @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</UiButton>
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>

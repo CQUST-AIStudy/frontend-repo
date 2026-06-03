@@ -3,22 +3,22 @@
     <div class="sidebar [width:260px] [flex-shrink:0] [display:flex] [flex-direction:column] [gap:12px] [padding:12px] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] max-[900px]:[width:100%]">
       <h3>AI 学习助手</h3>
 
-      <el-select
+      <ui-select
         v-model="selectedCourseSpaceId"
         placeholder="选择课程空间（可选）"
         clearable
         class="[width:100%]"
       >
-        <el-option
+        <ui-option
           v-for="item in courseSpaces"
           :key="item.id"
           :label="buildCourseSpaceLabel(item)"
           :value="item.id"
         />
-      </el-select>
+      </ui-select>
 
       <div v-if="selectedCourseSpaceId" class="mode-row [display:flex] [flex-direction:column] [gap:8px]">
-        <el-switch
+        <ui-switch
           v-model="isOpenMode"
           active-text="开放模式"
           inactive-text="严格模式"
@@ -35,23 +35,23 @@
       <div v-else class="empty-space-tip [display:flex] [flex-direction:column] [gap:8px] [padding:12px] [background:#fff8e8] [border:1px_solid_#f5d28b] [border-radius:10px] [&_p]:[margin:0] [&_p]:[color:#8c6d1f] [&_p]:[font-size:12px] [&_p]:[line-height:1.6]">
         <div class="empty-space-title [font-size:14px] [font-weight:600] [color:#7a4f01]">还没有可用的课程空间</div>
         <p>你可以先加入教学班，解锁班级授权的课程知识库；也可以先使用普通聊天模式。</p>
-        <el-button size="small" @click="goClassJoin">去加入教学班</el-button>
+        <ui-button size="small" @click="goClassJoin">去加入教学班</ui-button>
       </div>
 
       <div class="quick-list [display:flex] [flex-direction:column] [gap:4px]">
-        <el-button
+        <ui-button
           v-for="q in quickPrompts"
           :key="q.label"
           text
           @click="useQuickPrompt(q.prompt)"
         >
           {{ q.label }}
-        </el-button>
+        </ui-button>
       </div>
     </div>
 
     <div class="chat-panel [flex:1] [display:flex] [flex-direction:column] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] [overflow:hidden]">
-      <el-alert
+      <ui-alert
         v-if="assistantNotice"
         class="assistant-alert [margin:12px_12px_0]"
         type="warning"
@@ -84,7 +84,7 @@
       </div>
 
       <div class="input-area [border-top:1px_solid_#e6eaf0] [padding:12px]">
-        <el-input
+        <ui-input
           v-model="userInput"
           type="textarea"
           :rows="3"
@@ -94,14 +94,14 @@
         />
         <div class="actions [margin-top:8px] [display:flex] [justify-content:space-between] [align-items:center] [color:#909399] [font-size:12px]">
           <span>{{ selectedCourseSpaceId ? '当前为 RAG 问答模式' : '当前为普通聊天模式' }}</span>
-          <el-button
+          <ui-button
             type="primary"
             :disabled="!userInput.trim() || isTyping"
             :loading="isTyping"
             @click="sendMessage"
           >
             发送
-          </el-button>
+          </ui-button>
         </div>
       </div>
     </div>
@@ -109,9 +109,9 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { message as uiMessage } from '@/services/feedback'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { buildApiUrl } from '../../config/runtime'
@@ -169,7 +169,7 @@ async function fetchCourseSpaces() {
     const isRagMode = !!selectedCourseSpaceId.value
     const friendlyMessage = formatAssistantError(error?.message, isRagMode)
     assistantNotice.value = friendlyMessage
-    ElMessage.warning(friendlyMessage)
+    uiMessage.warning(friendlyMessage)
     courseSpaces.value = []
   }
 }
@@ -278,7 +278,7 @@ async function sendMessage() {
     const isRagMode = !!selectedCourseSpaceId.value
     const friendlyMessage = formatAssistantError(error?.message, isRagMode)
     assistantNotice.value = friendlyMessage
-    ElMessage.warning(friendlyMessage)
+    uiMessage.warning(friendlyMessage)
     const current = messages.value[aiIndex]
     if (current && !current.content) {
       current.content = friendlyMessage

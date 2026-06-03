@@ -1,13 +1,13 @@
 <template>
   <div class="knowledge-base-container">
-    <page-header title="课程知识库" description="管理课程资料、查看 RAG 处理状态，并进行课程问答" />
+    <UiPageHeader title="课程知识库" description="管理课程资料、查看 RAG 处理状态，并进行课程问答" />
 
     <div v-if="!selectedSpace" class="space-list-view">
       <div class="mb-5">
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="showCreateDialog">
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="showCreateDialog">
           <Plus class="w-4 h-4" />
           创建课程空间
-        </button>
+        </UiButton>
       </div>
 
       <div
@@ -29,7 +29,7 @@
         <p class="text-sm">暂无课程空间，先创建一个再上传资料</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" v-loading="loading">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" :aria-busy="loading">
         <div v-for="space in visibleSpaces" :key="space.id"
           class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] cursor-pointer transition-all hover:-translate-y-[3px] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
           @click="selectSpace(space)"
@@ -41,12 +41,12 @@
                 {{ visibilityLabel(space.docVisibility) }}
               </span>
               <div class="relative" @click.stop>
-                <button @click="toggleSpaceDropdown(space.id)" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent">
+                <UiButton @click="toggleSpaceDropdown(space.id)" class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent">
                   <MoreFilled class="w-[18px] h-[18px] text-[#aeaeb2]" />
-                </button>
+                </UiButton>
                 <div v-show="spaceDropdownId === space.id" class="absolute right-0 top-full mt-1 w-[120px] py-1 rounded-[12px] bg-white border border-black/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-10">
-                  <button @click="editSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">编辑</button>
-                  <button @click="confirmDeleteSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">删除</button>
+                  <UiButton @click="editSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">编辑</UiButton>
+                  <UiButton @click="confirmDeleteSpace(space); spaceDropdownId = null" class="w-full text-left px-3 py-2 text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors border-none bg-transparent cursor-pointer">删除</UiButton>
                 </div>
               </div>
             </div>
@@ -64,10 +64,10 @@
     </div>
     <div v-else class="space-detail-view">
       <div class="flex items-center gap-3 mb-4">
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="backToList">
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="backToList">
           <ArrowLeft class="w-4 h-4" />
           返回
-        </button>
+        </UiButton>
         <h2 class="text-lg font-semibold text-[#1d1d1f]">{{ selectedSpace.name }}</h2>
         <span v-if="selectedSpace.term" class="text-[#6e6e73] text-sm bg-[#f5f5f7] px-2.5 py-0.5 rounded-full">{{ selectedSpace.term }}</span>
         <span :class="visibilityBadgeClass(selectedSpace.docVisibility)" class="text-xs px-2 py-0.5 rounded-full font-medium">
@@ -77,7 +77,7 @@
 
       <!-- Custom Tabs -->
       <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
-        <button v-for="tab in detailTabs" :key="tab.name" @click="activeTab = tab.name" class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none" :class="activeTab === tab.name ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] bg-transparent'">{{ tab.label }}</button>
+        <UiButton v-for="tab in detailTabs" :key="tab.name" @click="activeTab = tab.name" class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none" :class="activeTab === tab.name ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] bg-transparent'">{{ tab.label }}</UiButton>
       </div>
 
       <!-- Docs Tab -->
@@ -85,7 +85,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="font-semibold text-[15px] text-[#1d1d1f] mb-4">上传课程资料</div>
 
-          <el-upload
+          <ui-upload
             drag
             multiple
             :auto-upload="false"
@@ -98,19 +98,19 @@
             <template #tip>
               <div class="text-xs text-[#aeaeb2] mt-2">支持 PDF、DOCX、TXT、Markdown，适合教材、讲义、参考资料</div>
             </template>
-          </el-upload>
+          </ui-upload>
 
           <div v-if="pendingFiles.length > 0" class="mt-3 flex justify-end gap-2 items-center">
-            <select v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[160px]">
-              <option value="textbook">教材</option>
-              <option value="lecture">讲义</option>
-              <option value="reference">参考书</option>
-              <option value="exercise">习题集</option>
-              <option value="other">其他</option>
-            </select>
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="uploading" @click="uploadFiles">
+            <UiSelect v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[160px]">
+              <UiOption value="textbook">教材</UiOption>
+              <UiOption value="lecture">讲义</UiOption>
+              <UiOption value="reference">参考书</UiOption>
+              <UiOption value="exercise">习题集</UiOption>
+              <UiOption value="other">其他</UiOption>
+            </UiSelect>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="uploading" @click="uploadFiles">
               {{ uploading ? '上传中...' : `上传 ${pendingFiles.length} 个文件` }}
-            </button>
+            </UiButton>
           </div>
         </div>
         <div class="grid grid-cols-5 gap-3 mb-4">
@@ -140,11 +140,11 @@
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">文档处理结果</span>
             <div class="flex items-center gap-2">
-              <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docsLoading" @click="loadDocuments">刷新</button>
-              <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</button>
-              <button class="h-[32px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" :disabled="docActionLoading" @click="reprocessAllDocuments">
+              <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docsLoading" @click="loadDocuments">刷新</UiButton>
+              <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</UiButton>
+              <UiButton class="h-[32px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" :disabled="docActionLoading" @click="reprocessAllDocuments">
                 全部重处理
-              </button>
+              </UiButton>
             </div>
           </div>
 
@@ -153,8 +153,8 @@
             <p class="text-sm">暂无文档，请先上传课程资料</p>
           </div>
 
-          <div v-else class="overflow-x-auto" v-loading="docsLoading">
-            <table class="w-full text-sm">
+          <div v-else class="overflow-x-auto" :aria-busy="docsLoading">
+            <UiTable class="w-full text-sm">
               <thead>
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">任务 ID</th>
@@ -182,13 +182,13 @@
                     <span v-else class="text-[#aeaeb2]">-</span>
                   </td>
                   <td class="py-3 px-2">
-                    <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id" @click="reprocessDocument(row)">
+                    <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id" @click="reprocessDocument(row)">
                       {{ docRowLoadingId === row.id ? '处理中...' : '重处理' }}
-                    </button>
+                    </UiButton>
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>
@@ -200,9 +200,9 @@
               <ChatDotRound class="w-12 h-12 text-[#c3cad6] mx-auto mb-3" />
               <p class="text-sm">向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
               <div class="mt-4 flex flex-wrap gap-2 justify-center">
-                <button v-for="suggestion in suggestions" :key="suggestion" @click="askQuestion(suggestion)" class="h-[30px] px-3 rounded-full text-xs font-medium text-[#1d1d1f] bg-white border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#f5f5f7] active:scale-[0.96] transition-all cursor-pointer">
+                <UiButton v-for="suggestion in suggestions" :key="suggestion" @click="askQuestion(suggestion)" class="h-[30px] px-3 rounded-full text-xs font-medium text-[#1d1d1f] bg-white border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#f5f5f7] active:scale-[0.96] transition-all cursor-pointer">
                   {{ suggestion }}
-                </button>
+                </UiButton>
               </div>
             </div>
 
@@ -235,9 +235,9 @@
               @keydown.enter.ctrl="sendChat"
               class="flex-1 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"
             ></textarea>
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
               {{ chatLoading ? '发送中...' : '发送' }}
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -247,7 +247,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">知识分块（{{ chunks.length }}）</span>
-            <button class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="chunksLoading" @click="loadChunksAndAnnotations">刷新</button>
+            <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="chunksLoading" @click="loadChunksAndAnnotations">刷新</UiButton>
           </div>
 
           <div v-if="chunks.length === 0 && !chunksLoading" class="flex flex-col items-center justify-center py-12 text-[#6e6e73]">
@@ -266,8 +266,8 @@
                 <p class="text-sm text-[#1d1d1f] mt-1">{{ chunk.contentPreview || '' }}</p>
               </div>
               <div class="flex gap-2 mt-2">
-                <button class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'important')">重点</button>
-                <button class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#ef4444] bg-[#fef2f2] border border-[#fecaca] hover:bg-[#fee2e2] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'error_prone')">易错</button>
+                <UiButton class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'important')">重点</UiButton>
+                <UiButton class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#ef4444] bg-[#fef2f2] border border-[#fecaca] hover:bg-[#fee2e2] active:scale-[0.96] transition-all cursor-pointer" @click="addAnnotation(chunk.id, 'error_prone')">易错</UiButton>
               </div>
             </div>
           </div>
@@ -279,15 +279,15 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称 <span class="text-[#ef4444]">*</span></label>
-          <input v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学期</label>
-          <input v-model="spaceForm.term" placeholder="例如：2024-2025-2" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.term" placeholder="例如：2024-2025-2" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名</label>
-          <input v-model="spaceForm.courseName" placeholder="例如：数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.courseName" placeholder="例如：数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
@@ -295,39 +295,39 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">可见范围</label>
-          <select v-model="spaceForm.docVisibility" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
-            <option value="public">公开</option>
-            <option value="class">班级可见</option>
-            <option value="private">仅教师</option>
-          </select>
+          <UiSelect v-model="spaceForm.docVisibility" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <UiOption value="public">公开</UiOption>
+            <UiOption value="class">班级可见</UiOption>
+            <UiOption value="private">仅教师</UiOption>
+          </UiSelect>
         </div>
         <div v-if="spaceForm.docVisibility === 'class'">
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">绑定班级</label>
-          <select v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
-            <option v-for="cls in teacherClasses" :key="cls.id" :value="cls.id">{{ cls.name }}{{ cls.courseName ? ' / ' + cls.courseName : '' }}</option>
-          </select>
+          <UiSelect v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <UiOption v-for="cls in teacherClasses" :key="cls.id" :value="cls.id">{{ cls.name }}{{ cls.courseName ? ' / ' + cls.courseName : '' }}</UiOption>
+          </UiSelect>
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">默认模式</label>
-          <select v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
-            <option value="strict">Strict</option>
-            <option value="open">Open</option>
-          </select>
+          <UiSelect v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+            <UiOption value="strict">Strict</UiOption>
+            <UiOption value="open">Open</UiOption>
+          </UiSelect>
         </div>
         <div class="flex items-center gap-6">
           <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
-            <input type="checkbox" v-model="spaceForm.allowWebSearch" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="spaceForm.allowWebSearch" class="w-4 h-4 rounded accent-[#007aff]" />
             允许联网
           </label>
           <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
-            <input type="checkbox" v-model="spaceForm.requireCitation" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="spaceForm.requireCitation" class="w-4 h-4 rounded accent-[#007aff]" />
             要求引用
           </label>
         </div>
       </div>
       <template #footer>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="dialogVisible = false">取消</button>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!spaceForm.name || saving" @click="saveSpace">{{ saving ? '保存中...' : '保存' }}</button>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="dialogVisible = false">取消</UiButton>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!spaceForm.name || saving" @click="saveSpace">{{ saving ? '保存中...' : '保存' }}</UiButton>
       </template>
     </AppModal>
   </div>
@@ -335,9 +335,8 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Calendar, ChatDotRound, MoreFilled, Plus, Reading, UploadFilled } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { ArrowLeft, Calendar, ChatDotRound, MoreFilled, Plus, Reading, UploadFilled } from '@/components/ui/icons'
 import AppModal from '../../components/AppModal.vue'
 import { useUserStore } from '@/store'
 import {
@@ -503,7 +502,7 @@ async function loadSpaces() {
     const res = await getCourseSpaces()
     spaces.value = res?.data || res || []
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '加载课程空间失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '加载课程空间失败，请稍后重试'))
   }
   loading.value = false
 }
@@ -559,7 +558,7 @@ function editSpace(space) {
 async function saveSpace() {
   if (!spaceForm.value.name) return
   if (spaceForm.value.docVisibility === 'class' && spaceForm.value.classIds.length === 0) {
-    ElMessage.warning('班级可见模式下至少需要绑定一个班级')
+    uiMessage.warning('班级可见模式下至少需要绑定一个班级')
     return
   }
 
@@ -567,30 +566,30 @@ async function saveSpace() {
   try {
     if (editingSpace.value) {
       await updateCourseSpace(editingSpace.value.id, spaceForm.value)
-      ElMessage.success('课程空间已更新')
+      uiMessage.success('课程空间已更新')
     } else {
       await createCourseSpace(spaceForm.value)
-      ElMessage.success('课程空间已创建')
+      uiMessage.success('课程空间已创建')
     }
     dialogVisible.value = false
     await loadSpaces()
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '保存课程空间失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '保存课程空间失败，请稍后重试'))
   }
   saving.value = false
 }
 
 async function confirmDeleteSpace(space) {
   try {
-    await ElMessageBox.confirm(`确定删除"${space.name}"吗？`, '确认删除', { type: 'warning' })
+    await messageBox.confirm(`确定删除"${space.name}"吗？`, '确认删除', { type: 'warning' })
     await deleteCourseSpace(space.id)
-    ElMessage.success('课程空间已删除')
+    uiMessage.success('课程空间已删除')
     if (selectedSpace.value?.id === space.id) {
       backToList()
     }
     await loadSpaces()
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error(getFriendlyErrorMessage(e, '删除课程空间失败，请稍后重试'))
+    if (e !== 'cancel') uiMessage.error(getFriendlyErrorMessage(e, '删除课程空间失败，请稍后重试'))
   }
 }
 
@@ -613,7 +612,7 @@ async function loadDocuments() {
   } catch (e) {
     documents.value = []
     docStatusSummary.value = emptyDocSummary()
-    ElMessage.error(getFriendlyErrorMessage(e, '加载文档状态失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '加载文档状态失败，请稍后重试'))
   }
   docsLoading.value = false
 }
@@ -640,17 +639,17 @@ async function uploadFiles() {
   uploading.value = false
   pendingFiles.value = []
 
-  if (successCount) ElMessage.success(`成功上传 ${successCount} 个文件`)
-  if (failCount) ElMessage.warning(`${failCount} 个文件上传失败`)
+  if (successCount) uiMessage.success(`成功上传 ${successCount} 个文件`)
+  if (failCount) uiMessage.warning(`${failCount} 个文件上传失败`)
   await loadDocuments()
 }
 
 async function reprocessAllDocuments() {
   if (!selectedSpace.value) return
   try {
-    await ElMessageBox.confirm('确定重新处理当前课程空间下所有可重跑文档吗？', '确认操作', { type: 'warning' })
+    await messageBox.confirm('确定重新处理当前课程空间下所有可重跑文档吗？', '确认操作', { type: 'warning' })
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error(getFriendlyErrorMessage(e, '上传文档失败，请稍后重试'))
+    if (e !== 'cancel') uiMessage.error(getFriendlyErrorMessage(e, '上传文档失败，请稍后重试'))
     return
   }
 
@@ -658,10 +657,10 @@ async function reprocessAllDocuments() {
   try {
     const res = await reprocessAllCourseSpaceDocuments(selectedSpace.value.id)
     const data = res?.data || res || {}
-    ElMessage.success(`已加入重处理队列：${data.requestedCount || 0} 个文档`)
+    uiMessage.success(`已加入重处理队列：${data.requestedCount || 0} 个文档`)
     await loadDocuments()
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '文档重新处理失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '文档重新处理失败，请稍后重试'))
   }
   docActionLoading.value = false
 }
@@ -672,10 +671,10 @@ async function reprocessDocument(row) {
   try {
     const res = await reprocessCourseSpaceDocument(selectedSpace.value.id, row.id)
     const data = res?.data || res || {}
-    ElMessage.success(data.queued ? '文档已加入重处理队列' : '该文档当前正在处理中')
+    uiMessage.success(data.queued ? '文档已加入重处理队列' : '该文档当前正在处理中')
     await loadDocuments()
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '批量处理失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '批量处理失败，请稍后重试'))
   }
   docRowLoadingId.value = null
 }
@@ -685,9 +684,9 @@ async function rebuildBm25IndexAction() {
   docActionLoading.value = true
   try {
     await rebuildCourseSpaceBm25(selectedSpace.value.id)
-    ElMessage.success('BM25 索引已重建')
+    uiMessage.success('BM25 索引已重建')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '检索索引重建失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '检索索引重建失败，请稍后重试'))
   }
   docActionLoading.value = false
 }
@@ -699,7 +698,7 @@ async function loadChunksAndAnnotations() {
     const res = await getCourseSpaceChunks(selectedSpace.value.id)
     chunks.value = res?.data || res || []
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '加载分块失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '加载分块失败，请稍后重试'))
   }
   chunksLoading.value = false
 }
@@ -708,9 +707,9 @@ async function addAnnotation(chunkId, type) {
   if (!selectedSpace.value) return
   try {
     await createAnnotation(selectedSpace.value.id, { chunkId, annotationType: type, note: '' })
-    ElMessage.success('标注已添加')
+    uiMessage.success('标注已添加')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '保存批注失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '保存批注失败，请稍后重试'))
   }
 }
 

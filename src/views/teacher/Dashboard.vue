@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-[18px] max-[640px]:gap-3.5">
-    <page-header title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
-      <button @click="goToClasses" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f] bg-white/80 border border-black/[0.1] backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] cursor-pointer">教学班管理</button>
-      <button @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25),0_1px_3px_rgba(0,122,255,0.15)] transition-all duration-200 hover:from-[#4da6ff] hover:to-[#0066d6] hover:shadow-[0_4px_16px_rgba(0,122,255,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</button>
-    </page-header>
+    <UiPageHeader title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
+      <UiButton @click="goToClasses" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f] bg-white/80 border border-black/[0.1] backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] cursor-pointer">教学班管理</UiButton>
+      <UiButton @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25),0_1px_3px_rgba(0,122,255,0.15)] transition-all duration-200 hover:from-[#4da6ff] hover:to-[#0066d6] hover:shadow-[0_4px_16px_rgba(0,122,255,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</UiButton>
+    </UiPageHeader>
 
     <!-- Hero Strip -->
     <div class="grid grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-4 max-[1100px]:grid-cols-1">
@@ -50,7 +50,7 @@
           <a @click="goToExperiments" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl">
-          <table class="w-full text-left text-[13px]">
+          <UiTable class="w-full text-left text-[13px]">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
@@ -70,7 +70,7 @@
                 <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无实验数据</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
       </div>
 
@@ -84,7 +84,7 @@
           <a @click="goToSubmissions" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl mt-4">
-          <table class="w-full text-left text-[13px]">
+          <UiTable class="w-full text-left text-[13px]">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[110px]">学生</th>
@@ -104,7 +104,7 @@
                 <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无提交数据</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
       </div>
     </div>
@@ -128,9 +128,8 @@ import logger from '@/utils/logger'
 import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import { Document, DocumentChecked, Timer, UserFilled } from '@element-plus/icons-vue'
+import { Document, DocumentChecked, Timer, UserFilled } from '@/components/ui/icons'
 import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
 import { getTeachingClasses } from '../../api/tap'
 
 const router = useRouter()
