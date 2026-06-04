@@ -1,140 +1,268 @@
 <template>
-  <div class="leetcode-demo [padding:20px]">
-    <UiPageHeader title="LeetCode功能演示" description="测试代码提交和AI批改功能" />
-    
-    <ui-card class="demo-card [margin-bottom:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
-      <h3>🧪 功能测试</h3>
-      
-      <ui-space direction="vertical" size="large" class="[width:100%]">
-        <ui-button @click="testAIFeedback" type="primary" size="large">
-          测试AI批改反馈
-        </ui-button>
-        
-        <ui-button @click="testSubmitCode" type="success" size="large" :loading="testing">
-          测试代码提交
-        </ui-button>
-      </ui-space>
-    </ui-card>
+  <div class="leetcode-demo [padding:20px] [display:flex] [flex-direction:column] [gap:16px]">
+    <UiPageHeader title="LeetCode 接口诊断" description="查询题目并验证当前后端运行、提交服务状态" />
 
-    <!-- AI反馈演示 -->
-    <ui-card v-if="showDemo" class="feedback-demo [margin-top:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
-      <h3>🤖 AI批改反馈演示</h3>
-      
-      <div class="demo-result [max-height:70vh] [overflow-y:auto]">
-        <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
-          <div class="status accepted [display:flex] [align-items:center] [gap:8px] [font-size:18px] [font-weight:bold] [&.accepted]:[color:#67c23a] [&.rejected]:[color:#f56c6c]">
-            <ui-icon><Check /></ui-icon>
-            通过
-          </div>
-          <div class="score [font-size:16px] [font-weight:bold] [color:#409eff] [color:#f56c6c] [font-weight:700]">
-            得分: 85/100
-          </div>
+    <ui-card class="query-card [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[flex-direction:column] [&_.ui-card__body]:[gap:14px]">
+      <template #header>
+        <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px]">
+          <span>题目查询</span>
+          <ui-tag :type="problem ? 'success' : 'info'">{{ problem ? '已加载' : '未加载' }}</ui-tag>
         </div>
+      </template>
 
-        <!-- AI评测结果 -->
-        <div class="ai-feedback [margin:20px_0] [&_h4]:[margin-bottom:12px] [&_h4]:[color:#333]">
-          <h4>AI 评测反馈</h4>
-          <div class="feedback-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff] [&_h2]:[color:#409eff] [&_h2]:[margin-top:0] [&_h3]:[color:#333] [&_h3]:[margin:16px_0_8px_0] [&_ul]:[margin:8px_0] [&_ul]:[padding-left:20px] [&_li]:[margin:4px_0] [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e]" v-html="renderedFeedback"></div>
-        </div>
-
-        <!-- 执行详情 -->
-        <div class="execution-details [margin:20px_0]">
-          <ui-descriptions title="执行详情" :column="2" border>
-            <ui-descriptions-item label="执行时间">120ms</ui-descriptions-item>
-            <ui-descriptions-item label="内存消耗">暂无</ui-descriptions-item>
-            <ui-descriptions-item label="通过用例">3 / 3</ui-descriptions-item>
-          </ui-descriptions>
-        </div>
-
-        <!-- 技能提升建议-->
-        <div class="skill-suggestions [margin:20px_0] [&_h4]:[margin-bottom:12px] [&_h4]:[color:#333]">
-          <h4>技能提升建议</h4>
-          <ui-tag
-            v-for="suggestion in skillSuggestions"
-            :key="suggestion"
-            class="suggestion-tag [margin:4px_8px_4px_0]"
-            type="info"
-          >
-            {{ suggestion }}
-          </ui-tag>
+      <div class="query-grid [display:grid] [grid-template-columns:minmax(160px,_1fr)_minmax(220px,_1fr)_auto] [gap:12px] max-[860px]:[grid-template-columns:1fr]">
+        <ui-input v-model="problemId" placeholder="题号 / 数据库 ID / problem code" />
+        <ui-input v-model="problemSlug" placeholder="LeetCode slug，例如 two-sum" />
+        <div class="query-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
+          <ui-button type="primary" :loading="loadingProblem" @click="loadProblemById">
+            <ui-icon><Search /></ui-icon>
+            按题号查询
+          </ui-button>
+          <ui-button :loading="loadingProblem" @click="loadProblemBySlug">
+            <ui-icon><Search /></ui-icon>
+            按 slug 查询
+          </ui-button>
         </div>
       </div>
+
+      <ui-alert
+        v-if="problemMessage"
+        :title="problemMessage"
+        :type="problem ? 'success' : 'warning'"
+        :closable="false"
+      />
+
+      <div v-if="problem" class="problem-panel [display:grid] [grid-template-columns:minmax(0,_1.1fr)_minmax(260px,_0.9fr)] [gap:14px] max-[960px]:[grid-template-columns:1fr]">
+        <section class="problem-summary [min-width:0]">
+          <div class="problem-title [display:flex] [align-items:center] [gap:8px] [flex-wrap:wrap] [margin-bottom:10px]">
+            <h3 class="[margin:0] [font-size:18px] [color:#0f172a]">{{ problem.title || '未命名题目' }}</h3>
+            <ui-tag>{{ problem.difficulty || '未知难度' }}</ui-tag>
+          </div>
+          <p class="[margin:0] [color:#475569] [line-height:1.7] [white-space:pre-wrap]">{{ problem.description || problem.problemText || '后端未返回题面内容' }}</p>
+        </section>
+
+        <section class="problem-meta [display:flex] [flex-direction:column] [gap:8px] [font-size:13px] [color:#475569]">
+          <div><strong>problemId：</strong>{{ problem.problemId || problem.id || '-' }}</div>
+          <div><strong>numericId：</strong>{{ problem.numericId || '-' }}</div>
+          <div><strong>source：</strong><a v-if="problem.sourceUrl || problem.url" :href="problem.sourceUrl || problem.url" target="_blank" rel="noreferrer">{{ problem.sourceUrl || problem.url }}</a><span v-else>-</span></div>
+          <div class="[display:flex] [gap:6px] [flex-wrap:wrap]">
+            <ui-tag v-for="tag in problemTags" :key="tag" size="small" effect="plain">{{ tag }}</ui-tag>
+          </div>
+        </section>
+      </div>
+    </ui-card>
+
+    <ui-card class="judge-card [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[flex-direction:column] [&_.ui-card__body]:[gap:14px]">
+      <template #header>
+        <div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px]">
+          <span>运行与提交</span>
+          <ui-tag type="info">{{ language }}</ui-tag>
+        </div>
+      </template>
+
+      <div class="judge-toolbar [display:flex] [gap:10px] [align-items:center] [flex-wrap:wrap]">
+        <ui-select v-model="language" placeholder="语言" class="[min-width:160px]">
+          <ui-option label="Java" value="java" />
+          <ui-option label="Python" value="python" />
+          <ui-option label="C++" value="cpp" />
+          <ui-option label="C" value="c" />
+          <ui-option label="JavaScript" value="javascript" />
+        </ui-select>
+
+        <ui-button type="primary" :disabled="!canJudge" :loading="running" @click="runCode">
+          <ui-icon><VideoPlay /></ui-icon>
+          运行
+        </ui-button>
+        <ui-button type="success" :disabled="!canJudge" :loading="submitting" @click="submitCode">
+          <ui-icon><UploadFilled /></ui-icon>
+          提交
+        </ui-button>
+      </div>
+
+      <ui-input
+        v-model="code"
+        type="textarea"
+        :rows="14"
+        resize="none"
+        placeholder="请输入要发送到后端判题接口的代码"
+      />
+
+      <ui-alert
+        v-if="judgeMessage"
+        :title="judgeMessage"
+        :type="lastJudgeOk ? 'success' : 'warning'"
+        :closable="false"
+      />
+
+      <div v-if="judgeResult" class="judge-result [display:grid] [grid-template-columns:minmax(0,_0.8fr)_minmax(0,_1.2fr)] [gap:14px] max-[960px]:[grid-template-columns:1fr]">
+        <ui-descriptions title="接口返回" :column="2" border>
+          <ui-descriptions-item label="success">
+            <ui-tag :type="lastJudgeOk ? 'success' : 'warning'">{{ String(judgeResult.success) }}</ui-tag>
+          </ui-descriptions-item>
+          <ui-descriptions-item label="message">{{ judgeResult.message || '-' }}</ui-descriptions-item>
+          <ui-descriptions-item label="status">{{ judgeData.status || '-' }}</ui-descriptions-item>
+          <ui-descriptions-item label="score">{{ judgeData.score ?? '-' }}</ui-descriptions-item>
+        </ui-descriptions>
+
+        <div class="raw-result [min-width:0]">
+          <h3 class="[margin:0_0_10px] [font-size:15px] [color:#0f172a]">原始响应</h3>
+          <pre class="[margin:0] [max-height:360px] [overflow:auto] [border-radius:12px] [background:#0f172a] [padding:14px] [color:#e2e8f0] [font-size:12px] [line-height:1.6]">{{ formattedJudgeResult }}</pre>
+        </div>
+      </div>
+
+      <div v-if="renderedFeedback" class="ai-feedback [border-left:4px_solid_#007aff] [background:#f8fafc] [border-radius:12px] [padding:16px] [line-height:1.7]" v-html="renderedFeedback"></div>
     </ui-card>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import logger from '@/utils/logger'
+import { computed, ref, watch } from 'vue'
+import api from '@/api'
 import { message as uiMessage } from '@/services/feedback'
-import { Check } from '@/components/ui/icons'
+import { Search, UploadFilled, VideoPlay } from '@/components/ui/icons'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { testAIFeedback as getTestFeedback } from '@/utils/testLeetCode'
 
-const showDemo = ref(false)
-const testing = ref(false)
+const problemId = ref('')
+const problemSlug = ref('')
+const problem = ref(null)
+const problemMessage = ref('')
+const loadingProblem = ref(false)
 
-const mockFeedback = `## 🤖 AI代码评测报告
+const language = ref('java')
+const code = ref('')
+const running = ref(false)
+const submitting = ref(false)
+const judgeResult = ref(null)
+const judgeMessage = ref('')
 
-### 🎉 恭喜通过！
-你的解答**完全正确**，所有测试用例都通过了！
-
-### 📊 代码质量分析
-- ✅**正确性*: 完美 (3/3 测试用例通过)
-- 🚀 **执行效率**: 良好 (平均 120ms)
-- 📝 **代码风格**: 良好 ⭐⭐
-- 🧠 **算法复杂度*: O(n²) - 嵌套循环
-
-### 💡 个性化建议
-🌟 **进阶挑战**:
-- 尝试优化算法的时间复杂度
-- 考虑使用HashMap来实现O(n)时间复杂度
-- 添加注释提高代码可读性
-
-### 📚 推荐学习
-继续挑战相关题目:
-- 尝试同类型的中等难度题目
-- 学习更高效的算法和数据结构`
-
-const skillSuggestions = ref(['数组操作', '算法优化', '哈希表应用'])
-
+const problemTags = computed(() => Array.isArray(problem.value?.tags) ? problem.value.tags : [])
+const canJudge = computed(() => !!(problem.value && code.value.trim()))
+const judgeData = computed(() => judgeResult.value?.data || {})
+const lastJudgeOk = computed(() => judgeResult.value?.success === true)
+const formattedJudgeResult = computed(() => JSON.stringify(judgeResult.value, null, 2))
 const renderedFeedback = computed(() => {
-  return DOMPurify.sanitize(marked(mockFeedback))
+  const feedback = judgeData.value.aiFeedback || judgeData.value.feedback || ''
+  return feedback ? DOMPurify.sanitize(marked(feedback)) : ''
 })
 
-function testAIFeedback() {
-  showDemo.value = true
-  uiMessage.success('AI批改反馈演示已显示')
-  
-  // 调用测试工具
-  const result = getTestFeedback()
-  logger.debug('测试结果:', result)
-}
-
-async function testSubmitCode() {
-  testing.value = true
-  
-  try {
-    // 模拟提交过程
-    uiMessage.info('正在提交代码...')
-    
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // 模拟AI批改过程
-    uiMessage.info('AI正在批改中..')
-    
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // 显示结果
-    showDemo.value = true
-    uiMessage.success('代码提交成功，AI批改完成！')
-    
-  } catch (error) {
-    uiMessage.error('测试失败: ' + error.message)
-  } finally {
-    testing.value = false
+function extractProblem(response) {
+  if (response?.success === false) {
+    return { success: false, message: response.message || '题目查询失败', data: null }
+  }
+  return {
+    success: true,
+    message: response?.message || '题目已加载',
+    data: response?.data || response || null
   }
 }
-</script>
 
+function applyProblem(result) {
+  if (!result.success || !result.data) {
+    problem.value = null
+    problemMessage.value = result.message || '题目查询失败'
+    return
+  }
+
+  problem.value = result.data
+  problemMessage.value = result.message
+  if (!code.value.trim()) {
+    code.value = starterCodeForLanguage(result.data, language.value)
+  }
+}
+
+function starterCodeForLanguage(item, lang) {
+  const starter = item?.starterCode || {}
+  return starter[lang] || starter.java || starter.python || starter.cpp || starter.c || starter.javascript || ''
+}
+
+async function loadProblemById() {
+  if (!problemId.value.trim()) {
+    uiMessage.warning('请输入题号或 problem code')
+    return
+  }
+
+  loadingProblem.value = true
+  try {
+    applyProblem(extractProblem(await api.getLeetCodeProblem(problemId.value.trim())))
+  } catch (error) {
+    problem.value = null
+    problemMessage.value = error.message || '题目查询失败'
+  } finally {
+    loadingProblem.value = false
+  }
+}
+
+async function loadProblemBySlug() {
+  if (!problemSlug.value.trim()) {
+    uiMessage.warning('请输入 LeetCode slug')
+    return
+  }
+
+  loadingProblem.value = true
+  try {
+    applyProblem(extractProblem(await api.getLeetCodeProblemBySlug(problemSlug.value.trim())))
+  } catch (error) {
+    problem.value = null
+    problemMessage.value = error.message || '题目查询失败'
+  } finally {
+    loadingProblem.value = false
+  }
+}
+
+function judgePayload() {
+  return {
+    problemId: problem.value?.problemId || problem.value?.id || problemId.value.trim(),
+    code: code.value,
+    language: language.value
+  }
+}
+
+function applyJudgeResult(response, fallbackMessage) {
+  judgeResult.value = response || { success: false, message: fallbackMessage }
+  judgeMessage.value = judgeResult.value?.message || fallbackMessage
+  if (judgeResult.value?.success === false) {
+    uiMessage.warning(judgeMessage.value)
+    return
+  }
+  uiMessage.success(judgeMessage.value || '接口调用成功')
+}
+
+async function runCode() {
+  if (!canJudge.value) {
+    uiMessage.warning('请先加载题目并填写代码')
+    return
+  }
+
+  running.value = true
+  try {
+    applyJudgeResult(await api.runLeetCodeSolution(judgePayload()), '运行接口返回空结果')
+  } catch (error) {
+    applyJudgeResult({ success: false, message: error.message || '运行失败' }, '运行失败')
+  } finally {
+    running.value = false
+  }
+}
+
+async function submitCode() {
+  if (!canJudge.value) {
+    uiMessage.warning('请先加载题目并填写代码')
+    return
+  }
+
+  submitting.value = true
+  try {
+    applyJudgeResult(await api.submitLeetCodeSolution(judgePayload()), '提交接口返回空结果')
+  } catch (error) {
+    applyJudgeResult({ success: false, message: error.message || '提交失败' }, '提交失败')
+  } finally {
+    submitting.value = false
+  }
+}
+
+watch(language, (nextLanguage) => {
+  if (problem.value && !code.value.trim()) {
+    code.value = starterCodeForLanguage(problem.value, nextLanguage)
+  }
+})
+</script>

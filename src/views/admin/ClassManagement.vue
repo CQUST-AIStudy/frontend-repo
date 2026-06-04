@@ -113,35 +113,11 @@ import { useRouter } from 'vue-router'
 import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
+import api from '../../api'
+import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
-const classes = ref([
-  {
-    id: 'C2023001',
-    name: '计算机科学与技术1班',
-    grade: '2023',
-    studentCount: 49,
-    teacherId: '20001',
-    teacherName: '王老师'
-  }
-  // },
-  // {
-  //   id: 'C2023002',
-  //   name: '计算机科学与技术珀,
-  //   grade: '2023',
-  //   studentCount: 45,
-  //   teacherId: 'T2023002',
-  //   teacherName: '王老师'
-  // },
-  // {
-  //   id: 'C2022001',
-  //   name: '软件工程1班,
-  //   grade: '2022',
-  //   studentCount: 38,
-  //   teacherId: 'T2023003',
-  //   teacherName: '张教授
-  // }
-])
+const classes = ref([])
 
 // 过滤表单
 const filterForm = reactive({
@@ -165,12 +141,7 @@ const filteredClasses = computed(() => {
 })
 
 // 教师选项
-const teacherOptions = ref([
-  {id: 'T2023001', name: '李教授'},
-  {id: 'T2023002', name: '王老师'},
-  {id: 'T2023003', name: '张教授'},
-  {id: 'T2023004', name: '刘老师'}
-])
+const teacherOptions = ref([])
 
 // 班级表单
 const classFormRef = ref(null)
@@ -232,36 +203,28 @@ const editClass = (cls) => {
 
 // 保存班级
 const saveClass = () => {
-  classFormRef.value.validate((valid) => {
+  classFormRef.value.validate(async (valid) => {
     if (!valid) return
 
-    if (dialogType.value === 'add') {
-      // 模拟添加班级
-      const newClass = {
-        ...classForm,
-        id: `C${classForm.grade}${Date.now().toString().slice(-3)}`,
-        studentCount: 0,
-        teacherName: teacherOptions.value.find(t => t.id === classForm.teacherId)?.name || ''
+    try {
+      const payload = {
+        name: classForm.name,
+        grade: classForm.grade,
+        teacherId: classForm.teacherId
       }
-      classes.value.unshift(newClass)
-      uiMessage.success('添加班级成功')
-    } else {
-      // 模拟更新班级
-      const index = classes.value.findIndex(c => c.id === currentClassId.value)
-      if (index > -1) {
-        const teacherName = teacherOptions.value.find(t => t.id === classForm.teacherId)?.name || ''
-        classes.value[index] = {
-          ...classes.value[index],
-          name: classForm.name,
-          grade: classForm.grade,
-          teacherId: classForm.teacherId,
-          teacherName: teacherName
-        }
-        uiMessage.success('更新班级成功')
+      if (dialogType.value === 'add') {
+        await api.createClass(payload)
+        uiMessage.success('班级创建成功')
+      } else {
+        await api.updateClass(currentClassId.value, payload)
+        uiMessage.success('班级更新成功')
       }
+      classDialogVisible.value = false
+      await loadClasses()
+    } catch (error) {
+      logger.error('保存班级失败:', error)
+      uiMessage.error('保存班级失败')
     }
-
-    classDialogVisible.value = false
   })
 }
 
@@ -273,36 +236,55 @@ const manageStudents = (cls) => {
 // 删除班级
 const deleteClass = (cls) => {
   messageBox.confirm(
-      `确定要删除班级${cls.name} 吗？此操作不可恢复。`,
+      `确定要删除班级 ${cls.name} 吗？此操作不可恢复。`,
       '警告',
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }
-  ).then(() => {
-    const index = classes.value.findIndex(c => c.id === cls.id)
-    if (index > -1) {
-      classes.value.splice(index, 1)
-      uiMessage.success('删除班级成功')
+  ).then(async () => {
+    try {
+      await api.deleteClass(cls.id)
+      await loadClasses()
+      uiMessage.success('班级删除成功')
+    } catch (error) {
+      logger.error('删除班级失败:', error)
+      uiMessage.error(getFriendlyErrorMessage(error, '删除班级失败'))
     }
-  }).catch(() => {
-    // 取消删除
-  })
+  }).catch(() => {})
 }
 
 // 加载教师选项
+const loadClasses = async () => {
+  try {
+    classes.value = await api.getClassList()
+  } catch (error) {
+    classes.value = []
+    logger.error('加载班级列表失败:', error)
+  }
+}
+
 const loadTeacherOptions = async () => {
   try {
-    // 实际应用中应通过API获取教师列表
-    // const teachers = await api.getTeacherList()
-    // teacherOptions.value = teachers
+    const response = await api.getUsers({ role: 'teacher' })
+    const list = Array.isArray(response?.data)
+      ? response.data
+      : Array.isArray(response?.users)
+        ? response.users
+        : []
+    teacherOptions.value = list.map(teacher => ({
+      id: String(teacher.id ?? teacher.username ?? ''),
+      name: teacher.name || teacher.username || String(teacher.id ?? '')
+    })).filter(teacher => teacher.id && teacher.name)
   } catch (error) {
+    teacherOptions.value = []
     logger.error('加载教师列表失败:', error)
   }
 }
 
 onMounted(() => {
+  loadClasses()
   loadTeacherOptions()
 })
 </script>

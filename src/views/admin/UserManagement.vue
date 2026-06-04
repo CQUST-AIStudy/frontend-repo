@@ -210,63 +210,7 @@ const showReadOnlyNotice = () => {
 }
 
 // 表格数据
-const users = ref([
-  {
-    id: '2019443672',
-    name: '易星贵',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-    class: '计算机科学与技术1班',
-    grade: '2023级',
-    email: 'student1@example.com',
-    phone: '暂无',
-    role: 'student',
-    status: 'active'
-  },
-  {
-    id: '2023442308',
-    name: '施鉴航',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-    class: '计算机科学与技术1班',
-    grade: '2023级',
-    email: 'student1@example.com',
-    phone: '暂无',
-    role: 'student',
-    status: 'active'
-  },
-  {
-    id: '2023440548',
-    name: '李京谕',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-    class: '计算机科学与技术1班',
-    grade: '2023级',
-    email: 'student1@example.com',
-    phone: '暂无',
-    role: 'student',
-    status: 'active'
-  },
-
-  {
-    id: '20001',
-    name: '王老师',
-    avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-    department: '计算机科学与工程学院',
-    title: '副教授',
-    email: 'liteacher@example.com',
-    phone: '13800138000',
-    role: 'teacher',
-    status: 'active'
-  },
-  {
-    id: 'A2023001',
-    name: '王管理',
-    avatar: 'https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9cpng.png',
-    department: '教务处',
-    email: 'admin@example.com',
-    phone: '13900139000',
-    role: 'admin',
-    status: 'active'
-  }
-])
+const users = ref([])
 
 // 班级列表
 const classList = ref([])
@@ -374,9 +318,7 @@ const loadUsers = async () => {
   try {
     const response = await api.getUsers()
     const nextUsers = normalizeUsers(response)
-    if (nextUsers.length > 0) {
-      users.value = nextUsers
-    }
+    users.value = nextUsers
   } catch (error) {
     logger.error('加载用户列表失败:', error)
   }
@@ -432,14 +374,18 @@ const handleCurrentChange = (page) => {
 }
 
 // 状态更改
-const handleStatusChange = (user) => {
-  if (!userManagementReady) {
-    user.status = user.status === 'active' ? 'inactive' : 'active'
-    showReadOnlyNotice()
-    return
+const handleStatusChange = async (user) => {
+  const nextStatus = user.status
+  const previousStatus = nextStatus === 'active' ? 'inactive' : 'active'
+  try {
+    await api.updateUser(user.id, { status: nextStatus })
+    await loadUsers()
+    uiMessage.success('用户状态已更新')
+  } catch (error) {
+    user.status = previousStatus
+    logger.error('更新用户状态失败:', error)
+    uiMessage.error('更新用户状态失败')
   }
-  const status = user.status === 'active' ? '启用' : '禁用'
-  uiMessage.success(`已${status}用户 ${user.name}`)
 }
 
 // 添加用户

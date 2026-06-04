@@ -11,11 +11,44 @@
         <template #header>
           <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [flex-wrap:wrap]">
             <span>实验列表</span>
-            <ui-button type="primary" @click="openCreateDialog">添加实验</ui-button>
+            <div class="[display:flex] [align-items:center] [gap:10px] [flex-wrap:wrap]">
+              <ui-tag v-if="selectedExperimentCount" type="info">
+                已选 {{ selectedExperimentCount }} 项
+              </ui-tag>
+              <ui-button
+                type="danger"
+                :disabled="!selectedExperimentCount || batchDeleting"
+                :loading="batchDeleting && deleteMode === 'selected'"
+                @click="confirmDeleteSelected"
+              >
+                删除所选
+              </ui-button>
+              <ui-button
+                type="danger"
+                :disabled="!experimentList.length || batchDeleting"
+                :loading="batchDeleting && deleteMode === 'all'"
+                @click="confirmDeleteAll"
+              >
+                删除全部
+              </ui-button>
+              <ui-button type="primary" :disabled="batchDeleting" @click="openCreateDialog">添加实验</ui-button>
+            </div>
           </div>
         </template>
 
-        <ui-table :data="experimentList" :aria-busy="loading" border class="[width:100%]">
+        <ui-table :data="experimentList" :aria-busy="loading || batchDeleting" :loading="loading || batchDeleting" row-key="id" border class="[width:100%]">
+          <ui-table-column label="选择" width="80">
+            <template #default="scope">
+              <ui-input
+                type="checkbox"
+                :model-value="isExperimentSelected(scope.row)"
+                :disabled="batchDeleting"
+                :aria-label="`选择实验 ${scope.row.title}`"
+                class="[width:16px] [height:16px]"
+                @change="checked => toggleExperimentSelection(scope.row, checked)"
+              />
+            </template>
+          </ui-table-column>
           <ui-table-column prop="id" label="ID" width="80" />
           <ui-table-column prop="title" label="标题" min-width="200" />
           <ui-table-column prop="className" label="所属班级" width="150" />
@@ -29,11 +62,13 @@
               </ui-tag>
             </template>
           </ui-table-column>
-          <ui-table-column label="操作" width="180" fixed="right">
+          <ui-table-column label="操作" width="220" fixed="right">
             <template #default="scope">
-              <ui-button type="primary" link @click="viewExperiment(scope.row)">查看</ui-button>
-              <ui-button type="warning" link @click="editExperiment(scope.row)">编辑</ui-button>
-              <ui-button type="danger" link @click="confirmDelete(scope.row)">删除</ui-button>
+              <div class="[display:flex] [align-items:center] [gap:18px] [flex-wrap:nowrap] [white-space:nowrap]">
+                <ui-button type="primary" link @click="viewExperiment(scope.row)">查看</ui-button>
+                <ui-button type="warning" link @click="editExperiment(scope.row)">编辑</ui-button>
+                <ui-button type="danger" link :disabled="batchDeleting" @click="confirmDelete(scope.row)">删除</ui-button>
+              </div>
             </template>
           </ui-table-column>
         </ui-table>
@@ -88,8 +123,8 @@
       </ui-form>
       <template #footer>
         <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <ui-button @click="createDialogVisible = false">取消</ui-button>
-          <ui-button type="primary" @click="submitExperiment" :loading="submitLoading">确认</ui-button>
+          <ui-button :disabled="submitLoading" @click="createDialogVisible = false">取消</ui-button>
+          <ui-button type="primary" :disabled="submitLoading" :loading="submitLoading" @click="submitExperiment">确认</ui-button>
         </div>
       </template>
     </ui-dialog>
@@ -97,7 +132,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import api from '../../api'
@@ -106,6 +141,8 @@ import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 // 数据加载状态
 const loading = ref(false)
 const submitLoading = ref(false)
+const batchDeleting = ref(false)
+const deleteMode = ref('')
 
 // 分页参数
 const total = ref(0)
@@ -114,14 +151,37 @@ const currentPage = ref(1)
 
 // 实验列表数据
 const experimentList = ref([])
+const selectedExperimentIds = ref([])
+const selectedExperimentCount = computed(() => selectedExperimentIds.value.length)
 
 // 班级列表
-const classList = ref([
-  { id: 1, name: '计算机科学与技术1班' },
-  { id: 2, name: '计算机科学与技术2班' },
-  { id: 3, name: '软件工程1班' },
-  { id: 4, name: '软件工程2班' }
-])
+const classList = ref([])
+
+const normalizeExperimentId = (id) => String(id ?? '')
+
+const experimentIds = computed(() => experimentList.value
+  .map(item => normalizeExperimentId(item.id))
+  .filter(Boolean)
+)
+
+const pruneSelectedExperiments = () => {
+  const existingIds = new Set(experimentIds.value)
+  selectedExperimentIds.value = selectedExperimentIds.value.filter(id => existingIds.has(id))
+}
+
+const isExperimentSelected = (row) => {
+  return selectedExperimentIds.value.includes(normalizeExperimentId(row.id))
+}
+
+const toggleExperimentSelection = (row, checked) => {
+  const id = normalizeExperimentId(row.id)
+  if (!id) return
+  if (checked) {
+    selectedExperimentIds.value = [...new Set([...selectedExperimentIds.value, id])]
+    return
+  }
+  selectedExperimentIds.value = selectedExperimentIds.value.filter(item => item !== id)
+}
 
 // 加载实验列表
 const loadExperimentList = async () => {
@@ -146,26 +206,29 @@ const loadExperimentList = async () => {
     }
 
     // 将所有实验的创建老师统一显示为王老师"
-    experimentList.value = experiments.map(exp => {
-      return {
-        id: exp.id,
-        title: exp.name,
-        className: exp.classes?.join('、') || '计算机科学1班',
-        teacherName: '王老师', // 统一设置为王老师
-        deadline: exp.deadline,
-        submissionCount: exp.submissionCount || 0,
-        status: exp.status,
-        averageScore: exp.averageScore
-      }
-    })
+    experimentList.value = experiments.map(exp => ({
+      id: exp.id,
+      title: exp.name || exp.title || '',
+      classIds: exp.classIds || [],
+      className: Array.isArray(exp.classes) && exp.classes.length > 0 ? exp.classes.join('、') : (exp.className || '未关联'),
+      teacherId: exp.teacherId || '',
+      teacherName: exp.teacherName || '未关联',
+      deadline: exp.deadline,
+      description: exp.description || '',
+      submissionCount: exp.submissionCount || exp.submitCount || 0,
+      status: exp.status,
+      averageScore: exp.averageScore
+    }))
 
     total.value = experimentList.value.length
+    pruneSelectedExperiments()
     
     logger.debug('处理后的实验列表:', experimentList.value)
   } catch (error) {
     logger.error('加载实验列表失败:', error)
     uiMessage.error(getFriendlyErrorMessage(error, '加载实验列表失败，请稍后重试'))
     experimentList.value = []
+    selectedExperimentIds.value = []
   } finally {
     loading.value = false
   }
@@ -239,67 +302,125 @@ const viewExperiment = (row) => {
 const editExperiment = (row) => {
   experimentForm.id = row.id
   experimentForm.title = row.title
-  experimentForm.classId = classList.value.find(c => c.name === row.className)?.id || ''
+  experimentForm.classId = Array.isArray(row.classIds) && row.classIds.length > 0 ? row.classIds[0] : ''
   experimentForm.deadline = row.deadline
-  experimentForm.description = '此处为实验描述示例文本，实际应从后端获取。'
+  experimentForm.description = row.description || ''
   createDialogVisible.value = true
 }
 
 // 确认删除
 const confirmDelete = (row) => {
-  messageBox.confirm(`确定要删除实验"${row.title}"吗？此操作不可逆`, '警告', {
+  messageBox.confirm(`确定要删除实验 "${row.title}" 吗？此操作不可恢复。`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    // 模拟删除
-    setTimeout(() => {
-      experimentList.value = experimentList.value.filter(item => item.id !== row.id)
-      uiMessage.success('删除成功!')
-    }, 500)
+  }).then(async () => {
+    try {
+      await api.deleteExperiment(row.id)
+      selectedExperimentIds.value = selectedExperimentIds.value.filter(id => id !== normalizeExperimentId(row.id))
+      await loadExperimentList()
+      uiMessage.success('删除成功')
+    } catch (error) {
+      logger.error('删除实验失败:', error)
+      uiMessage.error(getFriendlyErrorMessage(error, '删除实验失败，请稍后重试'))
+    }
   }).catch(() => {})
 }
 
+const deleteExperiments = async (targetRows, mode) => {
+  if (!targetRows.length || batchDeleting.value) return
+
+  batchDeleting.value = true
+  deleteMode.value = mode
+  const failed = []
+
+  for (const row of targetRows) {
+    try {
+      await api.deleteExperiment(row.id)
+    } catch (error) {
+      failed.push({ row, error })
+      logger.error('删除实验失败:', row, error)
+    }
+  }
+
+  try {
+    await loadExperimentList()
+  } finally {
+    batchDeleting.value = false
+    deleteMode.value = ''
+  }
+
+  if (failed.length) {
+    const successCount = targetRows.length - failed.length
+    uiMessage.error(`删除完成：成功 ${successCount} 个，失败 ${failed.length} 个`)
+    return
+  }
+
+  selectedExperimentIds.value = []
+  uiMessage.success(`删除成功，共删除 ${targetRows.length} 个实验`)
+}
+
+const confirmDeleteSelected = () => {
+  const selectedIds = new Set(selectedExperimentIds.value)
+  const targetRows = experimentList.value.filter(row => selectedIds.has(normalizeExperimentId(row.id)))
+  if (!targetRows.length) {
+    uiMessage.warning('请先选择要删除的实验')
+    return
+  }
+
+  messageBox.confirm(`确定要删除选中的 ${targetRows.length} 个实验吗？此操作不可恢复。`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => deleteExperiments(targetRows, 'selected')).catch(() => {})
+}
+
+const confirmDeleteAll = () => {
+  const targetRows = [...experimentList.value]
+  if (!targetRows.length) {
+    uiMessage.warning('当前没有可删除的实验')
+    return
+  }
+
+  messageBox.confirm(`确定要删除全部 ${targetRows.length} 个实验吗？此操作不可恢复。`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => deleteExperiments(targetRows, 'all')).catch(() => {})
+}
+
 // 提交实验
-const submitExperiment = () => {
-  experimentFormRef.value.validate((valid) => {
+const submitExperiment = async () => {
+  if (submitLoading.value) return
+
+  submitLoading.value = true
+  try {
+    const valid = await experimentFormRef.value?.validate().catch(() => false)
     if (!valid) return
 
-    submitLoading.value = true
-    // 模拟提交
-    setTimeout(() => {
-      submitLoading.value = false
-      createDialogVisible.value = false
-
-      if (experimentForm.id) {
-        // 更新
-        const index = experimentList.value.findIndex(item => item.id === experimentForm.id)
-        if (index > -1) {
-          const classItem = classList.value.find(c => c.id === experimentForm.classId)
-          experimentList.value[index] = {
-            ...experimentList.value[index],
-            title: experimentForm.title,
-            className: classItem ? classItem.name : '',
-            deadline: experimentForm.deadline
-          }
-        }
-        uiMessage.success('更新成功!')
-      } else {
-        // 创建
-        const classItem = classList.value.find(c => c.id === experimentForm.classId)
-        experimentList.value.unshift({
-          id: Date.now(),
-          title: experimentForm.title,
-          className: classItem ? classItem.name : '',
-          teacherName: '王老师',
-          deadline: experimentForm.deadline,
-          submissionCount: 0,
-          status: 'draft'
-        })
-        uiMessage.success('创建成功!')
-      }
-    }, 1000)
-  })
+    const payload = {
+      name: experimentForm.title,
+      title: experimentForm.title,
+      classId: experimentForm.classId,
+      classIds: experimentForm.classId ? [experimentForm.classId] : [],
+      deadline: experimentForm.deadline,
+      description: experimentForm.description
+    }
+    if (experimentForm.id) {
+      await api.updateExperiment(experimentForm.id, payload)
+      uiMessage.success('更新成功')
+    } else {
+      await api.createExperiment(payload)
+      uiMessage.success('创建成功')
+    }
+    createDialogVisible.value = false
+    await loadExperimentList()
+  } catch (error) {
+    logger.error('保存实验失败:', error)
+    uiMessage.error(getFriendlyErrorMessage(error, '保存实验失败，请稍后重试'))
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 // 页码改变
@@ -316,7 +437,18 @@ const handleSizeChange = (val) => {
 }
 
 // 初始化加载数据
+const loadClassList = async () => {
+  try {
+    classList.value = await api.getClassList()
+  } catch (error) {
+    classList.value = []
+    logger.error('加载班级列表失败:', error)
+  }
+}
+
+// 初始化加载数据
 onMounted(() => {
+  loadClassList()
   loadExperimentList()
 })
 </script>

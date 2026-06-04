@@ -154,29 +154,93 @@ export const useExperimentStore = defineStore('experiment', {
       return this.experimentCache.get(id)
     },
 
-    async generateAIReport(_experimentId, userData) {
-      this.generatingReport = true
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1200))
-        const report = `# ${userData.experimentName || '实验报告'}\n\n`
-          + `## 学生信息\n- 姓名：${userData.studentName || ''}\n- 学号：${userData.studentId || ''}\n- 班级：${userData.className || ''}\n\n`
-          + `## 实验内容\n${userData.content || '待补充'}\n\n`
-          + `## AI点评\n${userData.aiComment || '暂无'}\n\n`
-          + `## 实验心得体会\n${userData.experience || '待补充'}\n`
-        return { success: true, report }
-      } catch {
-        return { success: false, message: 'AI 报告生成失败' }
-      } finally {
-        this.generatingReport = false
+    applyExperimentReport(experimentId, report, data = {}) {
+      const experimentIndex = this.experimentList.findIndex(exp => String(exp.id) === String(experimentId))
+      if (experimentIndex !== -1) {
+        this.experimentList[experimentIndex] = {
+          ...this.experimentList[experimentIndex],
+          report,
+          reportData: data
+        }
+      }
+
+      if (this.currentExperiment && String(this.currentExperiment.id) === String(experimentId)) {
+        this.currentExperiment = {
+          ...this.currentExperiment,
+          report,
+          reportData: data
+        }
+      }
+
+      if (this.experimentCache.has(experimentId)) {
+        const cached = this.experimentCache.get(experimentId)
+        this.experimentCache.set(experimentId, {
+          ...cached,
+          report,
+          reportData: data
+        })
       }
     },
 
-    generateLinearListReport(experimentName, userData) {
-      return `# ${experimentName || '线性表实验'} - 实验报告\n\n`
-        + `## 1. 学生信息\n- 姓名：${userData.studentName || ''}\n- 学号：${userData.studentId || ''}\n- 班级：${userData.className || ''}\n\n`
-        + `## 2. 实验代码\n${userData.code ? `\`\`\`c\n${userData.code}\n\`\`\`` : '实验代码见实验平台'}\n\n`
-        + `## 3. AI点评\n${userData.aiComment || '暂无'}\n\n`
-        + `## 4. 实验心得体会\n${userData.experience || '待补充'}\n`
+    normalizeReportResponse(response) {
+      if (response?.success === false) {
+        return {
+          success: false,
+          message: response.message || 'AI 报告生成失败',
+          report: '',
+          data: null
+        }
+      }
+
+      const data = response?.data || {}
+      const report = response?.report || data.report || ''
+      return {
+        success: true,
+        message: response?.message || '',
+        report,
+        data
+      }
+    },
+
+    async fetchExperimentReport(experimentId) {
+      try {
+        const response = await api.getExperimentReport(experimentId)
+        const result = this.normalizeReportResponse(response)
+        if (result.success && result.report) {
+          this.applyExperimentReport(experimentId, result.report, result.data)
+        }
+        return result
+      } catch (error) {
+        logger.error(`获取实验 ${experimentId} 报告失败:`, error)
+        return {
+          success: false,
+          message: getFriendlyErrorMessage(error, '获取报告失败'),
+          report: '',
+          data: null
+        }
+      }
+    },
+
+    async generateAIReport(experimentId, userData) {
+      this.generatingReport = true
+      try {
+        const response = await api.generateExperimentReport(experimentId, userData)
+        const result = this.normalizeReportResponse(response)
+        if (result.success && result.report) {
+          this.applyExperimentReport(experimentId, result.report, result.data)
+        }
+        return result
+      } catch (error) {
+        logger.error(`生成实验 ${experimentId} 报告失败:`, error)
+        return {
+          success: false,
+          message: getFriendlyErrorMessage(error, 'AI 报告生成失败'),
+          report: '',
+          data: null
+        }
+      } finally {
+        this.generatingReport = false
+      }
     },
   },
   getters: {

@@ -100,7 +100,7 @@
                     下载报告
                   </ui-button> -->
 
-                  <ui-button type="primary" @click="generateWordDoc">
+                  <ui-button v-if="selectedExperiment.report" type="primary" @click="generateWordDoc">
                     <ui-icon>
                       <Download />
                     </ui-icon>下载Word文档
@@ -317,6 +317,11 @@ const experienceContent = ref('')
 const tempUserData = ref(null) // 临时存储用户数据
 const labRoomName = ref('') // 实验机房名称
 const labTime = ref('') // 上机时间
+const experienceForm = computed(() => ({
+  labRoomName: labRoomName.value,
+  labTime: labTime.value,
+  experienceContent: experienceContent.value
+}))
 
 // 过滤后的实验列表
 const filteredExperiments = computed(() => {
@@ -364,103 +369,40 @@ const getPlagiarismColor = (rate) => {
   return '#f56c6c'
 }
 
-// 获取正确的实验名称
-const getCorrectExperimentName = (experiment, index) => {
-  // 根据实验顺序和ID特征确定正确的实验名称
-
-  // 方法1：基于实验在列表中的顺序（假设顺序固定）
-  if (experimentStore.experimentList.length >= 3) {
-    // 从experimentStore.experimentList中找出该实验的索引
-    const actualIndex = experimentStore.experimentList.findIndex(exp => exp.id === experiment.id);
-    if (actualIndex === 0) return '线性表的实现与应用';
-    if (actualIndex === 1) return '栈与队列的实现与应用';
-    if (actualIndex === 2) return '树与二叉树的实现与应用';
-  }
-
-  // 方法2：基于实验ID
-  if (experiment.id) {
-    const id = experiment.id.toString().toLowerCase();
-    if (id.includes('stack') || id.includes('queue') || id.includes('stk')) {
-      return '栈与队列的实现与应用';
-    }
-    if (id.includes('tree') || id.includes('bst') || id.includes('binary')) {
-      return '树与二叉树的实现与应用';
-    }
-    if (id.includes('list') || id.includes('linear') || id.includes('array')) {
-      return '线性表的实现与应用';
-    }
-  }
-
-  // 方法3：基于代码内容（如果代码已加载）
-  if (experiment.code) {
-    const code = experiment.code.toLowerCase();
-    if (code.includes('stack') || code.includes('queue') || code.includes('push') && code.includes('pop')) {
-      return '栈与队列的实现与应用';
-    }
-    if (code.includes('tree') || code.includes('binary') || code.includes('left') && code.includes('right')) {
-      return '树与二叉树的实现与应用';
-    }
-  }
-
-  // 默认根据索引位置
-  if (index === 0) return '线性表的实现与应用';
-  if (index === 1) return '栈与队列的实现与应用';
-  if (index === 2) return '树与二叉树的实现与应用';
-
-  // 如果都无法确定，返回原始名称
-  return experiment.name;
-}
-
 // 选择实验
-const selectExperiment = (experiment) => {
-  // 创建一个副本并修正实验名称
-  const correctedExperiment = {...experiment};
-  const index = experimentStore.experimentList.findIndex(exp => exp.id === experiment.id);
-  correctedExperiment.name = getCorrectExperimentName(experiment, index);
+const selectExperiment = async (experiment) => {
+  selectedExperiment.value = { ...experiment }
+  reportData.value = {}
+  isReportViewVisible.value = false
 
-  // 检查是否有缓存的报告
-  const cachedReport = localStorage.getItem(`experiment_report_${experiment.id}`)
-  if (cachedReport && experiment.status === 'completed') {
-    correctedExperiment.report = cachedReport;
-      logger.debug(`从缓存加载实验${experiment.id}的报告`);
+  if (experiment.status !== 'completed') {
+    return
   }
 
-  // 从experimentCache中获取最新数据（如果有）
-  if (experimentStore.experimentCache && experimentStore.experimentCache.has(experiment.id)) {
-    const cachedData = experimentStore.experimentCache.get(experiment.id).data;
-    if (cachedData && cachedData.report && experiment.status === 'completed') {
-      logger.debug(`从experimentCache获取实验${experiment.id}的报告`);
-      correctedExperiment.report = cachedData.report;
+  loading.value = true
+  try {
+    const result = await experimentStore.fetchExperimentReport(experiment.id)
+    if (result.success && result.report && selectedExperiment.value?.id === experiment.id) {
+      selectedExperiment.value = {
+        ...selectedExperiment.value,
+        report: result.report,
+        reportData: result.data
+      }
+      return
     }
-  }
 
-  // 检查实验特殊情况- 线性表实验(ID=1)应当有报告，其他实验可能没有
-  if (experiment.id === 1 && experiment.status === 'completed' && !correctedExperiment.report) {
-    // 为线性表实验生成默认报告
-    logger.debug('线性表实验应当有报告，正在生成默认内容');
-    const userData = {
-      experimentName: correctedExperiment.name,
-      studentName: userStore.userInfo?.name || '学生',
-      studentId: userStore.userInfo?.id || '未知学号',
-      className: userStore.userInfo?.class || '未知班级'
-    };
-    // 使用默认的线性表报告模板
-    const reportTemplate = experimentStore.generateLinearListReport;
-    correctedExperiment.report = reportTemplate(correctedExperiment.name, userData);
-
-    // 保存到本地存储
-    try {
-      const report = correctedExperiment.report
-      localStorage.setItem(`experiment_report_${experiment.id}`, correctedExperiment.report);
-      const teacherCommentMatch = report.match(/##\s*教师评语[^\n]*\n+([\s\S]+?)(?=\n##|\s*$)/i)
-      if (teacherCommentMatch) reportData.value.teacherComment = teacherCommentMatch[1].trim()
-    } catch (e) {
-      logger.error('保存报告到本地存储失败', e);
+    if (selectedExperiment.value?.id === experiment.id) {
+      selectedExperiment.value = {
+        ...selectedExperiment.value,
+        report: ''
+      }
     }
+  } catch (error) {
+    logger.error(`加载实验 ${experiment.id} 报告失败:`, error)
+    uiMessage.warning('报告加载失败，请稍后重试')
+  } finally {
+    loading.value = false
   }
-
-  selectedExperiment.value = correctedExperiment;
-  isReportViewVisible.value = false;
 }
 
 // 生成报告
@@ -472,10 +414,10 @@ const generateReport = async () => {
 
   // 准备用户数据
   const userData = {
-    studentName: userStore.userInfo?.name || '学生',
-    studentId: userStore.userInfo?.id || '未知学号',
-    className: userStore.userInfo?.class || '未知班级',
-    experimentContent:'线性表基础操作，包括顺序表的初始化、插入、删除、查找和遍历实现',
+    studentName: userStore.userInfo?.name || userStore.userInfo?.username || '',
+    studentId: userStore.userInfo?.usernum || userStore.userInfo?.username || userStore.userInfo?.id || '',
+    className: userStore.userInfo?.class || userStore.userInfo?.classname || '',
+    experimentContent: selectedExperiment.value.description || selectedExperiment.value.content || '',
     // 传递完整的实验详情
     experimentName: selectedExperiment.value.name,
     experimentId: selectedExperiment.value.id,
@@ -528,7 +470,7 @@ const submitExperienceAndGenerateReport = async () => {
   tempUserData.value.labName = labRoomName.value
   tempUserData.value.labTime = labTime.value
   tempUserData.value.courseName = "数据结构"
-  tempUserData.value.teacherName = "指导教师"
+  tempUserData.value.teacherName = selectedExperiment.value.teacherName || ''
   tempUserData.value.summary = experienceContent.value
 
   // 关闭对话框
@@ -541,21 +483,19 @@ const submitExperienceAndGenerateReport = async () => {
     // 调用AI生成报告
     const result = await experimentStore.generateAIReport(selectedExperiment.value.id, tempUserData.value)
 
-    if (result.success) {
+    if (result.success && result.report) {
       // 更新当前选中的实验报告
       selectedExperiment.value.report = result.report
+      selectedExperiment.value.reportData = result.data
 
       // 更新experimentList中的报告
       const experimentIndex = experimentStore.experimentList.findIndex(exp => exp.id === selectedExperiment.value.id)
       if (experimentIndex !== -1) {
-        experimentStore.experimentList[experimentIndex].report = result.report
-      }
-
-      // 保存报告到本地存储
-      try {
-        localStorage.setItem(`experiment_report_${selectedExperiment.value.id}`, result.report)
-      } catch (e) {
-        logger.error('保存报告到本地存储失败', e)
+        experimentStore.experimentList[experimentIndex] = {
+          ...experimentStore.experimentList[experimentIndex],
+          report: result.report,
+          reportData: result.data
+        }
       }
 
       // 准备报告数据
@@ -654,20 +594,22 @@ const updateReportWithResults = () => {
 const prepareReportData = () => {
   if (!selectedExperiment.value) return
   parseQuestionCode()
+  const profile = userStore.userInfo || {}
+  const reportMeta = selectedExperiment.value.reportData || {}
   reportData.value = {
     experimentName: selectedExperiment.value.name,
-    studentName: userStore.userInfo?.name || '易星贵',
-    studentId: userStore.userInfo?.username || '2019443672',
-    className: userStore.userInfo?.class || '计算机科学班',
+    studentName: reportMeta.studentName || profile.name || profile.username || '',
+    studentId: reportMeta.studentId || profile.usernum || profile.username || profile.id || '',
+    className: profile.class || profile.classname || '',
     courseName: '数据结构',
     steps: '', // 由updateReportWithCode生成
     results: '', // 由updateReportWithResults生成
     submitTime: selectedExperiment.value.submitTime,
     deadline: selectedExperiment.value.deadline,
     plagiarismRate: selectedExperiment.value.plagiarismRate,
-    labName: labRoomName.value || 'I301',
-    labTime: labTime.value || new Date().toLocaleDateString(),
-    teacherName: '张老师',
+    labName: reportMeta.labName || labRoomName.value || '',
+    labTime: reportMeta.labTime || labTime.value || '',
+    teacherName: selectedExperiment.value.teacherName || '',
   }
   // 提取其他章节
   if (selectedExperiment.value.report) {
@@ -707,84 +649,6 @@ const handleReportDataUpdate = (newData) => {
   reportData.value = newData
 }
 
-// 处理报告保存
-// const handleReportSaved = (savedData) => {
-//   // 更新本地报告内容
-//   if (selectedExperiment.value && selectedExperiment.value.id) {
-//     try {
-//       // 将ReportGenerator组件中的结构化数据转换为Markdown格式
-//       const markdownReport = generateMarkdownFromData(savedData)
-//
-//       // 更新当前选中的实验报告
-//       selectedExperiment.value.report = markdownReport
-//
-//       // 更新experimentList中的报告
-//       const experimentIndex = experimentStore.experimentList.findIndex(exp => exp.id === selectedExperiment.value.id)
-//       if (experimentIndex !== -1) {
-//         experimentStore.experimentList[experimentIndex].report = markdownReport
-//       }
-//
-//       // 保存报告到本地存储
-//       localStorage.setItem(`experiment_report_${selectedExperiment.value.id}`, markdownReport)
-//
-//       logger.debug('报告已保存并更新')
-//     } catch (e) {
-//       logger.error('保存报告时出错', e)
-//     }
-//   }
-// }
-
-// 将结构化数据转换为Markdown格式
-// // 下载报告
-// const downloadReport = async () => {
-//   if (!selectedExperiment.value || !selectedExperiment.value.report) {
-//     uiMessage.warning('没有找到报告内容')
-//     return
-//   }
-
-//   // 显示格式选择对话框
-//   messageBox.confirm(
-//     '请选择导出格式',
-//     '导出报告',
-//     {
-//       confirmButtonText: 'Word格式',
-//       cancelButtonText: 'Markdown格式',
-//       distinguishCancelAndClose: true,
-//       type: 'info'
-//     }
-//   ).then(async () => {
-//     // 导出Word格式
-//     try {
-//       // 首先确保reportData已准备好
-//       if (Object.keys(reportData.value).length === 0) {
-//         prepareReportData()
-//       }
-
-//       const docxGenerator = new DocxGenerator()
-//       const blob = await docxGenerator.generateStandardReport(reportData.value)
-
-//       DocxGenerator.downloadReport(blob, `${selectedExperiment.value.name}-实验报告.docx`)
-//       uiMessage.success('报告下载成功')
-//     } catch (error) {
-//       logger.error('生成Word报告失败:', error)
-//       uiMessage.error('生成Word报告失败，请稍后再试')
-//     }
-//   }).catch(action => {
-//     if (action === 'cancel') {
-//       // 导出Markdown格式
-//       const blob = new Blob([selectedExperiment.value.report], { type: 'text/markdown' })
-//       const link = document.createElement('a')
-//       link.href = URL.createObjectURL(blob)
-//       link.download = `${selectedExperiment.value.name}-实验报告.md`
-//       document.body.appendChild(link)
-//       link.click()
-//       document.body.removeChild(link)
-//       uiMessage.success('报告下载成功')
-//     }
-//   })
-// }
-
-
 // 初始化
 onMounted(async () => {
   loading.value = true
@@ -802,11 +666,20 @@ onMounted(async () => {
 
 // 生成并下载Word文档
 const generateWordDoc = async () => {
+  if (!selectedExperiment.value?.report) {
+    uiMessage.warning('没有可下载的报告')
+    return
+  }
+
   try {
+    if (Object.keys(reportData.value || {}).length === 0) {
+      prepareReportData()
+    }
+    const profile = userStore.userInfo || {}
     const docxGenerator = new DocxGenerator()
     const blob = await docxGenerator.generateStandardReport(reportData.value)
 
-    DocxGenerator.downloadReport(blob, `${userStore.userInfo.id || "学号"}_${userStore.userInfo.name || "姓名"}_${selectedExperiment.value.name || '数据结构实验'}.docx`)
+    DocxGenerator.downloadReport(blob, `${profile.usernum || profile.username || profile.id || "学号"}_${profile.name || profile.username || "姓名"}_${selectedExperiment.value.name || '数据结构实验'}.docx`)
     uiMessage.success('报告生成成功！')
   } catch (error) {
     logger.error('生成报告时发生错误', error)

@@ -178,13 +178,11 @@
 </template>
 
 <script setup>
-import axios from 'axios'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import LoadingState from '../../components/LoadingState.vue'
 import { useUserStore } from '../../store'
 import api from '../../api'
-import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const userStore = useUserStore()
@@ -283,15 +281,27 @@ async function saveProfile() {
   const valid = await profileFormRef.value?.validate().catch(() => false)
   if (!valid) return
 
-  userStore.updateUserInfo({
-    name: profileForm.name,
-    username: currentUser.value.username || profileForm.name,
-    email: profileForm.email,
-    phone: profileForm.phone
-  })
-
-  profileDialogVisible.value = false
-  uiMessage.success('展示信息已更新')
+  try {
+    const response = await api.updateMyProfile({
+      name: profileForm.name,
+      email: profileForm.email,
+      phone: profileForm.phone
+    })
+    const profileData = response?.data || response || {}
+    userStore.updateUserInfo({
+      name: profileData.name || profileForm.name,
+      username: profileData.username || currentUser.value.username || profileForm.name,
+      usernum: profileData.studentId || profileData.usernum || currentUser.value.usernum,
+      class: profileData.className || profileData.class || currentUser.value.class,
+      classname: profileData.className || profileData.class || currentUser.value.classname,
+      email: profileData.email || profileForm.email,
+      phone: profileData.phone || profileForm.phone
+    })
+    profileDialogVisible.value = false
+    uiMessage.success('展示信息已更新')
+  } catch (error) {
+    uiMessage.error(getFriendlyErrorMessage(error, '展示信息更新失败'))
+  }
 }
 
 function openPasswordDialog() {
@@ -307,14 +317,11 @@ async function changePassword() {
 
   submittingPassword.value = true
   try {
-    const res = await axios.post(`${API_BASE_URL}/api/user/password`, {
+    const data = await api.updatePassword({
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword
-    }, {
-      withCredentials: true
     })
 
-    const data = res?.data || res
     if (data?.success) {
       passwordDialogVisible.value = false
       uiMessage.success('密码修改成功，请使用新密码重新登录')

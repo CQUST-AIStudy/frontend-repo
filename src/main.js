@@ -12,10 +12,6 @@ import { installFeedback } from './services/feedback'
 import { AUTH_STORAGE_CLEARED_EVENT, AUTH_STORAGE_KEYS } from './constants/auth'
 import { useUserStore } from './store'
 
-if (process.env.NODE_ENV === 'development') {
-  import('./mock')
-}
-
 const browserConsole = window.console
 const originalError = browserConsole?.error?.bind(browserConsole)
 browserConsole.error = (...args) => {

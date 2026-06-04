@@ -103,36 +103,22 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
+import api from '../../api'
+import { useUserStore } from '../../store'
 
-// 获取用户信息
-const userInfo = computed(() => {
-  const userInfoStr = localStorage.getItem('userInfo')
-  try {
-    return userInfoStr ? JSON.parse(userInfoStr) : {
-      name: '管理员',
-      role: 'admin',
-      avatar: '',
-      id: '',
-      department: '',
-      email: '',
-      phone: ''
-    }
-  } catch (error) {
-    return {
-      name: '管理员',
-      role: 'admin',
-      avatar: '',
-      id: '',
-      department: '',
-      email: '',
-      phone: ''
-    }
-  }
+const userStore = useUserStore()
+const userInfo = ref({
+  name: '',
+  role: 'admin',
+  avatar: '',
+  id: '',
+  department: '',
+  email: '',
+  phone: ''
 })
 
-// 表单数据
 const formRef = ref(null)
 const form = reactive({
   name: '',
@@ -141,7 +127,6 @@ const form = reactive({
   department: ''
 })
 
-// 密码表单
 const passwordFormRef = ref(null)
 const passwordForm = reactive({
   currentPassword: '',
@@ -149,67 +134,87 @@ const passwordForm = reactive({
   confirmPassword: ''
 })
 
-// 保存个人信息
-const saveProfile = () => {
-  // 模拟保存操作
-  uiMessage.success('个人信息已更新')
-
-  // 更新本地存储的用户信息
-  const updatedInfo = {
+const applyProfile = (profile = {}) => {
+  userInfo.value = {
     ...userInfo.value,
-    name: form.name,
-    email: form.email,
-    phone: form.phone,
-    department: form.department
+    ...profile,
+    role: profile.role || 'admin'
   }
-  localStorage.setItem('userInfo', JSON.stringify(updatedInfo))
+  resetForm()
+  userStore.updateUserInfo({
+    ...(userStore.userInfo || {}),
+    ...userInfo.value
+  })
 }
 
-// 重置表单
+const loadProfile = async () => {
+  try {
+    const response = await api.getMyProfile()
+    applyProfile(response?.data || response || {})
+  } catch (error) {
+    uiMessage.error('加载个人资料失败')
+  }
+}
+
+const saveProfile = async () => {
+  try {
+    const response = await api.updateMyProfile({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      department: form.department
+    })
+    applyProfile(response?.data || response || {})
+    uiMessage.success('个人信息已更新')
+  } catch (error) {
+    uiMessage.error('保存个人信息失败')
+  }
+}
+
 const resetForm = () => {
-  form.name = userInfo.value.name
-  form.email = userInfo.value.email
-  form.phone = userInfo.value.phone
-  form.department = userInfo.value.department
+  form.name = userInfo.value.name || ''
+  form.email = userInfo.value.email || ''
+  form.phone = userInfo.value.phone || ''
+  form.department = userInfo.value.department || ''
 }
 
-// 修改密码
-const changePassword = () => {
+const changePassword = async () => {
   if (!passwordForm.currentPassword) {
     uiMessage.warning('请输入当前密码')
     return
   }
-
   if (!passwordForm.newPassword) {
     uiMessage.warning('请输入新密码')
     return
   }
-
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
     uiMessage.warning('两次输入的新密码不一致')
     return
   }
 
-  // 模拟修改密码操作
-  uiMessage.success('密码已成功修改')
-  resetPasswordForm()
+  try {
+    const response = await api.updatePassword({
+      oldPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
+    })
+    if (response?.success === false) {
+      uiMessage.error(response.message || '密码修改失败')
+      return
+    }
+    uiMessage.success('密码已成功修改')
+    resetPasswordForm()
+  } catch (error) {
+    uiMessage.error('密码修改失败，请检查当前密码后重试')
+  }
 }
 
-// 重置密码表单
 const resetPasswordForm = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmPassword = ''
 }
 
-// 初始化表单数据
-onMounted(() => {
-  // 初始化个人信息表单
-  form.name = userInfo.value.name
-  form.email = userInfo.value.email
-  form.phone = userInfo.value.phone
-  form.department = userInfo.value.department
-})
+onMounted(loadProfile)
 </script>
 
 

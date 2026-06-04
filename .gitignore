@@ -13,6 +13,8 @@ node_modules/
 dist/
 dist-ssr/
 build/
+.output/
+storybook-static/
 coverage/
 .nyc_output/
 report.html
@@ -25,6 +27,9 @@ node_modules/.cache/
 .cache/
 .parcel-cache/
 .vite/
+.webpack/
+.turbo/
+.rollup.cache/
 .vuepress/dist/
 .npm/
 .pnpm-store/
@@ -36,7 +41,7 @@ temp/
 .eslintcache
 .stylelintcache
 
-# Logs and diagnostics
+# Logs, diagnostics, and local process files
 *.log
 *.local.log
 npm-debug.log*
@@ -44,6 +49,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pid
+*.pid.lock
+*.seed
 dev-server*.log
 static-server*.log
 serve.out.log
@@ -60,6 +68,10 @@ where-npm.txt
 !.env.production.example
 
 # Test and browser artifacts
+coverage-final.json
+lcov.info
+*.lcov
+junit.xml
 test-results/
 playwright-report/
 cypress/screenshots/
@@ -72,6 +84,11 @@ artifacts/
 # Editor and OS files
 .idea/
 .vscode/
+.vs/
+.fleet/
+.history/
+*.iml
+*.code-workspace
 *.suo
 *.ntvs*
 *.njsproj
