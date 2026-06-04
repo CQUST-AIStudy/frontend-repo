@@ -77,7 +77,7 @@
                     :label="getLanguageLabel(lang)"
                     :name="lang"
                   >
-                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code>{{ codeBlock }}</code></pre>
+                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code :class="getCodeLanguageClass(lang)" v-html="renderHighlightedCode(codeBlock, lang)"></code></pre>
                   </ui-tab-pane>
                 </ui-tabs>
               </section>
@@ -175,7 +175,14 @@
       </div>
 
       <!-- 代码编辑器 -->
-      <div class="code-editor [flex:1] [border:1px_solid_#ddd] [border-radius:4px] [overflow:hidden] [cursor:text]" @click="focusEditor">
+      <div class="code-editor [position:relative] [flex:1] [border:1px_solid_#ddd] [border-radius:4px] [overflow:hidden] [cursor:text]" @click="focusEditor">
+        <div
+          v-if="isStarterCodeRefilling"
+          class="starter-template-overlay [position:absolute] [right:14px] [top:14px] [z-index:10] [display:flex] [align-items:center] [gap:8px] [padding:8px_12px] [border-radius:999px] [background:rgba(15,_23,_42,_0.88)] [color:#e5e7eb] [font-size:12px] [box-shadow:0_8px_20px_rgba(15,_23,_42,_0.22)]"
+        >
+          <span class="starter-template-spinner"></span>
+          <span>正在补全初始化代码</span>
+        </div>
         <codemirror
           ref="editorRef"
           v-model="code"
@@ -188,7 +195,7 @@
       </div>
 
       <!-- 测试用例输入 -->
-      <div v-if="runResult" class="test-input [margin-top:16px] [height:200px]">
+      <div v-if="runResult" class="test-input [margin-top:16px]">
         <ui-tabs v-model="activeTab">
           <ui-tab-pane label="测试用例" name="testcase">
             <ui-input
@@ -199,13 +206,21 @@
             />
           </ui-tab-pane>
           <ui-tab-pane label="运行结果" name="result" v-if="runResult">
-            <div class="run-result [padding:12px]">
-              <div class="result-status [display:flex] [align-items:center] [gap:8px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#67c23a] [&.error]:[color:#f56c6c]" :class="runResult.status">
-                <ui-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></ui-icon>
-                {{ runResult.status === 'success' ? '运行成功' : '运行失败' }}
+            <div class="run-result [padding:14px_16px] [border-radius:8px] [border:1px_solid_#e5e7eb] [background:#fff]">
+              <div class="result-status [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#16a34a] [&.error]:[color:#dc2626]" :class="runResult.status">
+                <div class="[display:flex] [align-items:center] [gap:8px]">
+                  <ui-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></ui-icon>
+                  <span>{{ runResult.title }}</span>
+                </div>
+                <div class="result-meta [display:flex] [gap:8px] [flex-wrap:wrap] [font-size:12px] [font-weight:500] [color:#64748b]">
+                  <span v-if="runResult.rawStatus">状态: {{ runResult.rawStatus }}</span>
+                  <span v-if="runResult.runtime">耗时: {{ runResult.runtime }}</span>
+                  <span v-if="runResult.memory">内存: {{ runResult.memory }}</span>
+                </div>
               </div>
-              <div class="result-content">
-                <pre>{{ runResult.output }}</pre>
+              <div class="result-content [min-height:44px] [border-radius:6px] [background:#f8fafc] [padding:10px_12px] [color:#334155] [font-size:13px] [line-height:1.6]">
+                <pre v-if="runResult.output" class="[margin:0] [white-space:pre-wrap] [word-break:break-word]">{{ runResult.output }}</pre>
+                <div v-else class="[color:#64748b]">{{ runResult.emptyText }}</div>
               </div>
             </div>
           </ui-tab-pane>
@@ -289,7 +304,9 @@ import { python } from '@codemirror/lang-python'
 import { java } from '@codemirror/lang-java'
 import { cpp } from '@codemirror/lang-cpp'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { EditorView } from '@codemirror/view'
+import { tags as syntaxTags } from '@lezer/highlight'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '@/api'
@@ -306,6 +323,8 @@ const router = useRouter()
 marked.setOptions({ gfm: true, breaks: true })
 
 const COMPLETED_STORAGE_KEY = 'leetcode_completed_problem_ids'
+const starterRefillAttemptKeys = new Set()
+let loadProblemVersion = 0
 
 // 响应式数据
 const problem = ref({})
@@ -315,6 +334,9 @@ const testInput = ref('')
 const showSolution = ref(false)
 const running = ref(false)
 const submitting = ref(false)
+const isStarterCodeRefilling = ref(false)
+const isApplyingCodeTemplate = ref(false)
+const hasUserEditedCode = ref(false)
 const runResult = ref(null)
 const submitResult = ref(null)
 const showSubmitResult = ref(false)
@@ -362,6 +384,109 @@ var twoSum = function(nums, target) {
 }
 
 const starterLanguagePriority = ['cpp', 'c', 'java', 'python', 'javascript']
+const supportedCodeLanguages = new Set(['java', 'python', 'c', 'cpp', 'javascript', 'typescript'])
+const sharedTypeNames = new Set([
+  'Array', 'ArrayList', 'Boolean', 'Character', 'Collections', 'Deque', 'Double',
+  'HashMap', 'HashSet', 'Integer', 'LinkedList', 'List', 'Long', 'Map', 'Math',
+  'Object', 'Optional', 'Pair', 'Queue', 'Set', 'Stack', 'String', 'StringBuilder',
+  'TreeMap', 'TreeSet', 'Vector', 'bool', 'char', 'double', 'float', 'int', 'long',
+  'size_t', 'string', 'vector'
+])
+const codeKeywordSets = {
+  java: new Set('abstract assert break case catch class const continue default do else enum extends final finally for goto if implements import instanceof interface native new package private protected public return static strictfp super switch synchronized this throw throws transient try volatile while var void'.split(' ')),
+  python: new Set('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' ')),
+  c: new Set('auto break case const continue default do else enum extern for goto if inline register restrict return sizeof static struct switch typedef union volatile while'.split(' ')),
+  cpp: new Set('alignas alignof asm auto break case catch class const constexpr consteval constinit const_cast continue decltype default delete do dynamic_cast else enum explicit export extern for friend goto if inline mutable namespace new noexcept operator private protected public register reinterpret_cast requires return sizeof static static_assert static_cast struct switch template this throw try typedef typeid typename union using virtual volatile while'.split(' ')),
+  javascript: new Set('async await break case catch class const continue debugger default delete do else export extends finally for from function get if import in instanceof let new of return set static super switch this throw try typeof var void while with yield'.split(' ')),
+  typescript: new Set('abstract as async await break case catch class const continue debugger declare default delete do else enum export extends finally for from function get if implements import in infer instanceof interface keyof let module namespace new of private protected public readonly return set static super switch this throw try type typeof var void while with yield'.split(' '))
+}
+const codeConstantSets = {
+  java: new Set(['true', 'false', 'null']),
+  python: new Set(['True', 'False', 'None', 'Ellipsis']),
+  c: new Set(['NULL']),
+  cpp: new Set(['true', 'false', 'nullptr', 'NULL']),
+  javascript: new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']),
+  typescript: new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity'])
+}
+const codeBuiltinSets = {
+  java: new Set('Arrays Collections Math System StringBuilder Integer Long Double Boolean Character List ArrayList Map HashMap Set HashSet Queue Deque LinkedList Stack PriorityQueue'.split(' ')),
+  python: new Set('abs all any bool dict enumerate float int len list map max min print range reversed set sorted str sum tuple zip self cls'.split(' ')),
+  c: new Set('free malloc memcpy memset printf scanf size_t stdin stdout stderr'.split(' ')),
+  cpp: new Set('cout cin endl make_pair max min pair priority_queue queue sort stack string unordered_map unordered_set vector'.split(' ')),
+  javascript: new Set('Array Boolean Date JSON Map Math Number Object Promise Set String console parseFloat parseInt'.split(' ')),
+  typescript: new Set('Array Boolean Date JSON Map Math Number Object Promise Record Set String console parseFloat parseInt'.split(' '))
+}
+const typeIntroducerWords = new Set([
+  'class', 'enum', 'extends', 'implements', 'interface', 'namespace', 'new',
+  'struct', 'template', 'typedef', 'type', 'typename'
+])
+
+const codeEditorTheme = EditorView.theme({
+  '&': {
+    height: '100%',
+    backgroundColor: '#111827',
+    color: '#d1d5db',
+    fontSize: '14px'
+  },
+  '.cm-scroller': {
+    fontFamily: '"JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace',
+    lineHeight: '1.72'
+  },
+  '.cm-content': {
+    minHeight: '100%',
+    padding: '14px 0',
+    caretColor: '#93c5fd'
+  },
+  '.cm-line': {
+    padding: '0 18px 0 12px'
+  },
+  '.cm-gutters': {
+    backgroundColor: '#111827',
+    color: '#64748b',
+    borderRight: '1px solid rgba(148, 163, 184, 0.14)'
+  },
+  '.cm-lineNumbers .cm-gutterElement': {
+    padding: '0 12px 0 14px'
+  },
+  '.cm-activeLine': {
+    backgroundColor: 'rgba(59, 130, 246, 0.10)'
+  },
+  '.cm-activeLineGutter': {
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    color: '#cbd5e1'
+  },
+  '&.cm-focused': {
+    outline: 'none'
+  },
+  '&.cm-focused .cm-cursor': {
+    borderLeftColor: '#93c5fd'
+  },
+  '&.cm-focused .cm-selectionBackground, & .cm-selectionBackground, & .cm-content ::selection': {
+    backgroundColor: 'rgba(59, 130, 246, 0.32)'
+  },
+  '.cm-matchingBracket': {
+    backgroundColor: 'rgba(250, 204, 21, 0.16)',
+    outline: '1px solid rgba(250, 204, 21, 0.34)'
+  },
+  '.cm-nonmatchingBracket': {
+    backgroundColor: 'rgba(239, 68, 68, 0.20)',
+    outline: '1px solid rgba(239, 68, 68, 0.42)'
+  }
+}, { dark: true })
+
+const codeEditorHighlightStyle = HighlightStyle.define([
+  { tag: [syntaxTags.keyword, syntaxTags.modifier, syntaxTags.controlKeyword, syntaxTags.definitionKeyword], color: '#c084fc', fontWeight: '600' },
+  { tag: [syntaxTags.variableName, syntaxTags.self], color: '#bfdbfe' },
+  { tag: [syntaxTags.function(syntaxTags.variableName), syntaxTags.function(syntaxTags.propertyName)], color: '#7dd3fc' },
+  { tag: [syntaxTags.definition(syntaxTags.variableName), syntaxTags.className, syntaxTags.typeName], color: '#fbbf24' },
+  { tag: [syntaxTags.number, syntaxTags.integer, syntaxTags.float, syntaxTags.bool, syntaxTags.null, syntaxTags.atom], color: '#fca5a5' },
+  { tag: [syntaxTags.string, syntaxTags.docString, syntaxTags.character, syntaxTags.regexp, syntaxTags.special(syntaxTags.string)], color: '#86efac' },
+  { tag: [syntaxTags.comment, syntaxTags.lineComment, syntaxTags.blockComment, syntaxTags.docComment], color: '#64748b', fontStyle: 'italic' },
+  { tag: [syntaxTags.operator, syntaxTags.operatorKeyword, syntaxTags.compareOperator, syntaxTags.logicOperator, syntaxTags.arithmeticOperator], color: '#67e8f9' },
+  { tag: [syntaxTags.punctuation, syntaxTags.bracket, syntaxTags.separator], color: '#94a3b8' },
+  { tag: syntaxTags.annotation, color: '#f472b6' },
+  { tag: syntaxTags.invalid, color: '#fecaca', textDecoration: 'underline wavy #ef4444' }
+])
 
 const missingStarterCodeTemplates = {
   java: `class Solution {
@@ -387,7 +512,14 @@ public:
 const editorExtensions = computed(() => ([
   getLanguageExtension(),
   oneDark,
-  EditorView.lineWrapping
+  codeEditorTheme,
+  syntaxHighlighting(codeEditorHighlightStyle),
+  EditorView.lineWrapping,
+  EditorView.updateListener.of((update) => {
+    if (update.docChanged && !isApplyingCodeTemplate.value) {
+      hasUserEditedCode.value = true
+    }
+  })
 ]))
 
 // 计算属性
@@ -560,17 +692,221 @@ function decorateCodeBlocks(html) {
 
       const languageClass = normalizedLanguage ? ` language-${normalizedLanguage}` : ''
       const label = normalizedLanguage ? getLanguageLabel(normalizedLanguage) : 'Code'
+      const highlightedCode = highlightCodeHtml(codeHtml, normalizedLanguage)
 
       return [
         `<div class="md-code-block${languageClass}">`,
         '<div class="md-code-header">',
         `<span>${escapeHtml(label)}</span>`,
         '</div>',
-        `<pre><code class="${languageClass.trim()}">${codeHtml}</code></pre>`,
+        `<pre><code class="${languageClass.trim()}">${highlightedCode}</code></pre>`,
         '</div>'
       ].join('')
     }
   )
+}
+
+function renderHighlightedCode(codeValue, language) {
+  return DOMPurify.sanitize(highlightCodeText(String(codeValue || ''), language))
+}
+
+function highlightCodeHtml(codeHtml, language) {
+  return highlightCodeText(decodeHtmlEntities(codeHtml), language)
+}
+
+function highlightCodeText(codeValue, language) {
+  const normalizedLanguage = getSupportedCodeLanguage(language)
+  const codeText = String(codeValue || '')
+  if (!normalizedLanguage) {
+    return escapeHtml(codeText)
+  }
+
+  return tokenizeCode(codeText, normalizedLanguage)
+    .map(token => formatCodeToken(token.value, token.type))
+    .join('')
+}
+
+function tokenizeCode(codeText, language) {
+  const tokens = []
+  let index = 0
+  let previousWord = ''
+
+  while (index < codeText.length) {
+    const char = codeText[index]
+
+    if (/\s/.test(char)) {
+      const end = consumeWhile(codeText, index, value => /\s/.test(value))
+      tokens.push({ value: codeText.slice(index, end), type: '' })
+      index = end
+      continue
+    }
+
+    const tripleQuoteEnd = consumePythonTripleString(codeText, index, language)
+    if (tripleQuoteEnd > index) {
+      tokens.push({ value: codeText.slice(index, tripleQuoteEnd), type: 'string' })
+      index = tripleQuoteEnd
+      continue
+    }
+
+    if (language === 'python' && char === '#') {
+      const end = consumeUntilLineEnd(codeText, index)
+      tokens.push({ value: codeText.slice(index, end), type: 'comment' })
+      index = end
+      continue
+    }
+
+    if (language !== 'python' && codeText.startsWith('//', index)) {
+      const end = consumeUntilLineEnd(codeText, index)
+      tokens.push({ value: codeText.slice(index, end), type: 'comment' })
+      index = end
+      continue
+    }
+
+    if (language !== 'python' && codeText.startsWith('/*', index)) {
+      const end = codeText.indexOf('*/', index + 2)
+      const tokenEnd = end === -1 ? codeText.length : end + 2
+      tokens.push({ value: codeText.slice(index, tokenEnd), type: 'comment' })
+      index = tokenEnd
+      continue
+    }
+
+    if (isStringQuote(char, language)) {
+      const end = consumeQuotedString(codeText, index, char)
+      tokens.push({ value: codeText.slice(index, end), type: 'string' })
+      index = end
+      continue
+    }
+
+    if (/\d/.test(char)) {
+      const match = codeText.slice(index).match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?:[uUlLfFdD]*)/)
+      const value = match ? match[0] : char
+      tokens.push({ value, type: 'number' })
+      index += value.length
+      continue
+    }
+
+    if (char === '@') {
+      const end = consumeWhile(codeText, index + 1, value => /[\w.]/.test(value))
+      tokens.push({ value: codeText.slice(index, end), type: 'decorator' })
+      index = end
+      continue
+    }
+
+    if (isIdentifierStart(char)) {
+      const end = consumeWhile(codeText, index + 1, isIdentifierPart)
+      const value = codeText.slice(index, end)
+      const nextChar = getNextNonSpaceChar(codeText, end)
+      const type = getCodeTokenType(value, language, previousWord, nextChar)
+      tokens.push({ value, type })
+      previousWord = value
+      index = end
+      continue
+    }
+
+    const operatorMatch = codeText.slice(index).match(/^(?:=>|===|!==|==|!=|<=|>=|<<|>>|>>>|\+\+|--|&&|\|\||[+\-*/%=&|^~<>!?:]+)/)
+    if (operatorMatch) {
+      tokens.push({ value: operatorMatch[0], type: 'operator' })
+      index += operatorMatch[0].length
+      continue
+    }
+
+    tokens.push({
+      value: char,
+      type: /[{}()[\];,.]/.test(char) ? 'punctuation' : ''
+    })
+    index += 1
+  }
+
+  return tokens
+}
+
+function consumeWhile(text, start, predicate) {
+  let index = start
+  while (index < text.length && predicate(text[index])) {
+    index += 1
+  }
+  return index
+}
+
+function consumeUntilLineEnd(text, start) {
+  const end = text.indexOf('\n', start)
+  return end === -1 ? text.length : end
+}
+
+function consumePythonTripleString(text, start, language) {
+  if (language !== 'python') return start
+
+  const quote = text.slice(start, start + 3)
+  if (quote !== '"""' && quote !== "'''") return start
+
+  const end = text.indexOf(quote, start + 3)
+  return end === -1 ? text.length : end + 3
+}
+
+function consumeQuotedString(text, start, quote) {
+  let index = start + 1
+  while (index < text.length) {
+    if (text[index] === '\\') {
+      index += 2
+      continue
+    }
+    if (text[index] === quote) {
+      return index + 1
+    }
+    index += 1
+  }
+  return text.length
+}
+
+function isStringQuote(char, language) {
+  return char === '"' || char === "'" || (char === '`' && (language === 'javascript' || language === 'typescript'))
+}
+
+function isIdentifierStart(char) {
+  return /[A-Za-z_$]/.test(char)
+}
+
+function isIdentifierPart(char) {
+  return /[A-Za-z0-9_$]/.test(char)
+}
+
+function getNextNonSpaceChar(text, start) {
+  for (let index = start; index < text.length; index += 1) {
+    if (!/\s/.test(text[index])) {
+      return text[index]
+    }
+  }
+  return ''
+}
+
+function getCodeTokenType(value, language, previousWord, nextChar) {
+  if (codeConstantSets[language]?.has(value)) return 'constant'
+  if (codeKeywordSets[language]?.has(value)) return 'keyword'
+  if (codeBuiltinSets[language]?.has(value)) return 'builtin'
+  if (typeIntroducerWords.has(previousWord) || sharedTypeNames.has(value)) return 'type'
+  if (/^[A-Z][A-Za-z0-9_$]*$/.test(value)) return 'type'
+  if (nextChar === '(' && !codeKeywordSets[language]?.has(value)) return 'function'
+  return 'identifier'
+}
+
+function formatCodeToken(value, type) {
+  const escapedValue = escapeHtml(value)
+  return type ? `<span class="code-token token-${type}">${escapedValue}</span>` : escapedValue
+}
+
+function getSupportedCodeLanguage(language) {
+  const normalizedLanguage = normalizeMarkdownCodeLanguage(language)
+  if (supportedCodeLanguages.has(normalizedLanguage)) {
+    return normalizedLanguage
+  }
+
+  const starterLanguage = normalizeStarterLanguage(language)
+  return supportedCodeLanguages.has(starterLanguage) ? starterLanguage : ''
+}
+
+function getCodeLanguageClass(language) {
+  const normalizedLanguage = getSupportedCodeLanguage(language)
+  return normalizedLanguage ? `language-${normalizedLanguage}` : ''
 }
 
 function normalizeMarkdownCodeLanguage(language) {
@@ -808,8 +1144,19 @@ function getLanguageExtension() {
   }
 }
 
+function applyCodeTemplate(nextCode, { markPristine = false } = {}) {
+  isApplyingCodeTemplate.value = true
+  code.value = nextCode
+  if (markPristine) {
+    hasUserEditedCode.value = false
+  }
+  nextTick(() => {
+    isApplyingCodeTemplate.value = false
+  })
+}
+
 function onLanguageChange() {
-  code.value = getInitialCode(selectedLanguage.value)
+  applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
 }
 
 function onEditorReady(payload) {
@@ -837,6 +1184,7 @@ function getLanguageLabel(lang) {
     python: 'Python',
     cpp: 'C++',
     javascript: 'JavaScript',
+    typescript: 'TypeScript',
     c: 'C'
   }
   return labels[lang] || lang.toUpperCase()
@@ -851,6 +1199,72 @@ function resetCode() {
     code.value = getInitialCode(selectedLanguage.value)
     uiMessage.success('代码已重置')
   }).catch(() => {})
+}
+
+function normalizeRunResult(raw = {}) {
+  const rawStatus = String(raw.status || raw.result || '').trim()
+  const accepted = raw.accepted === true || isAcceptedStatus(rawStatus)
+  const output = firstDisplayText(
+    raw.output,
+    raw.stdout,
+    raw.stderr,
+    raw.compileError,
+    raw.error,
+    raw.message,
+    raw.details?.error
+  )
+  const status = accepted ? 'success' : 'error'
+
+  return {
+    ...raw,
+    status,
+    title: accepted ? '运行成功' : '运行失败',
+    rawStatus: rawStatus && rawStatus.toLowerCase() !== status ? rawStatus : '',
+    output,
+    emptyText: accepted ? '示例测试通过，暂无标准输出。' : '运行失败，服务未返回详细错误。',
+    runtime: formatRunMetric(raw.runtime || raw.runtimeMs, 'ms'),
+    memory: formatRunMetric(raw.memory || raw.memoryKb, 'KB')
+  }
+}
+
+function normalizeSubmitResult(raw = {}) {
+  const rawStatus = String(raw.status || '').trim()
+  const score = Number(raw.score)
+  const accepted = raw.accepted === true ||
+    isAcceptedStatus(rawStatus) ||
+    (Number.isFinite(score) && score >= 100)
+  const normalizedStatus = rawStatus.toLowerCase() === 'unavailable'
+    ? 'unavailable'
+    : accepted ? 'accepted' : 'rejected'
+
+  return {
+    ...raw,
+    accepted,
+    status: normalizedStatus,
+    score: Number.isFinite(score) ? score : raw.score
+  }
+}
+
+function isAcceptedStatus(status) {
+  return ['success', 'accepted', 'accept', 'ac', 'pass', 'passed', 'ok'].includes(
+    String(status || '').trim().toLowerCase()
+  )
+}
+
+function firstDisplayText(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined) continue
+    const text = String(value).trim()
+    if (text) return text
+  }
+  return ''
+}
+
+function formatRunMetric(value, unit) {
+  if (value === null || value === undefined || value === '') return ''
+  if (typeof value === 'string') return value
+  if (Number.isFinite(Number(value))) return `${value} ${unit}`
+  return ''
 }
 
 async function runCode() {
@@ -869,10 +1283,11 @@ async function runCode() {
     })
 
     if (response.success) {
-      runResult.value = response.data
+      const normalizedResult = normalizeRunResult(response.data)
+      runResult.value = normalizedResult
       activeTab.value = 'result'
 
-      if (response.data.status === 'success') {
+      if (normalizedResult.status === 'success') {
         uiMessage.success('代码运行成功')
       } else {
         uiMessage.error('代码运行失败')
@@ -915,13 +1330,14 @@ async function submitCode() {
     })
 
     if (response.success) {
-      submitResult.value = response.data
+      const normalizedResult = normalizeSubmitResult(response.data)
+      submitResult.value = normalizedResult
       showSubmitResult.value = true
-      recordTrainingReview(!!response.data.accepted)
+      recordTrainingReview(!!normalizedResult.accepted)
 
-      if (response.data.status === 'unavailable') {
+      if (normalizedResult.status === 'unavailable') {
         uiMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
-      } else if (response.data.accepted) {
+      } else if (normalizedResult.accepted) {
         markProblemCompleted(problem.value.id)
         uiMessage.success('答案通过')
       } else {
@@ -953,6 +1369,8 @@ function continuePractice() {
 }
 
 async function loadProblem() {
+  const version = loadProblemVersion + 1
+  loadProblemVersion = version
   const slug = typeof route.query.slug === 'string' ? route.query.slug.trim() : ''
   if (slug && !route.params.id) {
     try {
@@ -995,10 +1413,12 @@ async function loadProblem() {
     selectedLanguage.value = chooseInitialLanguage()
     
     // 设置默认代码模板
-    code.value = getInitialCode(selectedLanguage.value)
+    applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
     
     // 设置默认测试用例
     testInput.value = normalizeSampleTestCases(problem.value.sampleTestCases)
+
+    refillStarterCodeInBackground(response.data, version)
   } catch (error) {
     logger.error('加载题目失败:', error)
     uiMessage.error('加载题目失败')
@@ -1068,6 +1488,127 @@ function getRecommendationRequestId() {
 function getRecommendationSessionId() {
   const value = route.query.recommendationSessionId
   return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+async function refillStarterCodeInBackground(problemData, version) {
+  if (hasAnyProblemStarterCode(problemData)) {
+    return
+  }
+  if (!getProblemSlug(problemData)) {
+    return
+  }
+
+  isStarterCodeRefilling.value = true
+  try {
+    const refreshedProblem = await ensureStarterCodeForProblem(problemData)
+    if (version !== loadProblemVersion) {
+      return
+    }
+    if (!refreshedProblem || refreshedProblem === problemData) {
+      return
+    }
+
+    problem.value = refreshedProblem
+    if (!testInput.value) {
+      testInput.value = normalizeSampleTestCases(refreshedProblem.sampleTestCases)
+    }
+
+    if (!hasUserEditedCode.value) {
+      if (!getProblemStarterCode(selectedLanguage.value)) {
+        selectedLanguage.value = chooseInitialLanguage()
+      }
+      applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
+    }
+  } finally {
+    if (version === loadProblemVersion) {
+      isStarterCodeRefilling.value = false
+    }
+  }
+}
+
+async function ensureStarterCodeForProblem(problemData) {
+  if (hasAnyProblemStarterCode(problemData)) {
+    return problemData
+  }
+
+  const slug = getProblemSlug(problemData)
+  if (!slug) {
+    return problemData
+  }
+
+  const attemptKey = `${problemData?.id || route.params.id || ''}:${slug.toLowerCase()}`
+  if (starterRefillAttemptKeys.has(attemptKey)) {
+    return problemData
+  }
+  starterRefillAttemptKeys.add(attemptKey)
+
+  try {
+    await persistClawProblemBySlug(slug)
+
+    const refreshedProblem = await fetchRefilledProblem(problemData, slug)
+    if (refreshedProblem) {
+      if (hasAnyProblemStarterCode(refreshedProblem)) {
+        syncRouteWithRefilledProblem(refreshedProblem)
+        uiMessage.success('初始代码模板已补全')
+      } else {
+        uiMessage.warning('暂未获取到该题的初始代码模板')
+      }
+      return refreshedProblem
+    }
+
+    uiMessage.warning('暂未获取到该题的初始代码模板')
+  } catch (error) {
+    logger.warn('补全 LeetCode 初始代码模板失败:', error)
+    uiMessage.warning(error.friendlyMessage || error.message || '暂未获取到该题的初始代码模板')
+  }
+
+  return problemData
+}
+
+async function fetchRefilledProblem(problemData, slug) {
+  let fallbackProblem = null
+  const currentProblemId = problemData?.id || route.params.id
+  if (currentProblemId) {
+    const response = await api.getLeetCodeProblem(currentProblemId)
+    if (response?.success && response.data) {
+      fallbackProblem = response.data
+      if (hasAnyProblemStarterCode(response.data)) {
+        return response.data
+      }
+    }
+  }
+
+  const response = await api.getLeetCodeProblemBySlug(slug)
+  if (response?.success && response.data) {
+    return response.data
+  }
+
+  return fallbackProblem
+}
+
+function syncRouteWithRefilledProblem(problemData) {
+  if (!problemData?.id || !route.params.id || String(problemData.id) === String(route.params.id)) {
+    return
+  }
+
+  router.replace({
+    path: `/student/leetcode-practice/${problemData.id}`,
+    query: { ...route.query }
+  })
+}
+
+function hasAnyProblemStarterCode(problemData) {
+  const starterCode = problemData?.starterCode
+  if (starterCode && typeof starterCode === 'object') {
+    const hasStarterCode = Object.values(starterCode).some(value => String(value || '').trim())
+    if (hasStarterCode) return true
+  }
+
+  const snippets = Array.isArray(problemData?.codeSnippets) ? problemData.codeSnippets : []
+  return snippets.some(snippet =>
+    normalizeStarterLanguage(snippet?.langSlug || snippet?.lang) &&
+    String(snippet?.code || '').trim()
+  )
 }
 
 function getTrainingExperimentId() {
@@ -1265,6 +1806,87 @@ watch(() => route.params.id, () => {
   white-space: pre;
 }
 
+.code-editor {
+  border-color: #1e293b;
+  border-radius: 8px;
+  background: #111827;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 28px rgba(15, 23, 42, 0.10);
+}
+
+.code-editor :deep(.cm-editor) {
+  height: 100%;
+}
+
+.code-editor :deep(.cm-scroller) {
+  overflow: auto;
+}
+
+.code-editor :deep(.cm-focused) {
+  outline: none;
+}
+
+.solution-code-block {
+  border: 1px solid #263244;
+  background: #111827;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  tab-size: 4;
+}
+
+.solution-code-block code {
+  display: block;
+  min-width: max-content;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  white-space: pre;
+}
+
+:deep(.code-token.token-keyword) {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+:deep(.code-token.token-identifier) {
+  color: #dbeafe;
+}
+
+:deep(.code-token.token-type) {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+:deep(.code-token.token-function) {
+  color: #7dd3fc;
+}
+
+:deep(.code-token.token-builtin) {
+  color: #60a5fa;
+}
+
+:deep(.code-token.token-constant),
+:deep(.code-token.token-number) {
+  color: #fca5a5;
+}
+
+:deep(.code-token.token-string) {
+  color: #86efac;
+}
+
+:deep(.code-token.token-comment) {
+  color: #64748b;
+  font-style: italic;
+}
+
+:deep(.code-token.token-decorator) {
+  color: #f472b6;
+}
+
+:deep(.code-token.token-operator) {
+  color: #67e8f9;
+}
+
+:deep(.code-token.token-punctuation) {
+  color: #94a3b8;
+}
+
 :deep(.md-code-block.language-python .md-code-header span::before) {
   background: #3776ab;
 }
@@ -1291,6 +1913,21 @@ watch(() => route.params.id, () => {
 :deep(.solution-card .md-code-block:last-child),
 :deep(.solution-markdown .md-code-block:last-child) {
   margin-bottom: 0;
+}
+
+.starter-template-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(226, 232, 240, 0.35);
+  border-top-color: #60a5fa;
+  border-radius: 999px;
+  animation: starter-template-spin 0.8s linear infinite;
+}
+
+@keyframes starter-template-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
 
