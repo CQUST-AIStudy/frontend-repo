@@ -315,9 +315,8 @@ function buildDefaultSpiderUrl() {
 const envSpiderUrl = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_SPIDER_URL)
   ? process.env.VUE_APP_SPIDER_URL
   : ''
-const spiderUrl = ref(normalizeUrl(envSpiderUrl || '/spider'))
+const spiderUrl = ref(normalizeUrl(envSpiderUrl || buildDefaultSpiderUrl()))
 const spiderHealthError = ref('')
-const spiderProbeEnabled = !!envSpiderUrl
 
 function buildSpiderCandidates() {
   const candidates = []
@@ -344,6 +343,12 @@ function buildSpiderCandidates() {
 function spiderApi(path) {
   return `${spiderUrl.value}${path}`
 }
+
+const spiderRequestConfig = (options = {}) => ({
+  withCredentials: false,
+  ...options
+})
+
 const userStore = useUserStore()
 
 const selectedClassName = computed(() => userStore.selectedClass?.name || '')
@@ -412,15 +417,10 @@ const plannedCredentialSource = computed(() => {
 })
 
 async function probeSpiderHealth() {
-  if (!spiderProbeEnabled) {
-    spiderAlive.value = false
-    spiderHealthError.value = 'spider disabled'
-    return false
-  }
   spiderHealthError.value = ''
   for (const base of buildSpiderCandidates()) {
     try {
-      const r = await axios.get(`${base}/health`, { timeout: 3000 })
+      const r = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
       if (r.status === 200) {
         spiderAlive.value = true
         spiderUrl.value = base
@@ -467,7 +467,7 @@ async function loadCooldown() {
     return
   }
   try {
-    const r = await axios.get(spiderApi(`/cooldown/${encodeURIComponent(keyword)}`), { timeout: 5000 })
+    const r = await axios.get(spiderApi(`/cooldown/${encodeURIComponent(keyword)}`), spiderRequestConfig({ timeout: 5000 }))
     cooldownInfo.value = r.data
   } catch { /* spider not running */ }
 }
@@ -478,7 +478,7 @@ async function loadTaskHistory() {
     return
   }
   try {
-    const r = await axios.get(spiderApi('/tasks'), { timeout: 5000 })
+    const r = await axios.get(spiderApi('/tasks'), spiderRequestConfig({ timeout: 5000 }))
     taskHistory.value = r.data || []
   } catch { /* spider not running */ }
 }
@@ -502,7 +502,14 @@ function clearTempCredential() {
 
 async function triggerSync(mode) {
   const keyword = syncKeyword.value.trim() || currentKeyword.value
-  if (!selectedClassId.value || !keyword) return
+  if (!selectedClassId.value) {
+    uiMessage.warning('请先选择当前教学班')
+    return
+  }
+  if (!keyword) {
+    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+    return
+  }
   if (!keyword || !String(keyword).trim()) {
     uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
     return
@@ -535,12 +542,29 @@ async function triggerSync(mode) {
     const username = tempCredentialSubmitted.value ? draftUsername : ''
     const password = tempCredentialSubmitted.value ? draftPassword : ''
 
-    const res = await triggerPtaSync(selectedClassId.value, {
+    const payload = {
       ptaKeyword: keyword,
       mode,
       force: forceMode.value,
       ...(username ? { ptaUsername: username, ptaPassword: password } : {})
-    })
+    }
+    let res
+    try {
+      res = await triggerPtaSync(selectedClassId.value, payload)
+    } catch (backendError) {
+      if (!spiderAlive.value) {
+        throw backendError
+      }
+      uiMessage.warning('后端同步接口暂不可用，已改为直接提交到本地爬虫')
+      res = await axios.post(spiderApi('/crawl'), {
+        keyword,
+        class_id: selectedClassId.value,
+        mode,
+        force: forceMode.value,
+        credential_source: plannedCredentialSource.value,
+        ...(username ? { username, password } : {})
+      }, spiderRequestConfig({ timeout: 30000 }))
+    }
     const r = res?.data || res
 
     // 冷却拦截
@@ -582,7 +606,7 @@ function pollTaskStatus(taskId) {
   if (pollTimer) clearInterval(pollTimer)
   pollTimer = setInterval(async () => {
     try {
-      const r = await axios.get(spiderApi(`/status/${taskId}`), { timeout: 5000 })
+      const r = await axios.get(spiderApi(`/status/${taskId}`), spiderRequestConfig({ timeout: 5000 }))
       currentTask.value = r.data
       if (r.data.status === 'SUCCESS' || r.data.status === 'FAILED') {
         clearInterval(pollTimer)

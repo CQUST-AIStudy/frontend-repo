@@ -894,7 +894,7 @@ void Del_negative(SqList* L)
       await delay(800)
       return { success: true, id: Date.now() }
     }
-    return apiClient.post('/api/experiments', data)
+    return apiClient.post('/api/teacher/experiments', data)
   },
 
   async updateExperiment(id, data) {
