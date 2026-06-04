@@ -29,9 +29,15 @@
           <el-card shadow="hover" class="stat-card feedback-card [text-align:center] [border-radius:16px] [border:0.5px_solid_rgba(0,_0,_0,_0.06)] [box-shadow:0_1px_3px_rgba(0,0,0,0.04)] [transition:all_0.25s] hover:[transform:translateY(-2px)] hover:[box-shadow:0_6px_16px_rgba(0,0,0,0.08)] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f9f9f9,_#f5f5f7)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-label [font-size:13px] [color:#6e6e73] [margin-bottom:8px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">用户反馈</div>
             <div class="stat-value [font-size:28px] [font-weight:700] [color:#1d1d1f] [font-size:24px] [font-weight:bold] [color:#007aff] [margin-bottom:5px]">
-              <span class="[color:#67c23a]">👍 {{ feedbackStats.thumbsUp }}</span>
+              <span class="inline-flex items-center justify-center gap-1 [color:#67c23a]">
+                <LucideIcon name="thumbs-up" :size="20" />
+                {{ feedbackStats.thumbsUp }}
+              </span>
               <span class="[margin:0_8px] [color:#dcdfe6]">/</span>
-              <span class="[color:#f56c6c]">👎 {{ feedbackStats.thumbsDown }}</span>
+              <span class="inline-flex items-center justify-center gap-1 [color:#f56c6c]">
+                <LucideIcon name="thumbs-down" :size="20" />
+                {{ feedbackStats.thumbsDown }}
+              </span>
             </div>
             <div class="stat-desc [font-size:12px] [color:#aeaeb2] [margin-top:6px]">全{{ feedbackStats.total }} 次问答</div>
           </el-card>
@@ -49,7 +55,12 @@
       <el-row :gutter="16" class="[padding:0_20px_16px]">
         <el-col :span="14">
           <el-card shadow="hover">
-            <template #header><span>🔥 问题热榜 TOP 20</span></template>
+            <template #header>
+              <span class="inline-flex items-center gap-2">
+                <LucideIcon name="flame" class="text-[#ff9500]" :size="18" />
+                问题热榜 TOP 20
+              </span>
+            </template>
             <el-table :data="hotQuestions" stripe size="small" max-height="360">
               <el-table-column type="index" label="#" width="50" />
               <el-table-column prop="query" label="问题" show-overflow-tooltip />
@@ -59,9 +70,14 @@
         </el-col>
         <el-col :span="10">
           <el-card shadow="hover">
-            <template #header><span>⚠️ 资料缺口提示</span></template>
+            <template #header>
+              <span class="inline-flex items-center gap-2">
+                <LucideIcon name="alert-triangle" class="text-[#ff9500]" :size="18" />
+                资料缺口提示
+              </span>
+            </template>
             <div v-if="resourceGaps.length === 0" class="[text-align:center] [color:#aeaeb2] [padding:40px_0]">
-              暂无资料缺口，知识库覆盖良好 🎉
+              暂无资料缺口，知识库覆盖良好
             </div>
             <div v-else class="gap-list [max-height:320px] [overflow-y:auto]">
               <div v-for="(gap, idx) in resourceGaps" :key="idx" class="gap-item [padding:10px_0] [border-bottom:1px_solid_#f5f5f7] last:[border-bottom:none]">
@@ -80,7 +96,12 @@
       <el-row :gutter="16" class="[padding:0_20px_16px]">
         <el-col :span="24">
           <el-card shadow="hover">
-            <template #header><span>📚 文档引用频次</span></template>
+            <template #header>
+              <span class="inline-flex items-center gap-2">
+                <LucideIcon name="library" class="text-[#1677ff]" :size="18" />
+                文档引用频次
+              </span>
+            </template>
             <el-table :data="citationList" stripe size="small" max-height="300">
               <el-table-column type="index" label="#" width="50" />
               <el-table-column prop="docName" label="文档名称" show-overflow-tooltip />
@@ -106,6 +127,7 @@
 import logger from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
+import LucideIcon from '../../components/LucideIcon.vue'
 import { ElMessage } from 'element-plus'
 import {
   getCourseSpaces,

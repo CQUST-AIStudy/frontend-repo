@@ -25,7 +25,7 @@
 
     <div v-else-if="error" class="flex justify-center items-center min-h-[400px] w-full">
       <div class="flex flex-col items-center gap-4">
-        <div class="text-5xl">⚠️</div>
+        <LucideIcon name="alert-triangle" class="text-[#ff9500]" :size="48" />
         <p class="text-[15px] text-[#6e6e73]">{{ error }}</p>
         <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="loadClassData">重试</button>
       </div>
@@ -102,7 +102,7 @@
         </div>
 
         <div v-if="!studentList.length" class="py-10 flex flex-col items-center justify-center">
-          <div class="text-5xl mb-3">📋</div>
+          <LucideIcon name="clipboard" class="mb-3 text-[#c6ccd6]" :size="46" />
           <p class="text-[15px] text-[#6e6e73]">暂无学生数据</p>
         </div>
 
@@ -132,7 +132,7 @@
 
     <div v-else class="flex justify-center items-center min-h-[400px] w-full">
       <div class="flex flex-col items-center gap-4">
-        <div class="text-5xl">📭</div>
+        <LucideIcon name="inbox" class="text-[#c6ccd6]" :size="48" />
         <p class="text-[15px] text-[#6e6e73]">未找到班级数据</p>
         <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回班级列表</button>
       </div>
@@ -147,6 +147,7 @@ import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import api from '../../api'
 import PageHeader from '../../components/PageHeader.vue'
+import LucideIcon from '../../components/LucideIcon.vue'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()

@@ -2,7 +2,9 @@
   <div class="min-h-full">
     <!-- Hero -->
     <div class="flex items-center gap-4 p-7 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-      <div class="text-4xl">🌐</div>
+      <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
+        <LucideIcon name="globe" :size="26" />
+      </div>
       <div>
         <h1 class="m-0 mb-1 text-[22px] font-semibold text-[#1d1d1f]">双语对照阅读</h1>
         <p class="m-0 text-sm text-[#6e6e73]">高质量翻译，左右对照查看文档内容</p>
@@ -39,7 +41,7 @@
 
     <!-- Error Alert -->
     <div v-if="error" class="flex items-start gap-3 p-4 mb-5 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)]">
-      <span class="text-[#ff3b30] text-lg shrink-0">⚠</span>
+      <LucideIcon name="alert-triangle" class="shrink-0 text-[#ff3b30]" :size="19" />
       <div class="flex-1 text-sm text-[#ff3b30]">{{ error }}</div>
       <button @click="error = ''" class="text-[#ff3b30]/60 hover:text-[#ff3b30] text-lg cursor-pointer bg-transparent border-none">×</button>
     </div>
@@ -65,7 +67,7 @@
 
     <!-- Empty State -->
     <div v-if="!loading && segments.length === 0 && !error" class="flex flex-col items-center justify-center py-20 text-center">
-      <div class="text-5xl mb-4">📄</div>
+      <LucideIcon name="file" class="mb-4 text-[#c6ccd6]" :size="48" />
       <p class="text-sm text-[#aeaeb2]">选择文档后点击「开始翻译」</p>
     </div>
   </div>
@@ -77,6 +79,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getDocuments, translateDocument } from '../../api/tap'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
+import LucideIcon from '../../components/LucideIcon.vue'
 
 const route = useRoute()
 const docId = ref(route.query.docId || '')

@@ -3,7 +3,9 @@
     <!-- Hero -->
     <div class="bg-white rounded-2xl py-7 px-8 mb-5 border border-black/[0.06] flex items-center gap-4">
       <div class="flex items-center gap-4">
-        <div class="text-4xl">📝</div>
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
+          <LucideIcon name="clipboard-check" :size="26" />
+        </div>
         <div>
           <h1 class="m-0 mb-1 text-[22px] font-normal text-[#1d1d1f]">AI 批改中心</h1>
           <p class="m-0 text-sm text-[#6e6e73]">上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
@@ -163,7 +165,7 @@
 
         <!-- Empty state -->
         <div v-else class="flex flex-col items-center justify-center py-16">
-          <div class="text-5xl mb-3">📋</div>
+          <LucideIcon name="clipboard" class="mb-3 text-[#c6ccd6]" :size="46" />
           <p class="text-sm text-[#aeaeb2]">暂无批改任务</p>
         </div>
       </div>
@@ -177,6 +179,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Refresh } from '@element-plus/icons-vue'
 import { getRubrics, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
+import LucideIcon from '@/components/LucideIcon.vue'
 
 const rubrics = ref([])
 const tasks = ref([])

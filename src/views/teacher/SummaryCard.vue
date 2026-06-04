@@ -3,7 +3,9 @@
     <!-- 顶部 -->
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6 flex items-center">
       <div class="flex items-center gap-4">
-        <div class="text-4xl">📖</div>
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
+          <LucideIcon name="book-open" :size="26" />
+        </div>
         <div>
           <h1 class="m-0 mb-1 text-[22px] font-normal text-[#1d1d1f]">AI 精读卡片</h1>
           <p class="m-0 text-sm text-[#6e6e73]">支持 arXiv、DOI、粘贴文本、本地文档，一键生成结构化精读</p>
@@ -21,7 +23,7 @@
             : 'border-transparent text-[#6e6e73] hover:text-[#1d1d1f]'
         ]"
         @click="activeTab = t.key">
-        <span class="text-base">{{ t.icon }}</span>
+        <LucideIcon :name="t.icon" :size="17" />
         <span>{{ t.label }}</span>
       </div>
     </div>
@@ -112,6 +114,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Loading } from '@element-plus/icons-vue'
 import { getDocuments, summarizeArxiv, summarizeDoi, summarizeFreeText, summarizeDocument } from '../../api/tap'
+import LucideIcon from '../../components/LucideIcon.vue'
 import ResultBlock from './components/ResultBlock.vue'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
@@ -122,10 +125,10 @@ const activeTab = ref(queryDocId ? 'doc' : 'arxiv')
 const error = ref('')
 
 const tabs = [
-  { key: 'arxiv', label: 'arXiv 论文', icon: '📄' },
-  { key: 'doi', label: 'DOI 查询', icon: '🔗' },
-  { key: 'freetext', label: '粘贴文本', icon: '📝' },
-  { key: 'doc', label: '文档精读', icon: '📁' },
+  { key: 'arxiv', label: 'arXiv 论文', icon: 'file' },
+  { key: 'doi', label: 'DOI 查询', icon: 'link' },
+  { key: 'freetext', label: '粘贴文本', icon: 'pen' },
+  { key: 'doc', label: '文档精读', icon: 'folder' },
 ]
 const validTabs = new Set(tabs.map((tab) => tab.key))
 

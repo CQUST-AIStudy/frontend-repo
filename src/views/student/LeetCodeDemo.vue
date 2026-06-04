@@ -3,7 +3,10 @@
     <page-header title="LeetCode功能演示" description="测试代码提交和AI批改功能" />
     
     <el-card class="demo-card [margin-bottom:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
-      <h3>🧪 功能测试</h3>
+      <h3 class="[display:flex] [align-items:center] [gap:8px]">
+        <LucideIcon name="clipboard-check" :size="20" />
+        功能测试
+      </h3>
       
       <el-space direction="vertical" size="large" class="[width:100%]">
         <el-button @click="testAIFeedback" type="primary" size="large">
@@ -18,7 +21,10 @@
 
     <!-- AI反馈演示 -->
     <el-card v-if="showDemo" class="feedback-demo [margin-top:20px] [&_h3]:[margin-bottom:20px] [&_h3]:[color:#333]">
-      <h3>🤖 AI批改反馈演示</h3>
+      <h3 class="[display:flex] [align-items:center] [gap:8px]">
+        <LucideIcon name="bot" :size="20" />
+        AI批改反馈演示
+      </h3>
       
       <div class="demo-result [max-height:70vh] [overflow-y:auto]">
         <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
@@ -71,29 +77,30 @@ import { Check } from '@element-plus/icons-vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import PageHeader from '@/components/PageHeader.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { testAIFeedback as getTestFeedback } from '@/utils/testLeetCode'
 
 const showDemo = ref(false)
 const testing = ref(false)
 
-const mockFeedback = `## 🤖 AI代码评测报告
+const mockFeedback = `## AI代码评测报告
 
-### 🎉 恭喜通过！
+### 恭喜通过！
 你的解答**完全正确**，所有测试用例都通过了！
 
-### 📊 代码质量分析
-- ✅**正确性*: 完美 (3/3 测试用例通过)
-- 🚀 **执行效率**: 良好 (平均 120ms)
-- 📝 **代码风格**: 良好 ⭐⭐
-- 🧠 **算法复杂度*: O(n²) - 嵌套循环
+### 代码质量分析
+- **正确性*: 完美 (3/3 测试用例通过)
+- **执行效率**: 良好 (平均 120ms)
+- **代码风格**: 良好
+- **算法复杂度*: O(n²) - 嵌套循环
 
-### 💡 个性化建议
-🌟 **进阶挑战**:
+### 个性化建议
+**进阶挑战**:
 - 尝试优化算法的时间复杂度
 - 考虑使用HashMap来实现O(n)时间复杂度
 - 添加注释提高代码可读性
 
-### 📚 推荐学习
+### 推荐学习
 继续挑战相关题目:
 - 尝试同类型的中等难度题目
 - 学习更高效的算法和数据结构`

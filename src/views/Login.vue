@@ -208,7 +208,17 @@
               登录
             </button>
 
-            <div class="mt-[18px] flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[#5f6f83]">
+            <div class="mt-[16px] flex items-center gap-2 text-[14px] leading-[1.7] text-[#5f6f83]">
+              <input
+                id="remember-password"
+                v-model="rememberPassword"
+                type="checkbox"
+                class="h-[18px] w-[18px] rounded border-[#dce4ee] text-[#087cff] accent-[#087cff]"
+              />
+              <label for="remember-password">记住密码</label>
+            </div>
+
+            <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[#5f6f83]">
               <input
                 id="login-agreement"
                 v-model="agreementAccepted"
@@ -294,7 +304,7 @@
           </form>
 
           <p v-if="isDevelopment" class="mt-[18px] border-t border-[rgba(129,155,181,0.14)] pt-3.5 text-center text-[12px] text-[#8a9aab]">
-            开发环境已自动填充默认测试账号。
+            开发环境已自动填充默认测试用户名，可勾选记住密码保存本次输入。
           </p>
         </div>
       </section>
@@ -315,8 +325,11 @@ const userStore = useUserStore()
 
 const activeTab = ref('login')
 const loading = ref(false)
-const selectedRole = ref('teacher')
+const REMEMBERED_LOGIN_KEY = 'rememberedLogin'
+const rememberedLogin = loadRememberedLogin()
+const selectedRole = ref(rememberedLogin?.role || 'teacher')
 const agreementAccepted = ref(true)
+const rememberPassword = ref(Boolean(rememberedLogin?.rememberPassword))
 const isDevelopment = process.env.NODE_ENV === 'development'
 const showLoginPassword = ref(false)
 const showRegisterPassword = ref(false)
@@ -355,8 +368,8 @@ const defaultAccounts = isDevelopment
   : {}
 
 const loginForm = reactive({
-  username: defaultAccounts.teacher?.username || '',
-  password: defaultAccounts.teacher?.password || ''
+  username: rememberedLogin?.username || defaultAccounts[selectedRole.value]?.username || '',
+  password: rememberedLogin?.password || ''
 })
 
 const registerForm = reactive({
@@ -439,6 +452,28 @@ function showToast(type, message) {
   }, 2600)
 }
 
+function loadRememberedLogin() {
+  try {
+    const saved = localStorage.getItem(REMEMBERED_LOGIN_KEY)
+    return saved ? JSON.parse(saved) : null
+  } catch {
+    return null
+  }
+}
+
+function persistRememberedLogin() {
+  if (!rememberPassword.value) {
+    localStorage.removeItem(REMEMBERED_LOGIN_KEY)
+    return
+  }
+  localStorage.setItem(REMEMBERED_LOGIN_KEY, JSON.stringify({
+    rememberPassword: true,
+    role: selectedRole.value,
+    username: loginForm.username,
+    password: loginForm.password
+  }))
+}
+
 function setActiveTab(tab) {
   activeTab.value = tab
 }
@@ -457,10 +492,20 @@ function clearRegisterFieldError(field) {
 
 watch(selectedRole, (role) => {
   if (!isDevelopment) return
+  const remembered = loadRememberedLogin()
+  if (remembered?.rememberPassword && remembered.role === role) {
+    loginForm.username = remembered.username || ''
+    loginForm.password = remembered.password || ''
+    rememberPassword.value = true
+    clearLoginFieldError('username')
+    clearLoginFieldError('password')
+    return
+  }
   const account = defaultAccounts[role]
   if (!account) return
   loginForm.username = account.username
-  loginForm.password = account.password
+  loginForm.password = ''
+  rememberPassword.value = false
   clearLoginFieldError('username')
   clearLoginFieldError('password')
 })
@@ -542,6 +587,7 @@ async function handleLogin() {
       return
     }
 
+    persistRememberedLogin()
     const userInfo = result.user || result.userInfo
     const targetRole = userInfo?.role || selectedRole.value
     if (targetRole === 'teacher') {

@@ -16,6 +16,7 @@ import {
 import axios from 'axios'
 import {
   clearAuthStorage,
+  getTapToken,
   setSessionToken,
   setTapToken,
   setTapUser,
@@ -41,7 +42,16 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  config => config,
+  config => {
+    const tapToken = getTapToken()
+    if (tapToken) {
+      config.headers = config.headers || {}
+      if (!config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${tapToken}`
+      }
+    }
+    return config
+  },
   error => {
     return Promise.reject(createFriendlyError(error, '请求发送失败，请稍后重试'));
   }
@@ -54,8 +64,9 @@ apiClient.interceptors.response.use(
   error => {
     const requestUrl = error?.config?.url || ''
     const isLoginRequest = requestUrl.includes('/api/login')
+    const isTapLoginRequest = requestUrl.includes('/api/auth/login')
     const isSessionExchangeRequest = requestUrl.includes('/api/auth/session')
-    const isAuthRequest = isLoginRequest || isSessionExchangeRequest
+    const isAuthRequest = isLoginRequest || isTapLoginRequest || isSessionExchangeRequest
     const fallbackMessage = error?.response?.status === 401 && isLoginRequest
       ? '用户名或密码不正确，请检查后重试'
       : '请求失败，请稍后重试'
@@ -301,7 +312,7 @@ export default {
             logger.error('保存用户信息失败:', e);
           }
 
-          this.tryTapLogin();
+          await this.tryTapLogin(normalizedUsername, password);
         } else {
           logger.warn('登录响应显示失败:', response.message);
         }
@@ -323,21 +334,23 @@ export default {
     }
   },
 
-  async tryTapLogin() {
+  async tryTapLogin(username, password) {
     try {
-      const res = await apiClient.post('/api/auth/session', {});
+      const res = username && password
+        ? await apiClient.post('/api/auth/login', { username, password })
+        : await apiClient.post('/api/auth/session', {});
       const data = res?.data ?? res;
       if (data?.accessToken) {
         setTapToken(data.accessToken);
         setTapUser({
           userId: data.userId,
           role: data.role,
-          username: null
+          username: username || null
         });
-        logger.debug('TAP session 换票成功');
+        logger.debug(username && password ? 'TAP 账号登录成功' : 'TAP session 换票成功');
       }
     } catch (e) {
-      logger.warn('TAP session 换票失败（可忽略）', e.message);
+      logger.warn(username && password ? 'TAP 账号登录失败（可忽略）' : 'TAP session 换票失败（可忽略）', e.message);
     }
   },
 

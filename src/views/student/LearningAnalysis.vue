@@ -63,7 +63,10 @@
         <el-card class="chart-card [margin-top:20px] [margin-bottom:20px] [height:400px]" v-if="classData && classData.experiments?.length">
           <template #header>
             <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-              <span>📊 班级对比分析</span>
+              <span class="[display:inline-flex] [align-items:center] [gap:8px]">
+                <LucideIcon name="bar-chart" :size="18" />
+                班级对比分析
+              </span>
               <div class="class-summary-chips [display:flex] [gap:8px]" v-if="classData.summary">
                 <span class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" :class="avgDiffClass">
                   {{ avgDiffText }}
@@ -111,10 +114,15 @@
           <div class="ai-analysis-content">
             <!-- 学习特征标签 -->
             <div class="section-block [margin-bottom:24px]">
-              <h4>🏷️学习特征</h4>
+              <h4 class="[display:flex] [align-items:center] [gap:8px]">
+                <LucideIcon name="tags" :size="18" />
+                学习特征
+              </h4>
               <div class="patterns-row [display:flex] [gap:12px] [flex-wrap:wrap]">
                 <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card [display:flex] [gap:10px] [padding:12px_16px] [border-radius:12px] [border:1px_solid_#e8eaed] [flex:1] [min-width:200px] [&.pat-good]:[background:#e6f4ea] [&.pat-good]:[border-color:#ceead6] [&.pat-warn]:[background:#fef7e0] [&.pat-warn]:[border-color:#feefc3] [&.pat-bad]:[background:#fce8e6] [&.pat-bad]:[border-color:#f5c6c2]" :class="patternClass(p.tag)">
-                  <span class="pattern-emoji [font-size:24px]">{{ patternEmoji(p.tag) }}</span>
+                  <span class="pattern-emoji [display:inline-flex] [align-items:center] [justify-content:center] [width:28px] [height:28px] [color:#1a73e8]">
+                    <LucideIcon :name="patternIcon(p.tag)" :size="22" />
+                  </span>
                   <div>
                     <div class="pattern-name [font-weight:500] [font-size:14px] [color:#202124]">{{ p.tag }}</div>
                     <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
@@ -125,11 +133,17 @@
 
             <!-- 能力趋势 -->
             <div class="section-block [margin-bottom:24px]">
-              <h4>📊 各维度能力水平</h4>
+              <h4 class="[display:flex] [align-items:center] [gap:8px]">
+                <LucideIcon name="bar-chart" :size="18" />
+                各维度能力水平
+              </h4>
               <div class="ability-list [display:flex] [flex-direction:column] [gap:16px]">
                 <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item [padding:12px_16px] [border:1px_solid_#e8eaed] [border-radius:12px]">
                   <div class="ability-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
-                    <span class="ability-name [font-weight:500] [font-size:14px] [color:#202124]">{{ dimEmoji(dim.dimension) }} {{ dim.dimension }}</span>
+                    <span class="ability-name [display:flex] [align-items:center] [gap:6px] [font-weight:500] [font-size:14px] [color:#202124]">
+                      <LucideIcon :name="dimIcon(dim.dimension)" :size="16" />
+                      {{ dim.dimension }}
+                    </span>
                     <div class="ability-score [display:flex] [align-items:center] [gap:8px] [font-weight:500]">
                       <span>{{ dim.avgMastery }}分</span>
                       <el-tag size="small" :type="dim.level === 'good' ? 'success' : dim.level === 'medium' ? 'warning' : 'danger'">
@@ -145,7 +159,10 @@
 
             <!-- 薄弱点-->
             <div class="section-block [margin-bottom:24px]" v-if="profileData.weaknesses?.length">
-              <h4>⚠️ 重点提升方向</h4>
+              <h4 class="[display:flex] [align-items:center] [gap:8px]">
+                <LucideIcon name="alert-triangle" :size="18" />
+                重点提升方向
+              </h4>
               <div class="improvement-items [display:flex] [flex-direction:column] [gap:10px]">
                 <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item [display:flex] [align-items:center] [gap:8px] [font-size:14px] [color:#5f6368]">
                   <el-icon class="improvement-icon [color:#e37400] [font-size:18px] [&.high-priority]:[color:#d93025]" :class="i === 0 ? 'high-priority' : ''"><Warning /></el-icon>
@@ -158,7 +175,14 @@
 
         <!-- 学习建议 -->
         <el-card class="[margin-top:20px]">
-          <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>📚 学习方法推荐</span></div></template>
+          <template #header>
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+              <span class="[display:inline-flex] [align-items:center] [gap:8px]">
+                <LucideIcon name="book-open" :size="18" />
+                学习方法推荐
+              </span>
+            </div>
+          </template>
           <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
             <el-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
               <div class="method-header [display:flex] [flex-direction:column] [align-items:center] [gap:8px] [margin-bottom:8px]">
@@ -181,6 +205,7 @@ import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning } from 
 import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import LoadingState from '../../components/LoadingState.vue'
+import LucideIcon from '../../components/LucideIcon.vue'
 import * as echarts from 'echarts'
 import axios from 'axios'
 import { getStudentAnalyticsOverview } from '../../api/tap'
@@ -266,13 +291,13 @@ function patternClass(tag) {
   if (tag === '高波动型') return 'pat-warn'
   return 'pat-bad'
 }
-function patternEmoji(tag) {
-  const map = { '稳定进步': '📈', '表现均衡': '⚖️', '高波动型': '🎢', '高重做型': '🔄', '编码基础薄弱': '🔧' }
-  return map[tag] || '📋'
+function patternIcon(tag) {
+  const map = { '稳定进步': 'trend', '表现均衡': 'scale', '高波动型': 'bar-chart', '高重做型': 'refresh', '编码基础薄弱': 'wrench' }
+  return map[tag] || 'clipboard'
 }
-function dimEmoji(dim) {
-  const map = { '线性表': '📏', '栈与队列': '📚', '树': '🌲', '图': '🕸️', '哈希': '#️⃣', '综合': '🎯' }
-  return map[dim] || '📦'
+function dimIcon(dim) {
+  const map = { '线性表': 'ruler', '栈与队列': 'library', '树': 'tree', '图': 'network', '哈希': 'hash', '综合': 'target' }
+  return map[dim] || 'package'
 }
 
 function resolveCurrentStudentId() {

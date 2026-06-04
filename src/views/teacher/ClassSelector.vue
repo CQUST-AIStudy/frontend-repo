@@ -5,12 +5,6 @@
         <div class="brand-mark">AI</div>
         <span>智能教辅平台 · 教师工作台</span>
       </div>
-      <div class="assistant-block">
-        <span>AI TEACHING ASSISTANT</span>
-        <div class="assistant-logo" aria-hidden="true">
-          <span></span>
-        </div>
-      </div>
     </div>
 
     <div class="bg-orb bg-orb-left" aria-hidden="true"></div>
@@ -228,8 +222,7 @@ function goCreateClass() {
   backdrop-filter: blur(18px);
 }
 
-.brand-block,
-.assistant-block {
+.brand-block {
   display: flex;
   align-items: center;
 }
@@ -253,54 +246,6 @@ function goCreateClass() {
   font-size: 16px;
   font-weight: 800;
   background: rgba(21, 76, 137, 0.44);
-}
-
-.assistant-block {
-  gap: 26px;
-  color: rgba(222, 235, 255, 0.65);
-  font-size: 15px;
-  letter-spacing: 0.18em;
-}
-
-.assistant-logo {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background:
-    linear-gradient(#061b34, #061b34) padding-box,
-    linear-gradient(145deg, #78e1ff, #4f7cff, #ff9bcd) border-box;
-  border: 3px solid transparent;
-  box-shadow: 0 14px 34px rgba(3, 17, 36, 0.35);
-}
-
-.assistant-logo span {
-  width: 23px;
-  height: 23px;
-  display: block;
-  position: relative;
-}
-
-.assistant-logo span::before,
-.assistant-logo span::after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 22px;
-  border-radius: 999px;
-  background: white;
-  top: 0;
-}
-
-.assistant-logo span::before {
-  left: 4px;
-  transform: rotate(-42deg);
-}
-
-.assistant-logo span::after {
-  right: 4px;
-  transform: rotate(42deg);
 }
 
 .bg-orb,

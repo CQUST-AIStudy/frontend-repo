@@ -5,7 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "api:local": "node scripts/switch-api.js local",
+    "api:server": "node scripts/switch-api.js server",
+    "api:status": "node scripts/switch-api.js status"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
@@ -28,6 +31,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
+    "lucide-vue-next": "^0.577.0",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.8",
     "pinia": "^2.1.4",

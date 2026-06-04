@@ -1,7 +1,7 @@
 import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
-import { clearAuthStorage, setSessionToken, setUserInfo } from '../constants/auth'
+import { clearAuthStorage, getTapToken, setSessionToken, setUserInfo } from '../constants/auth'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
 export const useUserStore = defineStore('user', {
@@ -36,11 +36,13 @@ export const useUserStore = defineStore('user', {
         setSessionToken(this.token)
         setUserInfo(this.userInfo)
 
-        try {
-          const { restoreTapSession } = await import('../api/tap')
-          await restoreTapSession()
-        } catch (error) {
-          logger.warn('TAP session 换票失败:', error.message)
+        if (!getTapToken()) {
+          try {
+            const { restoreTapSession } = await import('../api/tap')
+            await restoreTapSession()
+          } catch (error) {
+            logger.warn('TAP session 换票失败:', error.message)
+          }
         }
 
         return { success: true, message: res.message || '登录成功', user: userInfo }

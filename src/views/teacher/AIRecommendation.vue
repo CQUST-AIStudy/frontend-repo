@@ -67,7 +67,7 @@
         v-if="errorMessage"
         class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)]"
       >
-        <span class="text-[#ff9500] text-lg shrink-0">⚠</span>
+        <LucideIcon name="alert-triangle" :size="20" class="text-[#ff9500] shrink-0" />
         <div class="flex-1">
           <div class="text-[14px] font-medium text-[#ff9500]">{{ errorMessage }}</div>
           <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
@@ -126,6 +126,7 @@ import DOMPurify from 'dompurify'
 import api from '../../api'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import PageHeader from '../../components/PageHeader.vue'
+import LucideIcon from '../../components/LucideIcon.vue'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const loading = ref(false)
