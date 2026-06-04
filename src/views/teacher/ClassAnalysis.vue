@@ -144,7 +144,7 @@
 import * as echarts from 'echarts'
 import api from '@/api'
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 
@@ -160,6 +160,18 @@ const completionChartRef = ref(null)
 const scoreChartRef = ref(null)
 let completionChart = null
 let scoreChart = null
+
+const handleResize = () => {
+  completionChart?.resize()
+  scoreChart?.resize()
+}
+
+const disposeCharts = () => {
+  completionChart?.dispose()
+  completionChart = null
+  scoreChart?.dispose()
+  scoreChart = null
+}
 
 // 实验列表
 const experimentList = ref([])
@@ -251,6 +263,8 @@ const initCharts = () => {
     logger.error('图表DOM引用或数据不存在，无法初始化图表')
     return
   }
+
+  disposeCharts()
 
   // 实验完成度图表
   try {
@@ -373,12 +387,6 @@ const initCharts = () => {
   } catch (error) {
     logger.error('初始化成绩分布图表失败', error)
   }
-
-  // 窗口大小变化时调整图表大小
-  window.addEventListener('resize', () => {
-    if (completionChart) completionChart.resize()
-    if (scoreChart) scoreChart.resize()
-  })
 }
 
 // 返回班级列表
@@ -456,6 +464,8 @@ watch(selectedExperiment, () => {
 })
 
 onMounted(() => {
+  window.addEventListener('resize', handleResize)
+
   loadClassData()
 
   // 加载实验列表
@@ -469,5 +479,10 @@ onMounted(() => {
   }).catch(err => {
     logger.error('加载学生提交列表失败:', err)
   })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  disposeCharts()
 })
 </script>

@@ -677,7 +677,6 @@ const initSubmissionChart = () => {
     }
 
     submissionChart.setOption(option)
-    window.addEventListener('resize', () => { submissionChart && submissionChart.resize() })
   }
 }
 
@@ -721,7 +720,6 @@ const initScoreChart = () => {
     }
 
     scoreChart.setOption(option)
-    window.addEventListener('resize', () => { scoreChart && scoreChart.resize() })
   }
 }
 
@@ -907,11 +905,18 @@ const cleanupCharts = () => {
   if (scoreChart) { scoreChart.dispose(); scoreChart = null }
 }
 
+const handleChartsResize = () => {
+  submissionChart?.resize()
+  scoreChart?.resize()
+}
+
 onMounted(() => {
+  window.addEventListener('resize', handleChartsResize)
   loadExperimentDetail()
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleChartsResize)
   cleanupCharts()
 })
 

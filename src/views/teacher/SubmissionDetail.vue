@@ -393,7 +393,7 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, loading as uiLoading } from '@/services/feedback'
 import api from '../../api'
@@ -481,6 +481,13 @@ const scoreChartContainer = ref(null)
 const completionChartContainer = ref(null)
 let scoreChart = null
 let completionChart = null
+
+const disposeCharts = () => {
+  scoreChart?.dispose()
+  scoreChart = null
+  completionChart?.dispose()
+  completionChart = null
+}
 
 // 题目解析相关
 const activeQuestionTab = ref('full')
@@ -941,6 +948,8 @@ const updatePerformanceCharts = (studentSubs, allData) => {
 }
 
 const initCharts = () => {
+  disposeCharts()
+
   if (scoreChartContainer.value) {
     scoreChart = echarts.init(scoreChartContainer.value)
     const scoreOption = {
@@ -1279,5 +1288,11 @@ onMounted(() => {
       updateReportWithComments();
     }
   }, { deep: true });
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  document.removeEventListener('click', handleDocumentClick)
+  disposeCharts()
 })
 </script>
