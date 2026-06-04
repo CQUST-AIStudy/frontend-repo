@@ -42,6 +42,11 @@
               <template #title>系统日志</template>
             </ui-menu-item>
 
+            <ui-menu-item index="/admin/leetcode-claw">
+              <ui-icon><DataAnalysis /></ui-icon>
+              <template #title>LeetCodeClaw</template>
+            </ui-menu-item>
+
             <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
             <ui-menu-item index="/admin/profile">
@@ -96,6 +101,11 @@
               <ui-menu-item index="/admin/system-log">
                 <ui-icon><DataAnalysis /></ui-icon>
                 <template #title>系统日志</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/admin/leetcode-claw">
+                <ui-icon><DataAnalysis /></ui-icon>
+                <template #title>LeetCodeClaw</template>
               </ui-menu-item>
 
               <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>

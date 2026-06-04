@@ -52,6 +52,11 @@
               <template #title>推荐练习</template>
             </ui-menu-item>
 
+            <ui-menu-item index="/student/leetcode-search">
+              <ui-icon><Search /></ui-icon>
+              <template #title>LeetCode 拓展</template>
+            </ui-menu-item>
+
             <ui-menu-item index="/student/weakness-training">
               <ui-icon><Finished /></ui-icon>
               <template #title>错题本/专项训练</template>
@@ -126,6 +131,11 @@
               <ui-menu-item index="/student/practice">
                 <ui-icon><Collection /></ui-icon>
                 <template #title>推荐练习</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/student/leetcode-search">
+                <ui-icon><Search /></ui-icon>
+                <template #title>LeetCode 拓展</template>
               </ui-menu-item>
 
               <ui-menu-item index="/student/weakness-training">
@@ -220,6 +230,7 @@ import {
   Document,
   ChatDotRound,
   Collection,
+  Search,
   Finished,
   TrendCharts,
   Setting,

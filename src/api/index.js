@@ -478,6 +478,10 @@ export default {
     return apiClient.get(`/api/leetcode/problem/${problemId}`)
   },
 
+  async getLeetCodeProblemBySlug(slug) {
+    return apiClient.get(`/api/leetcode/problem-by-slug/${encodeURIComponent(slug)}`)
+  },
+
   async runLeetCodeSolution(data) {
     return apiClient.post('/api/leetcode/run', data)
   },

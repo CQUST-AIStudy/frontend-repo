@@ -3,11 +3,11 @@ node_modules/
 .pnp/
 .pnp.*
 .yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
 
 # Build outputs
 dist/
@@ -24,20 +24,21 @@ bundle-report.html
 node_modules/.cache/
 .cache/
 .parcel-cache/
+.vite/
+.vuepress/dist/
 .npm/
 .pnpm-store/
 .temp/
 .tmp/
 tmp/
 temp/
-.vite/
-.vuepress/dist/
 *.tsbuildinfo
 .eslintcache
 .stylelintcache
 
-# Logs
+# Logs and diagnostics
 *.log
+*.local.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -45,7 +46,10 @@ pnpm-debug.log*
 lerna-debug.log*
 dev-server*.log
 static-server*.log
-*.local.log
+serve.out.log
+serve.err.log
+test-startprocess.txt
+where-npm.txt
 
 # Environment files
 .env
@@ -55,24 +59,7 @@ static-server*.log
 !.env.development.example
 !.env.production.example
 
-# Local editor / IDE files
-.idea/
-.vscode/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-.AppleDouble
-.LSOverride
-Thumbs.db
-desktop.ini
-
-# Test artifacts
+# Test and browser artifacts
 test-results/
 playwright-report/
 cypress/screenshots/
@@ -82,7 +69,22 @@ login-check.png
 screenshots/
 artifacts/
 
-# Local AI assistant config
+# Editor and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
+
+# Local assistant/workspace metadata
 .claude/
 .codex/
 .agents/
@@ -90,7 +92,3 @@ artifacts/
 # HBuilderX / uni-app artifacts
 unpackage/
 !/unpackage/res/
-
-# Local diagnostics
-test-startprocess.txt
-where-npm.txt

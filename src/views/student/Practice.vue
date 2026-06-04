@@ -2,6 +2,12 @@
   <div class="practice-container [display:flex] [flex-direction:column] [height:100%] [min-height:0] [overflow:hidden]">
     <UiPageHeader class="my-page-header [padding:12px_16px] [flex-shrink:0]" title="推荐练习" description="根据您的学习情况和技能掌握程度AI推荐的练习内容" />
 
+    <div class="[display:flex] [justify-content:flex-end] [margin-bottom:10px] [flex-shrink:0]">
+      <ui-button type="primary" plain @click="router.push('/student/leetcode-search')">
+        LeetCode 拓展找题
+      </ui-button>
+    </div>
+
     <loading-state :loading="loading" class="[flex:1_1_auto] [min-height:0] [display:flex] [flex-direction:column]">
       <div class="practice-content [flex:1_1_auto] [min-height:0] [display:flex] [flex-direction:column]">
         <div class="practice-main-grid">

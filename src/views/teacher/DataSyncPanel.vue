@@ -220,6 +220,44 @@
             </UiTable>
           </div>
         </div>
+
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <div class="text-[14px] font-semibold text-[#1d1d1f]">LeetCode 题库抓取</div>
+              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个 LeetCode 中文站 slug，抓取后写入本地题库。</div>
+            </div>
+            <UiButton
+              class="h-[34px] px-4 rounded-[9px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] disabled:opacity-50"
+              :disabled="!leetcodeSlugText.trim() || leetcodeCrawlLoading"
+              @click="crawlLeetCodeSlugs"
+            >
+              <span v-if="leetcodeCrawlLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+              抓取入库
+            </UiButton>
+          </div>
+          <textarea
+            v-model="leetcodeSlugText"
+            rows="4"
+            placeholder="two-sum&#10;add-two-numbers"
+            class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+          ></textarea>
+          <div v-if="leetcodeCrawlItems.length" class="mt-4 flex flex-col gap-2">
+            <div
+              v-for="item in leetcodeCrawlItems"
+              :key="item.slug"
+              class="flex items-center justify-between gap-3 rounded-[10px] border border-black/[0.06] bg-[#f9f9fb] px-3 py-2 text-[12px]"
+            >
+              <div class="min-w-0">
+                <div class="font-semibold text-[#1d1d1f] truncate">{{ item.title }}</div>
+                <div class="text-[#6e6e73]">{{ item.slug }} <span v-if="item.problemId">· 本地 ID {{ item.problemId }}</span></div>
+              </div>
+              <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-bold" :class="item.problemId ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">
+                {{ item.problemId ? '已入库' : '需检查' }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Right column: Cookie management -->
@@ -296,6 +334,10 @@ import {
 import { useUserStore } from '../../store'
 import axios from 'axios'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import {
+  crawlLeetCodeProblems,
+  mapClawItemToPractice
+} from '../../api/leetcodeClaw'
 
 const showPassword = ref(false)
 
@@ -375,6 +417,9 @@ const ptaPassword = ref('')
 const tempCredentialSubmitted = ref(false)
 const boundPtaUsername = ref('')
 const hasBoundPtaCredentials = ref(false)
+const leetcodeSlugText = ref('')
+const leetcodeCrawlLoading = ref(false)
+const leetcodeCrawlItems = ref([])
 let pollTimer = null
 
 const cookieStatusText = computed(() => {
@@ -635,6 +680,36 @@ async function submitCookieHandler() {
     cookieResult.value = { valid: false, message: getFriendlyErrorMessage(e, 'Cookie 提交失败，请稍后重试') }
   } finally {
     cookieSubmitting.value = false
+  }
+}
+
+function parseLeetCodeSlugs() {
+  return leetcodeSlugText.value
+    .split(/[\n,，\s]+/)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
+async function crawlLeetCodeSlugs() {
+  const slugs = parseLeetCodeSlugs()
+  if (!slugs.length) {
+    uiMessage.warning('请先输入 LeetCode 题目 slug')
+    return
+  }
+
+  leetcodeCrawlLoading.value = true
+  try {
+    const res = await crawlLeetCodeProblems({ slugs, persist: true })
+    leetcodeCrawlItems.value = (res?.items || []).map(mapClawItemToPractice)
+    if (res?.failed?.length) {
+      uiMessage.warning(`部分题目抓取失败：${res.failed.map(item => item.slug || item.error).join('，')}`)
+    } else {
+      uiMessage.success('LeetCode 题目抓取入库完成')
+    }
+  } catch (error) {
+    uiMessage.error(error.friendlyMessage || error.message || 'LeetCode 题目抓取失败')
+  } finally {
+    leetcodeCrawlLoading.value = false
   }
 }
 

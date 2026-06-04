@@ -58,6 +58,11 @@ const routes = [
         component: () => import('../views/student/Practice.vue')
       },
       {
+        path: 'leetcode-search',
+        name: 'LeetCodeSearch',
+        component: () => import('../views/student/LeetCodeSearch.vue')
+      },
+      {
         path: 'weakness-training',
         name: 'WeaknessTraining',
         component: () => import('../views/student/WeaknessTraining.vue')
@@ -258,6 +263,11 @@ const routes = [
         path: 'data-sync',
         name: 'DataSync',
         component: () => import('../views/teacher/DataSyncPanel.vue')
+      },
+      {
+        path: 'leetcode-bank',
+        name: 'LeetCodeBank',
+        component: () => import('../views/teacher/LeetCodeBank.vue')
       }
     ]
   },
@@ -293,6 +303,11 @@ const routes = [
         component: () => import('../views/admin/SystemLog.vue')
       },
       {
+        path: 'leetcode-claw',
+        name: 'LeetCodeClawStatus',
+        component: () => import('../views/admin/LeetCodeClawStatus.vue')
+      },
+      {
         path: 'profile',
         name: 'AdminProfile',
         component: () => import('../views/admin/Profile.vue')
@@ -310,7 +325,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isLoginPage = to.path === '/login'
   const isClassSelector = to.path === '/teacher/select-class'
-  const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile'])
+  const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'])
   const token = getSessionToken()
 
   if (!isLoginPage && !isClassSelector && !token) {

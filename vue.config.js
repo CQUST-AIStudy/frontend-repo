@@ -14,15 +14,22 @@ module.exports = {
     port: Number(process.env.PORT || 8080),
     historyApiFallback: true,
     proxy: {
-      '/api': {
+      '/leetcode-claw': {
+        target: 'http://127.0.0.1:10170',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/leetcode-claw': '',
+        },
+      },
+      '^/api(?:/|$)': {
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
-      '/rag': {
+      '^/rag(?:/|$)': {
         target: 'http://127.0.0.1:8001',
         changeOrigin: true,
       },
-      '/spider': {
+      '^/spider(?:/|$)': {
         target: 'http://127.0.0.1:8100',
         changeOrigin: true,
         pathRewrite: {
