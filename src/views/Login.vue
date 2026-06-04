@@ -315,7 +315,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, reactive, ref, watch } from 'vue'
+import { computed, defineComponent, h, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store'
 import api from '../api'
@@ -481,10 +481,6 @@ function setActiveTab(tab) {
   activeTab.value = tab
 }
 
-function selectRole(role) {
-  selectedRole.value = role
-}
-
 function clearLoginFieldError(field) {
   loginErrors[field] = ''
 }
@@ -493,7 +489,7 @@ function clearRegisterFieldError(field) {
   registerErrors[field] = ''
 }
 
-watch(selectedRole, (role) => {
+function fillDefaultAccountForRole(role) {
   if (!isDevelopment) return
   const account = defaultAccounts[role]
   if (!account) return
@@ -501,7 +497,26 @@ watch(selectedRole, (role) => {
   loginForm.password = account.password
   clearLoginFieldError('username')
   clearLoginFieldError('password')
-})
+}
+
+function selectRole(role) {
+  selectedRole.value = role
+  fillDefaultAccountForRole(role)
+}
+
+function trimText(value) {
+  return String(value ?? '').trim()
+}
+
+function buildRegisterPayload() {
+  return {
+    username: trimText(registerForm.username),
+    password: registerForm.password,
+    role: 'student',
+    usernum: trimText(registerForm.usernum),
+    classname: trimText(registerForm.classname)
+  }
+}
 
 function validateLoginField(field) {
   if (field === 'username') {
@@ -572,6 +587,7 @@ function validateRegisterForm() {
 
 async function handleLogin() {
   if (!validateLoginForm()) return
+  loginForm.username = trimText(loginForm.username)
   loading.value = true
   try {
     const result = await userStore.login(loginForm.username, loginForm.password, selectedRole.value)
@@ -603,12 +619,10 @@ async function handleLogin() {
 
 async function handleRegister() {
   if (!validateRegisterForm()) return
+  const payload = buildRegisterPayload()
   loading.value = true
   try {
-    const result = await api.register({
-      ...registerForm,
-      role: 'student'
-    })
+    const result = await api.register(payload)
     if (!(result && result.success)) {
       showToast('error', getFriendlyResponseMessage(result, '注册失败，请检查填写内容后重试'))
       return
@@ -616,7 +630,8 @@ async function handleRegister() {
 
     showToast('success', '注册成功，请登录')
     setActiveTab('login')
-    loginForm.username = registerForm.username
+    selectedRole.value = 'student'
+    loginForm.username = payload.username
     loginForm.password = ''
     registerForm.username = ''
     registerForm.password = ''

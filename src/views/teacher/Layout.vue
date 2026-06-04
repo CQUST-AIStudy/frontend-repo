@@ -272,7 +272,6 @@ import {
   UserFilled
 } from '@/components/ui/icons'
 import { useUserStore } from '../../store'
-import { clearAuthStorage } from '../../constants/auth'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
 
 const route = useRoute()
@@ -469,7 +468,7 @@ function onClickOutside(e) {
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
 
-  const canOpenWithoutClass = route.path === '/teacher/class-list' || route.path === '/teacher/profile'
+  const canOpenWithoutClass = ['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'].includes(route.path)
   if (!userStore.selectedClass && !canOpenWithoutClass) {
     router.replace('/teacher/select-class')
     return
@@ -477,7 +476,7 @@ onMounted(() => {
   if (userInfo.value.role && userInfo.value.role !== 'teacher') {
     messageBox.alert('当前账号没有教师权限，请重新登录。', '权限错误', {
       confirmButtonText: '确定',
-      callback: () => { clearAuthStorage(); router.push('/login') }
+      callback: () => { userStore.logout(); sessionStorage.clear(); router.push('/login') }
     })
   }
 })
@@ -499,7 +498,7 @@ function handleCommand(command) {
   messageBox.confirm('确定要退出登录吗？', '提示', {
     confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
   }).then(() => {
-    userStore.logout(); sessionStorage.clear(); clearAuthStorage(); router.push('/login')
+    userStore.logout(); sessionStorage.clear(); router.push('/login')
   }).catch(() => {})
 }
 </script>

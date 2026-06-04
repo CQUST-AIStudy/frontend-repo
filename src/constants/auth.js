@@ -3,6 +3,7 @@ export const AUTH_STORAGE_KEYS = Object.freeze({
   USER_INFO: 'userInfo',
   TAP_TOKEN: 'tap_token',
   TAP_USER: 'tap_user',
+  PINIA_USER: 'user',
 })
 
 export function clearAuthStorage(storage = localStorage) {

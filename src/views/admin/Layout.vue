@@ -265,6 +265,7 @@ onMounted(() => {
       confirmButtonText: '确定',
       callback: () => {
         userStore.logout()
+        sessionStorage.clear()
         router.push('/login')
       }
     })

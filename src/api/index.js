@@ -90,6 +90,13 @@ const parseSubmissionCompositeId = (submissionId) => {
 
 const isNumericStudentId = (value) => /^\d+$/.test(String(value ?? '').trim())
 
+const trimText = (value) => String(value ?? '').trim()
+
+const optionalTrimmedText = (value) => {
+  const text = trimText(value)
+  return text || null
+}
+
 const normalizeStudentId = (value) => {
   if (value === null || value === undefined) return ''
   return String(value)
@@ -297,7 +304,6 @@ export default {
             logger.error('保存用户信息失败:', e);
           }
 
-          this.tryTapLogin();
         } else {
           logger.warn('登录响应显示失败:', response.message);
         }
@@ -348,11 +354,11 @@ export default {
   async register(formData) {
     try {
       const response = await apiClient.post('/api/register', {
-        username: formData.username,
+        username: trimText(formData.username),
         password: formData.password,
         role: 'student',
-        usernum: formData.usernum || null,
-        classname: formData.classname || null
+        usernum: optionalTrimmedText(formData.usernum),
+        classname: optionalTrimmedText(formData.classname)
       })
       return response
     } catch (error) {
