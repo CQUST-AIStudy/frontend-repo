@@ -9,6 +9,8 @@ import './utils'
 import { installUiComponents } from './components/ui'
 import { installUiIcons } from './components/ui/icons'
 import { installFeedback } from './services/feedback'
+import { AUTH_STORAGE_CLEARED_EVENT, AUTH_STORAGE_KEYS } from './constants/auth'
+import { useUserStore } from './store'
 
 if (process.env.NODE_ENV === 'development') {
   import('./mock')
@@ -33,5 +35,12 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
 app.use(pinia)
+
+const userStore = useUserStore()
+window.addEventListener(AUTH_STORAGE_CLEARED_EVENT, () => {
+  userStore.resetAuthState()
+  localStorage.removeItem(AUTH_STORAGE_KEYS.PINIA_USER)
+})
+
 app.use(router)
 app.mount('#app')

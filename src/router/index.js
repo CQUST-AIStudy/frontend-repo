@@ -347,8 +347,8 @@ function getRoleHomePath(role) {
   return '/login'
 }
 
-function hasAnyPermission(requiredPermissions, userPermissions) {
-  return requiredPermissions.some(p => userPermissions.includes(p))
+function hasAllPermissions(requiredPermissions, userPermissions) {
+  return requiredPermissions.every(p => userPermissions.includes(p))
 }
 
 // 全局前置守卫
@@ -399,7 +399,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiredPermissions) {
     const userPermissions = userInfo?.permissions || []
-    if (!hasAnyPermission(to.meta.requiredPermissions, userPermissions)) {
+    if (!hasAllPermissions(to.meta.requiredPermissions, userPermissions)) {
       next('/teacher/dashboard')
       return
     }

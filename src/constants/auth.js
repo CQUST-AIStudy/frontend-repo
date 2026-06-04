@@ -6,8 +6,16 @@ export const AUTH_STORAGE_KEYS = Object.freeze({
   PINIA_USER: 'user',
 })
 
+export const AUTH_STORAGE_CLEARED_EVENT = 'auth-storage-cleared'
+
+function notifyAuthStorageCleared(storage) {
+  if (typeof window === 'undefined' || storage !== window.localStorage) return
+  window.dispatchEvent(new CustomEvent(AUTH_STORAGE_CLEARED_EVENT))
+}
+
 export function clearAuthStorage(storage = localStorage) {
   Object.values(AUTH_STORAGE_KEYS).forEach((key) => storage.removeItem(key))
+  notifyAuthStorageCleared(storage)
 }
 
 export function getSessionToken(storage = localStorage) {
@@ -73,7 +81,12 @@ export function clearTapAuth(storage = localStorage) {
 
 export function getCurrentStudentId(storage = localStorage) {
   const userInfo = getUserInfo(storage)
-  const candidate = userInfo?.usernum ?? userInfo?.studentId ?? null
+  const candidate = userInfo?.usernum
+    ?? userInfo?.studentId
+    ?? userInfo?.student_id
+    ?? userInfo?.username
+    ?? userInfo?.id
+    ?? null
   const parsed = Number(candidate)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null
 }

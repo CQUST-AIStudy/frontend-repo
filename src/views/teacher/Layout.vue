@@ -378,7 +378,7 @@ const openGroups = reactive(
 
 function hasPermission(permissions) {
   const userPermissions = userInfo.value?.permissions || []
-  return permissions.some((p) => userPermissions.includes(p))
+  return permissions.every((p) => userPermissions.includes(p))
 }
 
 function canShowItem(item) {

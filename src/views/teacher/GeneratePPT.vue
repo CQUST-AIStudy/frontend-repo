@@ -178,6 +178,7 @@ import { computed, reactive, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { chatSend } from '../../api/tap'
 import { useFormValidation } from '../../composables/useFormValidation'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 
 const generating = ref(false)
 const previewSlides = ref([])
@@ -306,11 +307,7 @@ function parseSlides(text) {
 }
 
 function formatSlideContent(content) {
-  if (!content) return ''
-  return content
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-    .replace(/\n/g, '<br>')
+  return renderSafeMarkdown(content)
 }
 
 async function generatePPT() {

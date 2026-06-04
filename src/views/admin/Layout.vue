@@ -184,7 +184,7 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { messageBox } from '@/services/feedback'
 import { useUserStore } from '../../store'
 import {
@@ -239,6 +239,7 @@ const handleCommand = (cmd) => {
 
 // --- PTA Cookie 告警 ---
 const ptaCookieExpired = ref(false)
+let ptaCookieTimer = null
 
 const checkPtaCookie = async () => {
   try {
@@ -259,7 +260,7 @@ const goToCookieAlert = () => {
 onMounted(() => {
   checkPtaCookie()
   // 每5 分钟检查一次
-  setInterval(checkPtaCookie, 5 * 60 * 1000)
+  ptaCookieTimer = setInterval(checkPtaCookie, 5 * 60 * 1000)
   if (userInfo.value.role && userInfo.value.role !== 'admin') {
     messageBox.alert('您没有管理员权限，请重新登录', '权限错误', {
       confirmButtonText: '确定',
@@ -269,6 +270,13 @@ onMounted(() => {
         router.push('/login')
       }
     })
+  }
+})
+
+onUnmounted(() => {
+  if (ptaCookieTimer) {
+    clearInterval(ptaCookieTimer)
+    ptaCookieTimer = null
   }
 })
 </script>

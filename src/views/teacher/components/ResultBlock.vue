@@ -29,18 +29,17 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { DocumentCopy, Download, Edit } from '@/components/ui/icons'
-import MarkdownIt from 'markdown-it'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 
 const props = defineProps({
   result: { type: String, default: '' },
   meta: { type: String, default: '' }
 })
 
-const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
 const showRaw = ref(false)
 const copied = ref(false)
 
-const renderedHtml = computed(() => md.render(props.result))
+const renderedHtml = computed(() => renderSafeMarkdown(props.result))
 
 const copyText = () => {
   navigator.clipboard.writeText(props.result)

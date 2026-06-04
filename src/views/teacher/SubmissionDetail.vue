@@ -110,7 +110,7 @@
                       <svg class="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
                     </UiButton>
                     <div v-show="fileDropdownOpen" class="absolute right-0 top-full mt-1 bg-white rounded-[10px] shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-black/[0.06] py-1 z-20 min-w-[140px]">
-                      <UiButton @click="downloadCode; fileDropdownOpen = false" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
+                      <UiButton @click="handleDownloadCode" class="w-full px-4 py-2 text-left text-[13px] text-[#1d1d1f] hover:bg-black/[0.04] transition-colors cursor-pointer border-none bg-transparent flex items-center gap-2">
                         <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>
                         下载代码
                       </UiButton>
@@ -148,7 +148,7 @@
 
                       <div v-if="question.testResults" class="mt-4 p-3 bg-[#f8f8f8] rounded-lg">
                         <h4 class="text-sm font-semibold text-[#1d1d1f] m-0 mb-2">测试结果</h4>
-                        <div v-html="formatTestResults(question.testResults)"></div>
+                        <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-[1.6] font-mono text-[#1d1d1f]">{{ formatTestResults(question.testResults) }}</pre>
                       </div>
 
                       <!-- Divider with label -->
@@ -577,9 +577,7 @@ const parseQuestionCode = () => {
 
 const formatTestResults = (resultsText) => {
   if (!resultsText) return ''
-  return resultsText.replace(/\|/g, '|')
-      .replace(/\n/g, '<br>')
-      .replace(/\s/g, '&nbsp;')
+  return String(resultsText)
 }
 
 const updateQuestionComment = (index, comment) => {
@@ -1113,12 +1111,21 @@ const copyCode = () => {
 }
 
 const downloadCode = () => {
-  const blob = new Blob([submission.value.code], { type: 'text/plain' })
+  if (!submission.value?.code) {
+    uiMessage.warning('暂无代码可下载')
+    return
+  }
+  const blob = new Blob([submission.value.code], { type: 'text/plain;charset=utf-8' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
   link.download = `${submission.value.experimentName}_${submission.value.studentName}.c`
   link.click()
   URL.revokeObjectURL(link.href)
+}
+
+const handleDownloadCode = () => {
+  downloadCode()
+  fileDropdownOpen.value = false
 }
 
 const downloadWordDoc = async () => {

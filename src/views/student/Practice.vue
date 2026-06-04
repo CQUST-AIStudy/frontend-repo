@@ -197,6 +197,7 @@ import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { useRouter } from 'vue-router'
 import api from '@/api'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 
 const router = useRouter()
 const learningStore = useLearningStore()
@@ -480,45 +481,7 @@ const getPracticeDescription = (practice) => {
 
 // 获取格式化的描述
 const getFormattedDescription = (practice) => {
-  if (!practice) return '';
-
-  // 如果是introduction类型，直接返回content
-  if (practice.type === 'introduction' && practice.content) {
-    let html = practice.content
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // 粗体
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');  // 斜体
-    
-    // 将换行符转换为br>标签
-    html = html.replace(/\n/g, '<br>');
-    return html;
-  }
-
-  // 获取描述
-  const description = getPracticeDescription(practice);
-
-  // 简单的Markdown格式转HTML
-  let html = description
-    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-    .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // 粗体
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');  // 斜体
-
-  // 代码块处理
-  html = html.replace(/```(\w*)([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
-
-  // 行内代码处理
-  html = html.replace(/`([^`]+)`/g, '<code class="[background-color:#f5f5f5] [padding:2px_4px] [border-radius:3px]">$1</code>');
-
-  // 将换行符转换为br>标签
-  html = html.replace(/\n/g, '<br>');
-
-  return html;
+  return renderSafeMarkdown(getPracticeDescription(practice))
 }
 
 // 统计数据

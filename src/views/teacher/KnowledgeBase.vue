@@ -356,6 +356,7 @@ import {
 } from '@/api/rag'
 import { getTeachingClasses } from '@/api/tap'
 import { getFriendlyErrorMessage } from '@/utils/errorMessage'
+import { renderSafeMarkdown, sanitizeHtml } from '@/utils/safeHtml'
 
 const userStore = useUserStore()
 const spaces = ref([])
@@ -489,11 +490,8 @@ function toggleSpaceDropdown(id) {
 }
 
 function renderMarkdown(text) {
-  if (!text) return ''
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>')
-    .replace(/\[(\d+)\]/g, '<sup class="text-[#007aff] cursor-pointer">[$1]</sup>')
+  const html = renderSafeMarkdown(text)
+  return sanitizeHtml(html.replace(/\[(\d+)\]/g, '<sup class="text-[#007aff] cursor-pointer">[$1]</sup>'))
 }
 
 async function loadSpaces() {

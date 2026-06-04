@@ -124,9 +124,9 @@
             </div>
           </template>
           <div class="solution-content [max-height:none] [overflow:visible] [max-height:400px] [overflow-y:auto]">
-            <div class="solution-approach" v-if="parsedSolution.approach">
+            <div class="solution-approach" v-if="renderedSolutionApproach">
               <h4>解题思路</h4>
-              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="parsedSolution.approach"></div>
+              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="renderedSolutionApproach"></div>
             </div>
             
             <div class="solution-code" v-if="parsedSolution.code">
@@ -143,9 +143,9 @@
               </ui-tabs>
             </div>
 
-            <div class="solution-complexity" v-if="parsedSolution.complexity">
+            <div class="solution-complexity" v-if="renderedSolutionComplexity">
               <h4>复杂度分析</h4>
-              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="parsedSolution.complexity"></div>
+              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="renderedSolutionComplexity"></div>
             </div>
           </div>
         </ui-collapse-item>
@@ -1317,9 +1317,14 @@ async function submitCode() {
     return
   }
 
+  const studentId = getCurrentStudentId()
+  if (!studentId) {
+    uiMessage.error('未获取到有效学号，请重新登录或完善个人信息')
+    return
+  }
+
   submitting.value = true
   try {
-    const studentId = getCurrentStudentId()
     const response = await api.submitLeetCodeSolution({
       problemId: problem.value.id,
       code: code.value,

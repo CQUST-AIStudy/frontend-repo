@@ -2,7 +2,22 @@ import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
 import { clearAuthStorage, setSessionToken, setUserInfo } from '../constants/auth'
+import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
+
+function normalizeUserInfo(userInfo, teacherLevel) {
+  const normalized = { ...(userInfo || {}) }
+  const role = String(normalized.role || '').toLowerCase()
+  if (role) normalized.role = role
+
+  if (role === 'teacher' && !Array.isArray(normalized.permissions)) {
+    const level = normalized.level || teacherLevel || 'normal'
+    normalized.level = level
+    normalized.permissions = getTeacherPermissions(level)
+  }
+
+  return normalized
+}
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -25,10 +40,11 @@ export const useUserStore = defineStore('user', {
           return { success: false, message: getFriendlyResponseMessage(res, '用户名或密码不正确，请检查后重试'), details: res }
         }
 
-        const userInfo = res.user || res.userInfo
-        if (!userInfo) {
+        const rawUserInfo = res.user || res.userInfo
+        if (!rawUserInfo) {
           return { success: false, message: '登录成功但未获取到用户信息' }
         }
+        const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
 
         this.userInfo = userInfo
         this.token = res.token || 'legacy_session'
@@ -53,10 +69,16 @@ export const useUserStore = defineStore('user', {
     },
 
     logout() {
+      this.resetAuthState({ clearStorage: true })
+    },
+
+    resetAuthState({ clearStorage = false } = {}) {
       this.token = null
       this.userInfo = null
       this.selectedClass = null
-      clearAuthStorage()
+      if (clearStorage) {
+        clearAuthStorage()
+      }
     },
 
     updateUserInfo(patch = {}) {
