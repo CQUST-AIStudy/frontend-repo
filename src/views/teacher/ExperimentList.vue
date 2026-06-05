@@ -64,11 +64,25 @@ import logger from '@/utils/logger'
 import { ref, onMounted, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api'
+import { useUserStore } from '../../store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const experiments = ref([])
 const loading = shallowRef(false)
 const errorMessage = shallowRef('')
+
+const getSelectedClassQuery = () => {
+  const selectedClass = userStore.selectedClass || {}
+  return {
+    classId: selectedClass.id,
+    classKeyword: selectedClass.ptaKeyword
+      || selectedClass.pta_keyword
+      || selectedClass.classKeyword
+      || selectedClass.class_keyword
+      || selectedClass.name
+  }
+}
 
 const unwrapExperimentList = response => {
   if (Array.isArray(response)) return response
@@ -105,7 +119,7 @@ const loadExperiments = async () => {
   errorMessage.value = ''
 
   try {
-    const response = await api.getTeacherExperimentList({ scope: 'all' })
+    const response = await api.getTeacherExperimentList(getSelectedClassQuery())
     if (response?.success === false) throw new Error(response.message || '实验列表加载失败')
     experiments.value = unwrapExperimentList(response).map(normalizeExperiment)
   } catch (e) {

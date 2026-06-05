@@ -498,6 +498,7 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import AppModal from '../../components/AppModal.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
+import axios from 'axios'
 import {
   addClassStudent,
   createTeachingClass,
@@ -595,6 +596,58 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
 
 const extract = (res) => res?.data ?? res
 
+function normalizeUrl(url) {
+  return String(url || '').replace(/\/+$/, '')
+}
+
+function buildDefaultSpiderUrl() {
+  if (typeof window !== 'undefined' && window.location) {
+    const protocol = window.location.protocol || 'http:'
+    const hostname = window.location.hostname || '127.0.0.1'
+    return `${protocol}//${hostname}:8100`
+  }
+  return 'http://127.0.0.1:8100'
+}
+
+const envSpiderUrl = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_SPIDER_URL)
+  ? process.env.VUE_APP_SPIDER_URL
+  : ''
+const spiderUrl = ref(normalizeUrl(envSpiderUrl || buildDefaultSpiderUrl()))
+
+const spiderRequestConfig = (options = {}) => ({
+  withCredentials: false,
+  ...options
+})
+
+function spiderApi(path) {
+  return `${spiderUrl.value}${path}`
+}
+
+async function probeSpiderHealth() {
+  const candidates = []
+  const push = (url) => {
+    const normalized = normalizeUrl(url)
+    if (normalized && !candidates.includes(normalized)) candidates.push(normalized)
+  }
+  push(spiderUrl.value)
+  push(buildDefaultSpiderUrl())
+  push('http://localhost:8100')
+  push('http://127.0.0.1:8100')
+
+  for (const base of candidates) {
+    try {
+      const res = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
+      if (res.status === 200) {
+        spiderUrl.value = base
+        return true
+      }
+    } catch {
+      // try next candidate
+    }
+  }
+  return false
+}
+
 const replacementChar = String.fromCharCode(0xfffd)
 
 const isCorruptedText = (value) => {
@@ -638,7 +691,7 @@ const resolvePtaKeyword = () => (classForm.ptaKeyword || classForm.name || '').t
 const toSelectedClass = (cls) => ({
   id: cls.id,
   name: displayClassName(cls),
-  ptaKeyword: cls.ptaKeyword || cls.name || ''
+  ptaKeyword: cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
 })
 
 // Sync tag styling
@@ -858,10 +911,30 @@ const triggerSyncForClass = async () => {
   const password = syncTempCredentialSubmitted.value ? draftPassword : ''
   syncingMap[cls.id] = true
   try {
-    const res = await triggerPtaSync(cls.id, {
-      ptaKeyword: keyword,
-      ...(username ? { ptaUsername: username, ptaPassword: password } : {})
-    })
+    const spiderAlive = await probeSpiderHealth()
+    const credentialSource = plannedSyncCredentialSource.value
+    if (spiderAlive && credentialSource === 'cookie' && cookieStatus.value !== 'OK') {
+      uiMessage.warning('当前没有有效 Cookie。请填写 PTA 账号密码并点击“提交临时账号密码”，再开始同步以打开浏览器登录。')
+      return
+    }
+
+    const res = spiderAlive && credentialSource !== 'bound'
+      ? await axios.post(spiderApi('/crawl'), {
+        keyword,
+        class_id: cls.id,
+        mode: 'incremental',
+        force: true,
+        credential_source: credentialSource,
+        force_selenium_login: credentialSource === 'temporary',
+        headless: false,
+        ...(username ? { username, password } : {})
+      }, spiderRequestConfig({ timeout: 30000 }))
+      : await triggerPtaSync(cls.id, {
+        ptaKeyword: keyword,
+        mode: 'incremental',
+        force: true,
+        ...(username ? { ptaUsername: username, ptaPassword: password } : {})
+      })
     const data = extract(res) || {}
     cls.ptaKeyword = keyword
     cls.syncStatus = 'RUNNING'

@@ -254,6 +254,8 @@ const validateField = (field, value) => {
   _validateField(field, value, formData)
 }
 
+const normalizePtaKeyword = (value) => String(value || '').replace(/[\s\u3000]+/g, '').trim()
+
 // 添加实验要求
 const addRequirement = () => {
   formData.requirements.push('')
@@ -274,7 +276,15 @@ const submitForm = async () => {
   if (!valid) return
 
   try {
-    const result = await api.createExperiment(formData)
+    const selectedKeywords = classList.value
+      .filter(item => formData.classes.some(classId => String(classId) === String(item.id)))
+      .map(item => normalizePtaKeyword(item.ptaKeyword || item.name || ''))
+      .filter(Boolean)
+    const payload = {
+      ...formData,
+      class: Array.from(new Set(selectedKeywords)).join(',')
+    }
+    const result = await api.createExperiment(payload)
     if (result.success) {
       uiMessage.success('实验创建成功')
       router.push('/teacher/experiments')
@@ -306,7 +316,11 @@ const loadClassList = async () => {
   try {
     const classes = await api.getClassList()
     const list = Array.isArray(classes) ? classes : (classes?.data || [])
-    classList.value = list.map(c => ({ id: c.id, name: c.name || c.className || `班级${c.id}` }))
+    classList.value = list.map(c => ({
+      id: c.id,
+      name: c.name || c.className || `班级${c.id}`,
+      ptaKeyword: normalizePtaKeyword(c.ptaKeyword || c.pta_keyword || c.name || c.className || '')
+    }))
   } catch (error) {
     logger.error('加载班级列表失败:', error)
   }

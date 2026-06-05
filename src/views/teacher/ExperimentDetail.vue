@@ -174,7 +174,7 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <UiTable class="w-full text-sm">
+          <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="text-left py-3 px-3 text-[12px] font-medium text-[#6e6e73] uppercase tracking-wide">学生姓名</th>
@@ -218,7 +218,7 @@
                 </td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
 
         <AppPagination
@@ -384,11 +384,13 @@ import { message as uiMessage } from '@/services/feedback'
 import * as echarts from 'echarts'
 import { Delete } from '@/components/ui/icons'
 import api from '../../api'
+import { useUserStore } from '../../store'
 import AppModal from '../../components/AppModal.vue'
 import AppPagination from '../../components/AppPagination.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const normalizeStudentId = (value) => {
   if (value === null || value === undefined) return ''
@@ -490,6 +492,21 @@ const syncSubmissionStats = (submissions) => {
 
 const classList = ref([])
 
+const syncClassListFromSelectedClass = () => {
+  const selectedClass = userStore.selectedClass
+  classList.value = selectedClass?.id
+    ? [{
+        id: selectedClass.id,
+        name: selectedClass.name || selectedClass.ptaKeyword || '当前班级',
+        ptaKeyword: selectedClass.ptaKeyword
+          || selectedClass.pta_keyword
+          || selectedClass.classKeyword
+          || selectedClass.class_keyword
+          || selectedClass.name
+      }]
+    : []
+}
+
 // 编辑相关
 const editDialogVisible = ref(false)
 const editContentDialogVisible = ref(false)
@@ -578,8 +595,7 @@ const loadExperimentDetail = async () => {
       uiMessage.warning(`未找到ID为${experimentId.value}的实验`)
     }
 
-    const classListData = await api.getClassList()
-    classList.value = classListData
+    syncClassListFromSelectedClass()
 
     await loadSubmissions()
 

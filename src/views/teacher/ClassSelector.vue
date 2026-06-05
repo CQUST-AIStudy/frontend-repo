@@ -88,10 +88,11 @@ onMounted(async () => {
 function confirmSelect() {
   const found = classList.value.find(item => item.id === selected.value)
   if (!found) return
+  const ptaKeyword = found.ptaKeyword || found.pta_keyword || found.classKeyword || found.class_keyword || found.name
   userStore.setSelectedClass({
     id: found.id,
     name: found.name,
-    ptaKeyword: found.ptaKeyword || found.name
+    ptaKeyword
   })
   router.replace('/teacher/dashboard')
 }

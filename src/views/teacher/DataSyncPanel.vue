@@ -586,6 +586,14 @@ async function triggerSync(mode) {
     }
     const username = tempCredentialSubmitted.value ? draftUsername : ''
     const password = tempCredentialSubmitted.value ? draftPassword : ''
+    if (
+      spiderAlive.value &&
+      plannedCredentialSource.value === 'cookie' &&
+      cookieStatus.value !== 'OK'
+    ) {
+      uiMessage.warning('当前没有有效 Cookie。请先填写 PTA 账号密码并点击“提交临时账号密码”，再开始同步以打开浏览器登录。')
+      return
+    }
 
     const payload = {
       ptaKeyword: keyword,
@@ -594,21 +602,19 @@ async function triggerSync(mode) {
       ...(username ? { ptaUsername: username, ptaPassword: password } : {})
     }
     let res
-    try {
-      res = await triggerPtaSync(selectedClassId.value, payload)
-    } catch (backendError) {
-      if (!spiderAlive.value) {
-        throw backendError
-      }
-      uiMessage.warning('后端同步接口暂不可用，已改为直接提交到本地爬虫')
+    if (spiderAlive.value && plannedCredentialSource.value !== 'bound') {
       res = await axios.post(spiderApi('/crawl'), {
         keyword,
         class_id: selectedClassId.value,
         mode,
         force: forceMode.value,
         credential_source: plannedCredentialSource.value,
+        force_selenium_login: plannedCredentialSource.value === 'temporary',
+        headless: false,
         ...(username ? { username, password } : {})
       }, spiderRequestConfig({ timeout: 30000 }))
+    } else {
+      res = await triggerPtaSync(selectedClassId.value, payload)
     }
     const r = res?.data || res
 

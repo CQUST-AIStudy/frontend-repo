@@ -98,10 +98,18 @@ const normalizeTeacherClassScope = (options) => {
   if (options && typeof options === 'object') {
     return {
       classId: options.classId ?? null,
+      classKeyword: options.classKeyword ?? options.ptaKeyword ?? options.class ?? null,
       scope: options.scope === 'all' ? 'all' : 'class'
     }
   }
-  return { classId: null, scope: 'class' }
+  return { classId: null, classKeyword: null, scope: 'class' }
+}
+
+const normalizePtaKeyword = (value) => String(value || '').replace(/[\s\u3000]+/g, '').trim()
+
+const getClassPtaKeyword = (cls) => {
+  if (!cls || typeof cls !== 'object') return ''
+  return cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
 }
 
 const isNumericClassId = (value) => /^\d+$/.test(String(value ?? '').trim())
@@ -114,6 +122,25 @@ const resolveTeacherClassId = (options) => {
   }
   const persistedId = getPersistedSelectedClass()?.id ?? null
   return isNumericClassId(persistedId) ? persistedId : null
+}
+
+const resolveTeacherClassKeyword = (options) => {
+  const normalized = normalizeTeacherClassScope(options)
+  if (normalized.scope === 'all') return null
+  if (normalized.classKeyword !== null && normalized.classKeyword !== undefined) {
+    const keyword = normalizePtaKeyword(normalized.classKeyword)
+    if (keyword) return keyword
+  }
+  const persistedClass = getPersistedSelectedClass()
+  const keyword = normalizePtaKeyword(getClassPtaKeyword(persistedClass))
+  return keyword || null
+}
+
+const buildTeacherClassParams = (options) => {
+  const classKeyword = resolveTeacherClassKeyword(options)
+  if (classKeyword) return { class: classKeyword }
+  const classId = resolveTeacherClassId(options)
+  return classId ? { classId } : undefined
 }
 
 const unwrapList = (response, keys = ['data']) => {
@@ -239,9 +266,8 @@ export default {
   },
 
   async getTeacherExperimentList(options) {
-    const classId = resolveTeacherClassId(options)
     return apiClient.get('/api/teacher/experiments', {
-      params: classId ? { classId } : undefined
+      params: buildTeacherClassParams(options)
     })
   },
 
@@ -293,9 +319,8 @@ export default {
   },
 
   async getAllStudentExperiments(options) {
-    const classId = resolveTeacherClassId(options)
     const response = await apiClient.get('/api/teacher/allStudentExperiments', {
-      params: classId ? { classId } : undefined
+      params: buildTeacherClassParams(options)
     })
     if (response?.success === false) {
       throw createFriendlyError({ data: response }, response.message || '获取数据失败')
