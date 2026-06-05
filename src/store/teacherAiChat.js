@@ -109,6 +109,7 @@ export const useTeacherAiChatStore = defineStore('teacherAiChat', {
 
     clearMessages() {
       this.messages = []
+      this.draft = ''
       this.loading = false
       this.streaming = false
     },

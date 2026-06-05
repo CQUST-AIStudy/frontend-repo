@@ -1,3 +1,147 @@
+<script setup>
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
+import { getKnowledgeBases } from '../../api/rag'
+import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/studentAiChat'
+
+const chatStore = useStudentAiChatStore()
+const {
+  messages,
+  userInput,
+  isTyping,
+  selectedCourseSpaceId,
+  isOpenMode,
+  assistantNotice
+} = storeToRefs(chatStore)
+
+const chatContainer = ref(null)
+const courseSpaces = ref([])
+
+const quickPrompts = [
+  { label: '顺序表和链表', prompt: '请解释顺序表和链表的区别，并给出适用场景。' },
+  { label: '树的遍历', prompt: '前序、中序、后序遍历分别是什么？如何记忆？' },
+  { label: '复杂度分析', prompt: '如何分析一个算法的时间复杂度和空间复杂度？' },
+  { label: '代码优化', prompt: '我应该如何优化一个查找算法？请给我常见思路。' }
+]
+
+const selectedCourseSpace = computed(() => {
+  return courseSpaces.value.find((item) => String(item.id) === String(selectedCourseSpaceId.value)) || null
+})
+
+const visibleMessages = computed(() => {
+  return messages.value.filter((message) => {
+    return message.role !== 'ai' || message.content || message.citations?.length
+  })
+})
+
+const showPromptSuggestions = computed(() => {
+  return !isTyping.value && !messages.value.some((message) => message.role === 'user')
+})
+
+const showTypingHint = computed(() => {
+  const lastMessage = messages.value[messages.value.length - 1]
+  return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
+})
+
+const currentModeText = computed(() => {
+  if (!selectedCourseSpaceId.value) return '普通聊天'
+  return isOpenMode.value ? 'RAG 开放模式' : 'RAG 严格模式'
+})
+
+const modeTooltip = computed(() => {
+  if (!selectedCourseSpaceId.value) {
+    return '未选择课程空间时使用普通聊天；选择课程空间后可切换 RAG 严格/开放模式。'
+  }
+  return isOpenMode.value
+    ? '开放模式：课程资料不足时允许补充联网检索。'
+    : '严格模式：只依据课程资料回答。'
+})
+
+const modeSummaryText = computed(() => {
+  return selectedCourseSpaceId.value ? '当前为 RAG 问答模式' : '当前为普通聊天模式'
+})
+
+const selectedSpaceSummary = computed(() => {
+  if (!selectedCourseSpaceId.value) return '未选择课程空间时使用普通聊天'
+  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
+})
+
+const canClearConversation = computed(() => {
+  return !isTyping.value && (messages.value.length > 0 || !!userInput.value.trim())
+})
+
+function buildCourseSpaceLabel(courseSpace) {
+  if (!courseSpace) return ''
+  const parts = [courseSpace.courseName, courseSpace.name, courseSpace.term].filter(Boolean)
+  const scope = courseSpace.docVisibility === 'class'
+    ? '班级授权'
+    : courseSpace.docVisibility === 'public'
+      ? '公开'
+      : null
+  if (scope) parts.push(scope)
+  return parts.join(' / ') || `课程空间 ${courseSpace.id}`
+}
+
+async function scrollToBottom() {
+  await nextTick()
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+  }
+}
+
+async function fetchCourseSpaces() {
+  try {
+    const spaces = await getKnowledgeBases()
+    courseSpaces.value = spaces
+    if (!selectedCourseSpaceId.value && spaces.length > 0) {
+      chatStore.setCourseSpace(spaces[0].id)
+    }
+  } catch (error) {
+    const friendlyMessage = formatStudentAssistantError(error?.message, !!selectedCourseSpaceId.value)
+    chatStore.setAssistantNotice(friendlyMessage)
+    uiMessage.warning(friendlyMessage)
+    courseSpaces.value = []
+  }
+}
+
+async function sendMessage() {
+  await chatStore.sendMessage()
+  await scrollToBottom()
+}
+
+function useQuickPrompt(prompt) {
+  chatStore.setInput(prompt)
+  nextTick(() => {
+    const textarea = document.querySelector('.input-area textarea')
+    if (textarea) textarea.focus()
+  })
+}
+
+async function clearConversation() {
+  try {
+    await messageBox.confirm('清空当前 AI 聊天记录和输入草稿？', '提示', {
+      confirmButtonText: '清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.clearMessages()
+    await scrollToBottom()
+  } catch {
+    // 用户取消清空。
+  }
+}
+
+watch(messages, scrollToBottom, { deep: true })
+watch(isTyping, scrollToBottom)
+
+onMounted(() => {
+  fetchCourseSpaces()
+  scrollToBottom()
+})
+</script>
+
 <template>
   <div class="flex h-full min-h-0 bg-[#f5f7fa] p-3 max-[640px]:p-2">
     <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#e6eaf0] bg-white">
@@ -10,6 +154,25 @@
         show-icon
       />
 
+      <div class="flex flex-none items-center justify-between gap-3 border-b border-[#e6eaf0] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
+        <div class="min-w-0">
+          <h2 class="m-0 text-[18px] font-bold leading-tight text-[#1d1d1f]">
+            AI 学习助手
+          </h2>
+          <p class="m-0 mt-1 truncate text-[12px] text-[#909399]">
+            已保存 {{ messages.length }} 条聊天内容，切换目录后可继续查看。
+          </p>
+        </div>
+        <ui-button
+          type="button"
+          :disabled="!canClearConversation"
+          class="min-h-9 rounded-[10px] border border-[#e6eaf0] bg-[#f8fafc] px-3 text-[13px] text-[#606266] shadow-none hover:border-[#ff3b30]/30 hover:text-[#ff3b30]"
+          @click="clearConversation"
+        >
+          清空记录
+        </ui-button>
+      </div>
+
       <div
         ref="chatContainer"
         class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 max-[640px]:px-3"
@@ -19,11 +182,11 @@
           class="mx-auto flex min-h-full w-full max-w-[820px] flex-1 flex-col items-center justify-center gap-6 py-8 text-center"
         >
           <div class="flex flex-col gap-2">
-            <h2 class="m-0 text-[24px] font-bold leading-tight text-[#1d1d1f] max-[640px]:text-[21px]">
-              AI 学习助手
-            </h2>
+            <h3 class="m-0 text-[24px] font-bold leading-tight text-[#1d1d1f] max-[640px]:text-[21px]">
+              从一个数据结构问题开始
+            </h3>
             <p class="m-0 max-w-[680px] text-[14px] leading-7 text-[#6e6e73]">
-              选择一个提示词开始，或直接输入你的数据结构问题。已授权课程空间会用于带引用的 RAG 问答。
+              选择一个提示词开始，或直接输入你的问题。选择课程空间后，将使用带引用的 RAG 问答。
             </p>
           </div>
 
@@ -77,7 +240,10 @@
               v-if="message.citations && message.citations.length"
               class="mt-2 flex flex-col gap-1 border-t border-[rgba(126,157,183,0.2)] pt-2 text-[12px] leading-5 text-[#606266]"
             >
-              <div v-for="cite in message.citations" :key="`${index}-${cite.index}`">
+              <div
+                v-for="cite in message.citations"
+                :key="`${message.id || index}-${cite.index}`"
+              >
                 [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
                 <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
                 <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
@@ -134,7 +300,7 @@
           </div>
 
           <span class="min-w-0 truncate text-[12px] text-[#909399]">
-            {{ selectedCourseSpaceId ? `当前空间：${buildCourseSpaceLabel(selectedCourseSpace)}` : '未选择课程空间时使用普通聊天' }}
+            {{ selectedSpaceSummary }}
           </span>
         </div>
 
@@ -148,11 +314,12 @@
         />
 
         <div class="flex items-center justify-between gap-3 text-[12px] text-[#909399] max-[640px]:items-stretch max-[640px]:flex-col">
-          <span>{{ selectedCourseSpaceId ? '当前为 RAG 问答模式' : '当前为普通聊天模式' }}</span>
+          <span>{{ modeSummaryText }}</span>
           <ui-button
             type="primary"
             :disabled="!userInput.trim() || isTyping"
             :loading="isTyping"
+            class="max-[640px]:w-full"
             @click="sendMessage"
           >
             发送
@@ -162,230 +329,6 @@
     </section>
   </div>
 </template>
-
-<script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { message as uiMessage } from '@/services/feedback'
-import { renderSafeMarkdown } from '@/utils/safeHtml'
-import { buildApiUrl } from '../../config/runtime'
-import { getKnowledgeBases, normalizeSourcesForDisplay, streamRagChat } from '../../api/rag'
-
-const userInput = ref('')
-const messages = ref([])
-const isTyping = ref(false)
-const chatContainer = ref(null)
-const courseSpaces = ref([])
-const selectedCourseSpaceId = ref(null)
-const isOpenMode = ref(false)
-const assistantNotice = ref('')
-
-const quickPrompts = [
-  { label: '顺序表和链表', prompt: '请解释顺序表和链表的区别，并给出适用场景。' },
-  { label: '树的遍历', prompt: '前序、中序、后序遍历分别是什么？如何记忆？' },
-  { label: '复杂度分析', prompt: '如何分析一个算法的时间复杂度和空间复杂度？' },
-  { label: '代码优化', prompt: '我该如何优化一个查找算法？请给我常见思路。' }
-]
-
-const selectedCourseSpace = computed(() => {
-  return courseSpaces.value.find((item) => item.id === selectedCourseSpaceId.value) || null
-})
-
-const visibleMessages = computed(() => {
-  return messages.value.filter((message) => {
-    return message.role !== 'ai' || message.content || message.citations?.length
-  })
-})
-
-const showPromptSuggestions = computed(() => {
-  return !isTyping.value && !messages.value.some((message) => message.role === 'user')
-})
-
-const showTypingHint = computed(() => {
-  const lastMessage = messages.value[messages.value.length - 1]
-  return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
-})
-
-const currentModeText = computed(() => {
-  if (!selectedCourseSpaceId.value) return '普通聊天'
-  return isOpenMode.value ? 'RAG 开放模式' : 'RAG 严格模式'
-})
-
-const modeTooltip = computed(() => {
-  if (!selectedCourseSpaceId.value) return '未选择课程空间时使用普通聊天；选择课程空间后可切换 RAG 严格/开放模式。'
-  return isOpenMode.value
-    ? '开放模式：课程资料不足时允许补充联网检索。'
-    : '严格模式：只依据课程资料回答。'
-})
-
-function buildCourseSpaceLabel(courseSpace) {
-  if (!courseSpace) return ''
-  const parts = [courseSpace.courseName, courseSpace.name, courseSpace.term].filter(Boolean)
-  const scope = courseSpace.docVisibility === 'class' ? '班级授权' : courseSpace.docVisibility === 'public' ? '公开' : null
-  if (scope) parts.push(scope)
-  return parts.join(' / ') || `课程空间 ${courseSpace.id}`
-}
-
-async function scrollToBottom() {
-  await nextTick()
-  if (chatContainer.value) {
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-  }
-}
-
-async function fetchCourseSpaces() {
-  try {
-    const spaces = await getKnowledgeBases()
-    courseSpaces.value = spaces
-    if (!selectedCourseSpaceId.value && spaces.length > 0) {
-      selectedCourseSpaceId.value = spaces[0].id
-    }
-  } catch (error) {
-    const isRagMode = !!selectedCourseSpaceId.value
-    const friendlyMessage = formatAssistantError(error?.message, isRagMode)
-    assistantNotice.value = friendlyMessage
-    uiMessage.warning(friendlyMessage)
-    courseSpaces.value = []
-  }
-}
-
-async function readErrorMessage(response) {
-  const contentType = response.headers.get('content-type') || ''
-  try {
-    if (contentType.includes('application/json')) {
-      const payload = await response.json()
-      return payload?.message || payload?.detail || payload?.error || `HTTP ${response.status}`
-    }
-    const text = await response.text()
-    return text || `HTTP ${response.status}`
-  } catch {
-    return `HTTP ${response.status}`
-  }
-}
-
-function formatAssistantError(message, isRagMode) {
-  const raw = String(message || '')
-  if (raw.includes('DASHSCOPE_API_KEY')) {
-    return '后端生成模型未配置，请先在 RAG 服务中配置 DASHSCOPE_API_KEY。'
-  }
-  if (raw.includes('RAG 生成失败') || raw.includes('生成模型') || raw.includes('DashScope')) {
-    return raw
-  }
-  if (raw.includes('timeout') || raw.includes('timed out') || raw.includes('ReadTimeout')) {
-    return isRagMode
-      ? 'RAG 资料检索已完成，但生成模型响应超时，请稍后重试。'
-      : 'AI 生成响应超时，请稍后重试。'
-  }
-  if (raw.includes('OPENAI_API_KEY') || raw.includes('AI service is not configured')) {
-    return '后端 AI 服务暂未配置，请先设置 OPENAI_API_KEY。'
-  }
-  if (raw.includes('course space')) {
-    return '当前没有可访问的课程空间，暂时无法使用 RAG 问答。'
-  }
-  if (raw.includes('401')) {
-    return isRagMode
-      ? '当前登录状态无效，RAG 问答暂不可用。'
-      : '当前登录状态无效，AI 聊天暂不可用。'
-  }
-  if (raw.includes('403')) {
-    return isRagMode
-      ? '当前账号无权使用该课程空间，RAG 问答暂不可用。'
-      : '当前账号无权使用 AI 聊天。'
-  }
-  return isRagMode ? 'RAG 问答暂时不可用。' : 'AI 聊天暂时不可用。'
-}
-
-async function sendMessage() {
-  const text = userInput.value.trim()
-  if (!text || isTyping.value) return
-  assistantNotice.value = ''
-
-  messages.value.push({ role: 'user', content: text, time: new Date().toLocaleTimeString() })
-  userInput.value = ''
-  await scrollToBottom()
-
-  isTyping.value = true
-  const aiIndex = messages.value.length
-  messages.value.push({ role: 'ai', content: '', time: new Date().toLocaleTimeString(), citations: [] })
-
-  try {
-    const isRagMode = !!selectedCourseSpaceId.value
-    if (isRagMode) {
-      await streamRagChat({
-        query: text,
-        knowledgeBaseIds: [String(selectedCourseSpaceId.value)],
-        mode: isOpenMode.value ? 'open' : 'strict',
-        options: {
-          topK: 10,
-          rerankTopN: 3,
-          scoreThreshold: 0,
-          enableRerank: true,
-          temperature: 0.7,
-          maxTokens: 1024,
-        },
-      }, {
-        onRetrieval: ({ sources }) => {
-          messages.value[aiIndex].citations = normalizeSourcesForDisplay(sources || [])
-          scrollToBottom()
-        },
-        onDelta: ({ content }) => {
-          messages.value[aiIndex].content += content || ''
-          scrollToBottom()
-        },
-      })
-    } else {
-      const response = await fetch(buildApiUrl('/api/chat'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userInput: text })
-      })
-
-      if (!response.ok) {
-        throw new Error(await readErrorMessage(response))
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('No response body reader')
-      }
-
-      const decoder = new TextDecoder()
-      let done = false
-      while (!done) {
-        const chunk = await reader.read()
-        done = chunk.done
-        if (done) break
-        messages.value[aiIndex].content += decoder.decode(chunk.value, { stream: true })
-        await scrollToBottom()
-      }
-    }
-  } catch (error) {
-    const isRagMode = !!selectedCourseSpaceId.value
-    const friendlyMessage = formatAssistantError(error?.message, isRagMode)
-    assistantNotice.value = friendlyMessage
-    uiMessage.warning(friendlyMessage)
-    const current = messages.value[aiIndex]
-    if (current && !current.content) {
-      current.content = friendlyMessage
-    }
-  } finally {
-    isTyping.value = false
-    await scrollToBottom()
-  }
-}
-
-function useQuickPrompt(prompt) {
-  userInput.value = prompt
-  nextTick(() => {
-    const textarea = document.querySelector('.input-area textarea')
-    if (textarea) textarea.focus()
-  })
-}
-
-onMounted(() => {
-  fetchCourseSpaces()
-})
-</script>
 
 <style scoped>
 .assistant-markdown {
