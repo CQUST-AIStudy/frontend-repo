@@ -5,7 +5,7 @@
     </UiPageHeader>
 
     <div class="mt-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] p-5 min-w-0 overflow-x-auto max-[640px]:p-4 max-[640px]:rounded-2xl">
-      <UiTable class="w-full text-left text-[13px]">
+      <table class="w-full text-left text-[13px]">
         <thead>
           <tr class="border-b border-black/[0.06]">
             <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl w-[70px]">ID</th>
@@ -18,45 +18,103 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in experiments" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
-            <td class="py-3 px-3 text-[#6e6e73]">{{ row.id }}</td>
-            <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
-            <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
-            <td class="py-3 px-3 text-[#1d1d1f]">{{ row.submissionCount }}</td>
-            <td class="py-3 px-3 text-[#1d1d1f]">{{ row.averageScore }}</td>
-            <td class="py-3 px-3">
-              <span class="inline-flex items-center h-6 px-2.5 rounded-full text-[11px] font-bold" :class="statusClass(row.status)">{{ getStatusText(row.status) }}</span>
-            </td>
-            <td class="py-3 px-3">
-              <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors" @click="viewDetail(row.id)">查看详情</a>
-              <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors ml-3" @click="viewSubmissions(row.id)">学生提交</a>
+          <tr v-if="loading">
+            <td colspan="7" class="py-12 text-center text-[#86868b] text-sm">正在加载实验列表...</td>
+          </tr>
+          <tr v-else-if="errorMessage">
+            <td colspan="7" class="py-12 text-center">
+              <div class="inline-flex flex-col items-center gap-3 text-sm text-[#ff3b30]">
+                <span>{{ errorMessage }}</span>
+                <UiButton
+                  class="h-8 rounded-[9px] border border-[rgba(255,59,48,0.18)] bg-[rgba(255,59,48,0.08)] px-3 text-xs font-semibold text-[#ff3b30] transition-colors hover:bg-[rgba(255,59,48,0.12)]"
+                  @click="loadExperiments"
+                >
+                  重新加载
+                </UiButton>
+              </div>
             </td>
           </tr>
-          <tr v-if="!experiments.length">
-            <td colspan="7" class="py-12 text-center text-[#aeaeb2] text-sm">暂无实验数据</td>
+          <template v-else-if="experiments.length">
+            <tr v-for="row in experiments" :key="row.rowKey" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <td class="py-3 px-3 text-[#6e6e73]">{{ row.displayId }}</td>
+              <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
+              <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
+              <td class="py-3 px-3 text-[#1d1d1f]">{{ row.submissionCount }}</td>
+              <td class="py-3 px-3 text-[#1d1d1f]">{{ row.averageScore }}</td>
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center h-6 px-2.5 rounded-full text-[11px] font-bold" :class="statusClass(row.status)">{{ getStatusText(row.status) }}</span>
+              </td>
+              <td class="py-3 px-3">
+                <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors" @click="viewDetail(row.id)">查看详情</a>
+                <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors ml-3" @click="viewSubmissions(row.id)">学生提交</a>
+              </td>
+            </tr>
+          </template>
+          <tr v-else>
+            <td colspan="7" class="py-12 text-center text-[#aeaeb2] text-sm">暂无我创建的实验</td>
           </tr>
         </tbody>
-      </UiTable>
+      </table>
     </div>
   </div>
 </template>
 
 <script setup>
 import logger from '@/utils/logger'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api'
 
 const router = useRouter()
 const experiments = ref([])
+const loading = shallowRef(false)
+const errorMessage = shallowRef('')
+
+const unwrapExperimentList = response => {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.data)) return response.data
+  if (Array.isArray(response?.data?.data)) return response.data.data
+  if (Array.isArray(response?.experiments)) return response.experiments
+  return []
+}
+
+const formatNumber = value => {
+  if (value === null || value === undefined || value === '') return '-'
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric)) return String(value)
+  return Number.isInteger(numeric) ? numeric : Number(numeric.toFixed(1))
+}
+
+const normalizeExperiment = (item = {}, index) => {
+  const id = item.id ?? item.experimentId ?? item.experiment_id
+
+  return {
+    id,
+    rowKey: id ?? `${item.name || item.experimentName || 'experiment'}-${index}`,
+    displayId: id ?? '-',
+    name: item.name || item.experimentName || item.title || '未命名实验',
+    deadline: item.deadline || item.dueDate || item.endTime || '-',
+    submissionCount: formatNumber(item.submissionCount ?? item.submittedCount ?? item.submitCount ?? item.submission_count ?? 0),
+    averageScore: formatNumber(item.averageScore ?? item.avgScore ?? item.avg_score),
+    status: item.status || 'unknown'
+  }
+}
 
 const loadExperiments = async () => {
+  loading.value = true
+  errorMessage.value = ''
+
   try {
-    const response = await api.getTeacherExperimentList()
-    if (response?.data && Array.isArray(response.data)) experiments.value = response.data
-    else if (Array.isArray(response)) experiments.value = response
-    else experiments.value = response?.data?.data || []
-  } catch (e) { logger.error('加载实验列表失败:', e); experiments.value = [] }
+    const response = await api.getTeacherExperimentList({ scope: 'all' })
+    if (response?.success === false) throw new Error(response.message || '实验列表加载失败')
+    experiments.value = unwrapExperimentList(response).map(normalizeExperiment)
+  } catch (e) {
+    logger.error('加载实验列表失败:', e)
+    experiments.value = []
+    errorMessage.value = '实验列表暂时无法加载，请稍后重试'
+  } finally {
+    loading.value = false
+  }
 }
 
 const getStatusText = s => ({ active: '进行中', draft: '草稿', expired: '已截止' }[s] || '未知')

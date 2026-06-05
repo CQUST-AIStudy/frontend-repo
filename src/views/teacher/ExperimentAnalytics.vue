@@ -19,10 +19,9 @@
             :value="prefix"
           >{{ prefix }}</UiOption>
         </UiSelect>
-        <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
       </div>
 
-      <div class="relative w-[360px] max-[768px]:!w-full">
+      <div v-if="!showComparison" class="relative w-[360px] max-[768px]:!w-full">
         <UiSelect
           v-model="selectedExp"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
@@ -35,18 +34,21 @@
             :value="exp.experimentId"
           >{{ exp.name }}</UiOption>
         </UiSelect>
-        <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div v-else class="flex min-h-10 w-[360px] items-center justify-between gap-3 rounded-[10px] bg-[#f5f5f7] px-3 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] max-[768px]:!w-full">
+        <span class="text-[12px] font-semibold text-[#6e6e73]">对比范围</span>
+        <span class="min-w-0 truncate text-sm font-medium text-[#1d1d1f]">{{ comparisonScopeLabel }}</span>
       </div>
 
       <UiButton
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
         @click="toggleComparison"
       >
-        {{ showComparison ? '返回单实验分析' : '实验横向对比' }}
+        {{ showComparison ? '返回单实验分析' : '对比当前范围实验' }}
       </UiButton>
 
       <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff] ml-auto max-[768px]:ml-0">
-        {{ activeClassLabel }} / {{ experiments.length }} 个实验
+        {{ activeClassLabel }} / {{ experiments.length }} 个可分析实验
       </span>
     </div>
 
@@ -82,8 +84,17 @@
 
     <template v-if="showComparison">
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6" :aria-busy="compLoading">
-        <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">实验横向对比</div>
-        <div v-if="comparisonItems.length" ref="compChartRef" class="h-[340px]"></div>
+        <div class="mb-4 flex items-start justify-between gap-4 max-[640px]:flex-col">
+          <div class="min-w-0">
+            <div class="text-[15px] font-semibold text-[#1d1d1f]">对比当前范围实验</div>
+            <div class="mt-1 text-xs text-[#6e6e73]">{{ comparisonSummary }}</div>
+          </div>
+          <span class="inline-flex h-[24px] items-center rounded-full bg-[rgba(0,122,255,0.08)] px-2.5 text-[11px] font-semibold text-[#007aff]">
+            平均分 / 难度 / 区分度
+          </span>
+        </div>
+        <div v-if="compLoading" class="py-12 text-center text-[#86868b] text-sm">正在加载对比数据...</div>
+        <div v-else-if="comparisonItems.length" ref="compChartRef" class="h-[340px]"></div>
         <div v-else-if="!compLoading" class="py-12 text-center text-[#aeaeb2] text-sm">暂无可对比的实验数据</div>
       </div>
     </template>
@@ -319,6 +330,10 @@ const problemAccuracy = computed(() => {
 })
 
 const activeClassLabel = computed(() => selectedClass.value || '全部实验')
+const comparisonScopeLabel = computed(() => selectedClass.value ? `${selectedClass.value} 范围` : '全部实验范围')
+const comparisonSummary = computed(() => (
+  `${comparisonScopeLabel.value}内共有 ${experiments.value.length} 个可分析实验，当前展示 ${comparisonItems.value.length} 个有对比指标的实验。`
+))
 const scopeInfo = computed(() => data.value?.scope || null)
 
 const scopeTitle = computed(() => {
@@ -415,6 +430,54 @@ function normalizeArray(payload) {
   if (Array.isArray(payload?.data)) return payload.data
   if (Array.isArray(payload)) return payload
   return []
+}
+
+function getExperimentId(item = {}) {
+  return item.experimentId ?? item.id ?? item.experiment_id ?? null
+}
+
+function normalizeExperiment(item = {}, index = 0) {
+  const experimentId = getExperimentId(item)
+  return {
+    ...item,
+    experimentId,
+    name: item.name || item.experimentName || item.title || `实验 ${index + 1}`,
+  }
+}
+
+function normalizeExperimentList(payload) {
+  return normalizeArray(payload)
+    .map(normalizeExperiment)
+    .filter(item => item.experimentId !== null && item.experimentId !== undefined && item.experimentId !== '')
+}
+
+function normalizeComparisonItem(item = {}, index = 0) {
+  const experimentId = getExperimentId(item)
+  return {
+    ...item,
+    experimentId,
+    name: item.name || item.experimentName || item.title || `实验 ${index + 1}`,
+  }
+}
+
+function alignComparisonItems(items) {
+  const experimentById = new Map(experiments.value.map(item => [String(item.experimentId), item]))
+  const experimentNameSet = new Set(experiments.value.map(item => String(item.name || '').trim()).filter(Boolean))
+  const normalizedItems = normalizeArray(items).map(normalizeComparisonItem)
+  const hasItemIds = normalizedItems.some(item => item.experimentId !== null && item.experimentId !== undefined && item.experimentId !== '')
+
+  if (!experiments.value.length) return []
+
+  if (hasItemIds) {
+    return normalizedItems
+      .filter(item => experimentById.has(String(item.experimentId)))
+      .map(item => ({
+        ...item,
+        name: experimentById.get(String(item.experimentId))?.name || item.name,
+      }))
+  }
+
+  return normalizedItems.filter(item => experimentNameSet.has(String(item.name || '').trim()))
 }
 
 function isBackendInternalError(message) {
@@ -514,12 +577,12 @@ async function loadExperiments({ autoSelect = true } = {}) {
   errorMessage.value = ''
 
   try {
-    let list = normalizeArray(await getAnalyticsExperiments(selectedClass.value || undefined))
+    let list = normalizeExperimentList(await getAnalyticsExperiments(selectedClass.value || undefined))
 
     if (!list.length && selectedClass.value) {
       filterFallback.value = true
       selectedClass.value = ''
-      list = normalizeArray(await getAnalyticsExperiments())
+      list = normalizeExperimentList(await getAnalyticsExperiments())
     }
 
     experiments.value = list
@@ -536,7 +599,7 @@ async function loadExperiments({ autoSelect = true } = {}) {
       selectedExp.value = autoSelect ? experiments.value[0].experimentId : null
     }
 
-    if (selectedExp.value) {
+    if (!showComparison.value && selectedExp.value) {
       await loadAnalytics()
     } else {
       data.value = null
@@ -584,11 +647,10 @@ async function loadAnalytics() {
 async function loadComparison() {
   compLoading.value = true
   errorMessage.value = ''
+
   try {
     const res = await getExperimentComparison(selectedClass.value || undefined)
-    comparisonItems.value = normalizeArray(res)
-    await nextTick()
-    renderComparisonChart()
+    comparisonItems.value = alignComparisonItems(res)
   } catch (error) {
     comparisonItems.value = []
     errorMessage.value = getErrorText(error, EXPERIMENT_COMPARISON_ERROR_TEXT)
@@ -597,6 +659,9 @@ async function loadComparison() {
   } finally {
     compLoading.value = false
   }
+
+  await nextTick()
+  renderComparisonChart()
 }
 
 function renderDistChart() {
@@ -764,6 +829,8 @@ function handleResize() {
 watch(showComparison, async value => {
   if (value) {
     await loadComparison()
+  } else if (selectedExp.value) {
+    await loadAnalytics()
   }
 })
 
