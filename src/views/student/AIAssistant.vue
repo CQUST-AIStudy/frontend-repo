@@ -61,10 +61,16 @@
               <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
               <span>{{ message.time }}</span>
             </div>
+            <p
+              v-if="message.role === 'user'"
+              class="m-0 whitespace-pre-wrap [overflow-wrap:anywhere]"
+            >
+              {{ message.content }}
+            </p>
             <div
-              class="[overflow-wrap:anywhere] [&_code]:rounded-[4px] [&_code]:bg-[rgba(15,23,42,0.08)] [&_code]:px-1 [&_code]:py-[1px] [&_code]:font-mono [&_code]:text-[0.92em] [&_li]:my-0.5 [&_ol]:my-1.5 [&_ol]:pl-5 [&_p]:mb-1.5 [&_p]:mt-0 [&_p:last-child]:mb-0 [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-[8px] [&_pre]:bg-[rgba(15,23,42,0.08)] [&_pre]:p-2.5 [&_ul]:my-1.5 [&_ul]:pl-5"
-              :class="message.role === 'user' ? '[&_code]:bg-[rgba(255,255,255,0.18)] [&_pre]:bg-[rgba(255,255,255,0.18)]' : ''"
-              v-html="formatMessage(message.content)"
+              v-else
+              class="assistant-markdown"
+              v-html="renderSafeMarkdown(message.content)"
             />
 
             <div
@@ -160,8 +166,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { buildApiUrl } from '../../config/runtime'
 import { getKnowledgeBases, normalizeSourcesForDisplay, streamRagChat } from '../../api/rag'
 
@@ -211,11 +216,6 @@ const modeTooltip = computed(() => {
     ? '开放模式：课程资料不足时允许补充联网检索。'
     : '严格模式：只依据课程资料回答。'
 })
-
-function formatMessage(content) {
-  const rawHtml = marked.parse(content || '')
-  return DOMPurify.sanitize(rawHtml)
-}
 
 function buildCourseSpaceLabel(courseSpace) {
   if (!courseSpace) return ''
@@ -386,3 +386,176 @@ onMounted(() => {
   fetchCourseSpaces()
 })
 </script>
+
+<style scoped>
+.assistant-markdown {
+  color: #202124;
+  font-size: 14px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.assistant-markdown :deep(p) {
+  margin: 0 0 8px;
+}
+
+.assistant-markdown :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.assistant-markdown :deep(h1),
+.assistant-markdown :deep(h2),
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  margin: 12px 0 8px;
+  color: #111827;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.assistant-markdown :deep(h1) {
+  font-size: 18px;
+}
+
+.assistant-markdown :deep(h2) {
+  font-size: 16px;
+}
+
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  font-size: 15px;
+}
+
+.assistant-markdown :deep(ul),
+.assistant-markdown :deep(ol) {
+  margin: 8px 0;
+  padding-left: 22px;
+}
+
+.assistant-markdown :deep(li) {
+  margin: 3px 0;
+}
+
+.assistant-markdown :deep(blockquote) {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border-left: 3px solid #60a5fa;
+  border-radius: 8px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #475569;
+}
+
+.assistant-markdown :deep(a) {
+  color: #0b63ce;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(table) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.assistant-markdown :deep(th),
+.assistant-markdown :deep(td) {
+  padding: 7px 9px;
+  border: 1px solid #d8dee8;
+  white-space: nowrap;
+}
+
+.assistant-markdown :deep(th) {
+  background: #eef3f8;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.assistant-markdown :deep(:not(pre) > code) {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #1d4ed8;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.92em;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(.markdown-code-block) {
+  max-width: 100%;
+  margin: 10px 0;
+  padding: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  background: #0f172a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.assistant-markdown :deep(.markdown-code-block code) {
+  display: block;
+  min-width: max-content;
+  padding: 12px 14px;
+  background: transparent;
+  color: #e5edf7;
+  font-family: Consolas, "SFMono-Regular", "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.62;
+  overflow-wrap: normal;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.assistant-markdown :deep(.hljs-keyword),
+.assistant-markdown :deep(.hljs-selector-tag),
+.assistant-markdown :deep(.hljs-built_in),
+.assistant-markdown :deep(.hljs-type) {
+  color: #93c5fd;
+}
+
+.assistant-markdown :deep(.hljs-string),
+.assistant-markdown :deep(.hljs-regexp),
+.assistant-markdown :deep(.hljs-attr),
+.assistant-markdown :deep(.hljs-symbol) {
+  color: #86efac;
+}
+
+.assistant-markdown :deep(.hljs-title),
+.assistant-markdown :deep(.hljs-name),
+.assistant-markdown :deep(.hljs-section),
+.assistant-markdown :deep(.hljs-function) {
+  color: #facc15;
+}
+
+.assistant-markdown :deep(.hljs-number),
+.assistant-markdown :deep(.hljs-literal),
+.assistant-markdown :deep(.hljs-variable),
+.assistant-markdown :deep(.hljs-template-variable) {
+  color: #fca5a5;
+}
+
+.assistant-markdown :deep(.hljs-comment),
+.assistant-markdown :deep(.hljs-quote) {
+  color: #94a3b8;
+}
+
+.assistant-markdown :deep(.hljs-meta),
+.assistant-markdown :deep(.hljs-operator),
+.assistant-markdown :deep(.hljs-punctuation) {
+  color: #c4b5fd;
+}
+
+@media (max-width: 640px) {
+  .assistant-markdown {
+    font-size: 13.5px;
+  }
+
+  .assistant-markdown :deep(.markdown-code-block code) {
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+}
+</style>
