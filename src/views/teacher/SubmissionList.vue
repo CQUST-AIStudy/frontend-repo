@@ -86,7 +86,7 @@
       </div>
 
       <div class="overflow-x-auto">
-        <UiTable v-if="pagedSubmissions.length" class="w-full text-left text-[13px]">
+        <table v-if="pagedSubmissions.length" class="w-full text-left text-[13px] border-collapse">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[55px]">
@@ -138,7 +138,7 @@
               </td>
             </tr>
           </tbody>
-        </UiTable>
+        </table>
         <div v-else class="py-12 text-center">
           <div class="text-[40px] mb-3 opacity-40">📋</div>
           <p class="text-[14px] text-[#aeaeb2]">暂无数据</p>
@@ -272,7 +272,7 @@ const getSubmitTimestamp = (value) => {
 const filteredSubmissions = computed(() => {
   let result = [...submissions.value]
   if (filterForm.experimentId) {
-    result = result.filter((sub) => sub.experimentId === filterForm.experimentId)
+    result = result.filter((sub) => String(sub.experimentId) === String(filterForm.experimentId))
   }
   if (filterForm.studentName) {
     const keyword = filterForm.studentName.toLowerCase()
@@ -417,14 +417,15 @@ const normalizeStatus = (item) => {
 const loadSubmissions = async () => {
   tableLoading.value = true
   try {
-    const raw = await api.getAllStudentExperiments()
+    const params = experimentId.value ? { experimentId: experimentId.value } : {}
+    const raw = await api.getAllStudentExperiments(params)
     const list = Array.isArray(raw) ? raw : raw?.data || []
     const data = list.map((item) => {
       const status = normalizeStatus(item)
       const hasSubmission = status === 'submitted' || status === 'graded' || status === 'rejected'
       return {
         id: `${normalizeStudentId(item.studentId)}-${item.experimentId}`,
-        experimentId: item.experimentId,
+        experimentId: Number(item.experimentId),
         experimentName: item.experimentName,
         studentId: normalizeStudentId(item.studentId),
         studentName: item.studentName,

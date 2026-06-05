@@ -614,7 +614,7 @@ const loadExperimentDetail = async () => {
 const loadSubmissions = async () => {
   submissionsLoading.value = true
   try {
-    const allStudentExperiments = await api.getAllStudentExperiments()
+    const allStudentExperiments = await api.getAllStudentExperiments({ experimentId: experimentId.value })
 
     const submissions = allStudentExperiments.filter(item =>
       item.experimentId === experimentId.value

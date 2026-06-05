@@ -143,6 +143,12 @@ const buildTeacherClassParams = (options) => {
   return classId ? { classId } : undefined
 }
 
+const buildExperimentParams = (options) => {
+  if (!options) return {}
+  const experimentId = options.experimentId || options.experiment_id
+  return experimentId != null ? { experimentId: Number(experimentId) } : {}
+}
+
 const unwrapList = (response, keys = ['data']) => {
   if (Array.isArray(response)) return response
   for (const key of keys) {
@@ -320,12 +326,13 @@ export default {
 
   async getAllStudentExperiments(options) {
     const response = await apiClient.get('/api/teacher/allStudentExperiments', {
-      params: buildTeacherClassParams(options)
+      params: { ...buildTeacherClassParams(options), ...buildExperimentParams(options) }
     })
-    if (response?.success === false) {
-      throw createFriendlyError({ data: response }, response.message || '获取数据失败')
+    const result = response.data
+    if (result?.success === false) {
+      throw createFriendlyError({ data: result }, result.message || '获取数据失败')
     }
-    return normalizeSubmissionList(response)
+    return normalizeSubmissionList(result)
   },
 
   async getSubmissionDetail(submissionId) {
