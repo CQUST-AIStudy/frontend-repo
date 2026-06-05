@@ -264,6 +264,17 @@ async function readErrorMessage(response) {
 
 function formatAssistantError(message, isRagMode) {
   const raw = String(message || '')
+  if (raw.includes('DASHSCOPE_API_KEY')) {
+    return '后端生成模型未配置，请先在 RAG 服务中配置 DASHSCOPE_API_KEY。'
+  }
+  if (raw.includes('RAG 生成失败') || raw.includes('生成模型') || raw.includes('DashScope')) {
+    return raw
+  }
+  if (raw.includes('timeout') || raw.includes('timed out') || raw.includes('ReadTimeout')) {
+    return isRagMode
+      ? 'RAG 资料检索已完成，但生成模型响应超时，请稍后重试。'
+      : 'AI 生成响应超时，请稍后重试。'
+  }
   if (raw.includes('OPENAI_API_KEY') || raw.includes('AI service is not configured')) {
     return '后端 AI 服务暂未配置，请先设置 OPENAI_API_KEY。'
   }
