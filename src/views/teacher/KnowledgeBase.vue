@@ -63,7 +63,7 @@
       </div>
     </div>
     <div v-else class="space-detail-view">
-      <div class="flex items-center gap-3 mb-4">
+      <div class="detail-header flex items-center gap-3 mb-4">
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="backToList">
           <ArrowLeft class="w-4 h-4" />
           返回
@@ -76,12 +76,23 @@
       </div>
 
       <!-- Custom Tabs -->
-      <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
-        <UiButton v-for="tab in detailTabs" :key="tab.name" @click="activeTab = tab.name" class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none" :class="activeTab === tab.name ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] bg-transparent'">{{ tab.label }}</UiButton>
+      <div class="detail-tabs">
+        <span class="detail-tab-indicator" :style="activeTabIndicatorStyle"></span>
+        <UiButton
+          v-for="tab in detailTabs"
+          :key="tab.name"
+          class="detail-tab-button"
+          :class="{ 'detail-tab-button--active': activeTab === tab.name }"
+          @click="setActiveTab(tab.name)"
+        >
+          <span class="detail-tab-label">{{ tab.label }}</span>
+          <span v-if="activeTab === tab.name" class="detail-tab-dot"></span>
+        </UiButton>
       </div>
 
-      <!-- Docs Tab -->
-      <div v-show="activeTab === 'docs'">
+      <transition name="tab-panel" mode="out-in">
+        <!-- Docs Tab -->
+        <div v-if="activeTab === 'docs'" key="docs" class="tab-panel">
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="font-semibold text-[15px] text-[#1d1d1f] mb-4">上传课程资料</div>
 
@@ -191,12 +202,12 @@
             </UiTable>
           </div>
         </div>
-      </div>
-      <!-- Chat Tab -->
-      <div v-show="activeTab === 'chat'">
-        <div class="flex flex-col h-[520px] border border-black/[0.06] rounded-[16px] overflow-hidden">
-          <div ref="chatMessagesRef" class="flex-1 overflow-y-auto p-4 bg-[#f8fafc]">
-            <div v-if="chatMessages.length === 0" class="text-center py-16 text-[#6b7280]">
+        </div>
+        <!-- Chat Tab -->
+        <div v-else-if="activeTab === 'chat'" key="chat" class="tab-panel chat-tab-panel">
+          <div class="knowledge-chat-shell">
+            <div ref="chatMessagesRef" class="knowledge-chat-messages">
+              <div v-if="chatMessages.length === 0" class="knowledge-chat-empty text-center text-[#6b7280]">
               <ChatDotRound class="w-12 h-12 text-[#c3cad6] mx-auto mb-3" />
               <p class="text-sm">向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
               <div class="mt-4 flex flex-wrap gap-2 justify-center">
@@ -206,7 +217,7 @@
               </div>
             </div>
 
-            <div v-for="(msg, idx) in chatMessages" :key="idx" class="mb-3 flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
+              <div v-for="(msg, idx) in chatMessages" :key="idx" class="mb-3 flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
               <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm leading-[1.7]" :class="msg.role === 'user' ? 'bg-gradient-to-b from-[#3898ff] to-[#007aff] text-white' : 'bg-white border border-black/[0.06] text-[#1d1d1f]'">
                 <div v-if="msg.role === 'user'">{{ msg.content }}</div>
                 <div v-else v-html="renderMarkdown(msg.content)"></div>
@@ -219,14 +230,14 @@
               </div>
             </div>
 
-            <div v-if="chatLoading" class="mb-3 flex justify-start">
+              <div v-if="chatLoading" class="mb-3 flex justify-start">
               <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm bg-white border border-black/[0.06]">
                 <span class="text-[#6b7280] italic">AI 正在思考...</span>
               </div>
             </div>
-          </div>
+            </div>
 
-          <div class="flex gap-2 p-3 bg-white border-t border-black/[0.06] items-end">
+            <div class="knowledge-chat-composer">
             <textarea
               v-model="chatInput"
               rows="2"
@@ -238,12 +249,12 @@
             <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
               {{ chatLoading ? '发送中...' : '发送' }}
             </UiButton>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Annotations Tab -->
-      <div v-show="activeTab === 'annotations'">
+        <!-- Annotations Tab -->
+        <div v-else key="annotations" class="tab-panel">
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">知识分块（{{ chunks.length }}）</span>
@@ -272,7 +283,8 @@
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </transition>
     </div>
     <!-- Create/Edit Dialog -->
     <AppModal v-model="dialogVisible" :title="editingSpace ? '编辑课程空间' : '创建课程空间'" width="520px">
@@ -371,6 +383,15 @@ const detailTabs = [
   { name: 'chat', label: '知识问答' },
   { name: 'annotations', label: '分块标注' },
 ]
+
+const activeTabIndex = computed(() => {
+  const index = detailTabs.findIndex(tab => tab.name === activeTab.value)
+  return index >= 0 ? index : 0
+})
+
+const activeTabIndicatorStyle = computed(() => ({
+  '--active-tab-index': activeTabIndex.value,
+}))
 
 const documents = ref([])
 const docsLoading = ref(false)
@@ -487,6 +508,11 @@ function docTypeLabel(docType) {
 
 function toggleSpaceDropdown(id) {
   spaceDropdownId.value = spaceDropdownId.value === id ? null : id
+}
+
+function setActiveTab(tabName) {
+  if (activeTab.value === tabName) return
+  activeTab.value = tabName
 }
 
 function renderMarkdown(text) {
@@ -801,3 +827,187 @@ onUnmounted(() => {
   if (refreshTimer) clearInterval(refreshTimer)
 })
 </script>
+
+<style scoped>
+.knowledge-base-container {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.space-detail-view {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.detail-header {
+  flex: 0 0 auto;
+}
+
+.detail-tabs {
+  position: relative;
+  display: grid;
+  width: min(100%, 360px);
+  height: 48px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 0 0 auto;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.detail-tab-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  border: 1px solid rgba(0, 122, 255, 0.16);
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transform: translateX(calc(var(--active-tab-index) * 100%));
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+}
+
+.detail-tab-button {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-width: 0;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.detail-tab-button:hover {
+  color: #1d1d1f;
+  transform: translateY(-1px);
+}
+
+.detail-tab-button--active {
+  color: #007aff;
+}
+
+.detail-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-tab-dot {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #007aff;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+  animation: tab-dot-pop 220ms ease-out;
+}
+
+.tab-panel {
+  min-height: 0;
+}
+
+.chat-tab-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.knowledge-chat-shell {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.knowledge-chat-messages {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.knowledge-chat-empty {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.knowledge-chat-composer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.tab-panel-enter-active,
+.tab-panel-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.tab-panel-enter-from {
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+}
+
+.tab-panel-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.995);
+}
+
+@keyframes tab-dot-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .detail-tabs {
+    width: 100%;
+  }
+
+  .knowledge-chat-composer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
