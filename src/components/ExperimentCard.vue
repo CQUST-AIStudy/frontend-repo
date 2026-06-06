@@ -10,13 +10,13 @@
         <div class="g-exp-meta">
           <span class="g-exp-deadline">
             <ui-icon><Clock /></ui-icon>
-            <span>截止: {{ experiment.deadline || '未设置' }}</span>
+            <span>截止: {{ formattedDeadline }}</span>
           </span>
 
           <template v-if="experiment.status === 'completed'">
             <span v-if="experiment.score">得分: <b>{{ experiment.score }}</b></span>
             <span v-if="experiment.plagiarismRate != null">查重率: {{ experiment.plagiarismRate }}%</span>
-            <span v-if="experiment.submitTime">{{ experiment.submitTime }}</span>
+            <span v-if="experiment.submitTime">提交: {{ formattedSubmitTime }}</span>
           </template>
         </div>
       </div>
@@ -31,12 +31,25 @@
 <script setup>
 import { computed } from 'vue'
 import { Clock } from '@/components/ui/icons'
+import { formatDate } from '@/utils/dateUtils'
 
 const props = defineProps({
   experiment: {
     type: Object,
     required: true
   }
+})
+
+const formattedDeadline = computed(() => {
+  return props.experiment.deadline
+    ? formatDate(props.experiment.deadline, 'YYYY-MM-DD HH:mm:ss')
+    : '未设置'
+})
+
+const formattedSubmitTime = computed(() => {
+  return props.experiment.submitTime
+    ? formatDate(props.experiment.submitTime, 'YYYY-MM-DD HH:mm:ss')
+    : ''
 })
 
 const statusText = computed(() => ({

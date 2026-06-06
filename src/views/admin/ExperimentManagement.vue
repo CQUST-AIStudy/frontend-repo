@@ -53,7 +53,11 @@
           <ui-table-column prop="title" label="标题" min-width="200" />
           <ui-table-column prop="className" label="所属班级" width="150" />
           <ui-table-column prop="teacherName" label="创建教师" width="120" />
-          <ui-table-column prop="deadline" label="截止日期" width="180" />
+          <ui-table-column label="截止日期" width="180">
+            <template #default="scope">
+              {{ formatDeadline(scope.row.deadline) }}
+            </template>
+          </ui-table-column>
           <ui-table-column prop="submissionCount" label="提交数" width="100" />
           <ui-table-column label="状态" width="100">
             <template #default="scope">
@@ -108,7 +112,7 @@
             v-model="experimentForm.deadline"
             type="datetime"
             placeholder="选择截止日期"
-            format="YYYY-MM-DD HH:mm"
+            format="YYYY-MM-DD HH:mm:ss"
             class="[width:100%]"
           ></ui-date-picker>
         </ui-form-item>
@@ -137,6 +141,7 @@ import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import api from '../../api'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
+import { formatDate } from '@/utils/dateUtils'
 
 // 数据加载状态
 const loading = ref(false)
@@ -261,6 +266,11 @@ const rules = {
     { required: true, message: '请输入实验描述', trigger: 'blur' },
     { min: 10, message: '描述不能少于10个字符', trigger: 'blur' }
   ]
+}
+
+// 格式化截止日期
+const formatDeadline = (deadline) => {
+  return formatDate(deadline, 'YYYY-MM-DD HH:mm:ss') || '-'
 }
 
 // 获取状态类型

@@ -65,6 +65,7 @@ import { ref, onMounted, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api'
 import { useUserStore } from '../../store'
+import { formatDate } from '@/utils/dateUtils'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -107,7 +108,7 @@ const normalizeExperiment = (item = {}, index) => {
     rowKey: id ?? `${item.name || item.experimentName || 'experiment'}-${index}`,
     displayId: id ?? '-',
     name: item.name || item.experimentName || item.title || '未命名实验',
-    deadline: item.deadline || item.dueDate || item.endTime || '-',
+    deadline: formatDate(item.deadline || item.dueDate || item.endTime, 'YYYY-MM-DD HH:mm:ss') || '-',
     submissionCount: formatNumber(item.submissionCount ?? item.submittedCount ?? item.submitCount ?? item.submission_count ?? 0),
     averageScore: formatNumber(item.averageScore ?? item.avgScore ?? item.avg_score),
     status: item.status || 'unknown'

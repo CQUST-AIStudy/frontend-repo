@@ -112,7 +112,7 @@
         <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">PTA 概览统计</div>
 
         <div class="overflow-x-auto">
-          <UiTable class="w-full border-collapse text-[12px] text-center">
+          <table class="w-full border-collapse text-[12px] text-center">
             <thead>
               <tr>
                 <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">统计项</th>
@@ -145,9 +145,9 @@
                 <td class="py-2 px-2" :class="discriminationClass">{{ safeNumber(data.overview.discrimination) }}</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
 
-          <UiTable class="w-full border-collapse text-[12px] text-center mt-3">
+          <table class="w-full border-collapse text-[12px] text-center mt-3">
             <thead>
               <tr>
                 <th class="bg-[#f5f5f7] font-semibold text-[#1d1d1f] min-w-[72px] py-2 px-2 border-b border-black/[0.06]">分数段</th>
@@ -168,7 +168,7 @@
                 </td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
 
           <div class="flex gap-6 mt-2 text-[11px] text-[#6e6e73] flex-wrap">
             <span>难度系数 = 1 - 平均分/ 满分，数值越大说明整体得分越低。</span>
@@ -194,7 +194,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-3">
         <div class="text-[15px] font-semibold text-[#1d1d1f] mb-4">题目明细</div>
         <div class="overflow-x-auto max-h-[320px] overflow-y-auto">
-          <UiTable class="w-full text-left text-[12px] border-collapse">
+          <table class="w-full text-left text-[12px] border-collapse">
             <thead class="sticky top-0 z-10">
               <tr class="border-b border-black/[0.06]">
                 <th class="py-2.5 px-3 text-[12px] font-semibold text-[#6e6e73] bg-[#f9f9f9] w-[90px]">题号</th>
@@ -234,7 +234,7 @@
                 <td colspan="8" class="py-12 text-center text-[#aeaeb2] text-sm">暂无题目明细数据</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
       </div>
     </template>
@@ -430,6 +430,29 @@ function normalizeArray(payload) {
   if (Array.isArray(payload?.data)) return payload.data
   if (Array.isArray(payload)) return payload
   return []
+}
+
+function normalizePayload(payload) {
+  let current = payload
+  for (let i = 0; i < 3; i += 1) {
+    if (
+      current
+      && typeof current === 'object'
+      && current.data
+      && typeof current.data === 'object'
+      && !Array.isArray(current.data)
+      && (
+        current.overview == null
+        || current.problemAccuracy == null
+        || current.scoreDistribution == null
+      )
+    ) {
+      current = current.data
+    } else {
+      break
+    }
+  }
+  return current || null
 }
 
 function getExperimentId(item = {}) {
@@ -631,7 +654,7 @@ async function loadAnalytics() {
   errorMessage.value = ''
   try {
     const res = await getExperimentAnalytics(selectedExp.value)
-    data.value = res?.data || res || null
+    data.value = normalizePayload(res)
     await nextTick()
     renderDistChart()
     renderAccChart()
