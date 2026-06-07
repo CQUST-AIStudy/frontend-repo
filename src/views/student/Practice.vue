@@ -16,10 +16,11 @@
               <div class="header-tabs">
                 <ui-radio-group v-model="activeTab" size="large">
                   <ui-radio-button label="recommended">为我推荐</ui-radio-button>
+                  <ui-radio-button label="pta">PTA推荐</ui-radio-button>
                 </ui-radio-group>
               </div>
 
-              <div class="header-filter [display:flex] [align-items:center] [gap:10px] [&_.ui-select]:[width:150px]">
+              <div class="header-filter [display:flex] [align-items:center] [gap:10px] [&_.ui-select]:[width:150px]" v-show="activeTab !== 'pta'">
                 <ui-select v-model="filterDifficulty" placeholder="难度筛选" clearable class="[width:150px]">
                   <ui-option label="简单" value="easy" />
                   <ui-option label="中等" value="medium" />
@@ -212,6 +213,8 @@ const completedProblemIds = ref([])
 const dismissedProblemIds = ref([])
 const sentFeedbackKeys = ref([])
 const recommendationSessionId = ref('')
+const ptaPracticeSets = ref([])
+const ptaLoading = ref(false)
 
 const COMPLETED_STORAGE_KEY = 'leetcode_completed_problem_ids'
 const SESSION_STORAGE_KEY = 'leetcode_recommendation_session_id'
@@ -220,8 +223,11 @@ const recommendationRequestId = computed(() => learningStore.recommendedPractice
 
 // 所有练习题目
 const practices = computed(() => {
+  if (activeTab.value === 'pta') {
+    return ptaPracticeSets.value || []
+  }
   const practicesToReturn = learningStore.recommendedPractices;
-
+  
   // 检查返回数据的格式并正确处理
   if (practicesToReturn && practicesToReturn.data && Array.isArray(practicesToReturn.data)) {
     // 处理 {data: Array(14), success: true} 格式
@@ -282,6 +288,7 @@ const selectPractice = (practice, options = {}) => {
 const canStartPractice = (practice) => {
   if (!practice) return false
   if (practice.type === 'introduction') return false
+  if (practice.type === 'pta_practice_set') return true
   return practice.type === 'problem' ||
     practice.type === 'leetcode_problem' ||
     practice.source === 'leetcode_recommendation' ||
@@ -296,6 +303,14 @@ const startProblem = (practice) => {
 
   detailDialogVisible.value = false
   void recordRecommendationFeedback(currentPractice, 'start')
+
+  // PTA 推荐题目集：跳转到实验详情页
+  if (currentPractice.type === 'pta_practice_set') {
+    const targetId = currentPractice.offeringId || currentPractice.id
+    router.push(`/student/experiment-detail/${targetId}`)
+    uiMessage.success(`开始做推荐题目集：${currentPractice.title || currentPractice.name}`)
+    return
+  }
 
   // 跳转到内置的LeetCode练习页面
   if (currentPractice.type === 'leetcode_problem' || currentPractice.source === 'leetcode_recommendation') {
@@ -319,6 +334,27 @@ const startProblem = (practice) => {
   }
 
   uiMessage.success(`开始解答题目 ${currentPractice.title || currentPractice.name}`)
+}
+
+// 获取 PTA 推荐题目集
+const fetchPtaPracticeSets = async () => {
+  if (ptaLoading.value) return
+  ptaLoading.value = true
+  try {
+    const res = await api.getPtaPracticeSets()
+    const body = res.data || res
+    const data = body.data || body || []
+    ptaPracticeSets.value = Array.isArray(data) ? data : []
+    // 默认选中第一个
+    if (ptaPracticeSets.value.length > 0 && !selectedPractice.value) {
+      selectPractice(ptaPracticeSets.value[0], { trackClick: false })
+    }
+  } catch (error) {
+    logger.error('获取PTA推荐题目集失败:', error)
+    ptaPracticeSets.value = []
+  } finally {
+    ptaLoading.value = false
+  }
 }
 
 const getPracticeProblemId = (practice) => {
@@ -418,8 +454,33 @@ const handleDislike = async (practice) => {
 // 处理分页和显示当前页内容
 const handlePageChange = (page) => {
   currentPage.value = page
-  void trackVisiblePracticeExposure()
+  if (activeTab.value === 'recommended') {
+    void trackVisiblePracticeExposure()
+  }
 }
+
+// 监听标签切换，懒加载 PTA 推荐题目集
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  if (newTab === 'pta') {
+    if (ptaPracticeSets.value.length === 0 && !ptaLoading.value) {
+      void fetchPtaPracticeSets()
+    }
+    if (ptaPracticeSets.value.length > 0) {
+      selectPractice(ptaPracticeSets.value[0], { trackClick: false })
+    } else if (!ptaLoading.value) {
+      selectedPractice.value = null
+    }
+  } else {
+    const list = practices.value || []
+    if (list.length > 0) {
+      selectPractice(list[0], { trackClick: false })
+    } else {
+      selectedPractice.value = null
+    }
+    void trackVisiblePracticeExposure()
+  }
+})
 
 // 获取难度对应的样式类型
 const difficultyType = (difficulty) => {

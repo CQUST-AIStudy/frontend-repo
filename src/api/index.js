@@ -313,6 +313,10 @@ export default {
     return apiClient.get('/api/current/recommendedPractices')
   },
 
+  async getPtaPracticeSets() {
+    return apiClient.get('/api/student/current/pta-practice-sets')
+  },
+
   async submitSelfAssessment(data) {
     return apiClient.post('/api/self-assessments', data)
   },

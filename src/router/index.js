@@ -34,6 +34,11 @@ const routes = [
         component: () => import('../views/student/ExperimentDetail.vue')
       },
       {
+        // 兼容旧链接：/student/experiment/2 → /student/experiment-detail/2
+        path: 'experiment/:id',
+        redirect: to => ({ path: `/student/experiment-detail/${to.params.id}` })
+      },
+      {
         path: 'learning-analysis',
         name: 'LearningAnalysis',
         component: () => import('../views/student/LearningAnalysis.vue')
@@ -409,5 +414,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-
-
