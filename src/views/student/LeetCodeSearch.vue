@@ -106,10 +106,6 @@ const SEARCH_PROGRESS_CAP = 94
 
 async function searchProblems() {
   const value = keyword.value.trim()
-  if (!value) {
-    uiMessage.warning('请先输入知识点关键词')
-    return
-  }
   const requestLimit = normalizedLimit.value
   limit.value = requestLimit
   loading.value = true
@@ -180,9 +176,7 @@ async function startPractice(item) {
   router.push(`/student/leetcode-practice/${item.id}`)
 }
 
-if (keyword.value) {
-  searchProblems()
-}
+searchProblems()
 
 onBeforeUnmount(() => {
   stopSearchProgress()
