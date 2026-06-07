@@ -146,11 +146,6 @@ export function getCrawlJobStatus(jobId) {
   return leetCodeClawClient.get(`/api/leetcode/crawl/jobs/${encodeURIComponent(jobId)}`)
 }
 
-/** 取消全量抓取任务 */
-export function cancelCrawlJob(jobId) {
-  return leetCodeClawClient.post(`/api/leetcode/crawl/jobs/${encodeURIComponent(jobId)}/cancel`)
-}
-
 export async function persistClawProblemBySlug(slug) {
   const response = await crawlLeetCodeProblems({ slugs: [slug], persist: true })
   const item = Array.isArray(response?.items) ? response.items[0] : null

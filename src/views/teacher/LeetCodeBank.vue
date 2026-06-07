@@ -85,15 +85,6 @@
           >
             清除结果
           </ui-button>
-          <ui-button
-            v-if="crawlAllJob && !isCrawlAllFinished"
-            type="warning"
-            plain
-            :loading="cancelLoading"
-            @click="cancelCrawlAll"
-          >
-            取消任务
-          </ui-button>
         </div>
 
         <!-- 任务进度 -->
@@ -194,7 +185,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
-  cancelCrawlJob,
   crawlAllLeetCodeProblems,
   crawlLeetCodeProblems,
   getCrawlJobStatus,
@@ -221,7 +211,6 @@ const candidateItems = ref([])
 
 // --- 全量抓取 ---
 const crawlAllLoading = ref(false)
-const cancelLoading = ref(false)
 const crawlAllJob = ref(null)
 let crawlAllPollTimer = null
 
@@ -288,7 +277,6 @@ function pollCrawlAllJob(jobId) {
           crawlAllPollTimer = null
           const s = crawlAllJob.value.status
           if (s === 'succeeded') uiMessage.success('全量抓取完成')
-          else if (s === 'canceled') uiMessage.warning('全量抓取已取消')
           else if (s === 'partial_failed') uiMessage.warning(`全量抓取完成，${crawlAllJob.value.failed} 题失败`)
           else uiMessage.error('全量抓取失败：' + (crawlAllJob.value.error || '未知错误'))
         }
@@ -297,36 +285,6 @@ function pollCrawlAllJob(jobId) {
       // 网络抖动，忽略
     }
   }, 3000)
-}
-
-async function cancelCrawlAll() {
-  if (!crawlAllJob.value) return
-  try {
-    await messageBox.confirm('确定取消当前全量抓取任务？已抓取的题目不会回滚。', '取消确认', {
-      confirmButtonText: '取消任务',
-      cancelButtonText: '继续抓取',
-      type: 'warning'
-    })
-  } catch {
-    return
-  }
-  cancelLoading.value = true
-  try {
-    const res = await cancelCrawlJob(crawlAllJob.value.id)
-    if (res?.success) {
-      uiMessage.success('取消指令已发送')
-      const jobRes = await getCrawlJobStatus(crawlAllJob.value.id)
-      if (jobRes?.success && jobRes?.job) {
-        crawlAllJob.value = jobRes.job
-      }
-    } else {
-      uiMessage.warning(res?.message || '取消失败')
-    }
-  } catch (error) {
-    uiMessage.error(error.friendlyMessage || error.message || '取消失败')
-  } finally {
-    cancelLoading.value = false
-  }
 }
 
 const healthCards = computed(() => {
