@@ -2,7 +2,7 @@
   <div class="leetcode-search page [display:flex] [flex-direction:column] [gap:16px] [height:100%] [min-height:0]">
     <UiPageHeader
       title="LeetCode 拓展练习"
-      description="按知识点从 LeetCode 中文站补充练习题，入库后进入现有做题与提交流程"
+      description="从 LeetCode 题库搜索练习题，支持关键词与难度过滤"
     >
       <ui-button plain @click="router.push('/student/practice')">返回推荐练习</ui-button>
     </UiPageHeader>
@@ -65,7 +65,7 @@
                 <ui-tag v-if="item.matchRate" size="small" effect="plain">匹配 {{ item.matchRate }}%</ui-tag>
               </div>
             </div>
-            <ui-button type="primary" size="small" :loading="persistingSlug === item.slug" @click="startPractice(item)">
+            <ui-button type="primary" size="small" @click="startPractice(item)">
               加入练习
             </ui-button>
           </div>
@@ -87,9 +87,8 @@ import { message as uiMessage } from '@/services/feedback'
 import {
   getDifficultyText,
   getDifficultyType,
-  mapClawItemToPractice,
-  persistClawProblemBySlug,
-  recommendLeetCodeByKeyword
+  mapProblemToPractice,
+  searchLeetCodeProblems
 } from '../../api/leetcodeClaw'
 
 const route = useRoute()
@@ -100,7 +99,6 @@ const limit = ref(5)
 const loading = ref(false)
 const searchProgress = ref(0)
 const progressTimer = ref(null)
-const persistingSlug = ref('')
 const items = ref([])
 
 const normalizedLimit = computed(() => Math.min(Math.max(Number(limit.value) || 5, 1), 50))
@@ -117,19 +115,15 @@ async function searchProblems() {
   loading.value = true
   startSearchProgress()
   try {
-    const res = await recommendLeetCodeByKeyword({
+    const res = await searchLeetCodeProblems({
       keyword: value,
-      limit: requestLimit,
       difficulty: difficulty.value,
-      persist: false
+      limit: requestLimit,
+      offset: 0
     })
     finishSearchProgress()
-    items.value = (res?.items || []).map(mapClawItemToPractice)
-    const omittedCount = Array.isArray(res?.omitted) ? res.omitted.length : 0
-    if (omittedCount > 0) {
-      uiMessage.warning(`已过滤 ${omittedCount} 道题解正文缺失的题目，当前仅展示可加入练习的题目`)
-    }
-    if (!items.value.length && omittedCount === 0) {
+    items.value = (res?.data || []).map(mapProblemToPractice)
+    if (!items.value.length) {
       uiMessage.warning('暂未找到匹配题目')
     }
   } catch (error) {
@@ -181,28 +175,9 @@ function stopSearchProgress() {
 }
 
 async function startPractice(item) {
-  if (!item?.slug) return
-  persistingSlug.value = item.slug
-  try {
-    const result = await persistClawProblemBySlug(item.slug)
-    const response = {
-      success: !!result?.problemId,
-      data: { id: result?.problemId },
-      message: 'problemId missing after persist'
-    }
-    if (!response?.success || !response.data?.id) {
-      throw new Error(response?.message || '题目已入库，但主服务暂未查到该题')
-    }
-    uiMessage.success('题目已加入本地题库')
-    router.push({
-      path: `/student/leetcode-practice/${response.data.id}`,
-      query: { slug: item.slug }
-    })
-  } catch (error) {
-    uiMessage.error(error.friendlyMessage || error.message || '题目入库失败')
-  } finally {
-    persistingSlug.value = ''
-  }
+  if (!item?.id) return
+  uiMessage.success('正在进入练习...')
+  router.push(`/student/leetcode-practice/${item.id}`)
 }
 
 if (keyword.value) {

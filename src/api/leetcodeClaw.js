@@ -10,6 +10,38 @@ const leetCodeClawClient = axios.create({
   }
 })
 
+/** 搜索 LeetCode 题库（学生端，请求 Java 后端，不直连爬虫服务） */
+export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 20, offset = 0 } = {}) {
+  return axios.get('/api/leetcode/problems/search', {
+    params: { keyword, difficulty, limit, offset }
+  }).then(res => res.data)
+}
+
+/** 将后端 LeetCodeProblem 实体映射为前端练习卡片格式 */
+export function mapProblemToPractice(problem = {}) {
+  const id = problem.id
+  const numericId = problem.numericId
+  const title = problem.titleMain || problem.titleAlt || '未命名题目'
+  const difficulty = (problem.difficulty || 'Unknown').toLowerCase()
+  return {
+    id,
+    problemId: id,
+    slug: problem.sourceKey || '',
+    number: numericId || problem.problemCode || '',
+    title,
+    name: title,
+    difficulty: difficulty === 'easy' ? 'easy' : difficulty === 'hard' ? 'hard' : 'medium',
+    estimatedMinutes: problem.estimatedMinutes || 30,
+    matchRate: null,
+    reason: '来自 LeetCode 题库',
+    source: 'leetcode_bank',
+    type: 'leetcode_bank_problem',
+    persisted: true,
+    warnings: [],
+    errors: []
+  }
+}
+
 leetCodeClawClient.interceptors.response.use(
   response => response.data,
   error => Promise.reject(createFriendlyError(error, 'LeetCodeClaw 服务请求失败，请检查服务是否已启动'))
@@ -99,6 +131,24 @@ export function getLeetCodeProblemBySlug(slug, { crawl = false } = {}) {
   return leetCodeClawClient.get(`/api/leetcode/problem/${encodeURIComponent(slug)}`, {
     params: { crawl }
   })
+}
+
+/** 全量抓取 LeetCode CN 公开题库（异步任务） */
+export function crawlAllLeetCodeProblems({ persist = true, forceRefresh = false } = {}) {
+  return leetCodeClawClient.post('/api/leetcode/crawl/all', {
+    persist,
+    forceRefresh
+  })
+}
+
+/** 查询全量抓取任务进度 */
+export function getCrawlJobStatus(jobId) {
+  return leetCodeClawClient.get(`/api/leetcode/crawl/jobs/${encodeURIComponent(jobId)}`)
+}
+
+/** 取消全量抓取任务 */
+export function cancelCrawlJob(jobId) {
+  return leetCodeClawClient.post(`/api/leetcode/crawl/jobs/${encodeURIComponent(jobId)}/cancel`)
 }
 
 export async function persistClawProblemBySlug(slug) {
