@@ -17,6 +17,12 @@ export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 
   }).then(res => res.data)
 }
 
+export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
+  return axios.get('/api/recommendations/leetcode/sync', {
+    params: { limit }
+  }).then(res => res.data)
+}
+
 /** 将后端 LeetCodeProblem 实体映射为前端练习卡片格式 */
 export function mapProblemToPractice(problem = {}) {
   const id = problem.id
@@ -39,6 +45,22 @@ export function mapProblemToPractice(problem = {}) {
     persisted: true,
     warnings: [],
     errors: []
+  }
+}
+
+export function mapRecommendationItemToPractice(item = {}) {
+  const problem = item.problem || {}
+  const mapped = mapProblemToPractice(problem)
+  return {
+    ...mapped,
+    id: problem.id || item.problemId || mapped.id,
+    problemId: problem.id || item.problemId || mapped.problemId,
+    matchRate: item.scoreNeedMatch ? Math.round(Number(item.scoreNeedMatch) * 100) : null,
+    reason: item.reasonText || '来自个性化推荐',
+    source: 'leetcode_recommendation',
+    type: 'leetcode_problem',
+    requestId: item.requestId || null,
+    rankNo: item.rankNo || null
   }
 }
 
