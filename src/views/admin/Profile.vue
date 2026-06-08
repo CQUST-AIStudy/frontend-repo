@@ -11,7 +11,7 @@
         <ui-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
           <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#909399]">
             <ui-avatar :size="100" :src="userInfo.avatar" />
-            <h3>{{ userInfo.name }}</h3>
+            <h3>{{ userInfo.name || '管理员' }}</h3>
             <p>{{ userInfo.role === 'admin' ? '系统管理员' : '未知角色' }}</p>
           </div>
 
@@ -23,17 +23,17 @@
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
               <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">部门</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.department }}</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.department || '未设置' }}</span>
             </div>
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
               <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">电子邮箱</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email }}</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email || '未设置' }}</span>
             </div>
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
               <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">联系电话</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone }}</span>
+              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone || '未设置' }}</span>
             </div>
           </div>
         </ui-card>
@@ -49,26 +49,26 @@
 
           <ui-form ref="formRef" :model="form" label-width="100px">
             <ui-form-item label="用户名">
-              <ui-input v-model="form.name" />
+              <ui-input v-model="form.name" placeholder="请输入用户名" />
             </ui-form-item>
 
             <ui-form-item label="电子邮箱">
-              <ui-input v-model="form.email" />
+              <ui-input v-model="form.email" placeholder="请输入电子邮箱" />
             </ui-form-item>
 
             <ui-form-item label="联系电话">
-              <ui-input v-model="form.phone" />
+              <ui-input v-model="form.phone" placeholder="请输入联系电话" />
             </ui-form-item>
 
             <ui-form-item label="部门">
-              <ui-input v-model="form.department" />
-            </ui-form-item>
-
-            <ui-form-item>
-              <ui-button type="primary" @click="saveProfile">保存修改</ui-button>
-              <ui-button @click="resetForm">重置</ui-button>
+              <ui-input v-model="form.department" placeholder="请输入部门" />
             </ui-form-item>
           </ui-form>
+
+          <div class="[display:flex] [gap:12px] [padding:0_0_0_100px] [margin-top:8px]">
+            <ui-button type="primary" native-type="button" :loading="savingProfile" @click="saveProfile">保存修改</ui-button>
+            <ui-button native-type="button" @click="resetForm">重置</ui-button>
+          </div>
         </ui-card>
 
         <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
@@ -80,22 +80,22 @@
 
           <ui-form ref="passwordFormRef" :model="passwordForm" label-width="100px">
             <ui-form-item label="当前密码">
-              <ui-input v-model="passwordForm.currentPassword" type="password" show-password />
+              <ui-input v-model="passwordForm.currentPassword" type="password" show-password placeholder="请输入当前密码" />
             </ui-form-item>
 
             <ui-form-item label="新密码">
-              <ui-input v-model="passwordForm.newPassword" type="password" show-password />
+              <ui-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（至少6位）" />
             </ui-form-item>
 
             <ui-form-item label="确认新密码">
-              <ui-input v-model="passwordForm.confirmPassword" type="password" show-password />
-            </ui-form-item>
-
-            <ui-form-item>
-              <ui-button type="primary" @click="changePassword">修改密码</ui-button>
-              <ui-button @click="resetPasswordForm">重置</ui-button>
+              <ui-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
             </ui-form-item>
           </ui-form>
+
+          <div class="[display:flex] [gap:12px] [padding:0_0_0_100px] [margin-top:8px]">
+            <ui-button type="primary" native-type="button" :loading="changingPassword" @click="changePassword">修改密码</ui-button>
+            <ui-button native-type="button" @click="resetPasswordForm">重置</ui-button>
+          </div>
         </ui-card>
       </ui-col>
     </ui-row>
@@ -104,11 +104,16 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { message as uiMessage } from '@/services/feedback'
 import api from '../../api'
 import { useUserStore } from '../../store'
 
+const router = useRouter()
 const userStore = useUserStore()
+const savingProfile = ref(false)
+const changingPassword = ref(false)
+
 const userInfo = ref({
   name: '',
   role: 'admin',
@@ -157,6 +162,7 @@ const loadProfile = async () => {
 }
 
 const saveProfile = async () => {
+  savingProfile.value = true
   try {
     const response = await api.updateMyProfile({
       name: form.name,
@@ -168,6 +174,8 @@ const saveProfile = async () => {
     uiMessage.success('个人信息已更新')
   } catch (error) {
     uiMessage.error('保存个人信息失败')
+  } finally {
+    savingProfile.value = false
   }
 }
 
@@ -187,11 +195,16 @@ const changePassword = async () => {
     uiMessage.warning('请输入新密码')
     return
   }
+  if (passwordForm.newPassword.length < 6) {
+    uiMessage.warning('新密码长度不能少于6位')
+    return
+  }
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
     uiMessage.warning('两次输入的新密码不一致')
     return
   }
 
+  changingPassword.value = true
   try {
     const response = await api.updatePassword({
       oldPassword: passwordForm.currentPassword,
@@ -201,10 +214,16 @@ const changePassword = async () => {
       uiMessage.error(response.message || '密码修改失败')
       return
     }
-    uiMessage.success('密码已成功修改')
+    uiMessage.success('密码已修改，即将跳转到登录页')
     resetPasswordForm()
+    setTimeout(() => {
+      userStore.logout()
+      router.push('/login')
+    }, 1500)
   } catch (error) {
     uiMessage.error('密码修改失败，请检查当前密码后重试')
+  } finally {
+    changingPassword.value = false
   }
 }
 
@@ -216,5 +235,3 @@ const resetPasswordForm = () => {
 
 onMounted(loadProfile)
 </script>
-
-
