@@ -2,8 +2,8 @@
   <div class="admin-profile [min-width:0] [min-height:100%]">
     <UiPageHeader
         class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
-      title="个人信息"
-      description="查看和编辑您的个人信息"
+        title="个人信息"
+        description="查看和编辑您的个人信息"
     />
 
     <ui-row :gutter="20" class="[margin-bottom:20px]">
