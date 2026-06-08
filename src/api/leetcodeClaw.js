@@ -29,10 +29,12 @@ export function mapProblemToPractice(problem = {}) {
   const numericId = problem.numericId
   const title = problem.titleMain || problem.titleAlt || '未命名题目'
   const difficulty = (problem.difficulty || 'Unknown').toLowerCase()
+  const slug = problem.sourceKey ? problem.sourceKey.replace(/^slug:/, '') : ''
+  const sourceUrl = problem.sourceUrl || (slug ? `https://leetcode.cn/problems/${slug}/` : '')
   return {
     id,
     problemId: id,
-    slug: problem.sourceKey || '',
+    slug,
     number: numericId || problem.problemCode || '',
     title,
     name: title,
@@ -42,6 +44,8 @@ export function mapProblemToPractice(problem = {}) {
     reason: '来自 LeetCode 题库',
     source: 'leetcode_bank',
     type: 'leetcode_bank_problem',
+    sourceUrl,
+    sourceLabel: 'LeetCode',
     persisted: true,
     warnings: [],
     errors: []
@@ -51,6 +55,9 @@ export function mapProblemToPractice(problem = {}) {
 export function mapRecommendationItemToPractice(item = {}) {
   const problem = item.problem || {}
   const mapped = mapProblemToPractice(problem)
+  const tags = Array.isArray(problem.tags || item.tags)
+    ? (problem.tags || item.tags).map(t => typeof t === 'string' ? t : t.tagName || t.name || '')
+    : []
   return {
     ...mapped,
     id: problem.id || item.problemId || mapped.id,
@@ -60,7 +67,10 @@ export function mapRecommendationItemToPractice(item = {}) {
     source: 'leetcode_recommendation',
     type: 'leetcode_problem',
     requestId: item.requestId || null,
-    rankNo: item.rankNo || null
+    rankNo: item.rankNo || null,
+    tags,
+    forgettingScore: item.forgettingScore ?? problem.forgettingScore ?? null,
+    lastPracticeAt: item.lastPracticeAt ?? problem.lastPracticeAt ?? null
   }
 }
 
@@ -110,6 +120,7 @@ export function mapClawItemToPractice(item = {}) {
   const problem = item.problem || {}
   const slug = getProblemSlug(problem)
   const problemId = getPersistedProblemId(item)
+  const sourceUrl = slug ? `https://leetcode.cn/problems/${slug}/` : ''
   return {
     id: problemId || slug,
     problemId,
@@ -123,6 +134,8 @@ export function mapClawItemToPractice(item = {}) {
     reason: item.reason || '来自 LeetCodeClaw 关键词推荐',
     source: 'leetcode_claw',
     type: 'leetcode_claw_problem',
+    sourceUrl,
+    sourceLabel: 'LeetCode',
     persisted: !!item.persisted,
     warnings: item.warnings || [],
     errors: item.errors || []

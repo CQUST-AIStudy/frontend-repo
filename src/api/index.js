@@ -310,11 +310,37 @@ export default {
   },
 
   async getRecommendedPractices() {
-    return apiClient.get('/api/current/recommendedPractices')
+    return apiClient.get('/api/recommendations/leetcode/sync', {
+      params: { limit: 20 }
+    })
   },
 
   async getPtaPracticeSets() {
     return apiClient.get('/api/student/current/pta-practice-sets')
+  },
+
+  async getSkillStates() {
+    return apiClient.get('/api/profile/skill-states')
+  },
+
+  async getRecommendServiceHealth() {
+    return axios.get('/recommend/health', { timeout: 5000 }).then(res => res.data).catch(() => null)
+  },
+
+  async getErrorAnalysisHealth() {
+    return apiClient.get('/api/analysis/health')
+  },
+
+  async analyzeError(payload) {
+    return apiClient.post('/api/analysis/error', payload, { timeout: 60000 })
+  },
+
+  async getLearningSuggestions(payload) {
+    return apiClient.post('/api/analysis/learning', payload, { timeout: 60000 })
+  },
+
+  async getWarningAnalysis(payload) {
+    return apiClient.post('/api/analysis/warning', payload, { timeout: 60000 })
   },
 
   async submitSelfAssessment(data) {

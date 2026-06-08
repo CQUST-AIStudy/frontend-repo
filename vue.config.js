@@ -36,6 +36,20 @@ module.exports = {
           '^/spider': '',
         },
       },
+      '^/recommend(?:/|$)': {
+        target: 'http://127.0.0.1:8003',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/recommend': '',
+        },
+      },
+      '^/error-analysis(?:/|$)': {
+        target: 'http://127.0.0.1:8002',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/error-analysis': '',
+        },
+      },
     },
     client: {
       overlay: false,

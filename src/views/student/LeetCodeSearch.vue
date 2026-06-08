@@ -73,6 +73,14 @@
           <div v-if="item.errors.length" class="[margin-top:10px] [font-size:12px] [color:#d93025]">
             {{ item.errors.join('；') }}
           </div>
+          <div v-if="item.sourceUrl" class="[margin-top:10px] [display:flex] [align-items:center] [gap:8px]">
+            <ui-tag size="small" type="primary" effect="plain">{{ item.sourceLabel || 'LeetCode' }}</ui-tag>
+            <a :href="item.sourceUrl" target="_blank" rel="noopener noreferrer"
+              class="[display:inline-flex] [align-items:center] [gap:3px] [font-size:12px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
+              <span>前往原题</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </a>
+          </div>
         </ui-card>
       </div>
       <ui-empty v-else description="输入关键词或难度后，可在个性化推荐结果中进一步筛选 LeetCode 题目。" :image-size="96" />
