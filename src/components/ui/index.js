@@ -1627,6 +1627,7 @@ export const UiUpload = defineComponent({
   setup(props, { attrs, emit, expose, slots }) {
     const inputRef = ref(null)
     const files = ref([])
+    const isDragging = ref(false)
     const open = () => inputRef.value?.click()
     const clearFiles = () => { files.value = [] }
     expose({ clearFiles, submit: () => {} })
@@ -1637,9 +1638,39 @@ export const UiUpload = defineComponent({
       emit('change', selected[0], files.value)
       event.target.value = ''
     }
+    const onDragOver = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!props.disabled) {
+        isDragging.value = true
+      }
+    }
+    const onDragLeave = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      isDragging.value = false
+    }
+    const onDrop = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      isDragging.value = false
+      if (props.disabled) return
+      const droppedFiles = Array.from(event.dataTransfer?.files || [])
+      if (droppedFiles.length === 0) return
+      const selected = droppedFiles.map((file) => ({ name: file.name, size: file.size, raw: file, file }))
+      files.value = props.multiple ? [...files.value, ...selected] : selected
+      selected.forEach((file) => props.onChange?.(file, files.value))
+      emit('change', selected[0], files.value)
+    }
     return () => h('div', { ...attrs, class: cls('ui-upload inline-block', attrs.class) }, [
       h('input', { ref: inputRef, type: 'file', accept: props.accept, multiple: props.multiple, disabled: props.disabled, class: 'sr-only', onChange: onFileChange }),
-      h('div', { class: cls(props.drag && 'rounded-2xl border border-dashed border-black/10 bg-white/60 p-6 text-center'), onClick: open }, slots.default?.()),
+      h('div', {
+        class: cls(props.drag && 'rounded-2xl border border-dashed bg-white/60 p-6 text-center cursor-pointer transition-colors', isDragging.value ? 'border-[#007aff] bg-[rgba(0,122,255,0.04)]' : 'border-black/10'),
+        onClick: open,
+        onDragover: props.drag ? onDragOver : undefined,
+        onDragleave: props.drag ? onDragLeave : undefined,
+        onDrop: props.drag ? onDrop : undefined
+      }, slots.default?.()),
       slots.tip && h('div', { class: 'mt-2 text-[12px] text-[#aeaeb2]' }, slots.tip())
     ])
   }
