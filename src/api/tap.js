@@ -162,6 +162,9 @@ tapClient.interceptors.response.use(
       }
       clearTapAuth()
       uiMessage.warning('教辅平台登录已过期，请重新登录')
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.assign('/login')
+      }
     } else if (status === 401 && isAuthRequest) {
       clearTapAuth()
     }
