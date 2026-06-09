@@ -69,7 +69,7 @@
             <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[50%]"></div>
           </div>
           <div v-else class="py-12 text-center">
-            <div class="text-[40px] mb-3 opacity-40">🤖</div>
+            <div class="mb-3 opacity-40"><LucideIcon name="bot" :size="40" /></div>
             <p class="text-[14px] text-[#aeaeb2]">点击生成教学建议按钮获取AI分析结果</p>
           </div>
         </div>
@@ -81,6 +81,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { message as uiMessage } from '@/services/feedback'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import * as echarts from 'echarts'

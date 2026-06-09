@@ -67,7 +67,7 @@
         v-if="errorMessage"
         class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)]"
       >
-        <span class="text-[#ff9500] text-lg shrink-0">⚠</span>
+        <span class="text-[#ff9500] text-lg shrink-0"><LucideIcon name="alert-triangle" :size="18" /></span>
         <div class="flex-1">
           <div class="text-[14px] font-medium text-[#ff9500]">{{ errorMessage }}</div>
           <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
@@ -121,6 +121,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { Loading } from '@/components/ui/icons'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '../../api'

@@ -24,14 +24,14 @@
       <ui-row :gutter="16" class="[margin-top:16px]">
         <ui-col :span="12">
           <ui-card shadow="hover">
-            <template #header><span class="card-title [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]">🎯 能力雷达图</span></template>
+            <template #header><span class="card-title [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]"><LucideIcon name="target" :size="18" class="mr-2" /> 能力雷达图</span></template>
             <div ref="radarChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
           </ui-card>
         </ui-col>
         <ui-col :span="12">
           <ui-card shadow="hover">
             <template #header>
-              <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">📈 学期趋势</span>
+              <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="trend" :size="18" class="mr-2" /> 学期趋势</span>
               <ui-tag :type="trendTagType" size="small" class="[margin-left:8px]" effect="dark">{{ trendText }}</ui-tag>
             </template>
             <div ref="trendChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
@@ -43,9 +43,9 @@
       <ui-card shadow="hover" class="feedback-card [margin-top:16px]">
         <template #header>
           <div class="[display:flex] [align-items:center] [justify-content:space-between]">
-            <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🤖 AI 学习建议</span>
+            <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="bot" :size="18" class="mr-2" /> AI 学习建议</span>
             <ui-button type="primary" size="small" :loading="refreshingFeedback" @click="handleRefreshFeedback" round>
-              {{ refreshingFeedback ? '分析中...' : '🔄 重新分析' }}
+              {{ refreshingFeedback ? '分析中...' : '重新分析' }}
             </ui-button>
           </div>
         </template>
@@ -61,15 +61,15 @@
 
       <!-- 学习特征 -->
       <ui-card shadow="hover" class="[margin-top:16px]">
-        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🏷️ 学习特征</span></template>
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="tags" :size="18" class="mr-2" /> 学习特征</span></template>
         <ui-row :gutter="16">
           <ui-col :span="8" v-for="p in profile.patterns" :key="p.tag">
             <div class="pattern-card [display:flex] [gap:12px] [padding:14px] [border-radius:12px] [border:1px_solid_#e8eaed] [transition:transform_.2s] [height:100%] hover:[transform:translateX(4px)]" :class="'pattern-' + patternClass(p.tag)">
-              <div class="pattern-icon [font-size:28px] [flex-shrink:0] [margin-top:2px]">{{ patternEmoji(p.tag) }}</div>
+              <div class="pattern-icon [flex-shrink:0] [margin-top:2px]"><LucideIcon :name="patternEmoji(p.tag)" :size="28" /></div>
               <div class="pattern-body">
                 <div class="pattern-tag-name [font-weight:500] [font-size:15px] [color:#202124]">{{ p.tag }}</div>
                 <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
-                <div class="pattern-evidence [font-size:12px] [color:#9aa0a6] [margin-top:4px]">📊 {{ p.evidence }}</div>
+                <div class="pattern-evidence [font-size:12px] [color:#9aa0a6] [margin-top:4px]"><LucideIcon name="bar-chart" :size="14" class="mr-1" /> {{ p.evidence }}</div>
               </div>
             </div>
           </ui-col>
@@ -78,7 +78,7 @@
 
       <!-- Top薄弱点 -->
       <ui-card shadow="hover" class="[margin-top:16px]">
-        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">⚠️ Top 薄弱点</span></template>
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="alert-triangle" :size="18" class="mr-2" /> Top 薄弱点</span></template>
         <ui-row :gutter="16">
           <ui-col :span="8" v-for="(w, idx) in profile.weaknesses" :key="w.experimentId">
             <div class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]">
@@ -89,9 +89,9 @@
               </div>
               <ui-progress :percentage="Math.round(w.mastery)" :color="masteryColor(w.mastery)" :stroke-width="12" class="[margin:10px_0]" />
               <div class="weakness-evidence [display:flex] [gap:10px] [font-size:12px] [color:#909399] [flex-wrap:wrap]">
-                <span>📝 提交{{ w.evidence?.totalSubmissions }}次</span>
-                <span>✅ AC{{ w.evidence?.acCount }}次</span>
-                <span>❌ 编译错误{{ w.evidence?.compileErrors }}</span>
+                <span><LucideIcon name="pen" :size="14" class="mr-1" /> 提交{{ w.evidence?.totalSubmissions }}次</span>
+                <span><LucideIcon name="check-mark" :size="14" class="mr-1" /> AC{{ w.evidence?.acCount }}次</span>
+                <span><LucideIcon name="circle-x" :size="14" class="mr-1" /> 编译错误{{ w.evidence?.compileErrors }}</span>
               </div>
               <div v-if="w.weakQuestions?.length" class="weakness-questions [margin-top:8px] [padding-top:8px] [border-top:1px_dashed_#fde2e2]">
                 <div class="q-title [font-size:12px] [color:#606266] [font-weight:600]">薄弱题目:</div>
@@ -106,12 +106,12 @@
 
       <!-- 技能树 -->
       <ui-card shadow="hover" class="[margin-top:16px]">
-        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🌳 技能树详情</span></template>
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="tree" :size="18" class="mr-2" /> 技能树详情</span></template>
         <div class="skill-tree [display:flex] [flex-direction:column] [gap:20px]">
           <div v-for="dim in profile.skillTree" :key="dim.dimension" class="tree-dimension [border:1px_solid_#eee] [border-radius:12px] [overflow:hidden] [transition:box-shadow_.2s] hover:[box-shadow:0_2px_12px_rgba(0,0,0,0.06)]">
             <div class="tree-dim-header [display:flex] [align-items:center] [justify-content:space-between] [padding:14px_18px] [background:#fafafa] [&.dim-good]:[background:linear-gradient(90deg,_#f0f9eb,_#fafafa)] [&.dim-medium]:[background:linear-gradient(90deg,_#fdf6ec,_#fafafa)] [&.dim-weak]:[background:linear-gradient(90deg,_#fef0f0,_#fafafa)]" :class="'dim-' + dim.level">
               <div class="dim-left [display:flex] [align-items:center] [gap:8px]">
-                <span class="dim-icon [font-size:20px]">{{ dimEmoji(dim.dimension) }}</span>
+                <span class="dim-icon"><LucideIcon :name="dimEmoji(dim.dimension)" :size="20" /></span>
                 <span class="dim-name [font-size:16px] [font-weight:700] [color:#303133]">{{ dim.dimension }}</span>
                 <ui-tag :type="levelTagType(dim.level)" size="small" effect="dark">{{ dim.avgMastery }}分</ui-tag>
               </div>
@@ -146,6 +146,7 @@ import * as echarts from 'echarts'
 import axios from 'axios'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { DataAnalysis, Finished, List as ListIcon, TrendCharts } from '@/components/ui/icons'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { message as uiMessage } from '@/services/feedback'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -225,12 +226,12 @@ function patternClass(tag) {
   return 'bad'
 }
 function patternEmoji(tag) {
-  const map = { '稳定进步': '📈', '表现均衡': '⚖️', '高波动型': '🎢', '高重做型': '🔄', '编码基础薄弱': '🔧' }
-  return map[tag] || '📋'
+  const map = { '稳定进步': 'trend', '表现均衡': 'scale', '高波动型': 'trend-down', '高重做型': 'refresh', '编码基础薄弱': 'wrench' }
+  return map[tag] || 'clipboard-text'
 }
 function dimEmoji(dim) {
-  const map = { '线性表': '📏', '栈与队列': '📚', '树': '🌲', '图': '🕸️', '哈希': '#️⃣', '综合': '🎯' }
-  return map[dim] || '📦'
+  const map = { '线性表': 'ruler', '栈与队列': 'library', '树': 'tree', '图': 'network', '哈希': 'hash', '综合': 'target' }
+  return map[dim] || 'package'
 }
 
 async function handleRefreshFeedback() {
