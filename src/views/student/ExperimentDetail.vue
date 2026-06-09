@@ -33,6 +33,7 @@
             <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'">📄 代码</UiButton>
             <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'">🤖 AI助教点评</UiButton>
             <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'report' }" @click="activeTab = 'report'" :disabled="!isCompleted">📋 实验报告</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8]" :class="{ active: activeTab === 'analysis' }" @click="activeTab = 'analysis'">🔍 AI 错误分析</UiButton>
           </div>
 
           <!-- 代码 -->
@@ -91,6 +92,21 @@
               <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="$router.push('/student/ai-report')">前往AI报告生成中心</UiButton>
             </div>
           </div>
+
+          <!-- AI 错误分析 -->
+          <div v-if="activeTab === 'analysis'" class="g-tab-body [padding:20px]">
+            <ErrorAnalysisPanel
+              ref="errorAnalysisRef"
+              :experiment-id="experimentId"
+              :experiment-name="currentExp?.name || ''"
+              :student-id="studentId"
+              :student-name="studentName"
+              :submissions="submissions"
+              :auto-load="false"
+              @warning-triggered="onWarningTriggered"
+              @analysis-complete="onAnalysisComplete"
+            />
+          </div>
         </div>
       </div>
       <ui-empty v-else description="未找到该实验" />
@@ -108,8 +124,10 @@ import { Loading } from '@/components/ui/icons'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import axios from 'axios'
+import api from '@/api'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import ErrorAnalysisPanel from './components/ErrorAnalysisPanel.vue'
 
 const API_BASE = API_BASE_URL
 const route = useRoute()
@@ -119,6 +137,10 @@ const activeTab = ref('code')
 const aiGenerating = ref(false)
 const aiSource = ref('')
 const localAiComment = ref('')
+const submissions = ref([])
+const studentId = ref('')
+const studentName = ref('')
+const errorAnalysisRef = ref(null)
 
 const experimentId = computed(() => Number(route.params.id))
 const currentExp = computed(() => {
@@ -159,11 +181,61 @@ async function generateAiComment(force) {
   finally { aiGenerating.value = false }
 }
 
+async function fetchSubmissions() {
+  try {
+    const res = await axios.get(`${API_BASE}/api/submissions?experimentId=${experimentId.value}`, { withCredentials: true })
+    const data = res.data || res
+    submissions.value = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []
+  } catch (e) {
+    logger.warn('获取提交记录失败:', e)
+    submissions.value = []
+  }
+}
+
+function resolveStudentInfo() {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    studentId.value = userInfo.usernum || userInfo.studentId || userInfo.username || ''
+    studentName.value = userInfo.name || userInfo.username || ''
+  } catch {
+    studentId.value = ''
+    studentName.value = ''
+  }
+}
+
+function onWarningTriggered(warningData) {
+  logger.info('学生触发了教学干预预警:', warningData)
+}
+
+function onAnalysisComplete(result) {
+  logger.info('错误分析完成:', result?.error?.analysisId)
+}
+
+/** 当学生有提交记录时，自动触发 AI 错误分析管线 */
+async function autoTriggerAnalysisIfNeeded() {
+  if (!submissions.value.length) return
+  try {
+    // 先检查是否已有存储的报告
+    const statusRes = await api.checkAnalysisStatus(experimentId.value)
+    if (statusRes?.success && statusRes?.ready) {
+      // 已有报告，ErrorAnalysisPanel 会自动加载
+      return
+    }
+    // 没有报告 → 触发异步管线
+    api.triggerErrorAnalysis(experimentId.value).catch(() => { /* fire-and-forget */ })
+    uiMessage.info('AI 错误分析已在后台启动，分析完成后可在此查看')
+  } catch { /* analysis trigger is best-effort, don't block page load */ }
+}
+
 onMounted(async () => {
   loading.value = true
+  resolveStudentInfo()
   try {
     await experimentStore.fetchExperimentDetail(experimentId.value)
+    await fetchSubmissions()
     if (isCompleted.value && !hasAiComment.value) generateAiComment(false)
+    // 自动触发分析（如果有提交记录但还没有报告）
+    autoTriggerAnalysisIfNeeded()
   } catch (e) { logger.error('加载实验详情失败:', e) }
   finally { loading.value = false }
 })
