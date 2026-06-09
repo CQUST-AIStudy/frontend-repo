@@ -2,6 +2,7 @@ import logger from '@/utils/logger'
 import axios from 'axios'
 import {
   clearAuthStorage,
+  getTapToken,
   setSessionToken,
   setTapToken,
   setTapUser,
@@ -25,7 +26,14 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use(
-  config => config,
+  config => {
+    const tapToken = getTapToken()
+    if (tapToken) {
+      config.headers = config.headers || {}
+      config.headers.Authorization = `Bearer ${tapToken}`
+    }
+    return config
+  },
   error => Promise.reject(createFriendlyError(error, '请求发送失败，请稍后重试'))
 )
 
@@ -34,8 +42,9 @@ apiClient.interceptors.response.use(
   error => {
     const requestUrl = error?.config?.url || ''
     const isLoginRequest = requestUrl.includes('/api/login')
+    const isTapLoginRequest = requestUrl.includes('/api/auth/login')
     const isSessionExchangeRequest = requestUrl.includes('/api/auth/session')
-    const isAuthRequest = isLoginRequest || isSessionExchangeRequest
+    const isAuthRequest = isLoginRequest || isTapLoginRequest || isSessionExchangeRequest
     const fallbackMessage = error?.response?.status === 401 && isLoginRequest
       ? '用户名或密码不正确，请检查后重试'
       : '请求失败，请稍后重试'
@@ -212,6 +221,30 @@ export default {
       if (response?.success && response.user) {
         setUserInfo(response.user)
         setSessionToken(response.token || 'legacy_session')
+      }
+
+      if (response?.success) {
+        try {
+          const tapResponse = await axios.post(
+            `${API_BASE_URL_WITH_SLASH}api/auth/login`,
+            { username: normalizedUsername, password },
+            {
+              withCredentials: true,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          )
+          const tapData = tapResponse?.data?.data ?? tapResponse?.data
+          if (tapData?.accessToken) {
+            setTapToken(tapData.accessToken)
+            setTapUser({
+              userId: tapData.userId,
+              role: tapData.role,
+              username: normalizedUsername
+            })
+          }
+        } catch (tapError) {
+          logger.warn('TAP 账号登录失败:', tapError.message)
+        }
       }
 
       return response
