@@ -1,6 +1,6 @@
 <template>
   <div class="department-teachers">
-    <page-header
+    <UiPageHeader
       class="my-page-header"
       title="系部教师"
       description="教师管理和教学数据概览"
@@ -36,7 +36,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">教师列表</span>
-          <input
+          <UiInput
             v-model="searchQuery"
             placeholder="搜索教师姓名"
             class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -44,7 +44,7 @@
         </div>
 
         <div v-if="loading" class="flex items-center justify-center py-12 text-[13px] text-[#6e6e73]">加载中...</div>
-        <table v-else class="w-full text-left text-[13px]">
+        <UiTable v-else class="w-full text-left text-[13px]">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[120px]">姓名</th>
@@ -66,11 +66,11 @@
               </td>
               <td class="py-3 px-3 text-center">{{ teacher.studentCount || 0 }}</td>
               <td class="py-3 px-3">
-                <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewTeacherClasses(teacher)">查看班级</button>
+                <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewTeacherClasses(teacher)">查看班级</UiButton>
               </td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
 
@@ -80,9 +80,9 @@
       <div class="relative w-[60%] max-h-[80vh] rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 overflow-auto">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">教师班级 - {{ selectedTeacher?.name }}</span>
-          <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="dialogVisible = false">关闭</button>
+          <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="dialogVisible = false">关闭</UiButton>
         </div>
-        <table class="w-full text-left text-[13px]">
+        <UiTable class="w-full text-left text-[13px]">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">班级名称</th>
@@ -101,17 +101,16 @@
               <td class="py-3 px-3">{{ cls.grade }}</td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, computed, onMounted } from 'vue'
-import PageHeader from '../../components/PageHeader.vue'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import api from '../../api'
 const loading = ref(false)
 const searchQuery = ref('')
@@ -170,7 +169,7 @@ const fetchTeachers = async () => {
     }
   } catch (e) {
     logger.error('获取教师数据失败:', e)
-    ElMessage.error('获取教师数据失败')
+    uiMessage.error('获取教师数据失败')
   } finally {
     loading.value = false
   }

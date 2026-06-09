@@ -21,13 +21,13 @@
         </p>
 
         <div class="flex gap-2.5 items-center flex-wrap">
-          <input
+          <UiInput
             v-model="folderName"
             placeholder="文件夹名称（可选）"
             class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
           <div class="flex rounded-[10px] overflow-hidden border border-black/10">
-            <button
+            <UiButton
               v-for="mode in [{ key: 'files', label: '多文件' }, { key: 'zip', label: '隔离 ZIP' }, { key: 'dir', label: '目录直传' }]"
               :key="mode.key"
               class="h-[32px] px-3 text-xs font-medium border-none cursor-pointer transition-all"
@@ -35,26 +35,26 @@
               @click="uploadMode = mode.key"
             >
               {{ mode.label }}
-            </button>
+            </UiButton>
           </div>
         </div>
 
         <!-- Files Mode -->
         <template v-if="uploadMode === 'files'">
           <div class="flex gap-2.5 items-center flex-wrap mt-3">
-            <button
+            <UiButton
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               :disabled="creating"
               @click="createFolder"
             >
               <span v-if="creating" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               1. 创建文档中心文件夹
-            </button>
+            </UiButton>
             <span v-if="currentFolderId" class="text-xs text-[#007aff] font-medium">当前文件夹 #{{ currentFolderId }}</span>
           </div>
 
           <div v-if="currentFolderId" class="mt-3.5">
-            <el-upload
+            <ui-upload
               ref="uploadRef"
               v-model:file-list="fileList"
               :auto-upload="false"
@@ -66,15 +66,15 @@
                 <p class="m-1 text-[#6e6e73] text-[13px]">拖拽文件到此处，或点击选择</p>
                 <p class="text-xs text-[#aeaeb2]">支持 PDF、DOCX、PPTX、TXT、ZIP 等格式</p>
               </div>
-            </el-upload>
-            <button
+            </ui-upload>
+            <UiButton
               class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="fileList.length === 0 || submitLoading"
               @click="uploadAndSubmit"
             >
               <span v-if="submitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               2. 上传并提交整理（{{ fileList.length }} 个文件）
-            </button>
+            </UiButton>
           </div>
         </template>
 
@@ -89,7 +89,7 @@
                 <p class="m-0 mt-0.5 text-xs text-[#6e6e73]">上传的 ZIP 会直接进入临时整理任务，不会落到文档中心。</p>
               </div>
             </div>
-            <el-upload
+            <ui-upload
               ref="zipUploadRef"
               v-model:file-list="zipFileList"
               :auto-upload="false"
@@ -101,22 +101,22 @@
                 <p class="m-1 text-[#6e6e73] text-[13px]">拖拽一个 ZIP 到此处，或点击选择</p>
                 <p class="text-xs text-[#aeaeb2]">上传后直接创建隔离整理任务，完成后返回整理后的 ZIP</p>
               </div>
-            </el-upload>
-            <button
+            </ui-upload>
+            <UiButton
               class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="zipFileList.length === 0 || zipSubmitLoading"
               @click="uploadZipAndSubmit"
             >
               <span v-if="zipSubmitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               ZIP 一键上传并整理
-            </button>
+            </UiButton>
           </div>
         </template>
 
         <!-- Directory Mode -->
         <template v-else>
           <div class="mt-3">
-            <input
+            <UiInput
               ref="dirInputRef"
               class="hidden"
               type="file"
@@ -126,25 +126,25 @@
               @change="onDirectoryChange"
             />
             <div class="flex gap-2.5 items-center flex-wrap">
-              <button
+              <UiButton
                 class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
                 @click="openDirectoryPicker"
               >
                 选择本地目录
-              </button>
+              </UiButton>
               <span v-if="selectedDirName" class="text-xs text-[#007aff] font-medium">已选择：{{ selectedDirName }}</span>
             </div>
             <p class="mt-2 text-xs text-[#aeaeb2]">
               已选 {{ dirFiles.length }} 个文件，保留原始目录结构上传到文档中心。
             </p>
-            <button
+            <UiButton
               class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="dirFiles.length === 0 || dirSubmitLoading"
               @click="uploadDirectoryAndSubmit"
             >
               <span v-if="dirSubmitLoading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               目录直传并整理
-            </button>
+            </UiButton>
           </div>
         </template>
       </div>
@@ -218,7 +218,7 @@
 
             <!-- File Table -->
             <div v-if="resultData.files?.length" class="max-h-[300px] overflow-auto border border-black/[0.06] rounded-[10px] mt-3">
-              <table class="w-full border-collapse text-xs">
+              <UiTable class="w-full border-collapse text-xs">
                 <thead>
                   <tr class="bg-[#f5f5f7]">
                     <th class="text-left px-3 py-2 font-medium text-[#6e6e73]">原文件</th>
@@ -253,29 +253,29 @@
                     </td>
                   </tr>
                 </tbody>
-              </table>
+              </UiTable>
             </div>
 
-            <button
+            <UiButton
               class="mt-4 w-full h-[42px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="downloading"
               @click="downloadZip"
             >
               <span v-if="downloading" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               下载整理结果 ZIP
-            </button>
+            </UiButton>
           </template>
 
           <!-- Failed Action -->
           <div v-if="jobData?.status === 'FAILED'" class="flex items-center gap-2 flex-wrap mt-3">
-            <button
+            <UiButton
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               :disabled="retrying"
               @click="retryJob"
             >
               <span v-if="retrying" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               重试
-            </button>
+            </UiButton>
           </div>
         </template>
 
@@ -283,14 +283,14 @@
         <div class="mt-4 pt-3 border-t border-dashed border-[#d0d7de]">
           <div class="flex justify-between items-center mb-2 text-[13px] text-[#6e6e73]">
             <span>{{ uploadMode === 'zip' ? '隔离 ZIP 任务历史' : '文档中心整理历史' }}</span>
-            <button
+            <UiButton
               class="text-[13px] text-[#007aff] bg-transparent border-none cursor-pointer hover:underline"
               :disabled="historyLoading"
               @click="loadHistory"
             >
               <span v-if="historyLoading" class="inline-block w-3 h-3 border-2 border-[#007aff]/30 border-t-[#007aff] rounded-full animate-spin mr-1"></span>
               刷新
-            </button>
+            </UiButton>
           </div>
           <div v-if="historyJobs.length === 0" class="text-[#aeaeb2] text-xs py-1.5">暂无历史任务</div>
           <div v-else class="flex flex-col gap-2 max-h-[220px] overflow-auto">
@@ -312,15 +312,15 @@
                 <div class="text-[11px] text-[#80868b]">{{ formatTime(job.createdAt) }}</div>
               </div>
               <div class="flex gap-1.5 mt-1">
-                <button
+                <UiButton
                   class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none"
                   @click="openHistoryJob(job)"
-                >查看</button>
-                <button
+                >查看</UiButton>
+                <UiButton
                   class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed"
                   :disabled="!job.hasZip"
                   @click="downloadHistoryZip(job)"
-                >ZIP</button>
+                >ZIP</UiButton>
               </div>
             </div>
           </div>
@@ -332,7 +332,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 
 import {
   createFolder as apiCreateFolder,
@@ -467,9 +467,9 @@ const createFolder = async () => {
     currentFolderId.value = data?.id ?? data?.folderId ?? null
     fileList.value = []
     saveLocalState()
-    ElMessage.success('文档中心文件夹已创建')
+    uiMessage.success('文档中心文件夹已创建')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '创建文件夹失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '创建文件夹失败，请稍后重试'))
   } finally {
     creating.value = false
   }
@@ -511,9 +511,9 @@ const uploadAndSubmit = async () => {
     const rawFiles = fileList.value.map((file) => file.raw || file).filter(Boolean)
     await uploadFiles(folderId, rawFiles)
     await submitJob({ folderId }, 'agent')
-    ElMessage.success('文档中心整理任务已提交')
+    uiMessage.success('文档中心整理任务已提交')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '提交失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '提交失败，请稍后重试'))
   } finally {
     submitLoading.value = false
   }
@@ -541,9 +541,9 @@ const uploadZipAndSubmit = async () => {
   zipSubmitLoading.value = true
   try {
     await submitJob({ file: zipRaw }, 'zip')
-    ElMessage.success('隔离 ZIP 整理任务已提交')
+    uiMessage.success('隔离 ZIP 整理任务已提交')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, 'ZIP 提交失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, 'ZIP 提交失败，请稍后重试'))
   } finally {
     zipSubmitLoading.value = false
   }
@@ -557,9 +557,9 @@ const uploadDirectoryAndSubmit = async () => {
     const paths = dirFiles.value.map((file) => file.webkitRelativePath || file.name)
     await uploadFiles(folderId, dirFiles.value, paths)
     await submitJob({ folderId }, 'agent')
-    ElMessage.success('目录整理任务已提交')
+    uiMessage.success('目录整理任务已提交')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '目录提交失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '目录提交失败，请稍后重试'))
   } finally {
     dirSubmitLoading.value = false
   }
@@ -613,9 +613,9 @@ const retryJob = async () => {
     }
     resultData.value = null
     startPolling()
-    ElMessage.success('任务已重新提交')
+    uiMessage.success('任务已重新提交')
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '重试失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '重试失败，请稍后重试'))
   } finally {
     retrying.value = false
   }
@@ -643,13 +643,13 @@ const downloadZip = async () => {
   downloading.value = true
   try {
     await downloadZipByKind(jobId.value, currentJobKind.value)
-    ElMessage.success('下载完成')
+    uiMessage.success('下载完成')
   } catch (e) {
     const message = String(e?.message || '')
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
-      ElMessage.warning('当前整理结果尚未生成，请等待任务完成后再下载。')
+      uiMessage.warning('当前整理结果尚未生成，请等待任务完成后再下载。')
     } else {
-      ElMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
+      uiMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
     }
   } finally {
     downloading.value = false
@@ -677,9 +677,9 @@ const downloadHistoryZip = async (job) => {
   } catch (e) {
     const message = String(e?.message || '')
     if (message.includes('整理结果尚未生成') || message.includes('400')) {
-      ElMessage.warning('该任务的整理结果尚未生成，暂时无法下载。')
+      uiMessage.warning('该任务的整理结果尚未生成，暂时无法下载。')
     } else {
-      ElMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
+      uiMessage.error(getFriendlyErrorMessage(e, '下载失败，请稍后重试'))
     }
   } finally {
     downloading.value = false

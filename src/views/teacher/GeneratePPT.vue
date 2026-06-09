@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-5">
-    <page-header
+    <UiPageHeader
       title="生成教学 PPT"
       description="根据课程主题、知识点和难度要求，快速生成可直接整理成课件的教学大纲。"
     />
@@ -12,11 +12,11 @@
           <span class="font-semibold text-[#1d1d1f]">生成配置</span>
         </div>
 
-        <form @submit.prevent="generatePPT" class="flex flex-col gap-5">
+        <UiForm @submit.prevent="generatePPT" class="flex flex-col gap-5">
           <!-- PPT 主题 -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#1d1d1f]">PPT 主题</label>
-            <input
+            <UiInput
               v-model="pptForm.title"
               type="text"
               placeholder="例如：二叉树的遍历与应用"
@@ -35,7 +35,7 @@
                 class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer flex items-center"
                 :class="pptForm.type === opt.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] hover:text-[#1d1d1f]'"
               >
-                <input type="radio" v-model="pptForm.type" :value="opt.value" class="sr-only" />
+                <UiInput type="radio" v-model="pptForm.type" :value="opt.value" class="sr-only" />
                 {{ opt.label }}
               </label>
             </div>
@@ -45,25 +45,25 @@
           <!-- 知识点 (multi-select) -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#1d1d1f]">知识点</label>
-            <select
+            <UiSelect
               v-model="pptForm.topics"
               multiple
               class="h-[120px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none cursor-pointer focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all"
             >
-              <option
+              <UiOption
                 v-for="item in knowledgeTopics"
                 :key="item.value"
                 :value="item.value"
-              >{{ item.label }}</option>
-            </select>
+              >{{ item.label }}</UiOption>
+            </UiSelect>
             <span class="text-[11px] text-[#86868b]">按住 Ctrl/Cmd 可多选</span>
             <span v-if="errors.topics" class="text-[12px] text-red-500">{{ errors.topics }}</span>
           </div>
 
-          <!-- 内容难度 (KEEP el-slider) -->
+          <!-- 内容难度 (KEEP ui-slider) -->
           <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-medium text-[#1d1d1f]">内容难度</label>
-            <el-slider
+            <ui-slider
               v-model="pptForm.difficulty"
               :step="1"
               :min="1"
@@ -82,7 +82,7 @@
                 :key="mod.value"
                 class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]"
               >
-                <input type="checkbox" v-model="pptForm.includes" :value="mod.value" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="pptForm.includes" :value="mod.value" class="w-4 h-4 rounded accent-[#007aff]" />
                 <span class="text-[13px] text-[#1d1d1f]">{{ mod.label }}</span>
               </label>
             </div>
@@ -101,36 +101,36 @@
 
           <!-- Actions -->
           <div class="flex items-center gap-3 flex-wrap">
-            <button
+            <UiButton
               type="submit"
               :disabled="generating"
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100"
             >
               {{ generating ? '正在生成...' : '生成 PPT 大纲' }}
-            </button>
-            <button
+            </UiButton>
+            <UiButton
               type="button"
               @click="resetForm"
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#ededf0] active:scale-[0.96] transition-all cursor-pointer border border-black/[0.06]"
             >
               重置
-            </button>
+            </UiButton>
           </div>
-        </form>
+        </UiForm>
       </div>
 
       <!-- Preview Card -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between gap-4 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">内容预览</span>
-          <button
+          <UiButton
             type="button"
             :disabled="!previewSlides.length"
             @click="downloadPPT"
             class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.12)] active:scale-[0.96] transition-all cursor-pointer border border-[rgba(0,122,255,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             下载文本
-          </button>
+          </UiButton>
         </div>
 
         <!-- Loading state -->
@@ -149,7 +149,7 @@
             :key="`${slide.title}-${index}`"
             class="overflow-hidden border border-black/[0.06] rounded-[14px] bg-gradient-to-b from-white to-[#f9fafb]"
           >
-            <header class="px-3.5 py-2.5 border-b border-black/[0.04] text-[12px] text-[#86868b] font-medium">第 {{ index + 1 }} 页</header>
+            <UiHeader class="px-3.5 py-2.5 border-b border-black/[0.04] text-[12px] text-[#86868b] font-medium">第 {{ index + 1 }} 页</UiHeader>
             <div class="p-4">
               <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-2">{{ slide.title }}</h3>
               <p v-if="slide.isTitle" class="m-0 text-[13px] text-[#6e6e73]">{{ pptTypeText }}</p>
@@ -175,10 +175,10 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage } from '@/services/feedback'
 import { chatSend } from '../../api/tap'
 import { useFormValidation } from '../../composables/useFormValidation'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 
 const generating = ref(false)
 const previewSlides = ref([])
@@ -307,17 +307,13 @@ function parseSlides(text) {
 }
 
 function formatSlideContent(content) {
-  if (!content) return ''
-  return content
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-    .replace(/\n/g, '<br>')
+  return renderSafeMarkdown(content)
 }
 
 async function generatePPT() {
   const valid = validate(pptForm)
   if (!valid) {
-    ElMessage.error('请先完善表单信息')
+    uiMessage.error('请先完善表单信息')
     return
   }
 
@@ -341,9 +337,9 @@ async function generatePPT() {
           { title: '内容', content: fullText, isTitle: false, isCode: false }
         ]
 
-    ElMessage.success(`PPT 生成完成，共 ${previewSlides.value.length} 页`)
+    uiMessage.success(`PPT 生成完成，共 ${previewSlides.value.length} 页`)
   } catch (error) {
-    ElMessage.error(`生成失败：${error?.message || '请稍后重试'}`)
+    uiMessage.error(`生成失败：${error?.message || '请稍后重试'}`)
   } finally {
     generating.value = false
   }

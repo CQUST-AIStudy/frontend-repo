@@ -1,18 +1,18 @@
 <template>
   <div class="min-h-full overflow-y-auto">
-    <page-header
+    <UiPageHeader
       class="mb-3"
       title="班级管理"
       description="管理教学班级、学生信息与 PTA 同步设置，首屏卡片会根据内容自动伸展。"
     >
-      <button
+      <UiButton
         class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
         @click="openCreateDialog"
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         新增班级
-      </button>
-    </page-header>
+      </UiButton>
+    </UiPageHeader>
 
     <!-- Cookie expired alert -->
     <div
@@ -22,10 +22,10 @@
       <svg class="w-5 h-5 text-[#b26a00] shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
       <div class="flex-1 flex items-center justify-between gap-3 flex-wrap text-[13px] leading-relaxed text-[#7a5200]">
         <span>PTA 登录凭证已过期。系统自动登录失败。可以手动更新Cookie，也可以在"个人资料"绑定PTA 账号，或在发起同步时临时输入账号密码。</span>
-        <button
+        <UiButton
           class="h-[32px] px-4 rounded-[10px] text-xs font-medium text-[#7a5200] bg-[#f5d76e]/30 hover:bg-[#f5d76e]/50 active:scale-[0.96] transition-all cursor-pointer border border-[#f5d76e]/60"
           @click="openCookieDialog"
-        >更新 Cookie</button>
+        >更新 Cookie</UiButton>
       </div>
     </div>
 
@@ -40,10 +40,10 @@
       <div v-if="classes.length === 0 && !loading" class="flex flex-col items-center justify-center py-20 text-center">
         <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 24 24" fill="none"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <p class="text-[#86868b] text-sm mb-4">暂无班级，点击上方按钮创建</p>
-        <button
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
           @click="openCreateDialog"
-        >创建第一个班级</button>
+        >创建第一个班级</UiButton>
       </div>
 
       <!-- Class grid -->
@@ -63,12 +63,16 @@
               </div>
             </div>
             <!-- Dropdown menu -->
-            <div :ref="el => setDropdownRef(cls.id, el)" class="relative">
+            <div :ref="el => setDropdownRef(cls.id, el)" class="relative shrink-0">
               <button
-                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent"
+                type="button"
+                aria-label="班级操作"
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15"
                 @click.stop="toggleDropdown(cls.id)"
               >
-                <svg class="w-5 h-5 text-[#71839a]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 6.5h.01M12 12h.01M12 17.5h.01" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </button>
               <Transition
                 enter-active-class="transition-all duration-150 ease-out"
@@ -82,10 +86,10 @@
                   v-if="openDropdownId === cls.id"
                   class="absolute right-0 top-full mt-1 w-36 bg-white/95 backdrop-blur-xl rounded-[12px] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.1)] border border-black/[0.06] py-1 z-50 overflow-hidden"
                 >
-                  <button class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="editClass(cls); closeDropdown()">编辑班级</button>
-                  <button class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="manageStudents(cls); closeDropdown()">学生管理</button>
+                  <UiButton class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="editClass(cls); closeDropdown()">编辑班级</UiButton>
+                  <UiButton class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="manageStudents(cls); closeDropdown()">学生管理</UiButton>
                   <div class="h-px bg-black/[0.06] my-1"></div>
-                  <button class="w-full text-left px-4 py-2 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/5 transition-colors cursor-pointer border-none bg-transparent" @click="confirmDelete(cls); closeDropdown()">删除班级</button>
+                  <UiButton class="w-full text-left px-4 py-2 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/5 transition-colors cursor-pointer border-none bg-transparent" @click="confirmDelete(cls); closeDropdown()">删除班级</UiButton>
                 </div>
               </Transition>
             </div>
@@ -96,7 +100,7 @@
             <div class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
               <span class="text-[#8091a5] text-xs whitespace-nowrap">班级号</span>
               <strong>{{ displayClassCode(cls) }}</strong>
-              <button class="text-[#007aff] text-xs hover:underline cursor-pointer border-none bg-transparent p-0" @click="copyCode(displayClassCode(cls))">复制</button>
+              <UiButton class="text-[#007aff] text-xs hover:underline cursor-pointer border-none bg-transparent p-0" @click="copyCode(displayClassCode(cls))">复制</UiButton>
             </div>
             <div v-if="hasPtaConfig(cls)" class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
               <span class="text-[#8091a5] text-xs whitespace-nowrap">PTA 同步</span>
@@ -127,18 +131,18 @@
 
           <!-- Card actions -->
           <div class="flex justify-between gap-2.5 mt-auto flex-wrap pt-1.5">
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="enterClassSpace(cls)">进入教学班</button>
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="manageStudents(cls)">学生管理</button>
-            <button
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="enterClassSpace(cls)">进入教学班</UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="manageStudents(cls)">学生管理</UiButton>
+            <UiButton
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#34a853] bg-[#e6f4ea] hover:bg-[#d4edda] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
               :disabled="importingMap[cls.id]"
               @click="importStudentsForClass(cls)"
             >
               <span v-if="importingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#34a853]/30 border-t-[#34a853] rounded-full animate-spin"></span>导入中...</span>
               <span v-else>导入 PTA 学生</span>
-            </button>
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAnalysis(cls)">班级分析</button>
-            <button
+            </UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAnalysis(cls)">班级分析</UiButton>
+            <UiButton
               v-if="hasPtaConfig(cls)"
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#b26a00] bg-[#fef7e0] hover:bg-[#fdf0c8] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
               :disabled="syncingMap[cls.id] || cls.syncStatus === 'RUNNING'"
@@ -146,7 +150,7 @@
             >
               <span v-if="syncingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#b26a00]/30 border-t-[#b26a00] rounded-full animate-spin"></span>同步中..</span>
               <span v-else>{{ cls.syncStatus === 'RUNNING' ? '同步中..' : '立即同步' }}</span>
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -158,7 +162,7 @@
         <!-- Name -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级名称 <span class="text-[#ff3b30]">*</span></label>
-          <input
+          <UiInput
             v-model="classForm.name"
             placeholder="例如：计算机科学与技术23 级1 班"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -169,19 +173,19 @@
         <div v-if="!editingClass">
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级号 <span class="text-[#ff3b30]">*</span></label>
           <div class="flex gap-2">
-            <input
+            <UiInput
               v-model="classForm.classCode"
               placeholder="唯一标识，例如CS2023-01"
               class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
             />
-            <button class="h-10 px-4 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="generateCode">随机生成</button>
+            <UiButton class="h-10 px-4 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="generateCode">随机生成</UiButton>
           </div>
           <p v-if="errors.classCode" class="mt-1 text-xs text-[#ff3b30]">{{ errors.classCode }}</p>
         </div>
         <!-- Join password -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">加入密码 <span class="text-[#ff3b30]">*</span></label>
-          <input
+          <UiInput
             v-model="classForm.joinPassword"
             type="password"
             placeholder="学生加入班级时需要输入"
@@ -192,18 +196,18 @@
         <!-- Grade -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">年级</label>
-          <select
+          <UiSelect
             v-model="classForm.grade"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
           >
-            <option value="">选择年级</option>
-            <option v-for="y in gradeOptions" :key="y" :value="y">{{ y }} 级</option>
-          </select>
+            <UiOption value="">选择年级</UiOption>
+            <UiOption v-for="y in gradeOptions" :key="y" :value="y">{{ y }} 级</UiOption>
+          </UiSelect>
         </div>
         <!-- Course name -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名称</label>
-          <input
+          <UiInput
             v-model="classForm.courseName"
             placeholder="例如：数据结构"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -229,7 +233,7 @@
         <!-- PTA keyword -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 关键词</label>
-          <input
+          <UiInput
             v-model="classForm.ptaKeyword"
             placeholder="例如：计科23 数据结构"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -239,7 +243,7 @@
         <!-- Sync toggle -->
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-[#1d1d1f]">定时同步</label>
-          <button
+          <UiButton
             type="button"
             :class="[
               'relative w-[44px] h-[26px] rounded-full transition-colors cursor-pointer border-none',
@@ -249,22 +253,22 @@
             @click="classForm.syncEnabled = !classForm.syncEnabled"
           >
             <span :class="['absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform', classForm.syncEnabled && classForm.ptaKeyword.trim() ? 'left-[21px]' : 'left-[3px]']"></span>
-          </button>
+          </UiButton>
           <span class="text-[13px] text-[#7b8ba0]">
             {{ classForm.syncEnabled ? '已开启，每天凌晨自动同步一次。' : '关闭' }}
           </span>
         </div>
       </div>
       <template #footer>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="classDialogVisible = false">取消</button>
-        <button
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="classDialogVisible = false">取消</UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="submitting"
           @click="submitClassForm"
         >
           <span v-if="submitting" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>提交中</span>
           <span v-else>确认</span>
-        </button>
+        </UiButton>
       </template>
     </AppModal>
 
@@ -272,12 +276,12 @@
     <AppModal v-model="studentDialogVisible" :title="`学生管理 - ${displayClassName(currentClass || {})}`" width="720px">
       <div>
         <div class="flex justify-between gap-3 mb-4">
-          <input
+          <UiInput
             v-model="studentSearch"
             placeholder="搜索姓名或学号"
             class="w-full max-w-[260px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
           />
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="openAddStudentDialog">添加学生</button>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="openAddStudentDialog">添加学生</UiButton>
         </div>
 
         <!-- Student table -->
@@ -285,7 +289,7 @@
           <div v-if="studentsLoading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-10">
             <div class="w-6 h-6 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
           </div>
-          <table class="w-full text-sm border-collapse">
+          <UiTable class="w-full text-sm border-collapse">
             <thead class="sticky top-0 bg-[#f5f5f7]/95 backdrop-blur-sm">
               <tr>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-14">#</th>
@@ -302,14 +306,14 @@
                 <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentName }}</td>
                 <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
                 <td class="px-4 py-3">
-                  <button class="text-[#ff3b30] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</button>
+                  <UiButton class="text-[#ff3b30] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
                 </td>
               </tr>
               <tr v-if="filteredStudents.length === 0 && !studentsLoading">
                 <td colspan="5" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
         </div>
         <p class="mt-3.5 text-[13px] text-[#7f90a4]">共{{ students.length }} 名学生</p>
       </div>
@@ -320,7 +324,7 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">姓名</label>
-          <input
+          <UiInput
             v-model="addStudentForm.studentName"
             placeholder="学生姓名"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -328,7 +332,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学号</label>
-          <input
+          <UiInput
             v-model="addStudentForm.studentNum"
             placeholder="选填"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
@@ -336,15 +340,15 @@
         </div>
       </div>
       <template #footer>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addStudentVisible = false">取消</button>
-        <button
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addStudentVisible = false">取消</UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="addingStudent"
           @click="doAddStudent"
         >
           <span v-if="addingStudent" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>添加中</span>
           <span v-else>确认</span>
-        </button>
+        </UiButton>
       </template>
     </AppModal>
 
@@ -367,7 +371,7 @@
         <!-- Sync keyword -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">同步关键词</label>
-          <input
+          <UiInput
             v-model="syncForm.ptaKeyword"
             autocomplete="off"
             placeholder="例如：计科5数据结构"
@@ -377,7 +381,7 @@
         <!-- PTA username -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 账号</label>
-          <input
+          <UiInput
             v-model="syncForm.ptaUsername"
             autocomplete="off"
             placeholder="本次同步使用的PTA 账号（可选）"
@@ -387,7 +391,7 @@
         <!-- PTA password -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 密码</label>
-          <input
+          <UiInput
             v-model="syncForm.ptaPassword"
             type="password"
             autocomplete="new-password"
@@ -398,8 +402,8 @@
 
         <!-- Temp credential actions -->
         <div class="flex gap-2">
-          <button class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#007aff] bg-[#007aff]/10 hover:bg-[#007aff]/15 active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitSyncTempCredential">提交临时账号密码</button>
-          <button class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearSyncTempCredential">清空临时凭据</button>
+          <UiButton class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#007aff] bg-[#007aff]/10 hover:bg-[#007aff]/15 active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitSyncTempCredential">提交临时账号密码</UiButton>
+          <UiButton class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearSyncTempCredential">清空临时凭据</UiButton>
         </div>
 
         <div v-if="syncTempCredentialSubmitted" class="rounded-[12px] bg-[#e6f4ea] p-3 text-[13px] text-[#1e8e3e]">
@@ -413,15 +417,15 @@
         </div>
       </div>
       <template #footer>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="syncDialogVisible = false">取消</button>
-        <button
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="syncDialogVisible = false">取消</UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="syncDialogClass ? syncingMap[syncDialogClass.id] : false"
           @click="triggerSyncForClass"
         >
           <span v-if="syncDialogClass && syncingMap[syncDialogClass.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>同步中</span>
           <span v-else>开始同步</span>
-        </button>
+        </UiButton>
       </template>
     </AppModal>
 
@@ -473,28 +477,28 @@
         </div>
       </div>
       <template #footer>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="cookieDialogVisible = false">取消</button>
-        <button
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="cookieDialogVisible = false">取消</UiButton>
+        <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="cookieSubmitting || !cookieInput.trim()"
           @click="submitCookieForm"
         >
           <span v-if="cookieSubmitting" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>验证中</span>
           <span v-else>验证并保存</span>
-        </button>
+        </UiButton>
       </template>
     </AppModal>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import AppModal from '../../components/AppModal.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
+import axios from 'axios'
 import {
   addClassStudent,
   createTeachingClass,
@@ -592,6 +596,58 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
 
 const extract = (res) => res?.data ?? res
 
+function normalizeUrl(url) {
+  return String(url || '').replace(/\/+$/, '')
+}
+
+function buildDefaultSpiderUrl() {
+  if (typeof window !== 'undefined' && window.location) {
+    const protocol = window.location.protocol || 'http:'
+    const hostname = window.location.hostname || '127.0.0.1'
+    return `${protocol}//${hostname}:8100`
+  }
+  return 'http://127.0.0.1:8100'
+}
+
+const envSpiderUrl = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_SPIDER_URL)
+  ? process.env.VUE_APP_SPIDER_URL
+  : ''
+const spiderUrl = ref(normalizeUrl(envSpiderUrl || buildDefaultSpiderUrl()))
+
+const spiderRequestConfig = (options = {}) => ({
+  withCredentials: false,
+  ...options
+})
+
+function spiderApi(path) {
+  return `${spiderUrl.value}${path}`
+}
+
+async function probeSpiderHealth() {
+  const candidates = []
+  const push = (url) => {
+    const normalized = normalizeUrl(url)
+    if (normalized && !candidates.includes(normalized)) candidates.push(normalized)
+  }
+  push(spiderUrl.value)
+  push(buildDefaultSpiderUrl())
+  push('http://localhost:8100')
+  push('http://127.0.0.1:8100')
+
+  for (const base of candidates) {
+    try {
+      const res = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
+      if (res.status === 200) {
+        spiderUrl.value = base
+        return true
+      }
+    } catch {
+      // try next candidate
+    }
+  }
+  return false
+}
+
 const replacementChar = String.fromCharCode(0xfffd)
 
 const isCorruptedText = (value) => {
@@ -635,7 +691,7 @@ const resolvePtaKeyword = () => (classForm.ptaKeyword || classForm.name || '').t
 const toSelectedClass = (cls) => ({
   id: cls.id,
   name: displayClassName(cls),
-  ptaKeyword: cls.ptaKeyword || cls.name || ''
+  ptaKeyword: cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
 })
 
 // Sync tag styling
@@ -665,7 +721,7 @@ const loadClasses = async () => {
     const res = await getTeachingClasses()
     classes.value = extract(res) || []
   } catch (error) {
-    ElMessage.error(`加载班级失败：${error.message}`)
+    uiMessage.error(`加载班级失败：${error.message}`)
   } finally {
     loading.value = false
   }
@@ -723,7 +779,7 @@ const submitClassForm = async () => {
         ptaKeyword,
         syncEnabled: classForm.syncEnabled
       })
-      ElMessage.success('班级更新成功')
+      uiMessage.success('班级更新成功')
     } else {
       const res = await createTeachingClass({ ...classForm, ptaKeyword })
       const created = extract(res)
@@ -733,13 +789,13 @@ const submitClassForm = async () => {
           ptaKeyword: created.ptaKeyword || ptaKeyword || created.name
         }))
       }
-      ElMessage.success('班级创建成功')
+      uiMessage.success('班级创建成功')
       if (ptaKeyword && created?.id) {
         try {
           await triggerPtaSync(created.id)
-          ElMessage.success('已自动触发PTA 数据同步')
+          uiMessage.success('已自动触发PTA 数据同步')
         } catch (syncError) {
-          ElMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '爬虫服务可能未启动'}`)
+          uiMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '爬虫服务可能未启动'}`)
         }
       }
     }
@@ -747,14 +803,14 @@ const submitClassForm = async () => {
     classDialogVisible.value = false
     await loadClasses()
   } catch (error) {
-    ElMessage.error(error.message || '保存班级失败')
+    uiMessage.error(error.message || '保存班级失败')
   } finally {
     submitting.value = false
   }
 }
 
 const confirmDelete = (cls) => {
-  ElMessageBox.confirm(
+  messageBox.confirm(
       `确定删除班级"${displayClassName(cls)}"？此操作不可恢复，班级内学生关系也会一并删除。`,
     '警告',
     {
@@ -765,10 +821,10 @@ const confirmDelete = (cls) => {
   ).then(async () => {
     try {
       await deleteTeachingClass(cls.id)
-      ElMessage.success('删除成功')
+      uiMessage.success('删除成功')
       await loadClasses()
     } catch (error) {
-      ElMessage.error(error.message || '删除失败')
+      uiMessage.error(error.message || '删除失败')
     }
   }).catch(() => {})
 }
@@ -777,15 +833,15 @@ const copyCode = async (code) => {
   if (!code || code === '未生成') return
   try {
     await navigator.clipboard.writeText(code)
-    ElMessage.success('班级号已复制')
+    uiMessage.success('班级号已复制')
   } catch {
-    ElMessage.warning('复制失败，请手动复制')
+    uiMessage.warning('复制失败，请手动复制')
   }
 }
 
 const enterClassSpace = (cls) => {
   userStore.setSelectedClass(toSelectedClass(cls))
-  ElMessage.success(`已切换到 ${displayClassName(cls)}`)
+  uiMessage.success(`已切换到 ${displayClassName(cls)}`)
   router.push('/teacher/dashboard')
 }
 
@@ -820,11 +876,11 @@ const submitSyncTempCredential = () => {
   const username = syncForm.ptaUsername.trim()
   const password = syncForm.ptaPassword
   if (!username || !password) {
-    ElMessage.warning('请先输入完整的临时PTA 账号和密码，再点击提交')
+    uiMessage.warning('请先输入完整的临时PTA 账号和密码，再点击提交')
     return
   }
   syncTempCredentialSubmitted.value = true
-  ElMessage.success(`已提交临时PTA 账号：${username}`)
+  uiMessage.success(`已提交临时PTA 账号：${username}`)
 }
 
 const clearSyncTempCredential = () => {
@@ -840,34 +896,54 @@ const triggerSyncForClass = async () => {
   const draftUsername = syncForm.ptaUsername.trim()
   const draftPassword = syncForm.ptaPassword
   if (!keyword) {
-    ElMessage.warning('请输入本次同步使用的 PTA 关键词')
+    uiMessage.warning('请输入本次同步使用的 PTA 关键词')
     return
   }
   if ((draftUsername && !draftPassword) || (!draftUsername && draftPassword)) {
-    ElMessage.warning('请输入完整的 PTA 账号和密码，或保持两项都为空。')
+    uiMessage.warning('请输入完整的 PTA 账号和密码，或保持两项都为空。')
     return
   }
   if ((draftUsername || draftPassword) && !syncTempCredentialSubmitted.value) {
-    ElMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
+    uiMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
     return
   }
   const username = syncTempCredentialSubmitted.value ? draftUsername : ''
   const password = syncTempCredentialSubmitted.value ? draftPassword : ''
   syncingMap[cls.id] = true
   try {
-    const res = await triggerPtaSync(cls.id, {
-      ptaKeyword: keyword,
-      ...(username ? { ptaUsername: username, ptaPassword: password } : {})
-    })
+    const spiderAlive = await probeSpiderHealth()
+    const credentialSource = plannedSyncCredentialSource.value
+    if (spiderAlive && credentialSource === 'cookie' && cookieStatus.value !== 'OK') {
+      uiMessage.warning('当前没有有效 Cookie。请填写 PTA 账号密码并点击“提交临时账号密码”，再开始同步以打开浏览器登录。')
+      return
+    }
+
+    const res = spiderAlive && credentialSource !== 'bound'
+      ? await axios.post(spiderApi('/crawl'), {
+        keyword,
+        class_id: cls.id,
+        mode: 'incremental',
+        force: true,
+        credential_source: credentialSource,
+        force_selenium_login: credentialSource === 'temporary',
+        headless: false,
+        ...(username ? { username, password } : {})
+      }, spiderRequestConfig({ timeout: 30000 }))
+      : await triggerPtaSync(cls.id, {
+        ptaKeyword: keyword,
+        mode: 'incremental',
+        force: true,
+        ...(username ? { ptaUsername: username, ptaPassword: password } : {})
+      })
     const data = extract(res) || {}
     cls.ptaKeyword = keyword
     cls.syncStatus = 'RUNNING'
     syncDialogVisible.value = false
     syncForm.ptaKeyword = ''
     clearSyncTempCredential()
-    ElMessage.success(`同步任务已提交，本次使用${credentialSourceText(data?.credentialSource || data?.credential_source || plannedSyncCredentialSource.value)}`)
+    uiMessage.success(`同步任务已提交，本次使用${credentialSourceText(data?.credentialSource || data?.credential_source || plannedSyncCredentialSource.value)}`)
   } catch (error) {
-    ElMessage.error(error.message || '同步失败')
+    uiMessage.error(error.message || '同步失败')
   } finally {
     syncingMap[cls.id] = false
   }
@@ -881,7 +957,7 @@ const manageStudents = async (cls) => {
     const res = await getClassStudents(cls.id)
     students.value = extract(res) || []
   } catch (error) {
-    ElMessage.error(error.message || '加载学生列表失败')
+    uiMessage.error(error.message || '加载学生列表失败')
   } finally {
     studentsLoading.value = false
   }
@@ -897,9 +973,9 @@ const importStudentsForClass = async (cls) => {
     const updated = Number(data.updatedCount || 0)
 
     if (matched === 0) {
-      ElMessage.warning(`未找到${displayClassName(cls)} 的已同步 PTA 学生数据`)
+      uiMessage.warning(`未找到${displayClassName(cls)} 的已同步 PTA 学生数据`)
     } else {
-      ElMessage.success(`已导入${created} 人，更新 ${updated} 人`)
+      uiMessage.success(`已导入${created} 人，更新 ${updated} 人`)
     }
 
     if (currentClass.value?.id === cls.id && studentDialogVisible.value) {
@@ -908,7 +984,7 @@ const importStudentsForClass = async (cls) => {
     }
     await loadClasses()
   } catch (error) {
-    ElMessage.error(error.message || '导入 PTA 学生失败')
+    uiMessage.error(error.message || '导入 PTA 学生失败')
   } finally {
     importingMap[cls.id] = false
   }
@@ -922,27 +998,27 @@ const openAddStudentDialog = () => {
 
 const doAddStudent = async () => {
   if (!addStudentForm.studentName.trim()) {
-    ElMessage.warning('请输入学生姓名')
+    uiMessage.warning('请输入学生姓名')
     return
   }
 
   addingStudent.value = true
   try {
     await addClassStudent(currentClass.value.id, { ...addStudentForm })
-    ElMessage.success('添加成功')
+    uiMessage.success('添加成功')
     addStudentVisible.value = false
     const res = await getClassStudents(currentClass.value.id)
     students.value = extract(res) || []
     await loadClasses()
   } catch (error) {
-    ElMessage.error(error.message || '添加学生失败')
+    uiMessage.error(error.message || '添加学生失败')
   } finally {
     addingStudent.value = false
   }
 }
 
 const confirmRemoveStudent = (row) => {
-  ElMessageBox.confirm(`确定移除学生"${row.studentName}"吗？`, '提示', {
+  messageBox.confirm(`确定移除学生"${row.studentName}"吗？`, '提示', {
     confirmButtonText: '移除',
     cancelButtonText: '取消',
     type: 'warning'
@@ -950,10 +1026,10 @@ const confirmRemoveStudent = (row) => {
     try {
       await removeClassStudent(currentClass.value.id, row.id)
       students.value = students.value.filter(item => item.id !== row.id)
-      ElMessage.success('已移除')
+      uiMessage.success('已移除')
       await loadClasses()
     } catch (error) {
-      ElMessage.error(error.message || '移除失败')
+      uiMessage.error(error.message || '移除失败')
     }
   }).catch(() => {})
 }
@@ -1007,7 +1083,7 @@ const submitCookieForm = async () => {
     cookieSubmitResult.value = data
     if (data?.valid) {
       cookieStatus.value = 'OK'
-      ElMessage.success('Cookie 更新成功，数据同步已恢复')
+      uiMessage.success('Cookie 更新成功，数据同步已恢复')
       setTimeout(() => {
         cookieDialogVisible.value = false
       }, 1500)

@@ -1,25 +1,25 @@
 <template>
   <div class="learning-analysis-container">
-    <page-header class="my-page-header [padding:20px]" title="学习分析" description="基于您的PTA平台提交数据的AI深度分析" />
+    <UiPageHeader class="my-page-header [padding:20px]" title="学习分析" description="基于您的PTA平台提交数据的AI深度分析" />
 
     <loading-state :loading="loading">
       <div class="analysis-content [display:flex] [flex-direction:column] [gap:20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
         <!-- 总体概览 -->
-        <el-row :gutter="20">
-          <el-col :span="6" v-for="item in overviewCards" :key="item.label">
-            <el-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+        <ui-row :gutter="20">
+          <ui-col :span="6" v-for="item in overviewCards" :key="item.label">
+            <ui-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
               <div class="stat-icon [width:44px] [height:44px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
-                <el-icon :size="22" color="#fff"><component :is="item.icon" /></el-icon>
+                <ui-icon :size="22" color="#fff"><component :is="item.icon" /></ui-icon>
               </div>
               <div class="stat-info [flex:1]">
                 <div class="stat-value [font-size:22px] [font-weight:600] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
                 <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
               </div>
-            </el-card>
-          </el-col>
-        </el-row>
+            </ui-card>
+          </ui-col>
+        </ui-row>
 
-        <el-alert
+        <ui-alert
           v-if="profileData.analyticsFallback"
           type="info"
           :closable="false"
@@ -28,45 +28,42 @@
         />
 
         <!-- 雷达图+ 趋势 -->
-        <el-row :gutter="20" class="chart-row [margin-top:0] [margin-bottom:0] [margin-bottom:20px]">
-          <el-col :span="12">
-            <el-card class="chart-card [min-height:420px] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] [margin-bottom:20px] [height:400px]">
+        <ui-row :gutter="20" class="chart-row [margin-top:0] [margin-bottom:0] [margin-bottom:20px]">
+          <ui-col :span="12">
+            <ui-card class="chart-card [min-height:420px] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] [margin-bottom:20px] [height:400px]">
               <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-size:15px] [font-weight:500] [color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>知识掌握雷达图</span></div></template>
               <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="radarChartRef" class="chart [width:100%] [height:100%]"></div></div>
-            </el-card>
-          </el-col>
-          <el-col :span="12">
-            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+            </ui-card>
+          </ui-col>
+          <ui-col :span="12">
+            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
               <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验掌握度趋势</span></div></template>
               <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="trendChartRef" class="chart [width:100%] [height:100%]"></div></div>
-            </el-card>
-          </el-col>
-        </el-row>
+            </ui-card>
+          </ui-col>
+        </ui-row>
 
         <!-- 实验得分对比 + 能力维度柱状图-->
-        <el-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
-          <el-col :span="12">
-            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+        <ui-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
+          <ui-col :span="12">
+            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
               <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各维度能力对比</span></div></template>
               <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
-            </el-card>
-          </el-col>
-          <el-col :span="12">
-            <el-card class="chart-card [margin-bottom:20px] [height:400px]">
+            </ui-card>
+          </ui-col>
+          <ui-col :span="12">
+            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
               <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>提交效率分析</span></div></template>
               <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="efficiencyChartRef" class="chart [width:100%] [height:100%]"></div></div>
-            </el-card>
-          </el-col>
-        </el-row>
+            </ui-card>
+          </ui-col>
+        </ui-row>
 
         <!-- 班级对比分析 -->
-        <el-card class="chart-card [margin-top:20px] [margin-bottom:20px] [height:400px]" v-if="classData && classData.experiments?.length">
+        <ui-card class="chart-card [margin-top:20px] [margin-bottom:20px] [height:400px]" v-if="classData && classData.experiments?.length">
           <template #header>
             <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-              <span class="[display:inline-flex] [align-items:center] [gap:8px]">
-                <LucideIcon name="bar-chart" :size="18" />
-                班级对比分析
-              </span>
+              <span>📊 班级对比分析</span>
               <div class="class-summary-chips [display:flex] [gap:8px]" v-if="classData.summary">
                 <span class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" :class="avgDiffClass">
                   {{ avgDiffText }}
@@ -89,10 +86,10 @@
               </div>
             </div>
           </div>
-        </el-card>
+        </ui-card>
 
         <!-- AI智能学情分析 -->
-        <el-alert
+        <ui-alert
           v-else-if="classCompareUnavailableReason"
           class="class-compare-alert [margin-top:20px]"
           type="warning"
@@ -101,28 +98,23 @@
           show-icon
         />
 
-        <el-card class="ai-analysis-card [margin-top:20px]">
+        <ui-card class="ai-analysis-card [margin-top:20px]">
           <template #header>
             <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [align-items:flex-start] [gap:16px] [gap:10px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <div class="ai-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
-                <el-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></el-icon>
+                <ui-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></ui-icon>
                 <span>AI智能学情分析</span>
               </div>
-              <el-tag type="success" effect="dark">基于真实数据</el-tag>
+              <ui-tag type="success" effect="dark">基于真实数据</ui-tag>
             </div>
           </template>
           <div class="ai-analysis-content">
             <!-- 学习特征标签 -->
             <div class="section-block [margin-bottom:24px]">
-              <h4 class="[display:flex] [align-items:center] [gap:8px]">
-                <LucideIcon name="tags" :size="18" />
-                学习特征
-              </h4>
+              <h4>🏷️学习特征</h4>
               <div class="patterns-row [display:flex] [gap:12px] [flex-wrap:wrap]">
                 <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card [display:flex] [gap:10px] [padding:12px_16px] [border-radius:12px] [border:1px_solid_#e8eaed] [flex:1] [min-width:200px] [&.pat-good]:[background:#e6f4ea] [&.pat-good]:[border-color:#ceead6] [&.pat-warn]:[background:#fef7e0] [&.pat-warn]:[border-color:#feefc3] [&.pat-bad]:[background:#fce8e6] [&.pat-bad]:[border-color:#f5c6c2]" :class="patternClass(p.tag)">
-                  <span class="pattern-emoji [display:inline-flex] [align-items:center] [justify-content:center] [width:28px] [height:28px] [color:#1a73e8]">
-                    <LucideIcon :name="patternIcon(p.tag)" :size="22" />
-                  </span>
+                  <span class="pattern-emoji [font-size:24px]">{{ patternEmoji(p.tag) }}</span>
                   <div>
                     <div class="pattern-name [font-weight:500] [font-size:14px] [color:#202124]">{{ p.tag }}</div>
                     <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
@@ -133,25 +125,19 @@
 
             <!-- 能力趋势 -->
             <div class="section-block [margin-bottom:24px]">
-              <h4 class="[display:flex] [align-items:center] [gap:8px]">
-                <LucideIcon name="bar-chart" :size="18" />
-                各维度能力水平
-              </h4>
+              <h4>📊 各维度能力水平</h4>
               <div class="ability-list [display:flex] [flex-direction:column] [gap:16px]">
                 <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item [padding:12px_16px] [border:1px_solid_#e8eaed] [border-radius:12px]">
                   <div class="ability-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
-                    <span class="ability-name [display:flex] [align-items:center] [gap:6px] [font-weight:500] [font-size:14px] [color:#202124]">
-                      <LucideIcon :name="dimIcon(dim.dimension)" :size="16" />
-                      {{ dim.dimension }}
-                    </span>
+                    <span class="ability-name [font-weight:500] [font-size:14px] [color:#202124]">{{ dimEmoji(dim.dimension) }} {{ dim.dimension }}</span>
                     <div class="ability-score [display:flex] [align-items:center] [gap:8px] [font-weight:500]">
                       <span>{{ dim.avgMastery }}分</span>
-                      <el-tag size="small" :type="dim.level === 'good' ? 'success' : dim.level === 'medium' ? 'warning' : 'danger'">
+                      <ui-tag size="small" :type="dim.level === 'good' ? 'success' : dim.level === 'medium' ? 'warning' : 'danger'">
                         {{ dim.level === 'good' ? '掌握良好' : dim.level === 'medium' ? '需要巩固' : '薄弱' }}
-                      </el-tag>
+                      </ui-tag>
                     </div>
                   </div>
-                  <el-progress :percentage="Math.min(100, Math.round(dim.avgMastery))" :color="masteryColor(dim.avgMastery)" :stroke-width="12" />
+                  <ui-progress :percentage="Math.min(100, Math.round(dim.avgMastery))" :color="masteryColor(dim.avgMastery)" :stroke-width="12" />
                   <div class="ability-desc [font-size:12px] [color:#5f6368] [margin-top:6px]">{{ dim.description }}</div>
                 </div>
               </div>
@@ -159,40 +145,30 @@
 
             <!-- 薄弱点-->
             <div class="section-block [margin-bottom:24px]" v-if="profileData.weaknesses?.length">
-              <h4 class="[display:flex] [align-items:center] [gap:8px]">
-                <LucideIcon name="alert-triangle" :size="18" />
-                重点提升方向
-              </h4>
+              <h4>⚠️ 重点提升方向</h4>
               <div class="improvement-items [display:flex] [flex-direction:column] [gap:10px]">
                 <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item [display:flex] [align-items:center] [gap:8px] [font-size:14px] [color:#5f6368]">
-                  <el-icon class="improvement-icon [color:#e37400] [font-size:18px] [&.high-priority]:[color:#d93025]" :class="i === 0 ? 'high-priority' : ''"><Warning /></el-icon>
+                  <ui-icon class="improvement-icon [color:#e37400] [font-size:18px] [&.high-priority]:[color:#d93025]" :class="i === 0 ? 'high-priority' : ''"><Warning /></ui-icon>
                   <span>{{ w.experimentName }}（{{ w.dimension }}）掌握度仅{{ Math.round(w.mastery) }}分，建议重点练习</span>
                 </div>
               </div>
             </div>
           </div>
-        </el-card>
+        </ui-card>
 
         <!-- 学习建议 -->
-        <el-card class="[margin-top:20px]">
-          <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
-              <span class="[display:inline-flex] [align-items:center] [gap:8px]">
-                <LucideIcon name="book-open" :size="18" />
-                学习方法推荐
-              </span>
-            </div>
-          </template>
+        <ui-card class="[margin-top:20px]">
+          <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>📚 学习方法推荐</span></div></template>
           <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
-            <el-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
+            <ui-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
               <div class="method-header [display:flex] [flex-direction:column] [align-items:center] [gap:8px] [margin-bottom:8px]">
-                <el-icon :size="24" class="method-icon [color:#1a73e8]"><component :is="item.icon" /></el-icon>
+                <ui-icon :size="24" class="method-icon [color:#1a73e8]"><component :is="item.icon" /></ui-icon>
                 <h4>{{ item.title }}</h4>
               </div>
               <p>{{ item.description }}</p>
-            </el-card>
+            </ui-card>
           </div>
-        </el-card>
+        </ui-card>
       </div>
     </loading-state>
   </div>
@@ -201,11 +177,9 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning } from '@element-plus/icons-vue'
-import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
+import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning } from '@/components/ui/icons'
+import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@/components/ui/icons'
 import LoadingState from '../../components/LoadingState.vue'
-import LucideIcon from '../../components/LucideIcon.vue'
 import * as echarts from 'echarts'
 import axios from 'axios'
 import { getStudentAnalyticsOverview } from '../../api/tap'
@@ -291,13 +265,13 @@ function patternClass(tag) {
   if (tag === '高波动型') return 'pat-warn'
   return 'pat-bad'
 }
-function patternIcon(tag) {
-  const map = { '稳定进步': 'trend', '表现均衡': 'scale', '高波动型': 'bar-chart', '高重做型': 'refresh', '编码基础薄弱': 'wrench' }
-  return map[tag] || 'clipboard'
+function patternEmoji(tag) {
+  const map = { '稳定进步': '📈', '表现均衡': '⚖️', '高波动型': '🎢', '高重做型': '🔄', '编码基础薄弱': '🔧' }
+  return map[tag] || '📋'
 }
-function dimIcon(dim) {
-  const map = { '线性表': 'ruler', '栈与队列': 'library', '树': 'tree', '图': 'network', '哈希': 'hash', '综合': 'target' }
-  return map[dim] || 'package'
+function dimEmoji(dim) {
+  const map = { '线性表': '📏', '栈与队列': '📚', '树': '🌲', '图': '🕸️', '哈希': '#️⃣', '综合': '🎯' }
+  return map[dim] || '📦'
 }
 
 function resolveCurrentStudentId() {

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getSessionToken, getUserInfo } from '../constants/auth'
+import { clearAuthStorage, getSessionToken, getUserInfo } from '../constants/auth'
 
 const routes = [
   {
@@ -15,6 +15,7 @@ const routes = [
     path: '/student',
     name: 'StudentLayout',
     component: () => import('../views/student/Layout.vue'),
+    meta: { requiredRole: 'student' },
     redirect: '/student/dashboard',
     children: [
       {
@@ -31,6 +32,11 @@ const routes = [
         path: 'experiment-detail/:id',
         name: 'ExperimentDetail',
         component: () => import('../views/student/ExperimentDetail.vue')
+      },
+      {
+        // 兼容旧链接：/student/experiment/2 → /student/experiment-detail/2
+        path: 'experiment/:id',
+        redirect: to => ({ path: `/student/experiment-detail/${to.params.id}` })
       },
       {
         path: 'learning-analysis',
@@ -56,6 +62,11 @@ const routes = [
         path: 'practice',
         name: 'Practice',
         component: () => import('../views/student/Practice.vue')
+      },
+      {
+        path: 'leetcode-search',
+        name: 'LeetCodeSearch',
+        component: () => import('../views/student/LeetCodeSearch.vue')
       },
       {
         path: 'weakness-training',
@@ -87,12 +98,14 @@ const routes = [
   {
     path: '/teacher/select-class',
     name: 'ClassSelector',
+    meta: { requiredRole: 'teacher' },
     component: () => import('../views/teacher/ClassSelector.vue')
   },
   {
     path: '/teacher',
     name: 'TeacherLayout',
     component: () => import('../views/teacher/Layout.vue'),
+    meta: { requiredRole: 'teacher' },
     redirect: '/teacher/dashboard',
     children: [
       {
@@ -258,6 +271,11 @@ const routes = [
         path: 'data-sync',
         name: 'DataSync',
         component: () => import('../views/teacher/DataSyncPanel.vue')
+      },
+      {
+        path: 'leetcode-bank',
+        name: 'LeetCodeBank',
+        component: () => import('../views/teacher/LeetCodeBank.vue')
       }
     ]
   },
@@ -265,6 +283,7 @@ const routes = [
     path: '/admin',
     name: 'AdminLayout',
     component: () => import('../views/admin/Layout.vue'),
+    meta: { requiredRole: 'admin' },
     redirect: '/admin/dashboard',
     children: [
       {
@@ -293,6 +312,11 @@ const routes = [
         component: () => import('../views/admin/SystemLog.vue')
       },
       {
+        path: 'leetcode-claw',
+        name: 'LeetCodeClawStatus',
+        component: () => import('../views/admin/LeetCodeClawStatus.vue')
+      },
+      {
         path: 'profile',
         name: 'AdminProfile',
         component: () => import('../views/admin/Profile.vue')
@@ -306,45 +330,87 @@ const router = createRouter({
   routes
 })
 
+const TEACHER_CLASS_SELECTOR_PATH = '/teacher/select-class'
+const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'])
+
+function getPersistedSelectedClass() {
+  try {
+    const userStr = localStorage.getItem('user')
+    const parsed = userStr ? JSON.parse(userStr) : null
+    return parsed?.selectedClass || null
+  } catch {
+    return null
+  }
+}
+
+function getRoleHomePath(role) {
+  if (role === 'teacher') {
+    return getPersistedSelectedClass() ? '/teacher/dashboard' : TEACHER_CLASS_SELECTOR_PATH
+  }
+  if (role === 'admin') return '/admin/dashboard'
+  if (role === 'student') return '/student/dashboard'
+  return '/login'
+}
+
+function hasAllPermissions(requiredPermissions, userPermissions) {
+  return requiredPermissions.every(p => userPermissions.includes(p))
+}
+
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
   const isLoginPage = to.path === '/login'
-  const isClassSelector = to.path === '/teacher/select-class'
-  const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile'])
   const token = getSessionToken()
+  const userInfo = getUserInfo()
+  const userRole = userInfo?.role
 
-  if (!isLoginPage && !isClassSelector && !token) {
-    next('/login')
-  } else if (to.path.startsWith('/teacher/') && !isClassSelector) {
-    // 教师端页面需要先选择班级
-    const userStr = localStorage.getItem('user')
-    let selectedClass = null
-    try {
-      const parsed = userStr ? JSON.parse(userStr) : null
-      selectedClass = parsed?.selectedClass
-    } catch (e) { /* ignore */ }
-    if (!selectedClass && !teacherRoutesWithoutSelectedClass.has(to.path)) {
-      next('/teacher/select-class')
-    } else if (to.meta.requiredPermissions) {
-      const userInfo = getUserInfo()
-      const userPermissions = userInfo?.permissions || []
-      const hasPermission = to.meta.requiredPermissions.some(p => userPermissions.includes(p))
-      if (hasPermission) next()
-      else next('/teacher/dashboard')
-    } else {
+  if (!token) {
+    if (isLoginPage) {
       next()
+      return
     }
-  } else if (to.meta.requiredPermissions) {
-    const userInfo = getUserInfo()
-    const userPermissions = userInfo?.permissions || []
-    const hasPermission = to.meta.requiredPermissions.some(p => userPermissions.includes(p))
-    if (hasPermission) next()
-    else next('/teacher/dashboard')
-  } else {
-    next()
+    next('/login')
+    return
   }
+
+  if (isLoginPage) {
+    const targetPath = getRoleHomePath(userRole)
+    if (targetPath === '/login') {
+      clearAuthStorage()
+      next()
+      return
+    }
+    next(targetPath)
+    return
+  }
+
+  if (!userRole) {
+    clearAuthStorage()
+    next('/login')
+    return
+  }
+
+  if (to.meta.requiredRole && userRole !== to.meta.requiredRole) {
+    next(getRoleHomePath(userRole))
+    return
+  }
+
+  if (userRole === 'teacher' && to.path.startsWith('/teacher/') && to.path !== TEACHER_CLASS_SELECTOR_PATH) {
+    const selectedClass = getPersistedSelectedClass()
+    if (!selectedClass && !teacherRoutesWithoutSelectedClass.has(to.path)) {
+      next(TEACHER_CLASS_SELECTOR_PATH)
+      return
+    }
+  }
+
+  if (to.meta.requiredPermissions) {
+    const userPermissions = userInfo?.permissions || []
+    if (!hasAllPermissions(to.meta.requiredPermissions, userPermissions)) {
+      next('/teacher/dashboard')
+      return
+    }
+  }
+
+  next()
 })
 
 export default router
-
-

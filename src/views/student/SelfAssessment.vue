@@ -1,6 +1,6 @@
 <template>
   <div class="self-assessment-container [height:100%]">
-    <page-header
+    <UiPageHeader
         class="my-page-header [padding:20px]"
       title="自我评估"
       description="评估您在每次实验中实际独立完成的部分，以获得更准确的学习分析"
@@ -8,7 +8,7 @@
 
     <loading-state :loading="loading">
       <div class="assessment-content [display:flex] [flex-direction:column] [gap:20px]">
-        <el-alert
+        <ui-alert
           type="info"
           show-icon
           :closable="false"
@@ -20,14 +20,14 @@
             AI测评系统会分析您的代码和查重率，但有时需要您的主观评价来更全面地了解您的学习情况。
             通过诚实地自我评估，系统可以为您提供更准确的学习建议和个性化的练习内容。
           </p>
-        </el-alert>
+        </ui-alert>
 
-        <el-tabs v-model="activeTab" class="assessment-tabs [margin-top:20px]">
-          <el-tab-pane label="实验自评" name="experiments">
-            <el-card v-for="exp in completedExperiments" :key="exp.id" class="assessment-card [margin-bottom:20px]">
+        <ui-tabs v-model="activeTab" class="assessment-tabs [margin-top:20px]">
+          <ui-tab-pane label="实验自评" name="experiments">
+            <ui-card v-for="exp in completedExperiments" :key="exp.id" class="assessment-card [margin-bottom:20px]">
               <div class="experiment-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:15px]">
                 <h3>{{ exp.name }}</h3>
-                <el-tag type="success" size="small">已完成</el-tag>
+                <ui-tag type="success" size="small">已完成</ui-tag>
               </div>
 
               <div class="experiment-info [display:flex] [margin-bottom:20px] [flex-wrap:wrap] [gap:20px]">
@@ -48,61 +48,61 @@
               <div class="assessment-form [border:1px_solid_#ebeef5] [border-radius:4px] [padding:20px] [background-color:#f9f9f9] [margin-bottom:15px]">
                 <div class="completion-rate [margin-bottom:20px] [display:flex] [flex-wrap:wrap] [align-items:center]">
                   <div class="rate-label [margin-bottom:10px] [color:#606266] [font-weight:500]">独立完成比例：</div>
-                  <el-slider
+                  <ui-slider
                     v-model="assessmentData[exp.id].completionRate"
                     :format-tooltip="percentFormat"
                     :min="0"
                     :max="100"
                     :step="5"
-                  ></el-slider>
+                  ></ui-slider>
                   <div class="rate-value [min-width:50px] [text-align:right] [font-weight:500]">{{ assessmentData[exp.id].completionRate }}%</div>
                 </div>
 
                 <div class="difficulty-rating [margin-bottom:20px]">
                   <div class="rate-label [margin-bottom:10px] [color:#606266] [font-weight:500]">实验难度评价：</div>
-                  <el-rate
+                  <ui-rate
                     v-model="assessmentData[exp.id].difficultyRating"
                     :texts="difficultyTexts"
                     show-text
-                  ></el-rate>
+                  ></ui-rate>
                 </div>
 
                 <div class="content-understanding [margin-bottom:20px]">
                   <div class="rate-label [margin-bottom:10px] [color:#606266] [font-weight:500]">对知识点的理解程度：</div>
-                  <el-rate
+                  <ui-rate
                     v-model="assessmentData[exp.id].understandingLevel"
                     :colors="understandingColors"
-                  ></el-rate>
+                  ></ui-rate>
                 </div>
 
                 <div class="assessment-notes [margin-bottom:20px]">
                   <div class="rate-label [margin-bottom:10px] [color:#606266] [font-weight:500]">自我评价与反思：</div>
-                  <el-input
+                  <ui-input
                     v-model="assessmentData[exp.id].notes"
                     type="textarea"
                     :rows="3"
                     placeholder="请简要描述您在实验过程中的收获、遇到的困难以及解决方法等.."
-                  ></el-input>
+                  ></ui-input>
                 </div>
               </div>
 
               <div class="save-button [margin-top:10px] [text-align:right]">
-                <el-button
+                <ui-button
                   type="primary"
                   size="small"
                   @click="saveAssessment(exp.id)"
                   :loading="savingId === exp.id"
-                >保存评估</el-button>
+                >保存评估</ui-button>
               </div>
-            </el-card>
+            </ui-card>
 
             <div v-if="completedExperiments.length === 0" class="empty-state [padding:40px_0]">
-              <el-empty description="暂无可评估的实验"></el-empty>
+              <ui-empty description="暂无可评估的实验"></ui-empty>
             </div>
-          </el-tab-pane>
+          </ui-tab-pane>
 
-          <el-tab-pane label="知识点自评" name="knowledge">
-            <el-card class="knowledge-card [margin-bottom:20px]">
+          <ui-tab-pane label="知识点自评" name="knowledge">
+            <ui-card class="knowledge-card [margin-bottom:20px]">
               <template #header>
                 <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                   <span>数据结构知识点掌握自评</span>
@@ -113,103 +113,102 @@
                 <div v-for="(item, index) in knowledgePoints" :key="index" class="knowledge-item [display:flex] [align-items:center] [margin-bottom:15px]">
                   <div class="knowledge-name [width:200px] [padding-right:15px] [color:#303133]">{{ item.name }}</div>
                   <div class="knowledge-slider [flex:1]">
-                    <el-slider
+                    <ui-slider
                       v-model="knowledgeAssessment[item.key]"
                       :format-tooltip="formatKnowledgeTooltip"
                       :min="0"
                       :max="100"
                       :step="5"
-                    ></el-slider>
+                    ></ui-slider>
                   </div>
                   <div class="knowledge-level [width:60px] [text-align:right] [font-weight:500] [color:#409EFF]">{{ getKnowledgeLevel(knowledgeAssessment[item.key]) }}</div>
                 </div>
 
                 <div class="save-button knowledge-save [margin-top:10px] [text-align:right] [margin-top:30px]">
-                  <el-button
+                  <ui-button
                     type="primary"
                     @click="saveKnowledgeAssessment"
                     :loading="savingKnowledge"
-                  >保存知识点评估</el-button>
+                  >保存知识点评估</ui-button>
                 </div>
               </div>
-            </el-card>
-          </el-tab-pane>
+            </ui-card>
+          </ui-tab-pane>
 
-          <el-tab-pane label="学习习惯自评" name="habits">
-            <el-card class="habits-card [margin-bottom:20px]">
+          <ui-tab-pane label="学习习惯自评" name="habits">
+            <ui-card class="habits-card [margin-bottom:20px]">
               <template #header>
                 <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                   <span>学习习惯自评</span>
                 </div>
               </template>
 
-              <el-form :model="habitsForm" label-position="top" class="habits-form [max-width:600px]">
-                <el-form-item label="每周平均学习时间（小时）">
-                  <el-input-number v-model="habitsForm.weeklyHours" :min="0" :max="100" :step="0.5"></el-input-number>
-                </el-form-item>
+              <ui-form :model="habitsForm" label-position="top" class="habits-form [max-width:600px]">
+                <ui-form-item label="每周平均学习时间（小时）">
+                  <ui-input-number v-model="habitsForm.weeklyHours" :min="0" :max="100" :step="0.5"></ui-input-number>
+                </ui-form-item>
 
-                <el-form-item label="课前预习情况">
-                  <el-radio-group v-model="habitsForm.preview">
-                    <el-radio :label="1">从不</el-radio>
-                    <el-radio :label="2">偶尔</el-radio>
-                    <el-radio :label="3">经常</el-radio>
-                    <el-radio :label="4">总是</el-radio>
-                  </el-radio-group>
-                </el-form-item>
+                <ui-form-item label="课前预习情况">
+                  <ui-radio-group v-model="habitsForm.preview">
+                    <ui-radio :label="1">从不</ui-radio>
+                    <ui-radio :label="2">偶尔</ui-radio>
+                    <ui-radio :label="3">经常</ui-radio>
+                    <ui-radio :label="4">总是</ui-radio>
+                  </ui-radio-group>
+                </ui-form-item>
 
-                <el-form-item label="课后复习情况">
-                  <el-radio-group v-model="habitsForm.review">
-                    <el-radio :label="1">从不</el-radio>
-                    <el-radio :label="2">偶尔</el-radio>
-                    <el-radio :label="3">经常</el-radio>
-                    <el-radio :label="4">总是</el-radio>
-                  </el-radio-group>
-                </el-form-item>
+                <ui-form-item label="课后复习情况">
+                  <ui-radio-group v-model="habitsForm.review">
+                    <ui-radio :label="1">从不</ui-radio>
+                    <ui-radio :label="2">偶尔</ui-radio>
+                    <ui-radio :label="3">经常</ui-radio>
+                    <ui-radio :label="4">总是</ui-radio>
+                  </ui-radio-group>
+                </ui-form-item>
 
-                <el-form-item label="独立解决问题能力自评">
-                  <el-rate v-model="habitsForm.problemSolving" :max="5"></el-rate>
-                </el-form-item>
+                <ui-form-item label="独立解决问题能力自评">
+                  <ui-rate v-model="habitsForm.problemSolving" :max="5"></ui-rate>
+                </ui-form-item>
 
-                <el-form-item label="学习方式（可多选）">
-                  <el-checkbox-group v-model="habitsForm.learningMethods">
-                    <el-checkbox label="books">教科书阅读</el-checkbox>
-                    <el-checkbox label="videos">视频教程</el-checkbox>
-                    <el-checkbox label="practice">编程练习</el-checkbox>
-                    <el-checkbox label="discussion">小组讨论</el-checkbox>
-                    <el-checkbox label="online">在线资源</el-checkbox>
-                  </el-checkbox-group>
-                </el-form-item>
+                <ui-form-item label="学习方式（可多选）">
+                  <ui-checkbox-group v-model="habitsForm.learningMethods">
+                    <ui-checkbox label="books">教科书阅读</ui-checkbox>
+                    <ui-checkbox label="videos">视频教程</ui-checkbox>
+                    <ui-checkbox label="practice">编程练习</ui-checkbox>
+                    <ui-checkbox label="discussion">小组讨论</ui-checkbox>
+                    <ui-checkbox label="online">在线资源</ui-checkbox>
+                  </ui-checkbox-group>
+                </ui-form-item>
 
-                <el-form-item label="学习难点和挑战">
-                  <el-input
+                <ui-form-item label="学习难点和挑战">
+                  <ui-input
                     v-model="habitsForm.challenges"
                     type="textarea"
                     :rows="4"
                     placeholder="请描述您在数据结构学习中遇到的主要困难和挑战..."
-                  ></el-input>
-                </el-form-item>
+                  ></ui-input>
+                </ui-form-item>
 
-                <el-form-item>
-                  <el-button
+                <ui-form-item>
+                  <ui-button
                     type="primary"
                     @click="saveHabitsAssessment"
                     :loading="savingHabits"
-                  >保存学习习惯评估</el-button>
-                </el-form-item>
-              </el-form>
-            </el-card>
-          </el-tab-pane>
-        </el-tabs>
+                  >保存学习习惯评估</ui-button>
+                </ui-form-item>
+              </ui-form>
+            </ui-card>
+          </ui-tab-pane>
+        </ui-tabs>
       </div>
     </loading-state>
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { message as uiMessage } from '@/services/feedback'
 import LoadingState from '../../components/LoadingState.vue'
 import { useExperimentStore, useLearningStore } from '../../store'
 
@@ -324,12 +323,12 @@ const saveAssessment = async (expId) => {
     })
 
     if (response.success) {
-      ElMessage.success('评估保存成功')
+      uiMessage.success('评估保存成功')
     } else {
-      ElMessage.error('保存失败，请重试')
+      uiMessage.error('保存失败，请重试')
     }
   } catch (error) {
-    ElMessage.error('发生错误，请重试')
+    uiMessage.error('发生错误，请重试')
     logger.error(error)
   } finally {
     savingId.value = null
@@ -346,12 +345,12 @@ const saveKnowledgeAssessment = async () => {
     })
 
     if (response.success) {
-      ElMessage.success('知识点评估保存成功')
+      uiMessage.success('知识点评估保存成功')
     } else {
-      ElMessage.error('保存失败，请重试')
+      uiMessage.error('保存失败，请重试')
     }
   } catch (error) {
-    ElMessage.error('发生错误，请重试')
+    uiMessage.error('发生错误，请重试')
     logger.error(error)
   } finally {
     savingKnowledge.value = false
@@ -368,12 +367,12 @@ const saveHabitsAssessment = async () => {
     })
 
     if (response.success) {
-      ElMessage.success('学习习惯评估保存成功')
+      uiMessage.success('学习习惯评估保存成功')
     } else {
-      ElMessage.error('保存失败，请重试')
+      uiMessage.error('保存失败，请重试')
     }
   } catch (error) {
-    ElMessage.error('发生错误，请重试')
+    uiMessage.error('发生错误，请重试')
     logger.error(error)
   } finally {
     savingHabits.value = false
@@ -401,7 +400,7 @@ onMounted(async () => {
     }, 100)
   } catch (error) {
     logger.error("加载自评数据时出错", error)
-    ElMessage.error("加载数据失败，请刷新页面重试")
+    uiMessage.error("加载数据失败，请刷新页面重试")
     loading.value = false
   }
 })

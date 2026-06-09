@@ -1,29 +1,29 @@
 <template>
   <div class="leetcode-practice [display:flex] [height:calc(100vh_-_120px)] [gap:16px] [padding:16px] max-[1200px]:[flex-direction:column] max-[1200px]:[height:auto]">
     <!-- 题目详情区域 -->
-    <div class="problem-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [overflow-y:auto] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)] max-[1200px]:[flex:none]">
+    <div class="problem-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [overflow-y:auto] [display:flex] [flex-direction:column] [min-height:0] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)] max-[1200px]:[flex:none]">
       <div class="problem-header [display:flex] [justify-content:space-between] [align-items:flex-start] [margin-bottom:20px] [padding-bottom:16px] [border-bottom:1px_solid_#eee]">
         <div class="problem-title [&_h2]:[margin:0_0_8px_0] [&_h2]:[color:#333] [&_h2]:[font-size:24px]">
           <h2>{{ problem.problemCode }} {{ problem.title }}</h2>
-          <el-tag :type="difficultyType" size="large">{{ problem.difficulty }}</el-tag>
+          <ui-tag :type="difficultyType" size="large">{{ problem.difficulty }}</ui-tag>
         </div>
         <div class="problem-actions [display:flex] [gap:8px]">
-          <el-button @click="showSolution = !showSolution" type="info" plain>
+          <ui-button @click="showSolution = !showSolution" type="info" plain>
             {{ showSolution ? '隐藏题解' : '查看题解' }}
-          </el-button>
-          <el-button @click="resetCode" type="warning" plain>重置代码</el-button>
+          </ui-button>
+          <ui-button @click="resetCode" type="warning" plain>重置代码</ui-button>
         </div>
       </div>
 
       <!-- 题目内容 -->
-      <div class="problem-content [line-height:1.6]">
-        <div class="problem-description [font-size:14px] [color:#555] [&_pre]:[background:#f5f5f5] [&_pre]:[padding:12px] [&_pre]:[border-radius:4px] [&_pre]:[overflow-x:auto] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_4px] [&_code]:[border-radius:2px] [&_code]:[font-family:'Courier_New',_monospace]">
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
+      <div v-if="!showSolution" class="problem-content [line-height:1.7] [flex:1] [min-height:0]">
+        <div class="problem-description [height:100%] [font-size:14px] [color:#555] [&_pre]:[background:#f5f5f5] [&_pre]:[padding:12px] [&_pre]:[border-radius:4px] [&_pre]:[overflow-x:auto] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_4px] [&_code]:[border-radius:2px] [&_code]:[font-family:'Courier_New',_monospace]">
+          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
             <h3>题目描述</h3>
-            <div class="formatted-content [font-size:14px] [color:#555] [background:#fafafa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff] [max-height:340px] [overflow:auto]" v-html="renderedProblemText"></div>
+            <div class="formatted-content [font-size:15px] [line-height:1.85] [color:#374151] [background:#f8fafc] [padding:18px_20px] [border-radius:8px] [border-left:4px_solid_#409eff] [overflow:visible]" v-html="renderedProblemText"></div>
           </div>
           
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="problem.examples">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="showSeparateExamples">
             <h3>示例</h3>
             <div class="examples-container [background:#f8f9fa] [padding:16px] [border-radius:8px]">
               <div 
@@ -55,67 +55,134 @@
       </div>
 
       <!-- 官方题解 -->
-      <el-collapse v-if="showSolution" class="solution-section [margin-top:20px]">
-        <el-collapse-item name="solution">
+        <div v-if="showSolution" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#1f2937] [&_pre]:[color:#e5e7eb] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
+          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
+            <h3>&#23448;&#26041;&#39064;&#35299;</h3>
+            <ui-empty v-if="!hasSolutionContent" description="&#26242;&#26080;&#39064;&#35299;&#20869;&#23481;" :image-size="96" />
+            <div v-else class="solution-blocks [display:flex] [flex-direction:column] [gap:16px]">
+              <section v-if="renderedSolutionApproach" class="solution-card [background:#f8fafc] [border-left:4px_solid_#409eff] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">&#35299;&#39064;&#24605;&#36335;</h4>
+                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionApproach"></div>
+              </section>
+              <section v-if="renderedSolutionComplexity" class="solution-card [background:#f0fdf4] [border-left:4px_solid_#22c55e] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">&#22797;&#26434;&#24230;&#20998;&#26512;</h4>
+                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionComplexity"></div>
+              </section>
+              <section v-if="Object.keys(solutionCodeBlocks).length" class="solution-card [background:#f8fafc] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">&#21442;&#32771;&#20195;&#30721;</h4>
+                <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
+                  <ui-tab-pane
+                    v-for="(codeBlock, lang) in solutionCodeBlocks"
+                    :key="lang"
+                    :label="getLanguageLabel(lang)"
+                    :name="lang"
+                  >
+                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code :class="getCodeLanguageClass(lang)" v-html="renderHighlightedCode(codeBlock, lang)"></code></pre>
+                  </ui-tab-pane>
+                </ui-tabs>
+              </section>
+            </div>
+          </div>
+        </div>
+        <!-- legacy-solution-view-disabled
+        <div v-if="false" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#1f2937] [&_pre]:[color:#e5e7eb] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
+          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
+            <h3>瀹樻柟棰樿В</h3>
+            <ui-empty v-if="!hasSolutionContent" description="鏆傛棤棰樿В鍐呭" :image-size="96" />
+            <div v-else class="solution-blocks [display:flex] [flex-direction:column] [gap:16px]">
+              <section v-if="renderedSolutionApproach" class="solution-card [background:#f8fafc] [border-left:4px_solid_#409eff] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">瑙ｉ鎬濊矾</h4>
+                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionApproach"></div>
+              </section>
+              <section v-if="renderedSolutionComplexity" class="solution-card [background:#f0fdf4] [border-left:4px_solid_#22c55e] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">澶嶆潅搴﹀垎鏋?/h4>
+                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionComplexity"></div>
+              </section>
+              <section v-if="Object.keys(solutionCodeBlocks).length" class="solution-card [background:#f8fafc] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:18px_20px]">
+                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">鍙傝€冧唬鐮?/h4>
+                <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
+                  <ui-tab-pane
+                    v-for="(codeBlock, lang) in solutionCodeBlocks"
+                    :key="lang"
+                    :label="getLanguageLabel(lang)"
+                    :name="lang"
+                  >
+                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code>{{ codeBlock }}</code></pre>
+                  </ui-tab-pane>
+                </ui-tabs>
+              </section>
+            </div>
+          </div>
+        </div>
+        -->
+      <ui-collapse v-if="false" class="solution-section [margin-top:20px]">
+        <ui-collapse-item name="solution">
           <template #title>
             <div class="solution-title [display:flex] [align-items:center] [gap:8px] [font-weight:600] [color:#409eff]">
-              <el-icon><Document /></el-icon>
+              <ui-icon><Document /></ui-icon>
               <span>官方题解</span>
             </div>
           </template>
           <div class="solution-content [max-height:none] [overflow:visible] [max-height:400px] [overflow-y:auto]">
-            <div class="solution-approach" v-if="parsedSolution.approach">
+            <div class="solution-approach" v-if="renderedSolutionApproach">
               <h4>解题思路</h4>
-              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="parsedSolution.approach"></div>
+              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="renderedSolutionApproach"></div>
             </div>
             
             <div class="solution-code" v-if="parsedSolution.code">
               <h4>参考代码</h4>
-              <el-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
-                <el-tab-pane 
+              <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
+                <ui-tab-pane 
                   v-for="(codeBlock, lang) in parsedSolution.code" 
                   :key="lang"
                   :label="getLanguageLabel(lang)" 
                   :name="lang"
                 >
                   <pre class="solution-code-block [background:#2d3748] [color:#e2e8f0] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.5] [margin:0]"><code>{{ codeBlock }}</code></pre>
-                </el-tab-pane>
-              </el-tabs>
+                </ui-tab-pane>
+              </ui-tabs>
             </div>
 
-            <div class="solution-complexity" v-if="parsedSolution.complexity">
+            <div class="solution-complexity" v-if="renderedSolutionComplexity">
               <h4>复杂度分析</h4>
-              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="parsedSolution.complexity"></div>
+              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="renderedSolutionComplexity"></div>
             </div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
+        </ui-collapse-item>
+      </ui-collapse>
     </div>
 
     <!-- 代码编辑区域 -->
     <div class="code-section [flex:1] [background:white] [border-radius:8px] [padding:20px] [display:flex] [flex-direction:column] [box-shadow:0_2px_8px_rgba(0,_0,_0,_0.1)]">
       <div class="code-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_#eee] [margin-bottom:15px] [padding-right:10px]">
         <div class="language-selector">
-          <el-select v-model="selectedLanguage" @change="onLanguageChange">
-            <el-option label="Java" value="java" />
-            <el-option label="Python" value="python" />
-            <el-option label="C" value="c" />
-            <el-option label="C++" value="cpp" />
-            <el-option label="JavaScript" value="javascript" />
-          </el-select>
+          <ui-select v-model="selectedLanguage" @change="onLanguageChange">
+            <ui-option label="Java" value="java" />
+            <ui-option label="Python" value="python" />
+            <ui-option label="C" value="c" />
+            <ui-option label="C++" value="cpp" />
+            <ui-option label="JavaScript" value="javascript" />
+          </ui-select>
         </div>
         <div class="code-actions [display:flex] [gap:8px] [flex-wrap:wrap]">
-          <el-button @click="runCode" :loading="running" type="primary" plain>
+          <ui-button @click="runCode" :loading="running" type="primary" plain>
             运行代码
-          </el-button>
-          <el-button @click="submitCode" :loading="submitting" type="success">
+          </ui-button>
+          <ui-button @click="submitCode" :loading="submitting" type="success">
             提交解答
-          </el-button>
+          </ui-button>
         </div>
       </div>
 
       <!-- 代码编辑器 -->
-      <div class="code-editor [flex:1] [border:1px_solid_#ddd] [border-radius:4px] [overflow:hidden] [cursor:text]" @click="focusEditor">
+      <div class="code-editor [position:relative] [flex:1] [border:1px_solid_#ddd] [border-radius:4px] [overflow:hidden] [cursor:text]" @click="focusEditor">
+        <div
+          v-if="isStarterCodeRefilling"
+          class="starter-template-overlay [position:absolute] [right:14px] [top:14px] [z-index:10] [display:flex] [align-items:center] [gap:8px] [padding:8px_12px] [border-radius:999px] [background:rgba(15,_23,_42,_0.88)] [color:#e5e7eb] [font-size:12px] [box-shadow:0_8px_20px_rgba(15,_23,_42,_0.22)]"
+        >
+          <span class="starter-template-spinner"></span>
+          <span>正在补全初始化代码</span>
+        </div>
         <codemirror
           ref="editorRef"
           v-model="code"
@@ -128,33 +195,41 @@
       </div>
 
       <!-- 测试用例输入 -->
-      <div class="test-input [margin-top:16px] [height:200px]">
-        <el-tabs v-model="activeTab">
-          <el-tab-pane label="测试用例" name="testcase">
-            <el-input
+      <div v-if="runResult" class="test-input [margin-top:16px]">
+        <ui-tabs v-model="activeTab">
+          <ui-tab-pane label="测试用例" name="testcase">
+            <ui-input
               v-model="testInput"
               type="textarea"
               :rows="4"
               placeholder="输入测试用例，每行一个..."
             />
-          </el-tab-pane>
-          <el-tab-pane label="运行结果" name="result" v-if="runResult">
-            <div class="run-result [padding:12px]">
-              <div class="result-status [display:flex] [align-items:center] [gap:8px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#67c23a] [&.error]:[color:#f56c6c]" :class="runResult.status">
-                <el-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></el-icon>
-                {{ runResult.status === 'success' ? '运行成功' : '运行失败' }}
+          </ui-tab-pane>
+          <ui-tab-pane label="运行结果" name="result" v-if="runResult">
+            <div class="run-result [padding:14px_16px] [border-radius:8px] [border:1px_solid_#e5e7eb] [background:#fff]">
+              <div class="result-status [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [margin-bottom:12px] [font-weight:bold] [&.success]:[color:#16a34a] [&.error]:[color:#dc2626]" :class="runResult.status">
+                <div class="[display:flex] [align-items:center] [gap:8px]">
+                  <ui-icon><Check v-if="runResult.status === 'success'" /><Close v-else /></ui-icon>
+                  <span>{{ runResult.title }}</span>
+                </div>
+                <div class="result-meta [display:flex] [gap:8px] [flex-wrap:wrap] [font-size:12px] [font-weight:500] [color:#64748b]">
+                  <span v-if="runResult.rawStatus">状态: {{ runResult.rawStatus }}</span>
+                  <span v-if="runResult.runtime">耗时: {{ runResult.runtime }}</span>
+                  <span v-if="runResult.memory">内存: {{ runResult.memory }}</span>
+                </div>
               </div>
-              <div class="result-content">
-                <pre>{{ runResult.output }}</pre>
+              <div class="result-content [min-height:44px] [border-radius:6px] [background:#f8fafc] [padding:10px_12px] [color:#334155] [font-size:13px] [line-height:1.6]">
+                <pre v-if="runResult.output" class="[margin:0] [white-space:pre-wrap] [word-break:break-word]">{{ runResult.output }}</pre>
+                <div v-else class="[color:#64748b]">{{ runResult.emptyText }}</div>
               </div>
             </div>
-          </el-tab-pane>
-        </el-tabs>
+          </ui-tab-pane>
+        </ui-tabs>
       </div>
     </div>
 
     <!-- 提交结果弹窗 -->
-    <el-dialog
+    <ui-dialog
       v-model="showSubmitResult"
       title="提交结果"
       width="80%"
@@ -163,7 +238,7 @@
       <div v-if="submitResult" class="submit-result [max-height:70vh] [overflow-y:auto]">
         <div class="result-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:20px] [padding:16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:10px]">
           <div class="status [display:flex] [align-items:center] [gap:8px] [font-size:18px] [font-weight:bold] [&.accepted]:[color:#67c23a] [&.rejected]:[color:#f56c6c]" :class="submitResult.status">
-            <el-icon><Check v-if="submitResult.accepted" /><Close v-else /></el-icon>
+            <ui-icon><Check v-if="submitResult.accepted" /><Close v-else /></ui-icon>
             {{ submitResult.status === 'unavailable' ? '评测暂不可用' : (submitResult.accepted ? '通过' : '未通过') }}
           </div>
           <div class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]" v-if="submitResult.score !== null && submitResult.score !== undefined">
@@ -179,60 +254,63 @@
 
         <!-- 执行详情 -->
         <div class="execution-details [margin:20px_0]" v-if="submitResult.details">
-          <el-descriptions title="执行详情" :column="2" border>
-            <el-descriptions-item label="执行时间">
+          <ui-descriptions title="执行详情" :column="2" border>
+            <ui-descriptions-item label="执行时间">
               {{ submitResult.details.runtime || '暂无' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="内存消耗">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="内存消耗">
               {{ submitResult.details.memory || '暂无' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="通过用例">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="通过用例">
               {{ submitResult.details.passedCases || 0 }} / {{ submitResult.details.totalCases || 0 }}
-            </el-descriptions-item>
-            <el-descriptions-item label="错误信息" v-if="submitResult.details.error">
+            </ui-descriptions-item>
+            <ui-descriptions-item label="错误信息" v-if="submitResult.details.error">
               <pre class="error-message [color:#f56c6c] [background:#fef0f0] [padding:8px] [border-radius:4px] [margin:0] [color:#d93025] [font-size:12px]">{{ submitResult.details.error }}</pre>
-            </el-descriptions-item>
-          </el-descriptions>
+            </ui-descriptions-item>
+          </ui-descriptions>
         </div>
 
         <!-- 技能提升建议 -->
         <div class="skill-suggestions [margin:20px_0]" v-if="submitResult.skillSuggestions">
           <h3>技能提升建议</h3>
-          <el-tag
+          <ui-tag
             v-for="suggestion in submitResult.skillSuggestions"
             :key="suggestion"
             class="suggestion-tag [margin:4px_8px_4px_0]"
             type="info"
           >
             {{ suggestion }}
-          </el-tag>
+          </ui-tag>
         </div>
       </div>
 
       <template #footer>
-        <el-button @click="showSubmitResult = false">关闭</el-button>
-        <el-button type="primary" @click="continuePractice">继续练习</el-button>
+        <ui-button @click="showSubmitResult = false">关闭</ui-button>
+        <ui-button type="primary" @click="continuePractice">继续练习</ui-button>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Close, Document } from '@element-plus/icons-vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { Check, Close, Document } from '@/components/ui/icons'
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
 import { java } from '@codemirror/lang-java'
 import { cpp } from '@codemirror/lang-cpp'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { EditorView } from '@codemirror/view'
+import { tags as syntaxTags } from '@lezer/highlight'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '@/api'
+import { persistClawProblemBySlug } from '../../api/leetcodeClaw'
 import { getCurrentStudentId as readCurrentStudentId } from '../../constants/auth'
 import {
   readWeaknessTrainingState,
@@ -245,6 +323,8 @@ const router = useRouter()
 marked.setOptions({ gfm: true, breaks: true })
 
 const COMPLETED_STORAGE_KEY = 'leetcode_completed_problem_ids'
+const starterRefillAttemptKeys = new Set()
+let loadProblemVersion = 0
 
 // 响应式数据
 const problem = ref({})
@@ -254,6 +334,9 @@ const testInput = ref('')
 const showSolution = ref(false)
 const running = ref(false)
 const submitting = ref(false)
+const isStarterCodeRefilling = ref(false)
+const isApplyingCodeTemplate = ref(false)
+const hasUserEditedCode = ref(false)
 const runResult = ref(null)
 const submitResult = ref(null)
 const showSubmitResult = ref(false)
@@ -265,7 +348,7 @@ const solutionLanguage = ref('java')
 // 代码模板
 const codeTemplates = {
   java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
+    // 当前题目暂无 Java 初始化代码模板。
         // 请在这里编写你的代码
         
     }
@@ -300,11 +383,143 @@ var twoSum = function(nums, target) {
 };`
 }
 
+const starterLanguagePriority = ['cpp', 'c', 'java', 'python', 'javascript']
+const supportedCodeLanguages = new Set(['java', 'python', 'c', 'cpp', 'javascript', 'typescript'])
+const sharedTypeNames = new Set([
+  'Array', 'ArrayList', 'Boolean', 'Character', 'Collections', 'Deque', 'Double',
+  'HashMap', 'HashSet', 'Integer', 'LinkedList', 'List', 'Long', 'Map', 'Math',
+  'Object', 'Optional', 'Pair', 'Queue', 'Set', 'Stack', 'String', 'StringBuilder',
+  'TreeMap', 'TreeSet', 'Vector', 'bool', 'char', 'double', 'float', 'int', 'long',
+  'size_t', 'string', 'vector'
+])
+const codeKeywordSets = {
+  java: new Set('abstract assert break case catch class const continue default do else enum extends final finally for goto if implements import instanceof interface native new package private protected public return static strictfp super switch synchronized this throw throws transient try volatile while var void'.split(' ')),
+  python: new Set('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' ')),
+  c: new Set('auto break case const continue default do else enum extern for goto if inline register restrict return sizeof static struct switch typedef union volatile while'.split(' ')),
+  cpp: new Set('alignas alignof asm auto break case catch class const constexpr consteval constinit const_cast continue decltype default delete do dynamic_cast else enum explicit export extern for friend goto if inline mutable namespace new noexcept operator private protected public register reinterpret_cast requires return sizeof static static_assert static_cast struct switch template this throw try typedef typeid typename union using virtual volatile while'.split(' ')),
+  javascript: new Set('async await break case catch class const continue debugger default delete do else export extends finally for from function get if import in instanceof let new of return set static super switch this throw try typeof var void while with yield'.split(' ')),
+  typescript: new Set('abstract as async await break case catch class const continue debugger declare default delete do else enum export extends finally for from function get if implements import in infer instanceof interface keyof let module namespace new of private protected public readonly return set static super switch this throw try type typeof var void while with yield'.split(' '))
+}
+const codeConstantSets = {
+  java: new Set(['true', 'false', 'null']),
+  python: new Set(['True', 'False', 'None', 'Ellipsis']),
+  c: new Set(['NULL']),
+  cpp: new Set(['true', 'false', 'nullptr', 'NULL']),
+  javascript: new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']),
+  typescript: new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity'])
+}
+const codeBuiltinSets = {
+  java: new Set('Arrays Collections Math System StringBuilder Integer Long Double Boolean Character List ArrayList Map HashMap Set HashSet Queue Deque LinkedList Stack PriorityQueue'.split(' ')),
+  python: new Set('abs all any bool dict enumerate float int len list map max min print range reversed set sorted str sum tuple zip self cls'.split(' ')),
+  c: new Set('free malloc memcpy memset printf scanf size_t stdin stdout stderr'.split(' ')),
+  cpp: new Set('cout cin endl make_pair max min pair priority_queue queue sort stack string unordered_map unordered_set vector'.split(' ')),
+  javascript: new Set('Array Boolean Date JSON Map Math Number Object Promise Set String console parseFloat parseInt'.split(' ')),
+  typescript: new Set('Array Boolean Date JSON Map Math Number Object Promise Record Set String console parseFloat parseInt'.split(' '))
+}
+const typeIntroducerWords = new Set([
+  'class', 'enum', 'extends', 'implements', 'interface', 'namespace', 'new',
+  'struct', 'template', 'typedef', 'type', 'typename'
+])
+
+const codeEditorTheme = EditorView.theme({
+  '&': {
+    height: '100%',
+    backgroundColor: '#111827',
+    color: '#d1d5db',
+    fontSize: '14px'
+  },
+  '.cm-scroller': {
+    fontFamily: '"JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace',
+    lineHeight: '1.72'
+  },
+  '.cm-content': {
+    minHeight: '100%',
+    padding: '14px 0',
+    caretColor: '#93c5fd'
+  },
+  '.cm-line': {
+    padding: '0 18px 0 12px'
+  },
+  '.cm-gutters': {
+    backgroundColor: '#111827',
+    color: '#64748b',
+    borderRight: '1px solid rgba(148, 163, 184, 0.14)'
+  },
+  '.cm-lineNumbers .cm-gutterElement': {
+    padding: '0 12px 0 14px'
+  },
+  '.cm-activeLine': {
+    backgroundColor: 'rgba(59, 130, 246, 0.10)'
+  },
+  '.cm-activeLineGutter': {
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    color: '#cbd5e1'
+  },
+  '&.cm-focused': {
+    outline: 'none'
+  },
+  '&.cm-focused .cm-cursor': {
+    borderLeftColor: '#93c5fd'
+  },
+  '&.cm-focused .cm-selectionBackground, & .cm-selectionBackground, & .cm-content ::selection': {
+    backgroundColor: 'rgba(59, 130, 246, 0.32)'
+  },
+  '.cm-matchingBracket': {
+    backgroundColor: 'rgba(250, 204, 21, 0.16)',
+    outline: '1px solid rgba(250, 204, 21, 0.34)'
+  },
+  '.cm-nonmatchingBracket': {
+    backgroundColor: 'rgba(239, 68, 68, 0.20)',
+    outline: '1px solid rgba(239, 68, 68, 0.42)'
+  }
+}, { dark: true })
+
+const codeEditorHighlightStyle = HighlightStyle.define([
+  { tag: [syntaxTags.keyword, syntaxTags.modifier, syntaxTags.controlKeyword, syntaxTags.definitionKeyword], color: '#c084fc', fontWeight: '600' },
+  { tag: [syntaxTags.variableName, syntaxTags.self], color: '#bfdbfe' },
+  { tag: [syntaxTags.function(syntaxTags.variableName), syntaxTags.function(syntaxTags.propertyName)], color: '#7dd3fc' },
+  { tag: [syntaxTags.definition(syntaxTags.variableName), syntaxTags.className, syntaxTags.typeName], color: '#fbbf24' },
+  { tag: [syntaxTags.number, syntaxTags.integer, syntaxTags.float, syntaxTags.bool, syntaxTags.null, syntaxTags.atom], color: '#fca5a5' },
+  { tag: [syntaxTags.string, syntaxTags.docString, syntaxTags.character, syntaxTags.regexp, syntaxTags.special(syntaxTags.string)], color: '#86efac' },
+  { tag: [syntaxTags.comment, syntaxTags.lineComment, syntaxTags.blockComment, syntaxTags.docComment], color: '#64748b', fontStyle: 'italic' },
+  { tag: [syntaxTags.operator, syntaxTags.operatorKeyword, syntaxTags.compareOperator, syntaxTags.logicOperator, syntaxTags.arithmeticOperator], color: '#67e8f9' },
+  { tag: [syntaxTags.punctuation, syntaxTags.bracket, syntaxTags.separator], color: '#94a3b8' },
+  { tag: syntaxTags.annotation, color: '#f472b6' },
+  { tag: syntaxTags.invalid, color: '#fecaca', textDecoration: 'underline wavy #ef4444' }
+])
+
+const missingStarterCodeTemplates = {
+  java: `class Solution {
+    // 当前题目暂无 Java 初始化代码模板。
+    // 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+}`,
+  python: `class Solution:
+    # 当前题目暂无 Python 初始化代码模板。
+    # 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+    pass`,
+  c: `// 当前题目暂无 C 初始化代码模板。
+// 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。`,
+  cpp: `class Solution {
+public:
+    // 当前题目暂无 C++ 初始化代码模板。
+    // 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+};`,
+  javascript: `// 当前题目暂无 JavaScript 初始化代码模板。
+// 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。`
+}
+
 // 编辑器配置
 const editorExtensions = computed(() => ([
   getLanguageExtension(),
   oneDark,
-  EditorView.lineWrapping
+  codeEditorTheme,
+  syntaxHighlighting(codeEditorHighlightStyle),
+  EditorView.lineWrapping,
+  EditorView.updateListener.of((update) => {
+    if (update.docChanged && !isApplyingCodeTemplate.value) {
+      hasUserEditedCode.value = true
+    }
+  })
 ]))
 
 // 计算属性
@@ -318,14 +533,14 @@ const difficultyType = computed(() => {
   }
 })
 
+const showSeparateExamples = computed(() => false)
+
 const renderedProblemText = computed(() => {
-  if (!problem.value.problemText) return ''
-  return DOMPurify.sanitize(marked(problem.value.problemText))
+  return renderMarkdown(problem.value.problemText)
 })
 
 const renderedAiFeedback = computed(() => {
-  if (!submitResult.value?.aiFeedback) return ''
-  return DOMPurify.sanitize(marked(submitResult.value.aiFeedback))
+  return renderMarkdown(submitResult.value?.aiFeedback)
 })
 
 const parsedExamples = computed(() => {
@@ -338,8 +553,7 @@ const parsedExamples = computed(() => {
 })
 
 const renderedConstraints = computed(() => {
-  if (!problem.value.constraints) return ''
-  return DOMPurify.sanitize(marked(problem.value.constraints))
+  return renderMarkdown(problem.value.constraints)
 })
 
 const parsedSolution = computed(() => {
@@ -353,12 +567,572 @@ const parsedSolution = computed(() => {
     // 如果不是 JSON 格式，则按 markdown 处理
     const text = problem.value.solutionText
     return {
-      approach: DOMPurify.sanitize(marked(text))
+      approach: text
     }
   }
 })
 
 // 方法
+const renderedSolutionApproach = computed(() => {
+  const content = parsedSolution.value.approach ||
+    parsedSolution.value.explanation ||
+    parsedSolution.value.content ||
+    ''
+  return renderMarkdown(content)
+})
+
+const renderedSolutionComplexity = computed(() => {
+  return renderMarkdown(parsedSolution.value.complexity || '')
+})
+
+const solutionCodeBlocks = computed(() => {
+  return normalizeSolutionCodeBlocks(parsedSolution.value.code)
+})
+
+const hasSolutionContent = computed(() => {
+  return !!renderedSolutionApproach.value ||
+    !!renderedSolutionComplexity.value ||
+    Object.keys(solutionCodeBlocks.value).length > 0
+})
+
+function renderMarkdown(content) {
+  const text = normalizeLeetCodeMarkdown(content)
+  if (!text) return ''
+  return DOMPurify.sanitize(decorateCodeBlocks(marked(renderMathExpressions(text))))
+}
+
+function normalizeLeetCodeMarkdown(content) {
+  const text = String(content || '').replace(/\r\n?/g, '\n').trim()
+  if (!text) return ''
+  return stripBrokenMarkdownMarkers(repairNestedCodeFences(text)).trim()
+}
+
+function repairNestedCodeFences(text) {
+  const lines = String(text || '').split('\n')
+  const output = []
+  let inFence = false
+
+  lines.forEach((line) => {
+    const fence = getMarkdownFence(line)
+    const isHeading = /^#{2,6}\s+\S/.test(line)
+
+    if (inFence && isHeading) {
+      output.push('```')
+      inFence = false
+    }
+
+    if (!fence) {
+      output.push(line)
+      return
+    }
+
+    const normalizedFence = normalizeMarkdownFenceLine(fence)
+    if (!inFence) {
+      output.push(normalizedFence)
+      inFence = true
+      return
+    }
+
+    if (fence.info) {
+      output.push('```')
+      output.push(normalizedFence)
+      inFence = true
+      return
+    }
+
+    output.push('```')
+    inFence = false
+  })
+
+  if (inFence) {
+    output.push('```')
+  }
+
+  return output.join('\n')
+}
+
+function getMarkdownFence(line) {
+  const match = String(line || '').match(/^(```+)\s*([^`]*)$/)
+  if (!match) return null
+  return {
+    marker: match[1],
+    info: String(match[2] || '').trim()
+  }
+}
+
+function normalizeMarkdownFenceLine(fence) {
+  if (!fence.info) return fence.marker
+  const language = normalizeMarkdownCodeLanguage(fence.info)
+  return language ? `${fence.marker}${language}` : fence.marker
+}
+
+function stripBrokenMarkdownMarkers(text) {
+  const lines = String(text || '').split('\n')
+  let inFence = false
+
+  return lines.map((line) => {
+    if (getMarkdownFence(line)) {
+      inFence = !inFence
+      return line
+    }
+    if (inFence) return line
+    return line.replace(/\*\*/g, '')
+  }).join('\n')
+}
+
+function decorateCodeBlocks(html) {
+  return String(html || '').replace(
+    /<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/g,
+    (_match, language, codeHtml) => {
+      const inferredLanguage = language ? '' : inferCodeLanguage(codeHtml)
+      const normalizedLanguage = normalizeMarkdownCodeLanguage(language || inferredLanguage)
+      if (!normalizedLanguage) {
+        return `<pre class="md-example-block"><code>${codeHtml}</code></pre>`
+      }
+
+      const languageClass = normalizedLanguage ? ` language-${normalizedLanguage}` : ''
+      const label = normalizedLanguage ? getLanguageLabel(normalizedLanguage) : 'Code'
+      const highlightedCode = highlightCodeHtml(codeHtml, normalizedLanguage)
+
+      return [
+        `<div class="md-code-block${languageClass}">`,
+        '<div class="md-code-header">',
+        `<span>${escapeHtml(label)}</span>`,
+        '</div>',
+        `<pre><code class="${languageClass.trim()}">${highlightedCode}</code></pre>`,
+        '</div>'
+      ].join('')
+    }
+  )
+}
+
+function renderHighlightedCode(codeValue, language) {
+  return DOMPurify.sanitize(highlightCodeText(String(codeValue || ''), language))
+}
+
+function highlightCodeHtml(codeHtml, language) {
+  return highlightCodeText(decodeHtmlEntities(codeHtml), language)
+}
+
+function highlightCodeText(codeValue, language) {
+  const normalizedLanguage = getSupportedCodeLanguage(language)
+  const codeText = String(codeValue || '')
+  if (!normalizedLanguage) {
+    return escapeHtml(codeText)
+  }
+
+  return tokenizeCode(codeText, normalizedLanguage)
+    .map(token => formatCodeToken(token.value, token.type))
+    .join('')
+}
+
+function tokenizeCode(codeText, language) {
+  const tokens = []
+  let index = 0
+  let previousWord = ''
+
+  while (index < codeText.length) {
+    const char = codeText[index]
+
+    if (/\s/.test(char)) {
+      const end = consumeWhile(codeText, index, value => /\s/.test(value))
+      tokens.push({ value: codeText.slice(index, end), type: '' })
+      index = end
+      continue
+    }
+
+    const tripleQuoteEnd = consumePythonTripleString(codeText, index, language)
+    if (tripleQuoteEnd > index) {
+      tokens.push({ value: codeText.slice(index, tripleQuoteEnd), type: 'string' })
+      index = tripleQuoteEnd
+      continue
+    }
+
+    if (language === 'python' && char === '#') {
+      const end = consumeUntilLineEnd(codeText, index)
+      tokens.push({ value: codeText.slice(index, end), type: 'comment' })
+      index = end
+      continue
+    }
+
+    if (language !== 'python' && codeText.startsWith('//', index)) {
+      const end = consumeUntilLineEnd(codeText, index)
+      tokens.push({ value: codeText.slice(index, end), type: 'comment' })
+      index = end
+      continue
+    }
+
+    if (language !== 'python' && codeText.startsWith('/*', index)) {
+      const end = codeText.indexOf('*/', index + 2)
+      const tokenEnd = end === -1 ? codeText.length : end + 2
+      tokens.push({ value: codeText.slice(index, tokenEnd), type: 'comment' })
+      index = tokenEnd
+      continue
+    }
+
+    if (isStringQuote(char, language)) {
+      const end = consumeQuotedString(codeText, index, char)
+      tokens.push({ value: codeText.slice(index, end), type: 'string' })
+      index = end
+      continue
+    }
+
+    if (/\d/.test(char)) {
+      const match = codeText.slice(index).match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?:[uUlLfFdD]*)/)
+      const value = match ? match[0] : char
+      tokens.push({ value, type: 'number' })
+      index += value.length
+      continue
+    }
+
+    if (char === '@') {
+      const end = consumeWhile(codeText, index + 1, value => /[\w.]/.test(value))
+      tokens.push({ value: codeText.slice(index, end), type: 'decorator' })
+      index = end
+      continue
+    }
+
+    if (isIdentifierStart(char)) {
+      const end = consumeWhile(codeText, index + 1, isIdentifierPart)
+      const value = codeText.slice(index, end)
+      const nextChar = getNextNonSpaceChar(codeText, end)
+      const type = getCodeTokenType(value, language, previousWord, nextChar)
+      tokens.push({ value, type })
+      previousWord = value
+      index = end
+      continue
+    }
+
+    const operatorMatch = codeText.slice(index).match(/^(?:=>|===|!==|==|!=|<=|>=|<<|>>|>>>|\+\+|--|&&|\|\||[+\-*/%=&|^~<>!?:]+)/)
+    if (operatorMatch) {
+      tokens.push({ value: operatorMatch[0], type: 'operator' })
+      index += operatorMatch[0].length
+      continue
+    }
+
+    tokens.push({
+      value: char,
+      type: /[{}()[\];,.]/.test(char) ? 'punctuation' : ''
+    })
+    index += 1
+  }
+
+  return tokens
+}
+
+function consumeWhile(text, start, predicate) {
+  let index = start
+  while (index < text.length && predicate(text[index])) {
+    index += 1
+  }
+  return index
+}
+
+function consumeUntilLineEnd(text, start) {
+  const end = text.indexOf('\n', start)
+  return end === -1 ? text.length : end
+}
+
+function consumePythonTripleString(text, start, language) {
+  if (language !== 'python') return start
+
+  const quote = text.slice(start, start + 3)
+  if (quote !== '"""' && quote !== "'''") return start
+
+  const end = text.indexOf(quote, start + 3)
+  return end === -1 ? text.length : end + 3
+}
+
+function consumeQuotedString(text, start, quote) {
+  let index = start + 1
+  while (index < text.length) {
+    if (text[index] === '\\') {
+      index += 2
+      continue
+    }
+    if (text[index] === quote) {
+      return index + 1
+    }
+    index += 1
+  }
+  return text.length
+}
+
+function isStringQuote(char, language) {
+  return char === '"' || char === "'" || (char === '`' && (language === 'javascript' || language === 'typescript'))
+}
+
+function isIdentifierStart(char) {
+  return /[A-Za-z_$]/.test(char)
+}
+
+function isIdentifierPart(char) {
+  return /[A-Za-z0-9_$]/.test(char)
+}
+
+function getNextNonSpaceChar(text, start) {
+  for (let index = start; index < text.length; index += 1) {
+    if (!/\s/.test(text[index])) {
+      return text[index]
+    }
+  }
+  return ''
+}
+
+function getCodeTokenType(value, language, previousWord, nextChar) {
+  if (codeConstantSets[language]?.has(value)) return 'constant'
+  if (codeKeywordSets[language]?.has(value)) return 'keyword'
+  if (codeBuiltinSets[language]?.has(value)) return 'builtin'
+  if (typeIntroducerWords.has(previousWord) || sharedTypeNames.has(value)) return 'type'
+  if (/^[A-Z][A-Za-z0-9_$]*$/.test(value)) return 'type'
+  if (nextChar === '(' && !codeKeywordSets[language]?.has(value)) return 'function'
+  return 'identifier'
+}
+
+function formatCodeToken(value, type) {
+  const escapedValue = escapeHtml(value)
+  return type ? `<span class="code-token token-${type}">${escapedValue}</span>` : escapedValue
+}
+
+function getSupportedCodeLanguage(language) {
+  const normalizedLanguage = normalizeMarkdownCodeLanguage(language)
+  if (supportedCodeLanguages.has(normalizedLanguage)) {
+    return normalizedLanguage
+  }
+
+  const starterLanguage = normalizeStarterLanguage(language)
+  return supportedCodeLanguages.has(starterLanguage) ? starterLanguage : ''
+}
+
+function getCodeLanguageClass(language) {
+  const normalizedLanguage = getSupportedCodeLanguage(language)
+  return normalizedLanguage ? `language-${normalizedLanguage}` : ''
+}
+
+function normalizeMarkdownCodeLanguage(language) {
+  const value = String(language || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s*\[\]\s*$/, '')
+  const firstToken = (value.split(/\s+/)[0] || '').replace(/\[\]$/, '')
+  const aliases = {
+    py: 'python',
+    python3: 'python',
+    jsx: 'javascript',
+    js: 'javascript',
+    ts: 'typescript',
+    cc: 'cpp',
+    cxx: 'cpp',
+    'c++': 'cpp'
+  }
+
+  return aliases[firstToken] || firstToken
+}
+
+function inferCodeLanguage(codeHtml) {
+  const code = decodeHtmlEntities(codeHtml)
+
+  if (/class\s+Solution\s*:|def\s+\w+\s*\(/.test(code)) return 'python'
+  if (/public\s+class|public\s+\w+|int\[\]|String\[\]/.test(code)) return 'java'
+  if (/#include\s*<|vector\s*<|std::|class\s+Solution\s*\{[\s\S]*public:/.test(code)) return 'cpp'
+  if (/function\s+\w*|const\s+\w+\s*=|let\s+\w+\s*=|var\s+\w+\s*=|=>/.test(code)) return 'javascript'
+  if (/#include\s*<|printf\s*\(|malloc\s*\(/.test(code)) return 'c'
+
+  return ''
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+}
+
+function renderMathExpressions(text) {
+  let output = ''
+  let index = 0
+
+  while (index < text.length) {
+    if (text[index] === '\\' && text[index + 1] === '$') {
+      output += '$'
+      index += 2
+      continue
+    }
+
+    if (text.startsWith('$$', index)) {
+      const end = findMathDelimiter(text, index + 2, '$$')
+      if (end === -1) {
+        output += text.slice(index)
+        break
+      }
+
+      output += `\n<div class="math-block">${formatMathExpression(text.slice(index + 2, end))}</div>\n`
+      index = end + 2
+      continue
+    }
+
+    if (text[index] === '$') {
+      const end = findMathDelimiter(text, index + 1, '$')
+      if (end === -1) {
+        output += text[index]
+        index += 1
+        continue
+      }
+
+      output += `<span class="math-inline">${formatMathExpression(text.slice(index + 1, end))}</span>`
+      index = end + 1
+      continue
+    }
+
+    output += text[index]
+    index += 1
+  }
+
+  return output
+}
+
+function findMathDelimiter(text, start, delimiter) {
+  for (let index = start; index < text.length; index += 1) {
+    if (text[index] === '\\') {
+      index += 1
+      continue
+    }
+
+    if (delimiter === '$$' && text.startsWith('$$', index)) {
+      return index
+    }
+
+    if (delimiter === '$' && text[index] === '$' && !text.startsWith('$$', index)) {
+      return index
+    }
+  }
+
+  return -1
+}
+
+function formatMathExpression(value) {
+  const replacements = {
+    '\\\\log': 'log',
+    '\\\\ln': 'ln',
+    '\\\\leq': '≤',
+    '\\\\geq': '≥',
+    '\\\\neq': '≠',
+    '\\\\times': '×',
+    '\\\\cdot': '·',
+    '\\\\infty': '∞',
+    '\\\\left': '',
+    '\\\\right': '',
+    '\\\\theta': 'θ',
+    '\\\\Theta': 'Θ',
+    '\\\\alpha': 'α',
+    '\\\\beta': 'β'
+  }
+
+  let expression = String(value || '').trim()
+  Object.entries(replacements).forEach(([source, target]) => {
+    expression = expression.replace(new RegExp(source, 'g'), target)
+  })
+
+  expression = expression
+    .replace(/\\[,;:!]/g, ' ')
+    .replace(/\\([{}()[\]])/g, '$1')
+    .replace(/\\/g, '')
+
+  return escapeHtml(expression)
+    .replace(/_\{([^{}]+)\}/g, '<sub>$1</sub>')
+    .replace(/\^\{([^{}]+)\}/g, '<sup>$1</sup>')
+    .replace(/_([A-Za-z0-9+-]+)/g, '<sub>$1</sub>')
+    .replace(/\^([A-Za-z0-9+-]+)/g, '<sup>$1</sup>')
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function normalizeSolutionCodeBlocks(codeValue) {
+  if (!codeValue) return {}
+
+  if (typeof codeValue === 'string') {
+    return { [selectedLanguage.value]: codeValue }
+  }
+
+  if (Array.isArray(codeValue)) {
+    return codeValue.reduce((blocks, item, index) => {
+      if (item === null || item === undefined) return blocks
+      blocks[`code${index + 1}`] = String(item)
+      return blocks
+    }, {})
+  }
+
+  if (typeof codeValue === 'object') {
+    return Object.entries(codeValue).reduce((blocks, [lang, value]) => {
+      if (value === null || value === undefined) return blocks
+      blocks[lang] = String(value)
+      return blocks
+    }, {})
+  }
+
+  return {}
+}
+
+function getInitialCode(language = selectedLanguage.value) {
+  const normalizedLanguage = normalizeStarterLanguage(language)
+  return getProblemStarterCode(language) ||
+    missingStarterCodeTemplates[normalizedLanguage] ||
+    codeTemplates[language] ||
+    ''
+}
+
+function getProblemStarterCode(language) {
+  const normalizedLanguage = normalizeStarterLanguage(language)
+  if (!normalizedLanguage) return ''
+
+  const starterCode = problem.value?.starterCode
+  if (starterCode && typeof starterCode === 'object') {
+    const directCode = String(starterCode[normalizedLanguage] || '').trim()
+    if (directCode) return directCode
+  }
+
+  const snippets = Array.isArray(problem.value?.codeSnippets) ? problem.value.codeSnippets : []
+  const matchedSnippet = snippets.find(snippet =>
+    normalizeStarterLanguage(snippet?.langSlug || snippet?.lang) === normalizedLanguage &&
+    String(snippet?.code || '').trim()
+  )
+  return matchedSnippet ? String(matchedSnippet.code).trim() : ''
+}
+
+function chooseInitialLanguage() {
+  return starterLanguagePriority.find(language => getProblemStarterCode(language)) || selectedLanguage.value
+}
+
+function normalizeStarterLanguage(value) {
+  switch (String(value || '').trim().toLowerCase()) {
+    case 'java': return 'java'
+    case 'python':
+    case 'python3':
+    case 'py':
+      return 'python'
+    case 'c': return 'c'
+    case 'cpp':
+    case 'c++':
+    case 'cc':
+    case 'cxx':
+      return 'cpp'
+    case 'javascript':
+    case 'js':
+      return 'javascript'
+    default:
+      return ''
+  }
+}
+
 function getLanguageExtension() {
   switch (selectedLanguage.value) {
     case 'java': return java()
@@ -370,8 +1144,19 @@ function getLanguageExtension() {
   }
 }
 
+function applyCodeTemplate(nextCode, { markPristine = false } = {}) {
+  isApplyingCodeTemplate.value = true
+  code.value = nextCode
+  if (markPristine) {
+    hasUserEditedCode.value = false
+  }
+  nextTick(() => {
+    isApplyingCodeTemplate.value = false
+  })
+}
+
 function onLanguageChange() {
-  code.value = codeTemplates[selectedLanguage.value] || ''
+  applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
 }
 
 function onEditorReady(payload) {
@@ -399,25 +1184,92 @@ function getLanguageLabel(lang) {
     python: 'Python',
     cpp: 'C++',
     javascript: 'JavaScript',
+    typescript: 'TypeScript',
     c: 'C'
   }
   return labels[lang] || lang.toUpperCase()
 }
 
 function resetCode() {
-  ElMessageBox.confirm('确定要重置代码吗？未保存的修改将会丢失。', '重置代码', {
+  messageBox.confirm('确定要重置代码吗？未保存的修改将会丢失。', '重置代码', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    code.value = codeTemplates[selectedLanguage.value] || ''
-    ElMessage.success('代码已重置')
+    code.value = getInitialCode(selectedLanguage.value)
+    uiMessage.success('代码已重置')
   }).catch(() => {})
+}
+
+function normalizeRunResult(raw = {}) {
+  const rawStatus = String(raw.status || raw.result || '').trim()
+  const accepted = raw.accepted === true || isAcceptedStatus(rawStatus)
+  const output = firstDisplayText(
+    raw.output,
+    raw.stdout,
+    raw.stderr,
+    raw.compileError,
+    raw.error,
+    raw.message,
+    raw.details?.error
+  )
+  const status = accepted ? 'success' : 'error'
+
+  return {
+    ...raw,
+    status,
+    title: accepted ? '运行成功' : '运行失败',
+    rawStatus: rawStatus && rawStatus.toLowerCase() !== status ? rawStatus : '',
+    output,
+    emptyText: accepted ? '示例测试通过，暂无标准输出。' : '运行失败，服务未返回详细错误。',
+    runtime: formatRunMetric(raw.runtime || raw.runtimeMs, 'ms'),
+    memory: formatRunMetric(raw.memory || raw.memoryKb, 'KB')
+  }
+}
+
+function normalizeSubmitResult(raw = {}) {
+  const rawStatus = String(raw.status || '').trim()
+  const score = Number(raw.score)
+  const accepted = raw.accepted === true ||
+    isAcceptedStatus(rawStatus) ||
+    (Number.isFinite(score) && score >= 100)
+  const normalizedStatus = rawStatus.toLowerCase() === 'unavailable'
+    ? 'unavailable'
+    : accepted ? 'accepted' : 'rejected'
+
+  return {
+    ...raw,
+    accepted,
+    status: normalizedStatus,
+    score: Number.isFinite(score) ? score : raw.score
+  }
+}
+
+function isAcceptedStatus(status) {
+  return ['success', 'accepted', 'accept', 'ac', 'pass', 'passed', 'ok'].includes(
+    String(status || '').trim().toLowerCase()
+  )
+}
+
+function firstDisplayText(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined) continue
+    const text = String(value).trim()
+    if (text) return text
+  }
+  return ''
+}
+
+function formatRunMetric(value, unit) {
+  if (value === null || value === undefined || value === '') return ''
+  if (typeof value === 'string') return value
+  if (Number.isFinite(Number(value))) return `${value} ${unit}`
+  return ''
 }
 
 async function runCode() {
   if (!code.value.trim()) {
-    ElMessage.warning('请先编写代码')
+    uiMessage.warning('请先编写代码')
     return
   }
 
@@ -431,16 +1283,17 @@ async function runCode() {
     })
 
     if (response.success) {
-      runResult.value = response.data
+      const normalizedResult = normalizeRunResult(response.data)
+      runResult.value = normalizedResult
       activeTab.value = 'result'
 
-      if (response.data.status === 'success') {
-        ElMessage.success('代码运行成功')
+      if (normalizedResult.status === 'success') {
+        uiMessage.success('代码运行成功')
       } else {
-        ElMessage.error('代码运行失败')
+        uiMessage.error('代码运行失败')
       }
     } else {
-      ElMessage.error('运行失败: ' + (response.message || '未知错误'))
+      uiMessage.error('运行失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
     logger.error('运行代码失败:', error)
@@ -452,7 +1305,7 @@ async function runCode() {
       errorMessage += ': ' + error.message
     }
     
-    ElMessage.error(errorMessage)
+    uiMessage.error(errorMessage)
   } finally {
     running.value = false
   }
@@ -460,13 +1313,18 @@ async function runCode() {
 
 async function submitCode() {
   if (!code.value.trim()) {
-    ElMessage.warning('请先编写代码')
+    uiMessage.warning('请先编写代码')
+    return
+  }
+
+  const studentId = getCurrentStudentId()
+  if (!studentId) {
+    uiMessage.error('未获取到有效学号，请重新登录或完善个人信息')
     return
   }
 
   submitting.value = true
   try {
-    const studentId = getCurrentStudentId()
     const response = await api.submitLeetCodeSolution({
       problemId: problem.value.id,
       code: code.value,
@@ -477,20 +1335,21 @@ async function submitCode() {
     })
 
     if (response.success) {
-      submitResult.value = response.data
+      const normalizedResult = normalizeSubmitResult(response.data)
+      submitResult.value = normalizedResult
       showSubmitResult.value = true
-      recordTrainingReview(!!response.data.accepted)
+      recordTrainingReview(!!normalizedResult.accepted)
 
-      if (response.data.status === 'unavailable') {
-        ElMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
-      } else if (response.data.accepted) {
+      if (normalizedResult.status === 'unavailable') {
+        uiMessage.warning('AI 评测暂不可用，已显示备用评测结果。')
+      } else if (normalizedResult.accepted) {
         markProblemCompleted(problem.value.id)
-        ElMessage.success('答案通过')
+        uiMessage.success('答案通过')
       } else {
-        ElMessage.error('答案未通过，请查看详细反馈')
+        uiMessage.error('答案未通过，请查看详细反馈')
       }
     } else {
-      ElMessage.error('提交失败: ' + (response.message || '未知错误'))
+      uiMessage.error('提交失败: ' + (response.message || '未知错误'))
     }
   } catch (error) {
     logger.error('提交代码失败:', error)
@@ -503,7 +1362,7 @@ async function submitCode() {
       errorMessage += ': ' + error.message
     }
     
-    ElMessage.error(errorMessage)
+    uiMessage.error(errorMessage)
   } finally {
     submitting.value = false
   }
@@ -515,9 +1374,32 @@ function continuePractice() {
 }
 
 async function loadProblem() {
+  const version = loadProblemVersion + 1
+  loadProblemVersion = version
+  const slug = typeof route.query.slug === 'string' ? route.query.slug.trim() : ''
+  if (slug && !route.params.id) {
+    try {
+      uiMessage.info('正在从 LeetCodeClaw 抓取题目并写入本地题库')
+      const result = await persistClawProblemBySlug(slug)
+      router.replace({
+        path: `/student/leetcode-practice/${result.problemId}`,
+        query: {
+          ...route.query,
+          slug: undefined
+        }
+      })
+      return
+    } catch (error) {
+      logger.error('LeetCodeClaw 抓题入库失败:', error)
+      uiMessage.error(error.friendlyMessage || error.message || 'LeetCodeClaw 抓题入库失败')
+      router.push('/student/leetcode-search')
+      return
+    }
+  }
+
   const problemId = route.params.id
   if (!problemId) {
-    ElMessage.error('题目ID不存在')
+    uiMessage.error('题目ID不存在')
     router.push('/student/practice')
     return
   }
@@ -527,19 +1409,79 @@ async function loadProblem() {
     if (!response?.success || !response.data) {
       throw new Error(response?.message || '题目数据为空')
     }
+    if (slug && !isSameProblemSlug(response.data, slug)) {
+      await redirectToProblemBySlug(slug)
+      return
+    }
+
     problem.value = response.data
+    selectedLanguage.value = chooseInitialLanguage()
     
     // 设置默认代码模板
-    code.value = codeTemplates[selectedLanguage.value] || ''
+    applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
     
     // 设置默认测试用例
-    if (problem.value.sampleTestCases) {
-      testInput.value = problem.value.sampleTestCases.join('\n')
-    }
+    testInput.value = normalizeSampleTestCases(problem.value.sampleTestCases)
+
+    refillStarterCodeInBackground(response.data, version)
   } catch (error) {
     logger.error('加载题目失败:', error)
-    ElMessage.error('加载题目失败')
+    uiMessage.error('加载题目失败')
     router.push('/student/practice')
+  }
+}
+
+function normalizeSampleTestCases(sampleTestCases) {
+  if (Array.isArray(sampleTestCases)) {
+    return sampleTestCases
+      .filter(item => item !== null && item !== undefined)
+      .map(item => String(item))
+      .join('\n')
+  }
+
+  if (typeof sampleTestCases === 'string') {
+    return sampleTestCases
+  }
+
+  return ''
+}
+
+function getProblemSlug(problemData) {
+  const sourceKey = String(problemData?.sourceKey || '')
+  if (sourceKey.startsWith('slug:')) {
+    return sourceKey.slice('slug:'.length)
+  }
+
+  const sourceUrl = String(problemData?.sourceUrl || '')
+  const match = sourceUrl.match(/\/problems\/([^/?#]+)\/?/)
+  return match?.[1] || ''
+}
+
+function isSameProblemSlug(problemData, slug) {
+  return getProblemSlug(problemData).toLowerCase() === String(slug || '').toLowerCase()
+}
+
+async function redirectToProblemBySlug(slug) {
+  try {
+    let response = await api.getLeetCodeProblemBySlug(slug)
+
+    if (!response?.success || !response.data?.id) {
+      await persistClawProblemBySlug(slug)
+      response = await api.getLeetCodeProblemBySlug(slug)
+    }
+
+    if (!response?.success || !response.data?.id) {
+      throw new Error(response?.message || '题目已入库，但主服务暂未查到该题')
+    }
+
+    router.replace({
+      path: `/student/leetcode-practice/${response.data.id}`,
+      query: { ...route.query, slug }
+    })
+  } catch (error) {
+    logger.error('按 slug 校准 LeetCode 题目失败:', error)
+    uiMessage.error(error.friendlyMessage || error.message || '加载题目失败')
+    router.push('/student/leetcode-search')
   }
 }
 
@@ -551,6 +1493,127 @@ function getRecommendationRequestId() {
 function getRecommendationSessionId() {
   const value = route.query.recommendationSessionId
   return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+async function refillStarterCodeInBackground(problemData, version) {
+  if (hasAnyProblemStarterCode(problemData)) {
+    return
+  }
+  if (!getProblemSlug(problemData)) {
+    return
+  }
+
+  isStarterCodeRefilling.value = true
+  try {
+    const refreshedProblem = await ensureStarterCodeForProblem(problemData)
+    if (version !== loadProblemVersion) {
+      return
+    }
+    if (!refreshedProblem || refreshedProblem === problemData) {
+      return
+    }
+
+    problem.value = refreshedProblem
+    if (!testInput.value) {
+      testInput.value = normalizeSampleTestCases(refreshedProblem.sampleTestCases)
+    }
+
+    if (!hasUserEditedCode.value) {
+      if (!getProblemStarterCode(selectedLanguage.value)) {
+        selectedLanguage.value = chooseInitialLanguage()
+      }
+      applyCodeTemplate(getInitialCode(selectedLanguage.value), { markPristine: true })
+    }
+  } finally {
+    if (version === loadProblemVersion) {
+      isStarterCodeRefilling.value = false
+    }
+  }
+}
+
+async function ensureStarterCodeForProblem(problemData) {
+  if (hasAnyProblemStarterCode(problemData)) {
+    return problemData
+  }
+
+  const slug = getProblemSlug(problemData)
+  if (!slug) {
+    return problemData
+  }
+
+  const attemptKey = `${problemData?.id || route.params.id || ''}:${slug.toLowerCase()}`
+  if (starterRefillAttemptKeys.has(attemptKey)) {
+    return problemData
+  }
+  starterRefillAttemptKeys.add(attemptKey)
+
+  try {
+    await persistClawProblemBySlug(slug)
+
+    const refreshedProblem = await fetchRefilledProblem(problemData, slug)
+    if (refreshedProblem) {
+      if (hasAnyProblemStarterCode(refreshedProblem)) {
+        syncRouteWithRefilledProblem(refreshedProblem)
+        uiMessage.success('初始代码模板已补全')
+      } else {
+        uiMessage.warning('暂未获取到该题的初始代码模板')
+      }
+      return refreshedProblem
+    }
+
+    uiMessage.warning('暂未获取到该题的初始代码模板')
+  } catch (error) {
+    logger.warn('补全 LeetCode 初始代码模板失败:', error)
+    uiMessage.warning(error.friendlyMessage || error.message || '暂未获取到该题的初始代码模板')
+  }
+
+  return problemData
+}
+
+async function fetchRefilledProblem(problemData, slug) {
+  let fallbackProblem = null
+  const currentProblemId = problemData?.id || route.params.id
+  if (currentProblemId) {
+    const response = await api.getLeetCodeProblem(currentProblemId)
+    if (response?.success && response.data) {
+      fallbackProblem = response.data
+      if (hasAnyProblemStarterCode(response.data)) {
+        return response.data
+      }
+    }
+  }
+
+  const response = await api.getLeetCodeProblemBySlug(slug)
+  if (response?.success && response.data) {
+    return response.data
+  }
+
+  return fallbackProblem
+}
+
+function syncRouteWithRefilledProblem(problemData) {
+  if (!problemData?.id || !route.params.id || String(problemData.id) === String(route.params.id)) {
+    return
+  }
+
+  router.replace({
+    path: `/student/leetcode-practice/${problemData.id}`,
+    query: { ...route.query }
+  })
+}
+
+function hasAnyProblemStarterCode(problemData) {
+  const starterCode = problemData?.starterCode
+  if (starterCode && typeof starterCode === 'object') {
+    const hasStarterCode = Object.values(starterCode).some(value => String(value || '').trim())
+    if (hasStarterCode) return true
+  }
+
+  const snippets = Array.isArray(problemData?.codeSnippets) ? problemData.codeSnippets : []
+  return snippets.some(snippet =>
+    normalizeStarterLanguage(snippet?.langSlug || snippet?.lang) &&
+    String(snippet?.code || '').trim()
+  )
 }
 
 function getTrainingExperimentId() {
@@ -615,6 +1678,263 @@ watch(() => route.params.id, () => {
   loadProblem()
 })
 </script>
+
+<style scoped>
+:deep(.math-inline) {
+  display: inline-flex;
+  align-items: baseline;
+  max-width: 100%;
+  margin: 0 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #eef2f7;
+  color: #1f2937;
+  font-family: "Cambria Math", "Times New Roman", serif;
+  font-style: italic;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+:deep(.math-inline sub),
+:deep(.math-inline sup),
+:deep(.math-block sub),
+:deep(.math-block sup) {
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+:deep(.math-block) {
+  margin: 12px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #eef6ff;
+  color: #1d4ed8;
+  font-family: "Cambria Math", "Times New Roman", serif;
+  font-style: italic;
+  line-height: 1.6;
+  text-align: center;
+  overflow-x: auto;
+}
+
+:deep(.solution-markdown p),
+:deep(.formatted-content p),
+:deep(.constraints-content p),
+:deep(.feedback-content p) {
+  margin: 0 0 12px;
+}
+
+:deep(.solution-markdown),
+:deep(.formatted-content),
+:deep(.constraints-content),
+:deep(.feedback-content) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:deep(.md-example-block) {
+  margin: 14px 0 22px;
+  padding: 14px 18px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #4b5563;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+:deep(.md-example-block code) {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+:deep(.md-code-block) {
+  margin: 22px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #263244;
+  background: #111827;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+}
+
+:deep(.md-code-block + .md-code-block) {
+  margin-top: 28px;
+}
+
+:deep(.md-code-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 0 14px;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+:deep(.md-code-header span) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:deep(.md-code-header span::before) {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+:deep(.md-code-block pre) {
+  margin: 0;
+  padding: 18px 20px;
+  overflow-x: auto;
+  background: #1f2937;
+  color: #e5e7eb;
+  font-size: 14px;
+  line-height: 1.72;
+  tab-size: 4;
+}
+
+:deep(.md-code-block code) {
+  display: block;
+  min-width: max-content;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  white-space: pre;
+}
+
+.code-editor {
+  border-color: #1e293b;
+  border-radius: 8px;
+  background: #111827;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 28px rgba(15, 23, 42, 0.10);
+}
+
+.code-editor :deep(.cm-editor) {
+  height: 100%;
+}
+
+.code-editor :deep(.cm-scroller) {
+  overflow: auto;
+}
+
+.code-editor :deep(.cm-focused) {
+  outline: none;
+}
+
+.solution-code-block {
+  border: 1px solid #263244;
+  background: #111827;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  tab-size: 4;
+}
+
+.solution-code-block code {
+  display: block;
+  min-width: max-content;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  white-space: pre;
+}
+
+:deep(.code-token.token-keyword) {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+:deep(.code-token.token-identifier) {
+  color: #dbeafe;
+}
+
+:deep(.code-token.token-type) {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+:deep(.code-token.token-function) {
+  color: #7dd3fc;
+}
+
+:deep(.code-token.token-builtin) {
+  color: #60a5fa;
+}
+
+:deep(.code-token.token-constant),
+:deep(.code-token.token-number) {
+  color: #fca5a5;
+}
+
+:deep(.code-token.token-string) {
+  color: #86efac;
+}
+
+:deep(.code-token.token-comment) {
+  color: #64748b;
+  font-style: italic;
+}
+
+:deep(.code-token.token-decorator) {
+  color: #f472b6;
+}
+
+:deep(.code-token.token-operator) {
+  color: #67e8f9;
+}
+
+:deep(.code-token.token-punctuation) {
+  color: #94a3b8;
+}
+
+:deep(.md-code-block.language-python .md-code-header span::before) {
+  background: #3776ab;
+}
+
+:deep(.md-code-block.language-java .md-code-header span::before) {
+  background: #f97316;
+}
+
+:deep(.md-code-block.language-cpp .md-code-header span::before),
+:deep(.md-code-block.language-c .md-code-header span::before) {
+  background: #60a5fa;
+}
+
+:deep(.md-code-block.language-javascript .md-code-header span::before),
+:deep(.md-code-block.language-typescript .md-code-header span::before) {
+  background: #facc15;
+}
+
+:deep(.solution-card .md-code-block:first-child),
+:deep(.solution-markdown .md-code-block:first-child) {
+  margin-top: 12px;
+}
+
+:deep(.solution-card .md-code-block:last-child),
+:deep(.solution-markdown .md-code-block:last-child) {
+  margin-bottom: 0;
+}
+
+.starter-template-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(226, 232, 240, 0.35);
+  border-top-color: #60a5fa;
+  border-radius: 999px;
+  animation: starter-template-spin 0.8s linear infinite;
+}
+
+@keyframes starter-template-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
 
 
 

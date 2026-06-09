@@ -11,7 +11,16 @@
     <!-- Error state -->
     <div v-else-if="errorMsg" class="rounded-[14px] bg-[#fff3cd] border border-[#ffecb5] p-4 flex items-center gap-3">
       <svg class="w-5 h-5 text-[#ff9500] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
-      <span class="text-[13px] text-[#86650a]">{{ errorMsg }}</span>
+      <div class="min-w-0 flex-1">
+        <div class="text-[13px] text-[#86650a]">{{ errorMsg }}</div>
+        <div class="mt-1 text-[12px] text-[#9a7b1f]">如果后端画像计算耗时较长，可以稍后重试。</div>
+      </div>
+      <UiButton
+        class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#86650a] bg-[#fff8e1] hover:bg-[#ffefb8] active:scale-[0.96] transition-all cursor-pointer border border-[#ffecb5]"
+        @click="fetchData"
+      >
+        重试
+      </UiButton>
     </div>
 
     <template v-else>
@@ -46,7 +55,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">薄弱维度排行</h3>
           <div class="overflow-x-auto">
-            <table class="w-full text-[13px]">
+            <UiTable class="w-full text-[13px]">
               <thead>
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">维度</th>
@@ -70,7 +79,7 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>
@@ -80,16 +89,16 @@
         <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">学生分层 (ABC)</h3>
         <!-- Custom tabs -->
         <div class="flex items-center gap-1 p-1 rounded-[12px] bg-black/[0.04] mb-4">
-          <button v-for="(tier, key) in data.tiers" :key="key" @click="activeTab = key"
+          <UiButton v-for="(tier, key) in data.tiers" :key="key" @click="activeTab = key"
             class="h-[32px] px-4 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer border-none"
             :class="activeTab === key ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-[#6e6e73] hover:text-[#1d1d1f]'">
             {{ key }} - {{ tier.label }} ({{ tier.count }}人)
-          </button>
+          </UiButton>
         </div>
         <!-- Tab panels -->
         <div v-for="(tier, key) in data.tiers" :key="key" v-show="activeTab === key">
           <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <table class="w-full text-[13px]">
+            <UiTable class="w-full text-[13px]">
               <thead class="sticky top-0 bg-white z-10">
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">学号</th>
@@ -111,11 +120,11 @@
                     </div>
                   </td>
                   <td class="py-2.5 px-3">
-                    <button @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</button>
+                    <UiButton @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</UiButton>
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
           </div>
         </div>
       </div>
@@ -130,12 +139,15 @@
         </div>
       </div>
       <template v-else>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div v-if="dialogProfile.error" class="rounded-[12px] bg-[#fff3cd] border border-[#ffecb5] p-4 text-[13px] text-[#86650a]">
+          {{ dialogProfile.error }}
+        </div>
+        <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div ref="dialogRadarRef" class="h-[300px]"></div>
           <div ref="dialogTrendRef" class="h-[300px]"></div>
         </div>
-        <div v-if="dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#34c759]">{{ dialogProfile.feedback }}</div>
-        <div v-if="dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
+        <div v-if="!dialogProfile.error && dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#34c759]">{{ dialogProfile.feedback }}</div>
+        <div v-if="!dialogProfile.error && dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
           <span v-for="p in dialogProfile.patterns" :key="p.tag" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[#007aff]/10 text-[#007aff]">{{ p.tag }}: {{ p.description }}</span>
         </div>
       </template>
@@ -147,18 +159,28 @@
 import logger from '@/utils/logger'
 import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
-import axios from 'axios'
-import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import { getClassProfile, getStudentProfile } from '../../api/tap'
 import AppModal from '../../components/AppModal.vue'
 
-const API_BASE = API_BASE_URL
 const loading = ref(true)
 const errorMsg = ref('')
 const data = ref({})
 const barChartRef = ref(null)
 let barChartInst = null
 const activeTab = ref('A')
+
+const emptyClassProfile = () => ({
+  totalStudents: 0,
+  dimensions: [],
+  dimensionAvg: {},
+  weakRanking: [],
+  tiers: {
+    A: { label: '优秀', count: 0, students: [] },
+    B: { label: '中等', count: 0, students: [] },
+    C: { label: '需关注', count: 0, students: [] }
+  }
+})
 
 // Dialog state
 const dialogVisible = ref(false)
@@ -186,12 +208,19 @@ function progressWidthStyle(value) {
   return { '--progress-width': `${value}%` }
 }
 
+function isTimeoutError(error) {
+  const code = String(error?.code || error?.rawError?.code || '').toUpperCase()
+  const message = String(error?.friendlyMessage || error?.message || error?.rawMessage || error?.rawError?.message || '')
+  return code === 'ECONNABORTED' || /timeout|timed out|超时/i.test(message)
+}
+
 async function fetchData() {
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await axios.get(`${API_BASE}/api/profile/class`, { withCredentials: true })
-    const d = res.data || res
+    const res = await getClassProfile()
+    const d = res?.data || res
+    if (!d) throw new Error('后端未返回班级画像数据')
     if (d.error) { errorMsg.value = getFriendlyResponseMessage(d, '班级画像加载失败，请稍后重试'); return }
     data.value = d
     logger.debug('[ClassProfile] 数据加载成功:', {
@@ -202,6 +231,14 @@ async function fetchData() {
     await nextTick()
     setTimeout(() => renderBar(), 100)
   } catch (e) {
+    if (isTimeoutError(e)) {
+      data.value = emptyClassProfile()
+      barChartInst?.dispose()
+      barChartInst = null
+      logger.warn('[ClassProfile] 班级画像请求超时，回退为空数据界面', e)
+      await nextTick()
+      return
+    }
     errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
   } finally {
     loading.value = false
@@ -251,9 +288,15 @@ async function viewStudent(studentId) {
   dialogVisible.value = true
   dialogLoading.value = true
   dialogStudentName.value = studentId
+  dialogProfile.value = {}
   try {
-    const res = await axios.get(`${API_BASE}/api/profile/student/${studentId}`, { withCredentials: true })
-    const d = res.data || res
+    const res = await getStudentProfile(studentId)
+    const d = res?.data || res
+    if (!d) throw new Error('后端未返回学生画像数据')
+    if (d.error) {
+      dialogProfile.value = { error: getFriendlyResponseMessage(d, '学生画像加载失败，请稍后重试') }
+      return
+    }
     dialogProfile.value = d
     dialogStudentName.value = d.studentName || studentId
     await nextTick()

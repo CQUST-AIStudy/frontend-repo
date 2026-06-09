@@ -1,6 +1,6 @@
 <template>
   <div class="ai-recommendation">
-    <page-header
+    <UiPageHeader
       class="my-page-header"
       title="AI 教学建议"
       description="基于课程真实数据生成教学分析。当 AI 服务异常时，页面会自动展示本地兜底建议。"
@@ -23,32 +23,32 @@
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-3">分析内容</label>
             <div class="grid grid-cols-2 gap-3">
               <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <input type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[#007aff]" />
                 <span class="text-[13px] text-[#1d1d1f]">学习状态分析</span>
               </label>
               <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <input type="checkbox" v-model="analysisForm.content" value="knowledge_points" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="analysisForm.content" value="knowledge_points" class="w-4 h-4 rounded accent-[#007aff]" />
                 <span class="text-[13px] text-[#1d1d1f]">知识点掌握情况</span>
               </label>
               <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <input type="checkbox" v-model="analysisForm.content" value="improvement" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="analysisForm.content" value="improvement" class="w-4 h-4 rounded accent-[#007aff]" />
                 <span class="text-[13px] text-[#1d1d1f]">改进建议</span>
               </label>
               <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <input type="checkbox" v-model="analysisForm.content" value="course_design" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="analysisForm.content" value="course_design" class="w-4 h-4 rounded accent-[#007aff]" />
                 <span class="text-[13px] text-[#1d1d1f]">课程设计优化</span>
               </label>
             </div>
           </div>
 
           <div class="flex items-center flex-wrap gap-3">
-            <button
+            <UiButton
               class="inline-flex items-center gap-2 h-[38px] px-5 rounded-[10px] bg-[#007aff] text-white text-[14px] font-medium shadow-[0_2px_8px_rgba(0,122,255,0.3)] transition-all hover:bg-[#0066d6] active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="loading"
               @click="generateRecommendation"
             >
               {{ loading ? 'AI 分析中..' : '生成 AI 教学建议' }}
-            </button>
+            </UiButton>
             <span class="text-[12px] text-[#86868b]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
           </div>
         </div>
@@ -67,7 +67,7 @@
         v-if="errorMessage"
         class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)]"
       >
-        <LucideIcon name="alert-triangle" :size="20" class="text-[#ff9500] shrink-0" />
+        <span class="text-[#ff9500] text-lg shrink-0">⚠</span>
         <div class="flex-1">
           <div class="text-[14px] font-medium text-[#ff9500]">{{ errorMessage }}</div>
           <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
@@ -81,13 +81,13 @@
             <span class="text-[15px] font-semibold text-[#1d1d1f]">AI 教学建议</span>
             <span v-if="usingFallback" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(255,149,0,0.1)] text-[#ff9500]">本地兜底</span>
           </div>
-          <button
+          <UiButton
             v-if="aiContent && !loading"
             class="ml-auto inline-flex items-center gap-1.5 h-[30px] px-3 rounded-[8px] border border-[#007aff]/20 text-[#007aff] text-[13px] font-medium transition-all hover:bg-[#007aff]/5 active:scale-[0.97]"
             @click="copyResult"
           >
             复制结果
-          </button>
+          </UiButton>
         </div>
 
         <div class="flex flex-col gap-4 py-2.5">
@@ -116,17 +116,15 @@
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import { Loading } from '@/components/ui/icons'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '../../api'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
-import PageHeader from '../../components/PageHeader.vue'
-import LucideIcon from '../../components/LucideIcon.vue'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const loading = ref(false)
@@ -222,7 +220,7 @@ const loadCourseData = async () => {
     }
   } catch (error) {
     logger.error('加载课程数据失败:', error)
-    ElMessage.warning('加载课程数据失败，将使用有限信息生成建议')
+    uiMessage.warning('加载课程数据失败，将使用有限信息生成建议')
   } finally {
     dataLoading.value = false
   }
@@ -337,7 +335,7 @@ const formatAiErrorMessage = (error) => {
 const generateRecommendation = async () => {
   if (loading.value) return
   if (!analysisForm.content.length) {
-    ElMessage.warning('请至少选择一项分析内容')
+    uiMessage.warning('请至少选择一项分析内容')
     return
   }
 
@@ -352,13 +350,13 @@ const generateRecommendation = async () => {
     const res = await chatSend(buildPrompt(), [])
     const data = res?.data ?? res
     aiContent.value = data?.reply || '暂无建议'
-    ElMessage.success('AI 教学建议生成完成')
+    uiMessage.success('AI 教学建议生成完成')
   } catch (error) {
     logger.error('生成失败:', error)
     errorMessage.value = formatAiErrorMessage(error)
     usingFallback.value = true
     aiContent.value = buildFallbackRecommendation()
-    ElMessage.warning(errorMessage.value)
+    uiMessage.warning(errorMessage.value)
   } finally {
     loading.value = false
   }
@@ -367,9 +365,9 @@ const generateRecommendation = async () => {
 const copyResult = async () => {
   try {
     await navigator.clipboard.writeText(aiContent.value)
-    ElMessage.success('已复制到剪贴板')
+    uiMessage.success('已复制到剪贴板')
   } catch {
-    ElMessage.warning('复制失败，请手动复制')
+    uiMessage.warning('复制失败，请手动复制')
   }
 }
 

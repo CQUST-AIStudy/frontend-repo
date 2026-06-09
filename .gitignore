@@ -1,58 +1,110 @@
 # Dependencies
 node_modules/
+.pnp/
+.pnp.*
+.yarn/*
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
 
 # Build outputs
 dist/
+dist-ssr/
 build/
+.output/
+storybook-static/
 coverage/
+.nyc_output/
+report.html
+stats.html
+stats.json
+bundle-report.html
 
-# Caches
+# Caches and temporary files
 node_modules/.cache/
 .cache/
-.temp/
-tmp/
+.parcel-cache/
 .vite/
+.webpack/
+.turbo/
+.rollup.cache/
+.vuepress/dist/
+.npm/
+.pnpm-store/
+.temp/
+.tmp/
+tmp/
+temp/
+*.tsbuildinfo
 .eslintcache
 .stylelintcache
 
-# Logs
+# Logs, diagnostics, and local process files
 *.log
+*.local.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pid
+*.pid.lock
+*.seed
 dev-server*.log
 static-server*.log
+serve.out.log
+serve.err.log
+test-startprocess.txt
+where-npm.txt
 
 # Environment files
 .env
 .env.*
 !.env.example
 !.env.template
+!.env.development.example
+!.env.production.example
 
-# Local editor / IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Test artifacts
+# Test and browser artifacts
+coverage-final.json
+lcov.info
+*.lcov
+junit.xml
 test-results/
 playwright-report/
 cypress/screenshots/
 cypress/videos/
 .edge-profile-login-check/
 login-check.png
+screenshots/
+artifacts/
 
-# Local Codex config
-.claude/settings.local.json
-.claude
+# Editor and OS files
+.idea/
+.vscode/
+.vs/
+.fleet/
+.history/
+*.iml
+*.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
+
+# Local assistant/workspace metadata
+.claude/
+.codex/
+.agents/
 
 # HBuilderX / uni-app artifacts
 unpackage/

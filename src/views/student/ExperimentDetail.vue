@@ -1,8 +1,8 @@
 <template>
   <div class="g-page [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
-    <page-header title="实验详情" :description="currentExp?.name || '加载中..'">
-      <button class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#5f6368] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa] hover:[border-color:#bdc1c6]" @click="$router.push('/student/experiments')">←返回列表</button>
-    </page-header>
+    <UiPageHeader title="实验详情" :description="currentExp?.name || '加载中..'">
+      <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#5f6368] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa] hover:[border-color:#bdc1c6]" @click="$router.push('/student/experiments')">←返回列表</UiButton>
+    </UiPageHeader>
 
     <loading-state :loading="loading">
       <div v-if="currentExp" class="g-content [display:flex] [flex-direction:column] [gap:16px]">
@@ -30,33 +30,22 @@
         <!-- 标签页-->
         <div class="g-card [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
           <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px]">
-            <button class="g-tab [display:inline-flex] [align-items:center] [gap:6px] [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'">
-              <LucideIcon name="file-code" :size="16" />
-              代码
-            </button>
-            <button class="g-tab [display:inline-flex] [align-items:center] [gap:6px] [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'">
-              <LucideIcon name="bot" :size="16" />
-              AI助教点评
-            </button>
-            <button class="g-tab [display:inline-flex] [align-items:center] [gap:6px] [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'report' }" @click="activeTab = 'report'" :disabled="!isCompleted">
-              <LucideIcon name="clipboard" :size="16" />
-              实验报告
-            </button>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'">📄 代码</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'">🤖 AI助教点评</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'report' }" @click="activeTab = 'report'" :disabled="!isCompleted">📋 实验报告</UiButton>
           </div>
 
           <!-- 代码 -->
           <div v-if="activeTab === 'code'" class="g-tab-body [padding:20px]">
             <div v-if="!currentExp.code || !isCompleted" class="g-empty [text-align:center] [padding:48px_20px]">
-              <div class="g-empty-icon [display:flex] [align-items:center] [justify-content:center] [color:#9aa0a6] [margin-bottom:12px]">
-                <LucideIcon name="file-code" :size="48" />
-              </div>
+              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">📄</div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无代码提交</div>
-              <button class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="goToPTA">前往PTA平台完成实验</button>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="goToPTA">前往PTA平台完成实验</UiButton>
             </div>
             <div v-else>
               <div class="g-toolbar [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
                 <span class="g-toolbar-title [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
-                <button class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" @click="copyCode">复制</button>
+                <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" @click="copyCode">复制</UiButton>
               </div>
               <pre class="g-code [background:#1e1e2e] [color:#cdd6f4] [padding:20px] [border-radius:12px] [overflow-x:auto] [font-size:13px] [line-height:1.7] [max-height:600px] [overflow-y:auto] [white-space:pre-wrap] [word-break:break-all] [font-family:'Cascadia_Code',_'Fira_Code',_Consolas,_monospace] [margin:0]"><code>{{ currentExp.code }}</code></pre>
             </div>
@@ -70,31 +59,23 @@
                 <span v-if="aiSource === 'cache'" class="g-chip c-info [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#f1f3f4] [color:#5f6368]">已缓存</span>
                 <span v-else-if="aiSource === 'deepseek'" class="g-chip c-ok [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#e6f4ea] [color:#1e8e3e]">刚生成</span>
               </div>
-              <button v-if="isCompleted" class="g-primary-btn-sm [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:6px_16px] [font-size:13px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6] disabled:[cursor:not-allowed]" :disabled="aiGenerating" @click="generateAiComment(true)">
-                <span class="[display:inline-flex] [align-items:center] [gap:6px]">
-                  <LucideIcon v-if="!aiGenerating" :name="hasAiComment ? 'refresh' : 'bot'" :size="14" />
-                  {{ aiGenerating ? '分析中..' : (hasAiComment ? '重新生成' : '生成AI点评') }}
-                </span>
-              </button>
+              <UiButton v-if="isCompleted" class="g-primary-btn-sm [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:6px_16px] [font-size:13px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6] disabled:[cursor:not-allowed]" :disabled="aiGenerating" @click="generateAiComment(true)">
+                {{ aiGenerating ? '分析中..' : (hasAiComment ? '🔄 重新生成' : '✨生成AI点评') }}
+              </UiButton>
             </div>
             <div v-if="aiGenerating" class="g-ai-loading [padding:20px_0]">
-              <el-skeleton :rows="6" animated />
+              <ui-skeleton :rows="6" animated />
               <div class="g-ai-loading-tip [display:flex] [align-items:center] [justify-content:center] [gap:8px] [color:#5f6368] [font-size:13px] [margin-top:16px]">
-                <el-icon class="is-loading"><Loading /></el-icon>
+                <ui-icon class="is-loading"><Loading /></ui-icon>
                 正在调用 DeepSeek 分析代码，预计需要10-20 秒..
               </div>
             </div>
             <div v-else-if="hasAiComment" class="g-ai-content markdown-body [background:#f8f9fa] [padding:24px] [border-radius:12px] [border:1px_solid_#e8eaed] [font-size:14px] [line-height:1.8] [color:#202124] [&_h1]:[color:#202124] [&_h1]:[margin:20px_0_10px] [&_h1]:[font-size:16px] [&_h2]:[color:#202124] [&_h2]:[margin:20px_0_10px] [&_h2]:[font-size:16px] [&_h3]:[color:#202124] [&_h3]:[margin:20px_0_10px] [&_h3]:[font-size:16px] [&_h3]:[font-size:15px] [&_p]:[margin:8px_0] [&_p]:[line-height:1.8] [&_ul]:[padding-left:20px] [&_ul]:[margin:8px_0] [&_ol]:[padding-left:20px] [&_ol]:[margin:8px_0] [&_li]:[margin:4px_0] [&_strong]:[color:#1a73e8] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#1e1e2e] [&_pre]:[color:#cdd6f4] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_blockquote]:[border-left:4px_solid_#1a73e8] [&_blockquote]:[padding:8px_16px] [&_blockquote]:[margin:10px_0] [&_blockquote]:[background:#e8f0fe] [&_blockquote]:[border-radius:0_8px_8px_0] [&_blockquote]:[color:#5f6368]" v-html="renderedAiComment"></div>
             <div v-else class="g-empty [text-align:center] [padding:48px_20px]">
-              <div class="g-empty-icon [display:flex] [align-items:center] [justify-content:center] [color:#9aa0a6] [margin-bottom:12px]">
-                <LucideIcon name="bot" :size="48" />
-              </div>
+              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">🤖</div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">{{ isCompleted ? '暂无AI点评' : '请先完成实验' }}</div>
               <div class="g-empty-sub [font-size:13px] [color:#5f6368] [margin-bottom:20px]">{{ isCompleted ? '点击上方按钮，AI助教将为您的代码进行专业点评' : '完成实验提交后，即可获取AI助教的代码点评' }}</div>
-              <button v-if="isCompleted" class="g-primary-btn [display:inline-flex] [align-items:center] [gap:6px] [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="generateAiComment(false)">
-                <LucideIcon name="bot" :size="14" />
-                生成AI点评
-              </button>
+              <UiButton v-if="isCompleted" class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="generateAiComment(false)">✨生成AI点评</UiButton>
             </div>
           </div>
 
@@ -104,31 +85,26 @@
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">完成实验后可生成报告</div>
             </div>
             <div v-else class="g-empty [text-align:center] [padding:48px_20px]">
-              <div class="g-empty-icon [display:flex] [align-items:center] [justify-content:center] [color:#9aa0a6] [margin-bottom:12px]">
-                <LucideIcon name="clipboard" :size="48" />
-              </div>
+              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">📋</div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">AI实验报告生成</div>
               <div class="g-empty-sub [font-size:13px] [color:#5f6368] [margin-bottom:20px]">基于您的代码和AI点评，快速生成专业的实验报告</div>
-              <button class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="$router.push('/student/ai-report')">前往AI报告生成中心</button>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="$router.push('/student/ai-report')">前往AI报告生成中心</UiButton>
             </div>
           </div>
         </div>
       </div>
-      <el-empty v-else description="未找到该实验" />
+      <ui-empty v-else description="未找到该实验" />
     </loading-state>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, computed, onMounted } from 'vue'
+import { useExperimentStore } from '@/store'
 import { useRoute } from 'vue-router'
-import { useExperimentStore } from '../../store'
-import PageHeader from '../../components/PageHeader.vue'
-import LoadingState from '../../components/LoadingState.vue'
-import LucideIcon from '../../components/LucideIcon.vue'
-import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { computed, onMounted, ref } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import { Loading } from '@/components/ui/icons'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import axios from 'axios'
@@ -165,9 +141,9 @@ const hasAiComment = computed(() => {
 const renderedAiComment = computed(() => hasAiComment.value ? DOMPurify.sanitize(marked(aiCommentRaw.value)) : '')
 
 function copyCode() {
-  if (currentExp.value?.code) { navigator.clipboard.writeText(currentExp.value.code); ElMessage.success('代码已复制') }
+  if (currentExp.value?.code) { navigator.clipboard.writeText(currentExp.value.code); uiMessage.success('代码已复制') }
 }
-function goToPTA() { ElMessage.info('请前往PTA平台完成实验') }
+function goToPTA() { uiMessage.info('请前往PTA平台完成实验') }
 
 async function generateAiComment(force) {
   if (!isCompleted.value) return
@@ -177,9 +153,9 @@ async function generateAiComment(force) {
     const data = res.data || res
     if (data.success && data.aiComment) {
       localAiComment.value = data.aiComment; aiSource.value = data.source || 'deepseek'
-      if (data.source === 'deepseek') ElMessage.success('AI点评已生成')
-    } else { ElMessage.warning(getFriendlyResponseMessage(data, 'AI 点评生成失败，请稍后重试')) }
-  } catch (e) { ElMessage.error(getFriendlyErrorMessage(e, 'AI 点评生成失败，请稍后重试')) }
+      if (data.source === 'deepseek') uiMessage.success('AI点评已生成')
+    } else { uiMessage.warning(getFriendlyResponseMessage(data, 'AI 点评生成失败，请稍后重试')) }
+  } catch (e) { uiMessage.error(getFriendlyErrorMessage(e, 'AI 点评生成失败，请稍后重试')) }
   finally { aiGenerating.value = false }
 }
 

@@ -1,5 +1,0 @@
-C:\Program Files\nodejs\npm
-C:\Program Files\nodejs\npm.cmd
-C:\Users\ASUS\AppData\Roaming\npm\npm
-C:\Users\ASUS\AppData\Roaming\npm\npm.cmd
-11.7.0

@@ -13,28 +13,28 @@
 
     <!-- Control Panel -->
     <div class="flex items-center gap-3 flex-wrap p-4 px-5 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-      <select v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
-        <option value="" disabled>选择文档</option>
-        <option v-for="d in docs" :key="d.id" :value="String(d.id)">{{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)</option>
-      </select>
+      <UiSelect v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+        <UiOption value="" disabled>选择文档</UiOption>
+        <UiOption v-for="d in docs" :key="d.id" :value="String(d.id)">{{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)</UiOption>
+      </UiSelect>
 
-      <select v-model="lang" class="w-[120px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
-        <option value="ZH">中文</option>
-        <option value="EN-US">英文</option>
-        <option value="JA">日文</option>
-        <option value="KO">韩文</option>
-        <option value="FR">法文</option>
-        <option value="DE">德文</option>
-      </select>
+      <UiSelect v-model="lang" class="w-[120px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+        <UiOption value="ZH">中文</UiOption>
+        <UiOption value="EN-US">英文</UiOption>
+        <UiOption value="JA">日文</UiOption>
+        <UiOption value="KO">韩文</UiOption>
+        <UiOption value="FR">法文</UiOption>
+        <UiOption value="DE">德文</UiOption>
+      </UiSelect>
 
       <label class="inline-flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer select-none">
-        <input type="checkbox" v-model="force" class="w-4 h-4 rounded accent-[#007aff]" />
+        <UiInput type="checkbox" v-model="force" class="w-4 h-4 rounded accent-[#007aff]" />
         强制重新翻译
       </label>
 
-      <button @click="translate" :disabled="!docId || loading" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none">
+      <UiButton @click="translate" :disabled="!docId || loading" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none">
         {{ loading ? '翻译中...' : '开始翻译' }}
-      </button>
+      </UiButton>
 
       <span v-if="meta" class="text-[12px] text-[#6e6e73] bg-[#f5f5f7] px-2.5 py-1 rounded-full">{{ meta }}</span>
     </div>
@@ -43,7 +43,7 @@
     <div v-if="error" class="flex items-start gap-3 p-4 mb-5 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)]">
       <LucideIcon name="alert-triangle" class="shrink-0 text-[#ff3b30]" :size="19" />
       <div class="flex-1 text-sm text-[#ff3b30]">{{ error }}</div>
-      <button @click="error = ''" class="text-[#ff3b30]/60 hover:text-[#ff3b30] text-lg cursor-pointer bg-transparent border-none">×</button>
+      <UiButton @click="error = ''" class="text-[#ff3b30]/60 hover:text-[#ff3b30] text-lg cursor-pointer bg-transparent border-none">×</UiButton>
     </div>
 
     <!-- Segments -->

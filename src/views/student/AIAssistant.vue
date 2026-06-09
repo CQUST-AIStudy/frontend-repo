@@ -1,152 +1,85 @@
-<template>
-  <div class="ai-assistant-page [display:flex] [gap:16px] [height:100%] [padding:16px] [background:#f5f7fa] max-[900px]:[flex-direction:column]">
-    <div class="sidebar [width:260px] [flex-shrink:0] [display:flex] [flex-direction:column] [gap:12px] [padding:12px] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] max-[900px]:[width:100%]">
-      <h3>AI 学习助手</h3>
-
-      <el-select
-        v-model="selectedCourseSpaceId"
-        placeholder="选择课程空间（可选）"
-        clearable
-        class="[width:100%]"
-      >
-        <el-option
-          v-for="item in courseSpaces"
-          :key="item.id"
-          :label="buildCourseSpaceLabel(item)"
-          :value="item.id"
-        />
-      </el-select>
-
-      <div v-if="selectedCourseSpaceId" class="mode-row [display:flex] [flex-direction:column] [gap:8px]">
-        <el-switch
-          v-model="isOpenMode"
-          active-text="开放模式"
-          inactive-text="严格模式"
-          size="small"
-        />
-        <p class="mode-hint [margin:0] [color:#909399] [font-size:12px] [line-height:1.5]">
-          严格模式只依据课程资料回答。开放模式在课程覆盖不足时允许补充联网检索。
-        </p>
-        <div class="space-summary [padding:8px_10px] [background:#f5f7fa] [border-radius:8px] [font-size:12px] [color:#606266] [line-height:1.5]">
-          当前空间：{{ buildCourseSpaceLabel(selectedCourseSpace) }}
-        </div>
-      </div>
-
-      <div v-else class="empty-space-tip [display:flex] [flex-direction:column] [gap:8px] [padding:12px] [background:#fff8e8] [border:1px_solid_#f5d28b] [border-radius:10px] [&_p]:[margin:0] [&_p]:[color:#8c6d1f] [&_p]:[font-size:12px] [&_p]:[line-height:1.6]">
-        <div class="empty-space-title [font-size:14px] [font-weight:600] [color:#7a4f01]">还没有可用的课程空间</div>
-        <p>你可以先加入教学班，解锁班级授权的课程知识库；也可以先使用普通聊天模式。</p>
-        <el-button size="small" @click="goClassJoin">去加入教学班</el-button>
-      </div>
-
-      <div class="quick-list [display:flex] [flex-direction:column] [gap:4px]">
-        <el-button
-          v-for="q in quickPrompts"
-          :key="q.label"
-          text
-          @click="useQuickPrompt(q.prompt)"
-        >
-          {{ q.label }}
-        </el-button>
-      </div>
-    </div>
-
-    <div class="chat-panel [flex:1] [display:flex] [flex-direction:column] [border-radius:10px] [background:#fff] [border:1px_solid_#e6eaf0] [overflow:hidden]">
-      <el-alert
-        v-if="assistantNotice"
-        class="assistant-alert [margin:12px_12px_0]"
-        type="warning"
-        :closable="false"
-        :title="assistantNotice"
-        show-icon
-      />
-
-      <div ref="chatContainer" class="messages [flex:1] [overflow-y:auto] [padding:16px]">
-        <div v-for="(message, index) in messages" :key="index" :class="['msg', message.role]">
-          <div class="meta">
-            <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
-            <span>{{ message.time }}</span>
-          </div>
-          <div class="body" v-html="formatMessage(message.content)" />
-
-          <div v-if="message.citations && message.citations.length" class="citations [margin-top:8px] [display:flex] [flex-direction:column] [gap:4px] [font-size:12px] [color:#606266]">
-            <div v-for="cite in message.citations" :key="`${index}-${cite.index}`" class="citation-item [line-height:1.5]">
-              [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
-              <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
-              <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="isTyping" class="msg ai [margin-bottom:12px] [&_.meta]:[display:flex] [&_.meta]:[justify-content:space-between] [&_.meta]:[color:#909399] [&_.meta]:[font-size:12px] [&_.meta]:[margin-bottom:4px] [&_.body]:[padding:10px] [&_.body]:[border-radius:8px] [&_.body]:[line-height:1.7]">
-          <div class="meta"><span>AI 助手</span><span>正在生成...</span></div>
-          <div class="body">...</div>
-        </div>
-      </div>
-
-      <div class="input-area [border-top:1px_solid_#e6eaf0] [padding:12px]">
-        <el-input
-          v-model="userInput"
-          type="textarea"
-          :rows="3"
-          resize="none"
-          placeholder="输入你的问题，按 Ctrl + Enter 发送"
-          @keyup.enter.ctrl="sendMessage"
-        />
-        <div class="actions [margin-top:8px] [display:flex] [justify-content:space-between] [align-items:center] [color:#909399] [font-size:12px]">
-          <span>{{ selectedCourseSpaceId ? '当前为 RAG 问答模式' : '当前为普通聊天模式' }}</span>
-          <el-button
-            type="primary"
-            :disabled="!userInput.trim() || isTyping"
-            :loading="isTyping"
-            @click="sendMessage"
-          >
-            发送
-          </el-button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
-import { buildApiUrl } from '../../config/runtime'
-import { getKnowledgeBases, normalizeSourcesForDisplay, streamRagChat } from '../../api/rag'
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
+import { getKnowledgeBases } from '../../api/rag'
+import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/studentAiChat'
 
-const router = useRouter()
-const userInput = ref('')
-const messages = ref([])
-const isTyping = ref(false)
+const chatStore = useStudentAiChatStore()
+const {
+  messages,
+  userInput,
+  isTyping,
+  selectedCourseSpaceId,
+  isOpenMode,
+  assistantNotice
+} = storeToRefs(chatStore)
+
 const chatContainer = ref(null)
 const courseSpaces = ref([])
-const selectedCourseSpaceId = ref(null)
-const isOpenMode = ref(false)
-const assistantNotice = ref('')
 
 const quickPrompts = [
   { label: '顺序表和链表', prompt: '请解释顺序表和链表的区别，并给出适用场景。' },
   { label: '树的遍历', prompt: '前序、中序、后序遍历分别是什么？如何记忆？' },
   { label: '复杂度分析', prompt: '如何分析一个算法的时间复杂度和空间复杂度？' },
-  { label: '代码优化', prompt: '我该如何优化一个查找算法？请给我常见思路。' }
+  { label: '代码优化', prompt: '我应该如何优化一个查找算法？请给我常见思路。' }
 ]
 
 const selectedCourseSpace = computed(() => {
-  return courseSpaces.value.find((item) => item.id === selectedCourseSpaceId.value) || null
+  return courseSpaces.value.find((item) => String(item.id) === String(selectedCourseSpaceId.value)) || null
 })
 
-function formatMessage(content) {
-  const rawHtml = marked.parse(content || '')
-  return DOMPurify.sanitize(rawHtml)
-}
+const visibleMessages = computed(() => {
+  return messages.value.filter((message) => {
+    return message.role !== 'ai' || message.content || message.citations?.length
+  })
+})
+
+const showPromptSuggestions = computed(() => {
+  return !isTyping.value && !messages.value.some((message) => message.role === 'user')
+})
+
+const showTypingHint = computed(() => {
+  const lastMessage = messages.value[messages.value.length - 1]
+  return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
+})
+
+const currentModeText = computed(() => {
+  if (!selectedCourseSpaceId.value) return '普通聊天'
+  return isOpenMode.value ? 'RAG 开放模式' : 'RAG 严格模式'
+})
+
+const modeTooltip = computed(() => {
+  if (!selectedCourseSpaceId.value) {
+    return '未选择课程空间时使用普通聊天；选择课程空间后可切换 RAG 严格/开放模式。'
+  }
+  return isOpenMode.value
+    ? '开放模式：课程资料不足时允许补充联网检索。'
+    : '严格模式：只依据课程资料回答。'
+})
+
+const modeSummaryText = computed(() => {
+  return selectedCourseSpaceId.value ? '当前为 RAG 问答模式' : '当前为普通聊天模式'
+})
+
+const selectedSpaceSummary = computed(() => {
+  if (!selectedCourseSpaceId.value) return '未选择课程空间时使用普通聊天'
+  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
+})
+
+const canClearConversation = computed(() => {
+  return !isTyping.value && (messages.value.length > 0 || !!userInput.value.trim())
+})
 
 function buildCourseSpaceLabel(courseSpace) {
   if (!courseSpace) return ''
   const parts = [courseSpace.courseName, courseSpace.name, courseSpace.term].filter(Boolean)
-  const scope = courseSpace.docVisibility === 'class' ? '班级授权' : courseSpace.docVisibility === 'public' ? '公开' : null
+  const scope = courseSpace.docVisibility === 'class'
+    ? '班级授权'
+    : courseSpace.docVisibility === 'public'
+      ? '公开'
+      : null
   if (scope) parts.push(scope)
   return parts.join(' / ') || `课程空间 ${courseSpace.id}`
 }
@@ -163,153 +96,409 @@ async function fetchCourseSpaces() {
     const spaces = await getKnowledgeBases()
     courseSpaces.value = spaces
     if (!selectedCourseSpaceId.value && spaces.length > 0) {
-      selectedCourseSpaceId.value = spaces[0].id
+      chatStore.setCourseSpace(spaces[0].id)
     }
   } catch (error) {
-    const isRagMode = !!selectedCourseSpaceId.value
-    const friendlyMessage = formatAssistantError(error?.message, isRagMode)
-    assistantNotice.value = friendlyMessage
-    ElMessage.warning(friendlyMessage)
+    const friendlyMessage = formatStudentAssistantError(error?.message, !!selectedCourseSpaceId.value)
+    chatStore.setAssistantNotice(friendlyMessage)
+    uiMessage.warning(friendlyMessage)
     courseSpaces.value = []
   }
 }
 
-async function readErrorMessage(response) {
-  const contentType = response.headers.get('content-type') || ''
-  try {
-    if (contentType.includes('application/json')) {
-      const payload = await response.json()
-      return payload?.message || payload?.detail || payload?.error || `HTTP ${response.status}`
-    }
-    const text = await response.text()
-    return text || `HTTP ${response.status}`
-  } catch {
-    return `HTTP ${response.status}`
-  }
-}
-
-function formatAssistantError(message, isRagMode) {
-  const raw = String(message || '')
-  if (raw.includes('OPENAI_API_KEY') || raw.includes('AI service is not configured')) {
-    return 'AI chat is not configured on the backend yet. Set OPENAI_API_KEY before using this entry.'
-  }
-  if (raw.includes('course space')) {
-    return 'No accessible course space is available for RAG chat right now.'
-  }
-  if (raw.includes('401')) {
-    return isRagMode
-      ? 'RAG chat is unavailable because the current login session is invalid.'
-      : 'AI chat is unavailable because the current login session is invalid.'
-  }
-  if (raw.includes('403')) {
-    return isRagMode
-      ? 'RAG chat is unavailable because the current account has no permission to use this course space.'
-      : 'AI chat is unavailable because the current account has no permission.'
-  }
-  return isRagMode ? 'RAG chat is temporarily unavailable.' : 'AI chat is temporarily unavailable.'
-}
-
 async function sendMessage() {
-  const text = userInput.value.trim()
-  if (!text || isTyping.value) return
-  assistantNotice.value = ''
-
-  messages.value.push({ role: 'user', content: text, time: new Date().toLocaleTimeString() })
-  userInput.value = ''
+  await chatStore.sendMessage()
   await scrollToBottom()
-
-  isTyping.value = true
-  const aiIndex = messages.value.length
-  messages.value.push({ role: 'ai', content: '', time: new Date().toLocaleTimeString(), citations: [] })
-
-  try {
-    const isRagMode = !!selectedCourseSpaceId.value
-    if (isRagMode) {
-      await streamRagChat({
-        query: text,
-        knowledgeBaseIds: [String(selectedCourseSpaceId.value)],
-        mode: isOpenMode.value ? 'open' : 'strict',
-        options: {
-          topK: 10,
-          rerankTopN: 3,
-          scoreThreshold: 0,
-          enableRerank: true,
-          temperature: 0.7,
-          maxTokens: 1024,
-        },
-      }, {
-        onRetrieval: ({ sources }) => {
-          messages.value[aiIndex].citations = normalizeSourcesForDisplay(sources || [])
-          scrollToBottom()
-        },
-        onDelta: ({ content }) => {
-          messages.value[aiIndex].content += content || ''
-          scrollToBottom()
-        },
-      })
-    } else {
-      const response = await fetch(buildApiUrl('/api/chat'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userInput: text })
-      })
-
-      if (!response.ok) {
-        throw new Error(await readErrorMessage(response))
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('No response body reader')
-      }
-
-      const decoder = new TextDecoder()
-      let done = false
-      while (!done) {
-        const chunk = await reader.read()
-        done = chunk.done
-        if (done) break
-        messages.value[aiIndex].content += decoder.decode(chunk.value, { stream: true })
-        await scrollToBottom()
-      }
-    }
-  } catch (error) {
-    const isRagMode = !!selectedCourseSpaceId.value
-    const friendlyMessage = formatAssistantError(error?.message, isRagMode)
-    assistantNotice.value = friendlyMessage
-    ElMessage.warning(friendlyMessage)
-    const current = messages.value[aiIndex]
-    if (current && !current.content) {
-      current.content = friendlyMessage
-    }
-  } finally {
-    isTyping.value = false
-    await scrollToBottom()
-  }
 }
 
 function useQuickPrompt(prompt) {
-  userInput.value = prompt
+  chatStore.setInput(prompt)
   nextTick(() => {
     const textarea = document.querySelector('.input-area textarea')
     if (textarea) textarea.focus()
   })
 }
 
-function goClassJoin() {
-  router.push('/student/class-join')
+async function clearConversation() {
+  try {
+    await messageBox.confirm('清空当前 AI 聊天记录和输入草稿？', '提示', {
+      confirmButtonText: '清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.clearMessages()
+    await scrollToBottom()
+  } catch {
+    // 用户取消清空。
+  }
 }
+
+watch(messages, scrollToBottom, { deep: true })
+watch(isTyping, scrollToBottom)
 
 onMounted(() => {
   fetchCourseSpaces()
-  messages.value.push({
-    role: 'ai',
-    content: '你好，我是你的数据结构 AI 学习助手。已授权的课程空间会自动用于带引用的 RAG 问答；如果暂时没有课程空间，你仍然可以先进行普通聊天。',
-    time: new Date().toLocaleTimeString(),
-    citations: []
-  })
+  scrollToBottom()
 })
 </script>
 
+<template>
+  <div class="flex h-full min-h-0 bg-[#f5f7fa] p-3 max-[640px]:p-2">
+    <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#e6eaf0] bg-white">
+      <ui-alert
+        v-if="assistantNotice"
+        class="m-3 mb-0"
+        type="warning"
+        :closable="false"
+        :title="assistantNotice"
+        show-icon
+      />
 
+      <div class="flex flex-none items-center justify-between gap-3 border-b border-[#e6eaf0] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
+        <div class="min-w-0">
+          <h2 class="m-0 text-[18px] font-bold leading-tight text-[#1d1d1f]">
+            AI 学习助手
+          </h2>
+          <p class="m-0 mt-1 truncate text-[12px] text-[#909399]">
+            已保存 {{ messages.length }} 条聊天内容，切换目录后可继续查看。
+          </p>
+        </div>
+        <ui-button
+          type="button"
+          :disabled="!canClearConversation"
+          class="min-h-9 rounded-[10px] border border-[#e6eaf0] bg-[#f8fafc] px-3 text-[13px] text-[#606266] shadow-none hover:border-[#ff3b30]/30 hover:text-[#ff3b30]"
+          @click="clearConversation"
+        >
+          清空记录
+        </ui-button>
+      </div>
+
+      <div
+        ref="chatContainer"
+        class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 max-[640px]:px-3"
+      >
+        <div
+          v-if="showPromptSuggestions"
+          class="mx-auto flex min-h-full w-full max-w-[820px] flex-1 flex-col items-center justify-center gap-6 py-8 text-center"
+        >
+          <div class="flex flex-col gap-2">
+            <h3 class="m-0 text-[24px] font-bold leading-tight text-[#1d1d1f] max-[640px]:text-[21px]">
+              从一个数据结构问题开始
+            </h3>
+            <p class="m-0 max-w-[680px] text-[14px] leading-7 text-[#6e6e73]">
+              选择一个提示词开始，或直接输入你的问题。选择课程空间后，将使用带引用的 RAG 问答。
+            </p>
+          </div>
+
+          <div class="grid w-full grid-cols-2 gap-3 max-[640px]:grid-cols-1">
+            <button
+              v-for="q in quickPrompts"
+              :key="q.label"
+              type="button"
+              class="group flex min-h-[88px] flex-col items-start justify-between rounded-[12px] border border-[#e6eaf0] bg-[#fbfdff] px-4 py-3 text-left transition-all duration-150 hover:-translate-y-[1px] hover:border-[#007aff]/40 hover:bg-[#f4f9ff] hover:shadow-[0_10px_24px_rgba(22,48,79,0.08)]"
+              @click="useQuickPrompt(q.prompt)"
+            >
+              <span class="text-[15px] font-semibold text-[#1d1d1f] group-hover:text-[#007aff]">
+                {{ q.label }}
+              </span>
+              <span class="mt-2 line-clamp-2 text-[12px] leading-5 text-[#6e6e73]">
+                {{ q.prompt }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-for="(message, index) in visibleMessages"
+          :key="message.id || index"
+          class="flex min-w-0"
+          :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+        >
+          <div
+            class="min-w-0 max-w-[min(760px,78%)] rounded-[12px] px-3 py-2 text-[14px] leading-[1.65] max-[640px]:max-w-[92%]"
+            :class="message.role === 'user'
+              ? 'rounded-tr-[4px] bg-[#007aff] text-white'
+              : 'rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] text-[#202124]'"
+          >
+            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
+              <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
+              <span>{{ message.time }}</span>
+            </div>
+            <p
+              v-if="message.role === 'user'"
+              class="m-0 whitespace-pre-wrap [overflow-wrap:anywhere]"
+            >
+              {{ message.content }}
+            </p>
+            <div
+              v-else
+              class="assistant-markdown"
+              v-html="renderSafeMarkdown(message.content)"
+            />
+
+            <div
+              v-if="message.citations && message.citations.length"
+              class="mt-2 flex flex-col gap-1 border-t border-[rgba(126,157,183,0.2)] pt-2 text-[12px] leading-5 text-[#606266]"
+            >
+              <div
+                v-for="cite in message.citations"
+                :key="`${message.id || index}-${cite.index}`"
+              >
+                [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
+                <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
+                <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showTypingHint" class="flex min-w-0 justify-start">
+          <div class="min-w-[126px] rounded-[12px] rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] px-3 py-2 text-[14px] leading-[1.65] text-[#202124]">
+            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
+              <span>AI 助手</span>
+              <span>正在生成</span>
+            </div>
+            <div class="inline-flex items-center gap-1" aria-label="正在生成">
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3]"></span>
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:120ms]"></span>
+              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:240ms]"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area flex flex-none flex-col gap-2 border-t border-[#e6eaf0] bg-white p-3">
+        <div class="flex min-w-0 items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch">
+          <div class="flex min-w-0 flex-wrap items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch">
+            <ui-select
+              v-model="selectedCourseSpaceId"
+              placeholder="选择课程空间（可选）"
+              clearable
+              class="w-[280px] max-[760px]:w-full"
+            >
+              <ui-option
+                v-for="item in courseSpaces"
+                :key="item.id"
+                :label="buildCourseSpaceLabel(item)"
+                :value="item.id"
+              />
+            </ui-select>
+
+            <div class="flex min-h-9 items-center gap-2 rounded-[10px] bg-[#f5f7fa] px-3 text-[12px] text-[#6e6e73]">
+              <ui-tooltip :content="modeTooltip">
+                <span class="inline-flex cursor-help items-center">
+                  <ui-switch
+                    v-model="isOpenMode"
+                    active-text="开放"
+                    inactive-text="严格"
+                    size="small"
+                  />
+                </span>
+              </ui-tooltip>
+              <span class="whitespace-nowrap">{{ currentModeText }}</span>
+            </div>
+          </div>
+
+          <span class="min-w-0 truncate text-[12px] text-[#909399]">
+            {{ selectedSpaceSummary }}
+          </span>
+        </div>
+
+        <ui-input
+          v-model="userInput"
+          type="textarea"
+          :rows="3"
+          resize="none"
+          placeholder="输入你的问题，按 Ctrl + Enter 发送"
+          @keyup.enter.ctrl="sendMessage"
+        />
+
+        <div class="flex items-center justify-between gap-3 text-[12px] text-[#909399] max-[640px]:items-stretch max-[640px]:flex-col">
+          <span>{{ modeSummaryText }}</span>
+          <ui-button
+            type="primary"
+            :disabled="!userInput.trim() || isTyping"
+            :loading="isTyping"
+            class="max-[640px]:w-full"
+            @click="sendMessage"
+          >
+            发送
+          </ui-button>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<style scoped>
+.assistant-markdown {
+  color: #202124;
+  font-size: 14px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.assistant-markdown :deep(p) {
+  margin: 0 0 8px;
+}
+
+.assistant-markdown :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.assistant-markdown :deep(h1),
+.assistant-markdown :deep(h2),
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  margin: 12px 0 8px;
+  color: #111827;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.assistant-markdown :deep(h1) {
+  font-size: 18px;
+}
+
+.assistant-markdown :deep(h2) {
+  font-size: 16px;
+}
+
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  font-size: 15px;
+}
+
+.assistant-markdown :deep(ul),
+.assistant-markdown :deep(ol) {
+  margin: 8px 0;
+  padding-left: 22px;
+}
+
+.assistant-markdown :deep(li) {
+  margin: 3px 0;
+}
+
+.assistant-markdown :deep(blockquote) {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border-left: 3px solid #60a5fa;
+  border-radius: 8px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #475569;
+}
+
+.assistant-markdown :deep(a) {
+  color: #0b63ce;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(table) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.assistant-markdown :deep(th),
+.assistant-markdown :deep(td) {
+  padding: 7px 9px;
+  border: 1px solid #d8dee8;
+  white-space: nowrap;
+}
+
+.assistant-markdown :deep(th) {
+  background: #eef3f8;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.assistant-markdown :deep(:not(pre) > code) {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #1d4ed8;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.92em;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(.markdown-code-block) {
+  max-width: 100%;
+  margin: 10px 0;
+  padding: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  background: #0f172a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.assistant-markdown :deep(.markdown-code-block code) {
+  display: block;
+  min-width: max-content;
+  padding: 12px 14px;
+  background: transparent;
+  color: #e5edf7;
+  font-family: Consolas, "SFMono-Regular", "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.62;
+  overflow-wrap: normal;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.assistant-markdown :deep(.hljs-keyword),
+.assistant-markdown :deep(.hljs-selector-tag),
+.assistant-markdown :deep(.hljs-built_in),
+.assistant-markdown :deep(.hljs-type) {
+  color: #93c5fd;
+}
+
+.assistant-markdown :deep(.hljs-string),
+.assistant-markdown :deep(.hljs-regexp),
+.assistant-markdown :deep(.hljs-attr),
+.assistant-markdown :deep(.hljs-symbol) {
+  color: #86efac;
+}
+
+.assistant-markdown :deep(.hljs-title),
+.assistant-markdown :deep(.hljs-name),
+.assistant-markdown :deep(.hljs-section),
+.assistant-markdown :deep(.hljs-function) {
+  color: #facc15;
+}
+
+.assistant-markdown :deep(.hljs-number),
+.assistant-markdown :deep(.hljs-literal),
+.assistant-markdown :deep(.hljs-variable),
+.assistant-markdown :deep(.hljs-template-variable) {
+  color: #fca5a5;
+}
+
+.assistant-markdown :deep(.hljs-comment),
+.assistant-markdown :deep(.hljs-quote) {
+  color: #94a3b8;
+}
+
+.assistant-markdown :deep(.hljs-meta),
+.assistant-markdown :deep(.hljs-operator),
+.assistant-markdown :deep(.hljs-punctuation) {
+  color: #c4b5fd;
+}
+
+@media (max-width: 640px) {
+  .assistant-markdown {
+    font-size: 13.5px;
+  }
+
+  .assistant-markdown :deep(.markdown-code-block code) {
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+}
+</style>

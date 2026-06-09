@@ -15,9 +15,9 @@
             <slot name="header">
               <h2 class="text-[16px] font-semibold text-[#1d1d1f]">{{ title }}</h2>
             </slot>
-            <button type="button" @click="close" class="w-[30px] h-[30px] rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer">
+            <UiButton type="button" @click="close" class="w-[30px] h-[30px] rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer">
               <svg class="w-3.5 h-3.5 text-[#6e6e73]" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
+            </UiButton>
           </div>
           <div class="flex-1 overflow-y-auto p-6">
             <slot></slot>

@@ -1,6 +1,6 @@
 <template>
   <div class="sync-panel">
-    <page-header title="PTA 数据同步" description="管理 PTA 平台数据爬取、同步状态和 Cookie 维护" />
+    <UiPageHeader title="PTA 数据同步" description="管理 PTA 平台数据爬取、同步状态和 Cookie 维护" />
 
     <div v-if="cookieStatus === 'EXPIRED'" class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] text-[13px] text-[#ff3b30] mb-4">
       <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -56,12 +56,36 @@
             </div>
           </div>
           <div class="h-px bg-black/[0.06] my-5"></div>
-          <div class="flex items-center gap-3 mb-3.5">
-            <button @click="forceMode = !forceMode" class="relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer border-none" :class="forceMode ? 'bg-[#007aff]' : 'bg-black/[0.12]'">
-              <span class="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200" :class="forceMode ? 'translate-x-[18px]' : ''"></span>
-            </button>
-            <span class="text-[13px] text-[#1d1d1f]">{{ forceMode ? '强制更新' : '正常模式' }}</span>
-            <span class="text-[12px] text-[#d93025]" v-if="forceMode">跳过冷却限制，请谨慎使用以保护 PTA 平台</span>
+          <div class="mb-3.5 rounded-[12px] border border-black/[0.06] bg-[#f9f9f9] px-4 py-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <div class="text-[14px] font-semibold leading-5 text-[#1d1d1f]">同步模式</div>
+                <div class="text-[12px] leading-5 text-[#6e6e73]">正常模式遵守冷却保护，强制更新会跳过冷却限制。</div>
+              </div>
+              <div class="inline-flex h-9 w-full rounded-[10px] bg-[#edf1f7] p-1 text-[12px] font-semibold sm:w-auto" role="group" aria-label="同步模式切换">
+                <button
+                  type="button"
+                  class="h-7 flex-1 rounded-[8px] px-3 transition-all sm:flex-none sm:min-w-[82px]"
+                  :class="!forceMode ? 'bg-white text-[#007aff] shadow-[0_1px_3px_rgba(15,23,42,0.12)]' : 'text-[#64748b] hover:text-[#1d1d1f]'"
+                  :aria-pressed="!forceMode"
+                  @click="forceMode = false"
+                >
+                  正常模式
+                </button>
+                <button
+                  type="button"
+                  class="h-7 flex-1 rounded-[8px] px-3 transition-all sm:flex-none sm:min-w-[82px]"
+                  :class="forceMode ? 'bg-[#fff1f0] text-[#d93025] shadow-[0_1px_3px_rgba(217,48,37,0.12)]' : 'text-[#64748b] hover:text-[#d93025]'"
+                  :aria-pressed="forceMode"
+                  @click="forceMode = true"
+                >
+                  强制更新
+                </button>
+              </div>
+            </div>
+            <div v-if="forceMode" class="mt-2 rounded-[8px] bg-[#fff4e6] px-3 py-2 text-[12px] leading-5 text-[#d93025]">
+              已开启强制更新：将跳过冷却限制，请谨慎使用以保护 PTA 平台。
+            </div>
           </div>
           <!-- Sync keyword panel -->
           <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
@@ -69,7 +93,7 @@
               <span class="text-[14px] font-semibold text-[#1d1d1f]">同步关键词</span>
               <span class="text-[12px] text-[#6e6e73]">可按当前班级临时覆盖 PTA 搜索关键词；提交同步时会同时保存到该班级配置。</span>
             </div>
-            <input v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
           </div>
           <!-- PTA credentials panel -->
           <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
@@ -84,12 +108,12 @@
               当前未绑定 PTA 账号，本页可临时输入；留空时只会尝试现有 Cookie。
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <input v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-              <input v-model="ptaPassword" :type="showPassword ? 'text' : 'password'" placeholder="本次同步使用的 PTA 密码（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+              <UiInput v-model="ptaUsername" placeholder="本次同步使用的 PTA 账号（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+              <UiInput v-model="ptaPassword" :type="showPassword ? 'text' : 'password'" placeholder="本次同步使用的 PTA 密码（可选）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             </div>
             <div class="flex gap-2.5 mt-3">
-              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitTempCredential">提交临时账号密码</button>
-              <button class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearTempCredential">清空临时凭据</button>
+              <UiButton class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitTempCredential">提交临时账号密码</UiButton>
+              <UiButton class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearTempCredential">清空临时凭据</UiButton>
             </div>
             <div v-if="tempCredentialSubmitted" class="mt-2.5 text-[12px] text-[#1e8e3e]">
               已提交临时 PTA 账号：{{ ptaUsername.trim() }}，本页后续同步将优先使用该账号。
@@ -106,40 +130,40 @@
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">增量同步</div>
                 <div class="text-[12px] text-[#6e6e73]">检测新题目集，爬取内容+提交+导出（仅新增）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
                 <span v-if="syncLoading === 'incremental'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>开始同步</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">拉取提交记录</div>
                 <div class="text-[12px] text-[#6e6e73]">拉取已有题目集的最新提交（轻量，冷却 4h）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
                 <span v-if="syncLoading === 'submissions'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>拉取提交</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">刷新导出</div>
                 <div class="text-[12px] text-[#6e6e73]">重新导出成绩单/答题卡/代码（较重，冷却 24h）</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
                 <span v-if="syncLoading === 'refresh'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>刷新导出</span>
-              </button>
+              </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">全量同步</div>
                 <div class="text-[12px] text-[#6e6e73]">增量 + 提交 + 导出，耗时较长</div>
               </div>
-              <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
+              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#ff3b30] shadow-[0_2px_8px_rgba(255,59,48,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
                 <span v-if="syncLoading === 'full'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span v-else>全量同步</span>
-              </button>
+              </UiButton>
             </div>
           </div>
           <!-- Task progress -->
@@ -170,7 +194,7 @@
         <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
           <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
-            <table class="w-full text-[12px] border-collapse">
+            <UiTable class="w-full text-[12px] border-collapse">
               <thead>
                 <tr class="bg-[#f9f9fb]">
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">任务ID</th>
@@ -193,7 +217,45 @@
                   <td class="px-3 py-2 text-[#6e6e73]">{{ row.created_at }}</td>
                 </tr>
               </tbody>
-            </table>
+            </UiTable>
+          </div>
+        </div>
+
+        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <div class="text-[14px] font-semibold text-[#1d1d1f]">LeetCode 题库抓取</div>
+              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个 LeetCode 中文站 slug，抓取后写入本地题库。</div>
+            </div>
+            <UiButton
+              class="h-[34px] px-4 rounded-[9px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] disabled:opacity-50"
+              :disabled="!leetcodeSlugText.trim() || leetcodeCrawlLoading"
+              @click="crawlLeetCodeSlugs"
+            >
+              <span v-if="leetcodeCrawlLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+              抓取入库
+            </UiButton>
+          </div>
+          <textarea
+            v-model="leetcodeSlugText"
+            rows="4"
+            placeholder="two-sum&#10;add-two-numbers"
+            class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+          ></textarea>
+          <div v-if="leetcodeCrawlItems.length" class="mt-4 flex flex-col gap-2">
+            <div
+              v-for="item in leetcodeCrawlItems"
+              :key="item.slug"
+              class="flex items-center justify-between gap-3 rounded-[10px] border border-black/[0.06] bg-[#f9f9fb] px-3 py-2 text-[12px]"
+            >
+              <div class="min-w-0">
+                <div class="font-semibold text-[#1d1d1f] truncate">{{ item.title }}</div>
+                <div class="text-[#6e6e73]">{{ item.slug }} <span v-if="item.problemId">· 本地 ID {{ item.problemId }}</span></div>
+              </div>
+              <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-bold" :class="item.problemId ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">
+                {{ item.problemId ? '已入库' : '需检查' }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -221,10 +283,10 @@
             <textarea v-model="cookieInput" rows="8" placeholder='粘贴 Cookie JSON 数组，格式如:
 [{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]' class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"></textarea>
           </div>
-          <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!cookieInput.trim() || cookieSubmitting" @click="submitCookieHandler">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!cookieInput.trim() || cookieSubmitting" @click="submitCookieHandler">
             <span v-if="cookieSubmitting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
             验证并保存 Cookie
-          </button>
+          </UiButton>
           <div v-if="cookieResult" class="mt-3.5 flex items-center gap-1.5 px-3.5 py-2.5 rounded-[8px] text-[13px]" :class="cookieResult.valid ? 'bg-[#e6f4ea] text-[#1e8e3e]' : 'bg-[#fce8e6] text-[#d93025]'">
             <svg v-if="cookieResult.valid" class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
             <svg v-else class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
@@ -261,9 +323,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../../components/PageHeader.vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   getPtaCookieStatus,
   getTeacherPtaCredentials,
@@ -273,6 +334,10 @@ import {
 import { useUserStore } from '../../store'
 import axios from 'axios'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
+import {
+  crawlLeetCodeProblems,
+  mapClawItemToPractice
+} from '../../api/leetcodeClaw'
 
 const showPassword = ref(false)
 
@@ -292,9 +357,8 @@ function buildDefaultSpiderUrl() {
 const envSpiderUrl = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_SPIDER_URL)
   ? process.env.VUE_APP_SPIDER_URL
   : ''
-const spiderUrl = ref(normalizeUrl(envSpiderUrl || '/spider'))
+const spiderUrl = ref(normalizeUrl(envSpiderUrl || buildDefaultSpiderUrl()))
 const spiderHealthError = ref('')
-const spiderProbeEnabled = !!envSpiderUrl
 
 function buildSpiderCandidates() {
   const candidates = []
@@ -321,6 +385,12 @@ function buildSpiderCandidates() {
 function spiderApi(path) {
   return `${spiderUrl.value}${path}`
 }
+
+const spiderRequestConfig = (options = {}) => ({
+  withCredentials: false,
+  ...options
+})
+
 const userStore = useUserStore()
 
 const selectedClassName = computed(() => userStore.selectedClass?.name || '')
@@ -347,6 +417,9 @@ const ptaPassword = ref('')
 const tempCredentialSubmitted = ref(false)
 const boundPtaUsername = ref('')
 const hasBoundPtaCredentials = ref(false)
+const leetcodeSlugText = ref('')
+const leetcodeCrawlLoading = ref(false)
+const leetcodeCrawlItems = ref([])
 let pollTimer = null
 
 const cookieStatusText = computed(() => {
@@ -389,15 +462,10 @@ const plannedCredentialSource = computed(() => {
 })
 
 async function probeSpiderHealth() {
-  if (!spiderProbeEnabled) {
-    spiderAlive.value = false
-    spiderHealthError.value = 'spider disabled'
-    return false
-  }
   spiderHealthError.value = ''
   for (const base of buildSpiderCandidates()) {
     try {
-      const r = await axios.get(`${base}/health`, { timeout: 3000 })
+      const r = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
       if (r.status === 200) {
         spiderAlive.value = true
         spiderUrl.value = base
@@ -440,11 +508,11 @@ async function loadCooldown() {
   }
   const keyword = syncKeyword.value.trim() || currentKeyword.value
   if (!selectedClassId.value) {
-    ElMessage.warning('请先选择当前教学班')
+    uiMessage.warning('请先选择当前教学班')
     return
   }
   try {
-    const r = await axios.get(spiderApi(`/cooldown/${encodeURIComponent(keyword)}`), { timeout: 5000 })
+    const r = await axios.get(spiderApi(`/cooldown/${encodeURIComponent(keyword)}`), spiderRequestConfig({ timeout: 5000 }))
     cooldownInfo.value = r.data
   } catch { /* spider not running */ }
 }
@@ -455,7 +523,7 @@ async function loadTaskHistory() {
     return
   }
   try {
-    const r = await axios.get(spiderApi('/tasks'), { timeout: 5000 })
+    const r = await axios.get(spiderApi('/tasks'), spiderRequestConfig({ timeout: 5000 }))
     taskHistory.value = r.data || []
   } catch { /* spider not running */ }
 }
@@ -464,11 +532,11 @@ function submitTempCredential() {
   const username = ptaUsername.value.trim()
   const password = ptaPassword.value
   if (!username || !password) {
-    ElMessage.warning('请先输入完整的临时 PTA 账号和密码，再点击提交')
+    uiMessage.warning('请先输入完整的临时 PTA 账号和密码，再点击提交')
     return
   }
   tempCredentialSubmitted.value = true
-  ElMessage.success(`已提交临时 PTA 账号：${username}`)
+  uiMessage.success(`已提交临时 PTA 账号：${username}`)
 }
 
 function clearTempCredential() {
@@ -479,9 +547,16 @@ function clearTempCredential() {
 
 async function triggerSync(mode) {
   const keyword = syncKeyword.value.trim() || currentKeyword.value
-  if (!selectedClassId.value || !keyword) return
+  if (!selectedClassId.value) {
+    uiMessage.warning('请先选择当前教学班')
+    return
+  }
+  if (!keyword) {
+    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+    return
+  }
   if (!keyword || !String(keyword).trim()) {
-    ElMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
     return
   }
   await probeSpiderHealth()
@@ -489,7 +564,7 @@ async function triggerSync(mode) {
   // 强制模式需二次确认
   if (forceMode.value) {
     try {
-      await ElMessageBox.confirm(
+      await messageBox.confirm(
         '强制更新将跳过冷却时间限制，频繁请求可能影响 PTA 平台。确定继续？',
         '强制更新确认', { confirmButtonText: '确定强制', cancelButtonText: '取消', type: 'warning' }
       )
@@ -501,28 +576,51 @@ async function triggerSync(mode) {
     const draftUsername = ptaUsername.value.trim()
     const draftPassword = ptaPassword.value
     if ((draftUsername && !draftPassword) || (!draftUsername && draftPassword)) {
-      ElMessage.warning('若要临时使用 PTA 账号同步，请同时填写账号和密码')
+      uiMessage.warning('若要临时使用 PTA 账号同步，请同时填写账号和密码')
       return
     }
 
     if ((draftUsername || draftPassword) && !tempCredentialSubmitted.value) {
-      ElMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
+      uiMessage.warning('若要使用临时 PTA 账号，请先点击"提交临时账号密码"')
       return
     }
     const username = tempCredentialSubmitted.value ? draftUsername : ''
     const password = tempCredentialSubmitted.value ? draftPassword : ''
+    if (
+      spiderAlive.value &&
+      plannedCredentialSource.value === 'cookie' &&
+      cookieStatus.value !== 'OK'
+    ) {
+      uiMessage.warning('当前没有有效 Cookie。请先填写 PTA 账号密码并点击“提交临时账号密码”，再开始同步以打开浏览器登录。')
+      return
+    }
 
-    const res = await triggerPtaSync(selectedClassId.value, {
+    const payload = {
       ptaKeyword: keyword,
       mode,
       force: forceMode.value,
       ...(username ? { ptaUsername: username, ptaPassword: password } : {})
-    })
+    }
+    let res
+    if (spiderAlive.value && plannedCredentialSource.value !== 'bound') {
+      res = await axios.post(spiderApi('/crawl'), {
+        keyword,
+        class_id: selectedClassId.value,
+        mode,
+        force: forceMode.value,
+        credential_source: plannedCredentialSource.value,
+        force_selenium_login: plannedCredentialSource.value === 'temporary',
+        headless: false,
+        ...(username ? { username, password } : {})
+      }, spiderRequestConfig({ timeout: 30000 }))
+    } else {
+      res = await triggerPtaSync(selectedClassId.value, payload)
+    }
     const r = res?.data || res
 
     // 冷却拦截
     if (r?.blocked) {
-      ElMessage.warning(getFriendlyResponseMessage(r, '同步任务暂时无法提交，请稍后重试'))
+      uiMessage.warning(getFriendlyResponseMessage(r, '同步任务暂时无法提交，请稍后重试'))
       syncLoading.value = ''
       return
     }
@@ -546,9 +644,9 @@ async function triggerSync(mode) {
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value
       }
     }
-    ElMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
+    uiMessage.success(`${r?.message || '任务已提交'}，本次使用${credentialSourceText(r?.credentialSource || r?.credential_source || plannedCredentialSource.value)}`)
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '同步任务提交失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '同步任务提交失败，请稍后重试'))
   } finally {
     syncLoading.value = ''
   }
@@ -559,15 +657,15 @@ function pollTaskStatus(taskId) {
   if (pollTimer) clearInterval(pollTimer)
   pollTimer = setInterval(async () => {
     try {
-      const r = await axios.get(spiderApi(`/status/${taskId}`), { timeout: 5000 })
+      const r = await axios.get(spiderApi(`/status/${taskId}`), spiderRequestConfig({ timeout: 5000 }))
       currentTask.value = r.data
       if (r.data.status === 'SUCCESS' || r.data.status === 'FAILED') {
         clearInterval(pollTimer)
         pollTimer = null
         loadTaskHistory()
         loadCooldown()
-        if (r.data.status === 'SUCCESS') ElMessage.success('数据同步完成')
-        else ElMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
+        if (r.data.status === 'SUCCESS') uiMessage.success('数据同步完成')
+        else uiMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
       }
     } catch { /* ignore */ }
   }, 3000)
@@ -582,12 +680,42 @@ async function submitCookieHandler() {
     cookieResult.value = { valid: d?.valid, message: getFriendlyResponseMessage(d, d?.valid ? 'Cookie 有效' : 'Cookie 无效，请重新提交') }
     if (d?.valid) {
       cookieStatus.value = 'OK'
-      ElMessage.success('Cookie 更新成功')
+      uiMessage.success('Cookie 更新成功')
     }
   } catch (e) {
     cookieResult.value = { valid: false, message: getFriendlyErrorMessage(e, 'Cookie 提交失败，请稍后重试') }
   } finally {
     cookieSubmitting.value = false
+  }
+}
+
+function parseLeetCodeSlugs() {
+  return leetcodeSlugText.value
+    .split(/[\n,，\s]+/)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
+async function crawlLeetCodeSlugs() {
+  const slugs = parseLeetCodeSlugs()
+  if (!slugs.length) {
+    uiMessage.warning('请先输入 LeetCode 题目 slug')
+    return
+  }
+
+  leetcodeCrawlLoading.value = true
+  try {
+    const res = await crawlLeetCodeProblems({ slugs, persist: true })
+    leetcodeCrawlItems.value = (res?.items || []).map(mapClawItemToPractice)
+    if (res?.failed?.length) {
+      uiMessage.warning(`部分题目抓取失败：${res.failed.map(item => item.slug || item.error).join('，')}`)
+    } else {
+      uiMessage.success('LeetCode 题目抓取入库完成')
+    }
+  } catch (error) {
+    uiMessage.error(error.friendlyMessage || error.message || 'LeetCode 题目抓取失败')
+  } finally {
+    leetcodeCrawlLoading.value = false
   }
 }
 

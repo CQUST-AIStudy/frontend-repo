@@ -1,126 +1,97 @@
 ﻿<template>
   <div class="ability-profile [padding:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
     <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
-      <el-skeleton :rows="10" animated />
+      <ui-skeleton :rows="10" animated />
     </div>
-    <el-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
+    <ui-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
     <template v-else>
       <!-- 概览卡片 -->
-      <el-row :gutter="16" class="overview-row [margin-bottom:20px]">
-        <el-col :span="6" v-for="item in overviewCards" :key="item.label">
-          <el-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.el-card__body]:[display:flex] [&_.el-card__body]:[align-items:center] [&_.el-card__body]:[gap:14px] [&_.el-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+      <ui-row :gutter="16" class="overview-row [margin-bottom:20px]">
+        <ui-col :span="6" v-for="item in overviewCards" :key="item.label">
+          <ui-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-icon [width:48px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
-              <el-icon :size="24" color="#fff"><component :is="item.icon" /></el-icon>
+              <ui-icon :size="24" color="#fff"><component :is="item.icon" /></ui-icon>
             </div>
             <div class="stat-info [flex:1]">
               <div class="stat-value [font-size:24px] [font-weight:600] [color:#202124] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
               <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </ui-card>
+        </ui-col>
+      </ui-row>
 
       <!-- 雷达图 + 趋势 -->
-      <el-row :gutter="16" class="[margin-top:16px]">
-        <el-col :span="12">
-          <el-card shadow="hover">
-            <template #header>
-              <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]">
-                <LucideIcon name="target" :size="18" />
-                能力雷达图
-              </span>
-            </template>
+      <ui-row :gutter="16" class="[margin-top:16px]">
+        <ui-col :span="12">
+          <ui-card shadow="hover">
+            <template #header><span class="card-title [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]">🎯 能力雷达图</span></template>
             <div ref="radarChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card shadow="hover">
+          </ui-card>
+        </ui-col>
+        <ui-col :span="12">
+          <ui-card shadow="hover">
             <template #header>
-              <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:600] [font-size:16px] [color:#202124]">
-                <LucideIcon name="trend" :size="18" />
-                学期趋势
-              </span>
-              <el-tag :type="trendTagType" size="small" class="[margin-left:8px]" effect="dark">{{ trendText }}</el-tag>
+              <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">📈 学期趋势</span>
+              <ui-tag :type="trendTagType" size="small" class="[margin-left:8px]" effect="dark">{{ trendText }}</ui-tag>
             </template>
             <div ref="trendChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </ui-card>
+        </ui-col>
+      </ui-row>
 
       <!-- AI学习建议 (全宽) -->
-      <el-card shadow="hover" class="feedback-card [margin-top:16px]">
+      <ui-card shadow="hover" class="feedback-card [margin-top:16px]">
         <template #header>
           <div class="[display:flex] [align-items:center] [justify-content:space-between]">
-            <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:600] [font-size:16px] [color:#202124]">
-              <LucideIcon name="bot" :size="18" />
-              AI 学习建议
-            </span>
-            <el-button type="primary" size="small" :loading="refreshingFeedback" @click="handleRefreshFeedback" round>
-              <span class="[display:inline-flex] [align-items:center] [gap:6px]">
-                <LucideIcon v-if="!refreshingFeedback" name="refresh" :size="14" />
-                {{ refreshingFeedback ? '分析中...' : '重新分析' }}
-              </span>
-            </el-button>
+            <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🤖 AI 学习建议</span>
+            <ui-button type="primary" size="small" :loading="refreshingFeedback" @click="handleRefreshFeedback" round>
+              {{ refreshingFeedback ? '分析中...' : '🔄 重新分析' }}
+            </ui-button>
           </div>
         </template>
         <div v-if="refreshingFeedback" class="feedback-loading [padding:10px_0]">
-          <el-skeleton :rows="4" animated />
+          <ui-skeleton :rows="4" animated />
           <div class="feedback-loading-tip [text-align:center] [color:#5f6368] [font-size:13px] [margin-top:12px]">正在调用 DeepSeek 分析学习数据，请稍候...</div>
         </div>
         <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff]" v-html="renderedFeedback"></div>
         <div v-else class="feedback-empty [padding:20px_0]">
-          <el-empty description="暂无AI分析，点击上方按钮生成" :image-size="80" />
+          <ui-empty description="暂无AI分析，点击上方按钮生成" :image-size="80" />
         </div>
-      </el-card>
+      </ui-card>
 
       <!-- 学习特征 -->
-      <el-card shadow="hover" class="[margin-top:16px]">
-        <template #header>
-          <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:600] [font-size:16px] [color:#202124]">
-            <LucideIcon name="tags" :size="18" />
-            学习特征
-          </span>
-        </template>
-        <el-row :gutter="16">
-          <el-col :span="8" v-for="p in profile.patterns" :key="p.tag">
+      <ui-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🏷️ 学习特征</span></template>
+        <ui-row :gutter="16">
+          <ui-col :span="8" v-for="p in profile.patterns" :key="p.tag">
             <div class="pattern-card [display:flex] [gap:12px] [padding:14px] [border-radius:12px] [border:1px_solid_#e8eaed] [transition:transform_.2s] [height:100%] hover:[transform:translateX(4px)]" :class="'pattern-' + patternClass(p.tag)">
-              <div class="pattern-icon [display:flex] [align-items:center] [justify-content:center] [width:32px] [height:32px] [color:#1a73e8] [flex-shrink:0] [margin-top:2px]">
-                <LucideIcon :name="patternIcon(p.tag)" :size="24" />
-              </div>
+              <div class="pattern-icon [font-size:28px] [flex-shrink:0] [margin-top:2px]">{{ patternEmoji(p.tag) }}</div>
               <div class="pattern-body">
                 <div class="pattern-tag-name [font-weight:500] [font-size:15px] [color:#202124]">{{ p.tag }}</div>
                 <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
-                <div class="pattern-evidence [display:flex] [align-items:center] [gap:5px] [font-size:12px] [color:#9aa0a6] [margin-top:4px]">
-                  <LucideIcon name="bar-chart" :size="13" />
-                  {{ p.evidence }}
-                </div>
+                <div class="pattern-evidence [font-size:12px] [color:#9aa0a6] [margin-top:4px]">📊 {{ p.evidence }}</div>
               </div>
             </div>
-          </el-col>
-        </el-row>
-      </el-card>
+          </ui-col>
+        </ui-row>
+      </ui-card>
 
       <!-- Top薄弱点 -->
-      <el-card shadow="hover" class="[margin-top:16px]">
-        <template #header>
-          <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:600] [font-size:16px] [color:#202124]">
-            <LucideIcon name="alert-triangle" :size="18" />
-            Top 薄弱点
-          </span>
-        </template>
-        <el-row :gutter="16">
-          <el-col :span="8" v-for="(w, idx) in profile.weaknesses" :key="w.experimentId">
+      <ui-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">⚠️ Top 薄弱点</span></template>
+        <ui-row :gutter="16">
+          <ui-col :span="8" v-for="(w, idx) in profile.weaknesses" :key="w.experimentId">
             <div class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]">
               <div class="weakness-rank [position:absolute] [top:-8px] [left:-8px] [width:28px] [height:28px] [background:#F56C6C] [color:#fff] [border-radius:50%] [display:flex] [align-items:center] [justify-content:center] [font-weight:700] [font-size:13px]">#{{ idx + 1 }}</div>
               <div class="weakness-header [display:flex] [align-items:center] [justify-content:space-between]">
                 <span class="weakness-name [font-weight:600] [font-size:14px]">{{ w.experimentName }}</span>
-                <el-tag type="danger" size="small" effect="plain">{{ w.dimension }}</el-tag>
+                <ui-tag type="danger" size="small" effect="plain">{{ w.dimension }}</ui-tag>
               </div>
-              <el-progress :percentage="Math.round(w.mastery)" :color="masteryColor(w.mastery)" :stroke-width="12" class="[margin:10px_0]" />
+              <ui-progress :percentage="Math.round(w.mastery)" :color="masteryColor(w.mastery)" :stroke-width="12" class="[margin:10px_0]" />
               <div class="weakness-evidence [display:flex] [gap:10px] [font-size:12px] [color:#909399] [flex-wrap:wrap]">
-                <span class="[display:inline-flex] [align-items:center] [gap:4px]"><LucideIcon name="pen" :size="12" />提交{{ w.evidence?.totalSubmissions }}次</span>
-                <span class="[display:inline-flex] [align-items:center] [gap:4px]"><LucideIcon name="check" :size="12" />AC{{ w.evidence?.acCount }}次</span>
-                <span class="[display:inline-flex] [align-items:center] [gap:4px]"><LucideIcon name="circle-x" :size="12" />编译错误{{ w.evidence?.compileErrors }}</span>
+                <span>📝 提交{{ w.evidence?.totalSubmissions }}次</span>
+                <span>✅ AC{{ w.evidence?.acCount }}次</span>
+                <span>❌ 编译错误{{ w.evidence?.compileErrors }}</span>
               </div>
               <div v-if="w.weakQuestions?.length" class="weakness-questions [margin-top:8px] [padding-top:8px] [border-top:1px_dashed_#fde2e2]">
                 <div class="q-title [font-size:12px] [color:#606266] [font-weight:600]">薄弱题目:</div>
@@ -129,27 +100,20 @@
                 </div>
               </div>
             </div>
-          </el-col>
-        </el-row>
-      </el-card>
+          </ui-col>
+        </ui-row>
+      </ui-card>
 
       <!-- 技能树 -->
-      <el-card shadow="hover" class="[margin-top:16px]">
-        <template #header>
-          <span class="card-title [display:inline-flex] [align-items:center] [gap:8px] [font-weight:600] [font-size:16px] [color:#202124]">
-            <LucideIcon name="tree" :size="18" />
-            技能树详情
-          </span>
-        </template>
+      <ui-card shadow="hover" class="[margin-top:16px]">
+        <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]">🌳 技能树详情</span></template>
         <div class="skill-tree [display:flex] [flex-direction:column] [gap:20px]">
           <div v-for="dim in profile.skillTree" :key="dim.dimension" class="tree-dimension [border:1px_solid_#eee] [border-radius:12px] [overflow:hidden] [transition:box-shadow_.2s] hover:[box-shadow:0_2px_12px_rgba(0,0,0,0.06)]">
             <div class="tree-dim-header [display:flex] [align-items:center] [justify-content:space-between] [padding:14px_18px] [background:#fafafa] [&.dim-good]:[background:linear-gradient(90deg,_#f0f9eb,_#fafafa)] [&.dim-medium]:[background:linear-gradient(90deg,_#fdf6ec,_#fafafa)] [&.dim-weak]:[background:linear-gradient(90deg,_#fef0f0,_#fafafa)]" :class="'dim-' + dim.level">
               <div class="dim-left [display:flex] [align-items:center] [gap:8px]">
-                <span class="dim-icon [display:inline-flex] [align-items:center] [color:#1a73e8]">
-                  <LucideIcon :name="dimIcon(dim.dimension)" :size="20" />
-                </span>
+                <span class="dim-icon [font-size:20px]">{{ dimEmoji(dim.dimension) }}</span>
                 <span class="dim-name [font-size:16px] [font-weight:700] [color:#303133]">{{ dim.dimension }}</span>
-                <el-tag :type="levelTagType(dim.level)" size="small" effect="dark">{{ dim.avgMastery }}分</el-tag>
+                <ui-tag :type="levelTagType(dim.level)" size="small" effect="dark">{{ dim.avgMastery }}分</ui-tag>
               </div>
               <span class="dim-desc [font-size:12px] [color:#909399]">{{ dim.description }}</span>
             </div>
@@ -172,20 +136,19 @@
             </div>
           </div>
         </div>
-      </el-card>
+      </ui-card>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import * as echarts from 'echarts'
 import axios from 'axios'
-import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { DataAnalysis, Finished, List as ListIcon, TrendCharts } from '@/components/ui/icons'
+import { message as uiMessage } from '@/services/feedback'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import LucideIcon from '../../components/LucideIcon.vue'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
@@ -252,13 +215,13 @@ function patternClass(tag) {
   if (tag === '高波动型') return 'warn'
   return 'bad'
 }
-function patternIcon(tag) {
-  const map = { '稳定进步': 'trend', '表现均衡': 'scale', '高波动型': 'bar-chart', '高重做型': 'refresh', '编码基础薄弱': 'wrench' }
-  return map[tag] || 'clipboard'
+function patternEmoji(tag) {
+  const map = { '稳定进步': '📈', '表现均衡': '⚖️', '高波动型': '🎢', '高重做型': '🔄', '编码基础薄弱': '🔧' }
+  return map[tag] || '📋'
 }
-function dimIcon(dim) {
-  const map = { '线性表': 'ruler', '栈与队列': 'library', '树': 'tree', '图': 'network', '哈希': 'hash', '综合': 'target' }
-  return map[dim] || 'package'
+function dimEmoji(dim) {
+  const map = { '线性表': '📏', '栈与队列': '📚', '树': '🌲', '图': '🕸️', '哈希': '#️⃣', '综合': '🎯' }
+  return map[dim] || '📦'
 }
 
 async function handleRefreshFeedback() {
@@ -269,9 +232,9 @@ async function handleRefreshFeedback() {
     if (studentId) url = `${API_BASE}/api/profile/feedback/refresh/${studentId}`
     const res = await axios.post(url, null, { withCredentials: true })
     const data = res.data || res
-    if (data.error) { ElMessage.error(getFriendlyResponseMessage(data, '刷新失败，请稍后重试')) }
-    else if (data.feedback) { profile.value.feedback = data.feedback; ElMessage.success('AI分析已更新') }
-  } catch (e) { ElMessage.error(getFriendlyErrorMessage(e, '刷新失败，请稍后重试')) }
+    if (data.error) { uiMessage.error(getFriendlyResponseMessage(data, '刷新失败，请稍后重试')) }
+    else if (data.feedback) { profile.value.feedback = data.feedback; uiMessage.success('AI分析已更新') }
+  } catch (e) { uiMessage.error(getFriendlyErrorMessage(e, '刷新失败，请稍后重试')) }
   finally { refreshingFeedback.value = false }
 }
 

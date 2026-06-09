@@ -1,8 +1,8 @@
 <template>
   <div class="min-w-0">
-    <page-header title="系部分析" description="基于真实教学数据的系部统计分析" />
+    <UiPageHeader title="系部分析" description="基于真实教学数据的系部统计分析" />
 
-    <div class="flex flex-col gap-5" v-loading="pageLoading">
+    <div class="flex flex-col gap-5" :aria-busy="pageLoading">
       <!-- 概览卡片 -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
@@ -56,9 +56,9 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
         <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">低完成率实验预警</span>
-          <button @click="exportReport" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">导出报告</button>
+          <UiButton @click="exportReport" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">导出报告</UiButton>
         </div>
-        <table class="w-full text-left text-[13px]">
+        <UiTable class="w-full text-left text-[13px]">
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-xl">实验名称</th>
@@ -88,17 +88,16 @@
               <td colspan="5" class="py-12 text-center text-[#aeaeb2] text-sm">暂无预警数据</td>
             </tr>
           </tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
-import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
-import PageHeader from '../../components/PageHeader.vue'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import * as echarts from 'echarts'
 import api from '../../api'
 
@@ -165,7 +164,7 @@ const loadData = async () => {
     initTrendChart()
   } catch (e) {
     logger.error('加载系部分析数据失败:', e)
-    ElMessage.error('加载数据失败')
+    uiMessage.error('加载数据失败')
   } finally {
     pageLoading.value = false
   }
@@ -281,7 +280,7 @@ const exportReport = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  ElMessage.success('报告导出成功')
+  uiMessage.success('报告导出成功')
 }
 
 onMounted(() => {

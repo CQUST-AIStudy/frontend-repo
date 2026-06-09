@@ -1,12 +1,12 @@
 <template>
   <div class="h-full px-5 pb-5">
-    <page-header
+    <UiPageHeader
         class="my-page-header p-5"
       title="班级分析"
       :description="`${className || '班级'} - 学习情况分析`"
     >
-      <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回列表</button>
-    </page-header>
+      <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回列表</UiButton>
+    </UiPageHeader>
 
     <div v-if="loading" class="flex justify-center items-center min-h-[400px] w-full">
       <div class="w-full space-y-4">
@@ -25,9 +25,9 @@
 
     <div v-else-if="error" class="flex justify-center items-center min-h-[400px] w-full">
       <div class="flex flex-col items-center gap-4">
-        <LucideIcon name="alert-triangle" class="text-[#ff9500]" :size="48" />
+        <div class="text-5xl">⚠️</div>
         <p class="text-[15px] text-[#6e6e73]">{{ error }}</p>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="loadClassData">重试</button>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="loadClassData">重试</UiButton>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
           <div class="flex justify-between items-center font-semibold gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
             <span>优秀学生</span>
           </div>
-          <table class="w-full text-left text-[13px]">
+          <UiTable class="w-full text-left text-[13px]">
             <thead><tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">学号</th>
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">姓名</th>
@@ -65,7 +65,7 @@
               <td class="py-3 px-3">{{ student.name }}</td>
               <td class="py-3 px-3">{{ student.averageScore }}</td>
             </tr></tbody>
-          </table>
+          </UiTable>
         </div>
 
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 h-full">
@@ -85,15 +85,15 @@
         <div class="flex justify-between items-center font-semibold gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span>学生实验报告</span>
           <div class="flex gap-2 items-center">
-            <select v-model="selectedExperiment" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[220px]">
-              <option value="" disabled>选择实验</option>
-              <option
+            <UiSelect v-model="selectedExperiment" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[220px]">
+              <UiOption value="" disabled>选择实验</UiOption>
+              <UiOption
                 v-for="item in experimentList"
                 :key="item.id"
                 :value="item.id"
-              >{{ item.name }}</option>
-            </select>
-            <input
+              >{{ item.name }}</UiOption>
+            </UiSelect>
+            <UiInput
               v-model="studentSearchText"
               placeholder="搜索学生"
               class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[200px] ml-2.5"
@@ -102,11 +102,11 @@
         </div>
 
         <div v-if="!studentList.length" class="py-10 flex flex-col items-center justify-center">
-          <LucideIcon name="clipboard" class="mb-3 text-[#c6ccd6]" :size="46" />
+          <div class="text-5xl mb-3">📋</div>
           <p class="text-[15px] text-[#6e6e73]">暂无学生数据</p>
         </div>
 
-        <table v-else class="w-full text-left text-[13px]">
+        <UiTable v-else class="w-full text-left text-[13px]">
           <thead><tr class="border-b border-black/[0.06]">
             <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">学号</th>
             <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">姓名</th>
@@ -122,33 +122,31 @@
             <td class="py-3 px-3">{{ row.submitTime }}</td>
             <td class="py-3 px-3">{{ row.score || '未评分' }}</td>
             <td class="py-3 px-3">
-              <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewReport(row)">查看报告</button>
-              <button class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none ml-3" @click="viewSubmission(row)">评阅</button>
+              <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewReport(row)">查看报告</UiButton>
+              <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none ml-3" @click="viewSubmission(row)">评阅</UiButton>
             </td>
           </tr></tbody>
-        </table>
+        </UiTable>
       </div>
     </div>
 
     <div v-else class="flex justify-center items-center min-h-[400px] w-full">
       <div class="flex flex-col items-center gap-4">
-        <LucideIcon name="inbox" class="text-[#c6ccd6]" :size="48" />
+        <div class="text-5xl">📭</div>
         <p class="text-[15px] text-[#6e6e73]">未找到班级数据</p>
-        <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回班级列表</button>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回班级列表</UiButton>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import logger from '@/utils/logger'
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import api from '../../api'
-import PageHeader from '../../components/PageHeader.vue'
-import LucideIcon from '../../components/LucideIcon.vue'
-import { ElMessage } from 'element-plus'
+import api from '@/api'
+import { useRoute, useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,6 +160,18 @@ const completionChartRef = ref(null)
 const scoreChartRef = ref(null)
 let completionChart = null
 let scoreChart = null
+
+const handleResize = () => {
+  completionChart?.resize()
+  scoreChart?.resize()
+}
+
+const disposeCharts = () => {
+  completionChart?.dispose()
+  completionChart = null
+  scoreChart?.dispose()
+  scoreChart = null
+}
 
 // 实验列表
 const experimentList = ref([])
@@ -236,7 +246,7 @@ const loadClassData = async () => {
   } catch (err) {
     error.value = '加载班级分析数据失败'
     logger.error('加载班级分析数据失败:', err)
-    ElMessage.error('获取班级分析数据失败')
+    uiMessage.error('获取班级分析数据失败')
   } finally {
     loading.value = false
   }
@@ -253,6 +263,8 @@ const initCharts = () => {
     logger.error('图表DOM引用或数据不存在，无法初始化图表')
     return
   }
+
+  disposeCharts()
 
   // 实验完成度图表
   try {
@@ -375,12 +387,6 @@ const initCharts = () => {
   } catch (error) {
     logger.error('初始化成绩分布图表失败', error)
   }
-
-  // 窗口大小变化时调整图表大小
-  window.addEventListener('resize', () => {
-    if (completionChart) completionChart.resize()
-    if (scoreChart) scoreChart.resize()
-  })
 }
 
 // 返回班级列表
@@ -458,6 +464,8 @@ watch(selectedExperiment, () => {
 })
 
 onMounted(() => {
+  window.addEventListener('resize', handleResize)
+
   loadClassData()
 
   // 加载实验列表
@@ -471,5 +479,10 @@ onMounted(() => {
   }).catch(err => {
     logger.error('加载学生提交列表失败:', err)
   })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  disposeCharts()
 })
 </script>

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { message as uiMessage } from '@/services/feedback'
 import {
   clearTapAuth,
   getTapToken,
@@ -161,7 +161,7 @@ tapClient.interceptors.response.use(
         // fall through to clear auth and surface the original 401
       }
       clearTapAuth()
-      ElMessage.warning('教辅平台登录已过期，请重新登录')
+      uiMessage.warning('教辅平台登录已过期，请重新登录')
     } else if (status === 401 && isAuthRequest) {
       clearTapAuth()
     }
@@ -606,6 +606,15 @@ export function getStudentAnalyticsOverview(studentId) {
 
 export function getStudentExperimentDetail(studentId, experimentId) {
   return tapClient.get(`/api/analytics/student/${studentId}/experiments/${experimentId}`)
+}
+
+// ========== Ability Profile ==========
+export function getClassProfile() {
+  return tapClient.get('/api/profile/class', { timeout: 30000 })
+}
+
+export function getStudentProfile(studentId) {
+  return tapClient.get(`/api/profile/student/${encodeURIComponent(studentId)}`, { timeout: 30000 })
 }
 
 export function getPtaCookieStatus() {

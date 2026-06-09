@@ -1,66 +1,66 @@
 <template>
-  <div class="system-log [height:100%]">
-    <page-header
-        class="my-page-header [padding:20px]"
+  <div class="system-log [min-width:0] [min-height:100%]">
+    <UiPageHeader
+        class="my-page-header [margin-bottom:20px] [min-height:68px] [padding:0_20px] max-[768px]:[margin-bottom:16px] max-[768px]:[min-height:56px] max-[768px]:[padding:0_16px]"
       title="系统日志"
       description="系统操作和事件记录"
     />
 
     <div class="system-log-content [display:flex] [flex-direction:column] [gap:20px]">
-      <el-card>
+      <ui-card class="[margin-bottom:20px]">
         <template #header>
-          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+          <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:16px] max-[900px]:[align-items:flex-start] max-[900px]:[flex-direction:column]">
             <div class="left">
               <span>日志列表</span>
             </div>
-            <div class="right [display:flex] [gap:10px] [align-items:center]">
-              <el-input
+            <div class="right [display:flex] [gap:12px] [align-items:center] [justify-content:flex-end] [flex-wrap:nowrap] max-[900px]:[width:100%] max-[900px]:[justify-content:flex-start] max-[900px]:[flex-wrap:wrap]">
+              <ui-input
                 placeholder="搜索日志内容"
                 v-model="searchKeyword"
-                class="search-input [width:200px] [width:250px]"
+                class="search-input log-search-input max-[900px]:[width:100%]"
                 clearable
               >
                 <template #prefix>
-                  <el-icon><Search /></el-icon>
+                  <ui-icon><Search /></ui-icon>
                 </template>
-              </el-input>
-              <el-select v-model="logLevel" placeholder="日志级别" clearable class="level-select [width:120px]">
-                <el-option label="全部" value="" />
-                <el-option label="信息" value="INFO" />
-                <el-option label="警告" value="WARNING" />
-                <el-option label="错误" value="ERROR" />
-              </el-select>
-              <el-button type="danger" @click="clearLogs">清空日志</el-button>
-              <el-button type="primary" @click="exportLogs">导出日志</el-button>
+              </ui-input>
+              <ui-select v-model="logLevel" placeholder="日志级别" clearable class="level-select [width:160px] max-[900px]:[width:100%]">
+                <ui-option label="全部" value="" />
+                <ui-option label="信息" value="INFO" />
+                <ui-option label="警告" value="WARNING" />
+                <ui-option label="错误" value="ERROR" />
+              </ui-select>
+              <ui-button type="danger" class="[min-width:96px] [padding:0_16px] [white-space:nowrap]" @click="clearLogs">清空日志</ui-button>
+              <ui-button type="primary" class="[min-width:96px] [padding:0_16px] [white-space:nowrap]" @click="exportLogs">导出日志</ui-button>
             </div>
           </div>
         </template>
 
-        <el-table :data="filteredLogs" v-loading="loading" border class="[width:100%]">
-          <el-table-column prop="timestamp" label="时间" width="180" sortable />
-          <el-table-column label="级别" width="100">
+        <ui-table :data="filteredLogs" :aria-busy="loading" border class="[width:100%]">
+          <ui-table-column prop="timestamp" label="时间" width="180" sortable />
+          <ui-table-column label="级别" width="100">
             <template #default="scope">
-              <el-tag
+              <ui-tag
                 :type="getLogLevelType(scope.row.level)"
                 size="small"
               >
                 {{ scope.row.level }}
-              </el-tag>
+              </ui-tag>
             </template>
-          </el-table-column>
-          <el-table-column prop="category" label="分类" width="120" />
-          <el-table-column prop="message" label="消息内容" min-width="400" show-overflow-tooltip />
-          <el-table-column prop="user" label="相关用户" width="120" />
-          <el-table-column prop="ip" label="IP地址" width="140" />
-          <el-table-column label="操作" width="120" fixed="right">
+          </ui-table-column>
+          <ui-table-column prop="category" label="分类" width="120" />
+          <ui-table-column prop="message" label="消息内容" min-width="400" show-overflow-tooltip />
+          <ui-table-column prop="user" label="相关用户" width="120" />
+          <ui-table-column prop="ip" label="IP地址" width="140" />
+          <ui-table-column label="操作" width="120" fixed="right">
             <template #default="scope">
-              <el-button type="primary" link @click="viewLogDetail(scope.row)">详情</el-button>
+              <ui-button type="primary" link @click="viewLogDetail(scope.row)">详情</ui-button>
             </template>
-          </el-table-column>
-        </el-table>
+          </ui-table-column>
+        </ui-table>
 
         <div class="pagination-container [margin-top:20px] [display:flex] [justify-content:center] [overflow-x:auto] [margin-top:10px] [text-align:right] [justify-content:flex-end] [margin-top:16px]">
-          <el-pagination
+          <ui-pagination
             background
             layout="total, sizes, prev, pager, next, jumper"
             :total="total"
@@ -70,280 +70,177 @@
             @current-change="handleCurrentChange"
           />
         </div>
-      </el-card>
+      </ui-card>
     </div>
 
     <!-- 日志详情对话框 -->
-    <el-dialog v-model="logDetailVisible" title="日志详情" width="60%">
-      <el-descriptions :column="1" border>
-        <el-descriptions-item label="时间">{{ selectedLog.timestamp }}</el-descriptions-item>
-        <el-descriptions-item label="级别">
-          <el-tag :type="getLogLevelType(selectedLog.level)">{{ selectedLog.level }}</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="分类">{{ selectedLog.category }}</el-descriptions-item>
-        <el-descriptions-item label="消息内容">{{ selectedLog.message }}</el-descriptions-item>
-        <el-descriptions-item label="相关用户">{{ selectedLog.user }}</el-descriptions-item>
-        <el-descriptions-item label="IP地址">{{ selectedLog.ip }}</el-descriptions-item>
-        <el-descriptions-item label="浏览器">{{ selectedLog.userAgent || '未知' }}</el-descriptions-item>
-        <el-descriptions-item label="完整请求地址" v-if="selectedLog.url">
+    <ui-dialog v-model="logDetailVisible" title="日志详情" width="60%">
+      <ui-descriptions :column="1" border>
+        <ui-descriptions-item label="时间">{{ selectedLog.timestamp }}</ui-descriptions-item>
+        <ui-descriptions-item label="级别">
+          <ui-tag :type="getLogLevelType(selectedLog.level)">{{ selectedLog.level }}</ui-tag>
+        </ui-descriptions-item>
+        <ui-descriptions-item label="分类">{{ selectedLog.category }}</ui-descriptions-item>
+        <ui-descriptions-item label="消息内容">{{ selectedLog.message }}</ui-descriptions-item>
+        <ui-descriptions-item label="相关用户">{{ selectedLog.user }}</ui-descriptions-item>
+        <ui-descriptions-item label="IP地址">{{ selectedLog.ip }}</ui-descriptions-item>
+        <ui-descriptions-item label="浏览器">{{ selectedLog.userAgent || '未知' }}</ui-descriptions-item>
+        <ui-descriptions-item label="完整请求地址" v-if="selectedLog.url">
           {{ selectedLog.url }}
-        </el-descriptions-item>
-        <el-descriptions-item label="请求参数" v-if="selectedLog.params">
+        </ui-descriptions-item>
+        <ui-descriptions-item label="请求参数" v-if="selectedLog.params">
           <pre>{{ selectedLog.params }}</pre>
-        </el-descriptions-item>
-        <el-descriptions-item label="错误堆栈" v-if="selectedLog.stackTrace">
-          <el-collapse>
-            <el-collapse-item title="查看错误堆栈信息">
+        </ui-descriptions-item>
+        <ui-descriptions-item label="错误堆栈" v-if="selectedLog.stackTrace">
+          <ui-collapse>
+            <ui-collapse-item title="查看错误堆栈信息">
               <pre class="stack-trace [font-family:monospace] [white-space:pre-wrap] [background-color:#f5f5f5] [padding:10px] [border-radius:4px] [color:#666] [font-size:12px] [max-height:300px] [overflow-y:auto]">{{ selectedLog.stackTrace }}</pre>
-            </el-collapse-item>
-          </el-collapse>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
+            </ui-collapse-item>
+          </ui-collapse>
+        </ui-descriptions-item>
+      </ui-descriptions>
+    </ui-dialog>
 
     <!-- 清空日志确认对话框 -->
-    <el-dialog v-model="clearConfirmVisible" title="警告" width="30%">
+    <ui-dialog v-model="clearConfirmVisible" title="警告" width="30%">
       <span>确定要清空所有日志吗？此操作不可撤销!</span>
       <template #footer>
         <div class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <el-button @click="clearConfirmVisible = false">取消</el-button>
-          <el-button type="danger" @click="confirmClearLogs">确定</el-button>
+          <ui-button @click="clearConfirmVisible = false">取消</ui-button>
+          <ui-button type="danger" @click="confirmClearLogs">确定</ui-button>
         </div>
       </template>
-    </el-dialog>
+    </ui-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
-import PageHeader from '../../components/PageHeader.vue'
+import { onMounted, ref, watch } from 'vue'
+import logger from '@/utils/logger'
+import { message as uiMessage } from '@/services/feedback'
+import { Search } from '@/components/ui/icons'
+import api from '../../api'
 
-// 数据加载状态
 const loading = ref(false)
-
-// 搜索和筛选
 const searchKeyword = ref('')
 const logLevel = ref('')
-
-// 分页参数
 const total = ref(0)
 const pageSize = ref(10)
 const currentPage = ref(1)
-
-// 对话框控制
 const logDetailVisible = ref(false)
 const clearConfirmVisible = ref(false)
 const selectedLog = ref({})
+const logs = ref([])
 
-// 模拟日志数据
-const logs = ref([
-  {
-    id: 1,
-    timestamp: '2023-07-01 10:23:45',
-    level: 'INFO',
-    category: '用户管理',
-    message: '用户登录成功',
-    user: '王管理',
-    ip: '192.168.0.1',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    url: '/api/auth/login'
-  },
-  {
-    id: 2,
-    timestamp: '2023-07-01 09:18:22',
-    level: 'WARNING',
-    category: '权限控制',
-    message: '用户尝试访问未授权页面: /admin/system-log',
-    user: '张三',
-    ip: '192.168.0.2',
-    url: '/admin/system-log'
-  },
-  {
-    id: 3,
-    timestamp: '2023-07-01 08:45:12',
-    level: 'ERROR',
-    category: '数据库',
-    message: '数据库连接失败',
-    user: '系统',
-    ip: '127.0.0.1',
-    stackTrace: `Error: Connection refused at Database.connect (db.js:42:23)
-at async Server.start (server.js:28:5)
-at async bootstrap (app.js:15:3)`
-  },
-  {
-    id: 4,
-    timestamp: '2023-06-30 22:34:56',
-    level: 'INFO',
-    category: '系统维护',
-    message: '系统备份完成',
-    user: '系统',
-    ip: '127.0.0.1'
-  },
-  {
-    id: 5,
-    timestamp: '2023-06-30 16:28:41',
-    level: 'INFO',
-    category: '用户管理',
-    message: '新用户注册: user123',
-    user: '李四',
-    ip: '192.168.0.3'
-  },
-  {
-    id: 6,
-    timestamp: '2023-06-30 14:12:39',
-    level: 'WARNING',
-    category: '安全',
-    message: '多次失败的登录尝试',
-    user: 'unknown',
-    ip: '203.0.113.42'
-  },
-  {
-    id: 7,
-    timestamp: '2023-06-30 11:35:21',
-    level: 'ERROR',
-    category: 'API',
-    message: '外部API调用超时: 支付服务',
-    user: '系统',
-    ip: '127.0.0.1',
-    url: '/api/payment/process',
-    params: JSON.stringify({orderId: 'ORD-123456', amount: 199.99}, null, 2)
-  },
-  {
-    id: 8,
-    timestamp: '2023-06-30 10:03:15',
-    level: 'INFO',
-    category: '实验管理',
-    message: '创建了新实验: 数据结构基础',
-    user: '王教师',
-    ip: '192.168.0.4'
-  },
-  {
-    id: 9,
-    timestamp: '2023-06-29 16:42:33',
-    level: 'INFO',
-    category: '用户管理',
-    message: '修改用户信息: zhangsan',
-    user: '王管理',
-    ip: '192.168.0.1'
-  },
-  {
-    id: 10,
-    timestamp: '2023-06-29 15:12:05',
-    level: 'ERROR',
-    category: '文件系统',
-    message: '文件上传失败: 磁盘空间不足',
-    user: '张三',
-    ip: '192.168.0.2',
-    stackTrace: `Error: No space left on device at FileSystem.write (fs.js:75:11)
-at async UploadService.saveFile (upload.js:42:8)
-at async Router.handleUpload (routes.js:28:12)`
-  }
-])
+const filteredLogs = logs
 
-// 过滤日志
-const filteredLogs = computed(() => {
-  let result = logs.value
-
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(log =>
-      log.message.toLowerCase().includes(keyword) ||
-      log.user.toLowerCase().includes(keyword)
-    )
-  }
-
-  if (logLevel.value) {
-    result = result.filter(log => log.level === logLevel.value)
-  }
-
-  // 简单的客户端分页
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return result.slice(start, end)
-})
-
-// 添加一个新的计算属性来计算总数
-const filteredTotal = computed(() => {
-  let result = logs.value
-
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(log =>
-      log.message.toLowerCase().includes(keyword) ||
-      log.user.toLowerCase().includes(keyword)
-    )
-  }
-
-  if (logLevel.value) {
-    result = result.filter(log => log.level === logLevel.value)
-  }
-
-  return result.length
-})
-
-// 监听过滤条件变化更新总数
-watch([searchKeyword, logLevel], () => {
-  total.value = filteredTotal.value
-})
-
-// 获取日志级别类型
 const getLogLevelType = (level) => {
   const typeMap = {
-    'INFO': 'info',
-    'WARNING': 'warning',
-    'ERROR': 'danger'
+    INFO: 'info',
+    WARNING: 'warning',
+    ERROR: 'danger'
   }
   return typeMap[level] || 'info'
 }
 
-// 查看日志详情
+const loadLogs = async () => {
+  loading.value = true
+  try {
+    const response = await api.getSystemLogs({
+      keyword: searchKeyword.value,
+      level: logLevel.value,
+      page: currentPage.value,
+      pageSize: pageSize.value
+    })
+    logs.value = Array.isArray(response?.data) ? response.data : []
+    total.value = Number(response?.total || logs.value.length)
+  } catch (error) {
+    logs.value = []
+    total.value = 0
+    logger.error('加载系统日志失败:', error)
+    uiMessage.error('加载系统日志失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 const viewLogDetail = (log) => {
   selectedLog.value = { ...log }
   logDetailVisible.value = true
 }
 
-// 清空日志
 const clearLogs = () => {
   clearConfirmVisible.value = true
 }
 
-// 确认清空日志
-const confirmClearLogs = () => {
-  // 在实际环境中，这里应该调用API
-  logs.value = []
-  clearConfirmVisible.value = false
-  ElMessage.success('日志已清空')
+const confirmClearLogs = async () => {
+  try {
+    await api.clearSystemLogs()
+    clearConfirmVisible.value = false
+    currentPage.value = 1
+    await loadLogs()
+    uiMessage.success('日志已清空')
+  } catch (error) {
+    logger.error('清空系统日志失败:', error)
+    uiMessage.error('清空系统日志失败')
+  }
 }
 
-// 导出日志
-const exportLogs = () => {
-  ElMessage.success('日志导出功能已触发（演示）')
-  // 实际实现可能涉及后端API调用或前端导出逻辑
+const exportLogs = async () => {
+  try {
+    const blob = await api.exportSystemLogs({
+      keyword: searchKeyword.value,
+      level: logLevel.value
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'system-logs.csv'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    logger.error('导出系统日志失败:', error)
+    uiMessage.error('导出系统日志失败')
+  }
 }
 
-// 页码改变
 const handleCurrentChange = (val) => {
   currentPage.value = val
+  loadLogs()
 }
 
-// 每页条数改变
 const handleSizeChange = (val) => {
   pageSize.value = val
   currentPage.value = 1
+  loadLogs()
 }
 
-// 组件挂载时加载数据
-onMounted(() => {
-  loading.value = true
-  // 模拟API请求延迟
-  setTimeout(() => {
-    // 使用计算属性获取总数，而不是直接使用logs.value.length
-    total.value = filteredTotal.value
-    loading.value = false
-  }, 500)
+watch([searchKeyword, logLevel], () => {
+  currentPage.value = 1
+  loadLogs()
 })
+
+onMounted(loadLogs)
 </script>
+
+<style scoped>
+.log-search-input {
+  width: 220px;
+  transition: width 0.2s ease;
+}
+
+.log-search-input:focus-within {
+  width: 360px;
+}
+
+@media (max-width: 900px) {
+  .log-search-input,
+  .log-search-input:focus-within {
+    width: 100%;
+  }
+}
+</style>
 
 

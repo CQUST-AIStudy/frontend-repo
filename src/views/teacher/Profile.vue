@@ -1,6 +1,6 @@
 <template>
   <div class="h-full">
-    <page-header class="p-5" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
+    <UiPageHeader class="p-5" title="个人信息" description="查看并维护教师账户信息、登录密码和 PTA 账号绑定。" />
 
     <div class="grid grid-cols-[1fr_2fr] gap-5 max-[768px]:grid-cols-1 px-5">
       <!-- Left column: Profile card -->
@@ -56,19 +56,19 @@
 
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 账号</label>
-            <input v-model="ptaForm.ptaUsername" type="text" placeholder="请输入教师自己的 PTA 登录账号" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="ptaForm.ptaUsername" type="text" placeholder="请输入教师自己的 PTA 登录账号" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
           </div>
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 密码</label>
-            <input v-model="ptaForm.ptaPassword" type="password" placeholder="请输入 PTA 登录密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="ptaForm.ptaPassword" type="password" placeholder="请输入 PTA 登录密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
           </div>
           <div class="flex gap-3">
-            <button :disabled="savingPtaCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="savePtaCredential">
+            <UiButton :disabled="savingPtaCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="savePtaCredential">
               {{ savingPtaCredential ? '保存中...' : '保存绑定' }}
-            </button>
-            <button :disabled="!hasBoundCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="clearPtaCredential">
+            </UiButton>
+            <UiButton :disabled="!hasBoundCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="clearPtaCredential">
               解除绑定
-            </button>
+            </UiButton>
           </div>
         </div>
 
@@ -80,26 +80,26 @@
 
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">当前密码</label>
-            <input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             <p v-if="passwordErrors.oldPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.oldPassword }}</p>
           </div>
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">新密码</label>
-            <input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             <p v-if="passwordErrors.newPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.newPassword }}</p>
           </div>
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">确认新密码</label>
-            <input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+            <UiInput v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
             <p v-if="passwordErrors.confirmPassword" class="text-[12px] text-[#ff3b30] mt-1.5">{{ passwordErrors.confirmPassword }}</p>
           </div>
           <div class="flex gap-3">
-            <button :disabled="changingPassword" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="changePassword">
+            <UiButton :disabled="changingPassword" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="changePassword">
               {{ changingPassword ? '修改中...' : '修改密码' }}
-            </button>
-            <button class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordForm">
+            </UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordForm">
               重置
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -108,12 +108,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import axios from 'axios'
 import { getUserInfo } from '../../constants/auth'
-import PageHeader from '../../components/PageHeader.vue'
 import { API_BASE_URL_WITH_SLASH } from '../../config/runtime'
 import {
   clearTeacherPtaCredentials,
@@ -192,7 +190,7 @@ async function savePtaCredential() {
   const username = ptaForm.ptaUsername.trim()
   const password = ptaForm.ptaPassword
   if (!username || !password) {
-    ElMessage.warning('请输入完整的 PTA 账号和密码')
+    uiMessage.warning('请输入完整的 PTA 账号和密码')
     return
   }
 
@@ -207,9 +205,9 @@ async function savePtaCredential() {
     ptaCredential.bound = !!data?.bound
     ptaCredential.lastUpdated = data?.lastUpdated || ''
     ptaForm.ptaPassword = ''
-    ElMessage.success('PTA 账号绑定已保存')
+    uiMessage.success('PTA 账号绑定已保存')
   } catch (error) {
-    ElMessage.error(getFriendlyErrorMessage(error, 'PTA 账号绑定保存失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, 'PTA 账号绑定保存失败，请稍后重试'))
   } finally {
     savingPtaCredential.value = false
   }
@@ -217,7 +215,7 @@ async function savePtaCredential() {
 
 async function clearPtaCredential() {
   try {
-    await ElMessageBox.confirm(
+    await messageBox.confirm(
       '解除绑定后，系统将不再自动使用此 PTA 账号进行同步。是否继续？',
       '解除 PTA 绑定',
       {
@@ -238,9 +236,9 @@ async function clearPtaCredential() {
     ptaCredential.lastUpdated = ''
     ptaForm.ptaUsername = ''
     ptaForm.ptaPassword = ''
-    ElMessage.success('PTA 账号绑定已解除')
+    uiMessage.success('PTA 账号绑定已解除')
   } catch (error) {
-    ElMessage.error(getFriendlyErrorMessage(error, '解除 PTA 绑定失败，请稍后重试'))
+    uiMessage.error(getFriendlyErrorMessage(error, '解除 PTA 绑定失败，请稍后重试'))
   } finally {
     savingPtaCredential.value = false
   }
@@ -256,13 +254,13 @@ const changePassword = async () => {
     })
     const data = res.data || res
     if (data.success) {
-      ElMessage.success('密码修改成功')
+      uiMessage.success('密码修改成功')
       resetPasswordForm()
     } else {
-      ElMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
+      uiMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))
     }
   } catch (e) {
-    ElMessage.error(getFriendlyErrorMessage(e, '密码修改失败，请检查当前密码后重试'))
+    uiMessage.error(getFriendlyErrorMessage(e, '密码修改失败，请检查当前密码后重试'))
   } finally {
     changingPassword.value = false
   }
@@ -279,4 +277,3 @@ onMounted(() => {
   loadPtaCredential()
 })
 </script>
-

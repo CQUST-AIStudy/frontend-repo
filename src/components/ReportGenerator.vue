@@ -1,44 +1,44 @@
 <template>
   <div class="report-generator [width:100%] [margin:0_auto]">
-    <el-card class="report-card [margin-bottom:20px]">
+    <ui-card class="report-card [margin-bottom:20px]">
       <template #header>
         <div class="card-header [display:flex] [align-items:center] [gap:12px] [justify-content:space-between] [align-items:flex-start] [gap:16px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
           <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
             <span>{{ isEditMode ? '编辑报告' : '预览报告' }}</span>
-            <el-button v-if="isEditMode" type="success" @click="saveEdits">保存修改</el-button>
+            <ui-button v-if="isEditMode" type="success" @click="saveEdits">保存修改</ui-button>
           </div>
           <div class="header-right [display:flex] [align-items:center] [gap:12px] [justify-content:flex-end] [min-width:0] [gap:14px]">
-            <el-button v-if="!isEditMode" type="primary" @click="toggleEditMode">编辑报告</el-button>
-            <el-button v-else @click="cancelEdits">取消编辑</el-button>
+            <ui-button v-if="!isEditMode" type="primary" @click="toggleEditMode">编辑报告</ui-button>
+            <ui-button v-else @click="cancelEdits">取消编辑</ui-button>
           </div>
         </div>
       </template>
 
       <div v-if="isEditMode" class="edit-mode [padding:20px]">
-        <el-form :model="editingData" label-position="top">
-          <el-divider content-position="left">基本信息</el-divider>
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="课程名称">
-                <el-input v-model="editingData.courseName" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="实验项目">
-                <el-input v-model="editingData.experimentName" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="机房名称">
-                <el-input v-model="editingData.labName" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+        <ui-form :model="editingData" label-position="top">
+          <ui-divider content-position="left">基本信息</ui-divider>
+          <ui-row :gutter="20">
+            <ui-col :span="8">
+              <ui-form-item label="课程名称">
+                <ui-input v-model="editingData.courseName" />
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="实验项目">
+                <ui-input v-model="editingData.experimentName" />
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="机房名称">
+                <ui-input v-model="editingData.labName" />
+              </ui-form-item>
+            </ui-col>
+          </ui-row>
 
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="上机时间">
-                <el-date-picker
+          <ui-row :gutter="20">
+            <ui-col :span="8">
+              <ui-form-item label="上机时间">
+                <ui-date-picker
                   v-model="editingData.labTime"
                   type="date"
                   placeholder="选择日期"
@@ -46,61 +46,61 @@
                   value-format="YYYY/MM/DD"
                   class="[width:100%]"
                 />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="指导教师">
-                <el-input v-model="editingData.teacherName" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="上机成绩">
-                <el-input v-model="editingData.score" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="指导教师">
+                <ui-input v-model="editingData.teacherName" />
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="上机成绩">
+                <ui-input v-model="editingData.score" />
+              </ui-form-item>
+            </ui-col>
+          </ui-row>
 
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="学生姓名">
-                <el-input v-model="editingData.studentName" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="学号">
-                <el-input v-model="editingData.studentId" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="专业班级">
-                <el-input v-model="editingData.className" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <ui-row :gutter="20">
+            <ui-col :span="8">
+              <ui-form-item label="学生姓名">
+                <ui-input v-model="editingData.studentName" />
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="学号">
+                <ui-input v-model="editingData.studentId" />
+              </ui-form-item>
+            </ui-col>
+            <ui-col :span="8">
+              <ui-form-item label="专业班级">
+                <ui-input v-model="editingData.className" />
+              </ui-form-item>
+            </ui-col>
+          </ui-row>
 
-          <el-divider content-position="left">报告内容</el-divider>
-          <el-form-item label="一、实验目的和要求">
-            <el-input v-model="editingData.purpose" type="textarea" :rows="4" />
-          </el-form-item>
-          <el-form-item label="二、实验环境">
-            <el-input v-model="editingData.requirements" type="textarea" :rows="4" />
-          </el-form-item>
-          <el-form-item label="三、实验内容">
-            <el-input v-model="editingData.tasks" type="textarea" :rows="5" />
-          </el-form-item>
-          <el-form-item label="四、实验步骤与关键代码">
-            <el-input v-model="editingData.steps" type="textarea" :rows="10" />
-          </el-form-item>
-          <el-form-item label="五、实验结果与问题分析">
-            <el-input v-model="editingData.results" type="textarea" :rows="6" />
-          </el-form-item>
-          <el-form-item label="六、实验总结">
-            <el-input v-model="editingData.summary" type="textarea" :rows="6" />
-          </el-form-item>
-          <el-form-item label="教师评语">
-            <el-input v-model="editingData.teacherComment" type="textarea" :rows="5" />
-          </el-form-item>
-        </el-form>
+          <ui-divider content-position="left">报告内容</ui-divider>
+          <ui-form-item label="一、实验目的和要求">
+            <ui-input v-model="editingData.purpose" type="textarea" :rows="4" />
+          </ui-form-item>
+          <ui-form-item label="二、实验环境">
+            <ui-input v-model="editingData.requirements" type="textarea" :rows="4" />
+          </ui-form-item>
+          <ui-form-item label="三、实验内容">
+            <ui-input v-model="editingData.tasks" type="textarea" :rows="5" />
+          </ui-form-item>
+          <ui-form-item label="四、实验步骤与关键代码">
+            <ui-input v-model="editingData.steps" type="textarea" :rows="10" />
+          </ui-form-item>
+          <ui-form-item label="五、实验结果与问题分析">
+            <ui-input v-model="editingData.results" type="textarea" :rows="6" />
+          </ui-form-item>
+          <ui-form-item label="六、实验总结">
+            <ui-input v-model="editingData.summary" type="textarea" :rows="6" />
+          </ui-form-item>
+          <ui-form-item label="教师评语">
+            <ui-input v-model="editingData.teacherComment" type="textarea" :rows="5" />
+          </ui-form-item>
+        </ui-form>
       </div>
 
       <div v-else class="report-preview [padding:20px] [background:#fff]">
@@ -126,7 +126,7 @@
             </div>
           </div>
 
-          <table class="info-table [width:100%] [border-collapse:collapse] [border:2px_solid_#111827]">
+          <UiTable class="info-table [width:100%] [border-collapse:collapse] [border:2px_solid_#111827]">
             <tbody>
               <tr>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">课程名称</td>
@@ -155,7 +155,7 @@
                 <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]">{{ experimentData.className || '-' }}</td>
               </tr>
             </tbody>
-          </table>
+          </UiTable>
 
           <div class="report-content-sections [width:100%]">
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
@@ -192,13 +192,13 @@
           </div>
         </div>
       </div>
-    </el-card>
+    </ui-card>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { ensureHandwritingFont } from '@/utils/handwritingFont'
@@ -266,11 +266,11 @@ function saveEdits() {
   emit('update:reportData', experimentData.value)
   emit('report-saved', experimentData.value)
   isEditMode.value = false
-  ElMessage.success('报告已更新')
+  uiMessage.success('报告已更新')
 }
 
 function cancelEdits() {
-  ElMessageBox.confirm('未保存的修改会丢失，确定取消编辑吗？', '提示', {
+  messageBox.confirm('未保存的修改会丢失，确定取消编辑吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '继续编辑',
     type: 'warning',
