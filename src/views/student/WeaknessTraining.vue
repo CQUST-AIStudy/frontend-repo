@@ -30,29 +30,29 @@
             </template>
 
             <div class="weakness-list [display:flex] [flex-direction:column] [gap:12px]">
-              <UiButton
+              <div
                 v-for="item in weaknessCards"
                 :key="item.experimentId"
-                class="weakness-card [background:#fff] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [position:relative] [width:100%] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)] [display:flex] [flex-direction:column] [align-items:stretch] [justify-content:flex-start] [white-space:normal] [gap:0] [min-height:auto]"
+                class="weakness-card [background:#fff] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [position:relative] [width:100%] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]"
                 :class="{ active: item.experimentId === selectedWeaknessId }"
                 @click="selectWeakness(item.experimentId)"
               >
-                <div class="card-row [display:flex] [align-items:center] [justify-content:space-between] [gap:10px]">
+                <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:10px]">
                   <div class="[min-width:0] [overflow:hidden] [flex:1]">
-                    <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.experimentName }}</div>
-                    <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.dimension }} · 掌握度{{ item.mastery }} 分</div>
+                    <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.experimentName }}</div>
+                    <div class="muted [color:#64748b] [font-size:12px] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.dimension }} · 掌握度{{ item.mastery }} 分</div>
                   </div>
                   <ui-tag class="[flex-shrink:0]" :type="item.estimatedMastery >= 70 ? 'success' : item.estimatedMastery >= 50 ? 'warning' : 'danger'">
                     估算 {{ item.estimatedMastery }}
                   </ui-tag>
                 </div>
                 <ui-progress :percentage="item.planProgress" :stroke-width="10" class="[margin-top:10px]" />
-                <div class="meta-line [display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:8px] [color:#64748b] [font-size:12px]">
+                <div class="[display:flex] [flex-wrap:wrap] [gap:10px] [margin-top:8px] [color:#64748b] [font-size:12px]">
                   <span>计划 {{ item.completedCount }}/{{ item.targetCount || item.recommendedPracticeCount }}</span>
                   <span>错题 {{ item.weakQuestionCount }}</span>
                   <span>回炉 {{ item.acceptedReviewCount }}</span>
                 </div>
-              </UiButton>
+              </div>
             </div>
 
             <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">最近回炉记录</div>
