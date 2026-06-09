@@ -3040,6 +3040,20 @@
   white-space: nowrap;
 }
 
+.ui-button.weakness-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  min-height: auto;
+  padding: 14px;
+  white-space: normal;
+  line-height: normal;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 .ui-button > span {
   min-width: 0;
   overflow: hidden;
