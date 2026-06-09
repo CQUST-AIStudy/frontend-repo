@@ -504,11 +504,11 @@ const submitExperienceAndGenerateReport = async () => {
       uiMessage.success('AI报告生成成功！')
       isReportViewVisible.value = true
     } else {
-      uiMessage.error(result.message || '生成报告失败1，请稍后重试')
+      uiMessage.error(result.message || '生成报告失败，请稍后重试')
       logger.error('生成报告失败:', result)
     }
   } catch (error) {
-    uiMessage.error('生成报告失败2，请稍后再试')
+    uiMessage.error('生成报告失败，请稍后再试')
     logger.error('生成报告异常:', error)
   } finally {
     loading.value = false

@@ -243,7 +243,7 @@ async function submitTask() {
       fd.append('scoreRangeMax', createForm.value.scoreRange[1])
     }
     await createGradingTask(fd)
-    uiMessage.success('批改任务已创建，AI 正在处理中..')
+    uiMessage.success('批改任务已创建，AI 正在处理中...')
     fileList.value = []
     createForm.value.teacherSignature = ''
     loadTasks()

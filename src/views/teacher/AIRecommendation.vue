@@ -47,7 +47,7 @@
               :disabled="loading"
               @click="generateRecommendation"
             >
-              {{ loading ? 'AI 分析中..' : '生成 AI 教学建议' }}
+              {{ loading ? 'AI 分析中...' : '生成 AI 教学建议' }}
             </UiButton>
             <span class="text-[12px] text-[#86868b]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
           </div>

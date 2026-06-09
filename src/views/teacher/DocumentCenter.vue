@@ -66,7 +66,7 @@
           @click="handleUpload"
         >
           <svg v-if="uploading" class="inline w-4 h-4 mr-1.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg>
-          {{ uploading ? '上传中..' : `上传 ${fileList.length} 个文件` }}
+          {{ uploading ? '上传中...' : `上传 ${fileList.length} 个文件` }}
         </UiButton>
 
         <!-- 上传错误提示 -->

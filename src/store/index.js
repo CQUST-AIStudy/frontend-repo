@@ -42,7 +42,7 @@ export const useUserStore = defineStore('user', {
 
         const rawUserInfo = res.user || res.userInfo
         if (!rawUserInfo) {
-          return { success: false, message: '登录成功但未获取到用户信息' }
+          return { success: false, message: '登录过程中出现问题，请稍后重试' }
         }
         const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
 

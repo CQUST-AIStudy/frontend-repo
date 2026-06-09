@@ -254,7 +254,7 @@ const changePassword = async () => {
     })
     const data = res.data || res
     if (data.success) {
-      uiMessage.success('密码修改成功')
+      uiMessage.success('密码修改成功，请使用新密码重新登录')
       resetPasswordForm()
     } else {
       uiMessage.error(getFriendlyResponseMessage(data, '密码修改失败，请检查当前密码后重试'))

@@ -304,7 +304,7 @@
               <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
               <UiButton @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
                 class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-                {{ aiAdviceLoading ? '生成中..' : '生成建议' }}
+                {{ aiAdviceLoading ? '生成中...' : '生成建议' }}
               </UiButton>
             </div>
 

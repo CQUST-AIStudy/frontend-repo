@@ -60,7 +60,7 @@
                 <span v-else-if="aiSource === 'deepseek'" class="g-chip c-ok [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#e6f4ea] [color:#1e8e3e]">刚生成</span>
               </div>
               <UiButton v-if="isCompleted" class="g-primary-btn-sm [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:6px_16px] [font-size:13px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6] disabled:[cursor:not-allowed]" :disabled="aiGenerating" @click="generateAiComment(true)">
-                {{ aiGenerating ? '分析中..' : (hasAiComment ? '重新生成' : '生成AI点评') }}
+                {{ aiGenerating ? '分析中...' : (hasAiComment ? '重新生成' : '生成AI点评') }}
               </UiButton>
             </div>
             <div v-if="aiGenerating" class="g-ai-loading [padding:20px_0]">

@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
     const isSessionExchangeRequest = requestUrl.includes('/api/auth/session')
     const isAuthRequest = isLoginRequest || isTapLoginRequest || isSessionExchangeRequest
     const fallbackMessage = error?.response?.status === 401 && isLoginRequest
-      ? '用户名或密码不正确，请检查后重试'
+      ? '登录失败，请检查账号密码是否正确'
       : '请求失败，请稍后重试'
     const friendlyError = createFriendlyError(error, fallbackMessage)
 

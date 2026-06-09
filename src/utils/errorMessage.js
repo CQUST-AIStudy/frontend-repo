@@ -240,9 +240,9 @@ export function getFriendlyErrorMessage(error, fallbackMessage = DEFAULT_ERROR_M
   const fallback = normalizeText(fallbackMessage) || DEFAULT_ERROR_MESSAGE
 
   if (status === 401 && isLoginRequestError(error) && (!raw || isTechnicalText(raw) || raw === STATUS_MESSAGES[401])) {
-    return fallback.includes('用户名或密码')
+    return fallback.includes('登录失败')
       ? fallback
-      : '用户名或密码不正确，请检查后重试'
+      : '登录失败，请检查账号密码是否正确'
   }
 
   const mapped = mapRawMessage(raw, status)
