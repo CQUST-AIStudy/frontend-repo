@@ -78,7 +78,7 @@
                     <div class="title [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ selectedWeakness.experimentName }}</div>
                     <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ selectedWeakness.dimension }} · {{ selectedWeakness.evidenceSummary }}</div>
                   </div>
-                  <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap] [margin-top:12px]">
+                  <div class="action-row [display:flex] [align-items:center] [gap:8px] [justify-content:space-between] [gap:10px] [flex-wrap:wrap]">
                     <ui-button plain @click="resetPlan(selectedWeakness)">重置计划</ui-button>
                     <ui-button type="primary" @click="buildPlan(selectedWeakness)">
                       {{ selectedWeakness.hasPlan ? '更新计划' : '生成计划' }}
