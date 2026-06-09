@@ -150,6 +150,7 @@ import { message as uiMessage } from '@/services/feedback'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { API_BASE_URL } from '../../config/runtime'
+import { getTapToken } from '../../constants/auth'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 
 const API_BASE = API_BASE_URL
@@ -161,6 +162,14 @@ const trendChartRef = ref(null)
 const refreshingFeedback = ref(false)
 let radarChart = null
 let trendChart = null
+
+function profileRequestConfig() {
+  const tapToken = getTapToken()
+  return {
+    withCredentials: true,
+    headers: tapToken ? { Authorization: `Bearer ${tapToken}` } : undefined
+  }
+}
 
 const overviewCards = computed(() => [
   { label: '总提交次数', value: profile.value.overview?.totalSubmissions || 0, icon: TrendCharts, color: '#409EFF', bg: 'linear-gradient(135deg,#409EFF,#79bbff)' },
@@ -230,7 +239,7 @@ async function handleRefreshFeedback() {
     const studentId = profile.value.studentId
     let url = `${API_BASE}/api/profile/feedback/refresh/me`
     if (studentId) url = `${API_BASE}/api/profile/feedback/refresh/${studentId}`
-    const res = await axios.post(url, null, { withCredentials: true })
+    const res = await axios.post(url, null, profileRequestConfig())
     const data = res.data || res
     if (data.error) { uiMessage.error(getFriendlyResponseMessage(data, '刷新失败，请稍后重试')) }
     else if (data.feedback) { profile.value.feedback = data.feedback; uiMessage.success('AI分析已更新') }
@@ -243,12 +252,12 @@ async function fetchProfile() {
   try {
     let res
     try {
-      res = await axios.get(`${API_BASE}/api/profile/me`, { withCredentials: true })
+      res = await axios.get(`${API_BASE}/api/profile/me`, profileRequestConfig())
     } catch {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
       const usernum = userInfo.usernum
       if (!usernum) { errorMsg.value = '未绑定学号，无法查看能力画像'; return }
-      res = await axios.get(`${API_BASE}/api/profile/student/${usernum}`, { withCredentials: true })
+      res = await axios.get(`${API_BASE}/api/profile/student/${usernum}`, profileRequestConfig())
     }
     const data = res.data || res
     if (data.error) { errorMsg.value = getFriendlyResponseMessage(data, '能力画像加载失败，请稍后重试'); return }
