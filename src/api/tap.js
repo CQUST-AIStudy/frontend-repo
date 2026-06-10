@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { message as uiMessage } from '@/services/feedback'
 import {
+  clearAuthStorage,
   clearTapAuth,
   getTapToken,
   getTapUser as readTapUser,
@@ -160,8 +161,11 @@ tapClient.interceptors.response.use(
       } catch {
         // fall through to clear auth and surface the original 401
       }
-      clearTapAuth()
-      uiMessage.warning('教辅平台登录已过期，请重新登录')
+      // TAP session truly expired → clear ALL auth (not just tap) to prevent
+      // redirect loop: main token alone would cause router guard to redirect
+      // back to /teacher/select-class, which would 401 again endlessly.
+      clearAuthStorage()
+      uiMessage.warning('登录已过期，请重新登录')
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.assign('/login')
       }
@@ -432,6 +436,24 @@ export function downloadZipOrganizeJobZip(jobId) {
 // ========== Grading - Rubrics ==========
 export function getRubrics(subject) {
   return tapClient.get('/api/grading/rubrics', { params: subject ? { subject } : {} })
+}
+
+export function normalizeRubricList(payload) {
+  const root = payload?.data ?? payload
+  const candidates = [
+    root,
+    root?.data,
+    root?.content,
+    root?.items,
+    root?.records,
+    root?.list,
+    root?.data?.content,
+    root?.data?.items,
+    root?.data?.records,
+    root?.data?.list
+  ]
+  const list = candidates.find(Array.isArray) || []
+  return list.filter(Boolean)
 }
 
 export function createRubric(data) {

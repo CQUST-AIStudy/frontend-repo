@@ -1,184 +1,279 @@
 <template>
   <div class="grading-center min-h-full">
-    <!-- Hero -->
-    <div class="bg-white rounded-2xl py-7 px-8 mb-5 border border-black/[0.06] flex items-center gap-4">
-      <div class="flex items-center gap-4">
-        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
-          <LucideIcon name="clipboard-check" :size="26" />
-        </div>
-        <div>
-          <h1 class="m-0 mb-1 text-[22px] font-normal text-[#1d1d1f]">AI 批改中心</h1>
-          <p class="m-0 text-sm text-[#6e6e73]">上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
-        </div>
-      </div>
+    <!-- 页面标题 -->
+    <div class="mb-6">
+      <h1 class="m-0 text-[20px] font-semibold text-[#1d1d1f] mb-1">AI 批改中心</h1>
+      <p class="m-0 text-[14px] text-[#6e6e73]">上传学生作业，AI 自动评分并生成详细评语</p>
     </div>
 
-    <!-- Create Task Card -->
-    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-5 overflow-hidden">
-      <div class="flex justify-between items-start gap-3 px-6 py-4 border-b border-black/[0.06]">
-        <span class="text-base font-semibold text-[#1d1d1f]">创建批改任务</span>
+    <!-- 流程引导卡片 -->
+    <div class="bg-white rounded-[12px] border border-[#e5e7eb] shadow-[0_6px_18px_rgba(15,23,42,0.04)] mb-6 overflow-hidden">
+      <!-- 流程步骤指示器 -->
+      <div class="flex bg-[#fbfcfe] border-b border-[#edf0f5] px-6 py-4">
+        <div class="flex-1 flex items-center gap-3 relative" :class="{ 'active': true, 'completed': false }">
+          <div class="w-7 h-7 rounded-[8px] bg-[#0b7cff] text-white flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10 shadow-[0_4px_10px_rgba(11,124,255,0.18)]">1</div>
+          <div class="flex-1">
+            <div class="text-[13px] font-semibold text-[#0b7cff]">配置批改参数</div>
+            <div class="text-[11px] text-[#9aa4b2]">选择评分标准和期望分数</div>
+          </div>
+          <div class="absolute top-1/2 left-10 right-[-12px] h-px bg-[#d9e7ff] -translate-y-1/2"></div>
+        </div>
+        <div class="flex-1 flex items-center gap-3 relative">
+          <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">2</div>
+          <div class="flex-1">
+            <div class="text-[13px] font-semibold text-[#1d1d1f]">上传作业文件</div>
+            <div class="text-[11px] text-[#9aa4b2]">支持 PDF、DOC 格式</div>
+          </div>
+          <div class="absolute top-1/2 left-10 right-[-12px] h-px bg-[#e5e7eb] -translate-y-1/2"></div>
+        </div>
+        <div class="flex-1 flex items-center gap-3 relative">
+          <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">3</div>
+          <div class="flex-1">
+            <div class="text-[13px] font-semibold text-[#1d1d1f]">AI 自动批改</div>
+            <div class="text-[11px] text-[#9aa4b2]">等待 AI 处理完成</div>
+          </div>
+        </div>
       </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5 mb-5">
+
+      <!-- 表单内容区 -->
+      <div class="p-6 space-y-5">
+        <!-- 配置区 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <!-- 评分标准 -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[13px] font-medium text-[#6e6e73]">评分标准</label>
+          <div class="flex flex-col gap-2">
+            <label class="text-[13px] font-medium text-[#6e6e73]">
+              <span class="text-[#ff3b30]">*</span> 评分标准
+            </label>
             <UiSelect v-model="createForm.rubricId"
-              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f]">
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
               <UiOption value="" disabled selected>选择评分标准</UiOption>
               <UiOption v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</UiOption>
             </UiSelect>
           </div>
-          <!-- 实验ID -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[13px] font-medium text-[#6e6e73]">实验ID</label>
-            <UiInput v-model="createForm.experimentId" placeholder="可选"
-              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
-          </div>
-          <!-- 班级ID -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[13px] font-medium text-[#6e6e73]">班级ID</label>
-            <UiInput v-model="createForm.classId" placeholder="可选"
-              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
-          </div>
+
           <!-- 教师署名 -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[13px] font-medium text-[#6e6e73]">教师署名</label>
+          <div class="flex flex-col gap-2">
+            <label class="text-[13px] font-medium text-[#6e6e73]">
+              <span class="text-[#ff3b30]">*</span> 教师署名
+            </label>
             <UiInput v-model="createForm.teacherSignature" maxlength="32" placeholder="例如：张老师"
-              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:ring-2 focus:ring-[#007aff]/30" />
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
           </div>
         </div>
 
-        <!-- 期望分数区间 -->
-        <div class="mb-5">
-          <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">期望分数区间</label>
-          <div class="max-w-[600px] px-3">
-            <ui-slider v-model="createForm.scoreRange" range :min="0" :max="100" :step="1"
-              :marks="{ 0: '0', 75: '75', 90: '90', 99: '99', 100: '100' }" />
-          </div>
-          <div class="text-xs text-[#aeaeb2] mt-1">
-            大多数学生的成绩应落在此区间内（{{ createForm.scoreRange[0] }} - {{ createForm.scoreRange[1] }}分），允许个别异常值
+        <!-- 分数区间 - 可视化版 -->
+        <div class="rounded-[12px] border border-[#e5eaf2] bg-white px-5 py-4">
+          <div class="flex items-start justify-between gap-6">
+            <span class="text-[13px] font-medium text-[#475467] pt-2">
+              <span class="text-[#ff3b30]">*</span> 期望分数区间
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-end gap-2 mb-3">
+                <input type="number" v-model.number="createForm.scoreRange[0]" min="0" max="100"
+                  class="w-14 h-9 text-center bg-[#f8fbff] border border-[#cfe2ff] rounded-[8px] text-[15px] font-semibold text-[#0b7cff] outline-none focus:border-[#0b7cff] focus:ring-2 focus:ring-[#0b7cff]/10 transition-all" />
+                <span class="text-[#98a2b3]">—</span>
+                <input type="number" v-model.number="createForm.scoreRange[1]" min="0" max="100"
+                  class="w-14 h-9 text-center bg-[#f8fbff] border border-[#cfe2ff] rounded-[8px] text-[15px] font-semibold text-[#0b7cff] outline-none focus:border-[#0b7cff] focus:ring-2 focus:ring-[#0b7cff]/10 transition-all" />
+                <span class="text-[13px] text-[#667085]">分</span>
+              </div>
+
+              <!-- 自定义 Range Slider -->
+              <div class="relative h-8 flex items-center mb-2">
+                <div class="absolute left-0 right-0 h-1.5 bg-[#eef2f6] rounded-full"></div>
+                <div class="absolute h-1.5 bg-[#0b7cff] rounded-full transition-all duration-100"
+                  :style="{ left: `${createForm.scoreRange[0]}%`, width: `${createForm.scoreRange[1] - createForm.scoreRange[0]}%` }"></div>
+                <div class="absolute w-4 h-4 bg-white border-[3px] border-[#0b7cff] rounded-[5px] shadow-[0_2px_7px_rgba(11,124,255,0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
+                  :style="{ left: `calc(${createForm.scoreRange[0]}% - 8px)` }"
+                  @mousedown="startDrag(0, $event)"
+                  @touchstart="startDrag(0, $event)"></div>
+                <div class="absolute w-4 h-4 bg-white border-[3px] border-[#0b7cff] rounded-[5px] shadow-[0_2px_7px_rgba(11,124,255,0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
+                  :style="{ left: `calc(${createForm.scoreRange[1]}% - 8px)` }"
+                  @mousedown="startDrag(1, $event)"
+                  @touchstart="startDrag(1, $event)"></div>
+              </div>
+              <div class="flex items-start gap-2 text-[12px] text-[#667085] leading-relaxed">
+                <LucideIcon name="flag" :size="14" class="text-[#0b7cff] mt-0.5 flex-shrink-0" />
+                <span>AI 会参考此区间识别异常成绩，偏离区间的成绩会标记为「需复核」。</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 上传PDF -->
-        <div class="mb-5">
-          <label class="text-[13px] font-medium text-[#6e6e73] mb-1.5 block">上传PDF</label>
-          <ui-upload ref="uploadRef" :auto-upload="false" :on-change="onFileChange"
-                     accept=".pdf,.docx,.doc" multiple drag :file-list="fileList" :on-remove="onFileRemove">
-            <UploadFilled class="text-[40px] text-[#aeaeb2]" />
-            <div class="text-[#6e6e73] mt-2">拖拽 PDF 文件到此处，或点击上传（最多200 份）</div>
+        <!-- 上传区域 - 流程化 -->
+        <div>
+          <label class="text-[13px] font-medium text-[#6e6e73] mb-3 block">
+            <span class="text-[#ff3b30]">*</span> 上传作业文件
+          </label>
+          <ui-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :on-change="onFileChange"
+                     accept=".pdf,.docx,.doc" multiple drag :on-remove="onFileRemove"
+                     class="upload-flow-wrapper w-full">
+            <div class="flex flex-col items-center justify-center py-9 w-full">
+              <div class="w-12 h-12 bg-[#edf5ff] rounded-[14px] flex items-center justify-center text-[#0b7cff] mb-4">
+                <LucideIcon name="cloud-upload" :size="25" />
+              </div>
+              <div class="text-[15px] font-semibold text-[#101828] mb-2">
+                拖拽作业文件到此处，或 <span class="text-[#0b7cff]">点击选择</span>
+              </div>
+              <div class="text-[13px] text-[#667085] mb-4">支持批量上传，AI 将自动识别并批改</div>
+              <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-[#98a2b3]">
+                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
+                  <LucideIcon name="file" :size="14" />
+                  PDF / DOC / DOCX
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
+                  <LucideIcon name="hard-drive" :size="14" />
+                  单文件 ≤ 50MB
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
+                  <LucideIcon name="users" :size="14" />
+                  最多 200 份
+                </span>
+              </div>
+            </div>
           </ui-upload>
+
+          <div v-if="fileList.length" class="mt-4 overflow-hidden rounded-[12px] border border-[#dbe7f5] bg-white">
+            <div class="flex items-center justify-between gap-3 border-b border-[#edf0f5] bg-[#f8fbff] px-4 py-3">
+              <div class="flex items-center gap-2 text-[13px] font-semibold text-[#101828]">
+                <LucideIcon name="files" :size="15" class="text-[#0b7cff]" />
+                已选择 {{ fileList.length }} 个文件
+              </div>
+              <button type="button" class="text-[12px] text-[#667085] hover:text-[#ff3b30]" @click="clearSelectedFiles">
+                清空
+              </button>
+            </div>
+            <div class="divide-y divide-[#edf0f5]">
+              <div v-for="file in fileList" :key="file.uid || file.name"
+                class="grid grid-cols-[1fr_96px_48px] items-center gap-4 px-4 py-3 text-[13px]">
+                <div class="flex min-w-0 items-center gap-2">
+                  <LucideIcon name="file-text" :size="15" class="shrink-0 text-[#0b7cff]" />
+                  <span class="min-w-0 flex-1 truncate text-[#344054]">{{ file.name }}</span>
+                </div>
+                <span class="text-right text-[12px] text-[#667085]">{{ formatFileSize(file.size || file.raw?.size) }}</span>
+                <button type="button" class="justify-self-end text-[#98a2b3] hover:text-[#ff3b30]" @click="removeSelectedFile(file)">
+                  <LucideIcon name="trash-2" :size="14" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Actions -->
-        <div class="flex items-center gap-3">
+        <!-- 流程操作按钮 -->
+        <div class="flex items-center justify-between pt-5 border-t border-[#edf0f5]">
+          <UiButton @click="$router.push('/teacher/grading/rubrics')"
+            class="h-11 px-5 rounded-[10px] text-[14px] font-medium text-[#344054] bg-white hover:bg-[#f8fafc] active:scale-[0.98] transition-all cursor-pointer border border-[#d0d5dd] shadow-none">
+            管理评分标准
+          </UiButton>
           <UiButton @click="submitTask"
             :disabled="submitting || !createForm.rubricId || fileList.length === 0"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-            <span v-if="submitting" class="inline-flex items-center gap-1.5">
-              <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[#0b7cff] shadow-[0_8px_18px_rgba(11,124,255,0.24)] hover:bg-[#006ee6] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
+            <span v-if="submitting" class="inline-flex items-center gap-2">
+              <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
               处理中...
             </span>
-            <span v-else>开始批改({{ fileList.length }} 件)</span>
-          </UiButton>
-          <UiButton @click="$router.push('/teacher/grading/rubrics')"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
-            管理评分标准
+            <span v-else class="inline-flex items-center gap-2">
+              <LucideIcon name="send" :size="18" />
+              开始批改
+            </span>
           </UiButton>
         </div>
       </div>
     </div>
 
-    <!-- Task List -->
-    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-5 overflow-hidden">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-black/[0.06]">
-        <span class="text-base font-semibold text-[#1d1d1f]">批改任务列表</span>
-        <UiButton @click="loadTasks"
-          class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none inline-flex items-center gap-1">
-          <Refresh class="w-4 h-4" /> 刷新
-        </UiButton>
+    <!-- 任务历史区 -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-[15px] font-semibold text-[#1d1d1f] m-0">批改历史</h3>
+        <span class="text-[13px] text-[#aeaeb2]">共 {{ tasks.length }} 个任务</span>
       </div>
-      <div class="p-6">
-        <!-- Loading state -->
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <svg class="animate-spin h-6 w-6 text-[#007aff]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-        </div>
 
-        <!-- Table -->
-        <div v-else-if="tasks.length > 0" class="overflow-x-auto">
-          <UiTable class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-black/[0.06]">
-                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9] rounded-tl-lg">ID</th>
-                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">状态</th>
-                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">进度</th>
-                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9]">创建时间</th>
-                <th class="py-3 px-3 text-xs font-medium text-[#6e6e73] bg-[#f9f9f9] rounded-tr-lg">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in tasks" :key="row.taskId" class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/50 transition-colors">
-                <td class="py-3 px-3 text-[13px] text-[#1d1d1f]">{{ row.taskId }}</td>
-                <td class="py-3 px-3">
-                  <span :class="statusTagClass(row.status)" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold">
-                    {{ statusText(row.status) }}
-                  </span>
-                </td>
-                <td class="py-3 px-3 min-w-[180px]">
-                  <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                    <div class="h-full w-[var(--progress-width)] rounded-full transition-all duration-300"
-                      :style="progressWidthStyle(row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0)"
-                      :class="row.failedCount > 0 ? 'bg-gradient-to-r from-[#ff6259] to-[#ff3b30]' : row.status === 'COMPLETED' ? 'bg-gradient-to-r from-[#30d158] to-[#28cd41]' : 'bg-gradient-to-r from-[#3898ff] to-[#007aff]'">
-                    </div>
-                  </div>
-                  <span class="text-xs text-[#aeaeb2] mt-1 block">
-                    {{ row.completedCount }}/{{ row.totalCount }} 完成
-                    <span v-if="row.failedCount > 0" class="text-[#ef4444]">，{{ row.failedCount }} 失败</span>
-                  </span>
-                </td>
-                <td class="py-3 px-3 text-[13px] text-[#6e6e73]">{{ formatTime(row.createdAt) }}</td>
-                <td class="py-3 px-3">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <UiButton @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
-                      class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
-                      查看详情
-                    </UiButton>
-                    <UiButton v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
-                      class="text-[13px] font-medium text-[#ff9500] cursor-pointer hover:text-[#cc7700] transition-colors bg-transparent border-none">
-                      重试失败
-                    </UiButton>
-                    <UiButton v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
-                      class="text-[13px] font-medium text-[#30d158] cursor-pointer hover:text-[#1fa840] transition-colors bg-transparent border-none">
-                      导出报告
-                    </UiButton>
-                    <UiButton @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
-                      class="text-[13px] font-medium text-[#ff3b30] cursor-pointer hover:text-[#cc2f26] transition-colors bg-transparent border-none disabled:opacity-40 disabled:cursor-not-allowed">
-                      删除
-                    </UiButton>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </UiTable>
-        </div>
+      <!-- Loading state -->
+      <div v-if="loading" class="flex items-center justify-center py-12 bg-white rounded-[12px] border border-black/[0.06]">
+        <svg class="animate-spin h-6 w-6 text-[#007aff]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+      </div>
 
-        <!-- Empty state -->
-        <div v-else class="flex flex-col items-center justify-center py-16">
-          <LucideIcon name="clipboard" class="mb-3 text-[#c6ccd6]" :size="46" />
-          <p class="text-sm text-[#aeaeb2]">暂无批改任务</p>
+      <!-- 任务列表 -->
+      <div v-else-if="tasks.length > 0" class="flex flex-col gap-3">
+        <div v-for="row in tasks" :key="row.taskId"
+          class="flex items-center gap-4 p-4 bg-white rounded-[12px] border border-black/[0.06] hover:border-[#007aff]/20 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+          <!-- 状态图标 -->
+          <div class="w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0"
+            :class="{
+              'bg-[#fff3e0] text-[#ff9500]': row.status === 'PROCESSING',
+              'bg-[#e8f8ed] text-[#30d158]': row.status === 'COMPLETED',
+              'bg-[#f5f5f7] text-[#6e6e73]': row.status === 'PENDING',
+              'bg-[#ffeeed] text-[#ff3b30]': row.status === 'FAILED'
+            }">
+            <LucideIcon v-if="row.status === 'PROCESSING'" name="loader" :size="20" />
+            <LucideIcon v-else-if="row.status === 'COMPLETED'" name="check" :size="20" />
+            <LucideIcon v-else-if="row.status === 'FAILED'" name="alert-triangle" :size="20" />
+            <LucideIcon v-else name="clock" :size="20" />
+          </div>
+
+          <!-- 任务信息 -->
+          <div class="flex-1 min-w-0">
+            <div class="text-[14px] font-medium text-[#1d1d1f] mb-1 truncate">
+              {{ row.experimentName || `批改任务 #${row.taskId}` }}
+            </div>
+            <div class="flex items-center gap-3 text-[12px] text-[#aeaeb2]">
+              <span>#{{ row.taskId }}</span>
+              <span>{{ formatTime(row.createdAt) }}</span>
+              <span>{{ row.totalCount }} 份作业</span>
+            </div>
+          </div>
+
+          <!-- 进度 -->
+          <div class="flex items-center gap-2">
+            <div class="w-20 h-1 bg-[#e5e5ea] rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300"
+                :style="{ width: `${row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0}%` }"
+                :class="row.failedCount > 0 ? 'bg-[#ff3b30]' : row.status === 'COMPLETED' ? 'bg-[#30d158]' : 'bg-[#007aff]'">
+              </div>
+            </div>
+            <span class="text-[12px] font-medium text-[#6e6e73] w-10 text-right">
+              {{ row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0 }}%
+            </span>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="flex items-center gap-2">
+            <button @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
+              class="h-8 px-3 rounded-lg bg-[#eef5ff] text-[#007aff] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e0edff] transition-colors">
+              查看详情
+            </button>
+            <button v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
+              class="h-8 px-3 rounded-lg bg-[#fff3e0] text-[#ff9500] text-[12px] font-medium border-none cursor-pointer hover:bg-[#ffe8cc] transition-colors">
+              重试失败
+            </button>
+            <button v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
+              class="h-8 px-3 rounded-lg bg-[#e8f8ed] text-[#30d158] text-[12px] font-medium border-none cursor-pointer hover:bg-[#d4f5e0] transition-colors">
+              导出报告
+            </button>
+            <button @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
+              class="h-8 px-3 rounded-lg bg-[#f5f5f7] text-[#6e6e73] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              删除
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else class="flex flex-col items-center justify-center py-12 bg-white rounded-[12px] border border-black/[0.06]">
+        <div class="w-16 h-16 bg-[#f5f5f7] rounded-2xl flex items-center justify-center text-[#aeaeb2] mb-4">
+          <LucideIcon name="clipboard" :size="32" />
+        </div>
+        <p class="text-[14px] text-[#aeaeb2] m-0">暂无批改任务</p>
+        <p class="text-[12px] text-[#d1d5db] m-0 mt-2">上传作业文件后开始批改</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { UploadFilled, Refresh } from '@/components/ui/icons'
-import { getRubrics, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
+import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
 import LucideIcon from '@/components/LucideIcon.vue'
 
 const rubrics = ref([])
@@ -186,35 +281,101 @@ const tasks = ref([])
 const loading = ref(false)
 const submitting = ref(false)
 const fileList = ref([])
+const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99] })
 let refreshTimer = null
 
+// 监听分数区间变化，确保值在有效范围内
+watch(() => createForm.value.scoreRange, (newVal) => {
+  // 确保值在 0-100 范围内
+  createForm.value.scoreRange[0] = Math.max(0, Math.min(100, newVal[0] || 0))
+  createForm.value.scoreRange[1] = Math.max(0, Math.min(100, newVal[1] || 100))
 
-function statusTagClass(s) {
-  const map = {
-    PENDING: 'bg-[#f5f5f7] text-[#6e6e73]',
-    PROCESSING: 'bg-[#fff3e0] text-[#ff9500]',
-    COMPLETED: 'bg-[#e8f8ed] text-[#30d158]',
-    FAILED: 'bg-[#ffeeed] text-[#ff3b30]'
+  // 确保最小值不超过最大值
+  if (createForm.value.scoreRange[0] > createForm.value.scoreRange[1]) {
+    createForm.value.scoreRange = [createForm.value.scoreRange[1], createForm.value.scoreRange[0]]
   }
-  return map[s] || 'bg-[#f5f5f7] text-[#6e6e73]'
+}, { deep: true })
+
+// Range Slider 拖拽逻辑
+let draggingIndex = -1
+let sliderElement = null
+
+function startDrag(index, event) {
+  event.preventDefault()
+  draggingIndex = index
+  sliderElement = event.target.closest('.relative')
+
+  const onMove = (e) => {
+    if (draggingIndex === -1 || !sliderElement) return
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const rect = sliderElement.getBoundingClientRect()
+    const percent = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100))
+    const value = Math.round(percent)
+
+    if (draggingIndex === 0) {
+      // 左手柄 - 最小值
+      createForm.value.scoreRange[0] = Math.min(value, createForm.value.scoreRange[1])
+    } else {
+      // 右手柄 - 最大值
+      createForm.value.scoreRange[1] = Math.max(value, createForm.value.scoreRange[0])
+    }
+  }
+
+  const onEnd = () => {
+    draggingIndex = -1
+    sliderElement = null
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onEnd)
+    document.removeEventListener('touchmove', onMove)
+    document.removeEventListener('touchend', onEnd)
+  }
+
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onEnd)
+  document.addEventListener('touchmove', onMove)
+  document.addEventListener('touchend', onEnd)
 }
 
-function statusText(s) {
-  return { PENDING: '等待中', PROCESSING: '处理中', COMPLETED: '已完成', FAILED: '失败' }[s] || s
-}
-
-function progressWidthStyle(value) {
-  return { '--progress-width': `${value}%` }
-}
 
 function formatTime(t) {
   if (!t) return '-'
   try { return new Date(t).toLocaleString('zh-CN') } catch { return t }
 }
 
-function onFileChange(_, list) { fileList.value = list }
-function onFileRemove(_, list) { fileList.value = list }
+function normalizeUploadList(list) {
+  return (Array.isArray(list) ? list : []).filter(Boolean)
+}
+
+function onFileChange(_, list) {
+  fileList.value = normalizeUploadList(list)
+}
+
+function onFileRemove(_, list) {
+  fileList.value = normalizeUploadList(list)
+}
+
+function removeSelectedFile(file) {
+  fileList.value = fileList.value.filter(item => {
+    if (item === file) return false
+    if (file.uid && item.uid === file.uid) return false
+    return true
+  })
+}
+
+function clearSelectedFiles() {
+  fileList.value = []
+  uploadRef.value?.clearFiles?.()
+}
+
+function formatFileSize(size) {
+  const bytes = Number(size || 0)
+  if (!bytes) return '-'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
 
 async function confirmDeleteTask(id) {
   try {
@@ -233,7 +394,7 @@ async function submitTask() {
   submitting.value = true
   try {
     const fd = new FormData()
-    fileList.value.forEach(f => fd.append('files', f.raw))
+    fileList.value.forEach(f => fd.append('files', f.raw || f.file || f))
     fd.append('rubricId', createForm.value.rubricId)
     if (createForm.value.experimentId) fd.append('experimentId', createForm.value.experimentId)
     if (createForm.value.classId) fd.append('classId', createForm.value.classId)
@@ -244,7 +405,7 @@ async function submitTask() {
     }
     await createGradingTask(fd)
     uiMessage.success('批改任务已创建，AI 正在处理中...')
-    fileList.value = []
+    clearSelectedFiles()
     createForm.value.teacherSignature = ''
     loadTasks()
   } catch (e) { uiMessage.error('创建失败: ' + e.message) }
@@ -298,8 +459,7 @@ async function exportTask(id) {
 onMounted(async () => {
   try {
     const res = await getRubrics()
-    const data = res?.data ?? res
-    rubrics.value = Array.isArray(data) ? data : []
+    rubrics.value = normalizeRubricList(res)
   } catch (e) { logger.error('加载评分标准失败:', e) }
   loadTasks()
   refreshTimer = setInterval(() => {
@@ -309,3 +469,16 @@ onMounted(async () => {
 
 onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
 </script>
+
+<style scoped>
+:deep(.upload-flow-wrapper) {
+  display: block !important;
+  width: 100% !important;
+}
+:deep(.upload-flow-wrapper > div:first-of-type) {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
