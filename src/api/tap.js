@@ -524,6 +524,23 @@ export function downloadSubmissionReport(id) {
   return tapClient.get(`/api/grading/reports/${id}`, { responseType: 'blob' })
 }
 
+// ========== Grading - Batches ==========
+export function getGradingBatches() {
+  return tapClient.get('/api/grading/batches')
+}
+
+export function exportGradingBatchExcel(batchId, includeComments = true) {
+  return tapClient.post(`/api/grading/batches/${batchId}/export-excel`,
+    { includeComments },
+    { responseType: 'blob', timeout: 120000 })
+}
+
+export function exportMergedGradingExcel(taskIds, includeComments = true) {
+  return tapClient.post('/api/grading/tasks/export-excel-merged',
+    { taskIds, includeComments },
+    { responseType: 'blob', timeout: 120000 })
+}
+
 // ========== Grading - Export ==========
 export function exportGradingTask(id) {
   return tapClient.post(`/api/grading/tasks/${id}/export`, null, { responseType: 'blob' })

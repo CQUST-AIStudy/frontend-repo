@@ -11,7 +11,7 @@
         </svg>
       </UiButton>
       <span class="text-[13px] text-[#6e6e73]">返回</span>
-      <span class="text-[15px] font-semibold text-[#1d1d1f]">批改任务 #{{ taskId }}</span>
+      <span class="text-[15px] font-semibold text-[#1d1d1f]">{{ task?.displayCode ? `批改任务 ${task.displayCode}` : `批改任务 #${taskId}` }}</span>
     </div>
 
     <!-- Task Overview -->
@@ -72,9 +72,8 @@
         导出 AI 批改报告 ZIP
       </UiButton>
       <UiButton
-        :disabled="submissions.length === 0"
         @click="showExportDialog"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
       >
         导出 Excel
       </UiButton>
@@ -120,7 +119,7 @@
 
         <!-- Table -->
         <div v-else class="overflow-x-auto">
-          <UiTable class="w-full text-left text-[13px]">
+          <table class="w-full text-left text-[13px] border-collapse">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] rounded-tl-lg">ID</th>
@@ -177,7 +176,7 @@
                 </td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
       </div>
     </div>
@@ -334,6 +333,10 @@ function reportTypeLabel(type) {
 }
 
 function showExportDialog() {
+  if (!submissions.value.length) {
+    uiMessage.warning('暂无可导出的提交数据')
+    return
+  }
   exportSelected.value = submissions.value.map(item => item.submissionId)
   exportSelectAll.value = true
   exportVisible.value = true

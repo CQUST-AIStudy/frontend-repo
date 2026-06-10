@@ -78,7 +78,7 @@
               <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
                 class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
                 @keyup.enter="confirmNewSignature" />
-              <UiButton @click="confirmNewSignature"
+              <UiButton type="primary" @click="confirmNewSignature"
                 class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
                 确定
               </UiButton>
@@ -87,6 +87,25 @@
                 取消
               </UiButton>
             </div>
+          </div>
+        </div>
+
+        <!-- 批改批次 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-2">
+            <label class="text-[13px] font-medium text-[#6e6e73]">批改批次</label>
+            <UiSelect v-model="createForm.batchId"
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+              <UiOption value="">新建批次（本次上传自动创建）</UiOption>
+              <UiOption v-for="b in batches" :key="b.batchId" :value="b.batchId">
+                {{ b.name }}{{ b.displayCode ? `（${b.displayCode}）` : '' }}
+              </UiOption>
+            </UiSelect>
+          </div>
+          <div v-if="!createForm.batchId" class="flex flex-col gap-2">
+            <label class="text-[13px] font-medium text-[#6e6e73]">批次名称（可选）</label>
+            <UiInput v-model="createForm.batchName" maxlength="64" placeholder="不填则按任务编号自动命名"
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
           </div>
         </div>
 
@@ -188,7 +207,7 @@
             class="h-11 px-5 rounded-[10px] text-[14px] font-medium text-[#344054] bg-white hover:bg-[#f8fafc] active:scale-[0.98] transition-all cursor-pointer border border-[#d0d5dd] shadow-none">
             管理评分标准
           </UiButton>
-          <UiButton @click="submitTask"
+          <UiButton type="primary" @click="submitTask"
             :disabled="submitting || !createForm.rubricId || fileList.length === 0"
             class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[#0b7cff] shadow-[0_8px_18px_rgba(11,124,255,0.24)] hover:bg-[#006ee6] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
             <span v-if="submitting" class="inline-flex items-center gap-2">
@@ -211,15 +230,46 @@
         <span class="text-[13px] text-[#aeaeb2]">共 {{ tasks.length }} 个任务</span>
       </div>
 
+      <!-- 批次筛选与导出工具栏 -->
+      <div class="flex items-center gap-3 flex-wrap mb-4 p-3 bg-white rounded-[12px] border border-black/[0.06]">
+        <UiSelect v-model="batchFilter"
+          class="h-9 min-w-[220px] px-3 rounded-[8px] bg-[#f5f5f7] border border-black/[0.1] text-[13px] outline-none appearance-none cursor-pointer text-[#1d1d1f]">
+          <UiOption value="">全部批次</UiOption>
+          <UiOption v-for="b in batches" :key="b.batchId" :value="b.batchId">
+            {{ b.name }}{{ b.displayCode ? `（${b.displayCode}）` : '' }} · {{ b.completedTaskCount }}/{{ b.taskCount }} 完成
+          </UiOption>
+        </UiSelect>
+        <button :disabled="exportingBatch" @click="exportBatchExcelAction"
+          class="h-9 px-4 rounded-[8px] bg-[#0b7cff] text-white text-[13px] font-medium border-none cursor-pointer hover:bg-[#006ee6] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+          {{ exportingBatch ? '导出中...' : (batchFilter ? '导出批次 Excel' : '导出全部已完成 Excel') }}
+        </button>
+        <div class="w-px h-5 bg-[#e5e7eb]"></div>
+        <span class="text-[13px] text-[#6e6e73]">已勾选 {{ selectedTaskIds.length }} 个任务</span>
+        <button :disabled="!selectedTaskIds.length || exportingMerged" @click="exportSelectedExcelAction"
+          class="h-9 px-4 rounded-[8px] bg-[#e8f8ed] text-[#1f9d4d] text-[13px] font-medium border-none cursor-pointer hover:bg-[#d4f5e0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+          {{ exportingMerged ? '导出中...' : '合并导出 Excel' }}
+        </button>
+        <button v-if="selectedTaskIds.length" @click="selectedTaskIds = []"
+          class="h-9 px-3 rounded-[8px] bg-[#f5f5f7] text-[#6e6e73] text-[13px] font-medium border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors">
+          清空勾选
+        </button>
+        <span class="text-[12px] text-[#aeaeb2]">仅已完成的任务可勾选，导出为一个合并 Excel（概览 + 成绩汇总）</span>
+      </div>
+
       <!-- Loading state -->
       <div v-if="loading" class="flex items-center justify-center py-12 bg-white rounded-[12px] border border-black/[0.06]">
         <svg class="animate-spin h-6 w-6 text-[#007aff]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
       </div>
 
       <!-- 任务列表 -->
-      <div v-else-if="tasks.length > 0" class="flex flex-col gap-3">
-        <div v-for="row in tasks" :key="row.taskId"
+      <div v-else-if="displayedTasks.length > 0" class="flex flex-col gap-3">
+        <div v-for="row in displayedTasks" :key="row.taskId"
           class="flex items-center gap-4 p-4 bg-white rounded-[12px] border border-black/[0.06] hover:border-[#007aff]/20 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+          <!-- 勾选框 -->
+          <input type="checkbox" :disabled="row.status !== 'COMPLETED'"
+            :checked="selectedTaskIds.includes(row.taskId)" @change="toggleSelect(row)"
+            class="w-4 h-4 flex-shrink-0 accent-[#0b7cff] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            :title="row.status === 'COMPLETED' ? '勾选后可合并导出 Excel' : '仅已完成任务可勾选'" />
           <!-- 状态图标 -->
           <div class="w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0"
             :class="{
@@ -237,10 +287,14 @@
           <!-- 任务信息 -->
           <div class="flex-1 min-w-0">
             <div class="text-[14px] font-medium text-[#1d1d1f] mb-1 truncate">
-              {{ row.experimentName || `批改任务 #${row.taskId}` }}
+              {{ row.experimentName || `批改任务 ${row.displayCode || `#${row.taskId}`}` }}
             </div>
             <div class="flex items-center gap-3 text-[12px] text-[#aeaeb2]">
-              <span>#{{ row.taskId }}</span>
+              <span>{{ row.displayCode || `#${row.taskId}` }}</span>
+              <span v-if="row.batchName"
+                class="inline-flex items-center px-2 py-0.5 rounded-[6px] bg-[#eef5ff] text-[#0b7cff] font-medium">
+                {{ row.batchName }}
+              </span>
               <span>{{ formatTime(row.createdAt) }}</span>
               <span>{{ row.totalCount }} 份作业</span>
             </div>
@@ -309,7 +363,7 @@
           <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
             class="flex-1 h-9 px-3 rounded-[10px] bg-white border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
             @keyup.enter="addSignature" />
-          <UiButton @click="addSignature"
+          <UiButton type="primary" @click="addSignature"
             class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
             添加
           </UiButton>
@@ -326,10 +380,10 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList } from '@/api/tap'
+import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList, getGradingBatches, exportGradingBatchExcel, exportMergedGradingExcel } from '@/api/tap'
 import LucideIcon from '@/components/LucideIcon.vue'
 import AppModal from '@/components/AppModal.vue'
 
@@ -339,8 +393,100 @@ const loading = ref(false)
 const submitting = ref(false)
 const fileList = ref([])
 const uploadRef = ref(null)
-const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99] })
+const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchId: '', batchName: '' })
 let refreshTimer = null
+
+// ---- 批次与多选导出 ----
+const batches = ref([]) // [{batchId, displayCode, name, taskCount, completedTaskCount, createdAt}]
+const batchFilter = ref('')
+const selectedTaskIds = ref([])
+const exportingBatch = ref(false)
+const exportingMerged = ref(false)
+
+const displayedTasks = computed(() => {
+  if (!batchFilter.value) return tasks.value
+  return tasks.value.filter(t => t.batchId === batchFilter.value)
+})
+
+async function loadBatches() {
+  try {
+    const res = await getGradingBatches()
+    const data = res?.data ?? res
+    batches.value = data?.content || []
+  } catch (e) { logger.error('加载批次列表失败:', e) }
+}
+
+function toggleSelect(row) {
+  const id = row.taskId
+  if (selectedTaskIds.value.includes(id)) {
+    selectedTaskIds.value = selectedTaskIds.value.filter(x => x !== id)
+  } else {
+    selectedTaskIds.value = [...selectedTaskIds.value, id]
+  }
+}
+
+function downloadExcelBlob(data, filename) {
+  const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+async function readExportError(e) {
+  try {
+    const data = e?.response?.data
+    if (data instanceof Blob) {
+      const text = await data.text()
+      const json = JSON.parse(text)
+      if (json?.message) return json.message
+    }
+  } catch { /* fall through */ }
+  return e?.message || '导出失败'
+}
+
+async function exportBatchExcelAction() {
+  exportingBatch.value = true
+  try {
+    if (batchFilter.value) {
+      const batch = batches.value.find(b => b.batchId === batchFilter.value)
+      const res = await exportGradingBatchExcel(batchFilter.value)
+      const code = batch?.displayCode || batchFilter.value
+      downloadExcelBlob(res, `批改成绩-批次${code}.xlsx`)
+      uiMessage.success('批次 Excel 已导出')
+    } else {
+      // 全部批次：导出当前列表中所有已完成任务的合并 Excel
+      const completedIds = tasks.value.filter(t => t.status === 'COMPLETED').map(t => t.taskId)
+      if (!completedIds.length) {
+        uiMessage.warning('当前没有已完成的批改任务可导出')
+        exportingBatch.value = false
+        return
+      }
+      const res = await exportMergedGradingExcel(completedIds)
+      const stamp = new Date().toISOString().slice(0, 10).replaceAll('-', '')
+      downloadExcelBlob(res, `批改成绩-全部已完成-${stamp}.xlsx`)
+      uiMessage.success('全部已完成任务的 Excel 已导出')
+    }
+  } catch (e) {
+    uiMessage.error(await readExportError(e))
+  }
+  exportingBatch.value = false
+}
+
+async function exportSelectedExcelAction() {
+  if (!selectedTaskIds.value.length) return
+  exportingMerged.value = true
+  try {
+    const res = await exportMergedGradingExcel(selectedTaskIds.value)
+    const stamp = new Date().toISOString().slice(0, 10).replaceAll('-', '')
+    downloadExcelBlob(res, `批改成绩-合并导出-${stamp}.xlsx`)
+    uiMessage.success('合并 Excel 已导出')
+  } catch (e) {
+    uiMessage.error(await readExportError(e))
+  }
+  exportingMerged.value = false
+}
+// ---- 批次与多选导出结束 ----
 
 // ---- 署名管理 ----
 const savedSignatures = ref([]) // [{id, signature, createdAt}]
@@ -536,11 +682,19 @@ async function submitTask() {
       fd.append('scoreRangeMin', createForm.value.scoreRange[0])
       fd.append('scoreRangeMax', createForm.value.scoreRange[1])
     }
+    if (createForm.value.batchId) {
+      fd.append('batchId', createForm.value.batchId)
+    } else if (createForm.value.batchName?.trim()) {
+      fd.append('batchName', createForm.value.batchName.trim())
+    }
     await createGradingTask(fd)
     uiMessage.success('批改任务已创建，AI 正在处理中...')
     clearSelectedFiles()
     createForm.value.teacherSignature = ''
+    createForm.value.batchId = ''
+    createForm.value.batchName = ''
     loadTasks()
+    loadBatches()
   } catch (e) { uiMessage.error('创建失败: ' + e.message) }
   submitting.value = false
 }
@@ -551,6 +705,8 @@ async function loadTasks() {
     const res = await getGradingTasks()
     const data = res?.data ?? res
     tasks.value = data?.content || (Array.isArray(data) ? data : [])
+    const completedIds = new Set(tasks.value.filter(t => t.status === 'COMPLETED').map(t => t.taskId))
+    selectedTaskIds.value = selectedTaskIds.value.filter(id => completedIds.has(id))
   } catch (e) { uiMessage.error('加载任务列表失败: ' + e.message) }
   loading.value = false
 }
@@ -568,6 +724,7 @@ async function deleteTask(id) {
     await deleteGradingTask(id)
     uiMessage.success('任务已删除')
     loadTasks()
+    loadBatches()
   } catch (e) { uiMessage.error('删除失败: ' + e.message) }
 }
 
@@ -596,6 +753,7 @@ onMounted(async () => {
   } catch (e) { logger.error('加载评分标准失败:', e) }
   loadSignatures()
   loadTasks()
+  loadBatches()
   refreshTimer = setInterval(() => {
     if (tasks.value.some(t => t.status === 'PROCESSING' || t.status === 'PENDING')) loadTasks()
   }, 5000)
