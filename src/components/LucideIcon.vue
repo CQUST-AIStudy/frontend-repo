@@ -18,9 +18,11 @@ import {
   Clipboard,
   ClipboardCheck,
   ClipboardList,
+  CloudUpload,
   Code2,
   FileCode2,
   FileText,
+  Flag,
   Flame,
   Folder,
   Globe,
@@ -30,12 +32,14 @@ import {
   Library,
   Link as LinkIcon,
   ListChecks,
+  LoaderCircle,
   Mail,
   MessageSquare,
   Network,
   Package,
   PenLine,
   PieChart,
+  Plus,
   RefreshCw,
   Ruler,
   Scale,
@@ -48,9 +52,11 @@ import {
   ThumbsUp,
   TrendingDown,
   TrendingUp,
+  Trash2,
   TreePine,
   TriangleAlert,
-  Wrench
+  Wrench,
+  X
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -81,9 +87,11 @@ const icons = {
   clipboard: ClipboardList,
   'clipboard-check': ClipboardCheck,
   'clipboard-text': Clipboard,
+  'cloud-upload': CloudUpload,
   code: Code2,
   'file-code': FileCode2,
   file: FileText,
+  flag: Flag,
   flame: Flame,
   folder: Folder,
   globe: Globe,
@@ -93,12 +101,14 @@ const icons = {
   library: Library,
   link: LinkIcon,
   'list-checks': ListChecks,
+  loader: LoaderCircle,
   mail: Mail,
   'message-square': MessageSquare,
   network: Network,
   package: Package,
   pen: PenLine,
   'pie-chart': PieChart,
+  plus: Plus,
   refresh: RefreshCw,
   ruler: Ruler,
   scale: Scale,
@@ -111,9 +121,11 @@ const icons = {
   'thumbs-up': ThumbsUp,
   'trend-down': TrendingDown,
   trend: TrendingUp,
+  'trash-2': Trash2,
   tree: TreePine,
   'triangle-alert': TriangleAlert,
-  wrench: Wrench
+  wrench: Wrench,
+  x: X
 }
 
 const ResolvedIcon = computed(() => icons[props.name] || Circle)

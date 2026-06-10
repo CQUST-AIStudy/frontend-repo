@@ -10,25 +10,25 @@
     <div class="bg-white rounded-[12px] border border-[#e5e7eb] shadow-[0_6px_18px_rgba(15,23,42,0.04)] mb-6 overflow-hidden">
       <!-- 流程步骤指示器 -->
       <div class="flex bg-[#fbfcfe] border-b border-[#edf0f5] px-6 py-4">
-        <div class="flex-1 flex items-center gap-3 relative" :class="{ 'active': true, 'completed': false }">
+        <div class="flex-1 flex items-center justify-center gap-4 relative" :class="{ 'active': true, 'completed': false }">
           <div class="w-7 h-7 rounded-[8px] bg-[#0b7cff] text-white flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10 shadow-[0_4px_10px_rgba(11,124,255,0.18)]">1</div>
-          <div class="flex-1">
+          <div class="w-[170px]">
             <div class="text-[13px] font-semibold text-[#0b7cff]">配置批改参数</div>
             <div class="text-[11px] text-[#9aa4b2]">选择评分标准和期望分数</div>
           </div>
-          <div class="absolute top-1/2 left-10 right-[-12px] h-px bg-[#d9e7ff] -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[#0b7cff] -translate-y-1/2"></div>
         </div>
-        <div class="flex-1 flex items-center gap-3 relative">
+        <div class="flex-1 flex items-center justify-center gap-4 relative">
           <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">2</div>
-          <div class="flex-1">
+          <div class="w-[170px]">
             <div class="text-[13px] font-semibold text-[#1d1d1f]">上传作业文件</div>
             <div class="text-[11px] text-[#9aa4b2]">支持 PDF、DOC 格式</div>
           </div>
-          <div class="absolute top-1/2 left-10 right-[-12px] h-px bg-[#e5e7eb] -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[#e5e7eb] -translate-y-1/2"></div>
         </div>
-        <div class="flex-1 flex items-center gap-3 relative">
+        <div class="flex-1 flex items-center justify-center gap-4 relative">
           <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">3</div>
-          <div class="flex-1">
+          <div class="w-[170px]">
             <div class="text-[13px] font-semibold text-[#1d1d1f]">AI 自动批改</div>
             <div class="text-[11px] text-[#9aa4b2]">等待 AI 处理完成</div>
           </div>
@@ -53,11 +53,40 @@
 
           <!-- 教师署名 -->
           <div class="flex flex-col gap-2">
-            <label class="text-[13px] font-medium text-[#6e6e73]">
-              <span class="text-[#ff3b30]">*</span> 教师署名
-            </label>
-            <UiInput v-model="createForm.teacherSignature" maxlength="32" placeholder="例如：张老师"
-              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
+            <div class="flex items-center justify-between">
+              <label class="text-[13px] font-medium text-[#6e6e73]">
+                <span class="text-[#ff3b30]">*</span> 教师署名
+              </label>
+              <button type="button" @click="sigManageOpen = true"
+                class="text-[12px] text-[#007aff] hover:text-[#0056b3] cursor-pointer bg-transparent border-none transition-colors">
+                管理署名
+              </button>
+            </div>
+            <div class="flex gap-2">
+              <UiSelect v-model="createForm.teacherSignature" clearable
+                placeholder="选择署名"
+                class="h-11 flex-1 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+                <UiOption v-for="s in savedSignatures" :key="s.id" :value="s.signature">{{ s.signature }}</UiOption>
+              </UiSelect>
+              <button type="button" @click="showNewSigInput = true"
+                class="h-11 w-11 flex items-center justify-center rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-[#007aff] hover:bg-[#007aff] hover:text-white cursor-pointer transition-all"
+                title="新增署名">
+                <LucideIcon name="plus" :size="18" />
+              </button>
+            </div>
+            <div v-if="showNewSigInput" class="flex gap-2">
+              <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
+                class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+                @keyup.enter="confirmNewSignature" />
+              <UiButton @click="confirmNewSignature"
+                class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+                确定
+              </UiButton>
+              <UiButton @click="showNewSigInput = false; newSignature = ''"
+                class="h-10 px-3 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors">
+                取消
+              </UiButton>
+            </div>
           </div>
         </div>
 
@@ -107,51 +136,46 @@
           <ui-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :on-change="onFileChange"
                      accept=".pdf,.docx,.doc" multiple drag :on-remove="onFileRemove"
                      class="upload-flow-wrapper w-full">
-            <div class="flex flex-col items-center justify-center py-9 w-full">
-              <div class="w-12 h-12 bg-[#edf5ff] rounded-[14px] flex items-center justify-center text-[#0b7cff] mb-4">
-                <LucideIcon name="cloud-upload" :size="25" />
+            <div class="flex items-center justify-center gap-7 px-8 py-6 w-full">
+              <div class="w-16 h-16 bg-[#edf5ff] rounded-[14px] flex items-center justify-center text-[#0b7cff] shadow-[inset_0_0_0_1px_rgba(11,124,255,0.06)]">
+                <LucideIcon name="cloud-upload" :size="34" />
               </div>
-              <div class="text-[15px] font-semibold text-[#101828] mb-2">
-                拖拽作业文件到此处，或 <span class="text-[#0b7cff]">点击选择</span>
-              </div>
-              <div class="text-[13px] text-[#667085] mb-4">支持批量上传，AI 将自动识别并批改</div>
-              <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-[#98a2b3]">
-                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
-                  <LucideIcon name="file" :size="14" />
-                  PDF / DOC / DOCX
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
-                  <LucideIcon name="hard-drive" :size="14" />
-                  单文件 ≤ 50MB
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-[8px] bg-[#f8fafc] px-2.5 py-1">
-                  <LucideIcon name="users" :size="14" />
-                  最多 200 份
-                </span>
+              <div class="min-w-0">
+                <div class="text-[15px] font-semibold text-[#101828] mb-2">
+                  拖拽作业文件到此处，或 <span class="text-[#0b7cff]">点击选择</span>
+                </div>
+                <div class="text-[13px] text-[#667085] mb-3">支持批量上传，AI 将自动识别并批改</div>
+                <div class="flex flex-wrap items-center gap-2 text-[12px] text-[#667085]">
+                  <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">PDF</span>
+                  <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">DOC</span>
+                  <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">DOCX</span>
+                </div>
               </div>
             </div>
           </ui-upload>
 
-          <div v-if="fileList.length" class="mt-4 overflow-hidden rounded-[12px] border border-[#dbe7f5] bg-white">
-            <div class="flex items-center justify-between gap-3 border-b border-[#edf0f5] bg-[#f8fbff] px-4 py-3">
-              <div class="flex items-center gap-2 text-[13px] font-semibold text-[#101828]">
-                <LucideIcon name="files" :size="15" class="text-[#0b7cff]" />
-                已选择 {{ fileList.length }} 个文件
-              </div>
-              <button type="button" class="text-[12px] text-[#667085] hover:text-[#ff3b30]" @click="clearSelectedFiles">
-                清空
-              </button>
+          <div v-if="fileList.length" class="mt-4">
+            <div class="mb-2 flex items-center justify-between text-[13px]">
+              <span class="font-medium text-[#101828]">已选文件（{{ fileList.length }} 个）</span>
+              <button type="button" class="text-[#667085] hover:text-[#ff3b30]" @click="clearSelectedFiles">清空</button>
             </div>
-            <div class="divide-y divide-[#edf0f5]">
+            <div class="overflow-hidden rounded-[8px] border border-[#e4e7ec] bg-white">
+              <div class="grid grid-cols-[1fr_140px_90px] items-center bg-[#f8fafc] px-4 py-2.5 text-[12px] font-medium text-[#667085]">
+                <span>文件名</span>
+                <span class="text-center">大小</span>
+                <span class="text-center">操作</span>
+              </div>
               <div v-for="file in fileList" :key="file.uid || file.name"
-                class="grid grid-cols-[1fr_96px_48px] items-center gap-4 px-4 py-3 text-[13px]">
+                class="grid grid-cols-[1fr_140px_90px] items-center border-t border-[#edf0f5] px-4 py-3 text-[13px]">
                 <div class="flex min-w-0 items-center gap-2">
-                  <LucideIcon name="file-text" :size="15" class="shrink-0 text-[#0b7cff]" />
+                  <span :class="['inline-flex h-7 min-w-8 shrink-0 items-center justify-center rounded-[4px] px-1.5 text-[8px] font-bold leading-none text-white', fileTypeBadgeClass(file)]">
+                    {{ fileTypeLabel(file) }}
+                  </span>
                   <span class="min-w-0 flex-1 truncate text-[#344054]">{{ file.name }}</span>
                 </div>
-                <span class="text-right text-[12px] text-[#667085]">{{ formatFileSize(file.size || file.raw?.size) }}</span>
-                <button type="button" class="justify-self-end text-[#98a2b3] hover:text-[#ff3b30]" @click="removeSelectedFile(file)">
-                  <LucideIcon name="trash-2" :size="14" />
+                <span class="text-center text-[13px] text-[#344054]">{{ formatFileSize(file.size || file.raw?.size) }}</span>
+                <button type="button" class="justify-self-center text-[#ff3b30] hover:text-[#d92d20]" @click="removeSelectedFile(file)">
+                  <LucideIcon name="trash-2" :size="16" />
                 </button>
               </div>
             </div>
@@ -266,6 +290,38 @@
         <p class="text-[12px] text-[#d1d5db] m-0 mt-2">上传作业文件后开始批改</p>
       </div>
     </div>
+
+    <!-- 署名管理弹窗 -->
+    <AppModal v-model="sigManageOpen" title="管理署名" width="420px">
+      <div class="space-y-3">
+        <div v-for="(sig, i) in savedSignatures" :key="i"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] group">
+          <span class="flex-1 text-[14px] text-[#1d1d1f]">{{ sig.signature }}</span>
+          <button @click="removeSignature(i)"
+            class="opacity-0 group-hover:opacity-100 text-[#ff3b30] hover:text-[#d92d20] cursor-pointer bg-transparent border-none transition-all">
+            <LucideIcon name="x" :size="16" />
+          </button>
+        </div>
+        <div v-if="!savedSignatures.length" class="py-6 text-center text-[13px] text-[#aeaeb2]">
+          暂无保存的署名，创建批改任务时会自动保存
+        </div>
+        <div class="flex gap-2 pt-2">
+          <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
+            class="flex-1 h-9 px-3 rounded-[10px] bg-white border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+            @keyup.enter="addSignature" />
+          <UiButton @click="addSignature"
+            class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+            添加
+          </UiButton>
+        </div>
+      </div>
+      <template #footer>
+        <UiButton @click="sigManageOpen = false"
+          class="h-9 px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+          关闭
+        </UiButton>
+      </template>
+    </AppModal>
   </div>
 </template>
 
@@ -273,8 +329,9 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask } from '@/api/tap'
+import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList } from '@/api/tap'
 import LucideIcon from '@/components/LucideIcon.vue'
+import AppModal from '@/components/AppModal.vue'
 
 const rubrics = ref([])
 const tasks = ref([])
@@ -284,6 +341,62 @@ const fileList = ref([])
 const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99] })
 let refreshTimer = null
+
+// ---- 署名管理 ----
+const savedSignatures = ref([]) // [{id, signature, createdAt}]
+const sigManageOpen = ref(false)
+const showNewSigInput = ref(false)
+const newSignature = ref('')
+
+async function loadSignatures() {
+  try {
+    const res = await getTeacherSignatures()
+    savedSignatures.value = normalizeSignatureList(res)
+  } catch (e) { logger.error('加载署名失败:', e) }
+}
+
+async function confirmNewSignature() {
+  const sig = newSignature.value.trim()
+  if (!sig) return
+  try {
+    await addTeacherSignature(sig)
+    await loadSignatures()
+    createForm.value.teacherSignature = sig
+  } catch (e) {
+    uiMessage.error(e.message || '添加署名失败')
+  }
+  newSignature.value = ''
+  showNewSigInput.value = false
+}
+
+async function addSignature() {
+  const sig = newSignature.value.trim()
+  if (!sig) return
+  try {
+    await addTeacherSignature(sig)
+    await loadSignatures()
+    newSignature.value = ''
+    uiMessage.success('署名已添加')
+  } catch (e) {
+    uiMessage.error(e.message || '添加署名失败')
+  }
+}
+
+async function removeSignature(index) {
+  const sig = savedSignatures.value[index]
+  if (!sig?.id) return
+  try {
+    await deleteTeacherSignature(sig.id)
+    await loadSignatures()
+    if (createForm.value.teacherSignature === sig.signature) {
+      createForm.value.teacherSignature = ''
+    }
+    uiMessage.success('署名已删除')
+  } catch (e) {
+    uiMessage.error(e.message || '删除署名失败')
+  }
+}
+// ---- 署名管理结束 ----
 
 // 监听分数区间变化，确保值在有效范围内
 watch(() => createForm.value.scoreRange, (newVal) => {
@@ -377,6 +490,26 @@ function formatFileSize(size) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
+function getUploadFileName(file) {
+  return String(file?.name || file?.raw?.name || file?.file?.name || '')
+}
+
+function fileTypeLabel(file) {
+  const name = getUploadFileName(file)
+  const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : ''
+  if (ext === 'pdf') return 'PDF'
+  if (ext === 'doc') return 'DOC'
+  if (ext === 'docx') return 'DOCX'
+  return ext ? ext.toUpperCase().slice(0, 5) : 'FILE'
+}
+
+function fileTypeBadgeClass(file) {
+  const type = fileTypeLabel(file)
+  if (type === 'PDF') return 'bg-[#ff3b30]'
+  if (type === 'DOC' || type === 'DOCX') return 'bg-[#2563eb]'
+  return 'bg-[#667085]'
+}
+
 async function confirmDeleteTask(id) {
   try {
     await messageBox.confirm('确定删除此批改任务？删除后不可恢复', '确认删除', {
@@ -461,6 +594,7 @@ onMounted(async () => {
     const res = await getRubrics()
     rubrics.value = normalizeRubricList(res)
   } catch (e) { logger.error('加载评分标准失败:', e) }
+  loadSignatures()
   loadTasks()
   refreshTimer = setInterval(() => {
     if (tasks.value.some(t => t.status === 'PROCESSING' || t.status === 'PENDING')) loadTasks()
@@ -480,5 +614,16 @@ onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 142px;
+  border-color: #8ec5ff !important;
+  border-style: dashed !important;
+  border-width: 1.5px !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  padding: 0 !important;
+}
+:deep(.upload-flow-wrapper > div:first-of-type:hover) {
+  border-color: #0b7cff !important;
+  background: #f8fbff !important;
 }
 </style>

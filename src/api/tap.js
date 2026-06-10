@@ -662,4 +662,22 @@ export function clearTeacherPtaCredentials() {
   return tapClient.delete('/api/teachers/me/pta-credentials')
 }
 
+// ========== Grading - Teacher Signatures ==========
+export function getTeacherSignatures() {
+  return tapClient.get('/api/grading/signatures')
+}
 
+export function addTeacherSignature(signature) {
+  return tapClient.post('/api/grading/signatures', { signature })
+}
+
+export function deleteTeacherSignature(id) {
+  return tapClient.delete(`/api/grading/signatures/${id}`)
+}
+
+export function normalizeSignatureList(payload) {
+  const root = payload?.data ?? payload
+  const candidates = [root, root?.data, root?.content, root?.items, root?.records, root?.list]
+  const list = candidates.find(Array.isArray) || []
+  return list.filter(Boolean)
+}
