@@ -26,7 +26,7 @@ module.exports = {
         changeOrigin: true,
       },
       '^/rag(?:/|$)': {
-        target: 'http://127.0.0.1:8001',
+        target: 'http://127.0.0.1:8081',
         changeOrigin: true,
       },
       '^/spider(?:/|$)': {
