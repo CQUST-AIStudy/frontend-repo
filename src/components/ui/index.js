@@ -1,4 +1,4 @@
-import { Teleport, Transition, computed, defineComponent, h, inject, nextTick, onMounted, onUnmounted, provide, reactive, ref, resolveComponent } from 'vue'
+import { Teleport, Transition, computed, defineComponent, h, inject, nextTick, onMounted, onUnmounted, provide, reactive, ref, resolveComponent, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const radioGroupKey = Symbol('ui-radio-group')
@@ -1626,13 +1626,40 @@ export const UiUpload = defineComponent({
   emits: ['change'],
   setup(props, { attrs, emit, expose, slots }) {
     const inputRef = ref(null)
-    const files = ref([])
+    const normalizeUploadFile = (file) => {
+      if (!file) return null
+      return {
+        uid: file.uid || `${file.name || file.raw?.name || 'file'}-${file.size || file.raw?.size || 0}-${file.lastModified || file.raw?.lastModified || Date.now()}`,
+        name: file.name || file.raw?.name || file.file?.name,
+        size: file.size || file.raw?.size || file.file?.size,
+        raw: file.raw || file.file || file,
+        file: file.file || file.raw || file
+      }
+    }
+    const files = ref((props.fileList || []).map(normalizeUploadFile).filter(Boolean))
+    const syncFilesFromProps = () => {
+      files.value = (props.fileList || []).map(normalizeUploadFile).filter(Boolean)
+    }
     const open = () => inputRef.value?.click()
     const clearFiles = () => { files.value = [] }
     expose({ clearFiles, submit: () => {} })
+
+    watch(() => props.fileList, syncFilesFromProps, { deep: true, immediate: true })
+
+    const updateControlledFiles = (nextFiles) => {
+      files.value = nextFiles
+    }
+
     const onFileChange = (event) => {
-      const selected = Array.from(event.target.files || []).map((file) => ({ name: file.name, size: file.size, raw: file, file }))
-      files.value = props.multiple ? [...files.value, ...selected] : selected
+      const selected = Array.from(event.target.files || []).map((file, index) => normalizeUploadFile({
+        uid: `${file.name}-${file.size}-${file.lastModified}-${Date.now()}-${index}`,
+        name: file.name,
+        size: file.size,
+        raw: file,
+        file
+      })).filter(Boolean)
+      const nextFiles = props.multiple ? [...files.value, ...selected] : selected
+      updateControlledFiles(nextFiles)
       selected.forEach((file) => props.onChange?.(file, files.value))
       emit('change', selected[0], files.value)
       event.target.value = ''

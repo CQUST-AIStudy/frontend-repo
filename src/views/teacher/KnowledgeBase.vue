@@ -111,6 +111,32 @@
             </template>
           </ui-upload>
 
+          <div v-if="pendingFiles.length > 0" class="mt-4 rounded-[14px] border border-black/[0.06] bg-[#f8fafc] px-4 py-3">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <span class="text-sm font-medium text-[#1d1d1f]">待上传文件</span>
+              <span class="text-xs text-[#6e6e73]">{{ pendingFiles.length }} 个文件</span>
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="file in pendingFiles"
+                :key="pendingFileKey(file)"
+                class="flex items-center justify-between gap-3 rounded-[10px] bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]"
+              >
+                <div class="min-w-0 flex-1">
+                  <div class="truncate text-sm text-[#1d1d1f]">{{ pendingFileName(file) }}</div>
+                  <div class="mt-0.5 text-xs text-[#6e6e73]">{{ formatPendingFileSize(file) }}</div>
+                </div>
+                <UiButton
+                  class="h-7 w-7 rounded-full border-none bg-[#f5f5f7] p-0 text-sm font-semibold text-[#6e6e73] hover:bg-[#ffe4e6] hover:text-[#d93025]"
+                  :disabled="uploading"
+                  @click="removePendingFile(file)"
+                >
+                  x
+                </UiButton>
+              </div>
+            </div>
+          </div>
+
           <div v-if="pendingFiles.length > 0" class="mt-3 flex justify-end gap-2 items-center">
             <UiSelect v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[160px]">
               <UiOption value="textbook">教材</UiOption>
@@ -642,7 +668,124 @@ async function loadDocuments() {
 }
 
 function onFileChange(_file, fileList) {
-  pendingFiles.value = fileList
+  pendingFiles.value = dedupePendingFiles(fileList)
+}
+
+function removePendingFile(fileToRemove) {
+  pendingFiles.value = pendingFiles.value.filter((file) => !isSamePendingFile(file, fileToRemove))
+}
+
+function dedupePendingFiles(fileList = []) {
+  const uniqueFiles = []
+  for (const file of fileList) {
+    if (!uniqueFiles.some((item) => isSamePendingFile(item, file))) {
+      uniqueFiles.push(file)
+    }
+  }
+  return uniqueFiles
+}
+
+function isSamePendingFile(left, right) {
+  if (!left || !right) return false
+  if (left.uid && right.uid) return left.uid === right.uid
+  const leftRaw = left.raw || left.file || left
+  const rightRaw = right.raw || right.file || right
+  return (
+    pendingFileName(left) === pendingFileName(right) &&
+    Number(leftRaw?.size || left.size || 0) === Number(rightRaw?.size || right.size || 0) &&
+    Number(leftRaw?.lastModified || 0) === Number(rightRaw?.lastModified || 0)
+  )
+}
+
+function pendingFileName(file) {
+  return file?.name || file?.raw?.name || file?.file?.name || '未命名文件'
+}
+
+function pendingFileKey(file) {
+  const raw = file?.raw || file?.file || file
+  return `${pendingFileName(file)}-${raw?.size || file?.size || 0}-${raw?.lastModified || 0}`
+}
+
+function getPendingFileRaw(file) {
+  return file?.raw || file?.file || file || null
+}
+
+function formatPendingFileSize(file) {
+  const raw = getPendingFileRaw(file)
+  const size = Number(raw?.size || file?.size || 0)
+  if (!size) return '大小未知'
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`
+}
+
+function buildEditableCopyName(sourceName = '') {
+  const baseName = String(sourceName || '课程空间').trim() || '课程空间'
+  const suffix = '-我的副本'
+  const existingNames = new Set(spaces.value.map((space) => String(space?.name || '').trim()).filter(Boolean))
+
+  if (!existingNames.has(`${baseName}${suffix}`)) {
+    return `${baseName}${suffix}`
+  }
+
+  let index = 2
+  while (existingNames.has(`${baseName}${suffix}${index}`)) {
+    index += 1
+  }
+  return `${baseName}${suffix}${index}`
+}
+
+function buildEditableCopyPayload(space) {
+  const classIds = Array.isArray(space?.boundClassIds) ? [...space.boundClassIds] : []
+  return {
+    name: buildEditableCopyName(space?.name),
+    description: space?.description || '',
+    courseId: space?.courseId || '',
+    courseName: space?.courseName || '',
+    term: space?.term || '',
+    docVisibility: space?.docVisibility || (currentClassId.value ? 'class' : 'public'),
+    classIds: classIds.length > 0 ? classIds : (currentClassId.value ? [currentClassId.value] : []),
+    defaultMode: space?.defaultMode || 'strict',
+    allowWebSearch: !!space?.allowWebSearch,
+    requireCitation: space?.requireCitation !== false,
+  }
+}
+
+function isWriteDeniedUploadError(error) {
+  const rawMessage = String(error?.message || '').trim()
+  const friendlyMessage = String(getFriendlyErrorMessage(error, '') || '').trim()
+  const combined = `${rawMessage} ${friendlyMessage}`
+  return /没有访问该知识库的权限|没有权限|无权限|forbidden|access denied/i.test(combined)
+}
+
+async function createEditableCopyForUpload(space) {
+  const payload = buildEditableCopyPayload(space)
+  const res = await createCourseSpace(payload)
+  const createdSpace = res?.data || res || null
+  await loadSpaces()
+
+  const nextSpace =
+    spaces.value.find((item) => item.id && item.id === createdSpace?.id) ||
+    spaces.value.find((item) => item.name === payload.name) ||
+    (createdSpace?.id ? { ...space, ...createdSpace, id: createdSpace.id, name: payload.name } : null)
+
+  if (!nextSpace?.id) {
+    throw new Error('可编辑副本创建成功，但未能定位到新知识库')
+  }
+
+  selectedSpace.value = nextSpace
+  activeTab.value = 'docs'
+  documents.value = []
+  docStatusSummary.value = emptyDocSummary()
+  return nextSpace
+}
+
+async function uploadSinglePendingFile(space, file) {
+  const raw = getPendingFileRaw(file)
+  if (!raw) {
+    throw new Error(`文件 ${pendingFileName(file)} 数据异常，请重新选择后再上传`)
+  }
+  await uploadCourseSpaceDocument(space.id, raw, uploadDocType.value)
 }
 
 async function uploadFiles() {
@@ -650,21 +793,47 @@ async function uploadFiles() {
   uploading.value = true
   let successCount = 0
   let failCount = 0
+  let activeSpace = selectedSpace.value
+  let copiedForUpload = false
+  let copiedSpaceName = ''
+  const failedFiles = []
+  const filesToUpload = [...pendingFiles.value]
 
-  for (const file of pendingFiles.value) {
+  for (const file of filesToUpload) {
     try {
-      await uploadCourseSpaceDocument(selectedSpace.value.id, file.raw, uploadDocType.value)
+      await uploadSinglePendingFile(activeSpace, file)
       successCount += 1
-    } catch {
+      continue
+    } catch (error) {
+      if (!copiedForUpload && isWriteDeniedUploadError(error)) {
+        try {
+          activeSpace = await createEditableCopyForUpload(activeSpace)
+          copiedForUpload = true
+          copiedSpaceName = activeSpace.name || ''
+          await uploadSinglePendingFile(activeSpace, file)
+          successCount += 1
+          continue
+        } catch (copyError) {
+          failCount += 1
+          failedFiles.push(file)
+          uiMessage.error(getFriendlyErrorMessage(copyError, '当前知识库没有上传权限，且创建可编辑副本失败'))
+          continue
+        }
+      }
+
       failCount += 1
+      failedFiles.push(file)
     }
   }
 
   uploading.value = false
-  pendingFiles.value = []
+  pendingFiles.value = failedFiles
 
+  if (copiedForUpload) {
+    uiMessage.success(`当前知识库没有上传权限，已自动切换到“${copiedSpaceName || '我的副本'}”继续上传`)
+  }
   if (successCount) uiMessage.success(`成功上传 ${successCount} 个文件`)
-  if (failCount) uiMessage.warning(`${failCount} 个文件上传失败`)
+  if (failCount) uiMessage.warning(`${failCount} 个文件上传失败，已保留在待上传列表`)
   await loadDocuments()
 }
 
