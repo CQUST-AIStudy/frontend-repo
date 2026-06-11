@@ -543,7 +543,10 @@ export function exportMergedGradingExcel(taskIds, includeComments = true) {
 
 // ========== Grading - Export ==========
 export function exportGradingTask(id) {
-  return tapClient.post(`/api/grading/tasks/${id}/export`, null, { responseType: 'blob' })
+  return tapClient.post(`/api/grading/tasks/${id}/export`, null, {
+    responseType: 'blob',
+    timeout: 600000
+  })
 }
 
 export function exportGradingExcel(id, submissionIds, includeComments) {
@@ -697,4 +700,21 @@ export function normalizeSignatureList(payload) {
   const candidates = [root, root?.data, root?.content, root?.items, root?.records, root?.list]
   const list = candidates.find(Array.isArray) || []
   return list.filter(Boolean)
+}
+
+// ========== Student - Animation Explain ==========
+export function getAnimationStyles() {
+  return tapClient.get('/api/student/animation-explain/styles')
+}
+
+export function listAnimationExplains() {
+  return tapClient.get('/api/student/animation-explain')
+}
+
+export function getAnimationExplain(id) {
+  return tapClient.get(`/api/student/animation-explain/${id}`)
+}
+
+export function createAnimationExplain(topic, style = 'cyber-clean') {
+  return tapClient.post('/api/student/animation-explain', { topic, style })
 }

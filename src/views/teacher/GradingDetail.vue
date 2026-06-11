@@ -4,14 +4,14 @@
     <div class="flex items-center gap-3 mb-5">
       <UiButton
         @click="router.push('/teacher/grading')"
-        class="w-[34px] h-[34px] rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors cursor-pointer border-none"
+        class="h-[38px] w-[38px] rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center"
       >
-        <svg class="w-4 h-4 text-[#6e6e73]" viewBox="0 0 20 20" fill="none">
-          <path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </UiButton>
-      <span class="text-[13px] text-[#6e6e73]">返回</span>
-      <span class="text-[15px] font-semibold text-[#1d1d1f]">{{ task?.displayCode ? `批改任务 ${task.displayCode}` : `批改任务 #${taskId}` }}</span>
+      <span class="text-[15px] text-[#6e6e73]">返回</span>
+      <span class="text-[17px] font-semibold text-[#1d1d1f]">{{ task?.displayCode ? `批改任务 ${task.displayCode}` : `批改任务 #${taskId}` }}</span>
     </div>
 
     <!-- Task Overview -->
@@ -34,25 +34,6 @@
       <div class="flex flex-col gap-1 py-[18px] px-4 rounded-[16px] bg-gradient-to-b from-[#f7fbff] to-[#eef6ff]">
         <span class="text-[28px] font-bold text-[#ef4444]">{{ task.failedCount || 0 }}</span>
         <span class="text-[13px] text-[#6e6e73]">失败</span>
-      </div>
-      <div class="min-w-[280px] flex flex-col gap-2">
-        <span class="text-[13px] text-[#6e6e73]">教师署名</span>
-        <div class="flex items-center gap-2.5">
-          <UiInput
-            v-model="signatureDraft"
-            maxlength="32"
-            placeholder="例如：张老师"
-            class="flex-1 h-[38px] px-3 rounded-[10px] border border-black/[0.08] bg-white text-[14px] text-[#1d1d1f] placeholder:text-[#aeaeb2] outline-none focus:border-[#007aff] focus:ring-2 focus:ring-[rgba(0,122,255,0.15)] transition-all"
-          />
-          <UiButton
-            :disabled="signatureSaving"
-            @click="saveSignature"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-black/[0.1] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer"
-          >
-            <span v-if="signatureSaving" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
-            保存署名
-          </UiButton>
-        </div>
       </div>
       <div class="flex-1" />
       <UiButton
@@ -243,7 +224,6 @@ import {
   exportGradingTask,
   getGradingTaskDetail,
   retryGradingSubmission,
-  updateGradingTaskSignature,
 } from '@/api/tap'
 
 const route = useRoute()
@@ -262,8 +242,6 @@ const exportIncludeComments = ref(true)
 const exporting = ref(false)
 const annotating = ref(false)
 const exportingAnnotated = ref(false)
-const signatureDraft = ref('')
-const signatureSaving = ref(false)
 const retryingSubmissionId = ref(null)
 
 const filterOptions = [
@@ -366,41 +344,9 @@ async function doExport() {
   }
 }
 
-function normalizedSignature(value) {
-  return String(value || '').trim()
-}
-
-async function saveSignature() {
-  if (!task.value) return
-  signatureSaving.value = true
-  try {
-    const res = await updateGradingTaskSignature(taskId, normalizedSignature(signatureDraft.value))
-    const data = res?.data || res
-    const nextSignature = data?.teacherSignature || normalizedSignature(signatureDraft.value)
-    signatureDraft.value = nextSignature
-    task.value = { ...task.value, teacherSignature: nextSignature }
-    uiMessage.success('教师署名已保存')
-    return nextSignature
-  } catch (error) {
-    uiMessage.error(`保存教师署名失败: ${error.message}`)
-    throw error
-  } finally {
-    signatureSaving.value = false
-  }
-}
-
-async function ensureSignatureSaved() {
-  if (!task.value) return null
-  const draft = normalizedSignature(signatureDraft.value)
-  const current = normalizedSignature(task.value.teacherSignature)
-  if (draft === current) return current
-  return saveSignature()
-}
-
 async function doBatchAnnotate() {
   annotating.value = true
   try {
-    await ensureSignatureSaved()
     const res = await batchGenerateAnnotatedReports(taskId)
     const data = res?.data || res
     uiMessage.success(`批改报告处理完成：共${data.total || 0}份，新生成${data.generated || 0}份，刷新${data.refreshed || 0}份，跳过${data.skipped || 0}份`)
@@ -418,7 +364,6 @@ async function doBatchAnnotate() {
 async function doBatchExportAnnotated() {
   exportingAnnotated.value = true
   try {
-    await ensureSignatureSaved()
     const res = await exportGradingTask(taskId)
     const blob = new Blob([res], { type: 'application/zip' })
     const url = URL.createObjectURL(blob)
@@ -482,7 +427,6 @@ async function loadDetail() {
     const res = await getGradingTaskDetail(taskId)
     const data = res?.data || res
     task.value = data
-    signatureDraft.value = data?.teacherSignature || ''
     submissions.value = data.submissions || []
   } catch (error) {
     uiMessage.error(error.message)

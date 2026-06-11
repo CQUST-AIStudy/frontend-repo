@@ -90,23 +90,11 @@
           </div>
         </div>
 
-        <!-- 批改批次 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div class="flex flex-col gap-2">
-            <label class="text-[13px] font-medium text-[#6e6e73]">批改批次</label>
-            <UiSelect v-model="createForm.batchId"
-              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
-              <UiOption value="">新建批次（本次上传自动创建）</UiOption>
-              <UiOption v-for="b in batches" :key="b.batchId" :value="b.batchId">
-                {{ b.name }}{{ b.displayCode ? `（${b.displayCode}）` : '' }}
-              </UiOption>
-            </UiSelect>
-          </div>
-          <div v-if="!createForm.batchId" class="flex flex-col gap-2">
-            <label class="text-[13px] font-medium text-[#6e6e73]">批次名称（可选）</label>
-            <UiInput v-model="createForm.batchName" maxlength="64" placeholder="不填则按任务编号自动命名"
-              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
-          </div>
+        <!-- 批次名称 -->
+        <div class="flex flex-col gap-2">
+          <label class="text-[13px] font-medium text-[#6e6e73]">批次名称</label>
+          <UiInput v-model="createForm.batchName" maxlength="64" placeholder="例如：第三次作业（不填则自动命名）"
+            class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
         </div>
 
         <!-- 分数区间 - 可视化版 -->
@@ -287,14 +275,10 @@
           <!-- 任务信息 -->
           <div class="flex-1 min-w-0">
             <div class="text-[14px] font-medium text-[#1d1d1f] mb-1 truncate">
-              {{ row.experimentName || `批改任务 ${row.displayCode || `#${row.taskId}`}` }}
+              {{ row.batchName || row.experimentName || `批改任务 ${row.displayCode || `#${row.taskId}`}` }}
             </div>
             <div class="flex items-center gap-3 text-[12px] text-[#aeaeb2]">
               <span>{{ row.displayCode || `#${row.taskId}` }}</span>
-              <span v-if="row.batchName"
-                class="inline-flex items-center px-2 py-0.5 rounded-[6px] bg-[#eef5ff] text-[#0b7cff] font-medium">
-                {{ row.batchName }}
-              </span>
               <span>{{ formatTime(row.createdAt) }}</span>
               <span>{{ row.totalCount }} 份作业</span>
             </div>
@@ -393,7 +377,7 @@ const loading = ref(false)
 const submitting = ref(false)
 const fileList = ref([])
 const uploadRef = ref(null)
-const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchId: '', batchName: '' })
+const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchName: '' })
 let refreshTimer = null
 
 // ---- 批次与多选导出 ----
@@ -682,16 +666,13 @@ async function submitTask() {
       fd.append('scoreRangeMin', createForm.value.scoreRange[0])
       fd.append('scoreRangeMax', createForm.value.scoreRange[1])
     }
-    if (createForm.value.batchId) {
-      fd.append('batchId', createForm.value.batchId)
-    } else if (createForm.value.batchName?.trim()) {
+    if (createForm.value.batchName?.trim()) {
       fd.append('batchName', createForm.value.batchName.trim())
     }
     await createGradingTask(fd)
     uiMessage.success('批改任务已创建，AI 正在处理中...')
     clearSelectedFiles()
     createForm.value.teacherSignature = ''
-    createForm.value.batchId = ''
     createForm.value.batchName = ''
     loadTasks()
     loadBatches()

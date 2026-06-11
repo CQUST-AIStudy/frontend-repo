@@ -42,6 +42,11 @@
               <template #title>AI 学习助手</template>
             </ui-menu-item>
 
+            <ui-menu-item index="/student/animation-explain">
+              <ui-icon><VideoPlay /></ui-icon>
+              <template #title>动画讲解</template>
+            </ui-menu-item>
+
             <ui-menu-item index="/student/class-join">
               <ui-icon><UserFilled /></ui-icon>
               <template #title>教学班级</template>
@@ -121,6 +126,11 @@
               <ui-menu-item index="/student/ai-assistant">
                 <ui-icon><ChatDotRound /></ui-icon>
                 <template #title>AI 学习助手</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/student/animation-explain">
+                <ui-icon><VideoPlay /></ui-icon>
+                <template #title>动画讲解</template>
               </ui-menu-item>
 
               <ui-menu-item index="/student/class-join">
@@ -229,6 +239,7 @@ import {
   DataAnalysis,
   Document,
   ChatDotRound,
+  VideoPlay,
   Collection,
   Search,
   Finished,
@@ -274,6 +285,7 @@ const breadcrumbs = computed(() => {
     'learning-analysis': '学情分析',
     'ai-report': 'AI 报告生成',
     'ai-assistant': 'AI 学习助手',
+    'animation-explain': '动画讲解',
     'class-join': '教学班级',
     practice: '推荐练习',
     'weakness-training': '错题本/专项训练',

@@ -49,6 +49,11 @@ const routes = [
         component: () => import('../views/student/AIAssistant.vue')
       },
       {
+        path: 'animation-explain',
+        name: 'AnimationExplain',
+        component: () => import('../views/student/AnimationExplain.vue')
+      },
+      {
         path: 'class-join',
         name: 'StudentClassJoin',
         component: () => import('../views/student/ClassJoin.vue')
