@@ -55,7 +55,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">薄弱维度排行</h3>
           <div class="overflow-x-auto">
-            <UiTable class="w-full text-[13px]">
+            <table class="w-full border-separate border-spacing-0 text-[13px]">
               <thead>
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">维度</th>
@@ -79,7 +79,7 @@
                   </td>
                 </tr>
               </tbody>
-            </UiTable>
+            </table>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@
         <!-- Tab panels -->
         <div v-for="(tier, key) in data.tiers" :key="key" v-show="activeTab === key">
           <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <UiTable class="w-full text-[13px]">
+            <table class="w-full border-separate border-spacing-0 text-[13px]">
               <thead class="sticky top-0 bg-white z-10">
                 <tr class="border-b border-black/[0.06]">
                   <th class="text-left py-2.5 px-3 font-medium text-[#6e6e73]">学号</th>
@@ -124,7 +124,7 @@
                   </td>
                 </tr>
               </tbody>
-            </UiTable>
+            </table>
           </div>
         </div>
       </div>
@@ -182,6 +182,65 @@ const emptyClassProfile = () => ({
   }
 })
 
+function toFiniteNumber(value, fallback = 0) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : fallback
+}
+
+function clampPercent(value) {
+  return Math.max(0, Math.min(100, toFiniteNumber(value)))
+}
+
+function normalizeStudent(row = {}) {
+  const studentId = row.studentId ?? row.student_id ?? ''
+  return {
+    studentId: String(studentId),
+    studentName: row.studentName ?? row.student_name ?? String(studentId),
+    overallScore: toFiniteNumber(row.overallScore ?? row.overall_score)
+  }
+}
+
+function normalizeTier(rawTier, fallbackLabel) {
+  const students = Array.isArray(rawTier?.students) ? rawTier.students.map(normalizeStudent) : []
+  return {
+    label: rawTier?.label || fallbackLabel,
+    count: toFiniteNumber(rawTier?.count, students.length),
+    students
+  }
+}
+
+function normalizeClassProfile(payload) {
+  const fallback = emptyClassProfile()
+  const dimensions = Array.isArray(payload?.dimensions) ? payload.dimensions.map(String) : fallback.dimensions
+  const rawAvg = payload?.dimensionAvg && typeof payload.dimensionAvg === 'object' ? payload.dimensionAvg : {}
+  const dimensionAvg = dimensions.reduce((acc, dim) => {
+    acc[dim] = toFiniteNumber(rawAvg[dim])
+    return acc
+  }, {})
+  const weakRanking = Array.isArray(payload?.weakRanking)
+    ? payload.weakRanking.map(row => ({
+      dimension: String(row?.dimension ?? ''),
+      avgScore: toFiniteNumber(row?.avgScore),
+      weakCount: toFiniteNumber(row?.weakCount),
+      weakRatio: clampPercent(row?.weakRatio)
+    })).filter(row => row.dimension)
+    : []
+
+  return {
+    ...fallback,
+    ...payload,
+    totalStudents: toFiniteNumber(payload?.totalStudents),
+    dimensions,
+    dimensionAvg,
+    weakRanking,
+    tiers: {
+      A: normalizeTier(payload?.tiers?.A, fallback.tiers.A.label),
+      B: normalizeTier(payload?.tiers?.B, fallback.tiers.B.label),
+      C: normalizeTier(payload?.tiers?.C, fallback.tiers.C.label)
+    }
+  }
+}
+
 // Dialog state
 const dialogVisible = ref(false)
 const dialogLoading = ref(false)
@@ -205,7 +264,7 @@ function dimensionScoreColor(value, scale) {
 }
 
 function progressWidthStyle(value) {
-  return { '--progress-width': `${value}%` }
+  return { '--progress-width': `${clampPercent(value)}%` }
 }
 
 function isTimeoutError(error) {
@@ -222,11 +281,14 @@ async function fetchData() {
     const d = res?.data || res
     if (!d) throw new Error('后端未返回班级画像数据')
     if (d.error) { errorMsg.value = getFriendlyResponseMessage(d, '班级画像加载失败，请稍后重试'); return }
-    data.value = d
+    data.value = normalizeClassProfile(d)
+    if (!data.value.tiers?.[activeTab.value]) {
+      activeTab.value = 'A'
+    }
     logger.debug('[ClassProfile] 数据加载成功:', {
-      totalStudents: d.totalStudents,
-      dimensions: d.dimensions,
-      dimensionAvg: d.dimensionAvg
+      totalStudents: data.value.totalStudents,
+      dimensions: data.value.dimensions,
+      dimensionAvg: data.value.dimensionAvg
     })
     await nextTick()
     setTimeout(() => renderBar(), 100)
