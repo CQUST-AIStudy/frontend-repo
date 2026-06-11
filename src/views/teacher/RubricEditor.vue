@@ -38,27 +38,18 @@
 
       <!-- Table -->
       <div v-else class="overflow-x-auto rounded-[12px] border border-black/[0.04]">
-        <UiTable class="w-full text-sm">
-          <thead>
-            <tr class="bg-[#f5f5f7]/80">
-              <th class="text-left px-4 py-3 font-medium text-[#6e6e73]">名称</th>
-              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[150px]">学科</th>
-              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[80px]">维度数</th>
-              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[180px]">创建时间</th>
-              <th class="text-left px-4 py-3 font-medium text-[#6e6e73] w-[120px]">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in rubrics" :key="row.id" class="border-t border-black/[0.04] hover:bg-[#f5f5f7]/50 transition-colors">
-              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.name }}</td>
-              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.subject }}</td>
-              <td class="px-4 py-3 text-[#1d1d1f]">{{ row.dimensions?.length || 0 }}</td>
-              <td class="px-4 py-3 text-[#6e6e73]">{{ row.createdAt }}</td>
-              <td class="px-4 py-3">
-                <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
-              </td>
-            </tr>
-          </tbody>
+        <UiTable :data="rubrics" class="w-full text-sm" empty-text="暂无评分标准">
+          <UiTableColumn prop="name" label="名称" />
+          <UiTableColumn prop="subject" label="学科" width="150" />
+          <UiTableColumn label="维度数" width="80">
+            <template #default="{ row }">{{ row.dimensions?.length || 0 }}</template>
+          </UiTableColumn>
+          <UiTableColumn prop="createdAt" label="创建时间" width="180" />
+          <UiTableColumn label="操作" width="120">
+            <template #default="{ row }">
+              <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
+            </template>
+          </UiTableColumn>
         </UiTable>
       </div>
     </div>
@@ -130,7 +121,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
-import { getRubrics, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
+import { getRubrics, normalizeRubricList, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
 import AppModal from '../../components/AppModal.vue'
 
 const rubrics = ref([])
@@ -149,8 +140,11 @@ async function loadRubrics() {
   loading.value = true
   try {
     const res = await getRubrics()
-    rubrics.value = res?.data || []
-  } catch (e) { uiMessage.error(e.message) }
+    rubrics.value = normalizeRubricList(res)
+  } catch (e) {
+    console.error('[RubricEditor] loadRubrics error:', e)
+    uiMessage.error(e.message)
+  }
   loading.value = false
 }
 
@@ -201,7 +195,7 @@ async function onTemplatePicked(event) {
 async function editRubric(row) {
   try {
     const res = await getRubricDetail(row.id)
-    const r = res?.data || row
+    const r = res?.data ?? res ?? row
     editingId.value = r.id
     form.value = { name: r.name, subject: r.subject, description: r.description,
       customPrompt: r.customPrompt || '',

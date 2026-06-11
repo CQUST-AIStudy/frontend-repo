@@ -218,7 +218,17 @@
                   登录
                 </button>
 
-                <div class="mt-[18px] flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[#5f6f83] max-[720px]:mt-3 max-[720px]:items-start max-[720px]:text-[12px] max-[720px]:leading-[1.55]">
+                <div class="mt-[16px] flex items-center gap-2 text-[14px] leading-[1.7] text-[#5f6f83] max-[720px]:mt-2.5 max-[720px]:text-[12px]">
+                  <input
+                    id="remember-password"
+                    v-model="rememberPassword"
+                    type="checkbox"
+                    class="h-[18px] w-[18px] rounded border-[#dce4ee] text-[#087cff] accent-[#087cff] max-[720px]:h-4 max-[720px]:w-4"
+                  />
+                  <label for="remember-password">记住密码</label>
+                </div>
+
+                <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[#5f6f83] max-[720px]:mt-2.5 max-[720px]:items-start max-[720px]:text-[12px] max-[720px]:leading-[1.55]">
                   <input
                     id="login-agreement"
                     v-model="agreementAccepted"
@@ -306,7 +316,7 @@
           </div>
 
           <p v-if="isDevelopment" class="mt-[18px] border-t border-[rgba(129,155,181,0.14)] pt-3.5 text-center text-[12px] text-[#8a9aab] max-[720px]:mt-3 max-[720px]:pt-2.5 max-[720px]:text-[11px]">
-            开发环境已自动填充默认测试账号。
+            开发环境已自动填充默认测试账号，可勾选记住密码保存本次输入。
           </p>
         </div>
       </section>
@@ -315,7 +325,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, reactive, ref } from 'vue'
+import { computed, defineComponent, h, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store'
 import api from '../api'
@@ -328,8 +338,11 @@ const userStore = useUserStore()
 const activeTab = ref('login')
 const tabTransitionDirection = ref('forward')
 const loading = ref(false)
-const selectedRole = ref('teacher')
+const REMEMBERED_LOGIN_KEY = 'rememberedLogin'
+const rememberedLogin = loadRememberedLogin()
+const selectedRole = ref(rememberedLogin?.role || 'teacher')
 const agreementAccepted = ref(true)
+const rememberPassword = ref(Boolean(rememberedLogin?.rememberPassword))
 const isDevelopment = process.env.NODE_ENV === 'development'
 const showLoginPassword = ref(false)
 const showRegisterPassword = ref(false)
@@ -391,8 +404,8 @@ const defaultAccounts = isDevelopment
   : {}
 
 const loginForm = reactive({
-  username: defaultAccounts.teacher?.username || '',
-  password: defaultAccounts.teacher?.password || ''
+  username: rememberedLogin?.username || defaultAccounts[selectedRole.value]?.username || '',
+  password: rememberedLogin?.password || ''
 })
 
 const registerForm = reactive({
@@ -481,6 +494,28 @@ function setActiveTab(tab) {
   activeTab.value = tab
 }
 
+function loadRememberedLogin() {
+  try {
+    const saved = localStorage.getItem(REMEMBERED_LOGIN_KEY)
+    return saved ? JSON.parse(saved) : null
+  } catch {
+    return null
+  }
+}
+
+function persistRememberedLogin() {
+  if (!rememberPassword.value) {
+    localStorage.removeItem(REMEMBERED_LOGIN_KEY)
+    return
+  }
+  localStorage.setItem(REMEMBERED_LOGIN_KEY, JSON.stringify({
+    rememberPassword: true,
+    role: selectedRole.value,
+    username: loginForm.username,
+    password: loginForm.password
+  }))
+}
+
 function clearLoginFieldError(field) {
   loginErrors[field] = ''
 }
@@ -490,11 +525,21 @@ function clearRegisterFieldError(field) {
 }
 
 function fillDefaultAccountForRole(role) {
+  const remembered = loadRememberedLogin()
+  if (remembered?.rememberPassword && remembered.role === role) {
+    loginForm.username = remembered.username || ''
+    loginForm.password = remembered.password || ''
+    rememberPassword.value = true
+    clearLoginFieldError('username')
+    clearLoginFieldError('password')
+    return
+  }
   if (!isDevelopment) return
   const account = defaultAccounts[role]
   if (!account) return
   loginForm.username = account.username
   loginForm.password = account.password
+  rememberPassword.value = false
   clearLoginFieldError('username')
   clearLoginFieldError('password')
 }
@@ -603,6 +648,7 @@ async function handleLogin() {
     }
 
     showToast('success', '登录成功')
+    persistRememberedLogin()
     if (targetRole === 'teacher') {
       await router.push('/teacher/select-class')
     } else if (targetRole === 'admin') {

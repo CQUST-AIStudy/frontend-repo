@@ -1,7 +1,7 @@
 import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
-import { clearAuthStorage, setSessionToken, setUserInfo } from '../constants/auth'
+import { clearAuthStorage, getTapToken, setSessionToken, setUserInfo } from '../constants/auth'
 import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
@@ -42,7 +42,7 @@ export const useUserStore = defineStore('user', {
 
         const rawUserInfo = res.user || res.userInfo
         if (!rawUserInfo) {
-          return { success: false, message: '登录成功但未获取到用户信息' }
+          return { success: false, message: '登录过程中出现问题，请稍后重试' }
         }
         const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
 
@@ -52,11 +52,13 @@ export const useUserStore = defineStore('user', {
         setSessionToken(this.token)
         setUserInfo(this.userInfo)
 
-        try {
-          const { restoreTapSession } = await import('../api/tap')
-          await restoreTapSession()
-        } catch (error) {
-          logger.warn('TAP session 换票失败:', error.message)
+        if (!getTapToken()) {
+          try {
+            const { restoreTapSession } = await import('../api/tap')
+            await restoreTapSession()
+          } catch (error) {
+            logger.warn('TAP session 换票失败:', error.message)
+          }
         }
 
         return { success: true, message: res.message || '登录成功', user: userInfo }

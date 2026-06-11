@@ -53,7 +53,7 @@
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">AI教学建议</span>
           <UiButton :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
-            {{ aiLoading ? '生成中..' : '生成教学建议' }}
+            {{ aiLoading ? '生成中...' : '生成教学建议' }}
           </UiButton>
         </div>
         <div class="flex flex-col gap-4">
@@ -69,7 +69,7 @@
             <div class="h-4 bg-black/[0.04] rounded-full animate-pulse w-[50%]"></div>
           </div>
           <div v-else class="py-12 text-center">
-            <div class="text-[40px] mb-3 opacity-40">🤖</div>
+            <div class="mb-3 opacity-40"><LucideIcon name="bot" :size="40" /></div>
             <p class="text-[14px] text-[#aeaeb2]">点击生成教学建议按钮获取AI分析结果</p>
           </div>
         </div>
@@ -81,6 +81,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { message as uiMessage } from '@/services/feedback'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import * as echarts from 'echarts'

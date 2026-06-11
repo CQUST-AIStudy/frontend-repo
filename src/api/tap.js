@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { message as uiMessage } from '@/services/feedback'
 import {
+  clearAuthStorage,
   clearTapAuth,
   getTapToken,
   getTapUser as readTapUser,
@@ -8,9 +9,11 @@ import {
   setTapUser,
 } from '../constants/auth'
 import { API_BASE_URL } from '../config/runtime'
+import { getMockTeachingClasses } from '../mock/teachingClasses'
 import { createFriendlyError, getFriendlyErrorMessage } from '../utils/errorMessage'
 
 const TAP_BASE = API_BASE_URL
+const USE_MOCK_DATA = process.env.NODE_ENV === 'development' && process.env.VUE_APP_USE_MOCK_DATA === 'true'
 
 const tapClient = axios.create({
   baseURL: TAP_BASE,
@@ -158,8 +161,14 @@ tapClient.interceptors.response.use(
       } catch {
         // fall through to clear auth and surface the original 401
       }
-      clearTapAuth()
-      uiMessage.warning('教辅平台登录已过期，请重新登录')
+      // TAP session truly expired → clear ALL auth (not just tap) to prevent
+      // redirect loop: main token alone would cause router guard to redirect
+      // back to /teacher/select-class, which would 401 again endlessly.
+      clearAuthStorage()
+      uiMessage.warning('登录已过期，请重新登录')
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.assign('/login')
+      }
     } else if (status === 401 && isAuthRequest) {
       clearTapAuth()
     }
@@ -429,6 +438,24 @@ export function getRubrics(subject) {
   return tapClient.get('/api/grading/rubrics', { params: subject ? { subject } : {} })
 }
 
+export function normalizeRubricList(payload) {
+  const root = payload?.data ?? payload
+  const candidates = [
+    root,
+    root?.data,
+    root?.content,
+    root?.items,
+    root?.records,
+    root?.list,
+    root?.data?.content,
+    root?.data?.items,
+    root?.data?.records,
+    root?.data?.list
+  ]
+  const list = candidates.find(Array.isArray) || []
+  return list.filter(Boolean)
+}
+
 export function createRubric(data) {
   return tapClient.post('/api/grading/rubrics', data)
 }
@@ -497,6 +524,23 @@ export function downloadSubmissionReport(id) {
   return tapClient.get(`/api/grading/reports/${id}`, { responseType: 'blob' })
 }
 
+// ========== Grading - Batches ==========
+export function getGradingBatches() {
+  return tapClient.get('/api/grading/batches')
+}
+
+export function exportGradingBatchExcel(batchId, includeComments = true) {
+  return tapClient.post(`/api/grading/batches/${batchId}/export-excel`,
+    { includeComments },
+    { responseType: 'blob', timeout: 120000 })
+}
+
+export function exportMergedGradingExcel(taskIds, includeComments = true) {
+  return tapClient.post('/api/grading/tasks/export-excel-merged',
+    { taskIds, includeComments },
+    { responseType: 'blob', timeout: 120000 })
+}
+
 // ========== Grading - Export ==========
 export function exportGradingTask(id) {
   return tapClient.post(`/api/grading/tasks/${id}/export`, null, { responseType: 'blob' })
@@ -527,6 +571,9 @@ export function publishSubmissionReport(submissionId) {
 
 
 export function getTeachingClasses() {
+  if (USE_MOCK_DATA) {
+    return getMockTeachingClasses()
+  }
   return tapClient.get('/api/classes')
 }
 
@@ -632,4 +679,22 @@ export function clearTeacherPtaCredentials() {
   return tapClient.delete('/api/teachers/me/pta-credentials')
 }
 
+// ========== Grading - Teacher Signatures ==========
+export function getTeacherSignatures() {
+  return tapClient.get('/api/grading/signatures')
+}
 
+export function addTeacherSignature(signature) {
+  return tapClient.post('/api/grading/signatures', { signature })
+}
+
+export function deleteTeacherSignature(id) {
+  return tapClient.delete(`/api/grading/signatures/${id}`)
+}
+
+export function normalizeSignatureList(payload) {
+  const root = payload?.data ?? payload
+  const candidates = [root, root?.data, root?.content, root?.items, root?.records, root?.list]
+  const list = candidates.find(Array.isArray) || []
+  return list.filter(Boolean)
+}

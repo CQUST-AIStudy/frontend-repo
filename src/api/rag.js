@@ -98,11 +98,11 @@ function normalizeReadableErrorText(text) {
 async function request(path, options = {}) {
   const response = await fetchRagWithAuth(path, options)
   if (!response.ok) {
-    throw new Error(await readRagErrorMessage(response, `RAG 请求失败 (${response.status})`))
+    throw new Error(await readRagErrorMessage(response, '知识库请求失败'))
   }
   const payload = await response.json()
   if (payload?.code && payload.code !== 200) {
-    throw new Error(payload.message || 'RAG 请求失败')
+    throw new Error(payload.message || '知识库请求失败')
   }
   return payload?.data ?? payload
 }
@@ -275,7 +275,7 @@ export async function streamRagChat(payload, handlers = {}) {
     signal: handlers.signal
   })
   if (!response.ok) {
-    throw new Error(await readRagErrorMessage(response, `RAG 流式问答请求失败 (${response.status})`))
+    throw new Error(await readRagErrorMessage(response, '知识库问答请求失败'))
   }
   await readSse(response, handlers)
 }
@@ -300,14 +300,14 @@ export async function ragChatStream(knowledgeBaseId, query, mode = 'strict', opt
     signal: options.signal
   })
   if (!response.ok) {
-    throw new Error(await readRagErrorMessage(response, `RAG 流式问答请求失败 (${response.status})`))
+    throw new Error(await readRagErrorMessage(response, '知识库问答请求失败'))
   }
   return response
 }
 
 async function readSse(response, handlers = {}) {
   const reader = response.body?.getReader()
-  if (!reader) throw new Error('无法读取 RAG 流式响应')
+  if (!reader) throw new Error('无法读取知识库响应')
   const decoder = new TextDecoder()
   let buffer = ''
   let done = false

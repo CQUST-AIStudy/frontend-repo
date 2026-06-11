@@ -446,10 +446,10 @@ const saveUser = () => {
       }
       if (dialogType.value === 'add') {
         await api.addUser(payload)
-        uiMessage.success('添加用户成功')
+        uiMessage.warning('模拟添加成功（接口未接入，数据未实际保存）')
       } else {
         await api.updateUser(currentUserId.value, payload)
-        uiMessage.success('更新用户成功')
+        uiMessage.warning('模拟更新成功（接口未接入，数据未实际保存）')
       }
       await loadUsers()
       userDialogVisible.value = false
@@ -490,7 +490,7 @@ const confirmResetPassword = async () => {
 
   try {
     await api.updateUser(resetPasswordForm.userId, { password: resetPasswordForm.password })
-    uiMessage.success('密码重置成功')
+    uiMessage.warning('模拟重置成功（接口未接入，密码未实际修改）')
     resetPasswordDialogVisible.value = false
     await loadUsers()
   } catch (error) {
@@ -517,7 +517,7 @@ const deleteUser = (user) => {
     try {
       await api.deleteUser(user.id)
       await loadUsers()
-      uiMessage.success('删除用户成功')
+      uiMessage.warning('模拟删除成功（接口未接入，数据未实际删除）')
     } catch (error) {
       logger.error('删除用户失败:', error)
       uiMessage.error('删除用户失败')

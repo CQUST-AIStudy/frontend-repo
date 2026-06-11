@@ -211,10 +211,10 @@ const changePassword = async () => {
       newPassword: passwordForm.newPassword
     })
     if (response?.success === false) {
-      uiMessage.error(response.message || '密码修改失败')
+      uiMessage.error(response.message || '密码修改失败，请检查当前密码后重试')
       return
     }
-    uiMessage.success('密码已修改，即将跳转到登录页')
+    uiMessage.success('密码修改成功，请使用新密码重新登录')
     resetPasswordForm()
     setTimeout(() => {
       userStore.logout()

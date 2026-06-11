@@ -140,7 +140,7 @@
           </tbody>
         </table>
         <div v-else class="py-12 text-center">
-          <div class="text-[40px] mb-3 opacity-40">📋</div>
+          <LucideIcon name="clipboard" class="mx-auto mb-3 text-[#c6ccd6]" :size="42" />
           <p class="text-[14px] text-[#aeaeb2]">暂无数据</p>
         </div>
       </div>
@@ -217,6 +217,7 @@ import { message as uiMessage } from '@/services/feedback'
 import { Download, Edit, Refresh } from '@/components/ui/icons'
 import api from '../../api'
 import AppPagination from '../../components/AppPagination.vue'
+import LucideIcon from '../../components/LucideIcon.vue'
 
 const route = useRoute()
 const router = useRouter()

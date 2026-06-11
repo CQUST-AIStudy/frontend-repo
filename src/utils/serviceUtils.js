@@ -10,7 +10,7 @@ import { getFriendlyErrorMessage, getFriendlyResponseMessage } from './errorMess
  */
 export async function withLoading(promiseFn, options = {}) {
   const defaultOptions = {
-    text: '加载中..',
+    text: '加载中...',
     background: 'rgba(0, 0, 0, 0.7)'
   };
   

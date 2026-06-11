@@ -3,7 +3,7 @@
     <UiPageHeader
       class="mb-5"
       title="实验详情"
-      :description="experimentData.name || '加载中..'"
+      :description="experimentData.name || '加载中...'"
     >
       <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="goBack">返回列表</UiButton>
     </UiPageHeader>
@@ -420,7 +420,7 @@ let scoreChart = null
 // 实验详情数据
 const experimentData = ref({
   id: experimentId.value,
-  name: '加载中..',
+  name: '加载中...',
   deadline: '',
   createdTime: '',
   status: '',

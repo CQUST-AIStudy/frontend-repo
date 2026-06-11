@@ -1623,50 +1623,113 @@ export const UiUpload = defineComponent({
     autoUpload: Boolean,
     fileList: Array
   },
-  emits: ['change'],
+  emits: ['change', 'remove', 'update:fileList'],
   setup(props, { attrs, emit, expose, slots }) {
     const inputRef = ref(null)
-    const normalizeUploadFile = (file) => {
-      if (!file) return null
-      return {
-        uid: file.uid || `${file.name || file.raw?.name || 'file'}-${file.size || file.raw?.size || 0}-${file.lastModified || file.raw?.lastModified || Date.now()}`,
-        name: file.name || file.raw?.name || file.file?.name,
-        size: file.size || file.raw?.size || file.file?.size,
-        raw: file.raw || file.file || file,
-        file: file.file || file.raw || file
-      }
-    }
-    const files = ref((props.fileList || []).map(normalizeUploadFile).filter(Boolean))
-    const syncFilesFromProps = () => {
-      files.value = (props.fileList || []).map(normalizeUploadFile).filter(Boolean)
-    }
+    const files = ref([])
+    const isDragging = ref(false)
     const open = () => inputRef.value?.click()
-    const clearFiles = () => { files.value = [] }
-    expose({ clearFiles, submit: () => {} })
 
-    watch(() => props.fileList, syncFilesFromProps, { deep: true, immediate: true })
-
-    const updateControlledFiles = (nextFiles) => {
-      files.value = nextFiles
-    }
-
-    const onFileChange = (event) => {
-      const selected = Array.from(event.target.files || []).map((file, index) => normalizeUploadFile({
-        uid: `${file.name}-${file.size}-${file.lastModified}-${Date.now()}-${index}`,
-        name: file.name,
-        size: file.size,
+    const normalizeFileItem = (file) => {
+      if (!file) return null
+      if (file.raw || file.file) {
+        return {
+          uid: file.uid || `${file.name || file.raw?.name || file.file?.name || 'file'}-${file.size || file.raw?.size || file.file?.size || Date.now()}`,
+          name: file.name || file.raw?.name || file.file?.name || '未命名文件',
+          size: file.size || file.raw?.size || file.file?.size || 0,
+          raw: file.raw || file.file,
+          file: file.file || file.raw
+        }
+      }
+      return {
+        uid: `${file.name || 'file'}-${file.size || 0}-${file.lastModified || Date.now()}`,
+        name: file.name || '未命名文件',
+        size: file.size || 0,
         raw: file,
         file
-      })).filter(Boolean)
+      }
+    }
+
+    const syncFiles = (nextFiles) => {
+      files.value = (Array.isArray(nextFiles) ? nextFiles : []).map(normalizeFileItem).filter(Boolean)
+    }
+
+    watch(() => props.fileList, (nextFiles) => {
+      syncFiles(nextFiles)
+    }, { immediate: true, deep: true })
+
+    const updateFiles = (nextFiles) => {
+      files.value = nextFiles
+      emit('update:fileList', files.value)
+    }
+
+    const clearFiles = () => {
+      updateFiles([])
+    }
+    expose({ clearFiles, submit: () => {} })
+
+    const onFileChange = (event) => {
+      const selected = Array.from(event.target.files || []).map(normalizeFileItem).filter(Boolean)
       const nextFiles = props.multiple ? [...files.value, ...selected] : selected
-      updateControlledFiles(nextFiles)
+      updateFiles(nextFiles)
       selected.forEach((file) => props.onChange?.(file, files.value))
       emit('change', selected[0], files.value)
       event.target.value = ''
     }
+    const onDragOver = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!props.disabled) {
+        isDragging.value = true
+      }
+    }
+    const onDragLeave = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      isDragging.value = false
+    }
+    const onDrop = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      isDragging.value = false
+      if (props.disabled) return
+      const droppedFiles = Array.from(event.dataTransfer?.files || [])
+      if (droppedFiles.length === 0) return
+      const selected = droppedFiles.map(normalizeFileItem).filter(Boolean)
+      const nextFiles = props.multiple ? [...files.value, ...selected] : selected
+      updateFiles(nextFiles)
+      selected.forEach((file) => props.onChange?.(file, files.value))
+      emit('change', selected[0], files.value)
+    }
+    const removeFile = (file) => {
+      const nextFiles = files.value.filter((item) => item.uid !== file.uid)
+      updateFiles(nextFiles)
+      props.onRemove?.(file, files.value)
+      emit('remove', file, files.value)
+    }
     return () => h('div', { ...attrs, class: cls('ui-upload inline-block', attrs.class) }, [
       h('input', { ref: inputRef, type: 'file', accept: props.accept, multiple: props.multiple, disabled: props.disabled, class: 'sr-only', onChange: onFileChange }),
-      h('div', { class: cls(props.drag && 'rounded-2xl border border-dashed border-black/10 bg-white/60 p-6 text-center'), onClick: open }, slots.default?.()),
+      h('div', {
+        class: cls(props.drag && 'rounded-2xl border border-dashed bg-white/60 p-6 text-center cursor-pointer transition-colors', isDragging.value ? 'border-[#007aff] bg-[rgba(0,122,255,0.04)]' : 'border-black/10'),
+        onClick: open,
+        onDragover: props.drag ? onDragOver : undefined,
+        onDragleave: props.drag ? onDragLeave : undefined,
+        onDrop: props.drag ? onDrop : undefined
+      }, slots.default?.()),
+      !slots.default && files.value.length > 0 && h('div', { class: 'mt-3 flex flex-col gap-2' }, files.value.map((file) => h('div', {
+        key: file.uid,
+        class: 'flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-white px-3 py-2 text-[13px] text-[#334155]'
+      }, [
+        h('span', { class: 'min-w-0 truncate' }, file.name),
+        h('button', {
+          type: 'button',
+          class: 'shrink-0 text-[#6e6e73] hover:text-[#ff3b30]',
+          onClick: (event) => {
+            event.stopPropagation()
+            removeFile(file)
+          }
+        }, 'x')
+      ]))),
       slots.tip && h('div', { class: 'mt-2 text-[12px] text-[#aeaeb2]' }, slots.tip())
     ])
   }

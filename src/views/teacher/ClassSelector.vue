@@ -30,7 +30,7 @@
         </div>
 
         <div v-else class="py-16 text-center">
-          <div class="text-[48px] mb-4 opacity-40">📚</div>
+          <div class="flex justify-center mb-4 opacity-40"><LucideIcon name="book-open" :size="48" /></div>
           <p class="text-[15px] text-[#aeaeb2] mb-5">你还没有创建任何教学班</p>
           <UiButton @click="goCreateClass" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             去创建教学班
@@ -55,6 +55,7 @@ import logger from '@/utils/logger'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { CircleCheckFilled, Loading } from '@/components/ui/icons'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { useUserStore } from '../../store'
 import { getTeachingClasses } from '../../api/tap'
 

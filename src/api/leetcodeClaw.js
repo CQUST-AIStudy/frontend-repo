@@ -76,7 +76,7 @@ export function mapRecommendationItemToPractice(item = {}) {
 
 leetCodeClawClient.interceptors.response.use(
   response => response.data,
-  error => Promise.reject(createFriendlyError(error, 'LeetCodeClaw 服务请求失败，请检查服务是否已启动'))
+  error => Promise.reject(createFriendlyError(error, 'LeetCode 题库服务请求失败，请检查服务是否已启动'))
 )
 
 export function normalizeLeetCodeDifficulty(difficulty) {

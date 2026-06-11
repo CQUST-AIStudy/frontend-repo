@@ -148,8 +148,8 @@
               :disabled="syncingMap[cls.id] || cls.syncStatus === 'RUNNING'"
               @click="openSyncDialog(cls)"
             >
-              <span v-if="syncingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#b26a00]/30 border-t-[#b26a00] rounded-full animate-spin"></span>同步中..</span>
-              <span v-else>{{ cls.syncStatus === 'RUNNING' ? '同步中..' : '立即同步' }}</span>
+              <span v-if="syncingMap[cls.id]" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-[#b26a00]/30 border-t-[#b26a00] rounded-full animate-spin"></span>同步中...</span>
+              <span v-else>{{ cls.syncStatus === 'RUNNING' ? '同步中...' : '立即同步' }}</span>
             </UiButton>
           </div>
         </div>
@@ -831,7 +831,7 @@ const submitClassForm = async () => {
           await triggerPtaSync(created.id)
           uiMessage.success('已自动触发PTA 数据同步')
         } catch (syncError) {
-          uiMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '爬虫服务可能未启动'}`)
+          uiMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '数据同步服务可能未启动'}`)
         }
       }
     }
