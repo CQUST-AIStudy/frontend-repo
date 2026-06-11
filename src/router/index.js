@@ -307,6 +307,11 @@ const routes = [
         component: () => import('../views/admin/ExperimentManagement.vue')
       },
       {
+        path: 'experiment-screen',
+        name: 'AdminExperimentBigScreen',
+        component: () => import('../views/admin/ExperimentBigScreen.vue')
+      },
+      {
         path: 'system-log',
         name: 'SystemLog',
         component: () => import('../views/admin/SystemLog.vue')
