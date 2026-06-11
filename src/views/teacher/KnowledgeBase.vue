@@ -191,41 +191,43 @@
           </div>
 
           <div v-else class="overflow-x-auto" :aria-busy="docsLoading">
-            <UiTable class="w-full text-sm">
-              <thead>
-                <tr class="border-b border-black/[0.06]">
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">任务 ID</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">文档 ID</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">类型</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">状态</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">分块数</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">创建时间</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">错误信息</th>
-                  <th class="text-left py-3 px-2 font-medium text-[#6e6e73] text-xs">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in documents" :key="row.id" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
-                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.id }}</td>
-                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.documentId }}</td>
-                  <td class="py-3 px-2 text-[#1d1d1f]">{{ docTypeLabel(row.docType) }}</td>
-                  <td class="py-3 px-2">
+            <ui-table :data="documents" :loading="docsLoading" empty-text="暂无文档，请先上传课程资料" class="w-full text-sm">
+              <ui-table-column prop="id" label="任务 ID" width="140" />
+              <ui-table-column prop="documentId" label="文档 ID" width="140" />
+              <ui-table-column label="文档名称" min-width="260">
+                <template #default="{ row }">
+                  <div class="max-w-[260px] truncate" :title="documentName(row)">{{ documentName(row) }}</div>
+                </template>
+              </ui-table-column>
+              <ui-table-column label="类型" width="100">
+                <template #default="{ row }">
+                  {{ docTypeLabel(documentType(row)) }}
+                </template>
+              </ui-table-column>
+              <ui-table-column label="状态" width="120">
+                <template #default="{ row }">
                     <span :class="statusBadgeClass(row.status)" class="text-xs px-2 py-0.5 rounded-full font-medium">{{ statusLabel(row.status) }}</span>
-                  </td>
-                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.chunkCount }}</td>
-                  <td class="py-3 px-2 text-[#1d1d1f]">{{ row.createdAt }}</td>
-                  <td class="py-3 px-2">
-                    <span v-if="row.errorMessage" class="text-xs text-[#d93025] bg-[#fef0f0] px-2 py-1 rounded">{{ row.errorMessage }}</span>
-                    <span v-else class="text-[#aeaeb2]">-</span>
-                  </td>
-                  <td class="py-3 px-2">
-                    <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id" @click="reprocessDocument(row)">
+                </template>
+              </ui-table-column>
+              <ui-table-column prop="chunkCount" label="分块数" width="100" />
+              <ui-table-column prop="createdAt" label="创建时间" min-width="170" />
+              <ui-table-column label="错误信息" min-width="180">
+                <template #default="{ row }">
+                  <span v-if="row.errorMessage" class="text-xs text-[#d93025] bg-[#fef0f0] px-2 py-1 rounded">{{ row.errorMessage }}</span>
+                  <span v-else class="text-[#aeaeb2]">-</span>
+                </template>
+              </ui-table-column>
+              <ui-table-column label="操作" width="150">
+                <template #default="{ row }">
+                    <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id || docDeleteLoadingId === row.id" @click="reprocessDocument(row)">
                       {{ docRowLoadingId === row.id ? '处理中...' : '重处理' }}
                     </UiButton>
-                  </td>
-                </tr>
-              </tbody>
-            </UiTable>
+                    <UiButton class="ml-2 text-sm text-[#d93025] hover:text-[#b42318] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id || docDeleteLoadingId === row.id" @click="confirmDeleteDocument(row)">
+                      {{ docDeleteLoadingId === row.id ? '删除中...' : '删除' }}
+                    </UiButton>
+                </template>
+              </ui-table-column>
+            </ui-table>
           </div>
         </div>
         </div>
@@ -381,7 +383,9 @@ import {
   createAnnotation,
   createCourseSpace,
   deleteCourseSpace,
+  deleteCourseSpaceDocument,
   getCourseSpaceChunks,
+  getCourseSpaceDocuments,
   getCourseSpaceDocumentStatusSummary,
   getCourseSpaces,
   normalizeSourcesForDisplay,
@@ -424,6 +428,7 @@ const docsLoading = ref(false)
 const docStatusSummary = ref(emptyDocSummary())
 const docActionLoading = ref(false)
 const docRowLoadingId = ref(null)
+const docDeleteLoadingId = ref(null)
 const pendingFiles = ref([])
 const uploading = ref(false)
 const uploadDocType = ref('textbook')
@@ -530,6 +535,14 @@ function docTypeLabel(docType) {
     faq: 'FAQ',
     other: '其他',
   }[docType] || docType || '其他'
+}
+
+function documentType(row) {
+  return row?.docType || row?.metadata?.docType || row?.type || 'other'
+}
+
+function documentName(row) {
+  return row?.fileName || row?.filename || row?.name || row?.metadata?.fileName || row?.documentId || row?.id || '未命名文档'
 }
 
 function toggleSpaceDropdown(id) {
@@ -647,12 +660,18 @@ async function loadDocuments() {
   if (!selectedSpace.value) return
   docsLoading.value = true
   try {
-    const res = await getCourseSpaceDocumentStatusSummary(selectedSpace.value.id)
-    const payload = res?.data || res || {}
+    const [summaryRes, documentsRes] = await Promise.all([
+      getCourseSpaceDocumentStatusSummary(selectedSpace.value.id),
+      getCourseSpaceDocuments(selectedSpace.value.id),
+    ])
+    const payload = summaryRes?.data || summaryRes || {}
     const counts = payload.counts || {}
-    documents.value = payload.documents || []
+    const documentPayload = documentsRes?.data || documentsRes || []
+    documents.value = Array.isArray(documentPayload)
+      ? documentPayload
+      : (documentPayload.documents || payload.documents || [])
     docStatusSummary.value = {
-      total: Number(counts.total || 0),
+      total: Number(counts.total ?? documents.value.length ?? 0),
       ready: Number(counts.ready || 0),
       processing: Number(counts.processing || 0),
       pending: Number(counts.pending || 0),
@@ -870,6 +889,28 @@ async function reprocessDocument(row) {
     uiMessage.error(getFriendlyErrorMessage(e, '批量处理失败，请稍后重试'))
   }
   docRowLoadingId.value = null
+}
+
+async function confirmDeleteDocument(row) {
+  const documentId = row?.documentId || row?.id
+  if (!documentId) return
+  try {
+    await messageBox.confirm(`确定删除"${documentName(row)}"吗？删除后会同步移除对应向量与分块。`, '确认删除', { type: 'warning' })
+  } catch (e) {
+    if (e !== 'cancel') uiMessage.error(getFriendlyErrorMessage(e, '删除文档失败，请稍后重试'))
+    return
+  }
+
+  docDeleteLoadingId.value = row.id
+  try {
+    await deleteCourseSpaceDocument(documentId)
+    uiMessage.success('文档已删除')
+    await loadDocuments()
+  } catch (e) {
+    uiMessage.error(getFriendlyErrorMessage(e, '删除文档失败，请稍后重试'))
+  } finally {
+    docDeleteLoadingId.value = null
+  }
 }
 
 async function rebuildBm25IndexAction() {
