@@ -6,7 +6,7 @@
         :description="showDetailedAnalysis ? `${currentClassName} - 学习情况与能力趋势` : '查看班级学生的学习情况和能力趋势'"
     >
       <UiButton v-if="showDetailedAnalysis" @click="backToWelcome"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
         返回班级列表
       </UiButton>
     </UiPageHeader>
@@ -33,12 +33,12 @@
             <h2 class="text-[20px] font-semibold text-[#303133]">请选择要分析的班级</h2>
             <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
               <UiInput
-                v-model="classSearchText"
-                placeholder="搜索班级名称/课程"
-                class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm sm:w-[320px]"
+                  v-model="classSearchText"
+                  placeholder="搜索班级名称/课程"
+                  class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm sm:w-[320px]"
               />
               <UiSelect v-model="classSortOption"
-                class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer sm:w-[150px]">
+                        class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer sm:w-[150px]">
                 <UiOption value="name">按名称排序</UiOption>
                 <UiOption value="studentCount">按学生数量排序</UiOption>
                 <UiOption value="semester">按学期排序</UiOption>
@@ -49,8 +49,8 @@
           <template v-if="filteredClasses.length">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               <div v-for="classItem in filteredClasses" :key="classItem.id"
-                class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(0,122,255,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-                @click="viewDetailedAnalysis(classItem)">
+                   class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(0,122,255,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                   @click="viewDetailedAnalysis(classItem)">
                 <div class="flex flex-col h-full">
                   <h3 class="text-base font-semibold text-[#1d1d1f] mb-3">{{ classItem.name }}</h3>
                   <div class="flex-grow mb-4 space-y-2 text-sm text-[#6e6e73]">
@@ -60,11 +60,11 @@
                   </div>
                   <div class="flex justify-between gap-2.5 mt-auto pt-1.5 flex-wrap">
                     <UiButton @click.stop="viewDetailedAnalysis(classItem)"
-                      class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                       详细分析
                     </UiButton>
                     <UiButton @click.stop="quickViewAnalysis(classItem)"
-                      class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+                              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
                       快速分析
                     </UiButton>
                   </div>
@@ -85,7 +85,7 @@
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">我的教学班</span>
           <UiButton @click="refreshClassList"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             刷新
           </UiButton>
         </div>
@@ -102,31 +102,31 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <UiTable class="w-full text-sm">
+          <table class="w-full text-sm border-collapse">
             <thead>
-              <tr class="border-b border-black/[0.06]">
-                <th class="text-left py-3 px-4 font-medium text-[#6e6e73]">班级名称</th>
-                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学生人数</th>
-                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[180px]">课程</th>
-                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学期</th>
-                <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
-              </tr>
+            <tr class="border-b border-black/[0.06]">
+              <th class="text-left py-3 px-4 font-medium text-[#6e6e73]">班级名称</th>
+              <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学生人数</th>
+              <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[180px]">课程</th>
+              <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学期</th>
+              <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
+            </tr>
             </thead>
             <tbody>
-              <tr v-for="row in classList" :key="row.id"
+            <tr v-for="row in classList" :key="row.id"
                 class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors cursor-pointer"
                 @click="handleClassRowClick(row)">
-                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.name }}</td>
-                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.studentCount }}</td>
-                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.courseName }}</td>
-                <td class="py-3 px-4 text-[#1d1d1f]">{{ row.semester }}</td>
-                <td class="py-3 px-4">
-                  <UiButton @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</UiButton>
-                  <UiButton @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</UiButton>
-                </td>
-              </tr>
+              <td class="py-3 px-4 text-[#1d1d1f]">{{ row.name }}</td>
+              <td class="py-3 px-4 text-[#1d1d1f]">{{ row.studentCount }}</td>
+              <td class="py-3 px-4 text-[#1d1d1f]">{{ row.courseName }}</td>
+              <td class="py-3 px-4 text-[#1d1d1f]">{{ row.semester }}</td>
+              <td class="py-3 px-4">
+                <UiButton @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</UiButton>
+                <UiButton @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</UiButton>
+              </td>
+            </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
       </div>
 
@@ -135,7 +135,7 @@
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">{{ currentClassName }} 详细分析</span>
           <UiButton @click="backToWelcome"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             返回班级列表
           </UiButton>
         </div>
@@ -149,7 +149,7 @@
             <div class="flex items-center gap-2">
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">实验</label>
               <UiSelect v-model="filterForm.experimentId" @change="handleClassChange"
-                class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
+                        class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
                 <UiOption value="">所有实验</UiOption>
                 <UiOption v-for="item in experimentList" :key="item.id" :value="item.id">{{ item.name }}</UiOption>
               </UiSelect>
@@ -157,8 +157,8 @@
             <div class="flex items-center gap-2">
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">搜索</label>
               <UiInput v-model="filterForm.search" @input="filterStudents"
-                placeholder="搜索学生姓名/学号"
-                class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+                       placeholder="搜索学生姓名/学号"
+                       class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
               />
             </div>
           </div>
@@ -205,7 +205,7 @@
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">学生列表</span>
               <UiButton @click="exportStudentData"
-                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                 导出数据
               </UiButton>
             </div>
@@ -216,85 +216,85 @@
             </div>
 
             <div v-else class="overflow-x-auto max-h-[500px] overflow-y-auto">
-              <UiTable class="w-full text-sm">
+              <table class="w-full text-sm border-collapse">
                 <thead class="sticky top-0 bg-white z-10">
-                  <tr class="border-b border-black/[0.06]">
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[50px]"></th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学号</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">姓名</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">实验完成率</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[100px]">平均分</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">能力趋势</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">风险程度</th>
-                    <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
-                  </tr>
+                <tr class="border-b border-black/[0.06]">
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[50px]"></th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">学号</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">姓名</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">实验完成率</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[100px]">平均分</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">能力趋势</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[120px]">风险程度</th>
+                  <th class="text-left py-3 px-4 font-medium text-[#6e6e73] w-[200px]">操作</th>
+                </tr>
                 </thead>
                 <tbody>
-                  <template v-for="student in filteredStudents" :key="student.id">
-                    <tr class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors">
-                      <td class="py-3 px-4">
-                        <UiButton @click="toggleStudentExpand(student.id)" class="w-6 h-6 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.08] transition-colors cursor-pointer border-none">
-                          <svg class="w-3 h-3 text-[#6e6e73] transition-transform" :class="expandedStudents.has(student.id) ? 'rotate-90' : ''" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </UiButton>
-                      </td>
-                      <td class="py-3 px-4 text-[#1d1d1f]">{{ student.id }}</td>
-                      <td class="py-3 px-4 text-[#1d1d1f] font-medium">{{ student.name }}</td>
-                      <td class="py-3 px-4">
-                        <div class="flex items-center gap-2">
-                          <div class="flex-1 h-2 bg-[#f5f5f7] rounded-full overflow-hidden">
-                            <div class="h-full w-[var(--progress-width)] rounded-full bg-[var(--progress-color)] transition-all" :style="progressBarStyle(student.completionRate)"></div>
-                          </div>
-                          <span class="text-xs text-[#6e6e73] w-10 text-right">{{ student.completionRate }}%</span>
+                <template v-for="student in filteredStudents" :key="student.id">
+                  <tr class="border-b border-black/[0.04] hover:bg-[#f5f5f7]/60 transition-colors">
+                    <td class="py-3 px-4">
+                      <UiButton @click="toggleStudentExpand(student.id)" class="w-6 h-6 rounded-full bg-black/[0.04] flex items-center justify-center hover:bg-black/[0.08] transition-colors cursor-pointer border-none">
+                        <svg class="w-3 h-3 text-[#6e6e73] transition-transform" :class="expandedStudents.has(student.id) ? 'rotate-90' : ''" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </UiButton>
+                    </td>
+                    <td class="py-3 px-4 text-[#1d1d1f]">{{ student.id }}</td>
+                    <td class="py-3 px-4 text-[#1d1d1f] font-medium">{{ student.name }}</td>
+                    <td class="py-3 px-4">
+                      <div class="flex items-center gap-2">
+                        <div class="flex-1 h-2 bg-[#f5f5f7] rounded-full overflow-hidden">
+                          <div class="h-full w-[var(--progress-width)] rounded-full bg-[var(--progress-color)] transition-all" :style="progressBarStyle(student.completionRate)"></div>
                         </div>
-                      </td>
-                      <td class="py-3 px-4 text-[#1d1d1f]">{{ student.averageScore }}</td>
-                      <td class="py-3 px-4">
+                        <span class="text-xs text-[#6e6e73] w-10 text-right">{{ student.completionRate }}%</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-[#1d1d1f]">{{ student.averageScore }}</td>
+                    <td class="py-3 px-4">
                         <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-xs font-medium"
-                          :class="student.trend === 'up' ? 'bg-[#e8f8ef] text-[#1a7f37]' : student.trend === 'down' ? 'bg-[#ffeef0] text-[#d1242f]' : 'bg-[#f0f0f5] text-[#6e6e73]'">
+                              :class="student.trend === 'up' ? 'bg-[#e8f8ef] text-[#1a7f37]' : student.trend === 'down' ? 'bg-[#ffeef0] text-[#d1242f]' : 'bg-[#f0f0f5] text-[#6e6e73]'">
                           {{ student.trend === 'up' ? '上升' : student.trend === 'down' ? '下降' : '稳定' }}
                         </span>
-                      </td>
-                      <td class="py-3 px-4">
+                    </td>
+                    <td class="py-3 px-4">
                         <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-xs font-medium"
-                          :class="getRiskLevel(student).type === 'danger' ? 'bg-[#ffeef0] text-[#d1242f]' : getRiskLevel(student).type === 'warning' ? 'bg-[#fff8e1] text-[#b45309]' : getRiskLevel(student).type === 'info' ? 'bg-[#f0f0f5] text-[#6e6e73]' : 'bg-[#e8f8ef] text-[#1a7f37]'">
+                              :class="getRiskLevel(student).type === 'danger' ? 'bg-[#ffeef0] text-[#d1242f]' : getRiskLevel(student).type === 'warning' ? 'bg-[#fff8e1] text-[#b45309]' : getRiskLevel(student).type === 'info' ? 'bg-[#f0f0f5] text-[#6e6e73]' : 'bg-[#e8f8ef] text-[#1a7f37]'">
                           {{ getRiskLevel(student).text }}
                         </span>
-                      </td>
-                      <td class="py-3 px-4">
-                        <UiButton @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</UiButton>
-                        <UiButton @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</UiButton>
-                      </td>
-                    </tr>
-                    <!-- Expanded row -->
-                    <tr v-if="expandedStudents.has(student.id)">
-                      <td colspan="8" class="p-0">
-                        <div class="flex flex-wrap p-5 gap-5 bg-[#fafafa] border-b border-black/[0.04]">
-                          <div class="w-[300px] h-[300px]" ref="studentRadarRefs" :data-student-id="student.id"></div>
-                          <div class="flex-1 min-w-[300px]">
-                            <h4 class="text-sm font-semibold text-[#1d1d1f] mb-3">实验完成情况</h4>
-                            <div v-for="(exp, index) in student.experiments" :key="index" class="mb-3">
-                              <div class="flex items-center gap-3">
-                                <div class="flex-1">
-                                  <div class="h-[15px] bg-[#f5f5f7] rounded-full overflow-hidden">
-                                    <div class="h-full w-[var(--progress-width)] rounded-full transition-all"
-                                      :style="progressWidthStyle(exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0)"
-                                      :class="exp.status === 'completed' ? 'bg-[#34c759]' : exp.status === 'in_progress' ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'">
-                                    </div>
+                    </td>
+                    <td class="py-3 px-4">
+                      <UiButton @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</UiButton>
+                      <UiButton @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</UiButton>
+                    </td>
+                  </tr>
+                  <!-- Expanded row -->
+                  <tr v-if="expandedStudents.has(student.id)">
+                    <td colspan="8" class="p-0">
+                      <div class="flex flex-wrap p-5 gap-5 bg-[#fafafa] border-b border-black/[0.04]">
+                        <div class="w-[300px] h-[300px]" ref="studentRadarRefs" :data-student-id="student.id"></div>
+                        <div class="flex-1 min-w-[300px]">
+                          <h4 class="text-sm font-semibold text-[#1d1d1f] mb-3">实验完成情况</h4>
+                          <div v-for="(exp, index) in student.experiments" :key="index" class="mb-3">
+                            <div class="flex items-center gap-3">
+                              <div class="flex-1">
+                                <div class="h-[15px] bg-[#f5f5f7] rounded-full overflow-hidden">
+                                  <div class="h-full w-[var(--progress-width)] rounded-full transition-all"
+                                       :style="progressWidthStyle(exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0)"
+                                       :class="exp.status === 'completed' ? 'bg-[#34c759]' : exp.status === 'in_progress' ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'">
                                   </div>
                                 </div>
                               </div>
-                              <span class="text-xs text-[#aeaeb2] mt-1 block">
+                            </div>
+                            <span class="text-xs text-[#aeaeb2] mt-1 block">
                                 {{ exp.name }} - {{ exp.status === 'completed' ? '已完成' : exp.status === 'in_progress' ? '进行中' : '未开始' }}
                                 {{ exp.score ? `(${exp.score}分)` : '' }}
                               </span>
-                            </div>
                           </div>
                         </div>
-                      </td>
-                    </tr>
-                  </template>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
                 </tbody>
-              </UiTable>
+              </table>
             </div>
           </div>
 
@@ -303,7 +303,7 @@
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
               <UiButton @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
-                class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
                 {{ aiAdviceLoading ? '生成中...' : '生成建议' }}
               </UiButton>
             </div>
@@ -382,11 +382,11 @@
 
         <template #footer>
           <UiButton @click="quickAnalysisVisible = false"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">
             关闭
           </UiButton>
           <UiButton @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)" :disabled="!quickAnalysisData"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
             查看详细分析
           </UiButton>
         </template>
@@ -540,13 +540,13 @@ const updateAiAdvice = () => {
   const lowCompletion = students.filter(s => s.completionRate < 60)
 
   aiAdvice.classOverview = `该班级共${students.length}名学生，实验平均完成率${avgCompletion}%，平均分${avgScore}分。` +
-    (downTrend > 0 ? `有${downTrend}名学生成绩呈下降趋势。` : '整体趋势稳定。') +
-    (lowCompletion.length > 0 ? `${lowCompletion.length}名学生完成率低于60%，需要重点关注。` : '')
+      (downTrend > 0 ? `有${downTrend}名学生成绩呈下降趋势。` : '整体趋势稳定。') +
+      (lowCompletion.length > 0 ? `${lowCompletion.length}名学生完成率低于60%，需要重点关注。` : '')
 
   const riskStudents = students
-    .filter(s => s.completionRate < 60 || s.averageScore < 60 || s.trend === 'down')
-    .sort((a, b) => a.completionRate - b.completionRate)
-    .slice(0, 5)
+      .filter(s => s.completionRate < 60 || s.averageScore < 60 || s.trend === 'down')
+      .sort((a, b) => a.completionRate - b.completionRate)
+      .slice(0, 5)
 
   aiAdvice.studentsAtRisk = riskStudents.map(s => {
     const reasons = []
@@ -570,10 +570,10 @@ const updateAiAdvice = () => {
 const summarizeStudentForPrompt = (student) => {
   const unfinished = student.experiments.filter(e => e.status !== 'completed').length
   const recentScores = student.experiments
-    .filter(e => e.score > 0)
-    .slice(-3)
-    .map(e => `${e.name}:${e.score}`)
-    .join('，') || '暂无有效成绩'
+      .filter(e => e.score > 0)
+      .slice(-3)
+      .map(e => `${e.name}:${e.score}`)
+      .join('，') || '暂无有效成绩'
   const evidenceSummary = summarizeStudentEvidence(student)
   return `${student.name}(${student.id})：完成率${student.completionRate}%，均分${student.averageScore}，趋势${student.trend}，未完成${unfinished}项，近期成绩：${recentScores}，完成证据：${evidenceSummary}`
 }
@@ -598,20 +598,20 @@ const summarizeStudentEvidence = (student) => {
     return acc
   }, {})
   return Object.entries(counts)
-    .filter(([, count]) => count > 0)
-    .map(([key, count]) => `${evidenceLabel(key)}${count}项`)
-    .join('，') || '无完成证据'
+      .filter(([, count]) => count > 0)
+      .map(([key, count]) => `${evidenceLabel(key)}${count}项`)
+      .join('，') || '无完成证据'
 }
 
 const buildExperimentEvidenceStats = (experiment, students) => {
   const rows = students
-    .map(student => student.experiments.find(item => String(item.id) === String(experiment.id)))
-    .filter(Boolean)
+      .map(student => student.experiments.find(item => String(item.id) === String(experiment.id)))
+      .filter(Boolean)
   const completed = rows.filter(item => item.status === 'completed').length
   const scored = rows.filter(item => Number(item.score || 0) > 0)
   const score = scored.length
-    ? Math.round(scored.reduce((sum, item) => sum + Number(item.score || 0), 0) / scored.length)
-    : 0
+      ? Math.round(scored.reduce((sum, item) => sum + Number(item.score || 0), 0) / scored.length)
+      : 0
   const evidenceCounts = rows.reduce((acc, item) => {
     const key = item.completionEvidence || 'NONE'
     acc[key] = (acc[key] || 0) + 1
@@ -623,9 +623,9 @@ const buildExperimentEvidenceStats = (experiment, students) => {
   const attemptStudents = rows.filter(item => Number(item.submissionAttemptCount || 0) > 0).length
   const completionRate = students.length ? Math.round(completed / students.length * 100) : 0
   const evidenceText = Object.entries(evidenceCounts)
-    .filter(([key, count]) => count > 0 && completedEvidenceTypes.has(key))
-    .map(([key, count]) => `${evidenceLabel(key)}${count}人`)
-    .join('，') || '无完成证据'
+      .filter(([key, count]) => count > 0 && completedEvidenceTypes.has(key))
+      .map(([key, count]) => `${evidenceLabel(key)}${count}人`)
+      .join('，') || '无完成证据'
   return {
     rows,
     completed,
@@ -643,34 +643,34 @@ const buildClassTeachingAdvicePrompt = () => {
   const students = studentList.value || []
   const experiments = experimentList.value || []
   const avgCompletion = students.length
-    ? Math.round(students.reduce((sum, student) => sum + Number(student.completionRate || 0), 0) / students.length)
-    : 0
+      ? Math.round(students.reduce((sum, student) => sum + Number(student.completionRate || 0), 0) / students.length)
+      : 0
   const scoredStudents = students.filter(student => Number(student.averageScore || 0) > 0)
   const avgScore = scoredStudents.length
-    ? Math.round(scoredStudents.reduce((sum, student) => sum + Number(student.averageScore || 0), 0) / scoredStudents.length)
-    : Number(classData.value?.averageScore || 0)
+      ? Math.round(scoredStudents.reduce((sum, student) => sum + Number(student.averageScore || 0), 0) / scoredStudents.length)
+      : Number(classData.value?.averageScore || 0)
   const riskStudents = students
-    .filter(student => student.completionRate < 70 || student.averageScore < 60 || student.trend === 'down')
-    .sort((a, b) => (a.completionRate - b.completionRate) || (a.averageScore - b.averageScore))
-    .slice(0, 10)
+      .filter(student => student.completionRate < 70 || student.averageScore < 60 || student.trend === 'down')
+      .sort((a, b) => (a.completionRate - b.completionRate) || (a.averageScore - b.averageScore))
+      .slice(0, 10)
   const experimentStats = experiments.map(experiment => {
     const stats = buildExperimentEvidenceStats(experiment, students)
     return `${experiment.name}：完成率${stats.completionRate}%，均分${stats.score}，完成${stats.completed}/${students.length}，证据${stats.evidenceText}；源数据覆盖：成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人，提交记录尝试${stats.attemptStudents}人`
   }).slice(0, 30)
   const lowExperimentStats = experiments
-    .map(experiment => ({ experiment, stats: buildExperimentEvidenceStats(experiment, students) }))
-    .filter(item => item.stats.completionRate < 60)
-    .sort((a, b) => a.stats.completionRate - b.stats.completionRate)
-    .slice(0, 10)
-    .map(({ experiment, stats }) => `${experiment.name}：完成率${stats.completionRate}%，完成${stats.completed}/${students.length}，证据${stats.evidenceText}，成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人`)
+      .map(experiment => ({ experiment, stats: buildExperimentEvidenceStats(experiment, students) }))
+      .filter(item => item.stats.completionRate < 60)
+      .sort((a, b) => a.stats.completionRate - b.stats.completionRate)
+      .slice(0, 10)
+      .map(({ experiment, stats }) => `${experiment.name}：完成率${stats.completionRate}%，完成${stats.completed}/${students.length}，证据${stats.evidenceText}，成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人`)
   const evidenceTotals = students.flatMap(student => student.experiments).reduce((acc, item) => {
     const key = item.completionEvidence || 'NONE'
     acc[key] = (acc[key] || 0) + 1
     return acc
   }, {})
   const evidenceTotalItems = Object.entries(evidenceTotals)
-    .filter(([, count]) => count > 0)
-    .map(([key, count]) => `${evidenceLabel(key)}：${count}条`)
+      .filter(([, count]) => count > 0)
+      .map(([key, count]) => `${evidenceLabel(key)}：${count}条`)
 
   return buildStructuredPrompt({
     role: '你是一位资深数据结构课程教学顾问，擅长根据班级真实提交和成绩数据给教师提供可执行建议。',
@@ -751,10 +751,16 @@ const loadClassList = async () => {
   loading.value = true
   try {
     const data = await api.getClassList()
-    classList.value = data
+    if (Array.isArray(data) && data.length > 0) {
+      classList.value = data
+    } else {
+      classList.value = []
+      logger.warn('loadClassList: 接口返回空数据', data)
+    }
   } catch (error) {
     logger.error('加载班级列表失败:', error)
     uiMessage.error('加载班级列表失败')
+    classList.value = []
   } finally {
     loading.value = false
   }
@@ -1101,11 +1107,11 @@ const loadStudentData = async () => {
 
       const completedCount = studentExperiments.filter(e => e.status === 'completed').length;
       const completionRate = studentExperiments.length > 0
-        ? Math.round((completedCount / studentExperiments.length) * 100) : 0;
+          ? Math.round((completedCount / studentExperiments.length) * 100) : 0;
 
       const scoredExps = studentExperiments.filter(e => e.score > 0);
       const averageScore = scoredExps.length > 0
-        ? Math.round(scoredExps.reduce((sum, e) => sum + e.score, 0) / scoredExps.length) : 0;
+          ? Math.round(scoredExps.reduce((sum, e) => sum + e.score, 0) / scoredExps.length) : 0;
 
       const baseAbility = Math.min(100, 40 + (completionRate * 0.3) + (averageScore * 0.3));
       const abilities = {
@@ -1118,9 +1124,9 @@ const loadStudentData = async () => {
 
       let trend = 'stable';
       const recentExps = studentExps
-        .filter(e => e.submitTime && e.score > 0)
-        .sort((a, b) => new Date(b.submitTime) - new Date(a.submitTime))
-        .slice(0, 3);
+          .filter(e => e.submitTime && e.score > 0)
+          .sort((a, b) => new Date(b.submitTime) - new Date(a.submitTime))
+          .slice(0, 3);
 
       if (recentExps.length >= 2) {
         const recentAvg = recentExps.reduce((sum, e) => sum + e.score, 0) / recentExps.length;
@@ -1554,7 +1560,9 @@ const classIdFromRoute = computed(() => {
   return route.params.classId || route.params.id || route.query.classId || route.query.id
 })
 
-onMounted(() => {
+onMounted(async () => {
+  // 始终加载班级列表，确保默认页面有数据
+  await loadClassList()
   const idFromRoute = classIdFromRoute.value
   if (idFromRoute) {
     logger.debug('从路由获取班级ID:', idFromRoute)
