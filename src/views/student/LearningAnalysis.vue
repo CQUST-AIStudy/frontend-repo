@@ -156,7 +156,98 @@
           </div>
         </ui-card>
 
-        <!-- 学习建议 -->
+        <!-- 🤖 AI 个性化学习建议 -->
+        <ui-card v-if="aiSuggestions" class="ai-suggestions-card [margin-top:20px]">
+          <template #header>
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+              <div class="ai-suggestions-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
+                <ui-icon class="[font-size:20px] [color:#1a73e8]"><MagicStick /></ui-icon>
+                <span>🤖 AI 个性化学习建议</span>
+              </div>
+              <ui-tag v-if="aiSuggestions.aiGenerated" type="success" effect="dark">AI 生成</ui-tag>
+              <ui-tag v-else type="info" effect="plain">规则引擎</ui-tag>
+            </div>
+          </template>
+          <div class="ai-suggestions-body">
+            <!-- 总结语 -->
+            <div v-if="aiSuggestions.summaryMessage" class="ai-summary-msg [padding:12px_16px] [background:#e6f4ea] [border-radius:10px] [margin-bottom:16px] [font-size:14px] [color:#1e8e3e] [line-height:1.7]">
+              🌟 {{ aiSuggestions.summaryMessage }}
+            </div>
+
+            <!-- 薄弱知识点 -->
+            <div v-if="aiSuggestions.weakPoints?.length" class="sug-section [margin-bottom:16px]">
+              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">🎯 识别的薄弱知识点</h4>
+              <div class="sug-weak-list [display:flex] [gap:10px] [flex-wrap:wrap]">
+                <div v-for="(wp, i) in aiSuggestions.weakPoints" :key="i"
+                     class="sug-weak-card [display:flex] [align-items:center] [gap:12px] [padding:12px_16px] [background:#fff] [border:1px_solid_#fce8e6] [border-radius:10px] [flex:1] [min-width:220px]">
+                  <span class="sug-weak-icon [font-size:28px]">🎯</span>
+                  <div class="sug-weak-info [flex:1]">
+                    <div class="sug-weak-name [font-size:14px] [font-weight:500] [color:#202124]">{{ wp.tagName }}</div>
+                    <div class="sug-weak-reason [font-size:12px] [color:#5f6368] [margin-top:2px]">{{ wp.reason }}</div>
+                  </div>
+                  <ui-tag :type="wp.severity === 'HIGH' ? 'danger' : wp.severity === 'MEDIUM' ? 'warning' : 'info'" size="small">{{ wp.severity }}</ui-tag>
+                </div>
+              </div>
+            </div>
+
+            <!-- 学习计划 -->
+            <div v-if="aiSuggestions.studyPlan?.length" class="sug-section [margin-bottom:16px]">
+              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📋 个性化学习计划</h4>
+              <div class="sug-plan-list [display:flex] [flex-direction:column] [gap:8px]">
+                <div v-for="(item, i) in aiSuggestions.studyPlan" :key="i"
+                     class="sug-plan-item [display:flex] [align-items:center] [gap:12px] [padding:10px_16px] [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px]">
+                  <span class="sug-plan-num [display:inline-flex] [align-items:center] [justify-content:center] [width:28px] [height:28px] [border-radius:50%] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [font-weight:700] [flex-shrink:0]">{{ i + 1 }}</span>
+                  <div class="sug-plan-body [flex:1]">
+                    <div class="sug-plan-topic [font-size:14px] [font-weight:500] [color:#202124]">{{ item.topic }}</div>
+                    <div v-if="item.suggestedResources" class="sug-plan-resource [font-size:12px] [color:#5f6368] [margin-top:2px]">{{ item.suggestedResources }}</div>
+                  </div>
+                  <div class="sug-plan-meta [display:flex] [align-items:center] [gap:8px] [flex-shrink:0]">
+                    <span class="sug-plan-priority [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:600]"
+                          :class="{'sug-priority-high [background:#fce8e6] [color:#d93025]': item.priority === 'HIGH',
+                                  'sug-priority-med [background:#fef7e0] [color:#e37400]': item.priority === 'MEDIUM',
+                                  'sug-priority-low [background:#e6f4ea] [color:#1e8e3e]': item.priority === 'LOW'}">
+                      {{ item.priority === 'HIGH' ? '🔴 高优' : item.priority === 'MEDIUM' ? '🟡 中优' : '🟢 低优' }}
+                    </span>
+                    <span v-if="item.estimatedTime" class="sug-plan-time [font-size:12px] [color:#5f6368]">⏱ {{ item.estimatedTime }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 推荐练习 -->
+            <div v-if="aiSuggestions.recommendedProblems?.length" class="sug-section">
+              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📌 推荐练习方向</h4>
+              <div class="sug-rec-list [display:flex] [gap:8px] [flex-wrap:wrap]">
+                <span v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i"
+                      class="sug-rec-chip [display:inline-block] [font-size:13px] [padding:6px_14px] [border-radius:100px] [background:#e8f0fe] [color:#1a73e8] [font-weight:500]">
+                  📌 {{ rec }}
+                </span>
+              </div>
+            </div>
+
+            <!-- 刷新按钮 -->
+            <div class="sug-refresh [text-align:right] [margin-top:16px]">
+              <UiButton
+                class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:6px_16px] [font-size:12px] [color:#5f6368] [cursor:pointer] hover:[background:#f8f9fa]"
+                @click="fetchAiLearningSuggestions"
+                :disabled="aiSuggestionsLoading"
+              >
+                {{ aiSuggestionsLoading ? '加载中...' : '🔄 刷新 AI 建议' }}
+              </UiButton>
+            </div>
+          </div>
+        </ui-card>
+
+        <ui-alert
+          v-else-if="aiSuggestionsError"
+          class="ai-suggestions-alert [margin-top:20px]"
+          type="info"
+          :closable="false"
+          :title="aiSuggestionsError"
+          show-icon
+        />
+
+        <!-- 学习方法推荐 -->
         <ui-card class="[margin-top:20px]">
           <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span><LucideIcon name="book-open" :size="18" class="mr-2" /> 学习方法推荐</span></div></template>
           <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
@@ -177,12 +268,13 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning } from '@/components/ui/icons'
+import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning, MagicStick } from '@/components/ui/icons'
 import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import * as echarts from 'echarts'
 import axios from 'axios'
+import api from '@/api'
 import { getStudentAnalyticsOverview } from '../../api/tap'
 import { API_BASE_URL } from '../../config/runtime'
 
@@ -200,6 +292,11 @@ const trendChartRef = ref(null)
 const dimBarChartRef = ref(null)
 const efficiencyChartRef = ref(null)
 let radarChart = null, trendChart = null, dimBarChart = null, efficiencyChart = null
+
+// AI 学习建议
+const aiSuggestions = ref(null)
+const aiSuggestionsLoading = ref(false)
+const aiSuggestionsError = ref('')
 
 // 班级对比 computed
 const avgDiffClass = computed(() => {
@@ -358,6 +455,114 @@ function setEmptyChart(chart, message) {
   })
 }
 
+async function fetchAiLearningSuggestions() {
+  aiSuggestionsLoading.value = true
+  aiSuggestionsError.value = ''
+  try {
+    const studentId = resolveCurrentStudentId()
+    if (!studentId) {
+      aiSuggestionsError.value = '未识别到当前学生身份'
+      return
+    }
+
+    // 构建技能状态数据（从现有 profileData 提取）
+    const skillStates = []
+    const skillTree = profileData.value?.skillTree || []
+    for (const dim of skillTree) {
+      for (const child of dim.children || []) {
+        skillStates.push({
+          tagName: child.name || dim.dimension,
+          masteryScore: child.avgMastery || child.score || 0,
+          attemptCount: child.totalSubmissions || 0
+        })
+      }
+    }
+    // 如果 skillTree 为空，使用 radar 数据
+    if (!skillStates.length && profileData.value?.radar) {
+      const r = profileData.value.radar
+      r.dimensions?.forEach((dim, i) => {
+        skillStates.push({
+          tagName: dim,
+          masteryScore: r.scores?.[i] || 0,
+          attemptCount: 0
+        })
+      })
+    }
+
+    // 构建错误历史（从 weakPoints 或 experiment 数据中构建）
+    const errorHistory = []
+    const weaknesses = profileData.value?.weaknesses || []
+    for (const w of weaknesses) {
+      errorHistory.push({
+        errorType: w.dimension || 'UNKNOWN',
+        count: Math.max(1, Math.round((100 - w.mastery) / 10))
+      })
+    }
+    // 如果没有薄弱点数据，用默认值
+    if (!errorHistory.length) {
+      errorHistory.push({ errorType: 'COMPILE_ERROR', count: 0 })
+    }
+
+    const payload = {
+      studentId,
+      studentName: resolveStudentName(),
+      errorHistory,
+      skillStates,
+      previousRemark: ''
+    }
+
+    const res = await api.getLearningSuggestions(payload)
+    if (res?.success && res?.data) {
+      aiSuggestions.value = res.data
+    } else if (res?.code === 200 && res?.data) {
+      aiSuggestions.value = res.data
+    } else {
+      // 服务不可用，用本地 fallback
+      aiSuggestions.value = buildFallbackSuggestions()
+    }
+  } catch (e) {
+    logger.warn('AI 学习建议获取失败:', e)
+    // 服务不可用时显示本地建议
+    aiSuggestions.value = buildFallbackSuggestions()
+  } finally {
+    aiSuggestionsLoading.value = false
+  }
+}
+
+function resolveStudentName() {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    return userInfo.name || userInfo.username || ''
+  } catch {
+    return ''
+  }
+}
+
+function buildFallbackSuggestions() {
+  const weaknesses = profileData.value?.weaknesses || []
+  const weakPoints = weaknesses.slice(0, 3).map(w => ({
+    tagName: w.dimension || w.experimentName || '基础知识',
+    severity: w.mastery < 40 ? 'HIGH' : w.mastery < 70 ? 'MEDIUM' : 'LOW',
+    reason: `${w.experimentName || ''} 掌握度仅${Math.round(w.mastery)}分，建议重点练习`
+  }))
+
+  const studyPlan = weakPoints.map((wp, i) => ({
+    topic: `${wp.tagName}专项提升`,
+    priority: wp.severity,
+    suggestedResources: '教材相关章节 + PTA平台练习题',
+    estimatedTime: wp.severity === 'HIGH' ? '2小时' : wp.severity === 'MEDIUM' ? '1小时' : '30分钟'
+  }))
+
+  return {
+    suggestionId: `local_${Date.now()}`,
+    weakPoints,
+    studyPlan,
+    recommendedProblems: ['PTA同类题目练习', '教材课后习题', 'LeetCode相关题型'],
+    summaryMessage: `根据学习分析，建议优先巩固${weakPoints.slice(0, 2).map(w => w.tagName).join('和')}等薄弱知识点。持续练习，每天进步一点点！加油！💪`,
+    aiGenerated: false
+  }
+}
+
 async function loadData() {
   loading.value = true
   try {
@@ -380,6 +585,8 @@ async function loadData() {
     }
     loading.value = false
     await nextTick()
+    // 异步加载 AI 学习建议（不阻塞页面渲染）
+    fetchAiLearningSuggestions()
     // Use multiple delayed attempts to ensure DOM is fully rendered
     setTimeout(() => {
       initCharts()

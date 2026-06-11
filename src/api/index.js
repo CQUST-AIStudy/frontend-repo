@@ -364,6 +364,8 @@ export default {
     return apiClient.get('/api/analysis/health')
   },
 
+  // ========== 错误分析（同步调用） ==========
+
   async analyzeError(payload) {
     return apiClient.post('/api/analysis/error', payload, { timeout: 60000 })
   },
@@ -374,6 +376,23 @@ export default {
 
   async getWarningAnalysis(payload) {
     return apiClient.post('/api/analysis/warning', payload, { timeout: 60000 })
+  },
+
+  // ========== 错误分析（异步管线：触发 → 查询存储报告） ==========
+
+  /** 触发异步 AI 分析管线（后台执行，立即返回） */
+  async triggerErrorAnalysis(experimentId) {
+    return apiClient.post(`/api/analysis/trigger/${experimentId}`, {}, { timeout: 10000 })
+  },
+
+  /** 获取已存储的 AI 分析报告（从 MySQL/Redis 读取） */
+  async getStoredAnalysisReport(experimentId) {
+    return apiClient.get(`/api/analysis/report/${experimentId}`)
+  },
+
+  /** 检查分析状态（前端轮询用，轻量级） */
+  async checkAnalysisStatus(experimentId) {
+    return apiClient.get(`/api/analysis/status/${experimentId}`)
   },
 
   async submitSelfAssessment(data) {

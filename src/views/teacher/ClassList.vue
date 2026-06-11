@@ -241,22 +241,25 @@
           <p class="mt-1.5 text-xs text-[#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</p>
         </div>
         <!-- Sync toggle -->
-        <div class="flex items-center gap-3">
-          <label class="text-sm font-medium text-[#1d1d1f]">定时同步</label>
-          <UiButton
-            type="button"
-            :class="[
-              'relative w-[44px] h-[26px] rounded-full transition-colors cursor-pointer border-none',
-              classForm.syncEnabled && classForm.ptaKeyword.trim() ? 'bg-[#34c759]' : 'bg-[#e5e5ea]'
-            ]"
-            :disabled="!classForm.ptaKeyword.trim()"
-            @click="classForm.syncEnabled = !classForm.syncEnabled"
-          >
-            <span :class="['absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform', classForm.syncEnabled && classForm.ptaKeyword.trim() ? 'left-[21px]' : 'left-[3px]']"></span>
-          </UiButton>
-          <span class="text-[13px] text-[#7b8ba0]">
-            {{ classForm.syncEnabled ? '已开启，每天凌晨自动同步一次。' : '关闭' }}
-          </span>
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#dce7f2] bg-[#f8fbff] px-4 py-3">
+          <div class="min-w-[128px]">
+            <label class="block text-sm font-medium text-[#1d1d1f]">定时同步</label>
+            <p class="mt-1 text-xs leading-relaxed text-[#7b8ba0]">{{ syncToggleHelpText }}</p>
+          </div>
+          <div class="flex min-w-0 flex-wrap items-center justify-end gap-3">
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="isClassSyncActive ? 'true' : 'false'"
+              :aria-label="`定时同步：${syncToggleStatusText}`"
+              :disabled="!canToggleClassSync"
+              :class="syncSwitchClasses"
+              @click="toggleClassSync"
+            >
+              <span :class="syncSwitchKnobClasses"></span>
+            </button>
+            <span :class="syncStatusBadgeClasses">{{ syncToggleStatusText }}</span>
+          </div>
         </div>
       </div>
       <template #footer>
@@ -687,6 +690,39 @@ const filteredStudents = computed(() => {
 })
 
 const resolvePtaKeyword = () => (classForm.ptaKeyword || classForm.name || '').trim()
+const canToggleClassSync = computed(() => !!classForm.ptaKeyword.trim())
+const isClassSyncActive = computed(() => canToggleClassSync.value && !!classForm.syncEnabled)
+const syncToggleStatusText = computed(() => isClassSyncActive.value ? '已开启' : '已关闭')
+const syncToggleHelpText = computed(() => {
+  if (!canToggleClassSync.value) return '填写 PTA 关键词后可开启定时同步。'
+  return isClassSyncActive.value ? '每天凌晨自动同步一次。' : '需要时可开启自动同步。'
+})
+const syncSwitchClasses = computed(() => [
+  'relative inline-flex h-[28px] w-[50px] shrink-0 items-center rounded-full border border-transparent p-0.5 transition-all duration-200 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15',
+  canToggleClassSync.value
+    ? 'cursor-pointer hover:shadow-[0_2px_8px_rgba(15,23,42,0.12)] active:scale-95'
+    : 'cursor-not-allowed opacity-60',
+  isClassSyncActive.value
+    ? 'bg-[#22c55e] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
+    : 'bg-[#d8e0ea] shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]'
+])
+const syncSwitchKnobClasses = computed(() => [
+  'block h-[22px] w-[22px] rounded-full bg-white shadow-[0_2px_6px_rgba(15,23,42,0.24)] transition-transform duration-200 ease-out',
+  isClassSyncActive.value ? 'translate-x-[22px]' : 'translate-x-0'
+])
+const syncStatusBadgeClasses = computed(() => [
+  'inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold leading-none whitespace-nowrap',
+  isClassSyncActive.value
+    ? 'bg-[#dcfce7] text-[#15803d]'
+    : canToggleClassSync.value
+      ? 'bg-[#eef2f7] text-[#64748b]'
+      : 'bg-[#f1f5f9] text-[#94a3b8]'
+])
+
+function toggleClassSync() {
+  if (!canToggleClassSync.value) return
+  classForm.syncEnabled = !classForm.syncEnabled
+}
 
 const toSelectedClass = (cls) => ({
   id: cls.id,

@@ -203,7 +203,7 @@
           </div>
         </ui-header>
 
-        <ui-main class="layout-content student-layout-content [background:#f8f9fa] [padding:18px_24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow:hidden]">
+        <ui-main class="layout-content student-layout-content [background:#f8f9fa] [padding:18px_24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow-y:auto] [overflow-x:hidden] [position:relative]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -325,7 +325,25 @@ onMounted(() => {
   flex: 1 1 auto !important;
   min-height: 0 !important;
   padding: 18px 24px !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+.student-layout-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.student-layout-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+}
+
+.student-layout-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .student-layout-footer {

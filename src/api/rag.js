@@ -1,12 +1,72 @@
 import { getTapToken } from '../constants/auth'
 import { buildRagApiUrl } from '../config/runtime'
+import { restoreTapSession } from './tap'
 
-function authHeaders(extra = {}) {
+const AUTH_ERROR_MESSAGE = '登录已过期，请重新登录'
+
+let refreshTokenPromise = null
+
+async function refreshTapToken() {
+  if (!refreshTokenPromise) {
+    refreshTokenPromise = restoreTapSession()
+      .catch(() => null)
+      .finally(() => {
+        refreshTokenPromise = null
+      })
+  }
+  const data = await refreshTokenPromise
+  return data?.accessToken || null
+}
+
+async function ensureTapToken({ force = false } = {}) {
   const token = getTapToken()
+  if (token && !force) return token
+
+  const refreshedToken = await refreshTapToken()
+  if (!refreshedToken) {
+    throw new Error(AUTH_ERROR_MESSAGE)
+  }
+  return refreshedToken
+}
+
+function normalizeHeaders(headers = {}) {
+  if (typeof Headers !== 'undefined' && headers instanceof Headers) {
+    return Object.fromEntries(headers.entries())
+  }
+  return { ...headers }
+}
+
+function authHeaders(extra = {}, token = getTapToken()) {
   return {
-    ...extra,
+    ...normalizeHeaders(extra),
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   }
+}
+
+function buildAuthorizedOptions(options, token) {
+  return {
+    ...options,
+    credentials: options.credentials || 'include',
+    headers: authHeaders(options.headers || {}, token)
+  }
+}
+
+async function fetchRagWithAuth(path, options = {}) {
+  const url = buildRagApiUrl(path)
+  let token = await ensureTapToken()
+  let response = await fetch(url, buildAuthorizedOptions(options, token))
+
+  if (response.status === 401) {
+    token = await ensureTapToken({ force: true })
+    response = await fetch(url, buildAuthorizedOptions(options, token))
+  }
+
+  return response
+}
+
+async function readRagErrorMessage(response, fallback) {
+  if (response.status === 401) return AUTH_ERROR_MESSAGE
+  return readErrorMessage(response, fallback)
 }
 
 async function readErrorMessage(response, fallback) {
@@ -36,13 +96,9 @@ function normalizeReadableErrorText(text) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(buildRagApiUrl(path), {
-    credentials: 'include',
-    ...options,
-    headers: authHeaders(options.headers || {})
-  })
+  const response = await fetchRagWithAuth(path, options)
   if (!response.ok) {
-    throw new Error(await readErrorMessage(response, '知识库请求失败'))
+    throw new Error(await readRagErrorMessage(response, '知识库请求失败'))
   }
   const payload = await response.json()
   if (payload?.code && payload.code !== 200) {
@@ -212,24 +268,22 @@ export function deleteConversation(conversationId) {
 }
 
 export async function streamRagChat(payload, handlers = {}) {
-  const response = await fetch(buildRagApiUrl('/chat/stream'), {
+  const response = await fetchRagWithAuth('/chat/stream', {
     method: 'POST',
-    credentials: 'include',
-    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
     signal: handlers.signal
   })
   if (!response.ok) {
-    throw new Error(await readErrorMessage(response, '知识库问答请求失败'))
+    throw new Error(await readRagErrorMessage(response, '知识库问答请求失败'))
   }
   await readSse(response, handlers)
 }
 
 export async function ragChatStream(knowledgeBaseId, query, mode = 'strict', options = {}) {
-  const response = await fetch(buildRagApiUrl('/chat/stream'), {
+  const response = await fetchRagWithAuth('/chat/stream', {
     method: 'POST',
-    credentials: 'include',
-    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       query,
       knowledgeBaseIds: [String(knowledgeBaseId)],
@@ -246,7 +300,7 @@ export async function ragChatStream(knowledgeBaseId, query, mode = 'strict', opt
     signal: options.signal
   })
   if (!response.ok) {
-    throw new Error(await readErrorMessage(response, '知识库问答请求失败'))
+    throw new Error(await readRagErrorMessage(response, '知识库问答请求失败'))
   }
   return response
 }
