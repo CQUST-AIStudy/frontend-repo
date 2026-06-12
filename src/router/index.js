@@ -89,6 +89,11 @@ const routes = [
         component: () => import('../views/student/AbilityProfile.vue')
       },
       {
+        path: 'knowledge-graph',
+        name: 'KnowledgeGraph',
+        component: () => import('../views/student/KnowledgeGraph.vue')
+      },
+      {
         path: 'profile',
         name: 'StudentProfile',
         component: () => import('../views/student/Profile.vue')
