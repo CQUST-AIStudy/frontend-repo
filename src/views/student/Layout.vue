@@ -67,6 +67,11 @@
               <template #title>能力画像</template>
             </ui-menu-item>
 
+            <ui-menu-item index="/student/knowledge-graph">
+              <ui-icon><Connection /></ui-icon>
+              <template #title>知识图谱</template>
+            </ui-menu-item>
+
             <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
             <ui-menu-item index="/student/profile">
@@ -146,6 +151,11 @@
               <ui-menu-item index="/student/ability-profile">
                 <ui-icon><TrendCharts /></ui-icon>
                 <template #title>能力画像</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/student/knowledge-graph">
+                <ui-icon><Connection /></ui-icon>
+                <template #title>知识图谱</template>
               </ui-menu-item>
 
               <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
@@ -233,6 +243,7 @@ import {
   Search,
   Finished,
   TrendCharts,
+  Connection,
   Setting,
   Fold,
   UserFilled,
@@ -278,6 +289,7 @@ const breadcrumbs = computed(() => {
     practice: '推荐练习',
     'weakness-training': '错题本/专项训练',
     'ability-profile': '能力画像',
+    'knowledge-graph': '知识图谱',
     profile: '个人设置'
   }
   const paths = route.path.split('/').filter(Boolean)
