@@ -405,7 +405,7 @@ import {DataAnalysis} from '@/components/ui/icons'
 import {marked} from 'marked'
 import DOMPurify from 'dompurify'
 import api from '../../api'
-import {buildStructuredPrompt, chatSend} from '../../api/tap'
+import {buildStructuredPrompt, chatSend, CHAT_MESSAGE_MAX_LENGTH} from '../../api/tap'
 import AppModal from '../../components/AppModal.vue'
 
 const router = useRouter()
@@ -523,6 +523,7 @@ const aiAdviceLoading = ref(false)
 const aiAdviceContent = ref('')
 const aiAdviceError = ref('')
 const renderedAiAdvice = computed(() => aiAdviceContent.value ? DOMPurify.sanitize(marked.parse(aiAdviceContent.value)) : '')
+const CLASS_ADVICE_PROMPT_MAX_LENGTH = CHAT_MESSAGE_MAX_LENGTH - 200
 
 // 根据学生数据更新AI建议
 const updateAiAdvice = () => {
@@ -576,6 +577,11 @@ const summarizeStudentForPrompt = (student) => {
       .join('，') || '暂无有效成绩'
   const evidenceSummary = summarizeStudentEvidence(student)
   return `${student.name}(${student.id})：完成率${student.completionRate}%，均分${student.averageScore}，趋势${student.trend}，未完成${unfinished}项，近期成绩：${recentScores}，完成证据：${evidenceSummary}`
+}
+
+const summarizeStudentBriefForPrompt = (student) => {
+  const unfinished = student.experiments.filter(e => e.status !== 'completed').length
+  return `${student.name}(${student.id})：完成率${student.completionRate}%，均分${student.averageScore}，趋势${student.trend}，未完成${unfinished}项`
 }
 
 const completedEvidenceTypes = new Set(['TRANSCRIPT_SCORE', 'ANSWER_SHEET', 'SCORED_CODE'])
@@ -652,16 +658,16 @@ const buildClassTeachingAdvicePrompt = () => {
   const riskStudents = students
       .filter(student => student.completionRate < 70 || student.averageScore < 60 || student.trend === 'down')
       .sort((a, b) => (a.completionRate - b.completionRate) || (a.averageScore - b.averageScore))
-      .slice(0, 10)
+      .slice(0, 5)
   const experimentStats = experiments.map(experiment => {
     const stats = buildExperimentEvidenceStats(experiment, students)
     return `${experiment.name}：完成率${stats.completionRate}%，均分${stats.score}，完成${stats.completed}/${students.length}，证据${stats.evidenceText}；源数据覆盖：成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人，提交记录尝试${stats.attemptStudents}人`
-  }).slice(0, 30)
+  }).slice(0, 8)
   const lowExperimentStats = experiments
       .map(experiment => ({ experiment, stats: buildExperimentEvidenceStats(experiment, students) }))
       .filter(item => item.stats.completionRate < 60)
       .sort((a, b) => a.stats.completionRate - b.stats.completionRate)
-      .slice(0, 10)
+      .slice(0, 5)
       .map(({ experiment, stats }) => `${experiment.name}：完成率${stats.completionRate}%，完成${stats.completed}/${students.length}，证据${stats.evidenceText}，成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人`)
   const evidenceTotals = students.flatMap(student => student.experiments).reduce((acc, item) => {
     const key = item.completionEvidence || 'NONE'
@@ -672,7 +678,7 @@ const buildClassTeachingAdvicePrompt = () => {
       .filter(([, count]) => count > 0)
       .map(([key, count]) => `${evidenceLabel(key)}：${count}条`)
 
-  return buildStructuredPrompt({
+  const prompt = buildStructuredPrompt({
     role: '你是一位资深数据结构课程教学顾问，擅长根据班级真实提交和成绩数据给教师提供可执行建议。',
     task: `请为${currentClassName.value || '当前班级'}生成班级教学诊断与改进建议。`,
     contextSections: [
@@ -718,6 +724,57 @@ const buildClassTeachingAdvicePrompt = () => {
       '不要声称看到了未提供的数据。',
     ],
   })
+
+  if (prompt.length <= CLASS_ADVICE_PROMPT_MAX_LENGTH) {
+    return prompt
+  }
+
+  const compactExperimentStats = experiments
+      .map(experiment => {
+        const stats = buildExperimentEvidenceStats(experiment, students)
+        return `${experiment.name}：完成率${stats.completionRate}%，均分${stats.score}，完成${stats.completed}/${students.length}`
+      })
+      .sort((a, b) => {
+        const rateA = Number((a.match(/完成率(\d+)%/) || [])[1] || 100)
+        const rateB = Number((b.match(/完成率(\d+)%/) || [])[1] || 100)
+        return rateA - rateB
+      })
+      .slice(0, 6)
+
+  return buildStructuredPrompt({
+    role: '你是一位数据结构课程教学顾问。',
+    task: `请为${currentClassName.value || '当前班级'}生成简洁、可执行的班级教学诊断建议。`,
+    contextSections: [
+      {
+        title: '班级概况',
+        items: [
+          `学生数：${students.length || classData.value?.studentCount || 0}`,
+          `实验数：${experiments.length}`,
+          `班级平均完成率：${avgCompletion}%`,
+          `班级平均分：${avgScore}`,
+          `需关注学生数：${riskStudents.length}`,
+          '完成口径：GRADED 或 SUBMITTED 才算完成；提交记录只作过程证据。',
+        ],
+      },
+      {
+        title: '低完成率或重点实验',
+        items: compactExperimentStats.length ? compactExperimentStats : ['暂无实验统计'],
+      },
+      {
+        title: '优先关注学生',
+        items: riskStudents.length ? riskStudents.slice(0, 5).map(summarizeStudentBriefForPrompt) : ['暂无明显高风险学生'],
+      },
+    ],
+    instructions: [
+      '判断班级最主要教学风险，并引用上述指标。',
+      '指出优先补救的实验或能力方向。',
+      '给出3到5条教师可直接执行的课堂、课后和分层辅导建议。',
+    ],
+    outputRequirements: [
+      '使用 Markdown 输出。',
+      '不要声称看到了未提供的数据。',
+    ],
+  }).slice(0, CLASS_ADVICE_PROMPT_MAX_LENGTH)
 }
 
 const generateClassTeachingAdvice = async () => {
