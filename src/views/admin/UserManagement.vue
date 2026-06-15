@@ -307,9 +307,10 @@ const normalizeUsers = (payload) => {
     ...user,
     id: String(user.id ?? user.usernum ?? user.username ?? ''),
     name: user.name || user.displayName || user.username || user.usernum || '',
+    role: (user.role || '').toLowerCase(),
     class: user.class || user.className || '',
     phone: user.phone || '',
-    status: user.status || 'active',
+    status: user.status || (user.enabled ? 'active' : 'inactive'),
     avatar: user.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
   }))
 }
@@ -446,10 +447,10 @@ const saveUser = () => {
       }
       if (dialogType.value === 'add') {
         await api.addUser(payload)
-        uiMessage.warning('模拟添加成功（接口未接入，数据未实际保存）')
+        uiMessage.success('添加用户成功')
       } else {
         await api.updateUser(currentUserId.value, payload)
-        uiMessage.warning('模拟更新成功（接口未接入，数据未实际保存）')
+        uiMessage.success('更新用户成功')
       }
       await loadUsers()
       userDialogVisible.value = false
@@ -490,7 +491,7 @@ const confirmResetPassword = async () => {
 
   try {
     await api.updateUser(resetPasswordForm.userId, { password: resetPasswordForm.password })
-    uiMessage.warning('模拟重置成功（接口未接入，密码未实际修改）')
+    uiMessage.success('密码重置成功')
     resetPasswordDialogVisible.value = false
     await loadUsers()
   } catch (error) {
@@ -517,7 +518,7 @@ const deleteUser = (user) => {
     try {
       await api.deleteUser(user.id)
       await loadUsers()
-      uiMessage.warning('模拟删除成功（接口未接入，数据未实际删除）')
+      uiMessage.success('删除用户成功')
     } catch (error) {
       logger.error('删除用户失败:', error)
       uiMessage.error('删除用户失败')
