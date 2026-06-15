@@ -280,6 +280,19 @@ export async function streamRagChat(payload, handlers = {}) {
   await readSse(response, handlers)
 }
 
+export async function streamAssistantChat(payload, handlers = {}) {
+  const response = await fetchRagWithAuth('/assistant/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: handlers.signal
+  })
+  if (!response.ok) {
+    throw new Error(await readRagErrorMessage(response, 'AI 助手请求失败'))
+  }
+  await readSse(response, handlers)
+}
+
 export async function ragChatStream(knowledgeBaseId, query, mode = 'strict', options = {}) {
   const response = await fetchRagWithAuth('/chat/stream', {
     method: 'POST',

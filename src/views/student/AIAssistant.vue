@@ -5,18 +5,32 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { getKnowledgeBases } from '../../api/rag'
 import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/studentAiChat'
+import {
+  ChatDotRound,
+  Close,
+  Delete,
+  Document,
+  Menu,
+  Notebook,
+  Plus,
+  Reading,
+  Search,
+  Warning
+} from '@/components/ui/icons'
 
 const chatStore = useStudentAiChatStore()
 const {
-  messages,
   userInput,
   isTyping,
+  isAnyTyping,
   selectedCourseSpaceId,
-  isOpenMode,
+  assistantMode,
   assistantNotice
 } = storeToRefs(chatStore)
 
 const chatContainer = ref(null)
+const historyQuery = ref('')
+const historyVisible = ref(true)
 const courseSpaces = ref([])
 
 const quickPrompts = [
@@ -26,6 +40,28 @@ const quickPrompts = [
   { label: '代码优化', prompt: '我应该如何优化一个查找算法？请给我常见思路。' }
 ]
 
+const modeCards = [
+  {
+    value: 'ai',
+    title: 'AI 聊天',
+    desc: '自由问答',
+    icon: ChatDotRound,
+    tone: 'green'
+  },
+  {
+    value: 'rag',
+    title: 'RAG 模式',
+    desc: '知识库问答',
+    icon: Reading,
+    tone: 'purple'
+  }
+]
+
+const messages = computed(() => chatStore.messages)
+const conversations = computed(() => chatStore.sortedConversations)
+const effectiveWebEnabled = computed(() => chatStore.effectiveWebEnabled)
+const activeConversation = computed(() => chatStore.activeConversation)
+
 const selectedCourseSpace = computed(() => {
   return courseSpaces.value.find((item) => String(item.id) === String(selectedCourseSpaceId.value)) || null
 })
@@ -33,6 +69,18 @@ const selectedCourseSpace = computed(() => {
 const visibleMessages = computed(() => {
   return messages.value.filter((message) => {
     return message.role !== 'ai' || message.content || message.citations?.length
+  })
+})
+
+const filteredConversations = computed(() => {
+  const query = historyQuery.value.trim().toLowerCase()
+  if (!query) return conversations.value
+  return conversations.value.filter((item) => {
+    const haystack = [
+      item.title,
+      item.messages?.map((message) => message.content).join(' ')
+    ].join(' ').toLowerCase()
+    return haystack.includes(query)
   })
 })
 
@@ -45,31 +93,38 @@ const showTypingHint = computed(() => {
   return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
 })
 
-const currentModeText = computed(() => {
-  if (!selectedCourseSpaceId.value) return '普通聊天'
-  return isOpenMode.value ? 'RAG 开放模式' : 'RAG 严格模式'
-})
-
-const modeTooltip = computed(() => {
-  if (!selectedCourseSpaceId.value) {
-    return '未选择课程空间时使用普通聊天；选择课程空间后可切换 RAG 严格/开放模式。'
-  }
-  return isOpenMode.value
-    ? '开放模式：课程资料不足时允许补充联网检索。'
-    : '严格模式：只依据课程资料回答。'
-})
-
-const modeSummaryText = computed(() => {
-  return selectedCourseSpaceId.value ? '当前为 RAG 问答模式' : '当前为普通聊天模式'
-})
-
-const selectedSpaceSummary = computed(() => {
-  if (!selectedCourseSpaceId.value) return '未选择课程空间时使用普通聊天'
-  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
+const canSend = computed(() => {
+  if (!userInput.value.trim() || isTyping.value) return false
+  if (assistantMode.value === 'rag' && !selectedCourseSpaceId.value) return false
+  return true
 })
 
 const canClearConversation = computed(() => {
   return !isTyping.value && (messages.value.length > 0 || !!userInput.value.trim())
+})
+
+const currentModeText = computed(() => {
+  if (assistantMode.value === 'web') return '联网模式'
+  if (assistantMode.value === 'rag') return effectiveWebEnabled.value ? 'RAG 模式 · 联网已开启' : 'RAG 模式'
+  return effectiveWebEnabled.value ? 'AI 聊天 · 联网已开启' : 'AI 聊天'
+})
+
+const modeSummaryText = computed(() => {
+  if (assistantMode.value === 'web') return '当前模式：联网搜索 + AI 回答'
+  if (assistantMode.value === 'rag') {
+    return effectiveWebEnabled.value
+      ? '当前模式：RAG 问答 + 联网补充'
+      : '当前模式：RAG 知识库问答'
+  }
+  return effectiveWebEnabled.value
+    ? '当前模式：AI 聊天 + 联网增强'
+    : '当前模式：正常 AI 聊天'
+})
+
+const selectedSpaceSummary = computed(() => {
+  if (assistantMode.value !== 'rag') return effectiveWebEnabled.value ? '联网检索可用' : '普通问答无需课程空间'
+  if (!selectedCourseSpaceId.value) return '请选择课程空间'
+  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
 })
 
 function buildCourseSpaceLabel(courseSpace) {
@@ -84,6 +139,35 @@ function buildCourseSpaceLabel(courseSpace) {
   return parts.join(' / ') || `课程空间 ${courseSpace.id}`
 }
 
+function formatConversationTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const today = new Date()
+  if (date.toDateString() === today.toDateString()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+  return `${date.getMonth() + 1}-${date.getDate()}`
+}
+
+function modeLabel(mode) {
+  if (mode === 'rag') return 'RAG'
+  if (mode === 'web') return '联网'
+  return 'AI'
+}
+
+function lastMessagePreview(conversation) {
+  if (chatStore.isConversationTyping(conversation.id)) return '正在生成...'
+  const last = [...(conversation.messages || [])].reverse().find((message) => message.content)
+  return last?.content || '暂无消息'
+}
+
+function conversationStatusText(conversation) {
+  return chatStore.isConversationTyping(conversation.id)
+    ? '正在生成'
+    : formatConversationTime(conversation.updatedAt)
+}
+
 async function scrollToBottom() {
   await nextTick()
   if (chatContainer.value) {
@@ -95,11 +179,11 @@ async function fetchCourseSpaces() {
   try {
     const spaces = await getKnowledgeBases()
     courseSpaces.value = spaces
-    if (!selectedCourseSpaceId.value && spaces.length > 0) {
+    if (!selectedCourseSpaceId.value && spaces.length > 0 && assistantMode.value === 'rag') {
       chatStore.setCourseSpace(spaces[0].id)
     }
   } catch (error) {
-    const friendlyMessage = formatStudentAssistantError(error?.message, !!selectedCourseSpaceId.value)
+    const friendlyMessage = formatStudentAssistantError(error?.message, assistantMode.value)
     chatStore.setAssistantNotice(friendlyMessage)
     uiMessage.warning(friendlyMessage)
     courseSpaces.value = []
@@ -107,6 +191,10 @@ async function fetchCourseSpaces() {
 }
 
 async function sendMessage() {
+  if (!canSend.value && assistantMode.value === 'rag' && !selectedCourseSpaceId.value) {
+    uiMessage.warning('请先选择课程空间，再使用 RAG 模式提问。')
+    return
+  }
   await chatStore.sendMessage()
   await scrollToBottom()
 }
@@ -114,12 +202,31 @@ async function sendMessage() {
 function useQuickPrompt(prompt) {
   chatStore.setInput(prompt)
   nextTick(() => {
-    const textarea = document.querySelector('.input-area textarea')
+    const textarea = document.querySelector('.assistant-input')
     if (textarea) textarea.focus()
   })
 }
 
+function selectMode(mode) {
+  chatStore.setAssistantMode(mode)
+}
+
+function toggleWeb(value) {
+  chatStore.setWebEnabled(value)
+}
+
+function newConversation() {
+  chatStore.createConversation()
+  scrollToBottom()
+}
+
+function switchConversation(id) {
+  chatStore.switchConversation(id)
+  scrollToBottom()
+}
+
 async function clearConversation() {
+  if (!canClearConversation.value) return
   try {
     await messageBox.confirm('清空当前 AI 聊天记录和输入草稿？', '提示', {
       confirmButtonText: '清空',
@@ -133,148 +240,189 @@ async function clearConversation() {
   }
 }
 
+async function clearAllConversations() {
+  if (isAnyTyping.value || conversations.value.length <= 1) return
+  try {
+    await messageBox.confirm('清空所有本地历史聊天记录？该操作不可恢复。', '提示', {
+      confirmButtonText: '全部清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.clearAllConversations()
+    await scrollToBottom()
+  } catch {
+    // 用户取消清空。
+  }
+}
+
+function onKeyDown(event) {
+  if (event.key === 'Enter' && event.ctrlKey) {
+    event.preventDefault()
+    sendMessage()
+  }
+}
+
 watch(messages, scrollToBottom, { deep: true })
 watch(isTyping, scrollToBottom)
+watch(selectedCourseSpaceId, (value) => {
+  chatStore.setCourseSpace(value)
+})
 
 onMounted(() => {
+  chatStore.ensureActiveConversation()
   fetchCourseSpaces()
   scrollToBottom()
 })
 </script>
 
 <template>
-  <div class="flex h-full min-h-0 bg-[#f5f7fa] p-3 max-[640px]:p-2">
-    <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#e6eaf0] bg-white">
+  <div class="assistant-shell">
+    <aside
+      class="history-panel"
+      :class="{ 'history-panel--hidden': !historyVisible }"
+    >
+      <div class="history-head">
+        <div>
+          <h3>历史聊天</h3>
+          <p>{{ conversations.length }} 个本地会话</p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          title="收起历史"
+          @click="historyVisible = false"
+        >
+          <Close />
+        </button>
+      </div>
+
+      <div class="history-search">
+        <Search />
+        <input
+          v-model="historyQuery"
+          type="search"
+          placeholder="搜索历史记录"
+        />
+      </div>
+
+      <button type="button" class="new-chat-button" @click="newConversation">
+        <Plus />
+        新建对话
+      </button>
+
+      <div class="history-list">
+        <button
+          v-for="item in filteredConversations"
+          :key="item.id"
+          type="button"
+          class="history-item"
+          :class="{ 'history-item--active': item.id === activeConversation?.id }"
+          @click="switchConversation(item.id)"
+        >
+          <span class="history-title">{{ item.title }}</span>
+          <span class="history-preview">{{ lastMessagePreview(item) }}</span>
+          <span class="history-meta">
+            <span>{{ modeLabel(item.mode) }}{{ item.webEnabled ? ' · 联网' : '' }}</span>
+            <span
+              :class="{ 'history-status--typing': chatStore.isConversationTyping(item.id) }"
+            >
+              {{ conversationStatusText(item) }}
+            </span>
+          </span>
+        </button>
+
+        <div v-if="!filteredConversations.length" class="history-empty">
+          未找到历史记录
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="clear-all-button"
+        :disabled="isAnyTyping || conversations.length <= 1"
+        @click="clearAllConversations"
+      >
+        <Delete />
+        清空所有记录
+      </button>
+    </aside>
+
+    <section class="assistant-main">
       <ui-alert
         v-if="assistantNotice"
-        class="m-3 mb-0"
+        class="assistant-alert"
         type="warning"
         :closable="false"
         :title="assistantNotice"
         show-icon
       />
 
-      <div class="flex flex-none items-center justify-between gap-3 border-b border-[#e6eaf0] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
-        <div class="min-w-0">
-          <h2 class="m-0 text-[18px] font-bold leading-tight text-[#1d1d1f]">
-            AI 学习助手
-          </h2>
-          <p class="m-0 mt-1 truncate text-[12px] text-[#909399]">
-            已保存 {{ messages.length }} 条聊天内容，切换目录后可继续查看。
-          </p>
+      <header class="assistant-header">
+        <div class="header-title">
+          <button
+            v-if="!historyVisible"
+            type="button"
+            class="icon-button history-toggle"
+            title="展开历史"
+            @click="historyVisible = true"
+          >
+            <Menu />
+          </button>
+          <div class="min-w-0">
+            <h2>AI 学习助手</h2>
+            <p>{{ modeSummaryText }}，聊天记录会自动保存到本地。</p>
+          </div>
         </div>
         <ui-button
           type="button"
           :disabled="!canClearConversation"
-          class="min-h-9 rounded-[10px] border border-[#e6eaf0] bg-[#f8fafc] px-3 text-[13px] text-[#606266] shadow-none hover:border-[#ff3b30]/30 hover:text-[#ff3b30]"
+          class="clear-button"
           @click="clearConversation"
         >
-          清空记录
+          清空当前对话
         </ui-button>
-      </div>
+      </header>
 
-      <div
-        ref="chatContainer"
-        class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 max-[640px]:px-3"
-      >
-        <div
-          v-if="showPromptSuggestions"
-          class="mx-auto flex min-h-full w-full max-w-[820px] flex-1 flex-col items-center justify-center gap-6 py-8 text-center"
-        >
-          <div class="flex flex-col gap-2">
-            <h3 class="m-0 text-[24px] font-bold leading-tight text-[#1d1d1f] max-[640px]:text-[21px]">
-              从一个数据结构问题开始
-            </h3>
-            <p class="m-0 max-w-[680px] text-[14px] leading-7 text-[#6e6e73]">
-              选择一个提示词开始，或直接输入你的问题。选择课程空间后，将使用带引用的 RAG 问答。
-            </p>
-          </div>
-
-          <div class="grid w-full grid-cols-2 gap-3 max-[640px]:grid-cols-1">
-            <button
-              v-for="q in quickPrompts"
-              :key="q.label"
-              type="button"
-              class="group flex min-h-[88px] flex-col items-start justify-between rounded-[12px] border border-[#e6eaf0] bg-[#fbfdff] px-4 py-3 text-left transition-all duration-150 hover:-translate-y-[1px] hover:border-[#007aff]/40 hover:bg-[#f4f9ff] hover:shadow-[0_10px_24px_rgba(22,48,79,0.08)]"
-              @click="useQuickPrompt(q.prompt)"
-            >
-              <span class="text-[15px] font-semibold text-[#1d1d1f] group-hover:text-[#007aff]">
-                {{ q.label }}
-              </span>
-              <span class="mt-2 line-clamp-2 text-[12px] leading-5 text-[#6e6e73]">
-                {{ q.prompt }}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div
-          v-for="(message, index) in visibleMessages"
-          :key="message.id || index"
-          class="flex min-w-0"
-          :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
-        >
-          <div
-            class="min-w-0 max-w-[min(760px,78%)] rounded-[12px] px-3 py-2 text-[14px] leading-[1.65] max-[640px]:max-w-[92%]"
-            :class="message.role === 'user'
-              ? 'rounded-tr-[4px] bg-[#007aff] text-white'
-              : 'rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] text-[#202124]'"
+      <div class="mode-panel">
+        <div class="mode-title">选择模式</div>
+        <div class="mode-grid">
+          <button
+            v-for="card in modeCards"
+            :key="card.value"
+            type="button"
+            class="mode-card"
+            :class="[`mode-card--${card.tone}`, { 'mode-card--active': assistantMode === card.value }]"
+            @click="selectMode(card.value)"
           >
-            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
-              <span>{{ message.role === 'user' ? '我' : 'AI 助手' }}</span>
-              <span>{{ message.time }}</span>
-            </div>
-            <p
-              v-if="message.role === 'user'"
-              class="m-0 whitespace-pre-wrap [overflow-wrap:anywhere]"
-            >
-              {{ message.content }}
-            </p>
-            <div
-              v-else
-              class="assistant-markdown"
-              v-html="renderSafeMarkdown(message.content)"
+            <span class="mode-icon">
+              <component :is="card.icon" />
+            </span>
+            <span class="mode-copy">
+              <strong>{{ card.title }}</strong>
+              <span>{{ card.desc }}</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="mode-options">
+          <label class="web-toggle">
+            <span>
+              <strong>联网搜索</strong>
+              <small>AI 聊天与 RAG 可用，开启后检索最新信息</small>
+            </span>
+            <ui-switch
+              :model-value="effectiveWebEnabled"
+              :disabled="assistantMode === 'web'"
+              @update:modelValue="toggleWeb"
             />
+          </label>
 
-            <div
-              v-if="message.citations && message.citations.length"
-              class="mt-2 flex flex-col gap-1 border-t border-[rgba(126,157,183,0.2)] pt-2 text-[12px] leading-5 text-[#606266]"
-            >
-              <div
-                v-for="cite in message.citations"
-                :key="`${message.id || index}-${cite.index}`"
-              >
-                [{{ cite.index }}] {{ cite.docName || cite.title || '引用资料' }}
-                <span v-if="cite.chapterPath"> | {{ cite.chapterPath }}</span>
-                <span v-if="cite.pageRange"> | {{ cite.pageRange }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="showTypingHint" class="flex min-w-0 justify-start">
-          <div class="min-w-[126px] rounded-[12px] rounded-tl-[4px] border border-[#e9edf3] bg-[#f8fafc] px-3 py-2 text-[14px] leading-[1.65] text-[#202124]">
-            <div class="mb-1 flex items-center justify-between gap-3 text-[11px] leading-none opacity-70">
-              <span>AI 助手</span>
-              <span>正在生成</span>
-            </div>
-            <div class="inline-flex items-center gap-1" aria-label="正在生成">
-              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3]"></span>
-              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:120ms]"></span>
-              <span class="h-[5px] w-[5px] animate-typing-bounce rounded-full bg-[#8ca0b3] [animation-delay:240ms]"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="input-area flex flex-none flex-col gap-2 border-t border-[#e6eaf0] bg-white p-3">
-        <div class="flex min-w-0 items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch">
-          <div class="flex min-w-0 flex-wrap items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch">
+          <div v-if="assistantMode === 'rag'" class="course-select-wrap">
+            <Notebook />
             <ui-select
               v-model="selectedCourseSpaceId"
-              placeholder="选择课程空间（可选）"
-              clearable
-              class="w-[280px] max-[760px]:w-full"
+              placeholder="选择课程空间"
+              class="course-select"
             >
               <ui-option
                 v-for="item in courseSpaces"
@@ -283,54 +431,800 @@ onMounted(() => {
                 :value="item.id"
               />
             </ui-select>
+          </div>
+        </div>
+      </div>
 
-            <div class="flex min-h-9 items-center gap-2 rounded-[10px] bg-[#f5f7fa] px-3 text-[12px] text-[#6e6e73]">
-              <ui-tooltip :content="modeTooltip">
-                <span class="inline-flex cursor-help items-center">
-                  <ui-switch
-                    v-model="isOpenMode"
-                    active-text="开放"
-                    inactive-text="严格"
-                    size="small"
-                  />
-                </span>
-              </ui-tooltip>
-              <span class="whitespace-nowrap">{{ currentModeText }}</span>
-            </div>
+      <div ref="chatContainer" class="chat-panel">
+        <div
+          v-if="showPromptSuggestions"
+          class="prompt-suggestions"
+        >
+          <div class="suggestion-copy">
+            <h3>从一个数据结构问题开始</h3>
+            <p>选择一个提示词开始，或直接输入你的问题。RAG 模式会优先使用课程空间资料。</p>
           </div>
 
-          <span class="min-w-0 truncate text-[12px] text-[#909399]">
-            {{ selectedSpaceSummary }}
-          </span>
+          <div class="prompt-grid">
+            <button
+              v-for="q in quickPrompts"
+              :key="q.label"
+              type="button"
+              class="prompt-card"
+              @click="useQuickPrompt(q.prompt)"
+            >
+              <strong>{{ q.label }}</strong>
+              <span>{{ q.prompt }}</span>
+            </button>
+          </div>
         </div>
 
-        <ui-input
-          v-model="userInput"
-          type="textarea"
-          :rows="3"
-          resize="none"
-          placeholder="输入你的问题，按 Ctrl + Enter 发送"
-          @keyup.enter.ctrl="sendMessage"
-        />
+        <div
+          v-for="(message, index) in visibleMessages"
+          :key="message.id || index"
+          class="message-row"
+          :class="message.role === 'user' ? 'message-row--user' : 'message-row--ai'"
+        >
+          <div class="avatar">
+            {{ message.role === 'user' ? '我' : 'AI' }}
+          </div>
+          <div class="message-main">
+            <div class="message-meta">
+              <strong>{{ message.role === 'user' ? '我' : 'AI 助手' }}</strong>
+              <span>{{ message.time }}</span>
+              <span v-if="message.role === 'ai' && message.usedWeb" class="web-badge">联网</span>
+            </div>
+            <div class="message-bubble">
+              <p v-if="message.role === 'user'" class="plain-message">
+                {{ message.content }}
+              </p>
+              <div
+                v-else
+                class="assistant-markdown"
+                v-html="renderSafeMarkdown(message.content)"
+              />
 
-        <div class="flex items-center justify-between gap-3 text-[12px] text-[#909399] max-[640px]:items-stretch max-[640px]:flex-col">
-          <span>{{ modeSummaryText }}</span>
+              <div
+                v-if="message.citations && message.citations.length"
+                class="source-list"
+              >
+                <div
+                  v-for="cite in message.citations"
+                  :key="`${message.id || index}-${cite.index}`"
+                  class="source-item"
+                >
+                  <Document />
+                  <div class="source-copy">
+                    <a
+                      v-if="cite.url"
+                      :href="cite.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      [{{ cite.index }}] {{ cite.docName || '联网资料' }}
+                    </a>
+                    <span v-else>[{{ cite.index }}] {{ cite.docName || '引用资料' }}</span>
+                    <small v-if="cite.chapterPath || cite.pageRange">
+                      {{ [cite.chapterPath, cite.pageRange].filter(Boolean).join(' | ') }}
+                    </small>
+                    <small v-else-if="cite.source === 'web' || cite.url">联网来源</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showTypingHint" class="message-row message-row--ai">
+          <div class="avatar">AI</div>
+          <div class="message-main">
+            <div class="message-meta">
+              <strong>AI 助手</strong>
+              <span>正在生成</span>
+            </div>
+            <div class="message-bubble typing-bubble">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="composer">
+        <div class="composer-summary">
+          <span>{{ currentModeText }}</span>
+          <span>{{ selectedSpaceSummary }}</span>
+        </div>
+
+        <textarea
+          v-model="userInput"
+          class="assistant-input"
+          rows="3"
+          placeholder="输入你的问题，按 Ctrl + Enter 发送"
+          @keydown="onKeyDown"
+        ></textarea>
+
+        <div class="composer-actions">
+          <div class="composer-warning" :class="{ visible: assistantMode === 'rag' && !selectedCourseSpaceId }">
+            <Warning />
+            <span>RAG 模式需要先选择课程空间</span>
+          </div>
           <ui-button
             type="primary"
-            :disabled="!userInput.trim() || isTyping"
+            :disabled="!canSend"
             :loading="isTyping"
-            class="max-[640px]:w-full"
+            class="send-button"
             @click="sendMessage"
           >
             发送
           </ui-button>
         </div>
-      </div>
+      </footer>
     </section>
   </div>
 </template>
 
 <style scoped>
+.assistant-shell {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  gap: 12px;
+  overflow: hidden;
+  color: #1d1d1f;
+}
+
+.history-panel {
+  display: flex;
+  width: 250px;
+  min-width: 250px;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid #e6eaf0;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+  transition: width 0.2s ease, min-width 0.2s ease, opacity 0.2s ease;
+}
+
+.history-panel--hidden {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+}
+
+.history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.history-head h3,
+.assistant-header h2 {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.history-head p,
+.assistant-header p {
+  margin: 2px 0 0;
+  color: #8b95a1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.icon-button {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fff;
+  color: #667085;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  border-color: #bcd6ff;
+  color: #007aff;
+}
+
+.history-search {
+  display: flex;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #8b95a1;
+}
+
+.history-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+
+.new-chat-button,
+.clear-all-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #d7e6ff;
+  border-radius: 8px;
+  background: #f5f9ff;
+  color: #007aff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.history-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  min-height: 78px;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: #f7f9fc;
+}
+
+.history-item--active {
+  border-color: #cfe3ff;
+  background: #eaf4ff;
+}
+
+.history-title,
+.history-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-title {
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.history-preview {
+  color: #6e6e73;
+  font-size: 12px;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #8b95a1;
+  font-size: 11px;
+}
+
+.history-status--typing {
+  color: #007aff;
+  font-weight: 700;
+}
+
+.history-empty {
+  border: 1px dashed #d8dee8;
+  border-radius: 8px;
+  padding: 18px 10px;
+  color: #8b95a1;
+  text-align: center;
+  font-size: 13px;
+}
+
+.clear-all-button {
+  border-color: #ffe0dd;
+  background: #fff7f6;
+  color: #d92d20;
+}
+
+.clear-all-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.assistant-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e6eaf0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.assistant-alert {
+  margin: 12px 12px 0;
+}
+
+.assistant-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e6eaf0;
+  padding: 14px 18px;
+}
+
+.header-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.clear-button {
+  min-height: 36px;
+  border-radius: 8px;
+  border-color: #e6eaf0;
+  background: #fff;
+  color: #606266;
+  box-shadow: none;
+}
+
+.mode-panel {
+  flex: 0 0 auto;
+  border-bottom: 1px solid #e6eaf0;
+  padding: 10px 18px;
+}
+
+.mode-title {
+  margin-bottom: 8px;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mode-card {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.mode-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(22, 48, 79, 0.08);
+}
+
+.mode-card--active.mode-card--green {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.mode-card--active.mode-card--purple {
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+}
+
+.mode-card--active.mode-card--blue {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.mode-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #edf5ff;
+  color: #007aff;
+  font-size: 18px;
+}
+
+.mode-card--green .mode-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.mode-card--purple .mode-icon {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.mode-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mode-copy strong {
+  color: #1d1d1f;
+  font-size: 14px;
+}
+
+.mode-copy span {
+  color: #6e6e73;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.mode-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.web-toggle {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #4b5563;
+}
+
+.web-toggle span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.web-toggle strong {
+  font-size: 13px;
+}
+
+.web-toggle small {
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.course-select-wrap {
+  display: flex;
+  width: min(420px, 48%);
+  align-items: center;
+  gap: 8px;
+  color: #7c3aed;
+}
+
+.course-select {
+  width: 100%;
+}
+
+.chat-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(248, 251, 255, 0.9) 0%, rgba(255, 255, 255, 0) 38%),
+    #ffffff;
+}
+
+.prompt-suggestions {
+  margin: auto;
+  display: flex;
+  width: min(860px, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.suggestion-copy h3 {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.suggestion-copy p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: #6e6e73;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.prompt-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.prompt-card {
+  display: flex;
+  min-height: 92px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prompt-card:hover {
+  border-color: rgba(0, 122, 255, 0.4);
+  background: #f4f9ff;
+}
+
+.prompt-card strong {
+  color: #1d1d1f;
+  font-size: 15px;
+}
+
+.prompt-card span {
+  margin-top: 10px;
+  color: #6e6e73;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.message-row {
+  display: flex;
+  gap: 10px;
+}
+
+.message-row--user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.message-row--user .avatar {
+  background: #1f2937;
+}
+
+.message-main {
+  display: flex;
+  max-width: min(760px, 78%);
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.message-row--user .message-main {
+  align-items: flex-end;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b95a1;
+  font-size: 11px;
+}
+
+.message-meta strong {
+  color: #4b5563;
+}
+
+.web-badge {
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+
+.message-bubble {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #e9edf3;
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  color: #202124;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.message-row--user .message-bubble {
+  border-color: #007aff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 4px;
+  background: #007aff;
+  color: #fff;
+}
+
+.plain-message {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(126, 157, 183, 0.2);
+  padding-top: 10px;
+}
+
+.source-item {
+  display: flex;
+  gap: 8px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.source-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.source-copy a {
+  color: #0b63ce;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.source-copy a:hover {
+  text-decoration: underline;
+}
+
+.source-copy small {
+  color: #8b95a1;
+}
+
+.typing-bubble {
+  display: inline-flex;
+  min-width: 78px;
+  gap: 5px;
+}
+
+.typing-bubble span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #8ca0b3;
+  animation: typing-bounce 0.8s infinite alternate;
+}
+
+.typing-bubble span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.typing-bubble span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.composer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #e6eaf0;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+.composer-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.assistant-input {
+  width: 100%;
+  min-height: 92px;
+  resize: none;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #1d1d1f;
+  font-size: 14px;
+  line-height: 1.6;
+  outline: none;
+}
+
+.assistant-input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.composer-warning {
+  display: inline-flex;
+  visibility: hidden;
+  align-items: center;
+  gap: 6px;
+  color: #d97706;
+  font-size: 12px;
+}
+
+.composer-warning.visible {
+  visibility: visible;
+}
+
+.send-button {
+  min-width: 82px;
+}
+
 .assistant-markdown {
   color: #202124;
   font-size: 14px;
@@ -435,7 +1329,6 @@ onMounted(() => {
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 10px;
   background: #0f172a;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .assistant-markdown :deep(.markdown-code-block code) {
@@ -452,53 +1345,90 @@ onMounted(() => {
   white-space: pre;
 }
 
-.assistant-markdown :deep(.hljs-keyword),
-.assistant-markdown :deep(.hljs-selector-tag),
-.assistant-markdown :deep(.hljs-built_in),
-.assistant-markdown :deep(.hljs-type) {
-  color: #93c5fd;
+@keyframes typing-bounce {
+  0% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 
-.assistant-markdown :deep(.hljs-string),
-.assistant-markdown :deep(.hljs-regexp),
-.assistant-markdown :deep(.hljs-attr),
-.assistant-markdown :deep(.hljs-symbol) {
-  color: #86efac;
-}
+@media (max-width: 1080px) {
+  .assistant-shell {
+    position: relative;
+  }
 
-.assistant-markdown :deep(.hljs-title),
-.assistant-markdown :deep(.hljs-name),
-.assistant-markdown :deep(.hljs-section),
-.assistant-markdown :deep(.hljs-function) {
-  color: #facc15;
-}
+  .history-panel {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    box-shadow: 0 18px 42px rgba(22, 48, 79, 0.18);
+  }
 
-.assistant-markdown :deep(.hljs-number),
-.assistant-markdown :deep(.hljs-literal),
-.assistant-markdown :deep(.hljs-variable),
-.assistant-markdown :deep(.hljs-template-variable) {
-  color: #fca5a5;
-}
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
 
-.assistant-markdown :deep(.hljs-comment),
-.assistant-markdown :deep(.hljs-quote) {
-  color: #94a3b8;
-}
+  .mode-options {
+    align-items: stretch;
+    flex-direction: column;
+  }
 
-.assistant-markdown :deep(.hljs-meta),
-.assistant-markdown :deep(.hljs-operator),
-.assistant-markdown :deep(.hljs-punctuation) {
-  color: #c4b5fd;
+  .course-select-wrap {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
-  .assistant-markdown {
-    font-size: 13.5px;
+  .assistant-shell {
+    gap: 0;
   }
 
-  .assistant-markdown :deep(.markdown-code-block code) {
-    padding: 10px 12px;
-    font-size: 12.5px;
+  .assistant-header,
+  .mode-panel,
+  .composer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .assistant-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .clear-button {
+    width: 100%;
+  }
+
+  .chat-panel {
+    padding: 14px 12px;
+  }
+
+  .prompt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .message-main {
+    max-width: calc(100% - 44px);
+  }
+
+  .composer-summary,
+  .composer-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .composer-warning {
+    visibility: visible;
+    min-height: 18px;
+  }
+
+  .send-button {
+    width: 100%;
   }
 }
 </style>

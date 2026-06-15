@@ -427,7 +427,14 @@ export default {
 
   async getClassList() {
     const response = await apiClient.get('/api/classes')
-    return unwrapList(response)
+    // apiClient 拦截器已返回 response.data，即 {data: [...]}
+    // unwrapList 会解包 response.data → 返回数组
+    const result = unwrapList(response)
+    if (!Array.isArray(result)) {
+      logger.warn('getClassList 返回非数组数据:', result)
+      return []
+    }
+    return result
   },
 
   async getClasses(params = {}) {

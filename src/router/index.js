@@ -94,6 +94,11 @@ const routes = [
         component: () => import('../views/student/AbilityProfile.vue')
       },
       {
+        path: 'knowledge-graph',
+        name: 'KnowledgeGraph',
+        component: () => import('../views/student/KnowledgeGraph.vue')
+      },
+      {
         path: 'profile',
         name: 'StudentProfile',
         component: () => import('../views/student/Profile.vue')
@@ -310,6 +315,11 @@ const routes = [
         path: 'experiment-management',
         name: 'ExperimentManagement',
         component: () => import('../views/admin/ExperimentManagement.vue')
+      },
+      {
+        path: 'experiment-screen',
+        name: 'AdminExperimentBigScreen',
+        component: () => import('../views/admin/ExperimentBigScreen.vue')
       },
       {
         path: 'system-log',
