@@ -22,6 +22,8 @@ stats.html
 stats.json
 bundle-report.html
 
+AGENTS.md
+
 # Caches and temporary files
 node_modules/.cache/
 .cache/

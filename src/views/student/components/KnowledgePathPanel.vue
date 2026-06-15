@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
-import { KNOWLEDGE_STATUS } from '../knowledgeGraphData'
+import { KNOWLEDGE_STATUS } from '../knowledgeLearningData'
 
 const props = defineProps({
   paths: {

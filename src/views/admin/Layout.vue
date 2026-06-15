@@ -58,6 +58,11 @@
               <ui-icon><Setting /></ui-icon>
               <template #title>个人设置</template>
             </ui-menu-item>
+
+            <ui-menu-item index="/admin/knowledge-graph">
+              <ui-icon><Connection /></ui-icon>
+              <template #title>知识图谱</template>
+            </ui-menu-item>
           </ui-menu>
         </ui-scrollbar>
       </ui-aside>
@@ -123,6 +128,11 @@
               <ui-menu-item index="/admin/profile">
                 <ui-icon><Setting /></ui-icon>
                 <template #title>个人设置</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/admin/knowledge-graph">
+                <ui-icon><Connection /></ui-icon>
+                <template #title>知识图谱</template>
               </ui-menu-item>
             </ui-menu>
           </ui-scrollbar>
@@ -200,7 +210,7 @@ import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
   Setting, Fold, ArrowDown, SwitchButton, WarningFilled,
-  Menu as MenuIcon, TrendCharts
+  Menu as MenuIcon, TrendCharts, Connection
 } from '@/components/ui/icons'
 import { getPtaCookieStatus } from '../../api/tap'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
@@ -228,7 +238,8 @@ const activeMenu = computed(() => route.path)
 const breadcrumbs = computed(() => {
   const pathMap = {
     dashboard: '首页', 'user-management': '用户管理', 'class-management': '班级管理',
-    'experiment-management': '实验管理', 'experiment-screen': '实验大屏', 'system-log': '系统日志', profile: '个人设置'
+    'experiment-management': '实验管理', 'experiment-screen': '实验大屏', 'system-log': '系统日志', profile: '个人设置',
+    'knowledge-graph': '知识图谱'
   }
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'admin' ? paths.slice(1).map(p => pathMap[p.split('/')[0]] || p) : []

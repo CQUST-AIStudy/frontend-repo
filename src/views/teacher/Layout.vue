@@ -356,7 +356,8 @@ const menuItems = [
       { path: '/teacher/document-center', label: '文档中心' },
       { path: '/teacher/bilingual-read', label: '双语阅读' },
       { path: '/teacher/summary-card', label: 'AI 精读' },
-      { path: '/teacher/ai-organize', label: '智能整理' }
+      { path: '/teacher/ai-organize', label: '智能整理' },
+      { path: '/teacher/knowledge-graph', label: '知识图谱' }
     ]
   },
   { path: '/teacher/course-analysis', icon: DataAnalysis, label: '课程分析', permission: ['view_course_classes', 'analyze_course_classes'] },
@@ -447,6 +448,7 @@ const breadcrumbs = computed(() => {
     'class-list': '教学班列表', 'class-analysis': '教学班分析', 'class-profile': '能力画像',
     profile: '个人设置', 'document-center': '文档中心', 'bilingual-read': '双语阅读',
     'summary-card': 'AI 精读', 'ai-chat': 'AI 对话', 'ai-organize': '智能整理',
+    'knowledge-graph': '知识图谱',
     grading: 'AI 批改', 'knowledge-base': '课程知识库', 'rag-analytics': 'RAG 分析',
     'course-analysis': '课程分析', 'department-teachers': '教师管理',
     'department-analytics': '院系统计', 'teacher-ai-management': 'AI 管理',
@@ -468,7 +470,7 @@ function onClickOutside(e) {
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
 
-  const canOpenWithoutClass = ['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'].includes(route.path)
+  const canOpenWithoutClass = ['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank', '/teacher/knowledge-graph'].includes(route.path)
   if (!userStore.selectedClass && !canOpenWithoutClass) {
     router.replace('/teacher/select-class')
     return
