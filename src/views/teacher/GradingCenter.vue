@@ -191,7 +191,7 @@
 
         <!-- 流程操作按钮 -->
         <div class="flex items-center justify-between pt-5 border-t border-[#edf0f5]">
-          <UiButton @click="$router.push('/teacher/grading/rubrics')"
+          <UiButton @click="rubricManageOpen = true"
             class="h-11 px-5 rounded-[10px] text-[14px] font-medium text-[#344054] bg-white hover:bg-[#f8fafc] active:scale-[0.98] transition-all cursor-pointer border border-[#d0d5dd] shadow-none">
             管理评分标准
           </UiButton>
@@ -329,6 +329,11 @@
       </div>
     </div>
 
+    <!-- 评分标准管理弹窗 -->
+    <AppModal v-model="rubricManageOpen" title="评分标准管理" width="900px" @close="loadRubrics">
+      <RubricManager embedded @saved="loadRubrics" />
+    </AppModal>
+
     <!-- 署名管理弹窗 -->
     <AppModal v-model="sigManageOpen" title="管理署名" width="420px">
       <div class="space-y-3">
@@ -370,6 +375,7 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList, getGradingBatches, exportGradingBatchExcel, exportMergedGradingExcel } from '@/api/tap'
 import LucideIcon from '@/components/LucideIcon.vue'
 import AppModal from '@/components/AppModal.vue'
+import RubricManager from '@/components/RubricManager.vue'
 
 const rubrics = ref([])
 const tasks = ref([])
@@ -475,6 +481,7 @@ async function exportSelectedExcelAction() {
 // ---- 署名管理 ----
 const savedSignatures = ref([]) // [{id, signature, createdAt}]
 const sigManageOpen = ref(false)
+const rubricManageOpen = ref(false)
 const showNewSigInput = ref(false)
 const newSignature = ref('')
 
@@ -727,11 +734,15 @@ async function exportTask(id) {
   }
 }
 
-onMounted(async () => {
+async function loadRubrics() {
   try {
     const res = await getRubrics()
     rubrics.value = normalizeRubricList(res)
   } catch (e) { logger.error('加载评分标准失败:', e) }
+}
+
+onMounted(() => {
+  loadRubrics()
   loadSignatures()
   loadTasks()
   loadBatches()

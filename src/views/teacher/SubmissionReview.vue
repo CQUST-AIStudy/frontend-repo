@@ -21,12 +21,19 @@
         class="flex items-center justify-between gap-6 p-6 px-8 rounded-[18px] mb-6 border"
         :class="{
           'bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] border-[#bbf7d0]': scoreLevel === 'level-good' || scoreLevel === '',
-          'bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] border-[#fde68a]': scoreLevel === 'level-ok',
+          'bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border-[#bfdbfe]': scoreLevel === 'level-ok',
           'bg-gradient-to-br from-[#fef2f2] to-[#fecaca] border-[#fca5a5]': scoreLevel === 'level-low'
         }"
       >
         <div class="flex items-baseline gap-2">
-          <span class="text-4xl font-bold text-[#15803d]">{{ formatScore(detail.totalScore, '暂无') }}</span>
+          <span
+            class="text-4xl font-bold"
+            :class="{
+              'text-[#15803d]': scoreLevel === 'level-good' || scoreLevel === '',
+              'text-[#1d4ed8]': scoreLevel === 'level-ok',
+              'text-[#dc2626]': scoreLevel === 'level-low'
+            }"
+          >{{ formatScore(detail.totalScore, '暂无') }}</span>
           <span class="text-[#6e6e73]">总分</span>
         </div>
         <div class="text-[#6e6e73] flex items-center gap-3 text-sm">
@@ -100,19 +107,24 @@
         ></textarea>
       </div>
 
-      <!-- Main Grid: Scores + Evidence -->
-      <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
-        <!-- Left: Score Dimensions -->
-        <div>
-          <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">评分维度</div>
+      <!-- Score Dimensions -->
+      <div class="mb-5">
+        <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">评分维度（点击筛选证据）</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <div
             v-for="score in detail.scores"
             :key="score.dimensionId"
-            class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-3 overflow-hidden transition-all duration-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:-translate-y-px"
-            :class="{ 'border-l-[3px] border-l-[#f59e0b]': score.status === 'NEED_MORE_EVIDENCE' }"
+            @click="activeDimFilter = activeDimFilter === score.dimensionId ? 'all' : score.dimensionId"
+            class="rounded-[20px] border overflow-hidden transition-all duration-200 cursor-pointer hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:-translate-y-px"
+            :class="[
+              score.status === 'NEED_MORE_EVIDENCE' ? 'border-l-[3px] border-l-[#f59e0b]' : 'border-black/[0.06]',
+              activeDimFilter === score.dimensionId
+                ? 'bg-[rgba(0,122,255,0.04)] border-[rgba(0,122,255,0.5)] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
+                : 'bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
+            ]"
           >
             <div class="flex justify-between items-center gap-4 px-5 py-3.5 bg-[#f9f9f9] border-b border-black/[0.06]">
-              <span class="font-bold text-[#1d1d1f] text-base">{{ getDimName(score.dimensionId) }}</span>
+              <span class="font-bold text-base" :class="activeDimFilter === score.dimensionId ? 'text-[#007aff]' : 'text-[#1d1d1f]'">{{ getDimName(score.dimensionId) }}</span>
               <div class="flex items-center gap-1.5">
                 <span
                   v-if="score.status === 'NEED_MORE_EVIDENCE'"
@@ -134,49 +146,94 @@
                 <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[#007aff]">{{ score.comment }}</p>
               </div>
               <div v-else class="text-[#aeaeb2] text-[13px] mb-3">暂无评语</div>
-              <UiButton
-                @click="startOverride(score)"
-                class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
-              >
-                <Edit class="w-3.5 h-3.5" />
-                <span>修改评分</span>
-              </UiButton>
+              <div class="flex items-center justify-between">
+                <UiButton
+                  @click.stop="startOverride(score)"
+                  class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+                >
+                  <Edit class="w-3.5 h-3.5" />
+                  <span>修改评分</span>
+                </UiButton>
+                <span class="text-xs text-[#aeaeb2]">{{ countEvidenceIds(score) }} 条关联证据</span>
+              </div>
             </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Evidence Materials -->
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b-2 border-black/[0.06]">
+          <div class="text-base font-semibold text-[#1d1d1f]">
+            {{ activeDimFilter === 'all' ? '证据材料' : `支持「${getDimName(activeDimFilter)}」的证据` }} ({{ filteredEvidence.length }})
+          </div>
+
+          <!-- Type filter chips -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs text-[#6e6e73]">类型：</span>
+            <button
+              v-for="opt in kindOptions"
+              :key="opt.value"
+              @click="activeKindFilter = opt.value"
+              class="h-[28px] px-3 rounded-full text-xs font-semibold border transition-all"
+              :class="activeKindFilter === opt.value
+                ? 'bg-[#007aff] text-white border-[#007aff]'
+                : 'bg-white text-[#6e6e73] border-black/[0.08] hover:border-black/[0.15]'
+            ">
+              {{ opt.label }}
+            </button>
           </div>
         </div>
 
-        <!-- Right: Evidence -->
-        <div>
-          <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">证据材料 ({{ detail.evidenceBlocks?.length || 0 }})</div>
-          <div class="flex flex-col gap-2.5">
-            <div v-for="eb in detail.evidenceBlocks" :key="eb.evidenceId" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-3.5">
-              <div class="flex justify-between items-center gap-3 mb-2">
-                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-black/5 text-[#6e6e73]">{{ eb.evidenceId }}</span>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
-                    :class="{
-                      'bg-black/5 text-[#6e6e73]': kindType(eb.kind) === '' || kindType(eb.kind) === 'info',
-                      'bg-[rgba(52,199,89,0.12)] text-[#34c759]': kindType(eb.kind) === 'success',
-                      'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': kindType(eb.kind) === 'warning',
-                      'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger'
-                    }"
-                  >{{ kindLabel(eb.kind) }}</span>
-                  <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
-                </div>
-              </div>
-              <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ (eb.content || '').slice(0, 500) }}</pre>
-              <div v-if="eb.confidence" class="text-xs text-[#6e6e73] mt-2">
-                置信度 {{ (eb.confidence * 100).toFixed(1) }}%
-              </div>
+        <div class="columns-1 md:columns-2 xl:columns-3 gap-4">
+          <div
+            v-for="eb in filteredEvidence"
+            :key="eb.evidenceId"
+            class="break-inside-avoid rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-4 mb-4 transition-all hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)]"
+          >
+            <!-- Dimension support tags -->
+            <div v-if="evidenceDimMap.get(eb.evidenceId)?.length" class="flex flex-wrap gap-1.5 mb-2">
+              <span
+                v-for="(dimId, idx) in evidenceDimMap.get(eb.evidenceId)"
+                :key="dimId"
+                class="inline-flex items-center h-[22px] px-2.5 rounded-full text-[11px] font-bold"
+                :class="dimSupportClass(idx)"
+              >
+                支持 · {{ getDimName(dimId) }}
+              </span>
             </div>
-            <!-- Empty State -->
-            <div v-if="!detail.evidenceBlocks?.length" class="flex flex-col items-center justify-center py-12 text-[#aeaeb2]">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-              <span class="text-sm">暂无证据材料</span>
+
+            <div class="flex justify-between items-center gap-3 mb-2">
+              <div class="flex items-center gap-2">
+                <span
+                  class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
+                  :class="{
+                    'bg-black/5 text-[#6e6e73]': kindType(eb.kind) === 'info',
+                    'bg-[rgba(52,199,89,0.12)] text-[#34c759]': kindType(eb.kind) === 'success',
+                    'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': kindType(eb.kind) === 'warning',
+                    'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger'
+                  }"
+                >{{ kindLabel(eb.kind) }}</span>
+                <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
+              </div>
+              <span v-if="eb.confidence" class="text-xs text-[#aeaeb2]">置信度 {{ (eb.confidence * 100).toFixed(1) }}%</span>
             </div>
+
+            <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ eb.kind === 'vlm_failed' ? friendlyFailContent(eb.content) : (eb.content || '').slice(0, 500) }}</pre>
+
+            <div v-if="eb.kind === 'vlm_failed'" class="flex items-center gap-1.5 mt-2 text-xs text-[#ff3b30]">
+              <span>ℹ</span>
+              <span>可点击「下载批注报告」查看原图</span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="!filteredEvidence.length" class="flex flex-col items-center justify-center py-12 text-[#aeaeb2] break-inside-avoid">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <span class="text-sm">暂无匹配当前筛选条件的证据</span>
           </div>
         </div>
       </div>
@@ -279,6 +336,17 @@ const overrideVisible = ref(false)
 const overriding = ref(false)
 const overrideForm = ref({ dimensionId: null, newScore: 0, maxScore: 0, newComment: '', reason: '' })
 
+const activeDimFilter = ref('all')
+const activeKindFilter = ref('all')
+
+const kindOptions = [
+  { value: 'all', label: '全部' },
+  { value: 'text', label: '文本' },
+  { value: 'ocr', label: '图文识别' },
+  { value: 'vlm', label: '图片解析' },
+  { value: 'vlm_failed', label: '图片未识别' }
+]
+
 const scoreLevel = computed(() => {
   const score = Number(detail.value?.totalScore)
   if (!Number.isFinite(score)) return ''
@@ -294,6 +362,38 @@ const preferredReportLabel = computed(() => {
     annopdf: '批注版 PDF',
     pdf: '评分报告 PDF',
   }[type] || '报告文件'
+})
+
+// 建立 evidenceId -> dimensionId 列表 的映射，用于在证据卡片上显示「支持 xx 维度」
+const evidenceDimMap = computed(() => {
+  const map = new Map()
+  if (!detail.value?.scores) return map
+  detail.value.scores.forEach(score => {
+    let ids = []
+    try {
+      const raw = score.evidenceIdsJson
+      if (raw) ids = JSON.parse(raw)
+    } catch {
+      ids = []
+    }
+    const list = Array.isArray(ids) ? ids : []
+    list.forEach(id => {
+      if (!map.has(id)) map.set(id, [])
+      if (!map.get(id).includes(score.dimensionId)) {
+        map.get(id).push(score.dimensionId)
+      }
+    })
+  })
+  return map
+})
+
+const filteredEvidence = computed(() => {
+  const blocks = detail.value?.evidenceBlocks || []
+  return blocks.filter(eb => {
+    const dimMatch = activeDimFilter.value === 'all' || (evidenceDimMap.value.get(eb.evidenceId) || []).includes(activeDimFilter.value)
+    const kindMatch = activeKindFilter.value === 'all' || eb.kind === activeKindFilter.value
+    return dimMatch && kindMatch
+  })
 })
 
 function formatScore(score, fallback = '-') {
@@ -316,15 +416,45 @@ function statusText(status) {
 }
 
 function kindType(kind) {
-  return { text: '', ocr: 'success', vlm: 'warning', vlm_failed: 'danger' }[kind] || 'info'
+  return { text: 'info', ocr: 'success', vlm: 'warning', vlm_failed: 'danger' }[kind] || 'info'
 }
 
 function kindLabel(kind) {
-  return { text: '文本', ocr: 'OCR', vlm: 'VLM', vlm_failed: 'VLM 失败' }[kind] || kind
+  return { text: '文本', ocr: '图文识别', vlm: '图片解析', vlm_failed: '图片未识别' }[kind] || kind
+}
+
+function friendlyFailContent(content) {
+  // 将技术化英文失败提示转换为用户可理解的文案
+  if (!content) return '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。'
+  if (content.includes('multimodal model did not extract usable content') || content.includes('Image evidence exists')) {
+    return '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。'
+  }
+  return content
 }
 
 function getDimName(dimensionId) {
   return dimensions.value[dimensionId] || `维度 #${dimensionId}`
+}
+
+function countEvidenceIds(score) {
+  try {
+    const raw = score?.evidenceIdsJson
+    if (!raw) return 0
+    const ids = JSON.parse(raw)
+    return Array.isArray(ids) ? ids.length : 0
+  } catch {
+    return 0
+  }
+}
+
+function dimSupportClass(index) {
+  const styles = [
+    'bg-[rgba(0,122,255,0.08)] text-[#007aff]',
+    'bg-[rgba(255,149,0,0.1)] text-[#c2410c]',
+    'bg-[rgba(124,58,237,0.08)] text-[#7c3aed]',
+    'bg-[rgba(52,199,89,0.12)] text-[#15803d]'
+  ]
+  return styles[index % styles.length] || styles[0]
 }
 
 function startOverride(score) {

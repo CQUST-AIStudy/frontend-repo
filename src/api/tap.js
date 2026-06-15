@@ -702,19 +702,4 @@ export function normalizeSignatureList(payload) {
   return list.filter(Boolean)
 }
 
-// ========== Student - Animation Explain ==========
-export function getAnimationStyles() {
-  return tapClient.get('/api/student/animation-explain/styles')
-}
 
-export function listAnimationExplains() {
-  return tapClient.get('/api/student/animation-explain')
-}
-
-export function getAnimationExplain(id) {
-  return tapClient.get(`/api/student/animation-explain/${id}`)
-}
-
-export function createAnimationExplain(topic, style = 'cyber-clean') {
-  return tapClient.post('/api/student/animation-explain', { topic, style })
-}

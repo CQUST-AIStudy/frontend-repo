@@ -6,6 +6,7 @@ import KnowledgeGraphCanvas from './components/KnowledgeGraphCanvas.vue'
 import KnowledgeMasteryStats from './components/KnowledgeMasteryStats.vue'
 import KnowledgePathPanel from './components/KnowledgePathPanel.vue'
 import KnowledgePracticeTable from './components/KnowledgePracticeTable.vue'
+import KnowledgeNodePlayer from '@/components/KnowledgeNodePlayer.vue'
 import {
   KNOWLEDGE_STATUS,
   STATUS_ORDER,
@@ -41,7 +42,7 @@ const videoStatus = computed(() => {
 })
 const videoDialogTitle = computed(() => {
   const name = videoNode.value?.label || videoNode.value?.name || '知识点'
-  return `${name} 演示视频`
+  return `${name} 演示动画`
 })
 
 function handleHoverNode(node) {
@@ -109,7 +110,7 @@ function openPractice(target = {}) {
           <div class="board-header">
             <div>
               <h2 class="board-title">C语言程序设计 知识图谱</h2>
-              <p class="board-desc">点击具体知识点播放演示视频，悬停节点查看状态，滚轮缩放，拖拽画布查看全貌</p>
+              <p class="board-desc">点击具体知识点播放演示动画，悬停节点查看状态，滚轮缩放，拖拽画布查看全貌</p>
             </div>
             <div class="legend-list" aria-label="图谱图例">
               <span v-for="item in statusLegend" :key="item.status" class="legend-item">
@@ -160,17 +161,13 @@ function openPractice(target = {}) {
             </div>
           </div>
         </div>
-        <p>图谱中心为课程核心，四个一级模块向外展开到具体知识点。悬停节点后，右侧路径面板和下方练习表会优先展示关联内容；点击具体知识点可打开演示视频占位弹窗。</p>
+        <p>图谱中心为课程核心，四个一级模块向外展开到具体知识点。悬停节点后，右侧路径面板和下方练习表会优先展示关联内容；点击具体知识点可打开演示动画弹窗。</p>
       </div>
     </ui-dialog>
 
     <ui-dialog v-model="videoVisible" :title="videoDialogTitle" width="720px">
       <div v-if="videoNode" class="video-dialog">
-        <div class="video-placeholder" role="img" :aria-label="`${videoNode.label || videoNode.name} 演示视频占位`">
-          <div class="video-play-mark" aria-hidden="true"></div>
-          <strong>{{ videoNode.label || videoNode.name }}</strong>
-          <span>演示视频占位</span>
-        </div>
+        <KnowledgeNodePlayer :node="videoNode" />
 
         <div class="video-meta">
           <div class="video-meta-item">
@@ -190,7 +187,7 @@ function openPractice(target = {}) {
           </div>
         </div>
 
-        <p class="video-desc">{{ videoNode.description || '该知识点的演示视频内容稍后接入。' }}</p>
+        <p class="video-desc">{{ videoNode.description || '该知识点的演示动画已生成，可点击去练习巩固相关知识。' }}</p>
 
         <div class="video-actions">
           <ui-button plain @click="videoVisible = false">关闭</ui-button>

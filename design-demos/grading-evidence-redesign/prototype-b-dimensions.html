@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方案 B · 与评分维度联动</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --ink: #1d1d1f;
+      --ink-secondary: #6e6e73;
+      --border: rgba(0,0,0,0.06);
+      --blue: #007aff;
+      --blue-soft: rgba(0,122,255,0.08);
+      --green: #34c759;
+      --green-soft: rgba(52,199,89,0.12);
+      --orange: #ff9500;
+      --orange-soft: rgba(255,149,0,0.1);
+      --red: #ff3b30;
+      --red-soft: rgba(255,59,48,0.08);
+      --radius: 20px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* Header */
+    .header { margin-bottom: 28px; }
+    .back {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--ink-secondary); font-size: 15px; margin-bottom: 10px; cursor: pointer;
+    }
+    h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+    .subtitle { color: var(--ink-secondary); font-size: 14px; }
+
+    /* Score banner */
+    .score-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 1px solid #fde68a; border-radius: var(--radius);
+      padding: 22px 28px; margin-bottom: 24px; box-shadow: var(--shadow);
+    }
+    .score-main { display: flex; align-items: baseline; gap: 10px; }
+    .score-num { font-size: 48px; font-weight: 800; color: #15803d; letter-spacing: -1px; }
+    .score-label { color: #6e6e73; font-size: 15px; }
+    .student-meta { text-align: right; font-size: 14px; color: #3d2b1f; }
+    .status-tag {
+      display: inline-flex; align-items: center; height: 24px; padding: 0 10px;
+      border-radius: 12px; font-size: 12px; font-weight: 700;
+      background: rgba(52,199,89,0.12); color: #34c759; margin-top: 6px;
+    }
+
+    /* Review card */
+    .review-card {
+      background: var(--surface); border: var(--border) solid 1px; border-radius: var(--radius);
+      padding: 22px 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+    }
+    .review-header {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px;
+    }
+    .review-title { font-size: 16px; font-weight: 700; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      height: 32px; padding: 0 14px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      border: none; cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-green { color: #16a34a; background: rgba(52,199,89,0.08); }
+    .btn-green:hover { background: rgba(52,199,89,0.15); }
+    .btn-blue { color: #007aff; background: rgba(0,122,255,0.08); }
+    .btn-blue:hover { background: rgba(0,122,255,0.15); }
+    .btn-gray { color: #1d1d1f; background: #f5f5f7; }
+    .btn-gray:hover { background: #e8e8ed; }
+    .btn-red { color: #ff3b30; background: rgba(255,59,48,0.08); }
+    .btn-red:hover { background: rgba(255,59,48,0.15); }
+
+    .hint { font-size: 13px; color: var(--ink-secondary); margin: 8px 0 14px; }
+    textarea {
+      width: 100%; min-height: 120px; padding: 14px 16px; border-radius: 12px;
+      border: none; background: #f5f5f7; font-size: 14px; resize: vertical; outline: none;
+      box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.1);
+    }
+    textarea:focus {
+      background: #fff; box-shadow: 0 0 0 4px rgba(0,122,255,0.15), inset 0 0 0 1px rgba(0,122,255,0.5);
+    }
+
+    /* Main grid */
+    .grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface); border: var(--border) solid 1px; border-radius: var(--radius);
+      padding: 22px 24px; box-shadow: var(--shadow);
+    }
+    .panel-title {
+      font-size: 16px; font-weight: 700; margin: 0 0 18px; padding-bottom: 12px;
+      border-bottom: 2px solid rgba(0,0,0,0.06);
+    }
+
+    /* Dimension cards */
+    .dim-card {
+      border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 10px;
+      cursor: pointer; transition: all .15s; background: #fff;
+    }
+    .dim-card:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+    .dim-card.active { border-color: rgba(0,122,255,0.5); background: rgba(0,122,255,0.04); }
+    .dim-card.active .dim-name { color: #007aff; }
+    .dim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .dim-name { font-weight: 700; font-size: 15px; }
+    .dim-score { font-size: 18px; font-weight: 800; }
+    .dim-score span { color: #aeaeb2; font-size: 14px; font-weight: 600; }
+    .dim-meta { font-size: 12px; color: var(--ink-secondary); margin-top: 4px; }
+    .dim-bar { height: 5px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+    .dim-bar > div { height: 100%; border-radius: 3px; background: var(--blue); transition: width .3s; }
+    .dim-comment {
+      margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #f9f9f9;
+      font-size: 13px; color: var(--ink-secondary); border-left: 3px solid var(--blue);
+    }
+
+    /* Filters */
+    .filter-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .filter-label { font-size: 13px; color: var(--ink-secondary); }
+    .filter-chip {
+      height: 28px; padding: 0 12px; border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.08); background: #fff;
+      font-size: 12px; font-weight: 600; color: var(--ink-secondary);
+      cursor: pointer; transition: all .15s;
+    }
+    .filter-chip:hover { border-color: rgba(0,0,0,0.15); }
+    .filter-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    /* Evidence cards */
+    .ev-card {
+      border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px;
+      background: #fff; transition: all .15s;
+    }
+    .ev-card:hover { border-color: rgba(0,122,255,0.3); box-shadow: 0 4px 12px rgba(0,122,255,0.06); }
+    .ev-support { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+    .ev-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: 11px; font-size: 12px; font-weight: 700; }
+    .tag-text { background: var(--blue-soft); color: var(--blue); }
+    .tag-ocr { background: var(--green-soft); color: #15803d; }
+    .tag-vlm { background: #f5f3ff; color: #7c3aed; }
+    .tag-fail { background: var(--red-soft); color: var(--red); }
+    .ev-page { font-size: 12px; color: #aeaeb2; }
+    .ev-content { font-size: 14px; white-space: pre-wrap; line-height: 1.65; color: var(--ink); }
+    .ev-fail-hint {
+      display: flex; align-items: center; gap: 6px; margin-top: 8px;
+      font-size: 12px; color: #ff3b30;
+    }
+    .empty { text-align: center; color: var(--ink-secondary); padding: 40px 0; font-size: 14px; }
+
+    /* Support tags by dimension */
+    .sup-code { background: var(--blue-soft); color: var(--blue); }
+    .sup-analysis { background: var(--orange-soft); color: #c2410c; }
+    .sup-report { background: rgba(124,58,237,0.08); color: #7c3aed; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="back">← 返回</div>
+      <h1>评阅：小胡</h1>
+      <div class="subtitle">卷积网络基础 · 实验报告批改详情</div>
+    </div>
+
+    <div class="score-banner">
+      <div class="score-main">
+        <span class="score-num">75</span>
+        <span class="score-label">总分</span>
+      </div>
+      <div class="student-meta">
+        <div>学生：小胡</div>
+        <span class="status-tag">已评分</span>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-title">教师总评</span>
+        <div class="btn-row">
+          <button class="btn btn-green">下载批注报告</button>
+          <button class="btn btn-blue">AI 生成总评</button>
+          <button class="btn btn-gray">保存总评</button>
+          <button class="btn btn-red">一键导入学生报告</button>
+        </div>
+      </div>
+      <p class="hint">导入后会把当前总分和教师总评写入学生实验报告，学生端导出的 Word 会显示红色手写评语。</p>
+      <textarea placeholder="点击 AI 生成总评 自动生成，或直接手动编辑教师总评。"></textarea>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2 class="panel-title">评分维度（点击筛选证据）</h2>
+        <div id="dimList"></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title" id="evTitle">证据材料（全部）</h2>
+        <div class="filter-bar" id="kindFilter">
+          <span class="filter-label">类型：</span>
+          <button class="filter-chip active" data-kind="all">全部</button>
+          <button class="filter-chip" data-kind="text">文本</button>
+          <button class="filter-chip" data-kind="ocr">图文识别</button>
+          <button class="filter-chip" data-kind="vlm">图片解析</button>
+          <button class="filter-chip" data-kind="vlm_failed">图片未识别</button>
+        </div>
+        <div id="evList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dimensions = [
+      { id: 'code', name: '代码正确性', score: 30, max: 40, weight: 40, evidenceIds: ['ev-51-0cb16bd5-0002', 'ev-51-0cb16bd5-0003'], comment: '报告提到了问题 A、B、C 的要求，但未展示实际代码运行结果或输出截图，无法确认程序是否通过核心测试点。' },
+      { id: 'analysis', name: '实验分析', score: 25, max: 30, weight: 30, evidenceIds: ['ev-51-0cb16bd5-0007', 'ev-51-0cb16bd5-0008', 'ev-51-0cb16bd5-0010'], comment: '实验收获部分说明理解了卷积和池化原理，但缺少对代码正确性的直接证据，比如输出形状是否与预期一致。' },
+      { id: 'report', name: '报告规范', score: 20, max: 30, weight: 30, evidenceIds: ['ev-51-0cb16bd5-0011'], comment: '代码的命名、注释和结构划分没有体现，影响了报告的可读性。建议附上关键代码片段和运行结果截图。' }
+    ];
+
+    const evidence = [
+      { id: 'ev-51-0cb16bd5-0002', kind: 'text', page: 2, content: '输出通道为2 的卷积\n垂直方向的卷积核用于实现边缘检测\n效果：', dims: ['code'] },
+      { id: 'ev-51-0cb16bd5-0003', kind: 'vlm_failed', page: 2, content: '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。', dims: ['code'] },
+      { id: 'ev-51-0cb16bd5-0007', kind: 'text', page: 3, content: '# 锐化\n#这个核是方向性锐化核，主要通过增强中心像素和上下邻域的差异，让图像的边缘和细节更明显；\n但它不是标准全方向锐化核，\n高斯模糊：', dims: ['analysis'] },
+      { id: 'ev-51-0cb16bd5-0008', kind: 'vlm_failed', page: 3, content: '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。', dims: ['analysis'] },
+      { id: 'ev-51-0cb16bd5-0010', kind: 'text', page: 4, content: '重新组合后的结果：', dims: ['analysis'] },
+      { id: 'ev-51-0cb16bd5-0011', kind: 'vlm_failed', page: 4, content: '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。', dims: ['report'] }
+    ];
+
+    const kindMap = {
+      text: { label: '文本', cls: 'tag-text' },
+      ocr: { label: '图文识别', cls: 'tag-ocr' },
+      vlm: { label: '图片解析', cls: 'tag-vlm' },
+      vlm_failed: { label: '图片未识别', cls: 'tag-fail' }
+    };
+
+    let activeDim = 'all';
+    let activeKind = 'all';
+
+    function renderDims() {
+      const container = document.getElementById('dimList');
+      container.innerHTML = '';
+      dimensions.forEach(d => {
+        const div = document.createElement('div');
+        div.className = 'dim-card' + (activeDim === d.id ? ' active' : '');
+        div.innerHTML = `
+          <div class="dim-header">
+            <span class="dim-name">${d.name}</span>
+            <span class="dim-score">${d.score} <span>/ ${d.max}</span></span>
+          </div>
+          <div class="dim-meta">权重 ${d.weight}% · ${d.evidenceIds.length} 条关联证据</div>
+          <div class="dim-bar"><div style="width:${(d.score / d.max * 100).toFixed(0)}%"></div></div>
+          <div class="dim-comment">${d.comment}</div>
+        `;
+        div.onclick = () => { activeDim = activeDim === d.id ? 'all' : d.id; renderDims(); renderEvs(); };
+        container.appendChild(div);
+      });
+      const allDiv = document.createElement('div');
+      allDiv.className = 'dim-card' + (activeDim === 'all' ? ' active' : '');
+      allDiv.innerHTML = `
+        <div class="dim-header">
+          <span class="dim-name">查看全部证据</span>
+          <span class="dim-score">${evidence.length}</span>
+        </div>
+      `;
+      allDiv.onclick = () => { activeDim = 'all'; renderDims(); renderEvs(); };
+      container.appendChild(allDiv);
+    }
+
+    function renderEvs() {
+      const container = document.getElementById('evList');
+      container.innerHTML = '';
+      const filtered = evidence.filter(e => {
+        const dimMatch = activeDim === 'all' || e.dims.includes(activeDim);
+        const kindMatch = activeKind === 'all' || e.kind === activeKind;
+        return dimMatch && kindMatch;
+      });
+      document.getElementById('evTitle').textContent = activeDim === 'all' ? '证据材料（全部）' : `支持「${dimensions.find(d => d.id === activeDim).name}」的证据`;
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty">没有匹配当前筛选条件的证据</div>';
+        return;
+      }
+      filtered.forEach(e => {
+        const meta = kindMap[e.kind];
+        const supportDims = e.dims.map(did => {
+          const d = dimensions.find(x => x.id === did);
+          return `<span class="ev-support sup-${did}">支持 · ${d.name}</span>`;
+        }).join(' ');
+        const isFail = e.kind === 'vlm_failed';
+        const card = document.createElement('div');
+        card.className = 'ev-card';
+        card.innerHTML = `
+          <div>${supportDims}</div>
+          <div class="ev-meta">
+            <span class="tag ${meta.cls}">${meta.label}</span>
+            <span class="ev-page">页 ${e.page}</span>
+          </div>
+          <div class="ev-content">${e.content}</div>
+          ${isFail ? `<div class="ev-fail-hint">ℹ 可点击「下载批注报告」查看原图</div>` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('kindFilter').addEventListener('click', e => {
+      if (!e.target.classList.contains('filter-chip')) return;
+      document.querySelectorAll('#kindFilter .filter-chip').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+      activeKind = e.target.dataset.kind;
+      renderEvs();
+    });
+
+    renderDims();
+    renderEvs();
+  </script>
+</body>
+</html>
