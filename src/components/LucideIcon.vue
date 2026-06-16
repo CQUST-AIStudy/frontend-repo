@@ -21,6 +21,7 @@ import {
   Clock,
   CloudUpload,
   Code2,
+  Crosshair,
   FileCode2,
   FileText,
   Flag,
@@ -38,6 +39,7 @@ import {
   Maximize,
   MessageSquare,
   Minimize,
+  MousePointerClick,
   Network,
   Package,
   Pause,
@@ -46,6 +48,7 @@ import {
   Play,
   Plus,
   RefreshCw,
+  RotateCw,
   Ruler,
   Scale,
   Search,
@@ -63,7 +66,9 @@ import {
   TreePine,
   TriangleAlert,
   Wrench,
-  X
+  X,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -97,6 +102,7 @@ const icons = {
   'clipboard-text': Clipboard,
   'cloud-upload': CloudUpload,
   code: Code2,
+  crosshair: Crosshair,
   'file-code': FileCode2,
   file: FileText,
   flag: Flag,
@@ -114,6 +120,7 @@ const icons = {
   maximize: Maximize,
   'message-square': MessageSquare,
   minimize: Minimize,
+  'mouse-pointer-click': MousePointerClick,
   network: Network,
   package: Package,
   pause: Pause,
@@ -122,6 +129,7 @@ const icons = {
   play: Play,
   plus: Plus,
   refresh: RefreshCw,
+  'rotate-cw': RotateCw,
   ruler: Ruler,
   scale: Scale,
   search: Search,
@@ -139,7 +147,9 @@ const icons = {
   tree: TreePine,
   'triangle-alert': TriangleAlert,
   wrench: Wrench,
-  x: X
+  x: X,
+  'zoom-in': ZoomIn,
+  'zoom-out': ZoomOut
 }
 
 const ResolvedIcon = computed(() => icons[props.name] || Circle)

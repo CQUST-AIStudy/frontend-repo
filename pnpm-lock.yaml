@@ -80,6 +80,9 @@ importers:
       pinia-plugin-persistedstate:
         specifier: ^3.2.3
         version: 3.2.3(pinia@2.3.1(vue@3.5.38))
+      three:
+        specifier: ^0.184.0
+        version: 0.184.0
       vue:
         specifier: ^3.3.4
         version: 3.5.38
@@ -4180,6 +4183,9 @@ packages:
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.27.0 || ^5.0.0
+
+  three@0.184.0:
+    resolution: {integrity: sha512-wtTRjG92pM5eUg/KuUnHsqSAlPM296brTOcLgMRqEeylYTh/CdtvKUvCyyCQTzFuStieWxvZb8mVTMvdPyUpxg==}
 
   throttleit@1.0.1:
     resolution: {integrity: sha512-vDZpf9Chs9mAdfY046mcPt8fg5QSZr37hEH4TXYBnDF+izxgrbRGUAAaBvIk/fJm9aOFCGFd1EsNg5AZCbnQCQ==}
@@ -9164,6 +9170,8 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       webpack: 5.107.2(cssnano@5.1.15(postcss@8.5.15))(postcss@8.5.15)
+
+  three@0.184.0: {}
 
   throttleit@1.0.1:
     optional: true
