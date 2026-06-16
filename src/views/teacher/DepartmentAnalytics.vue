@@ -101,10 +101,6 @@ import { message as uiMessage } from '@/services/feedback'
 import * as echarts from 'echarts'
 import api from '../../api'
 
-function averageScoreClass(score) { // eslint-disable-line no-unused-vars
-  return score < 60 ? 'text-[#ff3b30]' : 'text-[#1d1d1f]'
-}
-
 const pageLoading = ref(true)
 const completionChartRef = ref(null)
 const gradeChartRef = ref(null)

@@ -302,10 +302,6 @@ export default {
     return apiClient.get('/api/experiments')
   },
 
-  async getExperiments() {
-    return apiClient.get('/api/experiments1')
-  },
-
   async getTeacherExperimentList(options) {
     return apiClient.get('/api/teacher/experiments', {
       params: buildTeacherClassParams(options)
@@ -359,7 +355,7 @@ export default {
   },
 
   async getRecommendServiceHealth() {
-    return axios.get('/recommend/health', { timeout: 5000 }).then(res => res.data).catch(() => null)
+    return apiClient.get('/recommend/health', { timeout: 5000 }).catch(() => null)
   },
 
   async getErrorAnalysisHealth() {

@@ -24,32 +24,46 @@ export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
 }
 
 /** 将后端 LeetCodeProblem 实体映射为前端练习卡片格式 */
-export function mapProblemToPractice(problem = {}) {
-  const id = problem.id
-  const numericId = problem.numericId
-  const title = problem.titleMain || problem.titleAlt || '未命名题目'
-  const difficulty = (problem.difficulty || 'Unknown').toLowerCase()
-  const slug = problem.sourceKey ? problem.sourceKey.replace(/^slug:/, '') : ''
-  const sourceUrl = problem.sourceUrl || (slug ? `https://leetcode.cn/problems/${slug}/` : '')
+function createPracticeCard(fields = {}, overrides = {}) {
+  const title = fields.title || '未命名题目'
   return {
-    id,
-    problemId: id,
-    slug,
-    number: numericId || problem.problemCode || '',
+    id: fields.id,
+    problemId: fields.problemId ?? fields.id ?? null,
+    slug: fields.slug || '',
+    number: fields.number || '',
     title,
-    name: title,
-    difficulty: difficulty === 'easy' ? 'easy' : difficulty === 'hard' ? 'hard' : 'medium',
+    name: fields.name || title,
+    difficulty: normalizeLeetCodeDifficulty(fields.difficulty),
+    estimatedMinutes: fields.estimatedMinutes || 30,
+    matchRate: fields.matchRate ?? null,
+    reason: fields.reason || '',
+    source: fields.source || '',
+    type: fields.type || '',
+    sourceUrl: fields.sourceUrl || '',
+    sourceLabel: fields.sourceLabel || 'LeetCode',
+    persisted: !!fields.persisted,
+    warnings: fields.warnings || [],
+    errors: fields.errors || [],
+    ...overrides
+  }
+}
+
+export function mapProblemToPractice(problem = {}) {
+  const slug = problem.sourceKey ? problem.sourceKey.replace(/^slug:/, '') : ''
+  return createPracticeCard({
+    id: problem.id,
+    problemId: problem.id,
+    slug,
+    number: problem.numericId || problem.problemCode || '',
+    title: problem.titleMain || problem.titleAlt || '未命名题目',
+    difficulty: problem.difficulty,
     estimatedMinutes: problem.estimatedMinutes || 30,
-    matchRate: null,
     reason: '来自 LeetCode 题库',
     source: 'leetcode_bank',
     type: 'leetcode_bank_problem',
-    sourceUrl,
-    sourceLabel: 'LeetCode',
-    persisted: true,
-    warnings: [],
-    errors: []
-  }
+    sourceUrl: problem.sourceUrl || (slug ? `https://leetcode.cn/problems/${slug}/` : ''),
+    persisted: true
+  })
 }
 
 export function mapRecommendationItemToPractice(item = {}) {
@@ -120,16 +134,16 @@ export function mapClawItemToPractice(item = {}) {
   const problem = item.problem || {}
   const slug = getProblemSlug(problem)
   const problemId = getPersistedProblemId(item)
+  const difficulty = normalizeLeetCodeDifficulty(problem.difficulty)
   const sourceUrl = slug ? `https://leetcode.cn/problems/${slug}/` : ''
-  return {
+  return createPracticeCard({
     id: problemId || slug,
     problemId,
     slug,
     number: problem.questionFrontendId || problem.questionId || slug,
     title: getProblemTitle(problem),
-    name: getProblemTitle(problem),
-    difficulty: normalizeLeetCodeDifficulty(problem.difficulty),
-    estimatedMinutes: problem.difficulty === 'Hard' ? 50 : problem.difficulty === 'Easy' ? 20 : 35,
+    difficulty,
+    estimatedMinutes: difficulty === 'hard' ? 50 : difficulty === 'easy' ? 20 : 35,
     matchRate: item.score ? Math.round(Number(item.score) * 100) : null,
     reason: item.reason || '来自 LeetCodeClaw 关键词推荐',
     source: 'leetcode_claw',
@@ -139,7 +153,7 @@ export function mapClawItemToPractice(item = {}) {
     persisted: !!item.persisted,
     warnings: item.warnings || [],
     errors: item.errors || []
-  }
+  })
 }
 
 export function getLeetCodeClawHealth() {
