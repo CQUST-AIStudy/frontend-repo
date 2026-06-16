@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { clearAuthStorage, getSessionToken, getUserInfo } from '../constants/auth'
 
+// 演示模式：设为 true 时跳过班级选择强制跳转，与 store/index.js 保持一致
+const DEMO_MODE = false
+
 const routes = [
   {
     path: '/',
@@ -419,7 +422,7 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (userRole === 'teacher' && to.path.startsWith('/teacher/') && to.path !== TEACHER_CLASS_SELECTOR_PATH) {
+  if (!DEMO_MODE && userRole === 'teacher' && to.path.startsWith('/teacher/') && to.path !== TEACHER_CLASS_SELECTOR_PATH) {
     const selectedClass = getPersistedSelectedClass()
     if (!selectedClass && !teacherRoutesWithoutSelectedClass.has(to.path)) {
       next(TEACHER_CLASS_SELECTOR_PATH)
