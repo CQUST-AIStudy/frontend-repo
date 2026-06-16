@@ -146,6 +146,8 @@ const resolveTeacherClassKeyword = (options) => {
 }
 
 const buildTeacherClassParams = (options) => {
+  const normalized = normalizeTeacherClassScope(options)
+  if (normalized.scope === 'all') return { scope: 'all' }
   const classKeyword = resolveTeacherClassKeyword(options)
   if (classKeyword) return { class: classKeyword }
   const classId = resolveTeacherClassId(options)
