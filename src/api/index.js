@@ -157,7 +157,11 @@ const buildTeacherClassParams = (options) => {
 const buildExperimentParams = (options) => {
   if (!options) return {}
   const experimentId = options.experimentId || options.experiment_id
-  return experimentId != null ? { experimentId: Number(experimentId) } : {}
+  const params = experimentId != null ? { experimentId: Number(experimentId) } : {}
+  if (options.limit != null && options.limit !== '') {
+    params.limit = Number(options.limit)
+  }
+  return params
 }
 
 const unwrapList = (response, keys = ['data']) => {
