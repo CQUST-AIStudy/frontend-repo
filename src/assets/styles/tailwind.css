@@ -5,6 +5,14 @@
 @source "../../**/*.{vue,js}";
 
 @font-face {
+  font-family: "NotoSerifSC";
+  src: url("../../fonts/NotoSerifSC-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "ZiYouLangManTi";
   src: url("../fonts/ZiYouLangManTi-2.ttf") format("truetype");
   font-weight: normal;
@@ -34,8 +42,9 @@
   --radius-app-sm: 8px;
   --shadow-app: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-app-soft: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0.5px 2px rgba(0, 0, 0, 0.03);
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-google: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --font-page: "NotoSerifSC", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans: var(--font-page);
+  --font-google: var(--font-page);
   --font-handwritten: "ZiYouLangManTi", "KaiTi", "STKaiti", sans-serif;
   --animate-g-shimmer: g-shimmer 1.5s ease-in-out infinite;
   --animate-typing-bounce: typing-bounce 0.8s infinite alternate;
@@ -65,6 +74,7 @@
     --app-radius-lg: 12px;
     --app-radius-md: 10px;
     --app-radius-sm: 8px;
+    --font-page: "NotoSerifSC", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
     --ui-color-primary: var(--app-primary);
     --ui-color-primary-light-3: #4da3ff;
     --ui-color-primary-light-5: #80c0ff;
@@ -107,10 +117,10 @@
     overflow-x: hidden;
     color: var(--app-text);
     background: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: var(--font-page);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
 
   #app {
@@ -129,6 +139,21 @@
   textarea,
   select {
     font: inherit;
+  }
+
+  .markdown-content,
+  .ai-advice-markdown,
+  .feedback-content,
+  .solution-markdown,
+  .formatted-content,
+  .constraints-content,
+  .chunk-content,
+  .markdown-body,
+  .prose,
+  .section-content,
+  .section-title,
+  .plain-text {
+    font-family: var(--font-page);
   }
 
   img,
@@ -2715,7 +2740,7 @@
   .teacher-comment-preview {
     max-width: 600px;
     margin: 0 auto;
-    font-family: 'Microsoft YaHei', sans-serif;
+    font-family: var(--font-page);
   }
   
   /* src/views/teacher/SubmissionList.vue */

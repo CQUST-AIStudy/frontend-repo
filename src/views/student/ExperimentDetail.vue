@@ -1,5 +1,5 @@
 <template>
-  <div class="g-page [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="g-page [font-family:var(--font-page)]">
     <UiPageHeader title="实验详情" :description="currentExp?.name || '加载中..'">
       <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#5f6368] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa] hover:[border-color:#bdc1c6]" @click="$router.push('/student/experiments')">←返回列表</UiButton>
     </UiPageHeader>

@@ -87,7 +87,7 @@ function arrowPath(x1, y1, x2, y2) {
     <circle cx="150" cy="120" r="70" :fill="color" fill-opacity="0.10" />
     <circle cx="1160" cy="650" r="100" :fill="color" fill-opacity="0.08" />
 
-    <text x="640" y="95" text-anchor="middle" fill="#3d2b1f" font-size="50" font-weight="800" font-family="Georgia, 'Times New Roman', serif" :opacity="anim.intro">
+    <text x="640" y="95" text-anchor="middle" fill="#3d2b1f" font-size="50" font-weight="800" font-family="NotoSerifSC, 'Noto Serif SC', serif" :opacity="anim.intro">
       {{ title }}
     </text>
 

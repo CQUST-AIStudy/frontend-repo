@@ -32,7 +32,7 @@ const anim = computed(() => {
     <circle cx="140" cy="120" r="75" :fill="color" fill-opacity="0.10" />
     <circle cx="1150" cy="620" r="100" :fill="color" fill-opacity="0.08" />
 
-    <text x="640" y="95" text-anchor="middle" fill="#3d2b1f" font-size="50" font-weight="800" font-family="Georgia, 'Times New Roman', serif" :opacity="anim.intro">
+    <text x="640" y="95" text-anchor="middle" fill="#3d2b1f" font-size="50" font-weight="800" font-family="NotoSerifSC, 'Noto Serif SC', serif" :opacity="anim.intro">
       {{ title }}
     </text>
 

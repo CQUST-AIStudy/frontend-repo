@@ -44,7 +44,7 @@ const tags = computed(() => {
 
     <!-- 标题 -->
     <g :transform="`translate(640, ${140 - (1 - anim.title) * 30})`" :opacity="anim.title">
-      <text x="0" y="0" text-anchor="middle" fill="#3d2b1f" font-size="56" font-weight="800" font-family="Georgia, 'Times New Roman', serif">{{ title }}</text>
+      <text x="0" y="0" text-anchor="middle" fill="#3d2b1f" font-size="56" font-weight="800" font-family="NotoSerifSC, 'Noto Serif SC', serif">{{ title }}</text>
       <line x1="-90" y1="25" x2="90" y2="25" :stroke="color" stroke-width="5" stroke-linecap="round" />
     </g>
 

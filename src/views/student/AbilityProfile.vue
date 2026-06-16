@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="ability-profile [padding:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="ability-profile [padding:0] [font-family:var(--font-page)]">
     <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
       <ui-skeleton :rows="10" animated />
     </div>

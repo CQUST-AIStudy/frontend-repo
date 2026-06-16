@@ -1,5 +1,5 @@
 <template>
-  <div class="g-dashboard [min-width:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="g-dashboard [min-width:0] [font-family:var(--font-page)]">
     <UiPageHeader title="首页" description="欢迎使用数据结构课程AI辅助系统" />
 
     <loading-state :loading="loading">

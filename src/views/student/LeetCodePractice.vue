@@ -39,7 +39,7 @@
                   <div class="example-output [margin-bottom:4px] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_6px] [&_code]:[border-radius:3px] [&_code]:[color:#e74c3c]">
                     <strong>输出:</strong> <code>{{ example.output }}</code>
                   </div>
-                  <div v-if="example.explanation" class="example-explanation [margin-top:8px] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_sans-serif] [color:#666] [font-style:italic]">
+                  <div v-if="example.explanation" class="example-explanation [margin-top:8px] [font-family:var(--font-page)] [color:#666] [font-style:italic]">
                     <strong>解释:</strong> {{ example.explanation }}
                   </div>
                 </div>
@@ -1623,7 +1623,7 @@ watch(() => route.params.id, () => {
   border-radius: 4px;
   background: #eef2f7;
   color: #1f2937;
-  font-family: "Cambria Math", "Times New Roman", serif;
+  font-family: var(--font-page);
   font-style: italic;
   line-height: 1.35;
   white-space: nowrap;
@@ -1643,7 +1643,7 @@ watch(() => route.params.id, () => {
   border-radius: 8px;
   background: #eef6ff;
   color: #1d4ed8;
-  font-family: "Cambria Math", "Times New Roman", serif;
+  font-family: var(--font-page);
   font-style: italic;
   line-height: 1.6;
   text-align: center;
