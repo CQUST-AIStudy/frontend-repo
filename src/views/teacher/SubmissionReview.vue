@@ -42,9 +42,9 @@
           <span
             class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
             :class="{
-              'bg-[rgba(52,199,89,0.12)] text-[#34c759]': statusTag(detail.status) === 'success',
-              'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': statusTag(detail.status) === 'warning',
-              'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': statusTag(detail.status) === 'danger',
+              'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]': statusTag(detail.status) === 'success',
+              'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]': statusTag(detail.status) === 'warning',
+              'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]': statusTag(detail.status) === 'danger',
               'bg-black/5 text-[#6e6e73]': statusTag(detail.status) === 'info'
             }"
           >
@@ -61,7 +61,7 @@
             <UiButton
               @click="downloadReport"
               :disabled="downloadingReport || !detail?.hasDownloadableReport"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#34c759] bg-[rgba(52,199,89,0.08)] hover:bg-[rgba(52,199,89,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#6b8f6b] bg-[rgba(107,143,107,0.08)] hover:bg-[rgba(107,143,107,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="downloadingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               下载批注报告
@@ -69,7 +69,7 @@
             <UiButton
               @click="generateReview"
               :disabled="generatingReview"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="generatingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               AI 生成总评
@@ -85,7 +85,7 @@
             <UiButton
               @click="publishReport"
               :disabled="publishingReport"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               一键导入学生报告
@@ -103,7 +103,7 @@
           rows="5"
           placeholder="点击 AI 生成总评 自动生成，或直接手动编辑教师总评。"
           @input="reviewEdited = true"
-          class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[120px]"
+          class="w-full px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y min-h-[120px]"
         ></textarea>
       </div>
 
@@ -119,16 +119,16 @@
             :class="[
               score.status === 'NEED_MORE_EVIDENCE' ? 'border-l-[3px] border-l-[#f59e0b]' : 'border-black/[0.06]',
               activeDimFilter === score.dimensionId
-                ? 'bg-[rgba(0,122,255,0.04)] border-[rgba(0,122,255,0.5)] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
+                ? 'bg-[rgba(194,112,62,0.04)] border-[rgba(194,112,62,0.5)] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
                 : 'bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)]'
             ]"
           >
             <div class="flex justify-between items-center gap-4 px-5 py-3.5 bg-[#f9f9f9] border-b border-black/[0.06]">
-              <span class="font-bold text-base" :class="activeDimFilter === score.dimensionId ? 'text-[#007aff]' : 'text-[#1d1d1f]'">{{ getDimName(score.dimensionId) }}</span>
+              <span class="font-bold text-base" :class="activeDimFilter === score.dimensionId ? 'text-[var(--app-primary)]' : 'text-[#1d1d1f]'">{{ getDimName(score.dimensionId) }}</span>
               <div class="flex items-center gap-1.5">
                 <span
                   v-if="score.status === 'NEED_MORE_EVIDENCE'"
-                  class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,149,0,0.1)] text-[#ff9500]"
+                  class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.1)] text-[#c49a3c]"
                 >
                   证据不足
                 </span>
@@ -139,17 +139,17 @@
             </div>
             <div class="px-5 py-4">
               <div v-if="score.comment" class="mb-3 mt-2">
-                <div class="flex items-center gap-1 text-xs text-[#007aff] font-semibold mb-1.5">
+                <div class="flex items-center gap-1 text-xs text-[var(--app-primary)] font-semibold mb-1.5">
                   <ChatDotRound class="w-3.5 h-3.5" />
                   <span>AI 评语</span>
                 </div>
-                <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[#007aff]">{{ score.comment }}</p>
+                <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[var(--app-primary)]">{{ score.comment }}</p>
               </div>
               <div v-else class="text-[#aeaeb2] text-[13px] mb-3">暂无评语</div>
               <div class="flex items-center justify-between">
                 <UiButton
                   @click.stop="startOverride(score)"
-                  class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+                  class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
                 >
                   <Edit class="w-3.5 h-3.5" />
                   <span>修改评分</span>
@@ -178,7 +178,7 @@
               @click="activeKindFilter = opt.value"
               class="h-[28px] px-3 rounded-full text-xs font-semibold border transition-all"
               :class="activeKindFilter === opt.value
-                ? 'bg-[#007aff] text-white border-[#007aff]'
+                ? 'bg-[var(--app-primary)] text-white border-[var(--app-primary)]'
                 : 'bg-white text-[#6e6e73] border-black/[0.08] hover:border-black/[0.15]'
             ">
               {{ opt.label }}
@@ -210,9 +210,9 @@
                   class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold"
                   :class="{
                     'bg-black/5 text-[#6e6e73]': kindType(eb.kind) === 'info',
-                    'bg-[rgba(52,199,89,0.12)] text-[#34c759]': kindType(eb.kind) === 'success',
-                    'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': kindType(eb.kind) === 'warning',
-                    'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger'
+                    'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]': kindType(eb.kind) === 'success',
+                    'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]': kindType(eb.kind) === 'warning',
+                    'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]': kindType(eb.kind) === 'danger'
                   }"
                 >{{ kindLabel(eb.kind) }}</span>
                 <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
@@ -222,7 +222,7 @@
 
             <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ eb.kind === 'vlm_failed' ? friendlyFailContent(eb.content) : (eb.content || '').slice(0, 500) }}</pre>
 
-            <div v-if="eb.kind === 'vlm_failed'" class="flex items-center gap-1.5 mt-2 text-xs text-[#ff3b30]">
+            <div v-if="eb.kind === 'vlm_failed'" class="flex items-center gap-1.5 mt-2 text-xs text-[#c44b3f]">
               <span>ℹ</span>
               <span>可点击「下载批注报告」查看原图</span>
             </div>
@@ -254,7 +254,7 @@
                 :min="0"
                 :max="overrideForm.maxScore"
                 step="0.5"
-                class="w-[120px] h-[38px] px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+                class="w-[120px] h-[38px] px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
               />
               <span class="text-[#aeaeb2] text-sm">/ {{ overrideForm.maxScore }}</span>
             </div>
@@ -264,7 +264,7 @@
                 v-model="overrideForm.newComment"
                 rows="3"
                 placeholder="输入修改后的评语"
-                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"
+                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"
               ></textarea>
             </div>
             <div class="flex gap-3">
@@ -273,7 +273,7 @@
                 v-model="overrideForm.reason"
                 rows="2"
                 placeholder="说明修改原因"
-                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y min-h-[60px]"
+                class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y min-h-[60px]"
               ></textarea>
             </div>
           </div>
@@ -285,7 +285,7 @@
             <UiButton
               @click="submitOverride"
               :disabled="overriding"
-              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
             >
               <span v-if="overriding" class="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span>
               确认修改
@@ -298,7 +298,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="h-[200px] flex items-center justify-center">
       <div class="flex flex-col items-center gap-3">
-        <div class="w-8 h-8 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+        <div class="w-8 h-8 border-[3px] border-[var(--app-primary)]/20 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
         <span class="text-sm text-[#6e6e73]">加载中...</span>
       </div>
     </div>
@@ -449,10 +449,10 @@ function countEvidenceIds(score) {
 
 function dimSupportClass(index) {
   const styles = [
-    'bg-[rgba(0,122,255,0.08)] text-[#007aff]',
-    'bg-[rgba(255,149,0,0.1)] text-[#c2410c]',
+    'bg-[rgba(194,112,62,0.08)] text-[#c2703e]',
+    'bg-[rgba(196,154,60,0.1)] text-[#c2410c]',
     'bg-[rgba(124,58,237,0.08)] text-[#7c3aed]',
-    'bg-[rgba(52,199,89,0.12)] text-[#15803d]'
+    'bg-[rgba(107,143,107,0.12)] text-[#15803d]'
   ]
   return styles[index % styles.length] || styles[0]
 }

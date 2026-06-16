@@ -14,7 +14,7 @@
           </span>
 
           <template v-if="experiment.status === 'completed'">
-            <span v-if="experiment.score">得分: <b>{{ experiment.score }}</b></span>
+            <span v-if="hasScore">得分: <b>{{ experiment.score }}</b></span>
             <span v-if="experiment.plagiarismRate != null">查重率: {{ experiment.plagiarismRate }}%</span>
             <span v-if="experiment.submitTime">提交: {{ formattedSubmitTime }}</span>
           </template>
@@ -51,6 +51,8 @@ const formattedSubmitTime = computed(() => {
     ? formatDate(props.experiment.submitTime, 'YYYY-MM-DD HH:mm:ss')
     : ''
 })
+
+const hasScore = computed(() => props.experiment.score !== null && props.experiment.score !== undefined && props.experiment.score !== '')
 
 const statusText = computed(() => ({
   completed: '已完成',
@@ -156,7 +158,7 @@ const actionText = computed(() => ({
 }
 
 .g-exp-meta b {
-  color: #007aff;
+  color: var(--app-primary);
   font-weight: 700;
 }
 
@@ -174,7 +176,7 @@ const actionText = computed(() => ({
 }
 
 .g-action-link {
-  color: #007aff;
+  color: var(--app-primary);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;

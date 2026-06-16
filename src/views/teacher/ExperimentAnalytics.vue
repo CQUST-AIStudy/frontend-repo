@@ -41,13 +41,13 @@
       </div>
 
       <UiButton
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
         @click="toggleComparison"
       >
         {{ showComparison ? '返回单实验分析' : '对比当前范围实验' }}
       </UiButton>
 
-      <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff] ml-auto max-[768px]:ml-0">
+      <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)] ml-auto max-[768px]:ml-0">
         {{ activeClassLabel }} / {{ experiments.length }} 个可分析实验
       </span>
     </div>
@@ -55,30 +55,30 @@
     <!-- Error alert -->
     <div
       v-if="errorMessage"
-      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)] mb-3"
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(196,75,63,0.2)] bg-[rgba(196,75,63,0.06)] mb-3"
     >
-      <svg class="w-5 h-5 text-[#ff3b30] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-      <span class="text-sm text-[#ff3b30]">{{ errorMessage }}</span>
+      <svg class="w-5 h-5 text-[#c44b3f] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+      <span class="text-sm text-[#c44b3f]">{{ errorMessage }}</span>
     </div>
 
     <!-- Warning alert -->
     <div
       v-if="filterFallback"
-      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)] mb-3"
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(196,154,60,0.2)] bg-[rgba(196,154,60,0.06)] mb-3"
     >
-      <svg class="w-5 h-5 text-[#ff9500] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-      <span class="text-sm text-[#ff9500]">当前教学班没有匹配到实验前缀，已自动切换为全部实验。</span>
+      <svg class="w-5 h-5 text-[#c49a3c] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <span class="text-sm text-[#c49a3c]">当前教学班没有匹配到实验前缀，已自动切换为全部实验。</span>
     </div>
 
     <!-- Info alert (scope) -->
     <div
       v-if="scopeDescription && !showComparison"
-      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(0,122,255,0.2)] bg-[rgba(0,122,255,0.06)] mb-3"
+      class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(194,112,62,0.2)] bg-[rgba(194,112,62,0.06)] mb-3"
     >
-      <svg class="w-5 h-5 text-[#007aff] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+      <svg class="w-5 h-5 text-[var(--app-primary)] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
       <div>
-        <p class="text-sm font-medium text-[#007aff]">{{ scopeTitle }}</p>
-        <p class="text-xs text-[#007aff]/80 mt-0.5">{{ scopeDescription }}</p>
+        <p class="text-sm font-medium text-[var(--app-primary)]">{{ scopeTitle }}</p>
+        <p class="text-xs text-[var(--app-primary)]/80 mt-0.5">{{ scopeDescription }}</p>
       </div>
     </div>
 
@@ -89,7 +89,7 @@
             <div class="text-[15px] font-semibold text-[#1d1d1f]">对比当前范围实验</div>
             <div class="mt-1 text-xs text-[#6e6e73]">{{ comparisonSummary }}</div>
           </div>
-          <span class="inline-flex h-[24px] items-center rounded-full bg-[rgba(0,122,255,0.08)] px-2.5 text-[11px] font-semibold text-[#007aff]">
+          <span class="inline-flex h-[24px] items-center rounded-full bg-[rgba(194,112,62,0.08)] px-2.5 text-[11px] font-semibold text-[var(--app-primary)]">
             平均分 / 难度 / 区分度
           </span>
         </div>
@@ -208,7 +208,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in problemAccuracy" :key="row.label" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <tr v-for="row in problemAccuracy" :key="row.label" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
                 <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.label }}</td>
                 <td class="py-2.5 px-3 text-[#1d1d1f] truncate max-w-[240px]" :title="row.type">{{ row.type }}</td>
                 <td class="py-2.5 px-3 text-[#1d1d1f] text-center">{{ row.fullScore }}</td>
@@ -362,11 +362,11 @@ const kpiItems = computed(() => {
   if (!overview) return []
 
   return [
-    { label: '总人数', value: safeNumber(overview.totalStudents), color: '#007aff' },
-    { label: '已提交', value: safeNumber(overview.submittedCount), color: '#007aff' },
+    { label: '总人数', value: safeNumber(overview.totalStudents), color: '#c2703e' },
+    { label: '已提交', value: safeNumber(overview.submittedCount), color: '#c2703e' },
     { label: '最高分', value: safeNumber(overview.maxScore), color: '#1e8e3e' },
     { label: '最低分', value: safeNumber(overview.minScore), color: '#d93025' },
-    { label: '平均分', value: safeNumber(overview.avgScore), color: '#007aff' },
+    { label: '平均分', value: safeNumber(overview.avgScore), color: '#c2703e' },
     { label: '中位数', value: safeNumber(overview.median) },
     { label: '高位平均', value: safeNumber(overview.topAvg), color: '#1e8e3e' },
     { label: '低位平均', value: safeNumber(overview.bottomAvg), color: '#e37400' },
@@ -388,7 +388,7 @@ const kpiItems = computed(() => {
 })
 
 function kpiValueClass(item) {
-  if (item.color === '#007aff') return '[color:#007aff]'
+  if (item.color === '#c2703e') return '[color:#c2703e]'
   if (item.color === '#1e8e3e') return '[color:#1e8e3e]'
   if (item.color === '#d93025') return '[color:#d93025]'
   if (item.color === '#e37400') return '[color:#e37400]'
@@ -531,7 +531,7 @@ function toPercent(value) {
 
 function accColor(rate) {
   if (rate >= 80) return '#1e8e3e'
-  if (rate >= 60) return '#007aff'
+  if (rate >= 60) return '#c2703e'
   if (rate >= 40) return '#e37400'
   return '#d93025'
 }
@@ -719,7 +719,7 @@ function renderDistChart() {
       data: values.map((value, index) => ({
         value,
         itemStyle: {
-          color: index <= 1 ? '#1e8e3e' : index <= 3 ? '#007aff' : index <= 4 ? '#e37400' : '#d93025',
+          color: index <= 1 ? '#1e8e3e' : index <= 3 ? '#c2703e' : index <= 4 ? '#e37400' : '#d93025',
           borderRadius: [3, 3, 0, 0],
         },
       })),
@@ -811,7 +811,7 @@ function renderComparisonChart() {
         type: 'bar',
         data: comparisonItems.value.map(item => Number(item.avgScore || 0)),
         barWidth: '30%',
-        itemStyle: { color: '#007aff', borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: '#c2703e', borderRadius: [3, 3, 0, 0] },
       },
       {
         name: '难度系数',

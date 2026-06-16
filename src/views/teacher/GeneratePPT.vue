@@ -20,7 +20,7 @@
               v-model="pptForm.title"
               type="text"
               placeholder="例如：二叉树的遍历与应用"
-              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
             />
             <span v-if="errors.title" class="text-[12px] text-red-500">{{ errors.title }}</span>
           </div>
@@ -48,7 +48,7 @@
             <UiSelect
               v-model="pptForm.topics"
               multiple
-              class="h-[120px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none cursor-pointer focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all"
+              class="h-[120px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none cursor-pointer focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all"
             >
               <UiOption
                 v-for="item in knowledgeTopics"
@@ -80,9 +80,9 @@
               <label
                 v-for="mod in moduleOptions"
                 :key="mod.value"
-                class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]"
+                class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]"
               >
-                <UiInput type="checkbox" v-model="pptForm.includes" :value="mod.value" class="w-4 h-4 rounded accent-[#007aff]" />
+                <UiInput type="checkbox" v-model="pptForm.includes" :value="mod.value" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">{{ mod.label }}</span>
               </label>
             </div>
@@ -95,7 +95,7 @@
               v-model="pptForm.notes"
               rows="4"
               placeholder="例如：偏向实验课、需要突出易错点、希望加入课堂讨论问题。"
-              class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+              class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y"
             ></textarea>
           </div>
 
@@ -104,7 +104,7 @@
             <UiButton
               type="submit"
               :disabled="generating"
-              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100"
             >
               {{ generating ? '正在生成...' : '生成 PPT 大纲' }}
             </UiButton>
@@ -127,7 +127,7 @@
             type="button"
             :disabled="!previewSlides.length"
             @click="downloadPPT"
-            class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.12)] active:scale-[0.96] transition-all cursor-pointer border border-[rgba(0,122,255,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
+            class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.12)] active:scale-[0.96] transition-all cursor-pointer border border-[rgba(194,112,62,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             下载文本
           </UiButton>
@@ -135,7 +135,7 @@
 
         <!-- Loading state -->
         <div v-if="generating" class="flex items-center gap-2.5 py-4 text-[#6e6e73]">
-          <svg class="w-5 h-5 animate-spin text-[#007aff]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 animate-spin text-[var(--app-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>

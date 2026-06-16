@@ -9,7 +9,7 @@
         <!-- 信息条-->
         <div class="g-info-bar [display:flex] [align-items:center] [gap:20px] [padding:16px_20px] [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [flex-wrap:wrap]">
           <span class="g-chip [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="'c-' + currentExp.status">{{ statusText }}</span>
-          <span v-if="currentExp.score" class="g-info-item [display:flex] [align-items:center] [gap:6px]">
+          <span v-if="hasScore" class="g-info-item [display:flex] [align-items:center] [gap:6px]">
             <span class="g-info-label [font-size:12px] [color:#5f6368]">得分</span>
             <span class="g-info-val [font-size:14px] [font-weight:500] [color:#202124] [color:#1a73e8] [font-size:18px]">{{ currentExp.score }}</span>
           </span>
@@ -151,6 +151,7 @@ const currentExp = computed(() => {
 })
 
 const isCompleted = computed(() => currentExp.value?.status === 'completed')
+const hasScore = computed(() => currentExp.value?.score !== null && currentExp.value?.score !== undefined && currentExp.value?.score !== '')
 const statusText = computed(() => ({ completed: '已完成', in_progress: '进行中' }[currentExp.value?.status] || '未开始'))
 const plagiarismClass = computed(() => {
   const r = currentExp.value?.plagiarismRate || 0

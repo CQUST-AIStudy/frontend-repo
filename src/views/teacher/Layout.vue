@@ -28,7 +28,7 @@
           <!-- Menu items rendered via menuItems data -->
           <template v-for="item in visibleMenuItems" :key="item.path || item.group">
             <!-- Single item -->
-            <router-link v-if="!item.children" :to="item.path" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== item.path }">
+            <router-link v-if="!item.children" :to="item.path" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[#c2703e] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== item.path }">
               <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
               <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
             </router-link>
@@ -41,12 +41,12 @@
                 :aria-expanded="openGroups[item.group]"
                 @click="toggleGroup(item.group)"
               >
-                <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[#007aff]': isGroupActive(item) }"></span>
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-black/[0.05] bg-white/65 text-[#5f6f82] transition-colors duration-150 group-hover:border-black/[0.08] group-hover:text-[#1d1d1f]" :class="{ '!border-[#007aff]/20 !bg-[#007aff]/10 !text-[#007aff]': isGroupActive(item) || openGroups[item.group] }">
+                <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[#c2703e]': isGroupActive(item) }"></span>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-black/[0.05] bg-white/65 text-[#5f6f82] transition-colors duration-150 group-hover:border-black/[0.08] group-hover:text-[#1d1d1f]" :class="{ '!border-[#c2703e]/20 !bg-[#c2703e]/10 !text-[#c2703e]': isGroupActive(item) || openGroups[item.group] }">
                   <component :is="item.icon" class="w-[17px] h-[17px]" />
                 </span>
                 <span v-if="!collapsed" class="truncate flex-1 text-left">{{ item.label }}</span>
-                <span v-if="!collapsed" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/[0.025] text-[#9aa0a6] transition-colors duration-150 group-hover:bg-black/[0.05]" :class="{ '!bg-[#007aff]/10 !text-[#007aff]': openGroups[item.group] || isGroupActive(item) }">
+                <span v-if="!collapsed" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/[0.025] text-[#9aa0a6] transition-colors duration-150 group-hover:bg-black/[0.05]" :class="{ '!bg-[#c2703e]/10 !text-[#c2703e]': openGroups[item.group] || isGroupActive(item) }">
                   <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
               </UiButton>
@@ -60,8 +60,8 @@
               >
                 <div v-if="openGroups[item.group] && !collapsed" class="relative mt-1 ml-[20px] pl-3 py-0.5 space-y-0.5 overflow-hidden before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-black/[0.08]">
                   <template v-for="child in item.children" :key="child.path">
-                    <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.08)] !text-[#007aff] !font-semibold': isChildActive(child.path), 'hover:bg-black/[0.035] hover:text-[#1d1d1f]': !isChildActive(child.path) }">
-                      <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[rgba(0,0,0,0.12)] bg-[#f5f5f7] transition-colors" :class="{ '!border-[#007aff] !bg-[#007aff]': isChildActive(child.path), 'group-hover/child:border-[#8e8e93]': !isChildActive(child.path) }"></span>
+                    <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(194, 112, 62, 0.08)] !text-[#c2703e] !font-semibold': isChildActive(child.path), 'hover:bg-black/[0.035] hover:text-[#1d1d1f]': !isChildActive(child.path) }">
+                      <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[rgba(0,0,0,0.12)] bg-[#f5f5f7] transition-colors" :class="{ '!border-[#c2703e] !bg-[#c2703e]': isChildActive(child.path), 'group-hover/child:border-[#8e8e93]': !isChildActive(child.path) }"></span>
                       <span class="truncate">{{ child.label }}</span>
                     </router-link>
                   </template>
@@ -72,7 +72,7 @@
 
           <div class="h-px bg-black/[0.06] mx-3 my-2.5"></div>
 
-          <router-link to="/teacher/profile" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === '/teacher/profile', 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== '/teacher/profile' }">
+          <router-link to="/teacher/profile" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[#6e6e73] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[#c2703e] !font-semibold': activeMenu === '/teacher/profile', 'hover:bg-black/[0.04] hover:text-[#1d1d1f]': activeMenu !== '/teacher/profile' }">
             <Setting class="w-[18px] h-[18px] shrink-0" />
             <span v-if="!collapsed" class="truncate">个人设置</span>
           </router-link>
@@ -111,7 +111,7 @@
           <nav class="flex-1 overflow-y-auto px-2 py-3">
             <div class="space-y-0.5">
               <template v-for="item in visibleMenuItems" :key="item.path || item.group">
-                <router-link v-if="!item.children" :to="item.path" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] transition-all duration-150" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04]': activeMenu !== item.path }" @click="closeMobileMenu">
+                <router-link v-if="!item.children" :to="item.path" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73] transition-all duration-150" :class="{ 'bg-[var(--app-primary-soft)] !text-[#c2703e] !font-semibold': activeMenu === item.path, 'hover:bg-black/[0.04]': activeMenu !== item.path }" @click="closeMobileMenu">
                   <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
                   <span>{{ item.label }}</span>
                 </router-link>
@@ -122,19 +122,19 @@
                     :aria-expanded="openGroups[item.group]"
                     @click="toggleGroup(item.group)"
                   >
-                    <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[#007aff]': isGroupActive(item) }"></span>
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-black/[0.05] bg-white/65 text-[#5f6f82] transition-colors duration-150 group-hover:border-black/[0.08] group-hover:text-[#1d1d1f]" :class="{ '!border-[#007aff]/20 !bg-[#007aff]/10 !text-[#007aff]': isGroupActive(item) || openGroups[item.group] }">
+                    <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[#c2703e]': isGroupActive(item) }"></span>
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-black/[0.05] bg-white/65 text-[#5f6f82] transition-colors duration-150 group-hover:border-black/[0.08] group-hover:text-[#1d1d1f]" :class="{ '!border-[#c2703e]/20 !bg-[#c2703e]/10 !text-[#c2703e]': isGroupActive(item) || openGroups[item.group] }">
                       <component :is="item.icon" class="w-[17px] h-[17px]" />
                     </span>
                     <span class="flex-1 text-left">{{ item.label }}</span>
-                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/[0.025] text-[#9aa0a6] transition-colors duration-150 group-hover:bg-black/[0.05]" :class="{ '!bg-[#007aff]/10 !text-[#007aff]': openGroups[item.group] || isGroupActive(item) }">
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/[0.025] text-[#9aa0a6] transition-colors duration-150 group-hover:bg-black/[0.05]" :class="{ '!bg-[#c2703e]/10 !text-[#c2703e]': openGroups[item.group] || isGroupActive(item) }">
                       <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </span>
                   </UiButton>
                   <div v-if="openGroups[item.group]" class="relative ml-[20px] mt-1 pl-3 py-0.5 space-y-0.5 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-black/[0.08]">
                     <template v-for="child in item.children" :key="child.path">
-                      <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[#6e6e73] transition-all duration-150" :class="{ 'bg-[rgba(0,122,255,0.08)] !text-[#007aff] !font-semibold': isChildActive(child.path), 'hover:bg-black/[0.035] hover:text-[#1d1d1f]': !isChildActive(child.path) }" @click="closeMobileMenu">
-                        <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[rgba(0,0,0,0.12)] bg-[#f5f5f7] transition-colors" :class="{ '!border-[#007aff] !bg-[#007aff]': isChildActive(child.path), 'group-hover/child:border-[#8e8e93]': !isChildActive(child.path) }"></span>
+                      <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[#6e6e73] transition-all duration-150" :class="{ 'bg-[rgba(194, 112, 62, 0.08)] !text-[#c2703e] !font-semibold': isChildActive(child.path), 'hover:bg-black/[0.035] hover:text-[#1d1d1f]': !isChildActive(child.path) }" @click="closeMobileMenu">
+                        <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[rgba(0,0,0,0.12)] bg-[#f5f5f7] transition-colors" :class="{ '!border-[#c2703e] !bg-[#c2703e]': isChildActive(child.path), 'group-hover/child:border-[#8e8e93]': !isChildActive(child.path) }"></span>
                         <span class="truncate">{{ child.label }}</span>
                       </router-link>
                     </template>
@@ -142,7 +142,7 @@
                 </div>
               </template>
               <div class="h-px bg-black/[0.06] mx-3 my-2.5"></div>
-              <router-link to="/teacher/profile" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73]" :class="{ 'bg-[rgba(0,122,255,0.12)] !text-[#007aff] !font-semibold': activeMenu === '/teacher/profile' }" @click="closeMobileMenu">
+              <router-link to="/teacher/profile" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[#6e6e73]" :class="{ 'bg-[var(--app-primary-soft)] !text-[#c2703e] !font-semibold': activeMenu === '/teacher/profile' }" @click="closeMobileMenu">
                 <Setting class="w-[18px] h-[18px] shrink-0" />
                 <span>个人设置</span>
               </router-link>
@@ -157,14 +157,14 @@
       <!-- Header -->
       <UiHeader class="sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
-          <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(0,122,255,0.08)] hover:text-[#007aff] shrink-0" title="切换导航">
+          <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(194, 112, 62, 0.08)] hover:text-[#c2703e] shrink-0" title="切换导航">
             <MenuIcon v-if="isMobile" />
             <Fold v-else />
           </UiButton>
 
           <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-white/60 border border-black/[0.06]">
             <nav class="flex items-center gap-1.5 text-[13px] text-[#6e6e73] whitespace-nowrap overflow-hidden">
-              <router-link to="/teacher/dashboard" class="hover:text-[#007aff] transition-colors">首页</router-link>
+              <router-link to="/teacher/dashboard" class="hover:text-[#c2703e] transition-colors">首页</router-link>
               <template v-for="(item, index) in breadcrumbs" :key="index">
                 <span class="text-[#aeaeb2]">/</span>
                 <span class="text-[#1d1d1f] font-medium truncate">{{ item }}</span>
@@ -174,7 +174,7 @@
         </div>
 
         <div class="flex items-center gap-3 min-w-0 shrink-0">
-          <UiButton v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[rgba(0,122,255,0.08)] text-[#007aff] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[rgba(0,122,255,0.14)] max-w-[min(280px,32vw)]">
+          <UiButton v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[rgba(194, 112, 62, 0.08)] text-[#c2703e] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[rgba(194, 112, 62, 0.14)] max-w-[min(280px,32vw)]">
             <School class="w-4 h-4 shrink-0" />
             <span class="truncate">{{ selectedClassName }}</span>
             <ArrowDown class="w-3 h-3 shrink-0" />
@@ -185,7 +185,7 @@
           <!-- User Dropdown -->
           <div class="relative" ref="dropdownRef">
             <UiButton @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-black/[0.06] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
-              <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+              <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#c2703e] to-[#5856d6] flex items-center justify-center text-white text-sm font-semibold shrink-0">
                 {{ (userInfo.name || '教').slice(0, 1) }}
               </div>
               <div v-if="!isMobile" class="flex flex-col gap-0.5">
@@ -211,7 +211,7 @@
                   <Setting class="w-4 h-4 shrink-0 text-[#6e6e73]" />个人信息
                 </UiButton>
                 <div class="h-px bg-black/[0.06] mx-2 my-1"></div>
-                <UiButton @click="handleCommand('logout')" class="flex !justify-start items-center gap-2.5 w-full !min-h-0 !px-3 !py-2.5 rounded-[10px] !border-transparent !bg-transparent !shadow-none text-[13px] font-medium text-[#ff3b30] hover:!bg-[rgba(255,59,48,0.08)] transition-colors text-left">
+                <UiButton @click="handleCommand('logout')" class="flex !justify-start items-center gap-2.5 w-full !min-h-0 !px-3 !py-2.5 rounded-[10px] !border-transparent !bg-transparent !shadow-none text-[13px] font-medium text-[#c44b3f] hover:!bg-[rgba(196,75,63,0.08)] transition-colors text-left">
                   <SwitchButton class="w-4 h-4 shrink-0" />退出登录
                 </UiButton>
               </div>
@@ -300,8 +300,8 @@ const teacherLevelText = computed(() => {
 })
 const teacherLevelClass = computed(() => ({
   'bg-black/5 text-[#6e6e73]': teacherLevel.value === 'normal',
-  'bg-[rgba(0,122,255,0.1)] text-[#007aff]': teacherLevel.value === 'course_leader',
-  'bg-[rgba(52,199,89,0.1)] text-[#34c759]': teacherLevel.value === 'department_head'
+  'bg-[rgba(194, 112, 62, 0.1)] text-[#c2703e]': teacherLevel.value === 'course_leader',
+  'bg-[rgba(107,143,107,0.1)] text-[#6b8f6b]': teacherLevel.value === 'department_head'
 }))
 const asideStyle = computed(() => ({ '--teacher-aside-width': asideWidth.value }))
 const mainStyle = computed(() => ({ '--teacher-main-margin': isMobile.value ? '0px' : asideWidth.value }))
@@ -418,7 +418,7 @@ function getGroupButtonClass(item) {
     'flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer',
     '!min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none',
     active
-      ? '!border-[#007aff]/25 !bg-[rgba(0,122,255,0.09)] !text-[#007aff]'
+      ? '!border-[#c2703e]/25 !bg-[rgba(194, 112, 62, 0.09)] !text-[#c2703e]'
       : open
         ? '!border-black/[0.08] !bg-white/75 !text-[#1d1d1f]'
         : '!border-black/[0.06] !bg-white/45 !text-[#5f6368] hover:!border-black/[0.1] hover:!bg-white/75 hover:!text-[#1d1d1f]'

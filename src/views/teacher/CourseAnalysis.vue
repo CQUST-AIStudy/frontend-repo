@@ -52,7 +52,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">AI教学建议</span>
-          <UiButton :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
+          <UiButton :disabled="aiLoading" @click="generateAIRecommendation" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-60">
             {{ aiLoading ? '生成中...' : '生成教学建议' }}
           </UiButton>
         </div>

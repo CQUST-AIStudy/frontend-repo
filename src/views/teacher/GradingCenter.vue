@@ -42,10 +42,10 @@
           <!-- 评分标准 -->
           <div class="flex flex-col gap-2">
             <label class="text-[13px] font-medium text-[#6e6e73]">
-              <span class="text-[#ff3b30]">*</span> 评分标准
+              <span class="text-[#c44b3f]">*</span> 评分标准
             </label>
             <UiSelect v-model="createForm.rubricId"
-              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all">
               <UiOption value="" disabled selected>选择评分标准</UiOption>
               <UiOption v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</UiOption>
             </UiSelect>
@@ -55,31 +55,31 @@
           <div class="flex flex-col gap-2">
             <div class="flex items-center justify-between">
               <label class="text-[13px] font-medium text-[#6e6e73]">
-                <span class="text-[#ff3b30]">*</span> 教师署名
+                <span class="text-[#c44b3f]">*</span> 教师署名
               </label>
               <button type="button" @click="sigManageOpen = true"
-                class="text-[12px] text-[#007aff] hover:text-[#0056b3] cursor-pointer bg-transparent border-none transition-colors">
+                class="text-[12px] text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] cursor-pointer bg-transparent border-none transition-colors">
                 管理署名
               </button>
             </div>
             <div class="flex gap-2">
               <UiSelect v-model="createForm.teacherSignature" clearable
                 placeholder="选择署名"
-                class="h-11 flex-1 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+                class="h-11 flex-1 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all">
                 <UiOption v-for="s in savedSignatures" :key="s.id" :value="s.signature">{{ s.signature }}</UiOption>
               </UiSelect>
               <button type="button" @click="showNewSigInput = true"
-                class="h-11 w-11 flex items-center justify-center rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-[#007aff] hover:bg-[#007aff] hover:text-white cursor-pointer transition-all"
+                class="h-11 w-11 flex items-center justify-center rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-[var(--app-primary)] hover:bg-[var(--app-primary)] hover:text-white cursor-pointer transition-all"
                 title="新增署名">
                 <LucideIcon name="plus" :size="18" />
               </button>
             </div>
             <div v-if="showNewSigInput" class="flex gap-2">
               <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
-                class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+                class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all"
                 @keyup.enter="confirmNewSignature" />
               <UiButton type="primary" @click="confirmNewSignature"
-                class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+                class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
                 确定
               </UiButton>
               <UiButton @click="showNewSigInput = false; newSignature = ''"
@@ -94,14 +94,14 @@
         <div class="flex flex-col gap-2">
           <label class="text-[13px] font-medium text-[#6e6e73]">批次名称</label>
           <UiInput v-model="createForm.batchName" maxlength="64" placeholder="例如：第三次作业（不填则自动命名）"
-            class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all" />
+            class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all" />
         </div>
 
         <!-- 分数区间 - 可视化版 -->
         <div class="rounded-[12px] border border-[#e5eaf2] bg-white px-5 py-4">
           <div class="flex items-start justify-between gap-6">
             <span class="text-[13px] font-medium text-[#475467] pt-2">
-              <span class="text-[#ff3b30]">*</span> 期望分数区间
+              <span class="text-[#c44b3f]">*</span> 期望分数区间
             </span>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-end gap-2 mb-3">
@@ -138,7 +138,7 @@
         <!-- 上传区域 - 流程化 -->
         <div>
           <label class="text-[13px] font-medium text-[#6e6e73] mb-3 block">
-            <span class="text-[#ff3b30]">*</span> 上传作业文件
+            <span class="text-[#c44b3f]">*</span> 上传作业文件
           </label>
           <ui-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :on-change="onFileChange"
                      accept=".pdf,.docx,.doc" multiple drag :on-remove="onFileRemove"
@@ -164,7 +164,7 @@
           <div v-if="fileList.length" class="mt-4">
             <div class="mb-2 flex items-center justify-between text-[13px]">
               <span class="font-medium text-[#101828]">已选文件（{{ fileList.length }} 个）</span>
-              <button type="button" class="text-[#667085] hover:text-[#ff3b30]" @click="clearSelectedFiles">清空</button>
+              <button type="button" class="text-[#667085] hover:text-[#c44b3f]" @click="clearSelectedFiles">清空</button>
             </div>
             <div class="overflow-hidden rounded-[8px] border border-[#e4e7ec] bg-white">
               <div class="grid grid-cols-[1fr_140px_90px] items-center bg-[#f8fafc] px-4 py-2.5 text-[12px] font-medium text-[#667085]">
@@ -181,7 +181,7 @@
                   <span class="min-w-0 flex-1 truncate text-[#344054]">{{ file.name }}</span>
                 </div>
                 <span class="text-center text-[13px] text-[#344054]">{{ formatFileSize(file.size || file.raw?.size) }}</span>
-                <button type="button" class="justify-self-center text-[#ff3b30] hover:text-[#d92d20]" @click="removeSelectedFile(file)">
+                <button type="button" class="justify-self-center text-[#c44b3f] hover:text-[#d92d20]" @click="removeSelectedFile(file)">
                   <LucideIcon name="trash-2" :size="16" />
                 </button>
               </div>
@@ -246,13 +246,13 @@
 
       <!-- Loading state -->
       <div v-if="loading" class="flex items-center justify-center py-12 bg-white rounded-[12px] border border-black/[0.06]">
-        <svg class="animate-spin h-6 w-6 text-[#007aff]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <svg class="animate-spin h-6 w-6 text-[var(--app-primary)]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
       </div>
 
       <!-- 任务列表 -->
       <div v-else-if="displayedTasks.length > 0" class="flex flex-col gap-3">
         <div v-for="row in displayedTasks" :key="row.taskId"
-          class="flex items-center gap-4 p-4 bg-white rounded-[12px] border border-black/[0.06] hover:border-[#007aff]/20 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+          class="flex items-center gap-4 p-4 bg-white rounded-[12px] border border-black/[0.06] hover:border-[var(--app-primary)]/20 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
           <!-- 勾选框 -->
           <input type="checkbox" :disabled="row.status !== 'COMPLETED'"
             :checked="selectedTaskIds.includes(row.taskId)" @change="toggleSelect(row)"
@@ -261,10 +261,10 @@
           <!-- 状态图标 -->
           <div class="w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0"
             :class="{
-              'bg-[#fff3e0] text-[#ff9500]': row.status === 'PROCESSING',
+              'bg-[#fff3e0] text-[#c49a3c]': row.status === 'PROCESSING',
               'bg-[#e8f8ed] text-[#30d158]': row.status === 'COMPLETED',
               'bg-[#f5f5f7] text-[#6e6e73]': row.status === 'PENDING',
-              'bg-[#ffeeed] text-[#ff3b30]': row.status === 'FAILED'
+              'bg-[#ffeeed] text-[#c44b3f]': row.status === 'FAILED'
             }">
             <LucideIcon v-if="row.status === 'PROCESSING'" name="loader" :size="20" />
             <LucideIcon v-else-if="row.status === 'COMPLETED'" name="check" :size="20" />
@@ -289,7 +289,7 @@
             <div class="w-20 h-1 bg-[#e5e5ea] rounded-full overflow-hidden">
               <div class="h-full rounded-full transition-all duration-300"
                 :style="{ width: `${row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0}%` }"
-                :class="row.failedCount > 0 ? 'bg-[#ff3b30]' : row.status === 'COMPLETED' ? 'bg-[#30d158]' : 'bg-[#007aff]'">
+                :class="row.failedCount > 0 ? 'bg-[#c44b3f]' : row.status === 'COMPLETED' ? 'bg-[#30d158]' : 'bg-[var(--app-primary)]'">
               </div>
             </div>
             <span class="text-[12px] font-medium text-[#6e6e73] w-10 text-right">
@@ -300,11 +300,11 @@
           <!-- 操作按钮 -->
           <div class="flex items-center gap-2">
             <button @click="$router.push(`/teacher/grading/detail/${row.taskId}`)"
-              class="h-8 px-3 rounded-lg bg-[#eef5ff] text-[#007aff] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e0edff] transition-colors">
+              class="h-8 px-3 rounded-lg bg-[#eef5ff] text-[var(--app-primary)] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e0edff] transition-colors">
               查看详情
             </button>
             <button v-if="row.failedCount > 0" @click="retryTask(row.taskId)"
-              class="h-8 px-3 rounded-lg bg-[#fff3e0] text-[#ff9500] text-[12px] font-medium border-none cursor-pointer hover:bg-[#ffe8cc] transition-colors">
+              class="h-8 px-3 rounded-lg bg-[#fff3e0] text-[#c49a3c] text-[12px] font-medium border-none cursor-pointer hover:bg-[#ffe8cc] transition-colors">
               重试失败
             </button>
             <button v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
@@ -341,7 +341,7 @@
           class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] group">
           <span class="flex-1 text-[14px] text-[#1d1d1f]">{{ sig.signature }}</span>
           <button @click="removeSignature(i)"
-            class="opacity-0 group-hover:opacity-100 text-[#ff3b30] hover:text-[#d92d20] cursor-pointer bg-transparent border-none transition-all">
+            class="opacity-0 group-hover:opacity-100 text-[#c44b3f] hover:text-[#d92d20] cursor-pointer bg-transparent border-none transition-all">
             <LucideIcon name="x" :size="16" />
           </button>
         </div>
@@ -350,10 +350,10 @@
         </div>
         <div class="flex gap-2 pt-2">
           <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
-            class="flex-1 h-9 px-3 rounded-[10px] bg-white border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+            class="flex-1 h-9 px-3 rounded-[10px] bg-white border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all"
             @keyup.enter="addSignature" />
           <UiButton type="primary" @click="addSignature"
-            class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+            class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
             添加
           </UiButton>
         </div>
@@ -642,7 +642,7 @@ function fileTypeLabel(file) {
 
 function fileTypeBadgeClass(file) {
   const type = fileTypeLabel(file)
-  if (type === 'PDF') return 'bg-[#ff3b30]'
+  if (type === 'PDF') return 'bg-[#c44b3f]'
   if (type === 'DOC' || type === 'DOCX') return 'bg-[#2563eb]'
   return 'bg-[#667085]'
 }

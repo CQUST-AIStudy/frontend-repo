@@ -24,7 +24,7 @@
 
     <div v-if="feedbackState.loadingCount > 0" class="fixed inset-0 z-[2900] flex items-center justify-center bg-[#f8fafc]/70">
       <div class="rounded-xl border border-[#e2e8f0] bg-white px-6 py-5 text-center shadow-[0_20px_48px_rgba(15,23,42,0.14)]">
-        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[#007aff]/20 border-t-[#007aff]"></div>
+        <div class="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[#c2703e]/20 border-t-[#c2703e]"></div>
         <div class="text-[14px] font-medium text-[#1d1d1f]">{{ feedbackState.loadingText || '加载中...' }}</div>
       </div>
     </div>
@@ -84,7 +84,7 @@ function toastDotClass(type) {
   if (type === 'success') return 'bg-[#16a34a]'
   if (type === 'warning') return 'bg-[#d97706]'
   if (type === 'error') return 'bg-[#dc2626]'
-  return 'bg-[#007aff]'
+  return 'bg-[#c2703e]'
 }
 
 function handleCancel(dialog) {

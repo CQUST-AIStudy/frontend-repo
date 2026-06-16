@@ -39,7 +39,7 @@
           <UiInput
             v-model="searchQuery"
             placeholder="搜索教师姓名"
-            class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
 
@@ -55,18 +55,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="teacher in filteredTeachers" :key="teacher.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+            <tr v-for="teacher in filteredTeachers" :key="teacher.id" class="border-b border-black/[0.04] hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3">{{ teacher.name }}</td>
               <td class="py-3 px-3">{{ teacher.username }}</td>
               <td class="py-3 px-3">
                 <div class="flex flex-wrap gap-1.5">
-                  <span v-for="cls in teacher.classes" :key="cls.id" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(0,122,255,0.08)] text-[#007aff]">{{ cls.name }}</span>
+                  <span v-for="cls in teacher.classes" :key="cls.id" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)]">{{ cls.name }}</span>
                   <span v-if="!teacher.classes?.length" class="text-[13px] text-[#aeaeb2]">暂无班级</span>
                 </div>
               </td>
               <td class="py-3 px-3 text-center">{{ teacher.studentCount || 0 }}</td>
               <td class="py-3 px-3">
-                <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="viewTeacherClasses(teacher)">查看班级</UiButton>
+                <UiButton class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none" @click="viewTeacherClasses(teacher)">查看班级</UiButton>
               </td>
             </tr>
           </tbody>
@@ -80,7 +80,7 @@
       <div class="relative w-[60%] max-h-[80vh] rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 overflow-auto">
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">教师班级 - {{ selectedTeacher?.name }}</span>
-          <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="dialogVisible = false">关闭</UiButton>
+          <UiButton class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none" @click="dialogVisible = false">关闭</UiButton>
         </div>
         <UiTable class="w-full text-left text-[13px]">
           <thead>
@@ -93,7 +93,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="cls in (selectedTeacher?.classes || [])" :key="cls.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+            <tr v-for="cls in (selectedTeacher?.classes || [])" :key="cls.id" class="border-b border-black/[0.04] hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3">{{ cls.name }}</td>
               <td class="py-3 px-3">{{ cls.classCode }}</td>
               <td class="py-3 px-3">{{ cls.studentCount }}</td>

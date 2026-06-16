@@ -23,7 +23,7 @@
           <div class="g-card g-card-half [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#e5e5e7] [min-width:0] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]">
             <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#1d1d1f] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]">
               <span>实验完成情况</span>
-              <a class="g-link [font-size:13px] [color:#007aff] [cursor:pointer] [font-weight:500] hover:[text-decoration:underline]" @click="nav('/student/experiments')">查看全部</a>
+              <a class="g-link [font-size:13px] [color:var(--app-primary)] [cursor:pointer] [font-weight:500] hover:[text-decoration:underline]" @click="nav('/student/experiments')">查看全部</a>
             </div>
             <div ref="progressChartRef" class="g-chart [height:280px] [width:100%] max-[640px]:[height:240px] [height:240px]"></div>
           </div>
@@ -38,7 +38,7 @@
           <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#1d1d1f] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]"><span>AI 辅助学习中心</span></div>
           <div class="g-feature-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:12px] max-[1180px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[640px]:[grid-template-columns:1fr]">
             <div class="g-feature-item [display:flex] [align-items:center] [gap:12px] [padding:16px] [border-radius:12px] [border:1px_solid_#f5f5f7] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:#d1d1d6] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.1)]" v-for="f in features" :key="f.path" @click="nav(f.path)">
-              <ui-icon class="g-feature-icon [color:#007aff] [flex-shrink:0]" :size="24"><component :is="f.icon" /></ui-icon>
+              <ui-icon class="g-feature-icon [color:var(--app-primary)] [flex-shrink:0]" :size="24"><component :is="f.icon" /></ui-icon>
               <div>
                 <div class="g-feature-title [font-size:13px] [font-weight:500] [color:#1d1d1f]">{{ f.title }}</div>
                 <div class="g-feature-desc [font-size:11px] [color:#6e6e73] [margin-top:2px]">{{ f.desc }}</div>
@@ -52,7 +52,7 @@
           <div class="g-card g-card-wide [background:#fff] [border-radius:16px] [padding:20px] [border:1px_solid_#e5e5e7] [min-width:0] max-[640px]:[padding:16px] max-[640px]:[border-radius:14px]">
             <div class="g-card-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [font-size:15px] [font-weight:500] [color:#1d1d1f] max-[640px]:[align-items:flex-start] max-[640px]:[flex-direction:column] max-[640px]:[gap:8px]">
               <span>最近实验</span>
-              <a class="g-link [font-size:13px] [color:#007aff] [cursor:pointer] [font-weight:500] hover:[text-decoration:underline]" @click="nav('/student/experiments')">查看全部</a>
+              <a class="g-link [font-size:13px] [color:var(--app-primary)] [cursor:pointer] [font-weight:500] hover:[text-decoration:underline]" @click="nav('/student/experiments')">查看全部</a>
             </div>
             <div class="g-exp-list [display:flex] [flex-direction:column]">
               <div class="g-exp-item [display:flex] [align-items:center] [gap:12px] [padding:12px_0] [border-bottom:1px_solid_#f5f5f7] [cursor:pointer] [transition:background_0.15s] [&:last-child]:[border-bottom:none] hover:[background:#f5f5f7] hover:[margin:0_-20px] hover:[padding:12px_20px] hover:[border-radius:8px]" v-for="e in recentExperiments" :key="e.id"
@@ -81,7 +81,7 @@
             </div>
             <div v-else class="g-empty-hint [text-align:center] [padding:24px_0] [font-size:13px] [color:#aeaeb2]">暂无数据</div>
             <div class="g-weak-action [margin-top:16px] [text-align:center]">
-              <UiButton class="g-pill-btn [background:#fff] [border:1px_solid_#e5e5e7] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:#007aff] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:#007aff]" @click="nav('/student/weakness-training')">去专项训练</UiButton>
+              <UiButton class="g-pill-btn [background:#fff] [border:1px_solid_#e5e5e7] [border-radius:100px] [padding:8px_20px] [font-size:13px] [color:var(--app-primary)] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#f5f5f7] hover:[border-color:var(--app-primary)]" @click="nav('/student/weakness-training')">去专项训练</UiButton>
             </div>
           </div>
         </div>
@@ -133,14 +133,14 @@ const trendHtml = computed(() => {
 })
 
 const statCards = computed(() => [
-  { label: '实验总数', value: stats.value.total, bg: '#e8f2ff', color: '#007aff', icon: markRaw(Notebook), extra: `完成率${stats.value.rate}%` },
+  { label: '实验总数', value: stats.value.total, bg: '#e8f2ff', color: '#c2703e', icon: markRaw(Notebook), extra: `完成率${stats.value.rate}%` },
   { label: '总提交次数', value: profileData.value.overview?.totalSubmissions || 0, bg: '#e6f4ea', color: '#1e8e3e', icon: markRaw(TrendCharts), extra: `AC率 ${profileData.value.overview?.overallAcRate || 0}%` },
   { label: '通过次数', value: profileData.value.overview?.totalAc || 0, bg: '#fef7e0', color: '#e37400', icon: markRaw(Finished), extra: trendHtml.value },
   { label: '推荐练习', value: stats.value.total, bg: '#f3e8fd', color: '#8430ce', icon: markRaw(Collection), extra: null }
 ])
 
 function statIconClass(item) {
-  if (item.bg === '#e8f0fe') return '[background:#e8f0fe] [color:#007aff]'
+  if (item.bg === '#e8f0fe') return '[background:#e8f0fe] [color:#c2703e]'
   if (item.bg === '#e6f4ea') return '[background:#e6f4ea] [color:#1e8e3e]'
   if (item.bg === '#fef7e0') return '[background:#fef7e0] [color:#e37400]'
   if (item.bg === '#f3e8fd') return '[background:#f3e8fd] [color:#8430ce]'
@@ -186,9 +186,9 @@ function initScoreChart() {
     xAxis: { type: 'category', data: series.map(x => x.name), axisLabel: { rotate: 35, fontSize: 10, color: '#6e6e73' }, axisLine: { lineStyle: { color: '#e5e5e7' } } },
     yAxis: { type: 'value', min: 0, max: 100, splitLine: { lineStyle: { type: 'dashed', color: '#e5e5e7' } }, axisLabel: { fontSize: 11, color: '#6e6e73' } },
     series: [{ type: 'line', data: series.map(x => x.mastery), smooth: true, symbolSize: 6,
-      lineStyle: { color: '#007aff', width: 2 },
+      lineStyle: { color: '#c2703e', width: 2 },
       areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(26,115,232,0.15)' }, { offset: 1, color: 'rgba(26,115,232,0.01)' }]) },
-      itemStyle: { color: '#007aff', borderColor: '#fff', borderWidth: 2 },
+      itemStyle: { color: '#c2703e', borderColor: '#fff', borderWidth: 2 },
       markLine: { data: [{ type: 'average', label: { formatter: '均值{c}', fontSize: 10 } }], lineStyle: { color: '#e37400', type: 'dashed', width: 1 } }
     }]
   })

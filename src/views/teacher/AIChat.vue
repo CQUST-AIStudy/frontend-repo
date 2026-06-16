@@ -315,8 +315,8 @@ onMounted(scrollToBottom)
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(0, 122, 255, 0.08);
-  color: #007aff;
+  background: rgba(194, 112, 62, 0.08);
+  color: var(--app-primary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -376,9 +376,9 @@ onMounted(scrollToBottom)
 .clear-button,
 .send-button {
   border: none;
-  background: linear-gradient(180deg, #3898ff 0%, #007aff 100%);
+  background: linear-gradient(180deg, #d49068 0%, var(--app-primary) 100%);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(194, 112, 62, 0.25);
 }
 
 .clear-button {
@@ -387,7 +387,7 @@ onMounted(scrollToBottom)
   padding: 0 14px;
   border-radius: 10px;
   background: #e8f2ff;
-  color: #007aff;
+  color: var(--app-primary);
   box-shadow: none;
 }
 
@@ -466,8 +466,8 @@ onMounted(scrollToBottom)
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(0, 122, 255, 0.08);
-  color: #007aff;
+  background: rgba(194, 112, 62, 0.08);
+  color: var(--app-primary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -523,7 +523,7 @@ onMounted(scrollToBottom)
 }
 
 .message-row.assistant .message-avatar {
-  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  background: linear-gradient(135deg, var(--app-primary) 0%, #5856d6 100%);
 }
 
 .message-row.user .message-avatar {
@@ -568,8 +568,8 @@ onMounted(scrollToBottom)
 }
 
 .message-row.user .message-bubble {
-  border-color: rgba(0, 122, 255, 0.2);
-  background: #007aff;
+  border-color: rgba(194, 112, 62, 0.2);
+  background: var(--app-primary);
   color: #fff;
 }
 
@@ -682,7 +682,7 @@ onMounted(scrollToBottom)
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid rgba(0, 122, 255, 0.16);
+  border: 1px solid rgba(194, 112, 62, 0.16);
   border-radius: 14px;
   background: #f8fbff;
   text-decoration: none;
@@ -690,7 +690,7 @@ onMounted(scrollToBottom)
 }
 
 .paper-card:hover {
-  border-color: rgba(0, 122, 255, 0.32);
+  border-color: rgba(194, 112, 62, 0.32);
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
   transform: translateY(-1px);
 }
@@ -704,7 +704,7 @@ onMounted(scrollToBottom)
 }
 
 .paper-head span:first-child {
-  color: #007aff;
+  color: var(--app-primary);
   font-weight: 800;
 }
 
@@ -735,7 +735,7 @@ onMounted(scrollToBottom)
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(52, 199, 89, 0.1);
+  background: rgba(107, 143, 107, 0.1);
   color: #15803d;
   font-size: 12px;
   font-weight: 700;
@@ -779,13 +779,13 @@ onMounted(scrollToBottom)
 }
 
 .suggestion-card:hover {
-  border-color: rgba(0, 122, 255, 0.32);
+  border-color: rgba(194, 112, 62, 0.32);
   background: #f8fbff;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
 }
 
 .suggestion-category {
-  color: #007aff;
+  color: var(--app-primary);
   font-size: 12px;
   font-weight: 800;
 }
@@ -830,8 +830,8 @@ onMounted(scrollToBottom)
 }
 
 .quick-chip:hover {
-  border-color: rgba(0, 122, 255, 0.28);
-  color: #007aff;
+  border-color: rgba(194, 112, 62, 0.28);
+  color: var(--app-primary);
 }
 
 .composer-box {

@@ -37,7 +37,7 @@
           <div class="text-[13px] text-[#6e6e73] mt-1">已提交数量</div>
         </div>
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
-          <div class="text-[28px] font-bold text-[#007aff] mb-1">{{ submissionStats.completionRate }}%</div>
+          <div class="text-[28px] font-bold text-[var(--app-primary)] mb-1">{{ submissionStats.completionRate }}%</div>
           <div class="text-[13px] text-[#6e6e73] mt-1">完成率</div>
         </div>
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 text-center">
@@ -52,7 +52,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">基本信息</span>
-          <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="openEditDialog">编辑</UiButton>
+          <UiButton class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none" @click="openEditDialog">编辑</UiButton>
         </div>
         <div class="grid grid-cols-2 gap-x-8 gap-y-4 max-[768px]:grid-cols-1">
           <div class="flex items-baseline gap-3">
@@ -100,13 +100,13 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">实验要求</span>
-          <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none" @click="openEditContentDialog">编辑内容</UiButton>
+          <UiButton class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none" @click="openEditContentDialog">编辑内容</UiButton>
         </div>
 
         <div v-if="!experimentData.description" class="flex flex-col items-center justify-center py-12 text-center">
           <svg class="w-16 h-16 text-[#d2d2d7] mb-4" fill="none" viewBox="0 0 64 64"><rect x="12" y="16" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M20 28h24M20 34h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <p class="text-[14px] text-[#6e6e73] mb-4">实验要求暂未编辑</p>
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="openEditContentDialog">添加实验要求</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="openEditContentDialog">添加实验要求</UiButton>
         </div>
 
         <div v-else class="space-y-4">
@@ -124,7 +124,7 @@
             <h3 class="text-[14px] font-semibold text-[#1d1d1f] mb-2">附件</h3>
             <ul class="space-y-1.5">
               <li v-for="(attachment, index) in experimentData.attachments" :key="index">
-                <a :href="attachment.url" target="_blank" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors underline">{{ attachment.name }}</a>
+                <a :href="attachment.url" target="_blank" class="text-[13px] font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] transition-colors underline">{{ attachment.name }}</a>
               </li>
             </ul>
           </div>
@@ -157,10 +157,10 @@
               <UiInput
                 v-model="searchKeyword"
                 placeholder="搜索学生姓名/班级"
-                class="w-[220px] h-10 pl-9 pr-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+                class="w-[220px] h-10 pl-9 pr-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
               />
             </div>
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAllSubmissions">查看全部</UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="viewAllSubmissions">查看全部</UiButton>
           </div>
         </div>
 
@@ -213,8 +213,8 @@
                   </span>
                 </td>
                 <td class="py-3 px-3 text-right">
-                  <UiButton class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none mr-3" @click="viewSubmissionDetail(row.id)">查看详情</UiButton>
-                  <UiButton v-if="row.status === 'submitted'" class="text-[13px] font-medium text-[#34c759] cursor-pointer hover:text-[#248a3d] transition-colors bg-transparent border-none" @click="gradeSubmission(row)">评分</UiButton>
+                  <UiButton class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none mr-3" @click="viewSubmissionDetail(row.id)">查看详情</UiButton>
+                  <UiButton v-if="row.status === 'submitted'" class="text-[13px] font-medium text-[#6b8f6b] cursor-pointer hover:text-[#248a3d] transition-colors bg-transparent border-none" @click="gradeSubmission(row)">评分</UiButton>
                 </td>
               </tr>
             </tbody>
@@ -235,7 +235,7 @@
       <div class="space-y-5">
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">实验名称</label>
-          <UiInput v-model="editForm.name" placeholder="请输入实验名称" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="editForm.name" placeholder="请输入实验名称" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">截止日期</label>
@@ -250,7 +250,7 @@
         </div>
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">状态</label>
-          <UiSelect v-model="editForm.status" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer">
+          <UiSelect v-model="editForm.status" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer">
             <UiOption value="draft">草稿</UiOption>
             <UiOption value="active">进行中</UiOption>
             <UiOption value="expired">已截止</UiOption>
@@ -258,7 +258,7 @@
         </div>
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">关联班级</label>
-          <UiSelect v-model="editForm.classes" multiple class="w-full min-h-[80px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+          <UiSelect v-model="editForm.classes" multiple class="w-full min-h-[80px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
             <UiOption v-for="cls in classList" :key="cls.id" :value="cls.id">{{ cls.name }}</UiOption>
           </UiSelect>
         </div>
@@ -269,7 +269,7 @@
       </div>
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="editDialogVisible = false">取消</UiButton>
-        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitEditForm">确定</UiButton>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitEditForm">确定</UiButton>
       </template>
     </AppModal>
 
@@ -282,18 +282,18 @@
             v-model="contentForm.description"
             rows="5"
             placeholder="请输入实验描述"
-            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y"
           ></textarea>
         </div>
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">实验要求</label>
           <div v-for="(req, index) in contentForm.requirements" :key="index" class="flex items-center gap-2 mb-2.5">
-            <UiInput v-model="contentForm.requirements[index]" class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
-            <UiButton class="w-8 h-8 rounded-full bg-[rgba(255,59,48,0.1)] text-[#ff3b30] flex items-center justify-center hover:bg-[rgba(255,59,48,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeRequirement(index)">
+            <UiInput v-model="contentForm.requirements[index]" class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
+            <UiButton class="w-8 h-8 rounded-full bg-[rgba(196,75,63,0.1)] text-[#c44b3f] flex items-center justify-center hover:bg-[rgba(196,75,63,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeRequirement(index)">
               <Delete class="w-3.5 h-3.5" />
             </UiButton>
           </div>
-          <UiButton class="h-[34px] px-4 rounded-[10px] text-[13px] font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addRequirement">添加要求</UiButton>
+          <UiButton class="h-[34px] px-4 rounded-[10px] text-[13px] font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addRequirement">添加要求</UiButton>
         </div>
         <div>
           <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">附件</label>
@@ -304,7 +304,7 @@
             :limit="5"
             :on-change="handleFileChange"
           >
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">选择文件</UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">选择文件</UiButton>
             <template #tip>
               <div class="text-[12px] text-[#aeaeb2] mt-2">可上传任意类型文件，单个文件不超过10MB</div>
             </template>
@@ -312,7 +312,7 @@
           <div v-if="contentForm.attachments && contentForm.attachments.length" class="mt-3 space-y-2">
             <div v-for="(file, index) in contentForm.attachments" :key="index" class="flex items-center gap-2">
               <span class="text-[14px] text-[#1d1d1f]">{{ file.name }}</span>
-              <UiButton class="w-6 h-6 rounded-full bg-[rgba(255,59,48,0.1)] text-[#ff3b30] flex items-center justify-center hover:bg-[rgba(255,59,48,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeAttachment(index)">
+              <UiButton class="w-6 h-6 rounded-full bg-[rgba(196,75,63,0.1)] text-[#c44b3f] flex items-center justify-center hover:bg-[rgba(196,75,63,0.2)] transition-colors cursor-pointer border-none shrink-0" @click="removeAttachment(index)">
                 <Delete class="w-3 h-3" />
               </UiButton>
             </div>
@@ -321,7 +321,7 @@
       </div>
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="editContentDialogVisible = false">取消</UiButton>
-        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitContentForm">确定</UiButton>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitContentForm">确定</UiButton>
       </template>
     </AppModal>
 
@@ -340,7 +340,7 @@
             min="0"
             max="100"
             step="0.1"
-            class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
         <div>
@@ -352,7 +352,7 @@
               min="0"
               max="100"
               step="0.1"
-              class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+              class="w-[180px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
             />
             <span class="text-[14px] text-[#6e6e73]">%</span>
           </div>
@@ -363,13 +363,13 @@
             v-model="gradeForm.aiComment"
             rows="6"
             placeholder="输入AI助教评语"
-            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y"
           ></textarea>
         </div>
       </div>
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</UiButton>
-        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</UiButton>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</UiButton>
       </template>
     </AppModal>
     </div>
@@ -536,27 +536,27 @@ const gradeForm = reactive({
 // Tag class helpers
 const getTagClass = (status) => {
   const classMap = {
-    'active': 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    'active': 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
     'draft': 'bg-black/5 text-[#6e6e73]',
-    'expired': 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+    'expired': 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'
   }
   return classMap[status] || 'bg-black/5 text-[#6e6e73]'
 }
 
 const getSubmissionTagClass = (status) => {
   const classMap = {
-    'submitted': 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]',
-    'graded': 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    'rejected': 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    'submitted': 'bg-[rgba(196,154,60,0.12)] text-[#c49a3c]',
+    'graded': 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    'rejected': 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
     'not_started': 'bg-black/5 text-[#6e6e73]'
   }
   return classMap[status] || 'bg-black/5 text-[#6e6e73]'
 }
 
 const getPlagiarismTagClass = (rate) => {
-  if (rate >= 50) return 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
-  if (rate >= 30) return 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]'
-  return 'bg-[rgba(52,199,89,0.12)] text-[#34c759]'
+  if (rate >= 50) return 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'
+  if (rate >= 30) return 'bg-[rgba(196,154,60,0.12)] text-[#c49a3c]'
+  return 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]'
 }
 
 // 获取实验详情

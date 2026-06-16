@@ -17,7 +17,7 @@
         <div class="rounded-xl border border-black/[0.06] bg-white/95 px-4 py-3 shadow-[0_1px_4px_rgba(15,23,42,0.05)]">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex min-w-0 items-center gap-3">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#007aff]/10 text-[#007aff]">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--app-primary)]/10 text-[var(--app-primary)]">
                 <DataAnalysis class="h-5 w-5" />
               </div>
               <div class="min-w-0">
@@ -35,10 +35,10 @@
               <UiInput
                   v-model="classSearchText"
                   placeholder="搜索班级名称/课程"
-                  class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm sm:w-[320px]"
+                  class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm sm:w-[320px]"
               />
               <UiSelect v-model="classSortOption"
-                        class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer sm:w-[150px]">
+                        class="h-10 w-full px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm cursor-pointer sm:w-[150px]">
                 <UiOption value="name">按名称排序</UiOption>
                 <UiOption value="studentCount">按学生数量排序</UiOption>
                 <UiOption value="semester">按学期排序</UiOption>
@@ -49,7 +49,7 @@
           <template v-if="filteredClasses.length">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               <div v-for="classItem in filteredClasses" :key="classItem.id"
-                   class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(0,122,255,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                   class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(194,112,62,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
                    @click="viewDetailedAnalysis(classItem)">
                 <div class="flex flex-col h-full">
                   <h3 class="text-base font-semibold text-[#1d1d1f] mb-3">{{ classItem.name }}</h3>
@@ -60,7 +60,7 @@
                   </div>
                   <div class="flex justify-between gap-2.5 mt-auto pt-1.5 flex-wrap">
                     <UiButton @click.stop="viewDetailedAnalysis(classItem)"
-                              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                       详细分析
                     </UiButton>
                     <UiButton @click.stop="quickViewAnalysis(classItem)"
@@ -85,7 +85,7 @@
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">我的教学班</span>
           <UiButton @click="refreshClassList"
-                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             刷新
           </UiButton>
         </div>
@@ -121,8 +121,8 @@
               <td class="py-3 px-4 text-[#1d1d1f]">{{ row.courseName }}</td>
               <td class="py-3 px-4 text-[#1d1d1f]">{{ row.semester }}</td>
               <td class="py-3 px-4">
-                <UiButton @click.stop="quickViewAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</UiButton>
-                <UiButton @click.stop="viewDetailedAnalysis(row)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</UiButton>
+                <UiButton @click.stop="quickViewAnalysis(row)" class="text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">快速分析</UiButton>
+                <UiButton @click.stop="viewDetailedAnalysis(row)" class="text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] text-sm font-medium bg-transparent border-none cursor-pointer">详细分析</UiButton>
               </td>
             </tr>
             </tbody>
@@ -135,7 +135,7 @@
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="font-semibold text-[#1d1d1f]">{{ currentClassName }} 详细分析</span>
           <UiButton @click="backToWelcome"
-                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             返回班级列表
           </UiButton>
         </div>
@@ -149,7 +149,7 @@
             <div class="flex items-center gap-2">
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">实验</label>
               <UiSelect v-model="filterForm.experimentId" @change="handleClassChange"
-                        class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm cursor-pointer">
+                        class="w-[220px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm cursor-pointer">
                 <UiOption value="">所有实验</UiOption>
                 <UiOption v-for="item in experimentList" :key="item.id" :value="item.id">{{ item.name }}</UiOption>
               </UiSelect>
@@ -158,7 +158,7 @@
               <label class="text-sm text-[#6e6e73] whitespace-nowrap">搜索</label>
               <UiInput v-model="filterForm.search" @input="filterStudents"
                        placeholder="搜索学生姓名/学号"
-                       class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+                       class="w-[200px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
               />
             </div>
           </div>
@@ -205,7 +205,7 @@
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">学生列表</span>
               <UiButton @click="exportStudentData"
-                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
                 导出数据
               </UiButton>
             </div>
@@ -261,8 +261,8 @@
                         </span>
                     </td>
                     <td class="py-3 px-4">
-                      <UiButton @click="viewStudentDetail(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</UiButton>
-                      <UiButton @click="viewStudentReports(student)" class="text-[#007aff] hover:text-[#0056b3] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</UiButton>
+                      <UiButton @click="viewStudentDetail(student)" class="text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] text-sm font-medium mr-4 bg-transparent border-none cursor-pointer">查看详情</UiButton>
+                      <UiButton @click="viewStudentReports(student)" class="text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] text-sm font-medium bg-transparent border-none cursor-pointer">查看报告</UiButton>
                     </td>
                   </tr>
                   <!-- Expanded row -->
@@ -278,7 +278,7 @@
                                 <div class="h-[15px] bg-[#f5f5f7] rounded-full overflow-hidden">
                                   <div class="h-full w-[var(--progress-width)] rounded-full transition-all"
                                        :style="progressWidthStyle(exp.status === 'completed' ? 100 : exp.status === 'in_progress' ? 50 : 0)"
-                                       :class="exp.status === 'completed' ? 'bg-[#34c759]' : exp.status === 'in_progress' ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'">
+                                       :class="exp.status === 'completed' ? 'bg-[#6b8f6b]' : exp.status === 'in_progress' ? 'bg-[#c49a3c]' : 'bg-[#c44b3f]'">
                                   </div>
                                 </div>
                               </div>
@@ -303,14 +303,14 @@
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
               <UiButton @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
-                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
                 {{ aiAdviceLoading ? '生成中...' : '生成建议' }}
               </UiButton>
             </div>
 
             <div class="px-1 py-1">
               <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--app-primary)] to-[#5856d6] flex items-center justify-center">
                   <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                 </div>
                 <div>
@@ -386,7 +386,7 @@
             关闭
           </UiButton>
           <UiButton @click="viewDetailedAnalysis(quickAnalysisData ? quickAnalysisData.class : null)" :disabled="!quickAnalysisData"
-                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                    class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
             查看详细分析
           </UiButton>
         </template>

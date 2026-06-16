@@ -35,7 +35,7 @@
           <UiInput
             v-model="filterForm.studentName"
             placeholder="请输入学生姓名"
-            class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
 
@@ -54,7 +54,7 @@
         </div>
 
         <div class="flex gap-2 items-end">
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="applyFilter">查询</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="applyFilter">查询</UiButton>
           <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetFilter">重置</UiButton>
         </div>
       </div>
@@ -64,13 +64,13 @@
       <div class="mb-4 flex justify-between items-center gap-2.5 flex-wrap">
         <div class="flex flex-wrap gap-2.5">
           <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-black/5 text-[#6e6e73]">总数：{{ filteredSubmissions.length }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(52,199,89,0.12)] text-[#34c759]">已评分：{{ getStatusCount('graded') }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,149,0,0.1)] text-[#ff9500]">已提交：{{ getStatusCount('submitted') }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(255,59,48,0.1)] text-[#ff3b30]">未开始：{{ getStatusCount('not_started') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">已评分：{{ getStatusCount('graded') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">已提交：{{ getStatusCount('submitted') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,75,63,0.1)] text-[#c44b3f]">未开始：{{ getStatusCount('not_started') }}</span>
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="loadSubmissions">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="loadSubmissions">
             <Refresh class="w-4 h-4" />
             刷新
           </UiButton>
@@ -104,7 +104,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in pagedSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)]">
+            <tr v-for="row in pagedSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3">
                 <UiInput type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="cursor-pointer" @change="toggleRowSelection(row, $event)" />
               </td>
@@ -116,7 +116,7 @@
                 <span v-if="hasRealSubmitTime(row)">{{ formatDate(row.submitTime) }}</span>
               </td>
               <td class="py-3 px-3 text-center">
-                <span v-if="row.score !== null" class="text-base font-bold text-[#007aff]">{{ row.score }}</span>
+                <span v-if="row.score !== null" class="text-base font-bold text-[var(--app-primary)]">{{ row.score }}</span>
                 <span v-else class="text-[13px] text-[#aeaeb2]">未评分</span>
               </td>
               <td class="py-3 px-3 text-center">
@@ -132,8 +132,8 @@
               </td>
               <td class="py-3 px-3">
                 <div class="flex gap-2">
-                  <UiButton class="text-[#007aff] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</UiButton>
-                  <UiButton v-if="row.status === 'submitted'" class="text-[#34c759] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</UiButton>
+                  <UiButton class="text-[var(--app-primary)] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</UiButton>
+                  <UiButton v-if="row.status === 'submitted'" class="text-[#6b8f6b] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</UiButton>
                 </div>
               </td>
             </tr>
@@ -170,7 +170,7 @@
               min="0"
               max="100"
               step="0.1"
-              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[120px]"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm w-[120px]"
             />
           </div>
 
@@ -183,7 +183,7 @@
                 min="0"
                 max="100"
                 step="0.1"
-                class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[120px]"
+                class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm w-[120px]"
               />
               <span class="text-sm text-[#6e6e73]">%</span>
             </div>
@@ -195,14 +195,14 @@
               v-model="gradeForm.aiComment"
               rows="6"
               placeholder="请输入AI 评语"
-              class="flex-1 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"
+              class="flex-1 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-none"
             ></textarea>
           </div>
         </div>
 
         <div class="flex justify-end gap-2.5 mt-6">
           <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="gradeDialogVisible = false">取消</UiButton>
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitGrade">确定</UiButton>
         </div>
       </div>
     </div>
@@ -352,9 +352,9 @@ const getPlagiarismRateType = (rate) => {
 const getPlagiarismRateTagClass = (rate) => {
   const type = getPlagiarismRateType(rate)
   const classMap = {
-    success: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    warning: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
-    danger: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
+    success: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    warning: 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]',
+    danger: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'
   }
   return classMap[type] || 'bg-black/5 text-[#6e6e73]'
 }
@@ -372,9 +372,9 @@ const getStatusType = (status) => {
 const getStatusTagClass = (status) => {
   const type = getStatusType(status)
   const classMap = {
-    success: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    warning: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
-    danger: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    success: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    warning: 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]',
+    danger: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
     info: 'bg-black/5 text-[#6e6e73]'
   }
   return classMap[type] || 'bg-black/5 text-[#6e6e73]'
