@@ -1,8 +1,8 @@
 <template>
   <div class="student-layout [width:100%] [height:100vh] [height:100dvh] [min-height:0] [overflow:hidden] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto] max-[960px]:[overflow-x:hidden]">
     <ui-container class="layout-container [height:100vh] [height:100dvh] [min-height:0] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto]">
-      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:rgba(246,_246,_248,_0.82)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_rgba(0,_0,_0,_0.06)] [backdrop-filter:blur(20px)_saturate(180%)]">
-        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_rgba(0,_0,_0,_0.06)]">
+      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--ink-surface-translucent)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_var(--ink-border)] [backdrop-filter:blur(20px)_saturate(180%)]">
+        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_var(--ink-border)]">
           <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_rgba(0,_0,_0,_0.08)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
           <transition name="fade-text">
             <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:#1d1d1f] [white-space:nowrap] [letter-spacing:-0.01em]">智能学习平台</span>
@@ -77,7 +77,7 @@
               <template #title>知识学习</template>
             </ui-menu-item>
 
-            <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
+            <div class="menu-divider [height:1px] [background:var(--ink-border-soft)] [margin:10px_12px]"></div>
 
             <ui-menu-item index="/student/profile">
               <ui-icon><Setting /></ui-icon>
@@ -168,7 +168,7 @@
                 <template #title>知识学习</template>
               </ui-menu-item>
 
-              <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
+              <div class="menu-divider [height:1px] [background:var(--ink-border-soft)] [margin:10px_12px]"></div>
 
               <ui-menu-item index="/student/profile">
                 <ui-icon><Setting /></ui-icon>
@@ -179,10 +179,10 @@
         </div>
       </ui-drawer>
 
-      <ui-container class="layout-main student-layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [height:100%] [min-width:0] [min-height:0] [overflow:hidden] [background:#f8f9fa] [background:transparent]">
-        <ui-header class="layout-header student-layout-header [position:relative] [z-index:80] [overflow:visible] [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [height:58px] [min-height:58px] [padding:8px_24px] [border-bottom:1px_solid_rgba(126,_157,_183,_0.14)] [gap:16px] [background:rgba(248,_251,_253,_0.86)] [backdrop-filter:blur(14px)] [flex-shrink:0]">
+      <ui-container class="layout-main student-layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [height:100%] [min-width:0] [min-height:0] [overflow:hidden] [background:var(--app-bg)] [background:transparent]">
+        <ui-header class="layout-header student-layout-header [position:relative] [z-index:80] [overflow:visible] [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [height:58px] [min-height:58px] [padding:8px_24px] [border-bottom:1px_solid_var(--ink-border)] [gap:16px] [background:var(--ink-header-bg)] [backdrop-filter:blur(14px)] [flex-shrink:0]">
           <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
-            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
+            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:var(--app-text-secondary)] [transition:all_0.2s_ease] hover:[background:rgba(194,_112,_62,_0.08)] hover:[color:var(--app-primary)]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
               <Fold v-else />
             </ui-icon>
@@ -197,15 +197,15 @@
           <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
             <ui-dropdown
               trigger="click"
-              class="[z-index:90] [&>div:nth-child(2)]:![z-index:3000] [&>div:nth-child(2)]:![min-width:184px] [&>div:nth-child(2)]:![border-radius:14px] [&>div:nth-child(2)]:![border-color:rgba(126,_157,_183,_0.22)] [&>div:nth-child(2)]:![background:rgba(255,_255,_255,_0.98)] [&>div:nth-child(2)]:![box-shadow:0_18px_42px_rgba(22,_48,_79,_0.16)]"
+              class="[z-index:90] [&>div:nth-child(2)]:![z-index:3000] [&>div:nth-child(2)]:![min-width:184px] [&>div:nth-child(2)]:![border-radius:14px] [&>div:nth-child(2)]:![border-color:var(--ink-border)] [&>div:nth-child(2)]:![background:rgba(255,_255,_255,_0.98)] [&>div:nth-child(2)]:![box-shadow:0_18px_42px_rgba(120,_90,_50,_0.16)]"
               @command="handleCommand"
             >
-              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [min-width:132px] [max-width:180px] [min-height:44px] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)] [flex-shrink:0] hover:[border-color:rgba(18,_112,_216,_0.28)] hover:[box-shadow:0_10px_24px_rgba(22,_48,_79,_0.08)]">
+              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [min-width:132px] [max-width:180px] [min-height:44px] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_var(--ink-border)] [flex-shrink:0] hover:[border-color:rgba(194,_112,_62,_0.28)] hover:[box-shadow:0_10px_24px_rgba(120,_90,_50,_0.08)]">
                 <ui-avatar :size="34">
                   <img src="../../assets/User/Cat.jpg" alt="avatar" class="[width:100%] [height:100%] [object-fit:cover]" />
                 </ui-avatar>
-                <span class="username [min-width:0] [flex:1_1_auto] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-size:14px] [color:#202124] [font-weight:500] [color:#16324a] [font-size:13px] [font-weight:700]">{{ userInfo.name || '学生' }}</span>
-                <ui-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:#8ca0b3]"><ArrowDown /></ui-icon>
+                <span class="username [min-width:0] [flex:1_1_auto] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-size:14px] [color:#202124] [font-weight:500] [color:var(--app-text)] [font-size:13px] [font-weight:700]">{{ userInfo.name || '学生' }}</span>
+                <ui-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:var(--app-text-soft)]"><ArrowDown /></ui-icon>
               </div>
               <template #dropdown>
                 <ui-dropdown-menu class="[display:flex] [flex-direction:column] [gap:2px] [padding:2px]">
@@ -223,7 +223,7 @@
           </div>
         </ui-header>
 
-        <ui-main class="layout-content student-layout-content [background:#f8f9fa] [padding:18px_24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow-y:auto] [overflow-x:hidden] [position:relative]">
+        <ui-main class="layout-content student-layout-content ink-paper-bg ink-bloom [background:var(--app-bg)] [padding:18px_24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow-y:auto] [overflow-x:hidden] [position:relative]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -231,7 +231,7 @@
           </router-view>
         </ui-main>
 
-        <ui-footer class="layout-footer student-layout-footer [text-align:center] [color:#8ca0b3] [padding:7px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_rgba(126,_157,_183,_0.12)] [flex-shrink:0]">
+        <ui-footer class="layout-footer student-layout-footer [text-align:center] [color:var(--app-text-soft)] [padding:7px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_var(--ink-border-soft)] [flex-shrink:0]">
           智能学情分析与个性化实验能力提升平台 © 2025
         </ui-footer>
       </ui-container>

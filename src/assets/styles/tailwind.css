@@ -21,10 +21,10 @@
 }
 
 @theme {
-  --color-app-bg: #faf6ef;
-  --color-app-surface: #fffcf7;
-  --color-app-surface-strong: #fffcf7;
-  --color-app-surface-muted: #f7f2ea;
+  --color-app-bg: #f4ecd8;
+  --color-app-surface: #fbf6e8;
+  --color-app-surface-strong: #fbf6e8;
+  --color-app-surface-muted: #f1e8d2;
   --color-app-border: #e8dfcf;
   --color-app-border-strong: #d4c5ad;
   --color-app-text: #3d3529;
@@ -53,10 +53,10 @@
 
 @layer base {
   :root {
-    --app-bg: #faf6ef;
-    --app-surface: #fffcf7;
-    --app-surface-strong: #fffcf7;
-    --app-surface-muted: #f7f2ea;
+    --app-bg: #f4ecd8;
+    --app-surface: #fbf6e8;
+    --app-surface-strong: #fbf6e8;
+    --app-surface-muted: #f1e8d2;
     --app-border: #e8dfcf;
     --app-border-strong: #d4c5ad;
     --app-text: #3d3529;
@@ -76,6 +76,14 @@
     --app-radius-md: 10px;
     --app-radius-sm: 8px;
     --font-page: "NotoSerifSC", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+    /* 水墨语义变量 —— 供 Layout 引用，集中管理 */
+    --ink-surface-translucent: rgba(251, 246, 232, 0.82);  /* 侧边栏半透明宣纸 */
+    --ink-surface-solid: rgba(251, 246, 232, 0.98);        /* 移动抽屉不透明宣纸 */
+    --ink-header-bg: rgba(249, 243, 226, 0.86);            /* header 半透明宣纸 */
+    --ink-border: rgba(120, 90, 50, 0.14);                 /* 墨线边框 */
+    --ink-border-soft: rgba(120, 90, 50, 0.08);            /* 淡墨线 */
+    --ink-bloom: rgba(74, 60, 45, 0.05);                   /* 淡墨晕染色 */
+    --ink-bloom-deep: rgba(74, 60, 45, 0.09);              /* 较深墨晕 */
     --ui-color-primary: var(--app-primary);
     --ui-color-primary-light-3: #d49068;
     --ui-color-primary-light-5: #e1b098;
@@ -93,10 +101,10 @@
     --ui-text-color-primary: var(--app-text);
     --ui-text-color-regular: var(--app-text-secondary);
     --ui-text-color-secondary: var(--app-text-soft);
-    --ui-bg-color: #fffcf7;
-    --ui-bg-color-overlay: #fffcf7;
-    --ui-fill-color-blank: #fffcf7;
-    --ui-fill-color-light: #faf6ef;
+    --ui-bg-color: #fbf6e8;
+    --ui-bg-color-overlay: #fbf6e8;
+    --ui-fill-color-blank: #fbf6e8;
+    --ui-fill-color-light: #f4ecd8;
     --ui-card-border-color: var(--app-border);
     --ui-card-bg-color: var(--app-surface);
   }
@@ -108,7 +116,7 @@
   }
 
   html {
-    background: #faf6ef;
+    background: #f4ecd8;
   }
 
   body {
@@ -190,6 +198,53 @@
 }
 
 @layer components {
+  /* ===== 水墨装饰：宣纸纹理 + 墨晕 ===== */
+  .ink-paper-bg {
+    position: relative;
+    background-color: var(--app-bg);
+    background-image:
+      radial-gradient(rgba(120, 90, 50, 0.04) 1px, transparent 1px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.33 0 0 0 0 0.25 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+    background-size: 14px 14px, 180px 180px;
+    background-repeat: repeat, repeat;
+  }
+
+  /* 角落淡墨晕染（伪元素自动渲染，不占用文档流） */
+  .ink-bloom::before,
+  .ink-bloom::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(8px);
+  }
+  .ink-bloom::before {
+    top: -120px;
+    left: -100px;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle at center, var(--ink-bloom) 0%, transparent 70%);
+  }
+  .ink-bloom::after {
+    bottom: -140px;
+    right: -120px;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle at center, var(--ink-bloom-deep) 0%, transparent 72%);
+  }
+  .ink-bloom > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 墨线分隔 */
+  .ink-line {
+    height: 1px;
+    background: var(--ink-border-soft);
+    border: none;
+  }
+
   .ui-card,
   .app-panel {
     border: 0.5px solid rgba(0, 0, 0, 0.08);
