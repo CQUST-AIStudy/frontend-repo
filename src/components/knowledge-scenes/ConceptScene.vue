@@ -28,7 +28,6 @@ const anim = computed(() => {
 })
 
 const tags = computed(() => {
-  const t = props.title
   return ['概念', '示例', '练习']
 })
 </script>

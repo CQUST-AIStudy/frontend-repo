@@ -122,6 +122,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { getRubrics, normalizeRubricList, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
+import logger from '@/utils/logger'
 import AppModal from './AppModal.vue'
 
 const props = defineProps({
@@ -154,7 +155,7 @@ async function loadRubrics() {
     const res = await getRubrics()
     rubrics.value = normalizeRubricList(res)
   } catch (e) {
-    console.error('[RubricManager] loadRubrics error:', e)
+    logger.error('[RubricManager] loadRubrics error:', e)
     uiMessage.error(e.message)
   }
   loading.value = false

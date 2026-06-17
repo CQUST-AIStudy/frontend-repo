@@ -35,8 +35,6 @@ const anim = computed(() => {
   const finish = clamp((p - 0.88) / 0.12, 0, 1)
 
   const baseY = 360
-  const nodeW = 100
-  const nodeH = 54
   const gap = 150
   const startX = 310
 

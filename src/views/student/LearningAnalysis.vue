@@ -546,7 +546,7 @@ function buildFallbackSuggestions() {
     reason: `${w.experimentName || ''} 掌握度仅${Math.round(w.mastery)}分，建议重点练习`
   }))
 
-  const studyPlan = weakPoints.map((wp, i) => ({
+  const studyPlan = weakPoints.map((wp) => ({
     topic: `${wp.tagName}专项提升`,
     priority: wp.severity,
     suggestedResources: '教材相关章节 + PTA平台练习题',

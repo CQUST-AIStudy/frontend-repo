@@ -7,10 +7,10 @@
 ## 快速开始
 
 ```bash
-pnpm install
-pnpm serve       # 开发服务器
-pnpm build       # 生产构建
-pnpm lint        # 代码检查
+npm install
+npm run serve    # 开发服务器
+npm run build    # 生产构建
+npm run lint     # 代码检查
 ```
 
 ---

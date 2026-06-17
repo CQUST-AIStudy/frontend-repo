@@ -2,6 +2,9 @@ const { DefinePlugin } = require('webpack')
 
 module.exports = {
   configureWebpack: {
+    performance: {
+      hints: false,
+    },
     plugins: [
       new DefinePlugin({
         __VUE_OPTIONS_API__: JSON.stringify(true),
