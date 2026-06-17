@@ -1,16 +1,18 @@
 <script setup>
-import { computed, shallowRef } from 'vue'
+import { computed, onMounted, shallowRef } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import DataStructureGraphCanvas from '@/features/knowledge-graph/components/DataStructureGraphCanvas.vue'
 import KnowledgeGraphDetailPanel from '@/features/knowledge-graph/components/KnowledgeGraphDetailPanel.vue'
 import KnowledgeGraphPayloadPreview from '@/features/knowledge-graph/components/KnowledgeGraphPayloadPreview.vue'
 import KnowledgeGraphToolbar from '@/features/knowledge-graph/components/KnowledgeGraphToolbar.vue'
 import {
+  GRAPH_CODE,
   nodeTypeOptions,
   rawGraph,
   relationTypeOptions
 } from '@/features/knowledge-graph/dataStructureGraph'
 import {
+  getAncestorChain,
   getGraphStats,
   getNodeContext,
   getNodeTypeMeta,
@@ -18,23 +20,54 @@ import {
   toGraphDbPayload,
   validateGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
+import { loadKnowledgeGraph, neo4jConfig } from '@/features/knowledge-graph/neo4jDataSource'
+import { useStateForGraph } from '@/features/knowledge-graph/learningState'
+import {
+  exportGraphCypher,
+  exportGraphJSON,
+  writeToNeo4j
+} from '@/features/knowledge-graph/exportUtils'
+import logger from '@/utils/logger'
 
 const loading = shallowRef(false)
 const errorMsg = shallowRef('')
+const fallbackNotice = shallowRef('')
+const dataSource = shallowRef('static')
+const graphData = shallowRef(rawGraph)
 const searchKeyword = shallowRef('')
 const nodeType = shallowRef('all')
 const relationType = shallowRef('all')
 const selectedNodeId = shallowRef(rawGraph.course.id)
+const collapsedChapterIds = shallowRef([])
 const payloadVisible = shallowRef(false)
+const writing = shallowRef(false)
+const resultMessage = shallowRef(null)
 
-const normalizedGraph = computed(() => normalizeGraph(rawGraph))
-const validation = computed(() => validateGraph(rawGraph))
-const payload = computed(() => toGraphDbPayload(rawGraph))
-const stats = computed(() => getGraphStats(rawGraph))
+const { state: learningState, update: updateLearningState } = useStateForGraph(GRAPH_CODE)
+
+const normalizedGraph = computed(() => normalizeGraph(graphData.value))
+const validation = computed(() => validateGraph(graphData.value))
+const payload = computed(() => toGraphDbPayload(graphData.value))
+const stats = computed(() => getGraphStats(graphData.value))
 const hasGraphData = computed(() => normalizedGraph.value.nodes.length > 0)
+
+const chapterOptions = computed(() => normalizedGraph.value.nodes
+  .filter(node => node.type === 'chapter')
+  .map(node => ({ value: node.id, label: node.label })))
+
+const chapterChildCounts = computed(() => {
+  const counts = {}
+  for (const node of normalizedGraph.value.nodes) {
+    if (node.chapterId) {
+      counts[node.chapterId] = (counts[node.chapterId] || 0) + 1
+    }
+  }
+  return counts
+})
 
 const visibleNodes = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
+  const collapsed = new Set(collapsedChapterIds.value)
   return normalizedGraph.value.nodes.filter((node) => {
     const matchesType = nodeType.value === 'all' || node.type === nodeType.value
     const text = [
@@ -45,7 +78,8 @@ const visibleNodes = computed(() => {
       ...(node.properties.keywords || [])
     ].filter(Boolean).join(' ').toLowerCase()
     const matchesKeyword = !keyword || text.includes(keyword)
-    return matchesType && matchesKeyword
+    const matchesCollapse = !collapsed.has(node.chapterId) || node.type === 'chapter' || node.type === 'course'
+    return matchesType && matchesKeyword && matchesCollapse
   })
 })
 
@@ -56,7 +90,59 @@ const visibleRelations = computed(() => normalizedGraph.value.relations.filter((
   return matchesType && visibleNodeIds.value.has(relation.source) && visibleNodeIds.value.has(relation.target)
 }))
 
-const selectedContext = computed(() => getNodeContext(rawGraph, selectedNodeId.value))
+const selectedContext = computed(() => getNodeContext(graphData.value, selectedNodeId.value))
+
+const highlightPaths = computed(() => {
+  const ng = normalizedGraph.value
+  const node = ng.nodeMap.get(selectedNodeId.value)
+  if (!node || node.type === 'course' || node.type === 'chapter') return null
+
+  const nodeIds = new Set()
+  const relationKeys = new Set()
+  nodeIds.add(node.id)
+
+  for (const ancestor of getAncestorChain(graphData.value, node.id)) {
+    nodeIds.add(ancestor.id)
+  }
+
+  const collectPrereq = (id, visited) => {
+    const incoming = ng.incomingByNodeId.get(id) || []
+    for (const relation of incoming) {
+      if (relation.type !== 'PREREQUISITE') continue
+      relationKeys.add(relation.id)
+      nodeIds.add(relation.source)
+      if (!visited.has(relation.source)) {
+        visited.add(relation.source)
+        collectPrereq(relation.source, visited)
+      }
+    }
+  }
+  collectPrereq(node.id, new Set([node.id]))
+
+  const collectNext = (id, visited) => {
+    const outgoing = ng.outgoingByNodeId.get(id) || []
+    for (const relation of outgoing) {
+      if (relation.type !== 'PREREQUISITE') continue
+      relationKeys.add(relation.id)
+      nodeIds.add(relation.target)
+      if (!visited.has(relation.target)) {
+        visited.add(relation.target)
+        collectNext(relation.target, visited)
+      }
+    }
+  }
+  collectNext(node.id, new Set([node.id]))
+
+  for (const relation of [...(ng.incomingByNodeId.get(node.id) || []), ...(ng.outgoingByNodeId.get(node.id) || [])]) {
+    if (relation.type === 'RELATED_TO' || relation.type === 'APPLIES_TO') {
+      relationKeys.add(relation.id)
+      nodeIds.add(relation.source)
+      nodeIds.add(relation.target)
+    }
+  }
+
+  return { nodeIds, relationKeys }
+})
 
 const statCards = computed(() => [
   {
@@ -104,12 +190,101 @@ function resetFilters() {
   searchKeyword.value = ''
   nodeType.value = 'all'
   relationType.value = 'all'
-  selectedNodeId.value = rawGraph.course.id
+  collapsedChapterIds.value = []
+  selectedNodeId.value = graphData.value.course.id
 }
 
 function showPayloadPreview() {
   payloadVisible.value = true
 }
+
+function notify(type, text) {
+  resultMessage.value = { type, text }
+}
+
+function handleExportJson() {
+  try {
+    exportGraphJSON(graphData.value)
+    notify('success', '已导出 JSON 文件')
+  } catch (error) {
+    logger.warn('[knowledge-graph] 导出 JSON 失败', error)
+    notify('warning', `导出 JSON 失败：${error?.message || error}`)
+  }
+}
+
+function handleExportCypher() {
+  try {
+    exportGraphCypher(graphData.value)
+    notify('success', '已导出 Cypher 文件，可在 Neo4j Browser 执行')
+  } catch (error) {
+    logger.warn('[knowledge-graph] 导出 Cypher 失败', error)
+    notify('warning', `导出 Cypher 失败：${error?.message || error}`)
+  }
+}
+
+async function handleWriteNeo4j() {
+  if (writing.value) return
+  writing.value = true
+  try {
+    const result = await writeToNeo4j(graphData.value)
+    if (result.success) {
+      notify('success', result.message || '已写入 Neo4j')
+    } else {
+      notify('warning', result.message || '写入 Neo4j 失败')
+    }
+  } catch (error) {
+    logger.warn('[knowledge-graph] 写入 Neo4j 失败', error)
+    notify('warning', `写入 Neo4j 失败：${error?.message || error}`)
+  } finally {
+    writing.value = false
+  }
+}
+
+async function handleSeedNeo4j() {
+  if (writing.value) return
+  writing.value = true
+  try {
+    // 把内置静态图谱全量写入 Neo4j，再重新拉取刷新为连库数据
+    const result = await writeToNeo4j(rawGraph)
+    if (!result.success) {
+      notify('warning', result.message || '导入种子数据失败')
+      return
+    }
+    const reloaded = await loadKnowledgeGraph()
+    graphData.value = reloaded.graph
+    dataSource.value = reloaded.source
+    selectedNodeId.value = reloaded.graph.course?.id || selectedNodeId.value
+    notify('success', `${result.message || '已导入种子数据'}，已刷新为 Neo4j 数据`)
+  } catch (error) {
+    logger.warn('[knowledge-graph] 导入种子数据失败', error)
+    notify('warning', `导入种子数据失败：${error?.message || error}`)
+  } finally {
+    writing.value = false
+  }
+}
+
+function handleUpdateState(patch) {
+  if (!selectedNodeId.value) return
+  updateLearningState(selectedNodeId.value, patch)
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const result = await loadKnowledgeGraph()
+    graphData.value = result.graph
+    dataSource.value = result.source
+    selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
+    if (neo4jConfig.enabled && result.source !== 'neo4j') {
+      fallbackNotice.value = 'Neo4j 连接失败或未导入数据，已回退到内置静态数据'
+    }
+  } catch (error) {
+    logger.warn('[knowledge-graph] 加载失败', error)
+    errorMsg.value = '加载知识图谱失败，请稍后重试'
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -131,6 +306,24 @@ function showPayloadPreview() {
       </div>
     </header>
 
+    <div class="source-bar">
+      <span class="source-tag" :class="{ neo4j: dataSource === 'neo4j' }">
+        <LucideIcon :name="dataSource === 'neo4j' ? 'database' : 'book-open'" :size="14" />
+        数据来源：{{ dataSource === 'neo4j' ? 'Neo4j' : '内置静态数据' }}
+      </span>
+      <span v-if="fallbackNotice" class="source-notice">
+        <LucideIcon name="triangle-alert" :size="14" />
+        {{ fallbackNotice }}
+      </span>
+      <transition name="fade">
+        <span v-if="resultMessage" :class="['source-result', resultMessage.type]">
+          <LucideIcon :name="resultMessage.type === 'success' ? 'check' : 'triangle-alert'" :size="14" />
+          {{ resultMessage.text }}
+          <button type="button" class="result-close" @click="resultMessage = null">×</button>
+        </span>
+      </transition>
+    </div>
+
     <section class="stats-grid" aria-label="知识图谱统计">
       <article v-for="item in statCards" :key="item.label" class="stat-card">
         <span class="stat-icon" :style="{ backgroundColor: item.bg, color: item.color }">
@@ -147,10 +340,18 @@ function showPayloadPreview() {
       v-model:search-keyword="searchKeyword"
       v-model:node-type="nodeType"
       v-model:relation-type="relationType"
+      v-model:collapsed-chapter-ids="collapsedChapterIds"
       :node-type-options="nodeTypeOptions"
       :relation-type-options="relationTypeOptions"
+      :chapter-options="chapterOptions"
+      :data-source="dataSource"
+      :writing="writing"
       @reset="resetFilters"
       @preview-payload="showPayloadPreview"
+      @export-json="handleExportJson"
+      @export-cypher="handleExportCypher"
+      @write-neo4j="handleWriteNeo4j"
+      @seed-neo4j="handleSeedNeo4j"
     />
 
     <div v-if="loading" class="loading-panel">
@@ -182,11 +383,18 @@ function showPayloadPreview() {
             :nodes="visibleNodes"
             :relations="visibleRelations"
             :selected-node-id="selectedNodeId"
+            :highlight-paths="highlightPaths"
+            :chapter-child-counts="chapterChildCounts"
+            :learning-state="learningState"
             @select-node="selectNode"
           />
         </div>
 
-        <KnowledgeGraphDetailPanel :context="selectedContext" />
+        <KnowledgeGraphDetailPanel
+          :context="selectedContext"
+          :learning-state="learningState"
+          @update-state="handleUpdateState"
+        />
       </section>
     </template>
 
@@ -275,6 +483,88 @@ function showPayloadPreview() {
   color: #64748b;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.source-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.source-tag.neo4j {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.source-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.source-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.source-result.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.source-result.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.result-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .stats-grid {

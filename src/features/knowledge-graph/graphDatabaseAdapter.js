@@ -301,12 +301,9 @@ export function toGraphDbPayload(graph = rawGraph) {
 }
 
 export async function saveKnowledgeGraph(payload) {
-  return {
-    success: false,
-    mode: 'preview',
-    message: '当前仅支持前端预览模式，待后端图数据库接口接入后再保存。',
-    payload
-  }
+  // 连库则真写，未连库则预览；具体由 neo4jDataSource 决定
+  const { writeKnowledgeGraph } = await import('./neo4jDataSource')
+  return writeKnowledgeGraph(payload)
 }
 
 export { getNodeTypeMeta, getRelationTypeMeta }

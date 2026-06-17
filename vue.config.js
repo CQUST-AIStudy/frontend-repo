@@ -5,6 +5,18 @@ module.exports = {
     performance: {
       hints: false,
     },
+    resolve: {
+      fallback: {
+        // neo4j-driver 浏览器构建走 WebSocket channel，静态分析触达的 Node 内置模块在此关闭
+        net: false,
+        tls: false,
+        dns: false,
+        fs: false,
+        child_process: false,
+        buffer: false,
+        stream: false,
+      },
+    },
     plugins: [
       new DefinePlugin({
         __VUE_OPTIONS_API__: JSON.stringify(true),

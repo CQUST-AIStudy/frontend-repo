@@ -1,7 +1,7 @@
 <script setup>
 import LucideIcon from '@/components/LucideIcon.vue'
 
-defineProps({
+const props = defineProps({
   searchKeyword: {
     type: String,
     default: ''
@@ -21,13 +21,54 @@ defineProps({
   relationTypeOptions: {
     type: Array,
     default: () => []
+  },
+  chapterOptions: {
+    type: Array,
+    default: () => []
+  },
+  collapsedChapterIds: {
+    type: Array,
+    default: () => []
+  },
+  dataSource: {
+    type: String,
+    default: 'static'
+  },
+  writing: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['update:searchKeyword', 'update:nodeType', 'update:relationType', 'reset', 'preview-payload'])
+const emit = defineEmits([
+  'update:searchKeyword',
+  'update:nodeType',
+  'update:relationType',
+  'update:collapsedChapterIds',
+  'reset',
+  'preview-payload',
+  'export-json',
+  'export-cypher',
+  'write-neo4j',
+  'seed-neo4j'
+])
 
 function updateSearch(event) {
   emit('update:searchKeyword', event.target.value)
+}
+
+function toggleChapter(chapterId) {
+  const current = new Set(props.collapsedChapterIds)
+  if (current.has(chapterId)) {
+    current.delete(chapterId)
+  } else {
+    current.add(chapterId)
+  }
+  emit('update:collapsedChapterIds', Array.from(current))
+}
+
+function isCollapsed(chapterId) {
+  return props.collapsedChapterIds.includes(chapterId)
 }
 </script>
 
@@ -66,10 +107,57 @@ function updateSearch(event) {
         <LucideIcon name="refresh" :size="15" />
         重置
       </button>
-      <button type="button" class="tool-button primary" @click="emit('preview-payload')">
+      <button type="button" class="tool-button" @click="emit('export-json')">
+        <LucideIcon name="braces" :size="15" />
+        导出 JSON
+      </button>
+      <button type="button" class="tool-button" @click="emit('export-cypher')">
+        <LucideIcon name="terminal" :size="15" />
+        导出 Cypher
+      </button>
+      <button
+        v-if="dataSource === 'neo4j'"
+        type="button"
+        class="tool-button"
+        :disabled="writing"
+        @click="emit('seed-neo4j')"
+      >
+        <LucideIcon :name="writing ? 'loader' : 'database-zap'" :size="15" />
+        导入种子数据
+      </button>
+      <button
+        v-if="dataSource === 'neo4j'"
+        type="button"
+        class="tool-button primary"
+        :disabled="writing"
+        @click="emit('write-neo4j')"
+      >
+        <LucideIcon :name="writing ? 'loader' : 'database'" :size="15" />
+        {{ writing ? '写入中…' : '写入 Neo4j' }}
+      </button>
+      <button type="button" class="tool-button ghost" @click="emit('preview-payload')">
         <LucideIcon name="code" :size="15" />
         预览写库数据
       </button>
+    </div>
+
+    <div v-if="chapterOptions.length" class="toolbar-chapters">
+      <span class="chapters-label">
+        <LucideIcon name="layers" :size="14" />
+        章节折叠
+      </span>
+      <div class="chapter-chips">
+        <button
+          v-for="chapter in chapterOptions"
+          :key="chapter.value"
+          type="button"
+          :class="['chapter-chip', { collapsed: isCollapsed(chapter.value) }]"
+          @click="toggleChapter(chapter.value)"
+        >
+          <LucideIcon :name="isCollapsed(chapter.value) ? 'chevron-right' : 'chevron-down'" :size="13" />
+          {{ chapter.label }}
+        </button>
+      </div>
     </div>
   </section>
 </template>
@@ -163,6 +251,64 @@ function updateSearch(event) {
   border-color: #1270d8;
   background: #1270d8;
   color: #fff;
+}
+
+.tool-button.ghost {
+  border-style: dashed;
+  background: transparent;
+  color: #64748b;
+}
+
+.tool-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toolbar-chapters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.chapters-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chapter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.chapter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chapter-chip.collapsed {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+  color: #94a3b8;
 }
 
 @media (max-width: 1080px) {
