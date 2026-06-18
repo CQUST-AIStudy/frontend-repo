@@ -146,6 +146,28 @@
                 <p class="text-sm leading-relaxed text-[#1d1d1f] m-0 px-3.5 py-2.5 bg-[#f9f9f9] rounded-[10px] border-l-[3px] border-l-[#007aff]">{{ score.comment }}</p>
               </div>
               <div v-else class="text-[#aeaeb2] text-[13px] mb-3">暂无评语</div>
+
+              <div v-if="parseAnnotations(score.annotationsJson).length" class="mb-3">
+                <div class="flex items-center gap-1 text-xs text-[#ff3b30] font-semibold mb-1.5">
+                  <LucideIcon name="pen" :size="14" />
+                  <span>Inline 批注</span>
+                </div>
+                <div class="space-y-1.5">
+                  <div
+                    v-for="(ann, idx) in parseAnnotations(score.annotationsJson)"
+                    :key="idx"
+                    class="text-xs px-3 py-2 rounded-[8px] border-l-[3px]"
+                    :class="{
+                      'bg-[rgba(52,199,89,0.08)] border-l-[#34c759]': ann.type === 'CHECK',
+                      'bg-[rgba(255,59,48,0.08)] border-l-[#ff3b30]': ann.type === 'CROSS',
+                      'bg-[rgba(255,149,0,0.08)] border-l-[#ff9500]': ann.type === 'WAVE'
+                    }"
+                  >
+                    <span class="font-bold">{{ ann.type === 'CHECK' ? '✓' : ann.type === 'CROSS' ? '✗' : '〰' }}</span>
+                    <span class="text-[#1d1d1f] ml-1 whitespace-pre-wrap">{{ ann.note }}</span>
+                  </div>
+                </div>
+              </div>
               <div class="flex items-center justify-between">
                 <UiButton
                   @click.stop="startOverride(score)"
@@ -212,19 +234,31 @@
                     'bg-black/5 text-[#6e6e73]': kindType(eb.kind) === 'info',
                     'bg-[rgba(52,199,89,0.12)] text-[#34c759]': kindType(eb.kind) === 'success',
                     'bg-[rgba(255,149,0,0.1)] text-[#ff9500]': kindType(eb.kind) === 'warning',
-                    'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger'
+                    'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]': kindType(eb.kind) === 'danger',
+                    'bg-[rgba(0,122,255,0.1)] text-[#007aff]': kindType(eb.kind) === 'image'
                   }"
                 >{{ kindLabel(eb.kind) }}</span>
                 <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
+                <span v-if="eb.locationJson" class="text-xs text-[#aeaeb2]">· {{ formatLocation(eb.locationJson) }}</span>
               </div>
-              <span v-if="eb.confidence" class="text-xs text-[#aeaeb2]">置信度 {{ (eb.confidence * 100).toFixed(1) }}%</span>
+              <span v-if="eb.confidence && eb.kind !== 'vlm_failed'" class="text-xs text-[#aeaeb2]">置信度 {{ (eb.confidence * 100).toFixed(1) }}%</span>
             </div>
 
-            <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ eb.kind === 'vlm_failed' ? friendlyFailContent(eb.content) : (eb.content || '').slice(0, 500) }}</pre>
+            <pre v-if="eb.kind !== 'vlm_failed'" class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ (eb.content || '').slice(0, 500) }}</pre>
 
-            <div v-if="eb.kind === 'vlm_failed'" class="flex items-center gap-1.5 mt-2 text-xs text-[#ff3b30]">
-              <span>ℹ</span>
-              <span>可点击「下载批注报告」查看原图</span>
+            <div v-if="eb.kind === 'vlm_failed'" class="flex items-start gap-2 mt-1 text-[13px] text-[#6e6e73] bg-[#f5f5f7] rounded-[10px] p-3">
+              <LucideIcon name="image" :size="16" class="shrink-0 mt-0.5 text-[#007aff]" />
+              <span>该页包含图片，已作为页面上下文参与评分。如需查看原图，可下载批注报告。</span>
+            </div>
+
+            <div v-if="eb.imageKey" class="mt-3">
+              <img
+                :src="`/api/grading/evidence/${eb.evidenceId}/image`"
+                class="w-full max-h-[200px] object-contain rounded-[12px] border border-black/[0.06] bg-[#f5f5f7] cursor-zoom-in"
+                :alt="`证据图片 页 ${eb.page}`"
+                loading="lazy"
+                @click="previewImageUrl = `/api/grading/evidence/${eb.evidenceId}/image`"
+              />
             </div>
           </div>
 
@@ -295,6 +329,14 @@
       </div>
     </Teleport>
 
+    <!-- Image Preview Modal -->
+    <Teleport to="body">
+      <div v-if="previewImageUrl" class="fixed inset-0 z-[9999] flex items-center justify-center" @click="previewImageUrl = null">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <img :src="previewImageUrl" class="relative max-w-[90vw] max-h-[90vh] object-contain rounded-[16px] shadow-[0_24px_80px_rgba(0,0,0,0.4)]" @click.stop />
+      </div>
+    </Teleport>
+
     <!-- Loading State -->
     <div v-if="loading" class="h-[200px] flex items-center justify-center">
       <div class="flex flex-col items-center gap-3">
@@ -310,6 +352,7 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { ChatDotRound, Edit } from '@/components/ui/icons'
+import LucideIcon from '@/components/LucideIcon.vue'
 import {
   downloadSubmissionReport,
   generateFinalReview,
@@ -335,6 +378,7 @@ const downloadingReport = ref(false)
 const overrideVisible = ref(false)
 const overriding = ref(false)
 const overrideForm = ref({ dimensionId: null, newScore: 0, maxScore: 0, newComment: '', reason: '' })
+const previewImageUrl = ref(null)
 
 const activeDimFilter = ref('all')
 const activeKindFilter = ref('all')
@@ -344,7 +388,7 @@ const kindOptions = [
   { value: 'text', label: '文本' },
   { value: 'ocr', label: '图文识别' },
   { value: 'vlm', label: '图片解析' },
-  { value: 'vlm_failed', label: '图片未识别' }
+  { value: 'vlm_failed', label: '图片页' }
 ]
 
 const scoreLevel = computed(() => {
@@ -416,20 +460,11 @@ function statusText(status) {
 }
 
 function kindType(kind) {
-  return { text: 'info', ocr: 'success', vlm: 'warning', vlm_failed: 'danger' }[kind] || 'info'
+  return { text: 'info', ocr: 'success', vlm: 'warning', vlm_failed: 'image' }[kind] || 'info'
 }
 
 function kindLabel(kind) {
-  return { text: '文本', ocr: '图文识别', vlm: '图片解析', vlm_failed: '图片未识别' }[kind] || kind
-}
-
-function friendlyFailContent(content) {
-  // 将技术化英文失败提示转换为用户可理解的文案
-  if (!content) return '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。'
-  if (content.includes('multimodal model did not extract usable content') || content.includes('Image evidence exists')) {
-    return '该页包含图片，但 AI 未能从中提取可用内容。建议直接查看原报告页面。'
-  }
-  return content
+  return { text: '文本', ocr: '图文识别', vlm: '图片解析', vlm_failed: '图片页' }[kind] || kind
 }
 
 function getDimName(dimensionId) {
@@ -444,6 +479,29 @@ function countEvidenceIds(score) {
     return Array.isArray(ids) ? ids.length : 0
   } catch {
     return 0
+  }
+}
+
+function parseAnnotations(raw) {
+  try {
+    if (!raw) return []
+    const list = JSON.parse(raw)
+    return Array.isArray(list) ? list : []
+  } catch {
+    return []
+  }
+}
+
+function formatLocation(raw) {
+  try {
+    if (!raw) return ''
+    const loc = JSON.parse(raw)
+    if (loc.paragraphIndex != null && loc.lineIndex != null) return `第 ${loc.paragraphIndex + 1} 段第 ${loc.lineIndex + 1} 行`
+    if (loc.paragraphIndex != null) return `第 ${loc.paragraphIndex + 1} 段`
+    if (loc.bbox) return '图片位置已记录'
+    return ''
+  } catch {
+    return ''
   }
 }
 

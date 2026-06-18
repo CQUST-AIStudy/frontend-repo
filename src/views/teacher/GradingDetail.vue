@@ -14,6 +14,93 @@
       <span class="text-[17px] font-semibold text-[#1d1d1f]">{{ task?.displayCode ? `批改任务 ${task.displayCode}` : `批改任务 #${taskId}` }}</span>
     </div>
 
+    <!-- Batch Review Card -->
+    <div v-if="task" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden mb-5">
+      <div class="flex items-center justify-between gap-4 px-5 pt-[18px] pb-[10px] border-b border-black/[0.06]">
+        <div class="flex items-center gap-2">
+          <span class="text-[16px] font-semibold text-[#1d1d1f]">AI 批次总评</span>
+          <span
+            v-if="batchReview.status === 'GENERATING'"
+            class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold bg-[rgba(255,149,0,0.1)] text-[#ff9500]"
+          >生成中</span>
+          <span
+            v-else-if="batchReview.status === 'COMPLETED'"
+            class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold bg-[rgba(52,199,89,0.12)] text-[#34c759]"
+          >已完成</span>
+          <span
+            v-else-if="batchReview.status === 'FAILED'"
+            class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold bg-[rgba(255,59,48,0.1)] text-[#ff3b30]"
+          >失败</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <UiButton
+            v-if="batchReview.status === 'FAILED'"
+            :disabled="batchReview.status === 'GENERATING' || task.completedCount === 0"
+            @click="doGenerateBatchReview"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] border-none cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <span v-if="batchReviewLoading" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1"></span>
+            重试生成
+          </UiButton>
+        </div>
+      </div>
+      <div class="p-5">
+        <div v-if="batchReview.status === 'PENDING' || batchReview.status === 'FAILED'" class="text-[13px] text-[#6e6e73]">
+          {{ batchReview.status === 'FAILED' ? '生成失败，可点击右上角按钮重试。' : '批改完成后会自动生成批次总评，无需手动操作。' }}
+        </div>
+        <div v-else-if="batchReview.status === 'GENERATING'" class="flex items-center gap-2 text-[13px] text-[#6e6e73]">
+          <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+          AI 正在分析全班成绩，请稍候...
+        </div>
+        <div v-else class="space-y-4">
+          <div v-if="batchReview.summary" class="text-[14px] text-[#1d1d1f] leading-relaxed bg-[#f9f9fb] rounded-[10px] p-3">{{ batchReview.summary }}</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-[12px] border border-[#e5e7eb] p-3">
+              <div class="text-[12px] font-semibold text-[#6e6e73] mb-2">常见薄弱点</div>
+              <ul v-if="batchReview.commonIssues?.length" class="list-disc list-inside text-[13px] text-[#1d1d1f] space-y-1">
+                <li v-for="(item, i) in batchReview.commonIssues" :key="i">{{ item }}</li>
+              </ul>
+              <div v-else class="text-[13px] text-[#aeaeb2]">暂无</div>
+            </div>
+            <div class="rounded-[12px] border border-[#e5e7eb] p-3">
+              <div class="text-[12px] font-semibold text-[#6e6e73] mb-2">整体优势</div>
+              <ul v-if="batchReview.strengths?.length" class="list-disc list-inside text-[13px] text-[#1d1d1f] space-y-1">
+                <li v-for="(item, i) in batchReview.strengths" :key="i">{{ item }}</li>
+              </ul>
+              <div v-else class="text-[13px] text-[#aeaeb2]">暂无</div>
+            </div>
+            <div class="rounded-[12px] border border-[#e5e7eb] p-3">
+              <div class="text-[12px] font-semibold text-[#6e6e73] mb-2">教学建议</div>
+              <ul v-if="batchReview.teachingAdvice?.length" class="list-disc list-inside text-[13px] text-[#1d1d1f] space-y-1">
+                <li v-for="(item, i) in batchReview.teachingAdvice" :key="i">{{ item }}</li>
+              </ul>
+              <div v-else class="text-[13px] text-[#aeaeb2]">暂无</div>
+            </div>
+          </div>
+          <div v-if="batchReview.scoreDistribution" class="rounded-[12px] border border-[#e5e7eb] p-3">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[12px] font-semibold text-[#6e6e73]">得分分布</div>
+              <div class="text-[12px] text-[#6e6e73]">
+                平均 {{ batchReview.scoreDistribution.average }} 分 · 中位 {{ batchReview.scoreDistribution.median }} 分 · 共 {{ batchReview.scoreDistribution.count }} 人
+              </div>
+            </div>
+            <div class="flex items-end gap-1 h-28">
+              <div
+                v-for="(bin, i) in batchReview.scoreDistribution.bins"
+                :key="i"
+                class="flex-1 bg-[#0b7cff]/80 hover:bg-[#0b7cff] rounded-t-[4px] min-w-[16px] transition-all relative group"
+                :style="{ height: maxBinCount ? `${Math.max(4, (bin.count / maxBinCount) * 100)}%` : '4px' }"
+              >
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 text-[10px] text-[#1d1d1f] opacity-0 group-hover:opacity-100 whitespace-nowrap">
+                  {{ bin.minInclusive }}-{{ bin.maxExclusive - 1 }}分：{{ bin.count }}人
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Task Overview -->
     <div v-if="task" class="flex items-center gap-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 px-6 mb-5 flex-wrap">
       <div class="flex flex-col gap-1 py-[18px] px-4 rounded-[16px] bg-gradient-to-b from-[#f7fbff] to-[#eef6ff]">
@@ -214,16 +301,19 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
+import logger from '@/utils/logger'
 import AppModal from '../../components/AppModal.vue'
 import {
   batchGenerateAnnotatedReports,
   downloadSubmissionReport,
   exportGradingExcel,
   exportGradingTask,
+  getBatchReview,
   getGradingTaskDetail,
   retryGradingSubmission,
+  triggerBatchReview,
 } from '@/api/tap'
 
 const route = useRoute()
@@ -243,6 +333,11 @@ const exporting = ref(false)
 const annotating = ref(false)
 const exportingAnnotated = ref(false)
 const retryingSubmissionId = ref(null)
+
+// ---- 批次总评 ----
+const batchReview = ref({ status: 'PENDING', summary: null, commonIssues: [], strengths: [], teachingAdvice: [], scoreDistribution: null })
+const batchReviewLoading = ref(false)
+const batchReviewRefreshTimer = ref(null)
 
 const filterOptions = [
   { label: '全部', value: '' },
@@ -421,6 +516,69 @@ function resolveAnnotatedFilename(originalFilename, studentName, reportType) {
   return dot >= 0 ? `${originalFilename.slice(0, dot)}.${ext}` : `${originalFilename}.${ext}`
 }
 
+const maxBinCount = computed(() => {
+  if (!batchReview.value.scoreDistribution?.bins) return 0
+  return Math.max(...batchReview.value.scoreDistribution.bins.map(b => b.count || 0))
+})
+
+async function loadBatchReview() {
+  try {
+    const res = await getBatchReview(taskId)
+    const data = res?.data || res
+    if (data) {
+      batchReview.value = {
+        status: data.status || 'PENDING',
+        summary: data.summary || null,
+        commonIssues: data.commonIssues || [],
+        strengths: data.strengths || [],
+        teachingAdvice: data.teachingAdvice || [],
+        scoreDistribution: data.scoreDistribution || null,
+      }
+    }
+  } catch (e) {
+    logger.error('加载批次总评失败:', e)
+  }
+}
+
+async function doGenerateBatchReview() {
+  batchReviewLoading.value = true
+  try {
+    await triggerBatchReview(taskId)
+    uiMessage.success('批次总评已开始生成')
+    await loadBatchReview()
+    startBatchReviewPolling()
+  } catch (error) {
+    uiMessage.error(`生成失败: ${error.message}`)
+  } finally {
+    batchReviewLoading.value = false
+  }
+}
+
+async function ensureBatchReviewAutoGeneration() {
+  const done = ['COMPLETED', 'FAILED'].includes(task.value?.status)
+  if (!done || task.value?.completedCount <= 0 || batchReview.value.status !== 'PENDING') {
+    return
+  }
+  try {
+    await triggerBatchReview(taskId)
+    await loadBatchReview()
+    startBatchReviewPolling()
+  } catch (error) {
+    logger.error('自动生成批次总评失败:', error)
+  }
+}
+
+function startBatchReviewPolling() {
+  if (batchReviewRefreshTimer.value) return
+  batchReviewRefreshTimer.value = setInterval(async () => {
+    await loadBatchReview()
+    if (batchReview.value.status !== 'GENERATING') {
+      clearInterval(batchReviewRefreshTimer.value)
+      batchReviewRefreshTimer.value = null
+    }
+  }, 4000)
+}
+
 async function loadDetail() {
   loading.value = true
   try {
@@ -428,6 +586,8 @@ async function loadDetail() {
     const data = res?.data || res
     task.value = data
     submissions.value = data.submissions || []
+    await loadBatchReview()
+    await ensureBatchReviewAutoGeneration()
   } catch (error) {
     uiMessage.error(error.message)
   } finally {
@@ -435,5 +595,12 @@ async function loadDetail() {
   }
 }
 
-onMounted(loadDetail)
+onMounted(() => {
+  loadDetail()
+  startBatchReviewPolling()
+})
+
+onUnmounted(() => {
+  if (batchReviewRefreshTimer.value) clearInterval(batchReviewRefreshTimer.value)
+})
 </script>

@@ -559,6 +559,15 @@ export function batchGenerateAnnotatedReports(taskId) {
   return tapClient.post(`/api/grading/tasks/${taskId}/generate-annotated-reports`, null, { timeout: 300000 })
 }
 
+// ========== Grading - Batch Review ==========
+export function getBatchReview(taskId) {
+  return tapClient.get(`/api/grading/tasks/${taskId}/batch-review`)
+}
+
+export function triggerBatchReview(taskId) {
+  return tapClient.post(`/api/grading/tasks/${taskId}/batch-review`, null, { timeout: 120000 })
+}
+
 // ========== Grading - Final Review ==========
 export function generateFinalReview(submissionId) {
   return tapClient.post(`/api/grading/submissions/${submissionId}/generate-review`)
