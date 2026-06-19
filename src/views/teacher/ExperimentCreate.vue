@@ -8,6 +8,7 @@
       </div>
       <UiButton
         class="h-9 shrink-0 rounded-[10px] border border-black/[0.08] bg-white px-4 text-sm font-medium text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all hover:bg-[#f5f5f7] active:scale-[0.96] max-[640px]:w-full"
+        :disabled="isSubmitting"
         @click="goBack"
       >
         返回列表
@@ -72,6 +73,7 @@
             <UiButton
               type="button"
               class="h-9 rounded-[10px] border border-[var(--app-primary)]/20 bg-[var(--app-primary)]/10 px-3 text-[13px] font-semibold text-[var(--app-primary)] transition-colors hover:bg-[var(--app-primary)]/15"
+              :disabled="isSubmitting"
               @click="addRequirement"
             >
               <Plus class="h-4 w-4" />
@@ -220,6 +222,7 @@ import { useFormValidation } from '../../composables/useFormValidation'
 
 const router = useRouter()
 const classList = ref([])
+const isSubmitting = ref(false)
 
 // 表单数据
 const formData = reactive({
@@ -272,9 +275,12 @@ const setStatus = (status) => {
 
 // 提交表单
 const submitForm = async () => {
+  if (isSubmitting.value) return
+
   const valid = validate(formData)
   if (!valid) return
 
+  isSubmitting.value = true
   try {
     const selectedKeywords = classList.value
       .filter(item => formData.classes.some(classId => String(classId) === String(item.id)))
@@ -292,6 +298,9 @@ const submitForm = async () => {
   } catch (error) {
     logger.error('创建实验失败:', error)
     uiMessage.error('创建实验失败，请稍后重试')
+  }
+  finally {
+    isSubmitting.value = false
   }
 }
 
