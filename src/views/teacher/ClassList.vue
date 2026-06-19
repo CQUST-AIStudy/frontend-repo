@@ -507,6 +507,7 @@ import {
   createTeachingClass,
   deleteTeachingClass,
   getClassStudents,
+  getStudentList,
   getPtaCookieStatus,
   getTeacherPtaCredentials,
   getTeachingClasses,
@@ -1038,8 +1039,25 @@ const doAddStudent = async () => {
     return
   }
 
+  if (!addStudentForm.studentNum.trim()) {
+    uiMessage.warning('请输入学生账号/学号')
+    return
+  }
+
   addingStudent.value = true
   try {
+    const studentListRes = await getStudentList()
+    const studentList = extract(studentListRes) || []
+    const inputStudentNum = addStudentForm.studentNum.trim()
+    const matchedStudent = studentList.find(item =>
+      String(item?.username || item?.studentNum || '').trim() === inputStudentNum
+    )
+
+    if (!matchedStudent) {
+      uiMessage.warning('没有此学生')
+      return
+    }
+
     await addClassStudent(currentClass.value.id, { ...addStudentForm })
     uiMessage.success('添加成功')
     addStudentVisible.value = false
