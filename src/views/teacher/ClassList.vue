@@ -292,7 +292,7 @@
           <div v-if="studentsLoading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-10">
             <div class="w-6 h-6 border-[3px] border-[var(--app-primary)]/20 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
           </div>
-          <UiTable class="w-full text-sm border-collapse">
+          <table class="w-full text-sm border-collapse">
             <thead class="sticky top-0 bg-[#f5f5f7]/95 backdrop-blur-sm">
               <tr>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-14">#</th>
@@ -316,7 +316,7 @@
                 <td colspan="5" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
         <p class="mt-3.5 text-[13px] text-[#7f90a4]">共{{ students.length }} 名学生</p>
       </div>
@@ -682,9 +682,10 @@ const displayGrade = (cls) => {
 }
 
 const filteredStudents = computed(() => {
-  if (!studentSearch.value) return students.value
-  const query = studentSearch.value.toLowerCase()
-  return students.value.filter(item =>
+  const rows = Array.isArray(students.value) ? students.value : []
+  const query = String(studentSearch.value ?? '').trim().toLowerCase()
+  if (!query) return rows
+  return rows.filter(item =>
     String(item.studentName || '').toLowerCase().includes(query) ||
     String(item.studentNum || '').toLowerCase().includes(query)
   )
@@ -988,11 +989,19 @@ const triggerSyncForClass = async () => {
 
 const manageStudents = async (cls) => {
   currentClass.value = cls
+  studentSearch.value = ''
   studentDialogVisible.value = true
   studentsLoading.value = true
   try {
     const res = await getClassStudents(cls.id)
-    students.value = extract(res) || []
+    const data = extract(res)
+    students.value = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.list)
+          ? data.list
+          : []
   } catch (error) {
     uiMessage.error(error.message || '加载学生列表失败')
   } finally {
