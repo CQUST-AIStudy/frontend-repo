@@ -62,10 +62,10 @@
               <template #title>错题本/专项训练</template>
             </ui-menu-item>
 
-            <ui-menu-item index="/student/ability-profile">
-              <ui-icon><TrendCharts /></ui-icon>
-              <template #title>能力画像</template>
-            </ui-menu-item>
+<!--            <ui-menu-item index="/student/ability-profile">-->
+<!--              <ui-icon><TrendCharts /></ui-icon>-->
+<!--              <template #title>能力画像</template>-->
+<!--            </ui-menu-item>-->
 
             <ui-menu-item index="/student/knowledge-graph">
               <ui-icon><Connection /></ui-icon>

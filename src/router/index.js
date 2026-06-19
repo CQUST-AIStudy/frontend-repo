@@ -86,11 +86,11 @@ const routes = [
         name: 'LeetCodeDemo',
         component: () => import('../views/student/LeetCodeDemo.vue')
       },
-      {
-        path: 'ability-profile',
-        name: 'AbilityProfile',
-        component: () => import('../views/student/AbilityProfile.vue')
-      },
+      // {
+      //   path: 'ability-profile',
+      //   name: 'AbilityProfile',
+      //   component: () => import('../views/student/AbilityProfile.vue')
+      // },
       {
         path: 'knowledge-learning',
         name: 'KnowledgeLearning',
