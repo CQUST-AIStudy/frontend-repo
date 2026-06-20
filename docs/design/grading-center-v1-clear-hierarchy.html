@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批改中心优化 - 清晰层级版</title>
+  <style>
+    /* 假设：保持现有品牌色（#007aff蓝色系），优化信息架构和视觉层级 */
+    /* 设计思路：用卡片分组区分必填/可选项，增强主要按钮，优化分数区间说明 */
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1d1d1f;
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 侧边栏 */
+    .sidebar {
+      width: 240px;
+      background: #fff;
+      border-right: 1px solid rgba(0,0,0,0.06);
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-header h1 .icon {
+      width: 32px;
+      height: 32px;
+      background: #eef5ff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #007aff;
+    }
+
+    .sidebar-header p {
+      font-size: 12px;
+      color: #6e6e73;
+      margin-top: 4px;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #6e6e73;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    .nav-item.active {
+      background: #eef5ff;
+      color: #007aff;
+      font-weight: 500;
+    }
+
+    .nav-item .arrow {
+      margin-left: auto;
+      font-size: 12px;
+      color: #aeaeb2;
+    }
+
+    /* 主内容区 */
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+
+    /* 页面标题区 */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .page-header-icon {
+      width: 56px;
+      height: 56px;
+      background: #eef5ff;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #007aff;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: #6e6e73;
+    }
+
+    /* 卡片容器 */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .card-header .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: #007aff;
+      color: #fff;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    /* 表单网格 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .form-grid.three-col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6e6e73;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .form-label .required {
+      color: #ff3b30;
+    }
+
+    .form-input {
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: #f5f5f7;
+      font-size: 14px;
+      color: #1d1d1f;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+    }
+
+    .form-input::placeholder {
+      color: #aeaeb2;
+    }
+
+    .form-input.optional {
+      background: #fafafa;
+      border-style: dashed;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: #aeaeb2;
+    }
+
+    /* 分数区间 - 优化版 */
+    .score-range-section {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 4px;
+    }
+
+    .score-range-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .score-range-values {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #007aff;
+    }
+
+    .score-range-values span {
+      background: #eef5ff;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .slider-track {
+      position: relative;
+      height: 6px;
+      background: #e5e5ea;
+      border-radius: 3px;
+      margin: 16px 0;
+    }
+
+    .slider-range {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #007aff, #3898ff);
+      border-radius: 3px;
+      left: 15%;
+      right: 10%;
+    }
+
+    .slider-thumb {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border: 2px solid #007aff;
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+      cursor: pointer;
+    }
+
+    .slider-thumb.left { left: 15%; }
+    .slider-thumb.right { right: 10%; }
+
+    .score-range-hint {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #6e6e73;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    .score-range-hint .icon {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      background: #fff3e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff9500;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+
+    /* 上传区域 - 增强版 */
+    .upload-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      background: #fafafa;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover {
+      border-color: #007aff;
+      background: #f0f7ff;
+    }
+
+    .upload-zone.dragging {
+      border-color: #007aff;
+      background: #eef5ff;
+      border-style: solid;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      background: #f5f5f7;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aeaeb2;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: #6e6e73;
+      margin-bottom: 8px;
+    }
+
+    .upload-text strong {
+      color: #007aff;
+    }
+
+    .upload-meta {
+      font-size: 12px;
+      color: #aeaeb2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .upload-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 按钮组 - 增强版 */
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .btn-primary {
+      height: 44px;
+      padding: 0 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(180deg, #3898ff, #007aff);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      height: 44px;
+      padding: 0 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #e8e8ed;
+    }
+
+    /* 任务列表卡片 */
+    .task-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .task-list-header .refresh-btn {
+      font-size: 13px;
+      color: #007aff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .task-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6e6e73;
+      background: #f9f9f9;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .task-table th:first-child { border-radius: 8px 0 0 0; }
+    .task-table th:last-child { border-radius: 0 8px 0 0; }
+
+    .task-table td {
+      padding: 16px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .task-table tr:hover td {
+      background: #f5f5f7;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-tag.processing {
+      background: #fff3e0;
+      color: #ff9500;
+    }
+
+    .status-tag.completed {
+      background: #e8f8ed;
+      color: #30d158;
+    }
+
+    .progress-bar {
+      width: 120px;
+      height: 6px;
+      background: #e5e5ea;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3898ff, #007aff);
+      border-radius: 3px;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #aeaeb2;
+      margin-top: 4px;
+    }
+
+    .action-link {
+      font-size: 13px;
+      color: #007aff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+    }
+
+    .action-link.danger {
+      color: #ff3b30;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 48px 0;
+    }
+
+    .empty-state .icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: #f5f5f7;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aeaeb2;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: #aeaeb2;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>
+          <span class="icon">📚</span>
+          智能教学平台
+        </h1>
+        <p>教师工作台</p>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-item">首页总览</div>
+        <div class="nav-item">教学班管理 <span class="arrow">›</span></div>
+        <div class="nav-item">实验教学 <span class="arrow">›</span></div>
+        <div class="nav-item active">AI 批改 <span class="arrow">›</span></div>
+        <div class="nav-item" style="padding-left: 44px; font-size: 13px;">批改中心</div>
+        <div class="nav-item" style="padding-left: 44px; font-size: 13px; color: #aeaeb2;">评分标准</div>
+        <div class="nav-item">课程知识库 <span class="arrow">›</span></div>
+        <div class="nav-item">AI 助教 <span class="arrow">›</span></div>
+        <div class="nav-item">教辅工具 <span class="arrow">›</span></div>
+        <div class="nav-item" style="margin-top: 24px;">个人设置</div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main">
+      <!-- 页面标题 -->
+      <div class="page-header">
+        <div class="page-header-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <h1>AI 批改中心</h1>
+          <p>上传学生 PDF 作业，AI 自动评分并生成详细评语</p>
+        </div>
+      </div>
+
+      <!-- 创建批改任务 -->
+      <div class="card">
+        <div class="card-header">
+          <h2>创建批改任务</h2>
+          <span class="badge">必填</span>
+        </div>
+        <div class="card-body">
+          <!-- 必填配置区 -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <span class="required">*</span> 评分标准
+              </label>
+              <select class="form-input">
+                <option value="" disabled selected>选择评分标准</option>
+                <option>数据结构实验综合评分标准</option>
+                <option>算法设计评分标准</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span class="required">*</span> 教师署名
+              </label>
+              <input type="text" class="form-input" placeholder="例如：张老师">
+            </div>
+          </div>
+
+          <!-- 期望分数区间 - 优化说明 -->
+          <div class="score-range-section">
+            <div class="score-range-header">
+              <label class="form-label">
+                <span class="required">*</span> 期望分数区间
+              </label>
+              <div class="score-range-values">
+                <span>75</span>
+                <span>—</span>
+                <span>99</span>
+                <span>分</span>
+              </div>
+            </div>
+            <div class="slider-track">
+              <div class="slider-range"></div>
+              <div class="slider-thumb left"></div>
+              <div class="slider-thumb right"></div>
+            </div>
+            <div class="score-range-hint">
+              <span class="icon">💡</span>
+              <span>
+                <strong>区间作用：</strong>AI 将参考此区间调整评分尺度。偏离区间过大的成绩（如明显异常高分/低分）会被标记为「需复核」，帮助您快速定位可能的评分偏差。
+              </span>
+            </div>
+          </div>
+
+          <!-- 上传区域 - 增强版 -->
+          <div style="margin-top: 24px;">
+            <label class="form-label" style="margin-bottom: 12px;">
+              <span class="required">*</span> 上传作业文件
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+              </div>
+              <div class="upload-text">
+                拖拽文件到此处，或 <strong>点击上传</strong>
+              </div>
+              <div class="upload-meta">
+                <span>📄 支持 PDF、DOC、DOCX</span>
+                <span>•</span>
+                <span>📦 单文件最大 50MB</span>
+                <span>•</span>
+                <span>📋 最多 200 份</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 操作按钮 - 增强版 -->
+          <div class="actions">
+            <button class="btn-primary" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              上传文件后开始批改
+            </button>
+            <button class="btn-secondary">管理评分标准</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 批改任务列表 -->
+      <div class="card">
+        <div class="card-header task-list-header">
+          <h2>批改任务列表</h2>
+          <button class="refresh-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            刷新
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- 空状态 -->
+          <div class="empty-state">
+            <div class="icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <p>暂无批改任务</p>
+          </div>
+
+          <!-- 示例任务行（隐藏状态，演示用） -->
+          <table class="task-table" style="display: none;">
+            <thead>
+              <tr>
+                <th>任务ID</th>
+                <th>状态</th>
+                <th>进度</th>
+                <th>创建时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1234</td>
+                <td><span class="status-tag processing">处理中</span></td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%;"></div>
+                  </div>
+                  <div class="progress-text">13/20 完成</div>
+                </td>
+                <td>2026-06-09 14:30</td>
+                <td>
+                  <button class="action-link">查看详情</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 上传区域拖拽交互演示
+    const uploadZone = document.getElementById('uploadZone');
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragging');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragging');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragging');
+      // 演示：模拟文件上传
+      alert('检测到文件拖入！实际项目中会处理文件上传。');
+    });
+  </script>
+</body>
+</html>

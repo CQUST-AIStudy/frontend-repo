@@ -6,7 +6,7 @@
       description="管理教学班级、学生信息与 PTA 同步设置，首屏卡片会根据内容自动伸展。"
     >
       <UiButton
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
         @click="openCreateDialog"
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -33,7 +33,7 @@
     <div class="pb-6 relative">
       <!-- Loading overlay -->
       <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-[20px] z-10">
-        <div class="w-8 h-8 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+        <div class="w-8 h-8 border-[3px] border-[var(--app-primary)]/20 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
       </div>
 
       <!-- Empty state -->
@@ -41,7 +41,7 @@
         <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 24 24" fill="none"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <p class="text-[#86868b] text-sm mb-4">暂无班级，点击上方按钮创建</p>
         <UiButton
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
           @click="openCreateDialog"
         >创建第一个班级</UiButton>
       </div>
@@ -58,7 +58,7 @@
             <div class="min-w-0 flex-1">
               <h3 class="m-0 text-[22px] leading-tight font-semibold text-[#1d1d1f] break-words">{{ displayClassName(cls) }}</h3>
               <div class="flex flex-wrap gap-2 mt-3">
-                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-[#007aff]/10 text-[#007aff] text-xs font-semibold">{{ displayGrade(cls) }}</span>
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-[var(--app-primary)]/10 text-[var(--app-primary)] text-xs font-semibold">{{ displayGrade(cls) }}</span>
                 <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-[#7e9db7]/12 text-[#5c7188] text-xs font-semibold">{{ studentCountValue(cls) }} 人</span>
               </div>
             </div>
@@ -67,7 +67,7 @@
               <button
                 type="button"
                 aria-label="班级操作"
-                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15"
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--app-primary)]/15"
                 @click.stop="toggleDropdown(cls.id)"
               >
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -89,7 +89,7 @@
                   <UiButton class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="editClass(cls); closeDropdown()">编辑班级</UiButton>
                   <UiButton class="w-full text-left px-4 py-2 text-sm text-[#1d1d1f] hover:bg-black/5 transition-colors cursor-pointer border-none bg-transparent" @click="manageStudents(cls); closeDropdown()">学生管理</UiButton>
                   <div class="h-px bg-black/[0.06] my-1"></div>
-                  <UiButton class="w-full text-left px-4 py-2 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/5 transition-colors cursor-pointer border-none bg-transparent" @click="confirmDelete(cls); closeDropdown()">删除班级</UiButton>
+                  <UiButton class="w-full text-left px-4 py-2 text-sm text-[#c44b3f] hover:bg-[#c44b3f]/5 transition-colors cursor-pointer border-none bg-transparent" @click="confirmDelete(cls); closeDropdown()">删除班级</UiButton>
                 </div>
               </Transition>
             </div>
@@ -100,7 +100,7 @@
             <div class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
               <span class="text-[#8091a5] text-xs whitespace-nowrap">班级号</span>
               <strong>{{ displayClassCode(cls) }}</strong>
-              <UiButton class="text-[#007aff] text-xs hover:underline cursor-pointer border-none bg-transparent p-0" @click="copyCode(displayClassCode(cls))">复制</UiButton>
+              <UiButton class="text-[var(--app-primary)] text-xs hover:underline cursor-pointer border-none bg-transparent p-0" @click="copyCode(displayClassCode(cls))">复制</UiButton>
             </div>
             <div v-if="hasPtaConfig(cls)" class="inline-flex items-center gap-2 px-3.5 py-3 rounded-[16px] bg-[#f4f8fd]/90 border border-[#e3ebf5] text-[#34475d] text-sm leading-relaxed break-words min-w-[min(280px,100%)]">
               <span class="text-[#8091a5] text-xs whitespace-nowrap">PTA 同步</span>
@@ -131,7 +131,7 @@
 
           <!-- Card actions -->
           <div class="flex justify-between gap-2.5 mt-auto flex-wrap pt-1.5">
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="enterClassSpace(cls)">进入教学班</UiButton>
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" @click="enterClassSpace(cls)">进入教学班</UiButton>
             <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="manageStudents(cls)">学生管理</UiButton>
             <UiButton
               class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#34a853] bg-[#e6f4ea] hover:bg-[#d4edda] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
@@ -161,44 +161,44 @@
       <div class="space-y-4">
         <!-- Name -->
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级名称 <span class="text-[#ff3b30]">*</span></label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级名称 <span class="text-[#c44b3f]">*</span></label>
           <UiInput
             v-model="classForm.name"
             placeholder="例如：计算机科学与技术23 级1 班"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
-          <p v-if="errors.name" class="mt-1 text-xs text-[#ff3b30]">{{ errors.name }}</p>
+          <p v-if="errors.name" class="mt-1 text-xs text-[#c44b3f]">{{ errors.name }}</p>
         </div>
         <!-- Class code -->
         <div v-if="!editingClass">
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级号 <span class="text-[#ff3b30]">*</span></label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">班级号 <span class="text-[#c44b3f]">*</span></label>
           <div class="flex gap-2">
             <UiInput
               v-model="classForm.classCode"
               placeholder="唯一标识，例如CS2023-01"
-              class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+              class="flex-1 h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
             />
             <UiButton class="h-10 px-4 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="generateCode">随机生成</UiButton>
           </div>
-          <p v-if="errors.classCode" class="mt-1 text-xs text-[#ff3b30]">{{ errors.classCode }}</p>
+          <p v-if="errors.classCode" class="mt-1 text-xs text-[#c44b3f]">{{ errors.classCode }}</p>
         </div>
         <!-- Join password -->
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">加入密码 <span class="text-[#ff3b30]">*</span></label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">加入密码 <span class="text-[#c44b3f]">*</span></label>
           <UiInput
             v-model="classForm.joinPassword"
             type="password"
             placeholder="学生加入班级时需要输入"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
-          <p v-if="errors.joinPassword" class="mt-1 text-xs text-[#ff3b30]">{{ errors.joinPassword }}</p>
+          <p v-if="errors.joinPassword" class="mt-1 text-xs text-[#c44b3f]">{{ errors.joinPassword }}</p>
         </div>
         <!-- Grade -->
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">年级</label>
           <UiSelect
             v-model="classForm.grade"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
           >
             <UiOption value="">选择年级</UiOption>
             <UiOption v-for="y in gradeOptions" :key="y" :value="y">{{ y }} 级</UiOption>
@@ -210,7 +210,7 @@
           <UiInput
             v-model="classForm.courseName"
             placeholder="例如：数据结构"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
         <!-- Description -->
@@ -220,7 +220,7 @@
             v-model="classForm.description"
             rows="3"
             placeholder="可选，用于补充班级说明"
-            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y"
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y"
           ></textarea>
         </div>
 
@@ -236,7 +236,7 @@
           <UiInput
             v-model="classForm.ptaKeyword"
             placeholder="例如：计科23 数据结构"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
           <p class="mt-1.5 text-xs text-[#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</p>
         </div>
@@ -265,7 +265,7 @@
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="classDialogVisible = false">取消</UiButton>
         <UiButton
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="submitting"
           @click="submitClassForm"
         >
@@ -282,17 +282,17 @@
           <UiInput
             v-model="studentSearch"
             placeholder="搜索姓名或学号"
-            class="w-full max-w-[260px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full max-w-[260px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="openAddStudentDialog">添加学生</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none whitespace-nowrap" @click="openAddStudentDialog">添加学生</UiButton>
         </div>
 
         <!-- Student table -->
         <div class="relative overflow-auto max-h-[420px] rounded-[12px] border border-black/[0.06]">
           <div v-if="studentsLoading" class="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm z-10">
-            <div class="w-6 h-6 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+            <div class="w-6 h-6 border-[3px] border-[var(--app-primary)]/20 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
           </div>
-          <UiTable class="w-full text-sm border-collapse">
+          <table class="w-full text-sm border-collapse">
             <thead class="sticky top-0 bg-[#f5f5f7]/95 backdrop-blur-sm">
               <tr>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-14">#</th>
@@ -309,14 +309,14 @@
                 <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentName }}</td>
                 <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
                 <td class="px-4 py-3">
-                  <UiButton class="text-[#ff3b30] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
+                  <UiButton class="text-[#c44b3f] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
                 </td>
               </tr>
               <tr v-if="filteredStudents.length === 0 && !studentsLoading">
                 <td colspan="5" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
         <p class="mt-3.5 text-[13px] text-[#7f90a4]">共{{ students.length }} 名学生</p>
       </div>
@@ -330,7 +330,7 @@
           <UiInput
             v-model="addStudentForm.studentName"
             placeholder="学生姓名"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
         <div>
@@ -338,14 +338,14 @@
           <UiInput
             v-model="addStudentForm.studentNum"
             placeholder="选填"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
       </div>
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="addStudentVisible = false">取消</UiButton>
         <UiButton
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="addingStudent"
           @click="doAddStudent"
         >
@@ -378,7 +378,7 @@
             v-model="syncForm.ptaKeyword"
             autocomplete="off"
             placeholder="例如：计科5数据结构"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
         <!-- PTA username -->
@@ -388,7 +388,7 @@
             v-model="syncForm.ptaUsername"
             autocomplete="off"
             placeholder="本次同步使用的PTA 账号（可选）"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
         <!-- PTA password -->
@@ -399,13 +399,13 @@
             type="password"
             autocomplete="new-password"
             placeholder="本次同步使用的PTA 密码（可选）"
-            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
 
         <!-- Temp credential actions -->
         <div class="flex gap-2">
-          <UiButton class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#007aff] bg-[#007aff]/10 hover:bg-[#007aff]/15 active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitSyncTempCredential">提交临时账号密码</UiButton>
+          <UiButton class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[var(--app-primary)] bg-[var(--app-primary)]/10 hover:bg-[var(--app-primary)]/15 active:scale-[0.96] transition-all cursor-pointer border-none" @click="submitSyncTempCredential">提交临时账号密码</UiButton>
           <UiButton class="h-[34px] px-4 rounded-[10px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="clearSyncTempCredential">清空临时凭据</UiButton>
         </div>
 
@@ -422,7 +422,7 @@
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="syncDialogVisible = false">取消</UiButton>
         <UiButton
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="syncDialogClass ? syncingMap[syncDialogClass.id] : false"
           @click="triggerSyncForClass"
         >
@@ -438,12 +438,12 @@
         <!-- Steps indicator -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-[#007aff] text-white text-xs font-semibold flex items-center justify-center">1</span>
+            <span class="w-6 h-6 rounded-full bg-[var(--app-primary)] text-white text-xs font-semibold flex items-center justify-center">1</span>
             <span class="text-sm font-medium text-[#1d1d1f]">获取 Cookie</span>
           </div>
           <div class="flex-1 h-px bg-black/[0.08] mx-3"></div>
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-[#007aff] text-white text-xs font-semibold flex items-center justify-center">2</span>
+            <span class="w-6 h-6 rounded-full bg-[var(--app-primary)] text-white text-xs font-semibold flex items-center justify-center">2</span>
             <span class="text-sm font-medium text-[#1d1d1f]">粘贴到下方</span>
           </div>
           <div class="flex-1 h-px bg-black/[0.08] mx-3"></div>
@@ -457,7 +457,7 @@
         <div class="rounded-[14px] bg-[#e8f4fd] border border-[#b8dcf5]/50 p-4">
           <p class="font-semibold text-sm text-[#1a6dab] mb-2">获取步骤</p>
           <ol class="list-decimal pl-5 text-[13px] text-[#4d6077] leading-relaxed space-y-1">
-            <li>打开 <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer" class="text-[#007aff] hover:underline">pintia.cn</a> 并登录。</li>
+            <li>打开 <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer" class="text-[var(--app-primary)] hover:underline">pintia.cn</a> 并登录。</li>
             <li>按 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">F12</code> 打开开发者工具，切换到 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">Application</code>。</li>
             <li>在左侧找到 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">Cookies</code>，选择 <code class="px-1.5 py-0.5 rounded bg-black/5 text-xs">https://pintia.cn</code>。</li>
             <li>复制导出的Cookie JSON，粘贴到下方输入框。</li>
@@ -469,7 +469,7 @@
           v-model="cookieInput"
           rows="8"
           placeholder='粘贴 Cookie JSON，例如：[{"name":"PTASession","value":"xxx","domain":".pintia.cn"}]'
-          class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-y font-mono"
+          class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y font-mono"
         ></textarea>
 
         <!-- Result -->
@@ -482,7 +482,7 @@
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="cookieDialogVisible = false">取消</UiButton>
         <UiButton
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
           :disabled="cookieSubmitting || !cookieInput.trim()"
           @click="submitCookieForm"
         >
@@ -507,6 +507,7 @@ import {
   createTeachingClass,
   deleteTeachingClass,
   getClassStudents,
+  getStudentList,
   getPtaCookieStatus,
   getTeacherPtaCredentials,
   getTeachingClasses,
@@ -681,9 +682,10 @@ const displayGrade = (cls) => {
 }
 
 const filteredStudents = computed(() => {
-  if (!studentSearch.value) return students.value
-  const query = studentSearch.value.toLowerCase()
-  return students.value.filter(item =>
+  const rows = Array.isArray(students.value) ? students.value : []
+  const query = String(studentSearch.value ?? '').trim().toLowerCase()
+  if (!query) return rows
+  return rows.filter(item =>
     String(item.studentName || '').toLowerCase().includes(query) ||
     String(item.studentNum || '').toLowerCase().includes(query)
   )
@@ -698,7 +700,7 @@ const syncToggleHelpText = computed(() => {
   return isClassSyncActive.value ? '每天凌晨自动同步一次。' : '需要时可开启自动同步。'
 })
 const syncSwitchClasses = computed(() => [
-  'relative inline-flex h-[28px] w-[50px] shrink-0 items-center rounded-full border border-transparent p-0.5 transition-all duration-200 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15',
+  'relative inline-flex h-[28px] w-[50px] shrink-0 items-center rounded-full border border-transparent p-0.5 transition-all duration-200 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c2703e]/15',
   canToggleClassSync.value
     ? 'cursor-pointer hover:shadow-[0_2px_8px_rgba(15,23,42,0.12)] active:scale-95'
     : 'cursor-not-allowed opacity-60',
@@ -987,11 +989,19 @@ const triggerSyncForClass = async () => {
 
 const manageStudents = async (cls) => {
   currentClass.value = cls
+  studentSearch.value = ''
   studentDialogVisible.value = true
   studentsLoading.value = true
   try {
     const res = await getClassStudents(cls.id)
-    students.value = extract(res) || []
+    const data = extract(res)
+    students.value = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.list)
+          ? data.list
+          : []
   } catch (error) {
     uiMessage.error(error.message || '加载学生列表失败')
   } finally {
@@ -1038,8 +1048,25 @@ const doAddStudent = async () => {
     return
   }
 
+  if (!addStudentForm.studentNum.trim()) {
+    uiMessage.warning('请输入学生账号/学号')
+    return
+  }
+
   addingStudent.value = true
   try {
+    const studentListRes = await getStudentList()
+    const studentList = extract(studentListRes) || []
+    const inputStudentNum = addStudentForm.studentNum.trim()
+    const matchedStudent = studentList.find(item =>
+      String(item?.username || item?.studentNum || '').trim() === inputStudentNum
+    )
+
+    if (!matchedStudent) {
+      uiMessage.warning('没有此学生')
+      return
+    }
+
     await addClassStudent(currentClass.value.id, { ...addStudentForm })
     uiMessage.success('添加成功')
     addStudentVisible.value = false

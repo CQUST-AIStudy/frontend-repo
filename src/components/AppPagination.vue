@@ -5,7 +5,7 @@
     </UiButton>
     <template v-for="page in visiblePages" :key="page">
       <span v-if="page === '...'" class="w-[34px] h-[34px] flex items-center justify-center text-[#aeaeb2] text-sm">...</span>
-      <UiButton v-else @click="goTo(page)" :class="[paginationButtonClass, page === current ? 'bg-[#007aff] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)]' : '']">
+      <UiButton v-else @click="goTo(page)" :class="[paginationButtonClass, page === current ? 'bg-[#c2703e] text-white shadow-[0_2px_8px_rgba(194, 112, 62, 0.3)]' : '']">
         {{ page }}
       </UiButton>
     </template>

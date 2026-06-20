@@ -3,14 +3,14 @@
     <!-- Loading state -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="flex flex-col items-center gap-3">
-        <div class="w-8 h-8 border-[3px] border-black/10 border-t-[#007aff] rounded-full animate-spin"></div>
+        <div class="w-8 h-8 border-[3px] border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
         <span class="text-[13px] text-[#6e6e73]">加载中...</span>
       </div>
     </div>
 
     <!-- Error state -->
     <div v-else-if="errorMsg" class="rounded-[14px] bg-[#fff3cd] border border-[#ffecb5] p-4 flex items-center gap-3">
-      <svg class="w-5 h-5 text-[#ff9500] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+      <svg class="w-5 h-5 text-[#c49a3c] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
       <div class="min-w-0 flex-1">
         <div class="text-[13px] text-[#86650a]">{{ errorMsg }}</div>
         <div class="mt-1 text-[12px] text-[#9a7b1f]">如果后端画像计算耗时较长，可以稍后重试。</div>
@@ -27,19 +27,19 @@
       <!-- Overview stat cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-          <div class="text-[24px] font-bold text-[#007aff] mb-1">{{ data.totalStudents }}</div>
+          <div class="text-[24px] font-bold text-[var(--app-primary)] mb-1">{{ data.totalStudents }}</div>
           <div class="text-[12px] text-[#6e6e73] mt-2">学生总数</div>
         </div>
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-          <div class="text-[24px] font-bold text-[#34c759] mb-1">{{ tierCount('A') }}</div>
+          <div class="text-[24px] font-bold text-[#6b8f6b] mb-1">{{ tierCount('A') }}</div>
           <div class="text-[12px] text-[#6e6e73] mt-2">优秀 (≥70)</div>
         </div>
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-          <div class="text-[24px] font-bold text-[#ff9500] mb-1">{{ tierCount('B') }}</div>
+          <div class="text-[24px] font-bold text-[#c49a3c] mb-1">{{ tierCount('B') }}</div>
           <div class="text-[12px] text-[#6e6e73] mt-2">中等 (40-69)</div>
         </div>
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-          <div class="text-[24px] font-bold text-[#ff3b30] mb-1">{{ tierCount('C') }}</div>
+          <div class="text-[24px] font-bold text-[#c44b3f] mb-1">{{ tierCount('C') }}</div>
           <div class="text-[12px] text-[#6e6e73] mt-2">需关注 (&lt;40)</div>
         </div>
       </div>
@@ -72,7 +72,7 @@
                   <td class="py-2.5 px-3">
                     <div class="flex items-center gap-2">
                       <div class="w-full h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(row.weakRatio)" :class="row.weakRatio > 30 ? 'bg-[#ff3b30]' : 'bg-[#ff9500]'"></div>
+                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(row.weakRatio)" :class="row.weakRatio > 30 ? 'bg-[#c44b3f]' : 'bg-[#c49a3c]'"></div>
                       </div>
                       <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ row.weakRatio }}%</span>
                     </div>
@@ -114,13 +114,13 @@
                   <td class="py-2.5 px-3">
                     <div class="flex items-center gap-2">
                       <div class="w-full max-w-[120px] h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(Math.round(row.overallScore))" :class="row.overallScore >= 70 ? 'bg-[#34c759]' : row.overallScore >= 40 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"></div>
+                        <div class="h-full w-[var(--progress-width)] rounded-full transition-all" :style="progressWidthStyle(Math.round(row.overallScore))" :class="row.overallScore >= 70 ? 'bg-[#6b8f6b]' : row.overallScore >= 40 ? 'bg-[#c49a3c]' : 'bg-[#c44b3f]'"></div>
                       </div>
                       <span class="text-[11px] text-[#6e6e73] whitespace-nowrap">{{ Math.round(row.overallScore) }}</span>
                     </div>
                   </td>
                   <td class="py-2.5 px-3">
-                    <UiButton @click="viewStudent(row.studentId)" class="text-[13px] text-[#007aff] hover:text-[#0056b3] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</UiButton>
+                    <UiButton @click="viewStudent(row.studentId)" class="text-[13px] text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] font-medium cursor-pointer bg-transparent border-none transition-colors">查看画像</UiButton>
                   </td>
                 </tr>
               </tbody>
@@ -134,7 +134,7 @@
     <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="80%">
       <div v-if="dialogLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-3">
-          <div class="w-8 h-8 border-[3px] border-black/10 border-t-[#007aff] rounded-full animate-spin"></div>
+          <div class="w-8 h-8 border-[3px] border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
           <span class="text-[13px] text-[#6e6e73]">加载中...</span>
         </div>
       </div>
@@ -146,9 +146,9 @@
           <div ref="dialogRadarRef" class="h-[300px]"></div>
           <div ref="dialogTrendRef" class="h-[300px]"></div>
         </div>
-        <div v-if="!dialogProfile.error && dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#34c759]">{{ dialogProfile.feedback }}</div>
+        <div v-if="!dialogProfile.error && dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#6b8f6b]">{{ dialogProfile.feedback }}</div>
         <div v-if="!dialogProfile.error && dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
-          <span v-for="p in dialogProfile.patterns" :key="p.tag" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[#007aff]/10 text-[#007aff]">{{ p.tag }}: {{ p.description }}</span>
+          <span v-for="p in dialogProfile.patterns" :key="p.tag" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[var(--app-primary)]/10 text-[var(--app-primary)]">{{ p.tag }}: {{ p.description }}</span>
         </div>
       </template>
     </AppModal>

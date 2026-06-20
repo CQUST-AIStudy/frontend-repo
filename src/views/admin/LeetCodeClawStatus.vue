@@ -67,7 +67,7 @@
           <!-- 进度条 -->
           <div v-if="crawlAllJob.status === 'running'" class="w-full [height:6px] [border-radius:3px] [background:#e2e8f0] [overflow:hidden] [margin-bottom:10px]">
             <div
-              class="[height:100%] [border-radius:3px] [background:linear-gradient(90deg,#3898ff,#007aff)] [transition:width_0.6s_ease]"
+              class="[height:100%] [border-radius:3px] [background:linear-gradient(90deg,#d49068,var(--app-primary))] [transition:width_0.6s_ease]"
               :style="{ width: crawlAllProgress + '%' }"
             ></div>
           </div>

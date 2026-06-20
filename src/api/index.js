@@ -146,6 +146,8 @@ const resolveTeacherClassKeyword = (options) => {
 }
 
 const buildTeacherClassParams = (options) => {
+  const normalized = normalizeTeacherClassScope(options)
+  if (normalized.scope === 'all') return { scope: 'all' }
   const classKeyword = resolveTeacherClassKeyword(options)
   if (classKeyword) return { class: classKeyword }
   const classId = resolveTeacherClassId(options)
@@ -155,7 +157,11 @@ const buildTeacherClassParams = (options) => {
 const buildExperimentParams = (options) => {
   if (!options) return {}
   const experimentId = options.experimentId || options.experiment_id
-  return experimentId != null ? { experimentId: Number(experimentId) } : {}
+  const params = experimentId != null ? { experimentId: Number(experimentId) } : {}
+  if (options.limit != null && options.limit !== '') {
+    params.limit = Number(options.limit)
+  }
+  return params
 }
 
 const unwrapList = (response, keys = ['data']) => {
@@ -300,10 +306,6 @@ export default {
     return apiClient.get('/api/experiments')
   },
 
-  async getExperiments() {
-    return apiClient.get('/api/experiments1')
-  },
-
   async getTeacherExperimentList(options) {
     return apiClient.get('/api/teacher/experiments', {
       params: buildTeacherClassParams(options)
@@ -357,7 +359,7 @@ export default {
   },
 
   async getRecommendServiceHealth() {
-    return axios.get('/recommend/health', { timeout: 5000 }).then(res => res.data).catch(() => null)
+    return apiClient.get('/recommend/health', { timeout: 5000 }).catch(() => null)
   },
 
   async getErrorAnalysisHealth() {

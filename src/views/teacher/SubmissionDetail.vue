@@ -11,7 +11,7 @@
       <!-- Loading overlay -->
       <div v-if="loading" class="absolute inset-0 z-10 flex items-center justify-center">
         <div class="flex flex-col items-center gap-3">
-          <div class="w-8 h-8 border-[3px] border-[#007aff]/20 border-t-[#007aff] rounded-full animate-spin"></div>
+          <div class="w-8 h-8 border-[3px] border-[var(--app-primary)]/20 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
           <span class="text-sm text-[#6e6e73]">加载中...</span>
         </div>
       </div>
@@ -46,16 +46,16 @@
             <div class="grid grid-cols-1 gap-3">
               <div class="bg-[#f7f9fc] rounded-xl p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <div class="text-[13px] text-[#6e6e73] mb-1">上机成绩评分</div>
-                <div class="text-[28px] font-bold text-[#1d1d1f]" :class="{ 'text-[#007aff]': submission.status === 'graded' }">
+                <div class="text-[28px] font-bold text-[#1d1d1f]" :class="{ 'text-[var(--app-primary)]': submission.status === 'graded' }">
                   {{ submission.score !== null ? submission.score : '未评分' }}
                 </div>
               </div>
               <div class="bg-[#f7f9fc] rounded-xl p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <div class="text-[13px] text-[#6e6e73] mb-1">查重率</div>
                 <div class="text-[28px] font-bold" :class="{
-                  'text-[#34c759]': submission.plagiarismRate < 15,
-                  'text-[#ff9500]': submission.plagiarismRate >= 15 && submission.plagiarismRate < 30,
-                  'text-[#ff3b30]': submission.plagiarismRate >= 30
+                  'text-[#6b8f6b]': submission.plagiarismRate < 15,
+                  'text-[#c49a3c]': submission.plagiarismRate >= 15 && submission.plagiarismRate < 30,
+                  'text-[#c44b3f]': submission.plagiarismRate >= 30
                 }">
                   {{ submission.plagiarismRate !== null ? `${submission.plagiarismRate}%` : '未检测' }}
                 </div>
@@ -70,7 +70,7 @@
           <!-- 操作按钮卡片 -->
           <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
             <div class="flex flex-col gap-3">
-              <UiButton @click="openGradeDialog" class="w-full h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center gap-2">
+              <UiButton @click="openGradeDialog" class="w-full h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/></svg>
                 {{ submission.status === 'graded' ? '重新评分' : '评分' }}
               </UiButton>
@@ -104,7 +104,7 @@
                     复制代码
                   </UiButton>
                   <div class="relative" ref="fileDropdownRef">
-                    <UiButton @click="fileDropdownOpen = !fileDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
+                    <UiButton @click="fileDropdownOpen = !fileDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#6b8f6b] bg-[#6b8f6b]/10 border-none hover:bg-[#6b8f6b]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
                       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5z"/></svg>
                       文件操作
                       <svg class="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
@@ -127,14 +127,14 @@
                     <UiButton
                       @click="activeQuestionTab = 'full'"
                       class="px-4 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer transition-all"
-                      :class="activeQuestionTab === 'full' ? 'bg-white text-[#007aff] shadow-[inset_3px_0_0_#007aff]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
+                      :class="activeQuestionTab === 'full' ? 'bg-white text-[var(--app-primary)] shadow-[inset_3px_0_0_var(--app-primary)]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
                     >完整源码</UiButton>
                     <UiButton
                       v-for="(question, index) in parsedQuestions"
                       :key="index"
                       @click="activeQuestionTab = String(index)"
                       class="px-4 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer transition-all"
-                      :class="activeQuestionTab === String(index) ? 'bg-white text-[#007aff] shadow-[inset_3px_0_0_#007aff]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
+                      :class="activeQuestionTab === String(index) ? 'bg-white text-[var(--app-primary)] shadow-[inset_3px_0_0_var(--app-primary)]' : 'bg-transparent text-[#6e6e73] hover:bg-white/60'"
                     >第{{ question.number }}题</UiButton>
                   </div>
                   <div class="flex-1 p-4 overflow-auto">
@@ -164,13 +164,13 @@
                           @input="updateQuestionComment(index, $event.target.value)"
                           rows="3"
                           placeholder="请输入对本题的评语.."
-                          class="w-full px-4 py-3 rounded-[10px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] placeholder-[#aeaeb2] resize-y focus:outline-none focus:ring-2 focus:ring-[#007aff]/20 focus:border-[#007aff] transition-all"
+                          class="w-full px-4 py-3 rounded-[10px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] placeholder-[#aeaeb2] resize-y focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/20 focus:border-[var(--app-primary)] transition-all"
                         ></textarea>
                         <div class="flex justify-end mt-2">
                           <UiButton
                             @click="saveQuestionComment(index)"
                             :disabled="question.saving"
-                            class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="h-[32px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <span v-if="question.saving" class="flex items-center gap-1.5">
                               <span class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -197,7 +197,7 @@
                   <h3 class="text-base font-semibold text-[#1d1d1f] m-0">运行结果</h3>
                   <span
                     class="px-3 py-1 rounded-full text-xs font-medium"
-                    :class="codeResult.success ? 'bg-[#34c759]/10 text-[#34c759]' : 'bg-[#ff3b30]/10 text-[#ff3b30]'"
+                    :class="codeResult.success ? 'bg-[#6b8f6b]/10 text-[#6b8f6b]' : 'bg-[#c44b3f]/10 text-[#c44b3f]'"
                   >{{ codeResult.success ? '运行成功' : '运行失败' }}</span>
                 </div>
                 <pre class="bg-[#f5f7fa] rounded-lg p-4 font-mono max-h-[200px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed m-0">{{ codeResult.output }}</pre>
@@ -210,7 +210,7 @@
                 <h3 class="text-base font-semibold text-[#1d1d1f] m-0">实验报告</h3>
                 <div class="flex gap-2 mt-0">
                   <div class="relative" ref="reportDropdownRef">
-                    <UiButton @click="reportDropdownOpen = !reportDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#34c759] bg-[#34c759]/10 border-none hover:bg-[#34c759]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
+                    <UiButton @click="reportDropdownOpen = !reportDropdownOpen" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-[#6b8f6b] bg-[#6b8f6b]/10 border-none hover:bg-[#6b8f6b]/15 active:scale-[0.96] transition-all cursor-pointer flex items-center gap-1.5">
                       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>
                       下载报告
                       <svg class="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
@@ -279,7 +279,7 @@
                     <div class="text-[12px] text-[#6e6e73] mb-1">作业提交及时性</div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'p'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.punctuality) ? 'text-[#ff9500]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.punctuality) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.punctuality }}</span>
                     </div>
@@ -288,7 +288,7 @@
                     <div class="text-[12px] text-[#6e6e73] mb-1">代码质量评分</div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'cq'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.codeQuality) ? 'text-[#ff9500]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.codeQuality) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.codeQuality }}</span>
                     </div>
@@ -297,7 +297,7 @@
                     <div class="text-[12px] text-[#6e6e73] mb-1">沟通参与度</div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'pa'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.participation) ? 'text-[#ff9500]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.participation) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.participation }}</span>
                     </div>
@@ -331,7 +331,7 @@
                           <h5 class="text-xs font-semibold text-[#6e6e73] mb-1">推荐资源：</h5>
                           <ul class="list-disc pl-4 m-0">
                             <li v-for="(resource, rIndex) in rec.resources" :key="rIndex" class="text-sm">
-                              <a :href="resource.url" target="_blank" class="text-[#007aff] hover:underline">{{ resource.name }}</a>
+                              <a :href="resource.url" target="_blank" class="text-[var(--app-primary)] hover:underline">{{ resource.name }}</a>
                             </li>
                           </ul>
                         </div>
@@ -367,14 +367,14 @@
               :min="0"
               :max="100"
               step="0.1"
-              class="w-[120px] h-[36px] px-3 rounded-[8px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#007aff]/20 focus:border-[#007aff] transition-all"
+              class="w-[120px] h-[36px] px-3 rounded-[8px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[var(--app-primary)]/20 focus:border-[var(--app-primary)] transition-all"
             />
           </div>
         </div>
       </div>
       <template #footer>
         <UiButton @click="gradeDialogVisible = false" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-black/[0.04] border-none hover:bg-black/[0.08] active:scale-[0.96] transition-all cursor-pointer">取消</UiButton>
-        <UiButton @click="submitGrade" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">提交评分</UiButton>
+        <UiButton @click="submitGrade" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">提交评分</UiButton>
       </template>
     </AppModal>
 
@@ -728,10 +728,10 @@ const updateReportWithComments = () => {
 
 const getScoreClass = (score) => {
   if (!score) return ''
-  if (score >= 90) return 'text-[#34c759]'
-  if (score >= 80) return 'text-[#007aff]'
-  if (score >= 60) return 'text-[#ff9500]'
-  return 'text-[#ff3b30]'
+  if (score >= 90) return 'text-[#6b8f6b]'
+  if (score >= 80) return 'text-[#c2703e]'
+  if (score >= 60) return 'text-[#c49a3c]'
+  return 'text-[#c44b3f]'
 }
 
 const loadSubmissionDetail = async () => {

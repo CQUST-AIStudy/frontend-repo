@@ -12,7 +12,7 @@
         <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">AI使用概览</span>
           <UiButton
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
             @click="refreshData"
             :disabled="loading"
           >
@@ -50,7 +50,7 @@
           <UiInput
             v-model="searchQuery"
             placeholder="搜索学生姓名或学号"
-            class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-[250px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
         </div>
 
@@ -92,7 +92,7 @@
                     <div class="flex-1 h-2 bg-black/[0.04] rounded-full overflow-hidden">
                       <div
                         class="h-full w-[var(--progress-width)] rounded-full transition-all"
-                        :class="row.completionRate >= 80 ? 'bg-[#34c759]' : row.completionRate >= 50 ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"
+                        :class="row.completionRate >= 80 ? 'bg-[#6b8f6b]' : row.completionRate >= 50 ? 'bg-[#c49a3c]' : 'bg-[#c44b3f]'"
                         :style="progressWidthStyle(row.completionRate)"
                       ></div>
                     </div>
@@ -132,7 +132,7 @@
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-1.5">AI助手模型</label>
             <UiSelect
               v-model="modelConfig.model"
-              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+              class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
             >
               <UiOption value="deepseek-chat">DeepSeek Chat (当前)</UiOption>
               <UiOption value="deepseek-coder">DeepSeek Coder</UiOption>
@@ -141,7 +141,7 @@
 
           <!-- 高级参数折叠 -->
           <details class="group">
-            <summary class="text-sm font-medium text-[#1d1d1f] cursor-pointer select-none flex items-center gap-1.5 hover:text-[#007aff] transition-colors">
+            <summary class="text-sm font-medium text-[#1d1d1f] cursor-pointer select-none flex items-center gap-1.5 hover:text-[var(--app-primary)] transition-colors">
               <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-90" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               高级参数
             </summary>
@@ -154,7 +154,7 @@
                   min="0"
                   max="1"
                   step="0.01"
-                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[#007aff]"
+                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[var(--app-primary)]"
                 />
               </div>
               <div>
@@ -165,7 +165,7 @@
                   min="100"
                   max="4000"
                   step="100"
-                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[#007aff]"
+                  class="w-full h-2 bg-[#f5f5f7] rounded-full appearance-none cursor-pointer accent-[var(--app-primary)]"
                 />
               </div>
             </div>
@@ -173,7 +173,7 @@
 
           <div class="pt-2">
             <UiButton
-              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               @click="saveModelConfig"
             >
               保存配置
@@ -201,9 +201,9 @@ const completionChartRef = ref(null)
 const scoreDistChartRef = ref(null)
 
 function averageScoreClass(score) {
-  if (score >= 80) return 'text-[#34c759] font-semibold'
-  if (score >= 60) return 'text-[#ff9500] font-semibold'
-  return 'text-[#ff3b30] font-semibold'
+  if (score >= 80) return 'text-[#6b8f6b] font-semibold'
+  if (score >= 60) return 'text-[#c49a3c] font-semibold'
+  return 'text-[#c44b3f] font-semibold'
 }
 
 function progressWidthStyle(value) {

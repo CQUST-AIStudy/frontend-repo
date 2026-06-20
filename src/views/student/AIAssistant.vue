@@ -638,7 +638,7 @@ onMounted(() => {
 
 .icon-button:hover {
   border-color: #bcd6ff;
-  color: #007aff;
+  color: var(--app-primary);
 }
 
 .history-search {
@@ -671,7 +671,7 @@ onMounted(() => {
   border: 1px solid #d7e6ff;
   border-radius: 8px;
   background: #f5f9ff;
-  color: #007aff;
+  color: var(--app-primary);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -735,7 +735,7 @@ onMounted(() => {
 }
 
 .history-status--typing {
-  color: #007aff;
+  color: var(--app-primary);
   font-weight: 700;
 }
 
@@ -863,7 +863,7 @@ onMounted(() => {
   flex: 0 0 auto;
   border-radius: 8px;
   background: #edf5ff;
-  color: #007aff;
+  color: var(--app-primary);
   font-size: 18px;
 }
 
@@ -1002,7 +1002,7 @@ onMounted(() => {
 }
 
 .prompt-card:hover {
-  border-color: rgba(0, 122, 255, 0.4);
+  border-color: rgba(194, 112, 62, 0.4);
   background: #f4f9ff;
 }
 
@@ -1035,7 +1035,7 @@ onMounted(() => {
   justify-content: center;
   flex: 0 0 auto;
   border-radius: 10px;
-  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  background: linear-gradient(135deg, var(--app-primary) 0%, #5856d6 100%);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
@@ -1092,10 +1092,10 @@ onMounted(() => {
 }
 
 .message-row--user .message-bubble {
-  border-color: #007aff;
+  border-color: var(--app-primary);
   border-top-left-radius: 12px;
   border-top-right-radius: 4px;
-  background: #007aff;
+  background: var(--app-primary);
   color: #fff;
 }
 

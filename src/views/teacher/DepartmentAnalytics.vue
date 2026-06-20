@@ -56,7 +56,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
         <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">低完成率实验预警</span>
-          <UiButton @click="exportReport" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">导出报告</UiButton>
+          <UiButton @click="exportReport" class="h-[34px] px-4 rounded-[8px] text-[13px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">导出报告</UiButton>
         </div>
         <UiTable class="w-full text-left text-[13px]">
           <thead>
@@ -69,18 +69,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in warningExperiments" :key="row.name" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+            <tr v-for="row in warningExperiments" :key="row.name" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
               <td class="py-3 px-3 text-center">
-                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="row.completionRate < 50 ? 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]' : 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]'">
+                <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold" :class="row.completionRate < 50 ? 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]' : 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]'">
                   {{ row.completionRate }}%
                 </span>
               </td>
               <td class="py-3 px-3 text-center text-[#6e6e73]">{{ row.submissionCount }} / {{ overview.studentCount }}</td>
-              <td class="py-3 px-3 text-center" :class="row.avgScore < 60 ? 'text-[#ff3b30]' : 'text-[#1d1d1f]'">{{ row.avgScore }}</td>
+              <td class="py-3 px-3 text-center" :class="row.avgScore < 60 ? 'text-[#c44b3f]' : 'text-[#1d1d1f]'">{{ row.avgScore }}</td>
               <td class="py-3 px-3">
-                <span v-if="row.completionRate < 30" class="text-[#ff3b30]">完成率极低，建议检查实验难度或延长截止时间</span>
-                <span v-else-if="row.completionRate < 50" class="text-[#ff9500]">完成率偏低，建议增加辅导答疑</span>
+                <span v-if="row.completionRate < 30" class="text-[#c44b3f]">完成率极低，建议检查实验难度或延长截止时间</span>
+                <span v-else-if="row.completionRate < 50" class="text-[#c49a3c]">完成率偏低，建议增加辅导答疑</span>
                 <span v-else class="text-[#aeaeb2]">完成率一般，可适当关注</span>
               </td>
             </tr>
@@ -100,10 +100,6 @@ import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import * as echarts from 'echarts'
 import api from '../../api'
-
-function averageScoreClass(score) { // eslint-disable-line no-unused-vars
-  return score < 60 ? 'text-[#ff3b30]' : 'text-[#1d1d1f]'
-}
 
 const pageLoading = ref(true)
 const completionChartRef = ref(null)

@@ -22,20 +22,20 @@
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-3">分析内容</label>
             <div class="grid grid-cols-2 gap-3">
-              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <UiInput type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[#007aff]" />
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]">
+                <UiInput type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">学习状态分析</span>
               </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <UiInput type="checkbox" v-model="analysisForm.content" value="knowledge_points" class="w-4 h-4 rounded accent-[#007aff]" />
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]">
+                <UiInput type="checkbox" v-model="analysisForm.content" value="knowledge_points" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">知识点掌握情况</span>
               </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <UiInput type="checkbox" v-model="analysisForm.content" value="improvement" class="w-4 h-4 rounded accent-[#007aff]" />
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]">
+                <UiInput type="checkbox" v-model="analysisForm.content" value="improvement" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">改进建议</span>
               </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(0,122,255,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(0,122,255,0.4)]">
-                <UiInput type="checkbox" v-model="analysisForm.content" value="course_design" class="w-4 h-4 rounded accent-[#007aff]" />
+              <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]">
+                <UiInput type="checkbox" v-model="analysisForm.content" value="course_design" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">课程设计优化</span>
               </label>
             </div>
@@ -43,7 +43,7 @@
 
           <div class="flex items-center flex-wrap gap-3">
             <UiButton
-              class="inline-flex items-center gap-2 h-[38px] px-5 rounded-[10px] bg-[#007aff] text-white text-[14px] font-medium shadow-[0_2px_8px_rgba(0,122,255,0.3)] transition-all hover:bg-[#0066d6] active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+              class="inline-flex items-center gap-2 h-[38px] px-5 rounded-[10px] bg-[var(--app-primary)] text-white text-[14px] font-medium shadow-[0_2px_8px_rgba(194,112,62,0.3)] transition-all hover:bg-[#a85c30] active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="loading"
               @click="generateRecommendation"
             >
@@ -57,7 +57,7 @@
       <!-- Data Loading Card -->
       <div v-if="dataLoading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center gap-2.5 py-5 text-[#86868b]">
-          <Loading class="w-6 h-6 animate-spin text-[#007aff]" />
+          <Loading class="w-6 h-6 animate-spin text-[var(--app-primary)]" />
           <span class="text-[14px]">正在加载课程数据...</span>
         </div>
       </div>
@@ -65,11 +65,11 @@
       <!-- Error Alert -->
       <div
         v-if="errorMessage"
-        class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(255,149,0,0.2)] bg-[rgba(255,149,0,0.06)]"
+        class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(196,154,60,0.2)] bg-[rgba(196,154,60,0.06)]"
       >
-        <span class="text-[#ff9500] text-lg shrink-0"><LucideIcon name="alert-triangle" :size="18" /></span>
+        <span class="text-[#c49a3c] text-lg shrink-0"><LucideIcon name="alert-triangle" :size="18" /></span>
         <div class="flex-1">
-          <div class="text-[14px] font-medium text-[#ff9500]">{{ errorMessage }}</div>
+          <div class="text-[14px] font-medium text-[#c49a3c]">{{ errorMessage }}</div>
           <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
         </div>
       </div>
@@ -79,11 +79,11 @@
         <div class="flex items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <div class="flex items-center gap-2.5">
             <span class="text-[15px] font-semibold text-[#1d1d1f]">AI 教学建议</span>
-            <span v-if="usingFallback" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(255,149,0,0.1)] text-[#ff9500]">本地兜底</span>
+            <span v-if="usingFallback" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">本地兜底</span>
           </div>
           <UiButton
             v-if="aiContent && !loading"
-            class="ml-auto inline-flex items-center gap-1.5 h-[30px] px-3 rounded-[8px] border border-[#007aff]/20 text-[#007aff] text-[13px] font-medium transition-all hover:bg-[#007aff]/5 active:scale-[0.97]"
+            class="ml-auto inline-flex items-center gap-1.5 h-[30px] px-3 rounded-[8px] border border-[var(--app-primary)]/20 text-[var(--app-primary)] text-[13px] font-medium transition-all hover:bg-[var(--app-primary)]/5 active:scale-[0.97]"
             @click="copyResult"
           >
             复制结果
@@ -92,7 +92,7 @@
 
         <div class="flex flex-col gap-4 py-2.5">
           <div class="flex items-center gap-2.5">
-            <div class="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] flex items-center justify-center text-white text-[13px] font-bold shrink-0">AI</div>
+            <div class="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[var(--app-primary)] to-[#5856d6] flex items-center justify-center text-white text-[13px] font-bold shrink-0">AI</div>
             <div class="flex flex-col gap-1">
               <span class="font-bold text-[14px] text-[#1d1d1f]">教学分析助手</span>
               <span class="text-[12px] text-[#86868b]">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>

@@ -4,7 +4,7 @@
 
     <div v-if="!selectedSpace" class="space-list-view">
       <div class="mb-5">
-        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="showCreateDialog">
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-2" @click="showCreateDialog">
           <Plus class="w-4 h-4" />
           创建课程空间
         </UiButton>
@@ -138,14 +138,14 @@
           </div>
 
           <div v-if="pendingFiles.length > 0" class="mt-3 flex justify-end gap-2 items-center">
-            <UiSelect v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm w-[160px]">
+            <UiSelect v-model="uploadDocType" class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm w-[160px]">
               <UiOption value="textbook">教材</UiOption>
               <UiOption value="lecture">讲义</UiOption>
               <UiOption value="reference">参考书</UiOption>
               <UiOption value="exercise">习题集</UiOption>
               <UiOption value="other">其他</UiOption>
             </UiSelect>
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="uploading" @click="uploadFiles">
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="uploading" @click="uploadFiles">
               {{ uploading ? '上传中...' : `上传 ${pendingFiles.length} 个文件` }}
             </UiButton>
           </div>
@@ -177,8 +177,8 @@
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">文档处理结果</span>
             <div class="flex items-center gap-2">
-              <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docsLoading" @click="loadDocuments">刷新</UiButton>
-              <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</UiButton>
+              <UiButton class="text-sm text-[var(--app-primary)] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docsLoading" @click="loadDocuments">刷新</UiButton>
+              <UiButton class="text-sm text-[var(--app-primary)] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docActionLoading" @click="rebuildBm25IndexAction">重建 BM25</UiButton>
               <UiButton class="h-[32px] px-3 rounded-[8px] text-xs font-medium text-[#f59e0b] bg-[#fffbeb] border border-[#fde68a] hover:bg-[#fef3c7] active:scale-[0.96] transition-all cursor-pointer" :disabled="docActionLoading" @click="reprocessAllDocuments">
                 全部重处理
               </UiButton>
@@ -219,7 +219,7 @@
               </ui-table-column>
               <ui-table-column label="操作" width="150">
                 <template #default="{ row }">
-                    <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id || docDeleteLoadingId === row.id" @click="reprocessDocument(row)">
+                    <UiButton class="text-sm text-[var(--app-primary)] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id || docDeleteLoadingId === row.id" @click="reprocessDocument(row)">
                       {{ docRowLoadingId === row.id ? '处理中...' : '重处理' }}
                     </UiButton>
                     <UiButton class="ml-2 text-sm text-[#d93025] hover:text-[#b42318] bg-transparent border-none cursor-pointer" :disabled="docRowLoadingId === row.id || docDeleteLoadingId === row.id" @click="confirmDeleteDocument(row)">
@@ -246,12 +246,12 @@
             </div>
 
               <div v-for="(msg, idx) in chatMessages" :key="idx" class="mb-3 flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
-              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm leading-[1.7]" :class="msg.role === 'user' ? 'bg-gradient-to-b from-[#3898ff] to-[#007aff] text-white' : 'bg-white border border-black/[0.06] text-[#1d1d1f]'">
+              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm leading-[1.7]" :class="msg.role === 'user' ? 'bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] text-white' : 'bg-white border border-black/[0.06] text-[#1d1d1f]'">
                 <div v-if="msg.role === 'user'">{{ msg.content }}</div>
                 <div v-else v-html="renderMarkdown(msg.content)"></div>
                 <div v-if="msg.citations && msg.citations.length" class="mt-2 pt-2 border-t border-black/[0.06]">
                   <span class="text-xs text-[#6b7280] mr-1">引用来源：</span>
-                  <span v-for="citation in msg.citations" :key="citation.index" class="inline-block text-xs bg-[#f0f5ff] text-[#007aff] px-1.5 py-0.5 rounded m-0.5">
+                  <span v-for="citation in msg.citations" :key="citation.index" class="inline-block text-xs bg-[#f0f5ff] text-[var(--app-primary)] px-1.5 py-0.5 rounded m-0.5">
                     [{{ citation.index }}] {{ citation.docName }} {{ citation.chapterPath }}
                   </span>
                 </div>
@@ -272,9 +272,9 @@
               placeholder="输入问题，例如：什么是二叉搜索树？"
               :disabled="chatLoading"
               @keydown.enter.ctrl="sendChat"
-              class="flex-1 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"
+              class="flex-1 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-none"
             ></textarea>
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
               {{ chatLoading ? '发送中...' : '发送' }}
             </UiButton>
             </div>
@@ -286,7 +286,7 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">知识分块（{{ chunks.length }}）</span>
-            <UiButton class="text-sm text-[#007aff] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="chunksLoading" @click="loadChunksAndAnnotations">刷新</UiButton>
+            <UiButton class="text-sm text-[var(--app-primary)] hover:text-[#005ec4] bg-transparent border-none cursor-pointer" :disabled="chunksLoading" @click="loadChunksAndAnnotations">刷新</UiButton>
           </div>
 
           <div v-if="chunks.length === 0 && !chunksLoading" class="flex flex-col items-center justify-center py-12 text-[#6e6e73]">
@@ -319,23 +319,23 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称 <span class="text-[#ef4444]">*</span></label>
-          <UiInput v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.name" placeholder="例如：数据结构 2025 春" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学期</label>
-          <UiInput v-model="spaceForm.term" placeholder="例如：2024-2025-2" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.term" placeholder="例如：2024-2025-2" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名</label>
-          <UiInput v-model="spaceForm.courseName" placeholder="例如：数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="spaceForm.courseName" placeholder="例如：数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
-          <textarea v-model="spaceForm.description" rows="2" class="w-full px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+          <textarea v-model="spaceForm.description" rows="2" class="w-full px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-none"></textarea>
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">可见范围</label>
-          <UiSelect v-model="spaceForm.docVisibility" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+          <UiSelect v-model="spaceForm.docVisibility" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
             <UiOption value="public">公开</UiOption>
             <UiOption value="class">班级可见</UiOption>
             <UiOption value="private">仅教师</UiOption>
@@ -343,31 +343,31 @@
         </div>
         <div v-if="spaceForm.docVisibility === 'class'">
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">绑定班级</label>
-          <UiSelect v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+          <UiSelect v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
             <UiOption v-for="cls in teacherClasses" :key="cls.id" :value="cls.id">{{ cls.name }}{{ cls.courseName ? ' / ' + cls.courseName : '' }}</UiOption>
           </UiSelect>
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">默认模式</label>
-          <UiSelect v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm">
+          <UiSelect v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
             <UiOption value="strict">Strict</UiOption>
             <UiOption value="open">Open</UiOption>
           </UiSelect>
         </div>
         <div class="flex items-center gap-6">
           <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
-            <UiInput type="checkbox" v-model="spaceForm.allowWebSearch" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="spaceForm.allowWebSearch" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
             允许联网
           </label>
           <label class="flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer">
-            <UiInput type="checkbox" v-model="spaceForm.requireCitation" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="spaceForm.requireCitation" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
             要求引用
           </label>
         </div>
       </div>
       <template #footer>
         <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="dialogVisible = false">取消</UiButton>
-        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!spaceForm.name || saving" @click="saveSpace">{{ saving ? '保存中...' : '保存' }}</UiButton>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!spaceForm.name || saving" @click="saveSpace">{{ saving ? '保存中...' : '保存' }}</UiButton>
       </template>
     </AppModal>
   </div>
@@ -556,7 +556,7 @@ function setActiveTab(tabName) {
 
 function renderMarkdown(text) {
   const html = renderSafeMarkdown(text)
-  return sanitizeHtml(html.replace(/\[(\d+)\]/g, '<sup class="text-[#007aff] cursor-pointer">[$1]</sup>'))
+  return sanitizeHtml(html.replace(/\[(\d+)\]/g, '<sup class="text-[#c2703e] cursor-pointer">[$1]</sup>'))
 }
 
 async function loadSpaces() {
@@ -1081,7 +1081,7 @@ onUnmounted(() => {
   bottom: 4px;
   left: 4px;
   width: calc((100% - 8px) / 3);
-  border: 1px solid rgba(0, 122, 255, 0.16);
+  border: 1px solid rgba(194, 112, 62, 0.16);
   border-radius: 11px;
   background: #ffffff;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
@@ -1115,7 +1115,7 @@ onUnmounted(() => {
 }
 
 .detail-tab-button--active {
-  color: #007aff;
+  color: var(--app-primary);
 }
 
 .detail-tab-label {
@@ -1129,8 +1129,8 @@ onUnmounted(() => {
   height: 5px;
   flex: 0 0 auto;
   border-radius: 999px;
-  background: #007aff;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+  background: var(--app-primary);
+  box-shadow: 0 0 0 4px rgba(194, 112, 62, 0.12);
   animation: tab-dot-pop 220ms ease-out;
 }
 

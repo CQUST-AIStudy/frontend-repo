@@ -106,8 +106,8 @@
       <div v-else class="report-preview [padding:20px] [background:#fff]">
         <div class="report-container [max-width:1024px] [margin:0_auto] [padding:20px] [background:#fff]">
           <div class="report-title [text-align:center] [margin-bottom:24px]">
-            <div class="university-name [font-family:'STHeiti',_'SimHei',_sans-serif] [font-size:30px] [font-weight:700] [color:#111827]">重庆科技大学</div>
-            <div class="report-type [font-family:'STHeiti',_'SimHei',_sans-serif] [font-size:30px] [font-weight:700] [color:#111827] [margin-top:8px]">上机实验报告</div>
+            <div class="university-name [font-family:var(--font-page)] [font-size:30px] [font-weight:700] [color:#111827]">重庆科技大学</div>
+            <div class="report-type [font-family:var(--font-page)] [font-size:30px] [font-weight:700] [color:#111827] [margin-top:8px]">上机实验报告</div>
           </div>
 
           <div v-if="hasTeacherReview" class="teacher-review-banner [margin-bottom:18px] [padding:18px_20px] [border:2px_solid_#f3b8b8] [border-radius:14px] [background:linear-gradient(180deg,_#fff7f7,_#fff1f1)]">
@@ -129,64 +129,64 @@
           <UiTable class="info-table [width:100%] [border-collapse:collapse] [border:2px_solid_#111827]">
             <tbody>
               <tr>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">课程名称</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ experimentData.courseName || '课程待补充' }}</td>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">实验项目</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ experimentData.experimentName || '实验待补充' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">课程名称</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.courseName || '课程待补充' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">实验项目</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.experimentName || '实验待补充' }}</td>
               </tr>
               <tr>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">机房名称</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ experimentData.labName || '实验机房' }}</td>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">上机时间</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ experimentData.labTime || currentDate }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">机房名称</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.labName || '实验机房' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">上机时间</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.labTime || currentDate }}</td>
               </tr>
               <tr>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">指导教师</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ experimentData.teacherName || '指导教师' }}</td>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">上机成绩</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]" colspan="2">{{ displayScore }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">指导教师</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.teacherName || '指导教师' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">上机成绩</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ displayScore }}</td>
               </tr>
               <tr>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">学生姓名</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]">{{ experimentData.studentName || '未命名学生' }}</td>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">学号</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]">{{ experimentData.studentId || '-' }}</td>
-                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif] [width:12%]">专业班级</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:'SimSun',_serif]">{{ experimentData.className || '-' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">学生姓名</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]">{{ experimentData.studentName || '未命名学生' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">学号</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]">{{ experimentData.studentId || '-' }}</td>
+                <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">专业班级</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]">{{ experimentData.className || '-' }}</td>
               </tr>
             </tbody>
           </UiTable>
 
           <div class="report-content-sections [width:100%]">
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">一、实验目的和要求</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">一、实验目的和要求</div>
               <div class="section-content white-space-pre [font-size:15px] [line-height:1.8] [color:#111827] [white-space:pre-line] [color:#5f6368]">{{ experimentData.purpose || '待补充。' }}</div>
             </section>
 
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">二、实验环境</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">二、实验环境</div>
               <div class="section-content white-space-pre [font-size:15px] [line-height:1.8] [color:#111827] [white-space:pre-line] [color:#5f6368]">{{ experimentData.requirements || '待补充。' }}</div>
             </section>
 
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">三、实验内容</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">三、实验内容</div>
               <div class="section-content white-space-pre [font-size:15px] [line-height:1.8] [color:#111827] [white-space:pre-line] [color:#5f6368]">{{ experimentData.tasks || '待补充。' }}</div>
             </section>
 
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">四、实验步骤与关键代码</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">四、实验步骤与关键代码</div>
               <div class="section-content markdown-shell [font-size:15px] [line-height:1.8] [color:#111827] [background:#fafafa] [border-radius:8px] [color:#5f6368]">
                 <div v-html="processContent(experimentData.steps || '')" class="markdown-content [padding:10px] [line-height:1.6]"></div>
               </div>
             </section>
 
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">五、实验结果与问题分析</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">五、实验结果与问题分析</div>
               <div class="section-content white-space-pre [font-size:15px] [line-height:1.8] [color:#111827] [white-space:pre-line] [color:#5f6368]">{{ experimentData.results || '待补充。' }}</div>
             </section>
 
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">六、实验总结</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">六、实验总结</div>
               <div class="section-content white-space-pre [font-size:15px] [line-height:1.8] [color:#111827] [white-space:pre-line] [color:#5f6368]">{{ experimentData.summary || '待补充。' }}</div>
             </section>
           </div>

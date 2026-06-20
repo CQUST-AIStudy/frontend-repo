@@ -110,7 +110,7 @@
         </div>
       </div>
 
-      <div v-if="renderedFeedback" class="ai-feedback [border-left:4px_solid_#007aff] [background:#f8fafc] [border-radius:12px] [padding:16px] [line-height:1.7]" v-html="renderedFeedback"></div>
+      <div v-if="renderedFeedback" class="ai-feedback [border-left:4px_solid_var(--app-primary)] [background:#f8fafc] [border-radius:12px] [padding:16px] [line-height:1.7]" v-html="renderedFeedback"></div>
     </ui-card>
   </div>
 </template>

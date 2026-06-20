@@ -2,18 +2,18 @@
   <div class="flex flex-col gap-[18px] max-[640px]:gap-3.5">
     <UiPageHeader title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
       <UiButton @click="goToClasses" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f] bg-white/80 border border-black/[0.1] backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] cursor-pointer">教学班管理</UiButton>
-      <UiButton @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25),0_1px_3px_rgba(0,122,255,0.15)] transition-all duration-200 hover:from-[#4da6ff] hover:to-[#0066d6] hover:shadow-[0_4px_16px_rgba(0,122,255,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</UiButton>
+      <UiButton @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25),0_1px_3px_rgba(194,112,62,0.15)] transition-all duration-200 hover:from-[#c2703e] hover:to-[#a85c30] hover:shadow-[0_4px_16px_rgba(194,112,62,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</UiButton>
     </UiPageHeader>
 
     <!-- Hero Strip -->
     <div class="grid grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-4 max-[1100px]:grid-cols-1">
-      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] bg-gradient-to-br from-[#007aff] to-[#5856d6] shadow-[0_8px_24px_rgba(0,122,255,0.2),0_2px_8px_rgba(0,122,255,0.1)] text-white max-[640px]:rounded-2xl max-[640px]:p-[18px]">
-        <div class="text-[12px] font-bold uppercase text-white/70">当前教学班</div>
-        <div class="max-w-[620px] mt-3.5 text-[28px] leading-[1.16] font-extrabold text-shadow-[0_1px_2px_rgba(0,0,0,0.22)] max-[640px]:text-2xl">{{ classLabel }} 的实验、知识库和批改工作台</div>
+      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="text-[12px] font-bold uppercase text-[#6e6e73]">当前教学班</div>
+        <div class="max-w-[620px] mt-3.5 text-[28px] leading-[1.16] font-extrabold text-[#1d1d1f] max-[640px]:text-2xl">{{ classLabel }} 的实验、知识库和批改工作台</div>
         <div class="flex flex-wrap gap-2.5 mt-[18px]">
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">实验 {{ stats.experimentCount }}</span>
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">待处理 {{ stats.pendingSubmissions }}</span>
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">班级 {{ stats.classCount }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">实验 {{ stats.experimentCount }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">待处理 {{ stats.pendingSubmissions }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">班级 {{ stats.classCount }}</span>
         </div>
       </div>
 
@@ -47,7 +47,7 @@
             <div class="text-[18px] font-bold text-[#1d1d1f]">近期发布实验</div>
             <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">优先关注仍在进行中的实验与即将截止的任务。</div>
           </div>
-          <a @click="goToExperiments" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
+          <a @click="goToExperiments" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl">
           <UiTable class="w-full text-left text-[13px]">
@@ -60,11 +60,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in recentExperiments" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <tr v-for="row in recentExperiments" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
                 <td class="py-3 px-3 text-[#1d1d1f]">{{ row.name }}</td>
                 <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
                 <td class="py-3 px-3"><span class="inline-flex items-center h-7 px-2.5 rounded-full text-[12px] font-bold" :class="statusClass(row.status)">{{ getExpStatusText(row.status) }}</span></td>
-                <td class="py-3 px-3"><a @click="goToExperimentDetail(row.id)" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3]">详情</a></td>
+                <td class="py-3 px-3"><a @click="goToExperimentDetail(row.id)" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)]">详情</a></td>
               </tr>
               <tr v-if="!recentExperiments.length">
                 <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无实验数据</td>
@@ -81,7 +81,7 @@
             <div class="text-[18px] font-bold text-[#1d1d1f]">最新学生提交</div>
             <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">用于快速定位刚进入批改队列的学生作业。</div>
           </div>
-          <a @click="goToSubmissions" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看全部</a>
+          <a @click="goToSubmissions" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl mt-4">
           <UiTable class="w-full text-left text-[13px]">
@@ -94,7 +94,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in recentSubmissions" :key="row.id || row.submitTime" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+              <tr v-for="row in recentSubmissions" :key="row.id || row.submitTime" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
                 <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.studentName }}</td>
                 <td class="py-3 px-3 text-[#6e6e73]">{{ row.experimentId }}</td>
                 <td class="py-3 px-3 text-[#6e6e73]">{{ row.submitTime }}</td>
@@ -116,7 +116,7 @@
           <div class="text-[18px] font-bold text-[#1d1d1f]">实验完成率排行</div>
           <div class="mt-1.5 text-[13px] text-[#6e6e73] leading-relaxed">按实验维度估算班级完成情况，帮助你识别推进节奏较慢的内容。</div>
         </div>
-        <a @click="goToClasses" class="text-[13px] font-semibold text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors">查看教学班</a>
+        <a @click="goToClasses" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看教学班</a>
       </div>
       <div ref="classChartRef" class="h-[340px] w-full min-w-0 max-[640px]:h-[280px]"></div>
     </div>
@@ -172,21 +172,21 @@ const statCards = computed(() => [
     label: '实验总数',
     value: stats.experimentCount,
     hint: '当前已创建实验',
-    iconClass: '[background:rgba(0,_122,_255,_0.1)] [color:#007aff]',
+    iconClass: '[background:rgba(194,_112,_62,_0.1)] [color:#c2703e]',
     icon: markRaw(Document)
   },
   {
     label: '进行中实验',
     value: stats.activeExperiments,
     hint: '需要关注课堂节奏',
-    iconClass: '[background:rgba(52,_199,_89,_0.1)] [color:#34c759]',
+    iconClass: '[background:rgba(107,_143,_107,_0.1)] [color:#6b8f6b]',
     icon: markRaw(DocumentChecked)
   },
   {
     label: '待处理提交',
     value: stats.pendingSubmissions,
     hint: '建议优先进入批改中心',
-    iconClass: '[background:rgba(255,_149,_0,_0.1)] [color:#ff9500]',
+    iconClass: '[background:rgba(196,_154,_60,_0.1)] [color:#c49a3c]',
     icon: markRaw(Timer)
   },
   {
@@ -352,13 +352,13 @@ function getSubStatusText(status) {
 
 function statusClass(status) {
   const map = {
-    active: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    graded: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
+    active: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    graded: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
     draft: 'bg-black/5 text-[#6e6e73]',
     not_started: 'bg-black/5 text-[#6e6e73]',
-    expired: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
-    rejected: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
-    submitted: 'bg-[rgba(255,149,0,0.12)] text-[#ff9500]'
+    expired: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
+    rejected: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
+    submitted: 'bg-[rgba(196,154,60,0.12)] text-[#c49a3c]'
   }
   return map[status] || 'bg-black/5 text-[#6e6e73]'
 }

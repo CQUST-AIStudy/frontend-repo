@@ -217,22 +217,6 @@
                   <div class="ai-content markdown-content [display:flex] [flex-direction:column] [gap:18px] [padding:10px_0] [padding:10px] [line-height:1.6]" v-html="renderMarkdown(selectedExperiment.aiComment)"></div>
                 </div>
 
-                <div class="report-actions [display:flex] [gap:10px] [margin-top:25px]">
-<!--                  <ui-button type="primary" :loading="experimentStore.generatingReport"-->
-<!--                             :disabled="experimentStore.generatingReport" @click="generateReport">-->
-<!--                    <ui-icon>-->
-<!--                      <Magic />-->
-<!--                    </ui-icon>-->
-<!--                    {{ selectedExperiment.report ? '重新生成报告' : '生成AI报告' }}-->
-<!--                  </ui-button>-->
-
-<!--                  <ui-button type="success" @click="viewReport" v-if="selectedExperiment.report">-->
-<!--                    <ui-icon>-->
-<!--                      <View />-->
-<!--                    </ui-icon>-->
-<!--                    查看报告-->
-<!--                  </ui-button>-->
-                </div>
               </div>
             </loading-state>
           </ui-card>

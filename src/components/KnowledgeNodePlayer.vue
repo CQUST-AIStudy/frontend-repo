@@ -10,7 +10,7 @@ import ControlFlowScene from './knowledge-scenes/ControlFlowScene.vue'
 import VariablesScene from './knowledge-scenes/VariablesScene.vue'
 import ConceptScene from './knowledge-scenes/ConceptScene.vue'
 import { resolveSceneType, getSceneDuration } from './knowledge-scenes/sceneResolver'
-import { KNOWLEDGE_STATUS } from '@/views/student/knowledgeGraphData'
+import { KNOWLEDGE_STATUS } from '@/views/student/knowledgeLearningData'
 
 const props = defineProps({
   node: { type: Object, default: null }

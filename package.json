@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "preinstall": "node scripts/ensure-npm.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "api:local": "node scripts/switch-api.js local",
     "api:server": "node scripts/switch-api.js server",
-    "api:status": "node scripts/switch-api.js status"
+    "api:status": "node scripts/switch-api.js status",
+    "seed:neo4j": "node scripts/seed-neo4j.mjs"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
@@ -33,8 +35,10 @@
     "lucide-vue-next": "^0.577.0",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.8",
+    "neo4j-driver": "^6.1.0",
     "pinia": "^2.1.4",
     "pinia-plugin-persistedstate": "^3.2.3",
+    "three": "^0.184.0",
     "vue": "^3.3.4",
     "vue-codemirror": "^6.1.1",
     "vue-router": "^4.2.2"

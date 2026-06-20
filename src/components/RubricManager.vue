@@ -19,7 +19,7 @@
             <span v-else>模板生成</span>
           </UiButton>
           <UiButton @click="showCreate"
-            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
+            class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[#c2703e] shadow-[0_2px_8px_rgba(194, 112, 62, 0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">
             + 新建标准
           </UiButton>
         </div>
@@ -27,7 +27,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <svg class="w-6 h-6 animate-spin text-[#007aff]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="12" stroke-linecap="round"/></svg>
+        <svg class="w-6 h-6 animate-spin text-[#c2703e]" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="50" stroke-dashoffset="12" stroke-linecap="round"/></svg>
       </div>
 
       <!-- Empty State -->
@@ -47,7 +47,7 @@
           <UiTableColumn prop="createdAt" label="创建时间" width="180" />
           <UiTableColumn label="操作" width="120">
             <template #default="{ row }">
-              <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#007aff] hover:text-[#0056b3] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
+              <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#c2703e] hover:text-[#a85c30] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
             </template>
           </UiTableColumn>
         </UiTable>
@@ -59,20 +59,20 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">名称</label>
-          <UiInput v-model="form.name" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="form.name" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学科</label>
-          <UiInput v-model="form.subject" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          <UiInput v-model="form.subject" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">描述</label>
-          <textarea v-model="form.description" rows="2" class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+          <textarea v-model="form.description" rows="2" class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm resize-none"></textarea>
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">自定义提示</label>
           <textarea v-model="form.customPrompt" rows="3" placeholder="输入自定义评分提示词，AI 评分时会参考此内容（如：重点关注代码注释质量、要求实验数据真实等）"
-            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm resize-none"></textarea>
+            class="w-full px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm resize-none"></textarea>
           <p class="text-xs text-[#aeaeb2] mt-1">此提示词将作为 AI 评分的额外指导，影响所有维度的评分</p>
         </div>
       </div>
@@ -81,21 +81,21 @@
         <h4 class="text-[15px] font-medium text-[#1d1d1f]">评分维度</h4>
         <span :class="[
           'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-          weightSum === 100 ? 'bg-[rgba(52,199,89,0.1)] text-[#34c759]' : 'bg-[rgba(255,59,48,0.08)] text-[#ff3b30]'
+          weightSum === 100 ? 'bg-[rgba(107,143,107,0.1)] text-[#6b8f6b]' : 'bg-[rgba(196,75,63,0.08)] text-[#c44b3f]'
         ]">权重合计: {{ weightSum }}%</span>
       </div>
 
       <div v-for="(dim, i) in form.dimensions" :key="i" class="flex gap-2 mb-2 items-center">
         <UiInput v-model="dim.name" placeholder="维度名称"
-          class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         <UiInput v-model="dim.description" placeholder="描述"
-          class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         <UiInput v-model.number="dim.maxScore" type="number" min="1" max="100" placeholder="满分"
-          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         <UiInput v-model.number="dim.weight" type="number" min="1" max="100" placeholder="权重%"
-          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm" />
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
         <UiButton @click="form.dimensions.splice(i, 1)"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] hover:bg-[rgba(255,59,48,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</UiButton>
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</UiButton>
       </div>
       <UiButton @click="addDimension"
         class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</UiButton>
@@ -104,7 +104,7 @@
         <UiButton @click="dialogVisible = false"
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">取消</UiButton>
         <UiButton @click="saveRubric" :disabled="weightSum !== 100 || saving"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[#c2703e] shadow-[0_2px_8px_rgba(194, 112, 62, 0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
           <span v-if="saving" class="inline-flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round"/></svg>
             保存中...
@@ -122,6 +122,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { getRubrics, normalizeRubricList, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
+import logger from '@/utils/logger'
 import AppModal from './AppModal.vue'
 
 const props = defineProps({
@@ -154,7 +155,7 @@ async function loadRubrics() {
     const res = await getRubrics()
     rubrics.value = normalizeRubricList(res)
   } catch (e) {
-    console.error('[RubricManager] loadRubrics error:', e)
+    logger.error('[RubricManager] loadRubrics error:', e)
     uiMessage.error(e.message)
   }
   loading.value = false

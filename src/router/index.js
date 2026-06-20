@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { clearAuthStorage, getSessionToken, getUserInfo } from '../constants/auth'
 
+// 演示模式：设为 true 时跳过班级选择强制跳转，与 store/index.js 保持一致
+// const DEMO_MODE = false
+const DEMO_MODE = true
+
 const routes = [
   {
     path: '/',
@@ -83,15 +87,20 @@ const routes = [
         name: 'LeetCodeDemo',
         component: () => import('../views/student/LeetCodeDemo.vue')
       },
+      // {
+      //   path: 'ability-profile',
+      //   name: 'AbilityProfile',
+      //   component: () => import('../views/student/AbilityProfile.vue')
+      // },
       {
-        path: 'ability-profile',
-        name: 'AbilityProfile',
-        component: () => import('../views/student/AbilityProfile.vue')
+        path: 'knowledge-learning',
+        name: 'KnowledgeLearning',
+        component: () => import('../views/student/KnowledgeGraph.vue')
       },
       {
         path: 'knowledge-graph',
         name: 'KnowledgeGraph',
-        component: () => import('../views/student/KnowledgeGraph.vue')
+        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       },
       {
         path: 'profile',
@@ -281,6 +290,11 @@ const routes = [
         path: 'leetcode-bank',
         name: 'LeetCodeBank',
         component: () => import('../views/teacher/LeetCodeBank.vue')
+      },
+      {
+        path: 'knowledge-graph',
+        name: 'TeacherKnowledgeGraph',
+        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       }
     ]
   },
@@ -330,6 +344,11 @@ const routes = [
         path: 'profile',
         name: 'AdminProfile',
         component: () => import('../views/admin/Profile.vue')
+      },
+      {
+        path: 'knowledge-graph',
+        name: 'AdminKnowledgeGraph',
+        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       }
     ]
   }
@@ -341,7 +360,7 @@ const router = createRouter({
 })
 
 const TEACHER_CLASS_SELECTOR_PATH = '/teacher/select-class'
-const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'])
+const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank', '/teacher/knowledge-graph'])
 
 function getPersistedSelectedClass() {
   try {
@@ -404,7 +423,7 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (userRole === 'teacher' && to.path.startsWith('/teacher/') && to.path !== TEACHER_CLASS_SELECTOR_PATH) {
+  if (!DEMO_MODE && userRole === 'teacher' && to.path.startsWith('/teacher/') && to.path !== TEACHER_CLASS_SELECTOR_PATH) {
     const selectedClass = getPersistedSelectedClass()
     if (!selectedClass && !teacherRoutesWithoutSelectedClass.has(to.path)) {
       next(TEACHER_CLASS_SELECTOR_PATH)

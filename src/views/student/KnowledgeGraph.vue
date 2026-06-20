@@ -17,7 +17,7 @@ import {
   knowledgeGraphNodes,
   learningPaths,
   practiceRecommendations
-} from './knowledgeGraphData'
+} from './knowledgeLearningData'
 
 const router = useRouter()
 
@@ -61,7 +61,7 @@ function handlePlayDemo(node) {
 }
 
 function openPractice(target = {}) {
-  const knowledge = target.knowledge || target.label || target.name || activeNode.value?.label || activeNode.value?.name || '知识图谱'
+  const knowledge = target.knowledge || target.label || target.name || activeNode.value?.label || activeNode.value?.name || '知识学习'
   router.push({
     path: '/student/practice',
     query: { knowledge }
@@ -73,14 +73,14 @@ function openPractice(target = {}) {
   <div class="knowledge-graph-page">
     <div class="page-toolbar">
       <div class="page-copy">
-        <h1 class="page-title">知识图谱</h1>
-        <p class="page-desc">基于你的 PTA 学习数据，智能推荐知识点学习路径，帮助你查漏补缺</p>
+        <h1 class="page-title">知识学习</h1>
+        <p class="page-desc">保留原有 C 语言知识点动画、学习路径和练习推荐，帮助你查漏补缺</p>
       </div>
 
       <div class="page-actions">
         <ui-button plain @click="infoVisible = true">
           <LucideIcon name="book-open" :size="16" />
-          图谱说明
+          学习说明
         </ui-button>
         <label class="source-control">
           <span>数据来源：</span>
@@ -102,14 +102,14 @@ function openPractice(target = {}) {
 
     <ui-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
 
-    <ui-empty v-else-if="!hasGraphData" description="暂无知识图谱数据" class="page-empty" />
+    <ui-empty v-else-if="!hasGraphData" description="暂无知识学习数据" class="page-empty" />
 
     <template v-else>
       <section class="graph-board">
         <div class="graph-main">
           <div class="board-header">
             <div>
-              <h2 class="board-title">C语言程序设计 知识图谱</h2>
+              <h2 class="board-title">C语言程序设计 知识学习</h2>
               <p class="board-desc">点击具体知识点播放演示动画，悬停节点查看状态，滚轮缩放，拖拽画布查看全貌</p>
             </div>
             <div class="legend-list" aria-label="图谱图例">
@@ -149,9 +149,9 @@ function openPractice(target = {}) {
       />
     </template>
 
-    <ui-dialog v-model="infoVisible" title="知识图谱说明" width="560px">
+    <ui-dialog v-model="infoVisible" title="知识学习说明" width="560px">
       <div class="info-content">
-        <p>本页首版使用静态演示数据呈现 C 语言程序设计知识图谱，后续可接入 PTA、能力画像与推荐服务数据。</p>
+        <p>本页保留原有静态演示数据，用于呈现 C 语言程序设计知识点动画、学习路径和练习建议。</p>
         <div class="info-legend">
           <div v-for="item in statusLegend" :key="`dialog-${item.status}`" class="info-legend-item">
             <span class="legend-dot" :style="{ backgroundColor: item.color }"></span>
@@ -161,7 +161,7 @@ function openPractice(target = {}) {
             </div>
           </div>
         </div>
-        <p>图谱中心为课程核心，四个一级模块向外展开到具体知识点。悬停节点后，右侧路径面板和下方练习表会优先展示关联内容；点击具体知识点可打开演示动画弹窗。</p>
+        <p>中心为课程核心，四个一级模块向外展开到具体知识点。悬停节点后，右侧路径面板和下方练习表会优先展示关联内容；点击具体知识点可打开演示动画弹窗。</p>
       </div>
     </ui-dialog>
 

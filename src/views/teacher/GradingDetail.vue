@@ -51,7 +51,7 @@
       <UiButton
         :disabled="annotating || submissions.length === 0"
         @click="doBatchAnnotate"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff3b30] bg-[rgba(255,59,48,0.08)] border border-[rgba(255,59,48,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] border border-[rgba(196,75,63,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span v-if="annotating" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
         生成红笔批改报告
@@ -59,14 +59,14 @@
       <UiButton
         :disabled="exportingAnnotated || submissions.length === 0"
         @click="doBatchExportAnnotated"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#ff9500] bg-[rgba(255,149,0,0.08)] border border-[rgba(255,149,0,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#c49a3c] bg-[rgba(196,154,60,0.08)] border border-[rgba(196,154,60,0.2)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span v-if="exportingAnnotated" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
         导出 AI 批改报告 ZIP
       </UiButton>
       <UiButton
         @click="showExportDialog"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
       >
         导出 Excel
       </UiButton>
@@ -209,7 +209,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in filteredSubs" :key="row.submissionId" class="border-b border-black/[0.04] hover:bg-[rgba(0,122,255,0.03)] transition-colors">
+              <tr v-for="row in filteredSubs" :key="row.submissionId" class="border-b border-black/[0.04] hover:bg-[rgba(194,112,62,0.03)] transition-colors">
                 <td class="py-3 px-3 text-[#6e6e73]">{{ row.submissionId }}</td>
                 <td class="py-3 px-3 font-medium text-[#1d1d1f] max-w-[160px] truncate">{{ row.studentName }}</td>
                 <td class="py-3 px-3 text-[#6e6e73] max-w-[140px] truncate">{{ row.className }}</td>
@@ -223,7 +223,7 @@
                 </td>
                 <td class="py-3 px-3 text-[#6e6e73] max-w-[220px] truncate" :title="row.originalFilename">{{ row.originalFilename }}</td>
                 <td class="py-3 px-3">
-                  <span v-if="row.hasDownloadableReport" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(52,199,89,0.12)] text-[#34c759]">
+                  <span v-if="row.hasDownloadableReport" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">
                     {{ reportTypeLabel(row.preferredReportFileType) }}
                   </span>
                   <span v-else class="text-[#aeaeb2]">未生成</span>
@@ -233,19 +233,19 @@
                   <span v-else class="text-[#aeaeb2]">暂无</span>
                 </td>
                 <td class="py-3 px-3 whitespace-nowrap">
-                  <UiButton v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#34c759] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
+                  <UiButton v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#6b8f6b] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
                     下载报告
                   </UiButton>
                   <UiButton
                     v-if="row.status === 'FAILED'"
                     :disabled="retryingSubmissionId === row.submissionId"
                     @click="retrySubmission(row)"
-                    class="text-[13px] font-medium text-[#ff9500] cursor-pointer hover:text-[#e08600] transition-colors bg-transparent border-none mr-3"
+                    class="text-[13px] font-medium text-[#c49a3c] cursor-pointer hover:text-[#e08600] transition-colors bg-transparent border-none mr-3"
                   >
                     <span v-if="retryingSubmissionId === row.submissionId" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1"></span>
                     重试
                   </UiButton>
-                  <UiButton @click="router.push(`/teacher/grading/submission/${row.submissionId}`)" class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors bg-transparent border-none">
+                  <UiButton @click="router.push(`/teacher/grading/submission/${row.submissionId}`)" class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors bg-transparent border-none">
                     查看详情
                   </UiButton>
                 </td>
@@ -262,7 +262,7 @@
         <div class="flex items-center gap-2">
           <span class="text-[14px] font-medium text-[#1d1d1f] w-[90px]">选择学生</span>
           <label class="flex items-center gap-1.5 cursor-pointer text-[13px] text-[#1d1d1f]">
-            <UiInput type="checkbox" v-model="exportSelectAll" @change="toggleSelectAll(exportSelectAll)" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" v-model="exportSelectAll" @change="toggleSelectAll(exportSelectAll)" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
             全选
           </label>
         </div>
@@ -272,7 +272,7 @@
             :key="sub.submissionId"
             class="flex items-center gap-2 py-1.5 cursor-pointer text-[13px] text-[#1d1d1f] hover:bg-black/[0.02] rounded px-1"
           >
-            <UiInput type="checkbox" :value="sub.submissionId" v-model="exportSelected" class="w-4 h-4 rounded accent-[#007aff]" />
+            <UiInput type="checkbox" :value="sub.submissionId" v-model="exportSelected" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
             <span>{{ sub.studentName || '未知学生' }}</span>
             <span class="text-[#aeaeb2]">{{ sub.className || '' }}</span>
             <span class="ml-2 text-[#6e6e73]">{{ sub.totalScore != null ? `${formatScore(sub.totalScore)}分` : '-' }}</span>
@@ -283,7 +283,7 @@
           <UiButton
             @click="exportIncludeComments = !exportIncludeComments"
             class="relative w-[44px] h-[24px] rounded-full transition-colors cursor-pointer border-none"
-            :class="exportIncludeComments ? 'bg-[#34c759]' : 'bg-black/[0.12]'"
+            :class="exportIncludeComments ? 'bg-[#6b8f6b]' : 'bg-black/[0.12]'"
           >
             <span class="absolute top-[2px] w-[20px] h-[20px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.15)] transition-all" :class="exportIncludeComments ? 'left-[22px]' : 'left-[2px]'"></span>
           </UiButton>
@@ -296,7 +296,7 @@
         <UiButton
           :disabled="exporting || exportSelected.length === 0"
           @click="doExport"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="exporting" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
           导出
@@ -423,9 +423,9 @@ const primaryTeachingAdvice = computed(() => batchReview.value.teachingAdvice?.[
 
 function tagClass(type) {
   return {
-    success: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    warning: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
-    danger: 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]',
+    success: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    warning: 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]',
+    danger: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
     info: 'bg-black/5 text-[#6e6e73]',
   }[type] || 'bg-black/5 text-[#6e6e73]'
 }
@@ -455,9 +455,9 @@ function statusText(status) {
 function scoreClass(score) {
   if (score == null) return ''
   const num = Number(score)
-  if (num >= 80) return 'text-[#34c759]'
-  if (num >= 60) return 'text-[#ff9500]'
-  return 'text-[#ff3b30]'
+  if (num >= 80) return 'text-[#6b8f6b]'
+  if (num >= 60) return 'text-[#c49a3c]'
+  return 'text-[#c44b3f]'
 }
 
 function formatScore(score) {

@@ -1,7 +1,7 @@
 <template>
   <div class="min-w-0">
     <UiPageHeader title="我的教学分析" description="个人教学数据可视化分析">
-      <UiButton @click="refreshData" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">刷新数据</UiButton>
+      <UiButton @click="refreshData" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none">刷新数据</UiButton>
     </UiPageHeader>
 
     <div v-if="loading" class="space-y-4 py-6">
@@ -17,8 +17,8 @@
       <!-- 教学概览卡片 -->
       <div class="grid grid-cols-3 gap-5 max-[768px]:grid-cols-1">
         <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(0,122,255,0.08)] flex items-center justify-center">
-            <svg class="w-5 h-5 text-[#007aff]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(194,112,62,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[var(--app-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           </div>
           <div>
             <div class="text-[13px] text-[#6e6e73]">教授班级</div>
@@ -26,8 +26,8 @@
           </div>
         </div>
         <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(52,199,89,0.08)] flex items-center justify-center">
-            <svg class="w-5 h-5 text-[#34c759]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(107,143,107,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#6b8f6b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           </div>
           <div>
             <div class="text-[13px] text-[#6e6e73]">实验数量</div>
@@ -35,8 +35,8 @@
           </div>
         </div>
         <div class="flex items-center gap-4 p-5 rounded-[16px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(255,149,0,0.08)] flex items-center justify-center">
-            <svg class="w-5 h-5 text-[#ff9500]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <div class="w-[52px] h-[52px] rounded-full bg-[rgba(196,154,60,0.08)] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#c49a3c]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </div>
           <div>
             <div class="text-[13px] text-[#6e6e73]">学生提交</div>
@@ -81,7 +81,7 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-5 overflow-x-auto">
         <div class="flex items-center justify-between pb-4 mb-4 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">我的班级</span>
-          <UiButton @click="goToClassList" class="text-[13px] font-medium text-[#007aff] hover:text-[#0056b3] transition-colors cursor-pointer bg-transparent border-none">查看所有</UiButton>
+          <UiButton @click="goToClassList" class="text-[13px] font-medium text-[var(--app-primary)] hover:text-[var(--app-primary-strong)] transition-colors cursor-pointer bg-transparent border-none">查看所有</UiButton>
         </div>
         <UiTable class="w-full text-left text-[13px]" :aria-busy="loading">
           <thead>
@@ -94,13 +94,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in (teachingData.classes || [])" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(0,122,255,0.03)]">
+            <tr v-for="row in (teachingData.classes || [])" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3 text-[#6e6e73]">{{ row.id }}</td>
               <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
               <td class="py-3 px-3 text-[#6e6e73]">{{ row.grade }}</td>
               <td class="py-3 px-3 text-[#1d1d1f]">{{ row.studentCount }}</td>
               <td class="py-3 px-3">
-                <a class="text-[13px] font-medium text-[#007aff] cursor-pointer hover:text-[#0056b3] transition-colors" @click="viewClassAnalysis(row)">查看分析</a>
+                <a class="text-[13px] font-medium text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors" @click="viewClassAnalysis(row)">查看分析</a>
               </td>
             </tr>
             <tr v-if="!(teachingData.classes || []).length">

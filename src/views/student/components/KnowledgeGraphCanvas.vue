@@ -1,7 +1,7 @@
 <script setup>
 import * as echarts from 'echarts'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { KNOWLEDGE_STATUS } from '../knowledgeGraphData'
+import { KNOWLEDGE_STATUS } from '../knowledgeLearningData'
 
 const props = defineProps({
   nodes: {

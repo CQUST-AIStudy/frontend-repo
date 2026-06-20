@@ -19,7 +19,7 @@
               v-if="showClose"
               type="button"
               aria-label="关闭弹窗"
-              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#007aff]/15"
+              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#dbe5f0] bg-white text-[#64748b] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#b8c7d6] hover:bg-[#f8fafc] hover:text-[#1f2a3d] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c2703e]/15"
               @click="close"
             >
               <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">

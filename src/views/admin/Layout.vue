@@ -12,7 +12,7 @@
         <ui-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.ui-scrollbar__bar.is-vertical]:[width:4px] [&_.ui-scrollbar__bar.is-vertical]:[right:2px] [&_.ui-scrollbar__thumb]:[background:rgba(0,_0,_0,_0.1)] [&_.ui-scrollbar__thumb]:[border-radius:4px]">
           <ui-menu
             :default-active="activeMenu"
-            class="layout-menu [border-right:none] ![background:transparent] [--ui-menu-bg-color:transparent] [--ui-menu-text-color:#6e6e73] [--ui-menu-active-color:#007aff] [--ui-menu-hover-bg-color:rgba(0,_0,_0,_0.04)] [--ui-menu-hover-text-color:#1d1d1f] [padding:8px] [&_.ui-menu-item]:[border-radius:8px] [&_.ui-menu-item]:[margin:2px_0] [&_.ui-menu-item]:[height:40px] [&_.ui-menu-item]:[line-height:40px] [&_.ui-menu-item]:[font-size:13.5px] [&_.ui-menu-item]:[transition:all_0.2s] [&_.ui-menu-item.is-active]:![background:rgba(0,_122,_255,_0.1)] [&_.ui-menu-item.is-active]:![color:#007aff] [&_.ui-menu-item.is-active]:[font-weight:600] [&_.ui-menu-item.is-active::before]:[position:absolute] [&_.ui-menu-item.is-active::before]:[left:0] [&_.ui-menu-item.is-active::before]:[top:50%] [&_.ui-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.ui-menu-item.is-active::before]:[width:3px] [&_.ui-menu-item.is-active::before]:[height:18px] [&_.ui-menu-item.is-active::before]:[background:#007aff] [&_.ui-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.ui-menu-item:hover]:![background:rgba(0,_0,_0,_0.04)] [&_.ui-icon]:[font-size:18px]"
+            class="layout-menu [border-right:none] ![background:transparent] [--ui-menu-bg-color:transparent] [--ui-menu-text-color:#6e6e73] [--ui-menu-active-color:var(--app-primary)] [--ui-menu-hover-bg-color:rgba(0,_0,_0,_0.04)] [--ui-menu-hover-text-color:#1d1d1f] [padding:8px] [&_.ui-menu-item]:[border-radius:8px] [&_.ui-menu-item]:[margin:2px_0] [&_.ui-menu-item]:[height:40px] [&_.ui-menu-item]:[line-height:40px] [&_.ui-menu-item]:[font-size:13.5px] [&_.ui-menu-item]:[transition:all_0.2s] [&_.ui-menu-item.is-active]:![background:var(--app-primary-soft)] [&_.ui-menu-item.is-active]:![color:var(--app-primary)] [&_.ui-menu-item.is-active]:[font-weight:600] [&_.ui-menu-item.is-active::before]:[position:absolute] [&_.ui-menu-item.is-active::before]:[left:0] [&_.ui-menu-item.is-active::before]:[top:50%] [&_.ui-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.ui-menu-item.is-active::before]:[width:3px] [&_.ui-menu-item.is-active::before]:[height:18px] [&_.ui-menu-item.is-active::before]:[background:var(--app-primary)] [&_.ui-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.ui-menu-item:hover]:![background:rgba(0,_0,_0,_0.04)] [&_.ui-icon]:[font-size:18px]"
             :collapse="collapsed"
             router
             :collapse-transition="false"
@@ -57,6 +57,11 @@
             <ui-menu-item index="/admin/profile">
               <ui-icon><Setting /></ui-icon>
               <template #title>个人设置</template>
+            </ui-menu-item>
+
+            <ui-menu-item index="/admin/knowledge-graph">
+              <ui-icon><Connection /></ui-icon>
+              <template #title>知识图谱</template>
             </ui-menu-item>
           </ui-menu>
         </ui-scrollbar>
@@ -123,6 +128,11 @@
               <ui-menu-item index="/admin/profile">
                 <ui-icon><Setting /></ui-icon>
                 <template #title>个人设置</template>
+              </ui-menu-item>
+
+              <ui-menu-item index="/admin/knowledge-graph">
+                <ui-icon><Connection /></ui-icon>
+                <template #title>知识图谱</template>
               </ui-menu-item>
             </ui-menu>
           </ui-scrollbar>
@@ -200,7 +210,7 @@ import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
   Setting, Fold, ArrowDown, SwitchButton, WarningFilled,
-  Menu as MenuIcon, TrendCharts
+  Menu as MenuIcon, TrendCharts, Connection
 } from '@/components/ui/icons'
 import { getPtaCookieStatus } from '../../api/tap'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
@@ -228,7 +238,8 @@ const activeMenu = computed(() => route.path)
 const breadcrumbs = computed(() => {
   const pathMap = {
     dashboard: '首页', 'user-management': '用户管理', 'class-management': '班级管理',
-    'experiment-management': '实验管理', 'experiment-screen': '实验大屏', 'system-log': '系统日志', profile: '个人设置'
+    'experiment-management': '实验管理', 'experiment-screen': '实验大屏', 'system-log': '系统日志', profile: '个人设置',
+    'knowledge-graph': '知识图谱'
   }
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'admin' ? paths.slice(1).map(p => pathMap[p.split('/')[0]] || p) : []

@@ -358,7 +358,7 @@ onMounted(loadSpaces)
 
 .stat-value {
   margin-bottom: 6px;
-  color: #007aff;
+  color: var(--app-primary);
   font-size: 28px;
   font-weight: 800;
   line-height: 1.2;

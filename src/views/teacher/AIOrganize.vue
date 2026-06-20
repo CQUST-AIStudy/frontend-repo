@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full">
     <!-- Hero -->
-    <div class="rounded-[14px] bg-gradient-to-br from-[#007aff] to-[#4285f4] px-9 py-7 mb-6 text-white relative overflow-hidden">
+    <div class="rounded-[14px] bg-gradient-to-br from-[var(--app-primary)] to-[#4285f4] px-9 py-7 mb-6 text-white relative overflow-hidden">
       <div>
         <h1 class="m-0 mb-1 text-2xl font-bold">AI 智能整理</h1>
         <p class="m-0 text-sm opacity-90">支持文档中心整理和隔离 ZIP 整理。ZIP 模式不会把文件写入文档中心，只返回整理后的结果包。</p>
@@ -13,7 +13,7 @@
       <!-- Upload Card -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center gap-2.5 mb-2.5">
-          <span class="text-sm text-[#007aff] font-bold min-w-[30px]">上传</span>
+          <span class="text-sm text-[var(--app-primary)] font-bold min-w-[30px]">上传</span>
           <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">上传与提交</h3>
         </div>
         <p class="text-[#6e6e73] text-[13px] m-0 mb-4 leading-relaxed">
@@ -24,14 +24,14 @@
           <UiInput
             v-model="folderName"
             placeholder="文件夹名称（可选）"
-            class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] transition-all outline-none text-sm"
+            class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
           <div class="flex rounded-[10px] overflow-hidden border border-black/10">
             <UiButton
               v-for="mode in [{ key: 'files', label: '多文件' }, { key: 'zip', label: '隔离 ZIP' }, { key: 'dir', label: '目录直传' }]"
               :key="mode.key"
               class="h-[32px] px-3 text-xs font-medium border-none cursor-pointer transition-all"
-              :class="uploadMode === mode.key ? 'bg-[#007aff] text-white' : 'bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]'"
+              :class="uploadMode === mode.key ? 'bg-[var(--app-primary)] text-white' : 'bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]'"
               @click="uploadMode = mode.key"
             >
               {{ mode.label }}
@@ -43,14 +43,14 @@
         <template v-if="uploadMode === 'files'">
           <div class="flex gap-2.5 items-center flex-wrap mt-3">
             <UiButton
-              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               :disabled="creating"
               @click="createFolder"
             >
               <span v-if="creating" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
               1. 创建文档中心文件夹
             </UiButton>
-            <span v-if="currentFolderId" class="text-xs text-[#007aff] font-medium">当前文件夹 #{{ currentFolderId }}</span>
+            <span v-if="currentFolderId" class="text-xs text-[var(--app-primary)] font-medium">当前文件夹 #{{ currentFolderId }}</span>
           </div>
 
           <div v-if="currentFolderId" class="mt-3.5">
@@ -68,7 +68,7 @@
               </div>
             </ui-upload>
             <UiButton
-              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="fileList.length === 0 || submitLoading"
               @click="uploadAndSubmit"
             >
@@ -82,8 +82,8 @@
         <template v-else-if="uploadMode === 'zip'">
           <div class="mt-3">
             <!-- Alert replacement -->
-            <div class="flex items-start gap-3 rounded-[12px] bg-[rgba(52,199,89,0.08)] border border-[rgba(52,199,89,0.2)] px-4 py-3 mb-3">
-              <svg class="w-5 h-5 text-[#34c759] shrink-0 mt-0.5" fill="none" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.7-5.3l5-5a.7.7 0 011 1l-5.5 5.5a.7.7 0 01-1 0l-2.5-2.5a.7.7 0 011-1l2 2z" fill="currentColor"/></svg>
+            <div class="flex items-start gap-3 rounded-[12px] bg-[rgba(107,143,107,0.08)] border border-[rgba(107,143,107,0.2)] px-4 py-3 mb-3">
+              <svg class="w-5 h-5 text-[#6b8f6b] shrink-0 mt-0.5" fill="none" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.7-5.3l5-5a.7.7 0 011 1l-5.5 5.5a.7.7 0 01-1 0l-2.5-2.5a.7.7 0 011-1l2 2z" fill="currentColor"/></svg>
               <div>
                 <p class="m-0 text-sm font-medium text-[#1d1d1f]">隔离 ZIP 模式</p>
                 <p class="m-0 mt-0.5 text-xs text-[#6e6e73]">上传的 ZIP 会直接进入临时整理任务，不会落到文档中心。</p>
@@ -103,7 +103,7 @@
               </div>
             </ui-upload>
             <UiButton
-              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="zipFileList.length === 0 || zipSubmitLoading"
               @click="uploadZipAndSubmit"
             >
@@ -132,13 +132,13 @@
               >
                 选择本地目录
               </UiButton>
-              <span v-if="selectedDirName" class="text-xs text-[#007aff] font-medium">已选择：{{ selectedDirName }}</span>
+              <span v-if="selectedDirName" class="text-xs text-[var(--app-primary)] font-medium">已选择：{{ selectedDirName }}</span>
             </div>
             <p class="mt-2 text-xs text-[#aeaeb2]">
               已选 {{ dirFiles.length }} 个文件，保留原始目录结构上传到文档中心。
             </p>
             <UiButton
-              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              class="mt-3 h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="dirFiles.length === 0 || dirSubmitLoading"
               @click="uploadDirectoryAndSubmit"
             >
@@ -152,7 +152,7 @@
       <!-- Progress Card -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center gap-2.5 mb-2.5">
-          <span class="text-sm text-[#007aff] font-bold min-w-[30px]">任务</span>
+          <span class="text-sm text-[var(--app-primary)] font-bold min-w-[30px]">任务</span>
           <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">整理进度</h3>
         </div>
 
@@ -167,7 +167,7 @@
             >{{ statusLabelC }}</span>
             <span
               class="inline-flex items-center h-[22px] px-2 rounded-full text-xs font-medium"
-              :class="currentJobKind === 'zip' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-black/5 text-[#6e6e73]'"
+              :class="currentJobKind === 'zip' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : 'bg-black/5 text-[#6e6e73]'"
             >
               {{ currentJobKind === 'zip' ? '隔离 ZIP' : '文档中心' }}
             </span>
@@ -181,7 +181,7 @@
             <div class="h-[10px] rounded-full bg-[#f5f5f7] overflow-hidden">
               <div
                 class="h-full w-[var(--progress-width)] rounded-full transition-all duration-300"
-                :class="jobData?.status === 'FAILED' ? 'bg-[#d93025]' : 'bg-[#007aff]'"
+                :class="jobData?.status === 'FAILED' ? 'bg-[#d93025]' : 'bg-[var(--app-primary)]'"
                 :style="progressWidthStyle(jobData?.progress || 0)"
               ></div>
             </div>
@@ -194,15 +194,15 @@
           <template v-if="jobData?.status === 'SUCCEEDED' && resultData">
             <div class="flex gap-6 my-4">
               <div class="text-center">
-                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.totalFiles || 0 }}</span>
+                <span class="block text-[28px] font-bold text-[var(--app-primary)]">{{ resultData.totalFiles || 0 }}</span>
                 <span class="text-[13px] text-[#6e6e73] mt-1">文件</span>
               </div>
               <div class="text-center">
-                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.reviewCount || 0 }}</span>
+                <span class="block text-[28px] font-bold text-[var(--app-primary)]">{{ resultData.reviewCount || 0 }}</span>
                 <span class="text-[13px] text-[#6e6e73] mt-1">待确认</span>
               </div>
               <div class="text-center">
-                <span class="block text-[28px] font-bold text-[#007aff]">{{ resultData.duplicateCount || 0 }}</span>
+                <span class="block text-[28px] font-bold text-[var(--app-primary)]">{{ resultData.duplicateCount || 0 }}</span>
                 <span class="text-[13px] text-[#6e6e73] mt-1">重复</span>
               </div>
             </div>
@@ -234,7 +234,7 @@
                     v-for="(file, index) in resultData.files"
                     :key="index"
                     class="border-t border-black/[0.04] hover:bg-[#f9f9fb] transition-colors"
-                    :class="{ 'bg-[rgba(255,149,0,0.04)]': file.reviewFlag }"
+                    :class="{ 'bg-[rgba(196,154,60,0.04)]': file.reviewFlag }"
                   >
                     <td class="px-3 py-2 max-w-[140px] truncate">{{ file.originalName }}</td>
                     <td class="px-3 py-2">{{ file.targetFolder }}</td>
@@ -247,9 +247,9 @@
                     </td>
                     <td class="px-3 py-2">{{ formatConfidence(file.confidence) }}</td>
                     <td class="px-3 py-2">
-                      <span v-if="file.reviewFlag" class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(255,149,0,0.1)] text-[#ff9500]">待确认</span>
+                      <span v-if="file.reviewFlag" class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">待确认</span>
                       <span v-else-if="file.duplicateGroupId" class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-black/5 text-[#6e6e73]">重复</span>
-                      <span v-else class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(52,199,89,0.12)] text-[#34c759]">完成</span>
+                      <span v-else class="inline-flex items-center h-[20px] px-1.5 rounded text-[11px] font-medium bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">完成</span>
                     </td>
                   </tr>
                 </tbody>
@@ -257,7 +257,7 @@
             </div>
 
             <UiButton
-              class="mt-4 w-full h-[42px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              class="mt-4 w-full h-[42px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               :disabled="downloading"
               @click="downloadZip"
             >
@@ -269,7 +269,7 @@
           <!-- Failed Action -->
           <div v-if="jobData?.status === 'FAILED'" class="flex items-center gap-2 flex-wrap mt-3">
             <UiButton
-              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#ff9500] shadow-[0_2px_8px_rgba(255,149,0,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
+              class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#c49a3c] shadow-[0_2px_8px_rgba(196,154,60,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none"
               :disabled="retrying"
               @click="retryJob"
             >
@@ -284,11 +284,11 @@
           <div class="flex justify-between items-center mb-2 text-[13px] text-[#6e6e73]">
             <span>{{ uploadMode === 'zip' ? '隔离 ZIP 任务历史' : '文档中心整理历史' }}</span>
             <UiButton
-              class="text-[13px] text-[#007aff] bg-transparent border-none cursor-pointer hover:underline"
+              class="text-[13px] text-[var(--app-primary)] bg-transparent border-none cursor-pointer hover:underline"
               :disabled="historyLoading"
               @click="loadHistory"
             >
-              <span v-if="historyLoading" class="inline-block w-3 h-3 border-2 border-[#007aff]/30 border-t-[#007aff] rounded-full animate-spin mr-1"></span>
+              <span v-if="historyLoading" class="inline-block w-3 h-3 border-2 border-[var(--app-primary)]/30 border-t-[var(--app-primary)] rounded-full animate-spin mr-1"></span>
               刷新
             </UiButton>
           </div>
@@ -304,7 +304,7 @@
                   #{{ job.id }} · {{ job.status }}
                   <span
                     class="inline-flex items-center h-[18px] px-1.5 rounded text-[10px] font-medium ml-1.5"
-                    :class="job.jobKind === 'zip' ? 'bg-[rgba(52,199,89,0.12)] text-[#34c759]' : 'bg-black/5 text-[#6e6e73]'"
+                    :class="job.jobKind === 'zip' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : 'bg-black/5 text-[#6e6e73]'"
                   >
                     {{ job.jobKind === 'zip' ? 'ZIP' : '文档中心' }}
                   </span>
@@ -317,7 +317,7 @@
                   @click="openHistoryJob(job)"
                 >查看</UiButton>
                 <UiButton
-                  class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[#007aff] bg-[rgba(0,122,255,0.08)] hover:bg-[rgba(0,122,255,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed"
+                  class="h-[28px] px-3 rounded-[8px] text-xs font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.14)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed"
                   :disabled="!job.hasZip"
                   @click="downloadHistoryZip(job)"
                 >ZIP</UiButton>
@@ -710,9 +710,9 @@ onUnmounted(stopPolling)
 
 const statusTagClass = computed(() => {
   const status = jobData.value?.status
-  if (status === 'SUCCEEDED') return 'bg-[rgba(52,199,89,0.12)] text-[#34c759]'
-  if (status === 'FAILED') return 'bg-[rgba(255,59,48,0.1)] text-[#ff3b30]'
-  if (status === 'RUNNING') return 'bg-[rgba(0,122,255,0.1)] text-[#007aff]'
+  if (status === 'SUCCEEDED') return 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]'
+  if (status === 'FAILED') return 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'
+  if (status === 'RUNNING') return 'bg-[rgba(194,112,62,0.1)] text-[#c2703e]'
   return 'bg-black/5 text-[#6e6e73]'
 })
 
@@ -731,9 +731,9 @@ const progressWidthStyle = (value) => ({ '--progress-width': `${value}%` })
 
 const kindTagClass = (kind) => {
   const map = {
-    paper: 'bg-[rgba(0,122,255,0.1)] text-[#007aff]',
-    teaching: 'bg-[rgba(52,199,89,0.12)] text-[#34c759]',
-    code: 'bg-[rgba(255,149,0,0.1)] text-[#ff9500]',
+    paper: 'bg-[rgba(194,112,62,0.1)] text-[#c2703e]',
+    teaching: 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]',
+    code: 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]',
     data: 'bg-black/5 text-[#6e6e73]',
     admin: 'bg-black/5 text-[#6e6e73]',
     other: 'bg-black/5 text-[#6e6e73]',

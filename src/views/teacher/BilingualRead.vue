@@ -13,12 +13,12 @@
 
     <!-- Control Panel -->
     <div class="flex items-center gap-3 flex-wrap p-4 px-5 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-      <UiSelect v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+      <UiSelect v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] appearance-none cursor-pointer">
         <UiOption value="" disabled>选择文档</UiOption>
         <UiOption v-for="d in docs" :key="d.id" :value="String(d.id)">{{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)</UiOption>
       </UiSelect>
 
-      <UiSelect v-model="lang" class="w-[120px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,122,255,0.15),inset_0_0_0_1px_rgba(0,122,255,0.5)] appearance-none cursor-pointer">
+      <UiSelect v-model="lang" class="w-[120px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] appearance-none cursor-pointer">
         <UiOption value="ZH">中文</UiOption>
         <UiOption value="EN-US">英文</UiOption>
         <UiOption value="JA">日文</UiOption>
@@ -28,11 +28,11 @@
       </UiSelect>
 
       <label class="inline-flex items-center gap-2 text-sm text-[#1d1d1f] cursor-pointer select-none">
-        <UiInput type="checkbox" v-model="force" class="w-4 h-4 rounded accent-[#007aff]" />
+        <UiInput type="checkbox" v-model="force" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
         强制重新翻译
       </label>
 
-      <UiButton @click="translate" :disabled="!docId || loading" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#3898ff] to-[#007aff] shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none">
+      <UiButton @click="translate" :disabled="!docId || loading" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:pointer-events-none">
         {{ loading ? '翻译中...' : '开始翻译' }}
       </UiButton>
 
@@ -40,10 +40,10 @@
     </div>
 
     <!-- Error Alert -->
-    <div v-if="error" class="flex items-start gap-3 p-4 mb-5 rounded-[14px] border border-[rgba(255,59,48,0.2)] bg-[rgba(255,59,48,0.06)]">
-      <LucideIcon name="alert-triangle" class="shrink-0 text-[#ff3b30]" :size="19" />
-      <div class="flex-1 text-sm text-[#ff3b30]">{{ error }}</div>
-      <UiButton @click="error = ''" class="text-[#ff3b30]/60 hover:text-[#ff3b30] text-lg cursor-pointer bg-transparent border-none">×</UiButton>
+    <div v-if="error" class="flex items-start gap-3 p-4 mb-5 rounded-[14px] border border-[rgba(196,75,63,0.2)] bg-[rgba(196,75,63,0.06)]">
+      <LucideIcon name="alert-triangle" class="shrink-0 text-[#c44b3f]" :size="19" />
+      <div class="flex-1 text-sm text-[#c44b3f]">{{ error }}</div>
+      <UiButton @click="error = ''" class="text-[#c44b3f]/60 hover:text-[#c44b3f] text-lg cursor-pointer bg-transparent border-none">×</UiButton>
     </div>
 
     <!-- Segments -->
@@ -54,12 +54,12 @@
       <div v-for="seg in segments" :key="seg.index" class="flex items-stretch gap-0 bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
         <div class="w-11 flex items-center justify-center bg-[#f9f9f9] text-[#aeaeb2] text-[13px] font-medium shrink-0 border-r border-black/[0.06]">{{ seg.index + 1 }}</div>
         <div class="flex-1 p-4 px-5">
-          <div class="text-[11px] font-medium uppercase text-[#007aff] mb-2 tracking-wide">原文</div>
+          <div class="text-[11px] font-medium uppercase text-[var(--app-primary)] mb-2 tracking-wide">原文</div>
           <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.source }}</div>
         </div>
         <div class="w-px bg-black/[0.06] shrink-0"></div>
         <div class="flex-1 p-4 px-5">
-          <div class="text-[11px] font-medium uppercase text-[#34c759] mb-2 tracking-wide">译文</div>
+          <div class="text-[11px] font-medium uppercase text-[#6b8f6b] mb-2 tracking-wide">译文</div>
           <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.target }}</div>
         </div>
       </div>

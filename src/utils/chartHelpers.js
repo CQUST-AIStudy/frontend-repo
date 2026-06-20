@@ -1,4 +1,70 @@
 import logger from '@/utils/logger'
+import { nextTick } from 'vue'
+
+function resolveChartElement(chartRef) {
+  const value = chartRef?.value ?? chartRef
+  return value?.$el ?? value ?? null
+}
+
+function isChartElementReady(element) {
+  return !!element && element.offsetWidth > 0 && element.offsetHeight > 0
+}
+
+function waitForChartContainers(chartRefs, timeout = 2000) {
+  return new Promise((resolve) => {
+    let observer = null
+    let intervalId = null
+    let timeoutId = null
+
+    const cleanup = () => {
+      if (observer) observer.disconnect()
+      if (intervalId) clearInterval(intervalId)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+
+    const getElements = () => chartRefs.map(resolveChartElement)
+
+    const checkReady = () => {
+      const elements = getElements()
+      const ready = elements.length === chartRefs.length && elements.every(isChartElementReady)
+      if (ready) {
+        cleanup()
+        resolve(true)
+      }
+      return ready
+    }
+
+    const setupObserver = () => {
+      if (observer || typeof ResizeObserver === 'undefined') return
+      const elements = getElements().filter(Boolean)
+      if (!elements.length) return
+      observer = new ResizeObserver(() => {
+        checkReady()
+      })
+      elements.forEach(element => observer.observe(element))
+    }
+
+    timeoutId = setTimeout(() => {
+      cleanup()
+      resolve(false)
+    }, timeout)
+
+    intervalId = setInterval(() => {
+      if (!checkReady()) {
+        setupObserver()
+      }
+    }, 100)
+
+    if (!checkReady()) {
+      setupObserver()
+    }
+  })
+}
+
+function wait(delay) {
+  return new Promise(resolve => setTimeout(resolve, delay))
+}
+
 /**
  * 安全地初始化echarts，包含错误处理和DOM检查
  * @param {Array} chartRefs - 包含图表容器refs的数组
@@ -11,48 +77,23 @@ export function safeInitCharts(chartRefs, initFunction, delay = 300) {
     return Promise.resolve(false)
   }
 
-  return new Promise((resolve) => {
-    // 确保所有chart容器都存在并且都已经渲染出来
-    const allRefsValid = chartRefs.every(ref => ref && ref.offsetWidth > 0 && ref.offsetHeight > 0)
-    
-    if (!allRefsValid) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('容器尚未完全渲染，增加延迟等待...', delay)
-      }
-      delay += 100 // 增加延迟时间
-      
-      if (delay > 2000) { // 设置最大延迟时间，避免无限等待
+  return nextTick()
+    .then(() => waitForChartContainers(chartRefs))
+    .then(async (ready) => {
+      if (!ready) {
         logger.error('等待DOM渲染超时，尝试继续初始化')
-        setTimeout(() => {
-          try {
-            initFunction()
-            resolve(true)
-          } catch (error) {
-            logger.error('图表初始化失败:', error)
-            resolve(false)
-          }
-        }, 100)
-        return
       }
-      
-      // 递归调用，增加延迟
-      setTimeout(() => {
-        safeInitCharts(chartRefs, initFunction, delay).then(resolve)
-      }, 100)
-      return
-    }
-    
-    // 所有容器都已准备好，执行初始化
-    setTimeout(() => {
+      if (delay > 0) {
+        await wait(delay)
+      }
       try {
         initFunction()
-        resolve(true)
+        return true
       } catch (error) {
         logger.error('图表初始化失败:', error)
-        resolve(false)
+        return false
       }
-    }, delay)
-  })
+    })
 }
 /**
  * 创建基本柱状图配置

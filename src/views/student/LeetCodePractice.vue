@@ -39,7 +39,7 @@
                   <div class="example-output [margin-bottom:4px] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_6px] [&_code]:[border-radius:3px] [&_code]:[color:#e74c3c]">
                     <strong>输出:</strong> <code>{{ example.output }}</code>
                   </div>
-                  <div v-if="example.explanation" class="example-explanation [margin-top:8px] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_sans-serif] [color:#666] [font-style:italic]">
+                  <div v-if="example.explanation" class="example-explanation [margin-top:8px] [font-family:var(--font-page)] [color:#666] [font-style:italic]">
                     <strong>解释:</strong> {{ example.explanation }}
                   </div>
                 </div>
@@ -84,72 +84,6 @@
             </div>
           </div>
         </div>
-        <!-- legacy-solution-view-disabled
-        <div v-if="false" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#1f2937] [&_pre]:[color:#e5e7eb] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
-          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
-            <h3>瀹樻柟棰樿В</h3>
-            <ui-empty v-if="!hasSolutionContent" description="鏆傛棤棰樿В鍐呭" :image-size="96" />
-            <div v-else class="solution-blocks [display:flex] [flex-direction:column] [gap:16px]">
-              <section v-if="renderedSolutionApproach" class="solution-card [background:#f8fafc] [border-left:4px_solid_#409eff] [border-radius:8px] [padding:18px_20px]">
-                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">瑙ｉ鎬濊矾</h4>
-                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionApproach"></div>
-              </section>
-              <section v-if="renderedSolutionComplexity" class="solution-card [background:#f0fdf4] [border-left:4px_solid_#22c55e] [border-radius:8px] [padding:18px_20px]">
-                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">澶嶆潅搴﹀垎鏋?/h4>
-                <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionComplexity"></div>
-              </section>
-              <section v-if="Object.keys(solutionCodeBlocks).length" class="solution-card [background:#f8fafc] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:18px_20px]">
-                <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">鍙傝€冧唬鐮?/h4>
-                <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
-                  <ui-tab-pane
-                    v-for="(codeBlock, lang) in solutionCodeBlocks"
-                    :key="lang"
-                    :label="getLanguageLabel(lang)"
-                    :name="lang"
-                  >
-                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code>{{ codeBlock }}</code></pre>
-                  </ui-tab-pane>
-                </ui-tabs>
-              </section>
-            </div>
-          </div>
-        </div>
-        -->
-      <ui-collapse v-if="false" class="solution-section [margin-top:20px]">
-        <ui-collapse-item name="solution">
-          <template #title>
-            <div class="solution-title [display:flex] [align-items:center] [gap:8px] [font-weight:600] [color:#409eff]">
-              <ui-icon><Document /></ui-icon>
-              <span>官方题解</span>
-            </div>
-          </template>
-          <div class="solution-content [max-height:none] [overflow:visible] [max-height:400px] [overflow-y:auto]">
-            <div class="solution-approach" v-if="renderedSolutionApproach">
-              <h4>解题思路</h4>
-              <div class="approach-content [background:#f8f9fa] [padding:16px] [border-radius:8px] [margin-bottom:16px]" v-html="renderedSolutionApproach"></div>
-            </div>
-            
-            <div class="solution-code" v-if="parsedSolution.code">
-              <h4>参考代码</h4>
-              <ui-tabs v-model="solutionLanguage" class="solution-tabs [margin-top:8px]">
-                <ui-tab-pane 
-                  v-for="(codeBlock, lang) in parsedSolution.code" 
-                  :key="lang"
-                  :label="getLanguageLabel(lang)" 
-                  :name="lang"
-                >
-                  <pre class="solution-code-block [background:#2d3748] [color:#e2e8f0] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.5] [margin:0]"><code>{{ codeBlock }}</code></pre>
-                </ui-tab-pane>
-              </ui-tabs>
-            </div>
-
-            <div class="solution-complexity" v-if="renderedSolutionComplexity">
-              <h4>复杂度分析</h4>
-              <div class="complexity-content [background:#e8f5e8] [padding:12px] [border-radius:6px] [border-left:4px_solid_#28a745]" v-html="renderedSolutionComplexity"></div>
-            </div>
-          </div>
-        </ui-collapse-item>
-      </ui-collapse>
     </div>
 
     <!-- 代码编辑区域 -->
@@ -297,7 +231,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { Check, Close, Document } from '@/components/ui/icons'
+import { Check, Close } from '@/components/ui/icons'
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
@@ -1689,7 +1623,7 @@ watch(() => route.params.id, () => {
   border-radius: 4px;
   background: #eef2f7;
   color: #1f2937;
-  font-family: "Cambria Math", "Times New Roman", serif;
+  font-family: var(--font-page);
   font-style: italic;
   line-height: 1.35;
   white-space: nowrap;
@@ -1709,7 +1643,7 @@ watch(() => route.params.id, () => {
   border-radius: 8px;
   background: #eef6ff;
   color: #1d4ed8;
-  font-family: "Cambria Math", "Times New Roman", serif;
+  font-family: var(--font-page);
   font-style: italic;
   line-height: 1.6;
   text-align: center;

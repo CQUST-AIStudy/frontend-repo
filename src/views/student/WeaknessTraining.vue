@@ -55,7 +55,7 @@
               </div>
             </div>
 
-            <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">最近回炉记录</div>
+            <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">最近回炉记录</div>
             <ui-timeline v-if="recentReviewRecords.length">
               <ui-timeline-item
                 v-for="record in recentReviewRecords"
@@ -115,7 +115,7 @@
                 </div>
               </div>
 
-              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:'SimSun',_serif] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">专项训练说明</div>
+              <div class="section-title [margin-bottom:12px] [font-size:16px] [font-family:var(--font-page)] [margin:6px_0_2px] [color:#334155] [font-size:13px] [font-weight:600] [margin:0] [font-weight:500] [color:#303133]">专项训练说明</div>
               <ui-input
                 v-model="selectedPlanNote"
                 type="textarea"

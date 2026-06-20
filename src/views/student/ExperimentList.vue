@@ -1,5 +1,5 @@
 <template>
-  <div class="g-page [min-width:0] [font-family:-apple-system,_BlinkMacSystemFont,_'Segoe_UI',_Roboto,_'Helvetica_Neue',_Arial,_sans-serif]">
+  <div class="g-page [min-width:0] [font-family:var(--font-page)]">
     <UiPageHeader title="实验列表" description="数据结构课程所有实验项目" />
 
     <loading-state :loading="loading">
