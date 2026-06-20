@@ -1,8 +1,8 @@
 <template>
   <div class="admin-layout [width:100%] [min-height:100vh] [min-height:100dvh] [overflow-x:hidden]">
     <ui-container class="layout-container [min-height:100vh] [min-height:100dvh]">
-      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--ink-surface-translucent)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_var(--ink-border)] [backdrop-filter:blur(20px)_saturate(180%)]">
-        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_var(--ink-border)]">
+      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:rgba(246,_246,_248,_0.82)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_rgba(0,_0,_0,_0.06)] [backdrop-filter:blur(20px)_saturate(180%)]">
+        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_rgba(0,_0,_0,_0.06)]">
           <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_rgba(0,_0,_0,_0.08)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
           <transition name="fade-text">
             <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:#1d1d1f] [white-space:nowrap] [letter-spacing:-0.01em]">系统管理后台</span>
@@ -52,7 +52,7 @@
               <template #title>LeetCodeClaw</template>
             </ui-menu-item>
 
-            <div class="menu-divider [height:1px] [background:var(--ink-border-soft)] [margin:10px_12px]"></div>
+            <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
             <ui-menu-item index="/admin/profile">
               <ui-icon><Setting /></ui-icon>
@@ -123,7 +123,7 @@
                 <template #title>LeetCodeClaw</template>
               </ui-menu-item>
 
-              <div class="menu-divider [height:1px] [background:var(--ink-border-soft)] [margin:10px_12px]"></div>
+              <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
               <ui-menu-item index="/admin/profile">
                 <ui-icon><Setting /></ui-icon>
@@ -139,10 +139,10 @@
         </div>
       </ui-drawer>
 
-      <ui-container class="layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [min-width:0] [background:var(--app-bg)] [background:transparent]">
-        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [padding:0_24px] [height:56px] [border-bottom:1px_solid_#dadce0] [gap:16px] [box-shadow:0_1px_2px_rgba(60,_64,_67,_0.1)] [min-height:56px] [gap:18px] [min-height:78px] [padding:0_28px] [border-bottom:1px_solid_var(--ink-border)] [background:var(--ink-header-bg)] [backdrop-filter:blur(14px)]">
+      <ui-container class="layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [min-width:0] [background:#f8f9fa] [background:transparent]">
+        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [padding:0_24px] [height:56px] [border-bottom:1px_solid_#dadce0] [gap:16px] [box-shadow:0_1px_2px_rgba(60,_64,_67,_0.1)] [min-height:56px] [gap:18px] [min-height:78px] [padding:0_28px] [border-bottom:1px_solid_rgba(126,_157,_183,_0.14)] [background:rgba(248,_251,_253,_0.72)] [backdrop-filter:blur(14px)]">
           <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
-            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:var(--app-text-secondary)] [transition:all_0.2s_ease] hover:[background:rgba(194,_112,_62,_0.08)] hover:[color:var(--app-primary)]" @click="toggleNavigation">
+            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
               <Fold v-else />
             </ui-icon>
@@ -158,19 +158,19 @@
             <!-- PTA Cookie 过期告警 -->
             <ui-tooltip v-if="ptaCookieExpired" content="PTA Cookie 已过期，数据同步暂停" placement="bottom">
               <ui-badge is-dot type="danger">
-                <ui-icon class="header-icon [color:#ea4335] [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:var(--app-text-secondary)] [transition:all_0.2s_ease] hover:[background:rgba(194,_112,_62,_0.08)] hover:[color:var(--app-primary)]" @click="goToCookieAlert">
+                <ui-icon class="header-icon [color:#ea4335] [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="goToCookieAlert">
                   <WarningFilled />
                 </ui-icon>
               </ui-badge>
             </ui-tooltip>
 
             <ui-dropdown class="[z-index:2200]" trigger="click" @command="handleCommand">
-              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_var(--ink-border)] [flex-shrink:0]">
+              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)] [flex-shrink:0]">
                 <ui-avatar :size="34">
                   <span>{{ (userInfo.name || '管')[0] }}</span>
                 </ui-avatar>
-                <span class="username [font-size:14px] [color:#202124] [font-weight:500] [color:var(--app-text)] [font-size:13px] [font-weight:700]">{{ userInfo.name || '管理员' }}</span>
-                <ui-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:var(--app-text-soft)]"><ArrowDown /></ui-icon>
+                <span class="username [font-size:14px] [color:#202124] [font-weight:500] [color:#16324a] [font-size:13px] [font-weight:700]">{{ userInfo.name || '管理员' }}</span>
+                <ui-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:#8ca0b3]"><ArrowDown /></ui-icon>
               </div>
               <template #dropdown>
                 <ui-dropdown-menu>
@@ -186,7 +186,7 @@
           </div>
         </ui-header>
 
-        <ui-main class="layout-content ink-paper-bg ink-bloom [background:var(--app-bg)] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
+        <ui-main class="layout-content [background:#f8f9fa] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -194,7 +194,7 @@
           </router-view>
         </ui-main>
 
-        <ui-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:var(--app-text-soft)] [font-size:12px] [background:transparent] [border-top:1px_solid_var(--ink-border-soft)]">
+        <ui-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
           智能学情分析与个性化实验能力提升平台 - 管理后台 © 2025
         </ui-footer>
       </ui-container>

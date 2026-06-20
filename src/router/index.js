@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { clearAuthStorage, getSessionToken, getUserInfo } from '../constants/auth'
 
 // 演示模式：设为 true 时跳过班级选择强制跳转，与 store/index.js 保持一致
-const DEMO_MODE = false
+// const DEMO_MODE = false
+const DEMO_MODE = true
 
 const routes = [
   {

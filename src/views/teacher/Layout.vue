@@ -1,12 +1,12 @@
 <template>
-  <div class="flex h-screen h-dvh overflow-hidden bg-[var(--app-bg)]">
+  <div class="flex h-screen h-dvh overflow-hidden bg-[#f5f5f7]">
     <!-- Sidebar (Desktop) -->
     <UiAside
       v-if="!isMobile"
-      class="fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-[var(--ink-border)] bg-[var(--ink-surface-translucent)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+      class="fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-black/[0.06] bg-[rgba(246,246,248,0.82)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
       :style="asideStyle"
     >
-      <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--ink-border)] shrink-0">
+      <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
         <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm shrink-0" />
         <transition
           enter-active-class="transition-opacity duration-200"
@@ -100,8 +100,8 @@
         leave-from-class="translate-x-0"
         leave-to-class="-translate-x-full"
       >
-        <UiAside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[var(--ink-surface-solid)] backdrop-blur-[24px] shadow-2xl">
-          <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--ink-border)] shrink-0">
+        <UiAside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[rgba(246,246,248,0.98)] backdrop-blur-[24px] shadow-2xl">
+          <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-black/[0.06] shrink-0">
             <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-black/8 shadow-sm" />
             <div class="flex flex-col gap-0.5">
               <span class="text-[11px] font-medium text-[#8e8e93] uppercase tracking-wide">教师工作台</span>
@@ -155,14 +155,14 @@
     <!-- Main Area -->
     <div class="ml-[var(--teacher-main-margin)] flex h-screen h-dvh flex-col flex-1 min-w-0 overflow-hidden transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
       <!-- Header -->
-      <UiHeader class="sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-[var(--ink-border)] bg-[var(--ink-header-bg)] backdrop-blur-[20px] backdrop-saturate-[180%]">
+      <UiHeader class="sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-black/[0.06] bg-white/72 backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
           <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[#6e6e73] text-xl cursor-pointer transition-all duration-200 hover:bg-[rgba(194, 112, 62, 0.08)] hover:text-[#c2703e] shrink-0" title="切换导航">
             <MenuIcon v-if="isMobile" />
             <Fold v-else />
           </UiButton>
 
-          <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-white/60 border border-[var(--ink-border)]">
+          <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-white/60 border border-black/[0.06]">
             <nav class="flex items-center gap-1.5 text-[13px] text-[#6e6e73] whitespace-nowrap overflow-hidden">
               <router-link to="/teacher/dashboard" class="hover:text-[#c2703e] transition-colors">首页</router-link>
               <template v-for="(item, index) in breadcrumbs" :key="index">
@@ -184,8 +184,8 @@
 
           <!-- User Dropdown -->
           <div class="relative" ref="dropdownRef">
-            <UiButton @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-[var(--ink-border)] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
-              <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#c2703e] to-[#5a4632] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+            <UiButton @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/60 border border-black/[0.06] cursor-pointer transition-all duration-200 hover:bg-black/[0.03]">
+              <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#c2703e] to-[#5856d6] flex items-center justify-center text-white text-sm font-semibold shrink-0">
                 {{ (userInfo.name || '教').slice(0, 1) }}
               </div>
               <div v-if="!isMobile" class="flex flex-col gap-0.5">
@@ -203,7 +203,7 @@
               leave-from-class="translate-y-0 scale-100 opacity-100"
               leave-to-class="-translate-y-1 scale-[0.96] opacity-0"
             >
-              <div v-if="dropdownOpen" class="absolute right-0 top-full mt-2 w-[188px] p-1.5 rounded-[14px] bg-white/95 backdrop-blur-[20px] border border-[var(--ink-border)] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_3px_10px_rgba(0,0,0,0.06)] z-50">
+              <div v-if="dropdownOpen" class="absolute right-0 top-full mt-2 w-[188px] p-1.5 rounded-[14px] bg-white/95 backdrop-blur-[20px] border border-black/[0.08] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_3px_10px_rgba(0,0,0,0.06)] z-50">
                 <UiButton @click="handleCommand('switchClass')" class="flex !justify-start items-center gap-2.5 w-full !min-h-0 !px-3 !py-2.5 rounded-[10px] !border-transparent !bg-transparent !shadow-none text-[13px] font-medium text-[#1d1d1f] hover:!bg-black/[0.04] transition-colors text-left">
                   <School class="w-4 h-4 shrink-0 text-[#6e6e73]" />切换教学班
                 </UiButton>
@@ -222,7 +222,7 @@
 
       <!-- Content -->
       <UiMain
-        class="ink-paper-bg ink-bloom flex-1 min-w-0 min-h-0 p-6 overflow-y-auto overflow-x-hidden bg-[var(--app-bg)]"
+        class="flex-1 min-w-0 min-h-0 p-6 overflow-y-auto overflow-x-hidden bg-[#f5f5f7]"
         :class="{
           '!box-border !h-[calc(100vh-64px)] !h-[calc(100dvh-64px)] !min-h-0 !overflow-hidden !p-4': isAiChatPage
         }"
@@ -243,7 +243,7 @@
       </UiMain>
 
       <!-- Footer -->
-      <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[var(--app-text-soft)] text-[12px] py-3 px-4 border-t border-[var(--ink-border-soft)]">
+      <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
         智能学情分析与个性化实验能力提升平台 · 教师工作空间
       </UiFooter>
     </div>

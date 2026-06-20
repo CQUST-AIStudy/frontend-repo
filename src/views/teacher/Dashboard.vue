@@ -7,13 +7,13 @@
 
     <!-- Hero Strip -->
     <div class="grid grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)] gap-4 max-[1100px]:grid-cols-1">
-      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] bg-gradient-to-br from-[var(--app-primary)] to-[#5856d6] shadow-[0_8px_24px_rgba(194,112,62,0.2),0_2px_8px_rgba(194,112,62,0.1)] text-white max-[640px]:rounded-2xl max-[640px]:p-[18px]">
-        <div class="text-[12px] font-bold uppercase text-white/70">当前教学班</div>
-        <div class="max-w-[620px] mt-3.5 text-[28px] leading-[1.16] font-extrabold text-shadow-[0_1px_2px_rgba(0,0,0,0.22)] max-[640px]:text-2xl">{{ classLabel }} 的实验、知识库和批改工作台</div>
+      <div class="relative overflow-hidden min-h-[148px] p-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:rounded-2xl max-[640px]:p-[18px]">
+        <div class="text-[12px] font-bold uppercase text-[#6e6e73]">当前教学班</div>
+        <div class="max-w-[620px] mt-3.5 text-[28px] leading-[1.16] font-extrabold text-[#1d1d1f] max-[640px]:text-2xl">{{ classLabel }} 的实验、知识库和批改工作台</div>
         <div class="flex flex-wrap gap-2.5 mt-[18px]">
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">实验 {{ stats.experimentCount }}</span>
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">待处理 {{ stats.pendingSubmissions }}</span>
-          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-white/[0.18] border border-white/[0.26] text-white text-[12px] font-bold">班级 {{ stats.classCount }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">实验 {{ stats.experimentCount }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">待处理 {{ stats.pendingSubmissions }}</span>
+          <span class="inline-flex items-center h-[34px] px-3 rounded-full bg-[#f5f5f7] border border-black/[0.06] text-[var(--app-primary-strong)] text-[12px] font-bold">班级 {{ stats.classCount }}</span>
         </div>
       </div>
 
