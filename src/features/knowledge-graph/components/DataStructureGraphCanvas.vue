@@ -106,6 +106,22 @@ let appearAnimations = []
 let initialCameraPosition = null
 let initialControlTarget = null
 
+// 主角模式（focus mode）：点击节点后放大居中为主角，其他节点淡出环绕
+let focusMode = false
+let focusTargetId = ''
+let focusPedestal = null
+let focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
+const focusState = { t: 0, active: false, mode: 'idle', duration: 0.7 }
+const FOCUS_CONFIG = {
+  heroScale: 2.6,
+  heroPos: new THREE.Vector3(0, 2.2, 0),
+  cameraOffset: new THREE.Vector3(0, 4.5, 11),
+  dimOpacity: 0.15,
+  neighborOpacity: 0.5,
+  neighborLabelOpacity: '0.35',
+  dimLabelOpacity: '0'
+}
+
 // 3D 提交版本链卫星组
 let submissionGroup = null
 let submissionMeshes = [] // 卫星 mesh 数组，供 raycaster 拾取
@@ -128,8 +144,8 @@ const SIZE_BY_TYPE = {
 }
 
 const TYPE_Y_OFFSET = {
-  course: 0, chapter: 0.85, concept: 1.2,
-  structure: 0.9, algorithm: 0.5, operation: 0.1, exercise: -0.4
+  course: 1.6, chapter: 2.45, concept: 2.8,
+  structure: 2.5, algorithm: 2.1, operation: 1.7, exercise: 1.2
 }
 function makeColor(color, fallback = '#1270d8') {
   return new THREE.Color(color || fallback)
@@ -180,10 +196,10 @@ function masteryYOffset(node) {
 // 节点浮动幅度按掌握度调整：优势轻盈高飘，薄弱小幅度
 function masteryFloatAmp(nodeId) {
   const m = props.masteryMap?.[nodeId]
-  if (!m || m.level === 'unstarted') return 0.12
-  if (m.level === 'good') return 0.2
-  if (m.level === 'weak') return 0.06
-  return 0.12
+  if (!m || m.level === 'unstarted') return 0.28
+  if (m.level === 'good') return 0.42
+  if (m.level === 'weak') return 0.14
+  return 0.28
 }
 
 function getNodeSize(node) {
@@ -434,17 +450,17 @@ function createNodeObject(node) {
   group.add(mesh)
 
   // 光晕：共享贴图，材质独立（控制透明度/缩放）
-  // 薄弱点用红色光晕贴图，优势点用金色
+  // 浅底用 NormalBlending 保留彩色光晕（AdditiveBlending 在暖米底上会泛白）
   const glowColor = isWeak ? '#ef4444' : isGood ? '#fbbf24' : meta.color
   const glowMaterial = new THREE.SpriteMaterial({
     map: getGlowTexture(glowColor),
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    opacity: isWeak ? 0.32 : isGood ? (selected ? 0.9 : 0.6) : (selected ? 0.85 : 0.5)
+    blending: THREE.NormalBlending,
+    opacity: isWeak ? 0.28 : isGood ? (selected ? 0.7 : 0.45) : (selected ? 0.6 : 0.34)
   })
   const glow = new THREE.Sprite(glowMaterial)
-  glow.scale.setScalar(size * (isGood ? (selected ? 6 : 4.8) : isWeak ? 3.4 : (selected ? 5.3 : 4.1)))
+  glow.scale.setScalar(size * (isGood ? (selected ? 5.4 : 4.2) : isWeak ? 3.2 : (selected ? 4.6 : 3.6)))
   glow.position.set(0, -size * 0.18, 0)
   group.add(glow)
 
@@ -542,13 +558,13 @@ function createSelectionRing(color = '#1270d8') {
 
 function createSceneBase() {
   scene = new THREE.Scene()
-  // 深色背景：让 Bloom 辉光更突出（白底会被泛白冲淡）；标签是 CSS 叠层，深底不影响可读性
-  scene.background = new THREE.Color('#0a1124')
-  scene.fog = new THREE.Fog('#0a1124', 46, 104)
+  // 浅色暖米底：贴合全局 UI 主题；节点饱和色在暖底上对比度充足
+  scene.background = new THREE.Color('#faf6ef')
+  scene.fog = new THREE.Fog('#faf6ef', 58, 130)
 
   camera = new THREE.PerspectiveCamera(46, 1, 0.1, 240)
   initialCameraPosition = new THREE.Vector3(0, 26, 38)
-  initialControlTarget = new THREE.Vector3(0, 0, 0)
+  initialControlTarget = new THREE.Vector3(0, 1.6, 0)
   camera.position.copy(initialCameraPosition)
 
   const { width, height } = getContainerSize()
@@ -559,7 +575,7 @@ function createSceneBase() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.05
+  renderer.toneMappingExposure = 1.0
   sceneRef.value.appendChild(renderer.domElement)
 
   labelRenderer = new CSS2DRenderer()
@@ -588,14 +604,42 @@ function createSceneBase() {
   edgeGroup = new THREE.Group()
   hoverRing = createSelectionRing('#94a3b8')
   selectRing = createSelectionRing('#38bdf8')
-  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing)
+  focusPedestal = createFocusPedestal()
+  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing, focusPedestal)
+}
+
+// 主角展台：暖橙光圈底盘，仅主角模式下显现并跟随主角脚下
+function createFocusPedestal() {
+  const group = new THREE.Group()
+  const disk = new THREE.Mesh(
+    new THREE.CircleGeometry(3.2, 64),
+    new THREE.MeshBasicMaterial({ color: '#c2703e', transparent: true, opacity: 0.1, depthWrite: false })
+  )
+  disk.rotation.x = -Math.PI / 2
+  group.add(disk)
+  const ring1 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.6, 0.05, 12, 96),
+    new THREE.MeshBasicMaterial({ color: '#c2703e', transparent: true, opacity: 0.85, depthWrite: false })
+  )
+  ring1.rotation.x = Math.PI / 2
+  group.add(ring1)
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(3.0, 0.03, 10, 96),
+    new THREE.MeshBasicMaterial({ color: '#e8a87c', transparent: true, opacity: 0.55, depthWrite: false })
+  )
+  ring2.rotation.x = Math.PI / 2
+  group.add(ring2)
+  group.userData.ring1 = ring1
+  group.userData.ring2 = ring2
+  group.visible = false
+  return group
 }
 function setupLights() {
-  const ambient = new THREE.HemisphereLight('#cfe6ff', '#0a1124', 1.15)
+  const ambient = new THREE.HemisphereLight('#fff7ec', '#e8dfcf', 0.95)
   scene.add(ambient)
 
   // 单一关键光投影（仅 course/chapter 接收 castShadow），shadow map 降到 1024 控成本
-  const keyLight = new THREE.DirectionalLight('#ffffff', 2.0)
+  const keyLight = new THREE.DirectionalLight('#fffaf2', 1.55)
   keyLight.position.set(16, 30, 20)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.width = 1024
@@ -609,33 +653,24 @@ function setupLights() {
   keyLight.shadow.bias = -0.0008
   scene.add(keyLight)
 
-  const rim = new THREE.DirectionalLight('#60a5fa', 0.8)
+  const rim = new THREE.DirectionalLight('#e8a87c', 0.5)
   rim.position.set(-22, 14, -18)
   scene.add(rim)
 }
 
 function setupGround() {
-  const grid = new THREE.GridHelper(64, 36, '#1e3a8a', '#162447')
-  grid.position.y = -1.4
+  const grid = new THREE.GridHelper(80, 40, '#d4c5ad', '#e8dfcf')
+  grid.position.y = -2.6
   grid.material.transparent = true
-  grid.material.opacity = 0.5
+  grid.material.opacity = 0.55
   scene.add(grid)
-
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(36, 80),
-    new THREE.MeshStandardMaterial({ color: '#0d1730', transparent: true, opacity: 0.7, roughness: 0.9 })
-  )
-  floor.rotation.x = -Math.PI / 2
-  floor.position.y = -1.44
-  floor.receiveShadow = true
-  scene.add(floor)
 }
 
 function setupComposer(width, height) {
   composer = new EffectComposer(renderer)
   renderPass = new RenderPass(scene, camera)
   composer.addPass(renderPass)
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 0.62, 0.7, 0.82)
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 0.28, 0.55, 0.92)
   composer.addPass(bloomPass)
   composer.addPass(new OutputPass())
   composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -686,6 +721,13 @@ function clearGraphObjects() {
 
 function buildGraphScene() {
   if (!scene || !nodeGroup || !edgeGroup || !hasGraphData.value) return
+  // 重建场景前强制清主角态（masteryMap 变化等触发重建时主角 group 失效）
+  focusMode = false
+  focusTargetId = ''
+  focusState.active = false
+  focusState.mode = 'idle'
+  focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
+  if (focusPedestal) focusPedestal.visible = false
   clearGraphObjects()
   nodePositionById = buildNodeLayout()
   buildEdges()
@@ -777,7 +819,7 @@ function rebuildSubmissionSatellites() {
   if (lastPositions.length > 1) {
     const lineGeo = new THREE.BufferGeometry().setFromPoints(lastPositions)
     const lineMat = new THREE.LineBasicMaterial({
-      color: '#7dd3fc',
+      color: '#c2703e',
       transparent: true,
       opacity: 0.55
     })
@@ -818,21 +860,61 @@ function updateNodeVisual(group, options = {}) {
   if (!mesh || !glow) return
 
   const nodeId = group.userData.node?.id
-  const dimmed = hasHighlight() && !isNodeHighlighted(nodeId)
-  group.userData.dimmed = dimmed
-  group.userData.selected = selected
-  const targetScale = dimmed ? 0.9 : selected ? 1.2 : hovered ? 1.1 : 1
+
+  // 主角模式 dim 分级：主角满显、相邻半淡、其他极淡
+  const isHero = focusMode && nodeId === focusTargetId
+  const isNeighbor = focusMode && focusNeighbors.neighborNodeIds.has(nodeId)
+  const dimmedByHighlight = hasHighlight() && !isNodeHighlighted(nodeId)
+  const dimmedByFocus = focusMode && !isHero && !isNeighbor
+
+  // 主角模式下主角强制选中视觉，忽略外部 selectedNodeId
+  const effectiveSelected = focusMode ? isHero : selected
+  group.userData.dimmed = dimmedByHighlight || dimmedByFocus || (focusMode && isNeighbor)
+  group.userData.selected = effectiveSelected
+
+  // 缩放：主角整体放大交给 group.scale（advanceFocusMode 接管），mesh 保持 1
+  let targetScale
+  if (focusMode) {
+    targetScale = isHero ? 1 : isNeighbor ? 0.95 : 0.8
+  } else {
+    targetScale = dimmedByHighlight ? 0.9 : effectiveSelected ? 1.2 : hovered ? 1.1 : 1
+  }
   group.userData.targetScale = targetScale
-  mesh.material.transparent = dimmed
-  mesh.material.opacity = dimmed ? 0.16 : 1
+
+  // 透明度
+  if (focusMode) {
+    const op = isHero ? 1 : isNeighbor ? FOCUS_CONFIG.neighborOpacity : FOCUS_CONFIG.dimOpacity
+    mesh.material.transparent = !isHero
+    mesh.material.opacity = op
+  } else {
+    mesh.material.transparent = dimmedByHighlight
+    mesh.material.opacity = dimmedByHighlight ? 0.16 : 1
+  }
+
+  // emissive：主角强发光（浅底替代 bloom 的关键），相邻中等，其他压暗
   const baseEmissive = mesh.userData.baseEmissiveIntensity || 0.22
-  mesh.userData.emissiveTarget = dimmed ? baseEmissive * 0.35 : selected ? 0.85 : hovered ? 0.5 : baseEmissive
-  glow.material.opacity = dimmed ? 0.08 : selected ? 0.95 : hovered ? 0.72 : 0.5
+  if (focusMode) {
+    mesh.userData.emissiveTarget = isHero ? 0.95 : isNeighbor ? baseEmissive * 0.6 : baseEmissive * 0.25
+  } else {
+    mesh.userData.emissiveTarget = dimmedByHighlight ? baseEmissive * 0.35 : effectiveSelected ? 0.85 : hovered ? 0.5 : baseEmissive
+  }
+
+  // 光晕
+  if (focusMode) {
+    glow.material.opacity = isHero ? 0.8 : isNeighbor ? 0.28 : 0.05
+  } else {
+    glow.material.opacity = dimmedByHighlight ? 0.08 : effectiveSelected ? 0.95 : hovered ? 0.72 : 0.5
+  }
 
   const label = labelObjectById.get(nodeId)
   if (label?.element) {
-    label.element.style.opacity = dimmed ? '0.22' : ''
-    label.element.classList.toggle('is-selected', selected)
+    if (focusMode) {
+      label.element.style.opacity = isHero ? '1' : isNeighbor ? FOCUS_CONFIG.neighborLabelOpacity : FOCUS_CONFIG.dimLabelOpacity
+      label.element.classList.toggle('is-selected', isHero)
+    } else {
+      label.element.style.opacity = dimmedByHighlight ? '0.22' : ''
+      label.element.classList.toggle('is-selected', effectiveSelected)
+    }
   }
 }
 
@@ -857,7 +939,7 @@ function updateSelectionState() {
       hovered: hoveredNode.value?.id === nodeId
     })
   })
-  updateRing(selectRing, props.selectedNodeId, 0.34)
+  updateRing(selectRing, focusMode ? focusTargetId : props.selectedNodeId, focusMode ? 0.5 : 0.34)
   updateRing(hoverRing, hoveredNode.value?.id, 0.2)
   updateEdgeHighlight()
   requestRender()
@@ -871,13 +953,24 @@ function updateEdgeHighlight() {
     const attr = mesh.geometry.getAttribute('color')
     const arr = attr.array
     for (const range of ranges) {
-      const factor = !highlightOn || isRelationHighlighted(range.relation) ? 1 : 0.14
+      let factor
+      if (focusMode) {
+        // 主角模式：仅与主角相连的边高亮，其他极淡
+        const rel = range.relation
+        factor = focusNeighbors.neighborRelationKeys.has(rel.id)
+          || focusNeighbors.neighborRelationKeys.has(`${rel.source}__${rel.type}__${rel.target}`)
+          ? 1 : 0.08
+      } else {
+        factor = !highlightOn || isRelationHighlighted(range.relation) ? 1 : 0.14
+      }
       const begin = range.start * 3
       const stop = (range.start + range.count) * 3
       for (let i = begin; i < stop; i++) arr[i] = baseColors[i] * factor
     }
     attr.needsUpdate = true
-    mesh.material.opacity = highlightOn ? (mesh.userData.type === 'CONTAINS' ? 0.4 : 0.7) : (mesh.userData.type === 'CONTAINS' ? 0.5 : 0.8)
+    mesh.material.opacity = focusMode
+      ? (mesh.userData.type === 'CONTAINS' ? 0.55 : 0.8)
+      : (highlightOn ? (mesh.userData.type === 'CONTAINS' ? 0.4 : 0.7) : (mesh.userData.type === 'CONTAINS' ? 0.5 : 0.8))
   })
 }
 
@@ -941,11 +1034,20 @@ function handlePointerLeave() {
 function handleClick(event) {
   const node = getIntersectedNode(event)
   if (node) {
+    // 点击主角本身 → 退出主角模式
+    if (focusMode && node.id === focusTargetId) {
+      exitFocusMode()
+      return
+    }
+    // 点击其他节点 → 进入/切换主角模式 + 联动右侧面板
     emit('select-node', node)
+    enterFocusMode(node.id)
     return
   }
   const sub = getIntersectedSubmission(event)
-  if (sub) emit('select-submission', sub)
+  if (sub) { emit('select-submission', sub); return }
+  // 点击空白 → 退出主角模式
+  if (focusMode) exitFocusMode()
 }
 
 function handleDblClick(event) {
@@ -1008,6 +1110,110 @@ function advanceAppear(delta) {
   return active
 }
 
+// 主角模式：预计算与主角直连的节点 id 和关系 key
+function computeFocusNeighbors(nodeId) {
+  const neighborNodeIds = new Set()
+  const neighborRelationKeys = new Set()
+  for (const relation of props.relations || []) {
+    if (relation.source === relation.target) continue
+    let connected = false
+    if (relation.source === nodeId) { neighborNodeIds.add(relation.target); connected = true }
+    if (relation.target === nodeId) { neighborNodeIds.add(relation.source); connected = true }
+    if (connected) {
+      if (relation.id) neighborRelationKeys.add(relation.id)
+      neighborRelationKeys.add(`${relation.source}__${relation.type}__${relation.target}`)
+    }
+  }
+  return { neighborNodeIds, neighborRelationKeys }
+}
+
+// 进入主角模式：主角飞到场景中心放大，相机推近正面
+function enterFocusMode(nodeId) {
+  const group = nodeObjectById.get(nodeId)
+  if (!group || !camera || !controls) return
+  focusTargetId = nodeId
+  focusNeighbors = computeFocusNeighbors(nodeId)
+  // 记录主角原始位姿，供退出还原
+  group.userData.restPos = group.position.clone()
+  group.userData.restBaseY = group.userData.baseY
+  group.userData.restScale = group.scale.x
+  focusMode = true
+  focusState.mode = 'enter'
+  focusState.t = 0
+  focusState.active = true
+  // 相机推近到主角正面（target 锁定主角目标位）
+  startCameraTween(
+    FOCUS_CONFIG.heroPos.clone().add(FOCUS_CONFIG.cameraOffset),
+    FOCUS_CONFIG.heroPos.clone()
+  )
+  // 展台就位
+  if (focusPedestal) {
+    focusPedestal.position.copy(FOCUS_CONFIG.heroPos)
+    focusPedestal.position.y -= 1.4
+    focusPedestal.scale.setScalar(0.01)
+    focusPedestal.visible = true
+  }
+  // 主角模式下禁止平移，保证主角稳定居中
+  controls.enablePan = false
+  updateSelectionState()
+  requestRender()
+}
+
+// 退出主角模式：主角缩回原位，相机回到全景
+function exitFocusMode() {
+  if (!focusMode) return
+  focusState.mode = 'exit'
+  focusState.t = 0
+  focusState.active = true
+  startCameraTween(initialCameraPosition.clone(), initialControlTarget.clone())
+  updateSelectionState()
+  requestRender()
+}
+
+// 主角模式过渡推进：插值主角 position/baseY/scale 与展台 scale
+function advanceFocusMode(delta) {
+  if (!focusState.active) return false
+  focusState.t = Math.min(1, focusState.t + delta / focusState.duration)
+  const k = easeInOutCubic(focusState.t)
+  const entering = focusState.mode === 'enter'
+
+  const hero = nodeObjectById.get(focusTargetId)
+  if (hero) {
+    const restPos = hero.userData.restPos
+    const targetPos = FOCUS_CONFIG.heroPos
+    if (entering) {
+      hero.position.x = THREE.MathUtils.lerp(restPos.x, targetPos.x, k)
+      hero.position.z = THREE.MathUtils.lerp(restPos.z, targetPos.z, k)
+      // y 由浮动基准接管，避免 animate 浮动段覆盖
+      hero.userData.baseY = THREE.MathUtils.lerp(restPos.y, targetPos.y, k)
+      hero.scale.setScalar(THREE.MathUtils.lerp(hero.userData.restScale || 1, FOCUS_CONFIG.heroScale, k))
+    } else {
+      hero.position.x = THREE.MathUtils.lerp(targetPos.x, restPos.x, k)
+      hero.position.z = THREE.MathUtils.lerp(targetPos.z, restPos.z, k)
+      hero.userData.baseY = THREE.MathUtils.lerp(targetPos.y, restPos.y, k)
+      hero.scale.setScalar(THREE.MathUtils.lerp(FOCUS_CONFIG.heroScale, hero.userData.restScale || 1, k))
+    }
+  }
+  // 展台缩放
+  if (focusPedestal?.visible) {
+    focusPedestal.scale.setScalar(entering ? k : (1 - k))
+  }
+  // 完成
+  if (focusState.t >= 1) {
+    focusState.active = false
+    focusState.mode = 'idle'
+    if (!entering) {
+      // 退出完成：彻底复位
+      focusMode = false
+      focusTargetId = ''
+      focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
+      if (focusPedestal) focusPedestal.visible = false
+      if (controls) controls.enablePan = true
+    }
+  }
+  return true
+}
+
 function animate() {
   animationId = window.requestAnimationFrame(animate)
   const delta = clock ? clock.getDelta() : 0.016
@@ -1018,7 +1224,7 @@ function animate() {
     // 轻微浮动 + 选中节点发光脉冲；浮动幅度按掌握度（优势高飘、薄弱小幅度）
     nodeGroup.children.forEach((group) => {
       const baseY = group.userData.baseY ?? group.position.y
-      const amp = group.userData.floatAmp ?? 0.12
+      const amp = group.userData.floatAmp ?? 0.28
       group.position.y = baseY + Math.sin(elapsed * 0.9 + group.userData.floatPhase) * amp
     })
     dynamic = true
@@ -1047,6 +1253,12 @@ function animate() {
   }
   if (hoverRing?.visible) { hoverRing.rotation.z += delta * 0.8; dynamic = true }
   if (selectRing?.visible) { selectRing.rotation.z -= delta * 0.5; dynamic = true }
+  if (focusPedestal?.visible) {
+    focusPedestal.userData.ring1.rotation.z += delta * 0.5
+    focusPedestal.userData.ring2.rotation.z -= delta * 0.35
+    dynamic = true
+  }
+  if (advanceFocusMode(delta)) dynamic = true
   if (advanceAppear(delta)) dynamic = true
   if (cameraTween.active) { advanceCameraTween(delta); dynamic = true }
 
@@ -1120,6 +1332,11 @@ function destroyScene() {
   scene = camera = renderer = composer = bloomPass = renderPass = null
   labelRenderer = controls = clock = null
   nodeGroup = edgeGroup = hoverRing = selectRing = raycaster = pointer = null
+  focusPedestal = null
+  focusMode = false
+  focusTargetId = ''
+  focusState.active = false
+  focusState.mode = 'idle'
   submissionGroup = null
   submissionMeshes = []
   hoveredNode.value = null
@@ -1153,6 +1370,8 @@ function focusNode(nodeId) {
 }
 
 function focusSelectedNode() {
+  // 主角模式下点击聚焦按钮 → 退出主角模式返回全景
+  if (focusMode) { exitFocusMode(); return }
   focusNode(props.selectedNodeId || hoveredNode.value?.id)
 }
 
@@ -1289,7 +1508,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-else-if="hoveredSubmission" class="node-tooltip">
-          <span class="tooltip-type" style="background:#0f172a;color:#7dd3fc">
+          <span class="tooltip-type" style="background:var(--app-primary-soft);color:var(--app-primary-strong)">
             提交记录
           </span>
           <strong>{{ hoveredSubmission.experimentName || '提交' }}</strong>
@@ -1334,12 +1553,12 @@ onBeforeUnmount(() => {
   min-width: 0;
   min-height: 640px;
   overflow: hidden;
-  border: 1px solid #1e293b;
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
   background:
-    radial-gradient(circle at 50% 16%, rgba(56, 189, 248, 0.16), transparent 42%),
-    linear-gradient(180deg, #0b1226, #0a1020);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    radial-gradient(circle at 50% 14%, rgba(194, 112, 62, 0.1), transparent 46%),
+    linear-gradient(180deg, #fffcf7, #faf6ef);
+  box-shadow: var(--app-shadow);
 }
 
 .graph-canvas-shell.fullscreen {
@@ -1380,11 +1599,11 @@ onBeforeUnmount(() => {
   min-height: 24px;
   padding: 3px 9px;
   overflow: hidden;
-  border: 1px solid rgba(148, 197, 255, 0.28);
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.45);
-  color: #e2e8f0;
+  background: rgba(255, 252, 247, 0.92);
+  box-shadow: 0 4px 12px rgba(120, 90, 50, 0.14);
+  color: var(--app-text);
   font-size: 12px;
   font-weight: 800;
   line-height: 1.35;
@@ -1397,16 +1616,16 @@ onBeforeUnmount(() => {
 }
 
 .graph-scene :deep(.graph-node-label.is-selected) {
-  border-color: var(--node-color);
-  box-shadow: 0 0 0 2px var(--node-color), 0 8px 20px rgba(2, 6, 23, 0.5);
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 2px var(--app-primary), 0 6px 16px rgba(194, 112, 62, 0.22);
 }
 
 .graph-scene :deep(.graph-node-label-course) {
   max-width: 140px;
   min-height: 30px;
   padding: 5px 13px;
-  background: rgba(18, 112, 216, 0.94);
-  border-color: rgba(125, 211, 252, 0.6);
+  background: linear-gradient(180deg, #d48a55, #b56535);
+  border-color: rgba(194, 112, 62, 0.6);
   color: #fff;
   font-size: 14px;
 }
@@ -1414,7 +1633,7 @@ onBeforeUnmount(() => {
 .graph-scene :deep(.graph-node-label-chapter) {
   position: relative;
   max-width: 118px;
-  color: #f1f5f9;
+  color: var(--app-text);
 }
 
 .graph-scene :deep(.chapter-badge) {
@@ -1432,7 +1651,7 @@ onBeforeUnmount(() => {
   color: #fff;
   font-size: 11px;
   font-weight: 900;
-  box-shadow: 0 2px 6px rgba(2, 6, 23, 0.4);
+  box-shadow: 0 2px 6px rgba(120, 90, 50, 0.25);
 }
 /* @@STYLE3@@ */
 
@@ -1445,11 +1664,11 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 8px;
   padding: 8px;
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.4);
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: rgba(255, 252, 247, 0.88);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
 }
 
 .graph-tool-button {
@@ -1459,22 +1678,22 @@ onBeforeUnmount(() => {
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--app-radius-sm);
   background: transparent;
-  color: #cbd5e1;
+  color: var(--app-text-secondary);
   cursor: pointer;
   transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .graph-tool-button:hover {
-  background: rgba(56, 189, 248, 0.16);
-  color: #7dd3fc;
+  background: rgba(194, 112, 62, 0.14);
+  color: var(--app-primary);
   transform: translateY(-1px);
 }
 
 .graph-tool-button.active {
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+  background: rgba(194, 112, 62, 0.18);
+  color: var(--app-primary-strong);
 }
 
 .node-tooltip {
@@ -1487,11 +1706,11 @@ onBeforeUnmount(() => {
   gap: 6px;
   width: min(290px, calc(100% - 36px));
   padding: 12px;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.46);
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: rgba(255, 252, 247, 0.92);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
 }
 
 .node-tooltip .tooltip-type {
@@ -1504,7 +1723,7 @@ onBeforeUnmount(() => {
 
 .node-tooltip strong {
   overflow: hidden;
-  color: #f1f5f9;
+  color: var(--app-text);
   font-size: 14px;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1514,7 +1733,7 @@ onBeforeUnmount(() => {
 .node-tooltip .tooltip-summary {
   display: -webkit-box;
   overflow: hidden;
-  color: #94a3b8;
+  color: var(--app-text-secondary);
   font-size: 12px;
   line-height: 1.55;
   -webkit-box-orient: vertical;
@@ -1530,8 +1749,8 @@ onBeforeUnmount(() => {
 .tooltip-chips span {
   padding: 2px 7px;
   border-radius: 6px;
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
   font-size: 11px;
   font-weight: 700;
 }
@@ -1556,14 +1775,14 @@ onBeforeUnmount(() => {
   max-width: calc(100% - 100px);
   min-height: 34px;
   padding: 0 12px;
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.7);
-  color: #cbd5e1;
+  background: rgba(255, 252, 247, 0.88);
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.35);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
 }
 
 .graph-legend {
@@ -1576,8 +1795,8 @@ onBeforeUnmount(() => {
   gap: 10px 16px;
   min-height: 52px;
   padding: 10px 16px;
-  border-top: 1px solid rgba(56, 189, 248, 0.16);
-  background: rgba(11, 18, 38, 0.86);
+  border-top: 1px solid var(--app-border);
+  background: rgba(255, 252, 247, 0.9);
   backdrop-filter: blur(10px);
 }
 
@@ -1594,7 +1813,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #cbd5e1;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -1604,7 +1823,7 @@ onBeforeUnmount(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(148, 197, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(120, 90, 50, 0.1);
 }
 
 .legend-line-item i {
