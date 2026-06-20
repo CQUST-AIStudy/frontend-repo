@@ -398,8 +398,8 @@ const toastClass = computed(() => {
 const defaultAccounts = isDevelopment
   ? {
       teacher: { username: 'teacher1', password: 'password123' },
-      student: { username: 'student1', password: 'password123' },
-      admin: { username: 'admin1', password: 'password123' }
+      student: { username: '格格', password: '123456' },
+      admin: { username: 'admin', password: '123456' }
     }
   : {}
 
