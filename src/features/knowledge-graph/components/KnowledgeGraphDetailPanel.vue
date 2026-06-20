@@ -4,6 +4,7 @@ import hljs from 'highlight.js/lib/common'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { getNodeTypeMeta, getRelationTypeMeta } from '../graphDatabaseAdapter'
 import { MASTERY_LEVELS } from '../learningState'
+import SubmissionTracePanel from './SubmissionTracePanel.vue'
 
 const props = defineProps({
   context: {
@@ -13,10 +14,23 @@ const props = defineProps({
   learningState: {
     type: Object,
     default: () => ({})
-  }
+  },
+  // 当前节点的画像掌握度信息 { level, score, isWeak, evidence, dimension, experimentName }
+  masteryInfo: {
+    type: Object,
+    default: null
+  },
+  // 提交记录列表
+  submissions: {
+    type: Array,
+    default: () => []
+  },
+  submissionsLoading: { type: Boolean, default: false },
+  submissionsError: { type: String, default: '' },
+  selectedSubmission: { type: Object, default: null }
 })
 
-const emit = defineEmits(['update-state'])
+const emit = defineEmits(['update-state', 'select-submission'])
 
 const context = computed(() => props.context || null)
 const node = computed(() => props.context?.node || null)
@@ -88,6 +102,21 @@ const nodeState = computed(() => {
   return props.learningState?.[id] || { mastery: 'unstarted', favorite: false, note: '' }
 })
 
+// 画像掌握度摘要
+const masterySummary = computed(() => {
+  const m = props.masteryInfo
+  if (!m) return null
+  const levelMap = {
+    good: { label: '已掌握', color: '#22c55e', bg: '#dcfce7', icon: 'badge-check', tip: '已掌握，可挑战进阶练习' },
+    medium: { label: '学习中', color: '#f59e0b', bg: '#fef3c7', icon: 'book-open', tip: '正在学习，继续巩固' },
+    weak: { label: '薄弱', color: '#ef4444', bg: '#fee2e2', icon: 'triangle-alert', tip: '建议重点复习' },
+    unstarted: { label: '未学习', color: '#94a3b8', bg: '#f1f5f9', icon: 'circle', tip: '尚未开始学习' }
+  }
+  return { ...m, meta: levelMap[m.level] || levelMap.unstarted }
+})
+
+const evidence = computed(() => props.masteryInfo?.evidence || null)
+
 function updateMastery(event) {
   emit('update-state', { mastery: event.target.value })
 }
@@ -127,6 +156,29 @@ const relationGroups = computed(() => {
       </div>
 
       <p class="detail-summary">{{ node.summary || '暂无简介' }}</p>
+
+      <!-- 学习画像优缺点摘要 -->
+      <section v-if="masterySummary" class="mastery-summary" :style="{ backgroundColor: masterySummary.meta.bg, borderColor: masterySummary.meta.color }">
+        <div class="mastery-head">
+          <span class="mastery-tag" :style="{ color: masterySummary.meta.color }">
+            <LucideIcon :name="masterySummary.meta.icon" :size="14" />
+            {{ masterySummary.meta.label }}
+          </span>
+          <strong v-if="masterySummary.score != null" class="mastery-score" :style="{ color: masterySummary.meta.color }">
+            {{ masterySummary.score }}分
+          </strong>
+        </div>
+        <p class="mastery-tip">{{ masterySummary.meta.tip }}</p>
+        <div v-if="masterySummary.dimension" class="mastery-dim">
+          能力维度：{{ masterySummary.dimension }}
+        </div>
+        <div v-if="evidence" class="mastery-evidence">
+          <span>提交 {{ evidence.totalSubmissions || 0 }}</span>
+          <span>AC {{ evidence.acCount || 0 }}</span>
+          <span v-if="evidence.compileErrors">编译错误 {{ evidence.compileErrors }}</span>
+          <span v-if="evidence.wrongAnswers">答案错误 {{ evidence.wrongAnswers }}</span>
+        </div>
+      </section>
 
       <div v-if="context.ancestorChain.length" class="breadcrumb-line">
         <span v-for="(item, index) in context.ancestorChain" :key="item.id">
@@ -270,6 +322,14 @@ const relationGroups = computed(() => {
         </div>
       </section>
 
+      <SubmissionTracePanel
+        :submissions="submissions"
+        :loading="submissionsLoading"
+        :error="submissionsError"
+        :selected-submission="selectedSubmission"
+        @select-submission="(s) => emit('select-submission', s)"
+      />
+
       <section class="relation-section">
         <div class="relation-title">
           <LucideIcon name="network" :size="15" />
@@ -340,6 +400,58 @@ const relationGroups = computed(() => {
   color: #475569;
   font-size: 13px;
   line-height: 1.7;
+}
+
+.mastery-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.mastery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mastery-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.mastery-score {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.mastery-tip {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mastery-dim {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mastery-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .breadcrumb-line {

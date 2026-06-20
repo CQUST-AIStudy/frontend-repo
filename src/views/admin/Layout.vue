@@ -58,11 +58,6 @@
               <ui-icon><Setting /></ui-icon>
               <template #title>个人设置</template>
             </ui-menu-item>
-
-            <ui-menu-item index="/admin/knowledge-graph">
-              <ui-icon><Connection /></ui-icon>
-              <template #title>知识图谱</template>
-            </ui-menu-item>
           </ui-menu>
         </ui-scrollbar>
       </ui-aside>
@@ -128,11 +123,6 @@
               <ui-menu-item index="/admin/profile">
                 <ui-icon><Setting /></ui-icon>
                 <template #title>个人设置</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/admin/knowledge-graph">
-                <ui-icon><Connection /></ui-icon>
-                <template #title>知识图谱</template>
               </ui-menu-item>
             </ui-menu>
           </ui-scrollbar>
@@ -210,7 +200,7 @@ import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
   Setting, Fold, ArrowDown, SwitchButton, WarningFilled,
-  Menu as MenuIcon, TrendCharts, Connection
+  Menu as MenuIcon, TrendCharts
 } from '@/components/ui/icons'
 import { getPtaCookieStatus } from '../../api/tap'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'

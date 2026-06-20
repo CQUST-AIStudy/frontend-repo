@@ -100,7 +100,7 @@ const routes = [
       {
         path: 'knowledge-graph',
         name: 'KnowledgeGraph',
-        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
+        component: () => import('../features/knowledge-graph/views/StudentLearningGraph.vue')
       },
       {
         path: 'profile',
@@ -290,11 +290,6 @@ const routes = [
         path: 'leetcode-bank',
         name: 'LeetCodeBank',
         component: () => import('../views/teacher/LeetCodeBank.vue')
-      },
-      {
-        path: 'knowledge-graph',
-        name: 'TeacherKnowledgeGraph',
-        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       }
     ]
   },
@@ -344,11 +339,6 @@ const routes = [
         path: 'profile',
         name: 'AdminProfile',
         component: () => import('../views/admin/Profile.vue')
-      },
-      {
-        path: 'knowledge-graph',
-        name: 'AdminKnowledgeGraph',
-        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       }
     ]
   }
@@ -360,7 +350,7 @@ const router = createRouter({
 })
 
 const TEACHER_CLASS_SELECTOR_PATH = '/teacher/select-class'
-const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank', '/teacher/knowledge-graph'])
+const teacherRoutesWithoutSelectedClass = new Set(['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'])
 
 function getPersistedSelectedClass() {
   try {

@@ -69,7 +69,7 @@
 
             <ui-menu-item index="/student/knowledge-graph">
               <ui-icon><Connection /></ui-icon>
-              <template #title>知识图谱</template>
+              <template #title>我的学习图谱</template>
             </ui-menu-item>
 
             <ui-menu-item index="/student/knowledge-learning">
@@ -160,7 +160,7 @@
 
               <ui-menu-item index="/student/knowledge-graph">
                 <ui-icon><Connection /></ui-icon>
-                <template #title>知识图谱</template>
+                <template #title>我的学习图谱</template>
               </ui-menu-item>
 
               <ui-menu-item index="/student/knowledge-learning">
@@ -300,7 +300,7 @@ const breadcrumbs = computed(() => {
     'weakness-training': '错题本/专项训练',
     'ability-profile': '能力画像',
     'knowledge-learning': '知识学习',
-    'knowledge-graph': '知识图谱',
+    'knowledge-graph': '我的学习图谱',
     profile: '个人设置'
   }
   const paths = route.path.split('/').filter(Boolean)

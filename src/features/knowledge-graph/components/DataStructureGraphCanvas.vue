@@ -17,14 +17,19 @@ const props = defineProps({
   selectedNodeId: { type: String, default: '' },
   highlightPaths: { type: Object, default: null },
   chapterChildCounts: { type: Object, default: () => ({}) },
-  learningState: { type: Object, default: () => ({}) }
+  learningState: { type: Object, default: () => ({}) },
+  // 个人学习模式：nodeId → { level, score, isWeak, evidence, experimentId }
+  masteryMap: { type: Object, default: () => ({}) },
+  // 当前选中节点的提交版本链数据 { nodeId, submissions: [...] }
+  submissionTrace: { type: Object, default: null }
 })
 
-const emit = defineEmits(['select-node'])
+const emit = defineEmits(['select-node', 'trace-node', 'select-submission'])
 
 const shellRef = ref(null)
 const sceneRef = ref(null)
 const hoveredNode = shallowRef(null)
+const hoveredSubmission = shallowRef(null)
 const isFullscreen = shallowRef(false)
 const motionEnabled = ref(true)
 const bloomEnabled = ref(true)
@@ -44,6 +49,18 @@ const relationTypeLegend = computed(() => {
 const hoveredMeta = computed(() => hoveredNode.value ? getNodeTypeMeta(hoveredNode.value.type) : null)
 const hoveredMastery = computed(() => {
   const id = hoveredNode.value?.id
+  // 优先用画像 masteryMap
+  const m = id ? props.masteryMap?.[id] : null
+  if (m) {
+    return {
+      value: m.level === 'good' ? 'mastered' : m.level === 'medium' ? 'learning' : m.level === 'weak' ? 'learning' : 'unstarted',
+      label: m.level === 'good' ? '已掌握' : m.level === 'medium' ? '学习中' : m.level === 'weak' ? '薄弱' : '未学习',
+      color: m.level === 'good' ? '#22c55e' : m.level === 'medium' ? '#f59e0b' : m.level === 'weak' ? '#ef4444' : '#94a3b8',
+      score: m.score,
+      isWeak: m.isWeak
+    }
+  }
+  // 降级 localStorage 手动标记
   const state = id ? props.learningState?.[id] : null
   if (!state || !state.mastery || state.mastery === 'unstarted') return null
   return getMasteryMeta(state.mastery)
@@ -88,6 +105,11 @@ let labelObjectById = new Map()
 let appearAnimations = []
 let initialCameraPosition = null
 let initialControlTarget = null
+
+// 3D 提交版本链卫星组
+let submissionGroup = null
+let submissionMeshes = [] // 卫星 mesh 数组，供 raycaster 拾取
+const submissionGeometry = new THREE.SphereGeometry(0.26, 18, 14)
 
 // 相机补间（自研轻量插值，不引第三方）
 const cameraTween = {
@@ -135,9 +157,33 @@ function isRelationHighlighted(relation) {
 }
 
 function getMasteryColor(nodeId) {
+  // 优先画像 masteryMap
+  const m = props.masteryMap?.[nodeId]
+  if (m) {
+    if (m.level === 'good') return '#22c55e'
+    if (m.level === 'medium') return '#f59e0b'
+    if (m.level === 'weak') return '#ef4444'
+  }
   const state = props.learningState?.[nodeId]
   if (!state || !state.mastery || state.mastery === 'unstarted') return null
   return getMasteryMeta(state.mastery).color
+}
+
+// 掌握度驱动的 Y 轴浮空偏移：优势上浮、薄弱下沉
+function masteryYOffset(node) {
+  const m = props.masteryMap?.[node.id]
+  if (!m || m.level === 'unstarted') return 0
+  const score = typeof m.score === 'number' ? m.score : 50
+  return ((score - 50) / 50) * 1.6
+}
+
+// 节点浮动幅度按掌握度调整：优势轻盈高飘，薄弱小幅度
+function masteryFloatAmp(nodeId) {
+  const m = props.masteryMap?.[nodeId]
+  if (!m || m.level === 'unstarted') return 0.12
+  if (m.level === 'good') return 0.2
+  if (m.level === 'weak') return 0.06
+  return 0.12
 }
 
 function getNodeSize(node) {
@@ -301,7 +347,8 @@ function buildNodeLayout() {
   const positions = new Map()
   for (const node of nodes) {
     const p = pos.get(node.id) || new THREE.Vector2()
-    positions.set(node.id, new THREE.Vector3(p.x, TYPE_Y_OFFSET[node.type] || 0, p.y))
+    const yOffset = (TYPE_Y_OFFSET[node.type] || 0) + masteryYOffset(node)
+    positions.set(node.id, new THREE.Vector3(p.x, yOffset, p.y))
   }
   return positions
 }
@@ -346,43 +393,67 @@ function createNodeObject(node) {
   const meta = getNodeTypeMeta(node.type)
   const size = getNodeSize(node)
   const group = new THREE.Group()
+  const m = props.masteryMap?.[node.id]
+  const isWeak = m?.isWeak || m?.level === 'weak'
+  const isGood = m?.level === 'good'
   const color = makeColor(meta.color)
   const selected = isSelected(node.id)
 
   // 几何共享、材质按节点克隆（color/emissive 独立，可单独高亮）
   const geometry = getGeometryForType(node.type)
+  // 薄弱点压暗基色并偏红；优势点提亮
+  let baseColor = color
+  let emissiveColor = color
+  let baseEmissive = 0.22
+  if (isWeak) {
+    baseColor = color.clone().lerp(new THREE.Color('#ef4444'), 0.45).multiplyScalar(0.7)
+    emissiveColor = new THREE.Color('#ef4444')
+    baseEmissive = 0.18
+  } else if (isGood) {
+    emissiveColor = color.clone().lerp(new THREE.Color('#fbbf24'), 0.35)
+    baseEmissive = 0.32
+  }
   const material = new THREE.MeshPhysicalMaterial({
-    color,
+    color: baseColor,
     roughness: 0.4,
     metalness: 0.12,
     clearcoat: 0.8,
     clearcoatRoughness: 0.25,
     sheen: 0.4,
-    sheenColor: color.clone().lerp(new THREE.Color('#ffffff'), 0.5),
-    emissive: color,
-    emissiveIntensity: selected ? 0.5 : 0.22
+    sheenColor: baseColor.clone().lerp(new THREE.Color('#ffffff'), 0.5),
+    emissive: emissiveColor,
+    emissiveIntensity: selected ? 0.5 : baseEmissive
   })
   const mesh = new THREE.Mesh(geometry, material)
   mesh.castShadow = node.type === 'course' || node.type === 'chapter'
   mesh.receiveShadow = false
   mesh.userData.node = node
-  mesh.userData.baseEmissiveIntensity = material.emissiveIntensity
+  mesh.userData.baseEmissiveIntensity = baseEmissive
+  mesh.userData.isWeak = isWeak
+  mesh.userData.isGood = isGood
   group.add(mesh)
 
   // 光晕：共享贴图，材质独立（控制透明度/缩放）
+  // 薄弱点用红色光晕贴图，优势点用金色
+  const glowColor = isWeak ? '#ef4444' : isGood ? '#fbbf24' : meta.color
   const glowMaterial = new THREE.SpriteMaterial({
-    map: getGlowTexture(meta.color),
+    map: getGlowTexture(glowColor),
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
-    opacity: selected ? 0.85 : 0.5
+    opacity: isWeak ? 0.32 : isGood ? (selected ? 0.9 : 0.6) : (selected ? 0.85 : 0.5)
   })
   const glow = new THREE.Sprite(glowMaterial)
-  glow.scale.setScalar(size * (selected ? 5.3 : 4.1))
+  glow.scale.setScalar(size * (isGood ? (selected ? 6 : 4.8) : isWeak ? 3.4 : (selected ? 5.3 : 4.1)))
   glow.position.set(0, -size * 0.18, 0)
   group.add(glow)
 
   const masteryRing = createMasteryRing(size, getMasteryColor(node.id))
+  // 薄弱点圆环偏红破质感：降低分段制造"裂缝"
+  if (isWeak) {
+    masteryRing.geometry.dispose()
+    masteryRing.geometry = new THREE.TorusGeometry(size + 0.34, 0.06, 8, 28)
+  }
   group.add(masteryRing)
 
   group.add(createNodeLabel(node, meta, size))
@@ -395,6 +466,7 @@ function createNodeObject(node) {
   group.userData.masteryRing = masteryRing
   group.userData.baseY = position.y
   group.userData.floatPhase = Math.random() * Math.PI * 2
+  group.userData.floatAmp = masteryFloatAmp(node.id)
 
   nodeObjects.push(mesh)
   nodeObjectById.set(node.id, group)
@@ -597,6 +669,7 @@ function disposeObject(object) {
 }
 
 function clearGraphObjects() {
+  disposeSubmissionSatellites()
   for (const group of [nodeGroup, edgeGroup]) {
     if (!group) continue
     while (group.children.length) {
@@ -622,7 +695,121 @@ function buildGraphScene() {
   // 入场动画：缩放从 0 弹入
   appearAnimations = nodeObjects.map((mesh, i) => ({ mesh, delay: i * 0.012, t: 0 }))
   updateSelectionState()
+  rebuildSubmissionSatellites()
   requestRender()
+}
+
+// 提交状态 → 颜色
+function submissionColor(sub) {
+  const status = String(sub.status || sub.judgeStatus || '').toLowerCase()
+  const score = Number(sub.score)
+  if (status.includes('ac') || status.includes('accept') || status.includes('completed') || status.includes('graded')) return '#22c55e'
+  if (status.includes('ce') || status.includes('compile') || status.includes('error')) return '#ef4444'
+  if (!Number.isNaN(score) && score >= 70) return '#22c55e'
+  if (!Number.isNaN(score) && score >= 40) return '#f59e0b'
+  if (status.includes('wa') || status.includes('wrong') || status.includes('reject')) return '#f59e0b'
+  return '#94a3b8'
+}
+
+/**
+ * 根据当前 submissionTrace（{ nodeId, submissions[] }）在选中节点周围构建提交卫星链。
+ * 卫星按提交时间螺旋上升排布，相邻用细线连接，可拾取。
+ */
+function rebuildSubmissionSatellites() {
+  // 清理上一组
+  disposeSubmissionSatellites()
+  if (!scene || !nodeGroup) return
+  const trace = props.submissionTrace
+  if (!trace || !Array.isArray(trace.submissions) || trace.submissions.length === 0) return
+
+  const group = nodeObjectById.get(trace.nodeId)
+  if (!group) return
+
+  submissionGroup = new THREE.Group()
+  submissionMeshes = []
+  const center = group.position.clone()
+  const subs = trace.submissions.slice().sort((a, b) => {
+    const ta = new Date(a.submitTime || a.submittedAt || a.date || 0).getTime()
+    const tb = new Date(b.submitTime || b.submittedAt || b.date || 0).getTime()
+    return ta - tb
+  })
+  const count = Math.min(subs.length, 20) // 最多 20 颗卫星
+  const radius = 2.4
+  const lastPositions = []
+
+  subs.slice(-count).forEach((sub, i) => {
+    const angle = (i / Math.max(count, 1)) * Math.PI * 2 * 1.6
+    const y = center.y + 1.4 + i * 0.34
+    const x = center.x + Math.cos(angle) * radius
+    const z = center.z + Math.sin(angle) * radius
+    const color = new THREE.Color(submissionColor(sub))
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      emissive: color,
+      emissiveIntensity: 0.6,
+      roughness: 0.35,
+      metalness: 0.2
+    })
+    const mesh = new THREE.Mesh(submissionGeometry, mat)
+    mesh.position.set(x, y, z)
+    mesh.userData.submission = sub
+    mesh.userData.isSubmission = true
+    submissionGroup.add(mesh)
+    submissionMeshes.push(mesh)
+
+    // 卫星光晕
+    const glowMat = new THREE.SpriteMaterial({
+      map: getGlowTexture(submissionColor(sub)),
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.6
+    })
+    const glow = new THREE.Sprite(glowMat)
+    glow.scale.setScalar(1.6)
+    glow.position.copy(mesh.position)
+    submissionGroup.add(glow)
+
+    lastPositions.push(mesh.position.clone())
+  })
+
+  // 相邻卫星连线成演进链
+  if (lastPositions.length > 1) {
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(lastPositions)
+    const lineMat = new THREE.LineBasicMaterial({
+      color: '#7dd3fc',
+      transparent: true,
+      opacity: 0.55
+    })
+    const line = new THREE.Line(lineGeo, lineMat)
+    submissionGroup.add(line)
+  }
+
+  nodeGroup.add(submissionGroup)
+  requestRender()
+}
+
+function disposeSubmissionSatellites() {
+  if (!submissionGroup) return
+  submissionMeshes = []
+  while (submissionGroup.children.length) {
+    const child = submissionGroup.children.pop()
+    if (child.geometry && child !== submissionGroup) {
+      // 共享 submissionGeometry 不单独 dispose；Line 自有 geometry 需释放
+      if (child.isLine) child.geometry.dispose()
+    }
+    if (child.material) disposeMaterial(child.material)
+  }
+  if (submissionGroup.parent) submissionGroup.parent.remove(submissionGroup)
+  submissionGroup = null
+}
+
+function formatTime(sub) {
+  const t = sub.submitTime || sub.submittedAt || sub.date
+  if (!t) return '未知时间'
+  const d = new Date(t)
+  if (Number.isNaN(d.getTime())) return String(t)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 function updateNodeVisual(group, options = {}) {
   const { selected = false, hovered = false } = options
@@ -723,30 +910,49 @@ function getIntersectedNode(event) {
   return intersects[0]?.object?.userData?.node || null
 }
 
+// 拾取提交卫星，返回 submission 数据
+function getIntersectedSubmission(event) {
+  if (!raycaster || !camera || !renderer || submissionMeshes.length === 0) return null
+  setPointerFromEvent(event)
+  raycaster.setFromCamera(pointer, camera)
+  const intersects = raycaster.intersectObjects(submissionMeshes, false)
+  return intersects[0]?.object?.userData?.submission || null
+}
+
 function handlePointerMove(event) {
   const node = getIntersectedNode(event)
-  if (node?.id === hoveredNode.value?.id) return
+  const sub = node ? null : getIntersectedSubmission(event)
+  if (node?.id === hoveredNode.value?.id && !sub) {
+    // 节点未变且无卫星悬停
+  }
   hoveredNode.value = node || null
-  renderer.domElement.style.cursor = node ? 'pointer' : 'grab'
+  hoveredSubmission.value = sub || null
+  renderer.domElement.style.cursor = (node || sub) ? 'pointer' : 'grab'
   updateSelectionState()
 }
 
 function handlePointerLeave() {
   hoveredNode.value = null
+  hoveredSubmission.value = null
   if (renderer?.domElement) renderer.domElement.style.cursor = 'grab'
   updateSelectionState()
 }
 
 function handleClick(event) {
   const node = getIntersectedNode(event)
-  if (!node) return
-  emit('select-node', node)
+  if (node) {
+    emit('select-node', node)
+    return
+  }
+  const sub = getIntersectedSubmission(event)
+  if (sub) emit('select-submission', sub)
 }
 
 function handleDblClick(event) {
   const node = getIntersectedNode(event)
   if (!node) return
   emit('select-node', node)
+  emit('trace-node', node)
   focusNode(node.id)
 }
 function resizeScene() {
@@ -809,20 +1015,24 @@ function animate() {
 
   let dynamic = false
   if (motionEnabled.value && nodeGroup) {
-    // 轻微浮动 + 选中节点发光脉冲
+    // 轻微浮动 + 选中节点发光脉冲；浮动幅度按掌握度（优势高飘、薄弱小幅度）
     nodeGroup.children.forEach((group) => {
       const baseY = group.userData.baseY ?? group.position.y
-      group.position.y = baseY + Math.sin(elapsed * 0.9 + group.userData.floatPhase) * 0.12
+      const amp = group.userData.floatAmp ?? 0.12
+      group.position.y = baseY + Math.sin(elapsed * 0.9 + group.userData.floatPhase) * amp
     })
     dynamic = true
   }
-  // 发光强度向目标平滑过渡（即便静止也短暂渲染到位）
+  // 发光强度向目标平滑过渡；薄弱点红色脉冲
   if (nodeGroup) {
     nodeGroup.children.forEach((group) => {
       const mesh = group.userData.mesh
       if (!mesh) return
+      const isWeak = mesh.userData.isWeak
+      const weakPulse = isWeak ? (Math.sin(elapsed * 2.4) * 0.5 + 0.5) * 0.35 : 0
       const target = (mesh.userData.emissiveTarget ?? mesh.material.emissiveIntensity)
         + (group.userData.selected ? Math.sin(elapsed * 3) * 0.18 : 0)
+        + weakPulse
       const cur = mesh.material.emissiveIntensity
       if (Math.abs(cur - target) > 0.002) {
         mesh.material.emissiveIntensity = cur + (target - cur) * Math.min(1, delta * 8)
@@ -898,6 +1108,7 @@ function destroyScene() {
   geometryByType.clear()
   glowTextureByType.forEach(texture => texture.dispose())
   glowTextureByType.clear()
+  submissionGeometry.dispose()
 
   composer?.dispose?.()
   bloomPass?.dispose?.()
@@ -909,7 +1120,10 @@ function destroyScene() {
   scene = camera = renderer = composer = bloomPass = renderPass = null
   labelRenderer = controls = clock = null
   nodeGroup = edgeGroup = hoverRing = selectRing = raycaster = pointer = null
+  submissionGroup = null
+  submissionMeshes = []
   hoveredNode.value = null
+  hoveredSubmission.value = null
   cameraTween.active = false
 }
 function resetCamera() {
@@ -991,6 +1205,18 @@ watch(
   () => { if (scene) buildGraphScene() },
   { deep: true }
 )
+// 掌握度变化：重建场景以应用浮空Y轴与材质差异化
+watch(
+  () => props.masteryMap,
+  () => { if (scene) buildGraphScene() },
+  { deep: true }
+)
+// 提交版本链变化：仅重建卫星组
+watch(
+  () => props.submissionTrace,
+  () => { if (scene) rebuildSubmissionSatellites() },
+  { deep: true }
+)
 
 onMounted(() => {
   document.addEventListener('fullscreenchange', handleFullscreenChange)
@@ -1062,9 +1288,23 @@ onBeforeUnmount(() => {
           </span>
         </div>
 
+        <div v-else-if="hoveredSubmission" class="node-tooltip">
+          <span class="tooltip-type" style="background:#0f172a;color:#7dd3fc">
+            提交记录
+          </span>
+          <strong>{{ hoveredSubmission.experimentName || '提交' }}</strong>
+          <span class="tooltip-summary">
+            {{ formatTime(hoveredSubmission) }} · {{ hoveredSubmission.status || '已提交' }}
+          </span>
+          <span v-if="hoveredSubmission.score != null" class="tooltip-mastery" style="color:#22c55e">
+            <LucideIcon name="award" :size="12" />
+            得分 {{ hoveredSubmission.score }}
+          </span>
+        </div>
+
         <div class="graph-hint">
           <LucideIcon name="mouse-pointer-click" :size="14" />
-          拖拽旋转 · 滚轮缩放 · 单击查看 · 双击聚焦
+          拖拽旋转 · 滚轮缩放 · 单击查看 · 双击追溯提交
         </div>
       </div>
 
