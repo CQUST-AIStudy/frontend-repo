@@ -44,11 +44,13 @@
             <label class="text-[13px] font-medium text-[#6e6e73]">
               <span class="text-[#ff3b30]">*</span> 评分标准
             </label>
-            <UiSelect v-model="createForm.rubricId"
-              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+            <UiSelect v-model="createForm.rubricId" @change="formErrors.rubricId = ''"
+              class="h-11 px-4 rounded-[10px] bg-[#f5f5f7] border text-sm outline-none appearance-none cursor-pointer focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+              :class="formErrors.rubricId ? 'border-[#ff3b30]' : 'border-black/[0.1]'">
               <UiOption value="" disabled selected>选择评分标准</UiOption>
               <UiOption v-for="r in rubrics" :key="r.id" :value="r.id">{{ r.name }}</UiOption>
             </UiSelect>
+            <div v-if="formErrors.rubricId" class="text-[12px] text-[#ff3b30] mt-1">{{ formErrors.rubricId }}</div>
           </div>
 
           <!-- 教师署名 -->
@@ -63,9 +65,10 @@
               </button>
             </div>
             <div class="flex gap-2">
-              <UiSelect v-model="createForm.teacherSignature" clearable
+              <UiSelect v-model="createForm.teacherSignature" clearable @change="formErrors.teacherSignature = ''"
                 placeholder="选择署名"
-                class="h-11 flex-1 px-4 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none appearance-none cursor-pointer text-[#1d1d1f] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all">
+                class="h-11 flex-1 px-4 rounded-[10px] bg-[#f5f5f7] border text-sm outline-none appearance-none cursor-pointer focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
+                :class="formErrors.teacherSignature ? 'border-[#ff3b30]' : 'border-black/[0.1]'">
                 <UiOption v-for="s in savedSignatures" :key="s.id" :value="s.signature">{{ s.signature }}</UiOption>
               </UiSelect>
               <button type="button" @click="showNewSigInput = true"
@@ -74,6 +77,7 @@
                 <LucideIcon name="plus" :size="18" />
               </button>
             </div>
+            <div v-if="formErrors.teacherSignature" class="text-[12px] text-[#ff3b30] mt-1">{{ formErrors.teacherSignature }}</div>
             <div v-if="showNewSigInput" class="flex gap-2">
               <UiInput v-model="newSignature" maxlength="32" placeholder="输入新署名"
                 class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10 transition-all"
@@ -142,7 +146,8 @@
           </label>
           <ui-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :on-change="onFileChange"
                      accept=".pdf,.docx,.doc" multiple drag :on-remove="onFileRemove"
-                     class="upload-flow-wrapper w-full">
+                     class="upload-flow-wrapper w-full"
+                     :class="formErrors.files ? 'upload-error' : ''">
             <div class="flex items-center justify-center gap-7 px-8 py-6 w-full">
               <div class="w-16 h-16 bg-[#edf5ff] rounded-[14px] flex items-center justify-center text-[#0b7cff] shadow-[inset_0_0_0_1px_rgba(11,124,255,0.06)]">
                 <LucideIcon name="cloud-upload" :size="34" />
@@ -160,6 +165,7 @@
               </div>
             </div>
           </ui-upload>
+          <div v-if="formErrors.files" class="text-[12px] text-[#ff3b30] mt-2">{{ formErrors.files }}</div>
 
           <div v-if="fileList.length" class="mt-4">
             <div class="mb-2 flex items-center justify-between text-[13px]">
@@ -196,7 +202,7 @@
             管理评分标准
           </UiButton>
           <UiButton type="primary" @click="submitTask"
-            :disabled="submitting || !createForm.rubricId || fileList.length === 0"
+            :disabled="submitting || !createForm.rubricId || !createForm.teacherSignature || fileList.length === 0"
             class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[#0b7cff] shadow-[0_8px_18px_rgba(11,124,255,0.24)] hover:bg-[#006ee6] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
             <span v-if="submitting" class="inline-flex items-center gap-2">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -384,6 +390,7 @@ const submitting = ref(false)
 const fileList = ref([])
 const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchName: '' })
+const formErrors = ref({ rubricId: '', teacherSignature: '', files: '' })
 let refreshTimer = null
 
 // ---- 批次与多选导出 ----
@@ -499,6 +506,7 @@ async function confirmNewSignature() {
     await addTeacherSignature(sig)
     await loadSignatures()
     createForm.value.teacherSignature = sig
+    formErrors.value.teacherSignature = ''
   } catch (e) {
     uiMessage.error(e.message || '添加署名失败')
   }
@@ -600,10 +608,12 @@ function normalizeUploadList(list) {
 
 function onFileChange(_, list) {
   fileList.value = normalizeUploadList(list)
+  if (fileList.value.length > 0) formErrors.value.files = ''
 }
 
 function onFileRemove(_, list) {
   fileList.value = normalizeUploadList(list)
+  if (fileList.value.length === 0) formErrors.value.files = '请上传作业文件'
 }
 
 function removeSelectedFile(file) {
@@ -612,10 +622,12 @@ function removeSelectedFile(file) {
     if (file.uid && item.uid === file.uid) return false
     return true
   })
+  if (fileList.value.length === 0) formErrors.value.files = '请上传作业文件'
 }
 
 function clearSelectedFiles() {
   fileList.value = []
+  formErrors.value.files = ''
   uploadRef.value?.clearFiles?.()
 }
 
@@ -660,7 +672,29 @@ async function confirmDeleteTask(id) {
   }
 }
 
+function validateForm() {
+  formErrors.value = { rubricId: '', teacherSignature: '', files: '' }
+  let valid = true
+  if (!createForm.value.rubricId) {
+    formErrors.value.rubricId = '请选择评分标准'
+    valid = false
+  }
+  if (!createForm.value.teacherSignature?.trim()) {
+    formErrors.value.teacherSignature = '请选择教师署名'
+    valid = false
+  }
+  if (fileList.value.length === 0) {
+    formErrors.value.files = '请上传作业文件'
+    valid = false
+  }
+  return valid
+}
+
 async function submitTask() {
+  if (!validateForm()) {
+    uiMessage.error('请完善必填项后再开始批改')
+    return
+  }
   submitting.value = true
   try {
     const fd = new FormData()
@@ -775,5 +809,9 @@ onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
 :deep(.upload-flow-wrapper > div:first-of-type:hover) {
   border-color: #0b7cff !important;
   background: #f8fbff !important;
+}
+:deep(.upload-flow-wrapper.upload-error > div:first-of-type) {
+  border-color: #ff3b30 !important;
+  background: #fff5f5 !important;
 }
 </style>
