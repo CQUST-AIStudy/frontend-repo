@@ -106,22 +106,6 @@ let appearAnimations = []
 let initialCameraPosition = null
 let initialControlTarget = null
 
-// 主角模式（focus mode）：点击节点后放大居中为主角，其他节点淡出环绕
-let focusMode = false
-let focusTargetId = ''
-let focusPedestal = null
-let focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
-const focusState = { t: 0, active: false, mode: 'idle', duration: 0.7 }
-const FOCUS_CONFIG = {
-  heroScale: 2.6,
-  heroPos: new THREE.Vector3(0, 2.2, 0),
-  cameraOffset: new THREE.Vector3(0, 4.5, 11),
-  dimOpacity: 0.15,
-  neighborOpacity: 0.5,
-  neighborLabelOpacity: '0.35',
-  dimLabelOpacity: '0'
-}
-
 // 3D 提交版本链卫星组
 let submissionGroup = null
 let submissionMeshes = [] // 卫星 mesh 数组，供 raycaster 拾取
@@ -433,10 +417,10 @@ function createNodeObject(node) {
     color: baseColor,
     roughness: 0.4,
     metalness: 0.12,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.25,
-    sheen: 0.4,
-    sheenColor: baseColor.clone().lerp(new THREE.Color('#ffffff'), 0.5),
+    clearcoat: 0.4,
+    clearcoatRoughness: 0.35,
+    sheen: 0.15,
+    sheenColor: baseColor.clone(),
     emissive: emissiveColor,
     emissiveIntensity: selected ? 0.5 : baseEmissive
   })
@@ -604,42 +588,15 @@ function createSceneBase() {
   edgeGroup = new THREE.Group()
   hoverRing = createSelectionRing('#94a3b8')
   selectRing = createSelectionRing('#38bdf8')
-  focusPedestal = createFocusPedestal()
-  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing, focusPedestal)
+  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing)
 }
 
-// 主角展台：暖橙光圈底盘，仅主角模式下显现并跟随主角脚下
-function createFocusPedestal() {
-  const group = new THREE.Group()
-  const disk = new THREE.Mesh(
-    new THREE.CircleGeometry(3.2, 64),
-    new THREE.MeshBasicMaterial({ color: '#c2703e', transparent: true, opacity: 0.1, depthWrite: false })
-  )
-  disk.rotation.x = -Math.PI / 2
-  group.add(disk)
-  const ring1 = new THREE.Mesh(
-    new THREE.TorusGeometry(2.6, 0.05, 12, 96),
-    new THREE.MeshBasicMaterial({ color: '#c2703e', transparent: true, opacity: 0.85, depthWrite: false })
-  )
-  ring1.rotation.x = Math.PI / 2
-  group.add(ring1)
-  const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(3.0, 0.03, 10, 96),
-    new THREE.MeshBasicMaterial({ color: '#e8a87c', transparent: true, opacity: 0.55, depthWrite: false })
-  )
-  ring2.rotation.x = Math.PI / 2
-  group.add(ring2)
-  group.userData.ring1 = ring1
-  group.userData.ring2 = ring2
-  group.visible = false
-  return group
-}
 function setupLights() {
-  const ambient = new THREE.HemisphereLight('#fff7ec', '#e8dfcf', 0.95)
+  const ambient = new THREE.HemisphereLight('#fff7ec', '#e8dfcf', 0.72)
   scene.add(ambient)
 
   // 单一关键光投影（仅 course/chapter 接收 castShadow），shadow map 降到 1024 控成本
-  const keyLight = new THREE.DirectionalLight('#fffaf2', 1.55)
+  const keyLight = new THREE.DirectionalLight('#fffaf2', 1.3)
   keyLight.position.set(16, 30, 20)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.width = 1024
@@ -670,7 +627,7 @@ function setupComposer(width, height) {
   composer = new EffectComposer(renderer)
   renderPass = new RenderPass(scene, camera)
   composer.addPass(renderPass)
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 0.28, 0.55, 0.92)
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 0.16, 0.5, 0.95)
   composer.addPass(bloomPass)
   composer.addPass(new OutputPass())
   composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -721,13 +678,6 @@ function clearGraphObjects() {
 
 function buildGraphScene() {
   if (!scene || !nodeGroup || !edgeGroup || !hasGraphData.value) return
-  // 重建场景前强制清主角态（masteryMap 变化等触发重建时主角 group 失效）
-  focusMode = false
-  focusTargetId = ''
-  focusState.active = false
-  focusState.mode = 'idle'
-  focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
-  if (focusPedestal) focusPedestal.visible = false
   clearGraphObjects()
   nodePositionById = buildNodeLayout()
   buildEdges()
@@ -861,60 +811,31 @@ function updateNodeVisual(group, options = {}) {
 
   const nodeId = group.userData.node?.id
 
-  // 主角模式 dim 分级：主角满显、相邻半淡、其他极淡
-  const isHero = focusMode && nodeId === focusTargetId
-  const isNeighbor = focusMode && focusNeighbors.neighborNodeIds.has(nodeId)
   const dimmedByHighlight = hasHighlight() && !isNodeHighlighted(nodeId)
-  const dimmedByFocus = focusMode && !isHero && !isNeighbor
+  group.userData.dimmed = dimmedByHighlight
+  group.userData.selected = selected
 
-  // 主角模式下主角强制选中视觉，忽略外部 selectedNodeId
-  const effectiveSelected = focusMode ? isHero : selected
-  group.userData.dimmed = dimmedByHighlight || dimmedByFocus || (focusMode && isNeighbor)
-  group.userData.selected = effectiveSelected
-
-  // 缩放：主角整体放大交给 group.scale（advanceFocusMode 接管），mesh 保持 1
-  let targetScale
-  if (focusMode) {
-    targetScale = isHero ? 1 : isNeighbor ? 0.95 : 0.8
-  } else {
-    targetScale = dimmedByHighlight ? 0.9 : effectiveSelected ? 1.2 : hovered ? 1.1 : 1
-  }
+  // 缩放
+  const targetScale = dimmedByHighlight ? 0.9 : selected ? 1.2 : hovered ? 1.1 : 1
   group.userData.targetScale = targetScale
 
   // 透明度
-  if (focusMode) {
-    const op = isHero ? 1 : isNeighbor ? FOCUS_CONFIG.neighborOpacity : FOCUS_CONFIG.dimOpacity
-    mesh.material.transparent = !isHero
-    mesh.material.opacity = op
-  } else {
-    mesh.material.transparent = dimmedByHighlight
-    mesh.material.opacity = dimmedByHighlight ? 0.16 : 1
-  }
+  mesh.material.transparent = dimmedByHighlight
+  mesh.material.opacity = dimmedByHighlight ? 0.16 : 1
 
-  // emissive：主角强发光（浅底替代 bloom 的关键），相邻中等，其他压暗
+  // emissive
   const baseEmissive = mesh.userData.baseEmissiveIntensity || 0.22
-  if (focusMode) {
-    mesh.userData.emissiveTarget = isHero ? 0.95 : isNeighbor ? baseEmissive * 0.6 : baseEmissive * 0.25
-  } else {
-    mesh.userData.emissiveTarget = dimmedByHighlight ? baseEmissive * 0.35 : effectiveSelected ? 0.85 : hovered ? 0.5 : baseEmissive
-  }
+  mesh.userData.emissiveTarget = dimmedByHighlight
+    ? baseEmissive * 0.35
+    : selected ? 0.85 : hovered ? 0.5 : baseEmissive
 
   // 光晕
-  if (focusMode) {
-    glow.material.opacity = isHero ? 0.8 : isNeighbor ? 0.28 : 0.05
-  } else {
-    glow.material.opacity = dimmedByHighlight ? 0.08 : effectiveSelected ? 0.95 : hovered ? 0.72 : 0.5
-  }
+  glow.material.opacity = dimmedByHighlight ? 0.08 : selected ? 0.95 : hovered ? 0.72 : 0.5
 
   const label = labelObjectById.get(nodeId)
   if (label?.element) {
-    if (focusMode) {
-      label.element.style.opacity = isHero ? '1' : isNeighbor ? FOCUS_CONFIG.neighborLabelOpacity : FOCUS_CONFIG.dimLabelOpacity
-      label.element.classList.toggle('is-selected', isHero)
-    } else {
-      label.element.style.opacity = dimmedByHighlight ? '0.22' : ''
-      label.element.classList.toggle('is-selected', effectiveSelected)
-    }
+    label.element.style.opacity = dimmedByHighlight ? '0.22' : ''
+    label.element.classList.toggle('is-selected', selected)
   }
 }
 
@@ -939,7 +860,7 @@ function updateSelectionState() {
       hovered: hoveredNode.value?.id === nodeId
     })
   })
-  updateRing(selectRing, focusMode ? focusTargetId : props.selectedNodeId, focusMode ? 0.5 : 0.34)
+  updateRing(selectRing, props.selectedNodeId, 0.34)
   updateRing(hoverRing, hoveredNode.value?.id, 0.2)
   updateEdgeHighlight()
   requestRender()
@@ -953,24 +874,15 @@ function updateEdgeHighlight() {
     const attr = mesh.geometry.getAttribute('color')
     const arr = attr.array
     for (const range of ranges) {
-      let factor
-      if (focusMode) {
-        // 主角模式：仅与主角相连的边高亮，其他极淡
-        const rel = range.relation
-        factor = focusNeighbors.neighborRelationKeys.has(rel.id)
-          || focusNeighbors.neighborRelationKeys.has(`${rel.source}__${rel.type}__${rel.target}`)
-          ? 1 : 0.08
-      } else {
-        factor = !highlightOn || isRelationHighlighted(range.relation) ? 1 : 0.14
-      }
+      const factor = !highlightOn || isRelationHighlighted(range.relation) ? 1 : 0.14
       const begin = range.start * 3
       const stop = (range.start + range.count) * 3
       for (let i = begin; i < stop; i++) arr[i] = baseColors[i] * factor
     }
     attr.needsUpdate = true
-    mesh.material.opacity = focusMode
-      ? (mesh.userData.type === 'CONTAINS' ? 0.55 : 0.8)
-      : (highlightOn ? (mesh.userData.type === 'CONTAINS' ? 0.4 : 0.7) : (mesh.userData.type === 'CONTAINS' ? 0.5 : 0.8))
+    mesh.material.opacity = highlightOn
+      ? (mesh.userData.type === 'CONTAINS' ? 0.4 : 0.7)
+      : (mesh.userData.type === 'CONTAINS' ? 0.5 : 0.8)
   })
 }
 
@@ -1034,20 +946,13 @@ function handlePointerLeave() {
 function handleClick(event) {
   const node = getIntersectedNode(event)
   if (node) {
-    // 点击主角本身 → 退出主角模式
-    if (focusMode && node.id === focusTargetId) {
-      exitFocusMode()
-      return
-    }
-    // 点击其他节点 → 进入/切换主角模式 + 联动右侧面板
+    // 单击节点 → 仅选中并联动右侧面板（相机与节点位姿不变）
     emit('select-node', node)
-    enterFocusMode(node.id)
     return
   }
   const sub = getIntersectedSubmission(event)
-  if (sub) { emit('select-submission', sub); return }
-  // 点击空白 → 退出主角模式
-  if (focusMode) exitFocusMode()
+  if (sub) { emit('select-submission', sub) }
+  // 单击空白：保持当前选中，不做任何处理
 }
 
 function handleDblClick(event) {
@@ -1110,110 +1015,6 @@ function advanceAppear(delta) {
   return active
 }
 
-// 主角模式：预计算与主角直连的节点 id 和关系 key
-function computeFocusNeighbors(nodeId) {
-  const neighborNodeIds = new Set()
-  const neighborRelationKeys = new Set()
-  for (const relation of props.relations || []) {
-    if (relation.source === relation.target) continue
-    let connected = false
-    if (relation.source === nodeId) { neighborNodeIds.add(relation.target); connected = true }
-    if (relation.target === nodeId) { neighborNodeIds.add(relation.source); connected = true }
-    if (connected) {
-      if (relation.id) neighborRelationKeys.add(relation.id)
-      neighborRelationKeys.add(`${relation.source}__${relation.type}__${relation.target}`)
-    }
-  }
-  return { neighborNodeIds, neighborRelationKeys }
-}
-
-// 进入主角模式：主角飞到场景中心放大，相机推近正面
-function enterFocusMode(nodeId) {
-  const group = nodeObjectById.get(nodeId)
-  if (!group || !camera || !controls) return
-  focusTargetId = nodeId
-  focusNeighbors = computeFocusNeighbors(nodeId)
-  // 记录主角原始位姿，供退出还原
-  group.userData.restPos = group.position.clone()
-  group.userData.restBaseY = group.userData.baseY
-  group.userData.restScale = group.scale.x
-  focusMode = true
-  focusState.mode = 'enter'
-  focusState.t = 0
-  focusState.active = true
-  // 相机推近到主角正面（target 锁定主角目标位）
-  startCameraTween(
-    FOCUS_CONFIG.heroPos.clone().add(FOCUS_CONFIG.cameraOffset),
-    FOCUS_CONFIG.heroPos.clone()
-  )
-  // 展台就位
-  if (focusPedestal) {
-    focusPedestal.position.copy(FOCUS_CONFIG.heroPos)
-    focusPedestal.position.y -= 1.4
-    focusPedestal.scale.setScalar(0.01)
-    focusPedestal.visible = true
-  }
-  // 主角模式下禁止平移，保证主角稳定居中
-  controls.enablePan = false
-  updateSelectionState()
-  requestRender()
-}
-
-// 退出主角模式：主角缩回原位，相机回到全景
-function exitFocusMode() {
-  if (!focusMode) return
-  focusState.mode = 'exit'
-  focusState.t = 0
-  focusState.active = true
-  startCameraTween(initialCameraPosition.clone(), initialControlTarget.clone())
-  updateSelectionState()
-  requestRender()
-}
-
-// 主角模式过渡推进：插值主角 position/baseY/scale 与展台 scale
-function advanceFocusMode(delta) {
-  if (!focusState.active) return false
-  focusState.t = Math.min(1, focusState.t + delta / focusState.duration)
-  const k = easeInOutCubic(focusState.t)
-  const entering = focusState.mode === 'enter'
-
-  const hero = nodeObjectById.get(focusTargetId)
-  if (hero) {
-    const restPos = hero.userData.restPos
-    const targetPos = FOCUS_CONFIG.heroPos
-    if (entering) {
-      hero.position.x = THREE.MathUtils.lerp(restPos.x, targetPos.x, k)
-      hero.position.z = THREE.MathUtils.lerp(restPos.z, targetPos.z, k)
-      // y 由浮动基准接管，避免 animate 浮动段覆盖
-      hero.userData.baseY = THREE.MathUtils.lerp(restPos.y, targetPos.y, k)
-      hero.scale.setScalar(THREE.MathUtils.lerp(hero.userData.restScale || 1, FOCUS_CONFIG.heroScale, k))
-    } else {
-      hero.position.x = THREE.MathUtils.lerp(targetPos.x, restPos.x, k)
-      hero.position.z = THREE.MathUtils.lerp(targetPos.z, restPos.z, k)
-      hero.userData.baseY = THREE.MathUtils.lerp(targetPos.y, restPos.y, k)
-      hero.scale.setScalar(THREE.MathUtils.lerp(FOCUS_CONFIG.heroScale, hero.userData.restScale || 1, k))
-    }
-  }
-  // 展台缩放
-  if (focusPedestal?.visible) {
-    focusPedestal.scale.setScalar(entering ? k : (1 - k))
-  }
-  // 完成
-  if (focusState.t >= 1) {
-    focusState.active = false
-    focusState.mode = 'idle'
-    if (!entering) {
-      // 退出完成：彻底复位
-      focusMode = false
-      focusTargetId = ''
-      focusNeighbors = { neighborNodeIds: new Set(), neighborRelationKeys: new Set() }
-      if (focusPedestal) focusPedestal.visible = false
-      if (controls) controls.enablePan = true
-    }
-  }
-  return true
-}
-
 function animate() {
   animationId = window.requestAnimationFrame(animate)
   const delta = clock ? clock.getDelta() : 0.016
@@ -1253,12 +1054,6 @@ function animate() {
   }
   if (hoverRing?.visible) { hoverRing.rotation.z += delta * 0.8; dynamic = true }
   if (selectRing?.visible) { selectRing.rotation.z -= delta * 0.5; dynamic = true }
-  if (focusPedestal?.visible) {
-    focusPedestal.userData.ring1.rotation.z += delta * 0.5
-    focusPedestal.userData.ring2.rotation.z -= delta * 0.35
-    dynamic = true
-  }
-  if (advanceFocusMode(delta)) dynamic = true
   if (advanceAppear(delta)) dynamic = true
   if (cameraTween.active) { advanceCameraTween(delta); dynamic = true }
 
@@ -1332,11 +1127,6 @@ function destroyScene() {
   scene = camera = renderer = composer = bloomPass = renderPass = null
   labelRenderer = controls = clock = null
   nodeGroup = edgeGroup = hoverRing = selectRing = raycaster = pointer = null
-  focusPedestal = null
-  focusMode = false
-  focusTargetId = ''
-  focusState.active = false
-  focusState.mode = 'idle'
   submissionGroup = null
   submissionMeshes = []
   hoveredNode.value = null
@@ -1370,8 +1160,6 @@ function focusNode(nodeId) {
 }
 
 function focusSelectedNode() {
-  // 主角模式下点击聚焦按钮 → 退出主角模式返回全景
-  if (focusMode) { exitFocusMode(); return }
   focusNode(props.selectedNodeId || hoveredNode.value?.id)
 }
 

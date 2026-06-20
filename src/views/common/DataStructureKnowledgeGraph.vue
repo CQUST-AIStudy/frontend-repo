@@ -394,6 +394,7 @@ onMounted(async () => {
           :context="selectedContext"
           :learning-state="learningState"
           @update-state="handleUpdateState"
+          @select-node="selectNode"
         />
       </section>
     </template>

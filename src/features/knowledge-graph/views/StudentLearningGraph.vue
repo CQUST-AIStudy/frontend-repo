@@ -274,6 +274,7 @@ onMounted(async () => {
         :selected-submission="selectedSubmission"
         @update-state="handleUpdateState"
         @select-submission="handleSelectSubmission"
+        @select-node="selectNode"
       />
     </section>
   </div>
