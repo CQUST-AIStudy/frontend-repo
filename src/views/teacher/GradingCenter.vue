@@ -202,7 +202,7 @@
             管理评分标准
           </UiButton>
           <UiButton type="primary" @click="submitTask"
-            :disabled="submitting || !createForm.rubricId || !createForm.teacherSignature || fileList.length === 0"
+            :disabled="submitting"
             class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[#0b7cff] shadow-[0_8px_18px_rgba(11,124,255,0.24)] hover:bg-[#006ee6] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
             <span v-if="submitting" class="inline-flex items-center gap-2">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
