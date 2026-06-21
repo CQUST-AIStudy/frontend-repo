@@ -5,9 +5,8 @@ import { clearAuthStorage, getTapToken, setSessionToken, setUserInfo } from '../
 import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
-// 演示模式：设为 true 时任意账号密码均可登录，无需真实后端
-// const DEMO_MODE = false
-const DEMO_MODE = true
+// 演示模式必须显式通过本地环境变量开启，避免真实账号被伪登录状态覆盖。
+const DEMO_MODE = process.env.VUE_APP_DEMO_MODE === 'true'
 
 const DEMO_USERS = {
   teacher: { id: 1, username: 'demo_teacher', name: '演示教师', role: 'teacher', level: 'normal' },

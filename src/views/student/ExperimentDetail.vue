@@ -27,6 +27,22 @@
           </span>
         </div>
 
+        <section v-if="publishedGrading?.published" class="rounded-[16px] border border-[#bfe2ca] bg-[#f6fcf8] p-5">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div class="text-sm font-semibold text-[#1f5130]">教师批改结果</div>
+              <div class="mt-2 flex items-baseline gap-2">
+                <span class="text-3xl font-semibold text-[#15803d]">{{ publishedGrading.score ?? '-' }}</span>
+                <span class="text-sm text-[#5f6f64]">分</span>
+              </div>
+              <p v-if="publishedGrading.finalReviewComment" class="mt-3 max-w-4xl whitespace-pre-line text-sm leading-7 text-[#33453a]">{{ publishedGrading.finalReviewComment }}</p>
+            </div>
+            <UiButton v-if="publishedGrading.hasReport" :disabled="downloadingPublishedReport" @click="downloadPublishedReport" class="h-10 rounded-lg border-none bg-[#15803d] px-5 text-sm text-white disabled:opacity-50">
+              {{ downloadingPublishedReport ? '下载中...' : '下载批注报告' }}
+            </UiButton>
+          </div>
+        </section>
+
         <!-- 标签页-->
         <div class="g-card [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
           <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px]">
@@ -142,6 +158,8 @@ const submissions = ref([])
 const studentId = ref('')
 const studentName = ref('')
 const errorAnalysisRef = ref(null)
+const publishedGrading = ref(null)
+const downloadingPublishedReport = ref(false)
 
 const experimentId = computed(() => Number(route.params.id))
 const currentExp = computed(() => {
@@ -194,6 +212,34 @@ async function fetchSubmissions() {
   }
 }
 
+async function fetchPublishedGrading() {
+  try {
+    const res = await api.getPublishedGradingResult(experimentId.value)
+    publishedGrading.value = res?.data || res
+  } catch (error) {
+    logger.warn('获取已发布批改结果失败:', error)
+    publishedGrading.value = null
+  }
+}
+
+async function downloadPublishedReport() {
+  if (!publishedGrading.value?.submissionId) return
+  downloadingPublishedReport.value = true
+  try {
+    const blob = await api.downloadPublishedGradingReport(publishedGrading.value.submissionId)
+    const url = URL.createObjectURL(new Blob([blob]))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = publishedGrading.value.reportFilename || '教师批注报告.pdf'
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    uiMessage.error(getFriendlyErrorMessage(error, '批注报告下载失败'))
+  } finally {
+    downloadingPublishedReport.value = false
+  }
+}
+
 function resolveStudentInfo() {
   try {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
@@ -235,6 +281,7 @@ onMounted(async () => {
   try {
     await experimentStore.fetchExperimentDetail(experimentId.value)
     await fetchSubmissions()
+    await fetchPublishedGrading()
     if (isCompleted.value && !hasAiComment.value) generateAiComment(false)
     // 自动触发分析（如果有提交记录但还没有报告）
     autoTriggerAnalysisIfNeeded()
