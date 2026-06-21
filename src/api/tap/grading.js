@@ -133,6 +133,30 @@ export function publishSubmissionReport(submissionId) {
   return tapClient.post(`/api/grading/submissions/${submissionId}/publish-report`)
 }
 
+export function getGradingMatchCandidates(taskId) {
+  return tapClient.get(`/api/grading/tasks/${taskId}/match-candidates`)
+}
+
+export function confirmSubmissionStudent(submissionId, studentId) {
+  return tapClient.put(`/api/grading/submissions/${submissionId}/student-match`, { studentId })
+}
+
+export function publishSubmission(submissionId) {
+  return tapClient.post(`/api/grading/submissions/${submissionId}/publish`)
+}
+
+export function revokeSubmissionPublication(submissionId) {
+  return tapClient.delete(`/api/grading/submissions/${submissionId}/publish`)
+}
+
+export function publishConfirmedTask(taskId) {
+  return tapClient.post(`/api/grading/tasks/${taskId}/publish-confirmed`)
+}
+
+export function revokeTaskPublications(taskId) {
+  return tapClient.delete(`/api/grading/tasks/${taskId}/publish`)
+}
+
 export function getTeacherSignatures() {
   return tapClient.get('/api/grading/signatures')
 }

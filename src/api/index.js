@@ -549,6 +549,16 @@ export default {
     return apiClient.get(`/api/experiments/${id}/report`)
   },
 
+  async getPublishedGradingResult(experimentId) {
+    return apiClient.get(`/api/student/grading-results/experiments/${experimentId}`)
+  },
+
+  async downloadPublishedGradingReport(submissionId) {
+    return apiClient.get(`/api/student/grading-results/submissions/${submissionId}/report`, {
+      responseType: 'blob'
+    })
+  },
+
   async gradeSubmission(id, data) {
     return apiClient.post(`/api/submissions/${id}/grade`, data)
   },

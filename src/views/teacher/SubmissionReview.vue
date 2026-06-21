@@ -55,6 +55,27 @@
 
       <!-- Review Card -->
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6">
+        <div class="mb-5 rounded-[12px] border border-[#dbe5f0] bg-[#f8fbff] p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold text-[#1d1d1f]">学生匹配与成绩发布</div>
+              <div class="mt-1 text-xs text-[#6e6e73]">
+                {{ matchConfirmed ? `已匹配：${detail.studentName || detail.studentNo || '学生'}` : matchStatusText }}
+              </div>
+            </div>
+            <div v-if="!matchConfirmed" class="flex items-center gap-2">
+              <select v-model="selectedStudentId" class="h-9 min-w-[220px] rounded-lg border border-[#d9e2ec] bg-white px-3 text-sm outline-none">
+                <option value="">请选择班级学生</option>
+                <option v-for="student in matchCandidates" :key="student.studentId" :value="student.studentId">
+                  {{ student.studentNo || '无学号' }} · {{ student.studentName }}
+                </option>
+              </select>
+              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-lg border-none bg-[#007aff] text-white text-sm disabled:opacity-50">
+                确认匹配
+              </UiButton>
+            </div>
+          </div>
+        </div>
         <div class="flex justify-between items-center gap-4 mb-2">
           <span class="font-semibold text-[#1d1d1f]">教师总评</span>
           <div class="flex gap-2 flex-wrap">
@@ -83,12 +104,13 @@
               保存总评
             </UiButton>
             <UiButton
-              @click="publishReport"
-              :disabled="publishingReport"
+              @click="togglePublication"
+              :disabled="publishingReport || (!detail.published && !matchConfirmed)"
+              :title="!matchConfirmed && !detail.published ? '请先确认学生匹配' : ''"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
-              一键导入学生报告
+              {{ detail.published ? '撤回发布' : (matchConfirmed ? '发布给学生' : '请先确认学生匹配') }}
             </UiButton>
           </div>
         </div>
@@ -357,8 +379,11 @@ import {
   downloadSubmissionReport,
   generateFinalReview,
   getSubmissionDetail,
+  getGradingMatchCandidates,
+  confirmSubmissionStudent,
   overrideSubmissionScore,
-  publishSubmissionReport,
+  publishSubmission,
+  revokeSubmissionPublication,
   saveFinalReview,
 } from '@/api/tap'
 
@@ -374,6 +399,14 @@ const generatingReview = ref(false)
 const savingReview = ref(false)
 const publishingReport = ref(false)
 const downloadingReport = ref(false)
+const matchCandidates = ref([])
+const selectedStudentId = ref('')
+const confirmingMatch = ref(false)
+
+const matchConfirmed = computed(() => ['AUTO_CONFIRMED', 'MANUAL_CONFIRMED'].includes(detail.value?.matchStatus))
+const matchStatusText = computed(() => detail.value?.matchStatus === 'AMBIGUOUS'
+  ? '识别到重名学生，请手动确认'
+  : '未能自动识别学生，请手动确认')
 
 const overrideVisible = ref(false)
 const overriding = ref(false)
@@ -573,20 +606,39 @@ async function saveReview() {
   }
 }
 
-async function publishReport() {
+async function togglePublication() {
   publishingReport.value = true
   try {
+    if (detail.value?.published) {
+      await revokeSubmissionPublication(subId)
+      await loadDetail()
+      uiMessage.success('已撤回发布')
+      return
+    }
     if (reviewEdited.value) {
       await saveFinalReview(subId, finalReview.value)
       reviewEdited.value = false
     }
-    await publishSubmissionReport(subId)
+    await publishSubmission(subId)
     await loadDetail()
-    uiMessage.success('已导入学生报告，学生端可直接查看和导出')
+    uiMessage.success('成绩与批注报告已发布给学生')
   } catch (error) {
-    uiMessage.error(`导入失败: ${error.message}`)
+    uiMessage.error(`发布失败: ${error.message}`)
   } finally {
     publishingReport.value = false
+  }
+}
+
+async function confirmMatch() {
+  confirmingMatch.value = true
+  try {
+    await confirmSubmissionStudent(subId, Number(selectedStudentId.value))
+    await loadDetail()
+    uiMessage.success('学生匹配已确认')
+  } catch (error) {
+    uiMessage.error(`确认失败: ${error.message}`)
+  } finally {
+    confirmingMatch.value = false
   }
 }
 
@@ -620,6 +672,15 @@ async function loadDetail() {
     detail.value = res?.data || res
     finalReview.value = detail.value?.finalReviewComment || ''
     reviewEdited.value = false
+
+    if (detail.value?.taskId) {
+      try {
+        const candidatesRes = await getGradingMatchCandidates(detail.value.taskId)
+        matchCandidates.value = candidatesRes?.data || candidatesRes || []
+      } catch {
+        matchCandidates.value = []
+      }
+    }
 
     if (detail.value?.taskId) {
       try {

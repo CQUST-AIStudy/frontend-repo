@@ -382,6 +382,7 @@ import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, re
 import LucideIcon from '@/components/LucideIcon.vue'
 import AppModal from '@/components/AppModal.vue'
 import RubricManager from '@/components/RubricManager.vue'
+import { useUserStore } from '@/store'
 
 const rubrics = ref([])
 const tasks = ref([])
@@ -390,6 +391,7 @@ const submitting = ref(false)
 const fileList = ref([])
 const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchName: '' })
+const userStore = useUserStore()
 const formErrors = ref({ rubricId: '', teacherSignature: '', files: '' })
 let refreshTimer = null
 
@@ -776,6 +778,7 @@ async function loadRubrics() {
 }
 
 onMounted(() => {
+  createForm.value.classId = userStore.selectedClass?.id || ''
   loadRubrics()
   loadSignatures()
   loadTasks()

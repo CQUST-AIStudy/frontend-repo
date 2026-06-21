@@ -158,7 +158,20 @@
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] overflow-hidden">
       <div class="flex items-center justify-between gap-4 px-5 pt-[18px] pb-[10px] border-b border-black/[0.06]">
         <span class="text-[16px] font-semibold text-[#1d1d1f]">提交列表</span>
-        <div class="flex items-center bg-black/[0.04] rounded-[10px] p-0.5">
+        <div class="flex items-center gap-3 flex-wrap justify-end">
+          <UiButton
+            :disabled="publishingTask || allPublished || hasUnconfirmedMatches || scoredValues.length === 0"
+            :title="hasUnconfirmedMatches ? '请先确认学生匹配' : ''"
+            @click="doPublishTask"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-[#16a34a] border-none disabled:opacity-50 disabled:cursor-not-allowed"
+          >{{ allPublished ? '已全部发布' : (hasUnconfirmedMatches ? '请先确认学生匹配' : '批量发布成绩') }}</UiButton>
+          <UiButton
+            v-if="publishedCount > 0"
+            :disabled="publishingTask"
+            @click="doRevokeTask"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-[#c44b3f] bg-white border border-[#f0c9c5]"
+          >批量撤回</UiButton>
+          <div class="flex items-center bg-black/[0.04] rounded-[10px] p-0.5">
           <UiButton
             v-for="opt in filterOptions"
             :key="opt.value"
@@ -166,6 +179,7 @@
             class="h-[30px] px-3 rounded-[8px] text-[12px] font-medium transition-all cursor-pointer border-none"
             :class="statusFilter === opt.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
           >{{ opt.label }}</UiButton>
+          </div>
         </div>
       </div>
 
@@ -201,6 +215,8 @@
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">学生</th>
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">班级</th>
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">状态</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">学生匹配</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">发布</th>
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">总分</th>
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">原始文件</th>
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">报告</th>
@@ -219,6 +235,12 @@
                   </span>
                 </td>
                 <td class="py-3 px-3">
+                  <span :class="isMatchConfirmed(row) ? 'text-[#16a34a]' : 'text-[#c49a3c]'">
+                    {{ isMatchConfirmed(row) ? '已确认' : (row.matchStatus === 'AMBIGUOUS' ? '重名待确认' : '待确认') }}
+                  </span>
+                </td>
+                <td class="py-3 px-3" :class="row.published ? 'text-[#16a34a]' : 'text-[#8b929d]'">{{ row.published ? '已发布' : '未发布' }}</td>
+                <td class="py-3 px-3">
                   <span class="font-semibold" :class="scoreClass(row.totalScore)">{{ formatScore(row.totalScore) }}</span>
                 </td>
                 <td class="py-3 px-3 text-[#6e6e73] max-w-[220px] truncate" :title="row.originalFilename">{{ row.originalFilename }}</td>
@@ -233,6 +255,23 @@
                   <span v-else class="text-[#aeaeb2]">暂无</span>
                 </td>
                 <td class="py-3 px-3 whitespace-nowrap">
+                  <UiButton
+                    v-if="!isMatchConfirmed(row)"
+                    @click="router.push(`/teacher/grading/submission/${row.submissionId}`)"
+                    class="text-[13px] font-medium text-[#c49a3c] bg-transparent border-none mr-3"
+                  >确认学生</UiButton>
+                  <UiButton
+                    v-else-if="!row.published && ['SCORED', 'NEED_MORE_EVIDENCE'].includes(row.status)"
+                    :disabled="publishingSubmissionId === row.submissionId"
+                    @click="publishOne(row)"
+                    class="text-[13px] font-medium text-[#16a34a] bg-transparent border-none mr-3 disabled:opacity-50"
+                  >发布成绩</UiButton>
+                  <UiButton
+                    v-else-if="row.published"
+                    :disabled="publishingSubmissionId === row.submissionId"
+                    @click="revokeOne(row)"
+                    class="text-[13px] font-medium text-[#c44b3f] bg-transparent border-none mr-3 disabled:opacity-50"
+                  >撤回发布</UiButton>
                   <UiButton v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#6b8f6b] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
                     下载报告
                   </UiButton>
@@ -320,6 +359,10 @@ import {
   exportGradingTask,
   getBatchReview,
   getGradingTaskDetail,
+  publishConfirmedTask,
+  publishSubmission,
+  revokeSubmissionPublication,
+  revokeTaskPublications,
   retryGradingSubmission,
   triggerBatchReview,
 } from '@/api/tap'
@@ -341,6 +384,8 @@ const exporting = ref(false)
 const annotating = ref(false)
 const exportingAnnotated = ref(false)
 const retryingSubmissionId = ref(null)
+const publishingTask = ref(false)
+const publishingSubmissionId = ref(null)
 
 // ---- 批次总评 ----
 const batchReview = ref({
@@ -368,6 +413,67 @@ const filteredSubs = computed(() => {
   if (!statusFilter.value) return submissions.value
   return submissions.value.filter(item => item.status === statusFilter.value)
 })
+
+const hasUnconfirmedMatches = computed(() => submissions.value.some(item => !isMatchConfirmed(item)))
+const publishedCount = computed(() => submissions.value.filter(item => item.published).length)
+const allPublished = computed(() => submissions.value.length > 0 && publishedCount.value === submissions.value.length)
+
+function isMatchConfirmed(row) {
+  return ['AUTO_CONFIRMED', 'MANUAL_CONFIRMED'].includes(row?.matchStatus)
+}
+
+async function doPublishTask() {
+  publishingTask.value = true
+  try {
+    const res = await publishConfirmedTask(taskId)
+    const data = res?.data || res
+    uiMessage.success(`已发布 ${data.publishedCount || 0} 份成绩`)
+    await loadDetail()
+  } catch (error) {
+    uiMessage.error(error.message || '批量发布失败')
+  } finally {
+    publishingTask.value = false
+  }
+}
+
+async function doRevokeTask() {
+  publishingTask.value = true
+  try {
+    await revokeTaskPublications(taskId)
+    uiMessage.success('已撤回本任务发布的成绩')
+    await loadDetail()
+  } catch (error) {
+    uiMessage.error(error.message || '撤回失败')
+  } finally {
+    publishingTask.value = false
+  }
+}
+
+async function publishOne(row) {
+  publishingSubmissionId.value = row.submissionId
+  try {
+    await publishSubmission(row.submissionId)
+    uiMessage.success('成绩已发布给学生')
+    await loadDetail()
+  } catch (error) {
+    uiMessage.error(error.message || '发布失败')
+  } finally {
+    publishingSubmissionId.value = null
+  }
+}
+
+async function revokeOne(row) {
+  publishingSubmissionId.value = row.submissionId
+  try {
+    await revokeSubmissionPublication(row.submissionId)
+    uiMessage.success('已撤回发布')
+    await loadDetail()
+  } catch (error) {
+    uiMessage.error(error.message || '撤回失败')
+  } finally {
+    publishingSubmissionId.value = null
+  }
+}
 
 const scoredValues = computed(() => submissions.value
   .map(item => Number(item.totalScore))
