@@ -37,7 +37,7 @@
       </div>
       <div class="overview-stat min-w-[110px] px-6">
         <span class="text-[13px] text-[#6e6e73]">平均分</span>
-        <span class="text-[23px] font-semibold text-[#007aff]">{{ scoreStats.average }}</span>
+        <span class="text-[23px] font-semibold text-[var(--app-primary)]">{{ scoreStats.average }}</span>
       </div>
       <div class="overview-stat min-w-[110px] px-6">
         <span class="text-[13px] text-[#6e6e73]">最高分</span>
@@ -107,7 +107,7 @@
             v-if="batchReview.status === 'FAILED'"
             :disabled="batchReviewLoading || task.completedCount === 0"
             @click="doGenerateBatchReview"
-            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-[#007aff] border-none cursor-pointer hover:bg-[#006ee6] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LoaderCircle v-if="batchReviewLoading" class="w-3.5 h-3.5 animate-spin" />
             重新生成
@@ -142,9 +142,9 @@
               <span class="text-[#e88700] line-clamp-1" :title="primaryCommonIssue">{{ primaryCommonIssue }}</span>
             </div>
             <div class="review-insight-row border-b-0">
-              <Lightbulb class="w-4 h-4 text-[#007aff] shrink-0" />
+              <Lightbulb class="w-4 h-4 text-[var(--app-primary)] shrink-0" />
               <span class="review-insight-label">教学建议</span>
-              <span class="text-[#007aff] line-clamp-1" :title="primaryTeachingAdvice">{{ primaryTeachingAdvice }}</span>
+              <span class="text-[var(--app-primary)] line-clamp-1" :title="primaryTeachingAdvice">{{ primaryTeachingAdvice }}</span>
             </div>
           </div>
           <div class="mt-auto pt-3 flex justify-end text-[11px] text-[#8b929d]">

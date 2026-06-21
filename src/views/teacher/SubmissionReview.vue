@@ -70,7 +70,7 @@
                   {{ student.studentNo || '无学号' }} · {{ student.studentName }}
                 </option>
               </select>
-              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-lg border-none bg-[#007aff] text-white text-sm disabled:opacity-50">
+              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-lg border-none bg-[var(--app-primary)] text-white text-sm disabled:opacity-50">
                 确认匹配
               </UiButton>
             </div>
@@ -257,7 +257,7 @@
                     'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]': kindType(eb.kind) === 'success',
                     'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]': kindType(eb.kind) === 'warning',
                     'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]': kindType(eb.kind) === 'danger',
-                    'bg-[rgba(0,122,255,0.1)] text-[#007aff]': kindType(eb.kind) === 'image'
+                    'bg-[rgba(var(--app-primary-rgb),0.1)] text-[var(--app-primary)]': kindType(eb.kind) === 'image'
                   }"
                 >{{ kindLabel(eb.kind) }}</span>
                 <span class="text-xs text-[#6e6e73]">页 {{ eb.page }}</span>
@@ -269,7 +269,7 @@
             <pre v-if="eb.kind !== 'vlm_failed'" class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ (eb.content || '').slice(0, 500) }}</pre>
 
             <div v-if="eb.kind === 'vlm_failed'" class="flex items-start gap-2 mt-1 text-[13px] text-[#6e6e73] bg-[#f5f5f7] rounded-[10px] p-3">
-              <LucideIcon name="image" :size="16" class="shrink-0 mt-0.5 text-[#007aff]" />
+              <LucideIcon name="image" :size="16" class="shrink-0 mt-0.5 text-[var(--app-primary)]" />
               <span>该页包含图片，已作为页面上下文参与评分。如需查看原图，可下载批注报告。</span>
             </div>
 

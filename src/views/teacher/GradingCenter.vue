@@ -11,12 +11,12 @@
       <!-- 流程步骤指示器 -->
       <div class="flex bg-[#fbfcfe] border-b border-[#edf0f5] px-6 py-4">
         <div class="flex-1 flex items-center justify-center gap-4 relative" :class="{ 'active': true, 'completed': false }">
-          <div class="w-7 h-7 rounded-[8px] bg-[#0b7cff] text-white flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10 shadow-[0_4px_10px_rgba(11,124,255,0.18)]">1</div>
+          <div class="w-7 h-7 rounded-[8px] bg-[var(--app-primary)] text-white flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10 shadow-[0_4px_10px_rgba(var(--app-primary-rgb),0.18)]">1</div>
           <div class="w-[170px]">
-            <div class="text-[13px] font-semibold text-[#0b7cff]">配置批改参数</div>
+            <div class="text-[13px] font-semibold text-[var(--app-primary)]">配置批改参数</div>
             <div class="text-[11px] text-[#9aa4b2]">选择评分标准和期望分数</div>
           </div>
-          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[#0b7cff] -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[var(--app-primary)] -translate-y-1/2"></div>
         </div>
         <div class="flex-1 flex items-center justify-center gap-4 relative">
           <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">2</div>
@@ -83,7 +83,7 @@
                 class="h-10 flex-1 px-3 rounded-[10px] bg-[#f5f5f7] border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all"
                 @keyup.enter="confirmNewSignature" />
               <UiButton type="primary" @click="confirmNewSignature"
-                class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+                class="h-10 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] transition-colors">
                 确定
               </UiButton>
               <UiButton @click="showNewSigInput = false; newSignature = ''"
@@ -110,29 +110,29 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-end gap-2 mb-3">
                 <input type="number" v-model.number="createForm.scoreRange[0]" min="0" max="100"
-                  class="w-14 h-9 text-center bg-[#f8fbff] border border-[#cfe2ff] rounded-[8px] text-[15px] font-semibold text-[#0b7cff] outline-none focus:border-[#0b7cff] focus:ring-2 focus:ring-[#0b7cff]/10 transition-all" />
+                  class="w-14 h-9 text-center bg-[var(--app-primary-soft)] border border-[var(--app-primary)]/20 rounded-[8px] text-[15px] font-semibold text-[var(--app-primary)] outline-none focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all" />
                 <span class="text-[#98a2b3]">—</span>
                 <input type="number" v-model.number="createForm.scoreRange[1]" min="0" max="100"
-                  class="w-14 h-9 text-center bg-[#f8fbff] border border-[#cfe2ff] rounded-[8px] text-[15px] font-semibold text-[#0b7cff] outline-none focus:border-[#0b7cff] focus:ring-2 focus:ring-[#0b7cff]/10 transition-all" />
+                  class="w-14 h-9 text-center bg-[var(--app-primary-soft)] border border-[var(--app-primary)]/20 rounded-[8px] text-[15px] font-semibold text-[var(--app-primary)] outline-none focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all" />
                 <span class="text-[13px] text-[#667085]">分</span>
               </div>
 
               <!-- 自定义 Range Slider -->
               <div class="relative h-8 flex items-center mb-2">
                 <div class="absolute left-0 right-0 h-1.5 bg-[#eef2f6] rounded-full"></div>
-                <div class="absolute h-1.5 bg-[#0b7cff] rounded-full transition-all duration-100"
+                <div class="absolute h-1.5 bg-[var(--app-primary)] rounded-full transition-all duration-100"
                   :style="{ left: `${createForm.scoreRange[0]}%`, width: `${createForm.scoreRange[1] - createForm.scoreRange[0]}%` }"></div>
-                <div class="absolute w-4 h-4 bg-white border-[3px] border-[#0b7cff] rounded-[5px] shadow-[0_2px_7px_rgba(11,124,255,0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
+                <div class="absolute w-4 h-4 bg-white border-[3px] border-[var(--app-primary)] rounded-[5px] shadow-[0_2px_7px_rgba(var(--app-primary-rgb),0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
                   :style="{ left: `calc(${createForm.scoreRange[0]}% - 8px)` }"
                   @mousedown="startDrag(0, $event)"
                   @touchstart="startDrag(0, $event)"></div>
-                <div class="absolute w-4 h-4 bg-white border-[3px] border-[#0b7cff] rounded-[5px] shadow-[0_2px_7px_rgba(11,124,255,0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
+                <div class="absolute w-4 h-4 bg-white border-[3px] border-[var(--app-primary)] rounded-[5px] shadow-[0_2px_7px_rgba(var(--app-primary-rgb),0.25)] cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110"
                   :style="{ left: `calc(${createForm.scoreRange[1]}% - 8px)` }"
                   @mousedown="startDrag(1, $event)"
                   @touchstart="startDrag(1, $event)"></div>
               </div>
               <div class="flex items-start gap-2 text-[12px] text-[#667085] leading-relaxed">
-                <LucideIcon name="flag" :size="14" class="text-[#0b7cff] mt-0.5 flex-shrink-0" />
+                <LucideIcon name="flag" :size="14" class="text-[var(--app-primary)] mt-0.5 flex-shrink-0" />
                 <span>AI 会参考此区间识别异常成绩，偏离区间的成绩会标记为「需复核」。</span>
               </div>
             </div>
@@ -149,12 +149,12 @@
                      class="upload-flow-wrapper w-full"
                      :class="formErrors.files ? 'upload-error' : ''">
             <div class="flex items-center justify-center gap-7 px-8 py-6 w-full">
-              <div class="w-16 h-16 bg-[#edf5ff] rounded-[14px] flex items-center justify-center text-[#0b7cff] shadow-[inset_0_0_0_1px_rgba(11,124,255,0.06)]">
+              <div class="w-16 h-16 bg-[var(--app-primary-soft)] rounded-[14px] flex items-center justify-center text-[var(--app-primary)] shadow-[inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.06)]">
                 <LucideIcon name="cloud-upload" :size="34" />
               </div>
               <div class="min-w-0">
                 <div class="text-[15px] font-semibold text-[#101828] mb-2">
-                  拖拽作业文件到此处，或 <span class="text-[#0b7cff]">点击选择</span>
+                  拖拽作业文件到此处，或 <span class="text-[var(--app-primary)]">点击选择</span>
                 </div>
                 <div class="text-[13px] text-[#667085] mb-3">支持批量上传，AI 将自动识别并批改</div>
                 <div class="flex flex-wrap items-center gap-2 text-[12px] text-[#667085]">
@@ -203,7 +203,7 @@
           </UiButton>
           <UiButton type="primary" @click="submitTask"
             :disabled="submitting"
-            class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[#0b7cff] shadow-[0_8px_18px_rgba(11,124,255,0.24)] hover:bg-[#006ee6] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
+            class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[var(--app-primary)] shadow-[0_8px_18px_rgba(var(--app-primary-rgb),0.24)] hover:bg-[var(--app-primary-strong)] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
             <span v-if="submitting" class="inline-flex items-center gap-2">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
               处理中...
@@ -234,7 +234,7 @@
           </UiOption>
         </UiSelect>
         <button :disabled="exportingBatch" @click="exportBatchExcelAction"
-          class="h-9 px-4 rounded-[8px] bg-[#0b7cff] text-white text-[13px] font-medium border-none cursor-pointer hover:bg-[#006ee6] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+          class="h-9 px-4 rounded-[8px] bg-[var(--app-primary)] text-white text-[13px] font-medium border-none cursor-pointer hover:bg-[var(--app-primary-strong)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
           {{ exportingBatch ? '导出中...' : (batchFilter ? '导出批次 Excel' : '导出全部已完成 Excel') }}
         </button>
         <div class="w-px h-5 bg-[#e5e7eb]"></div>
@@ -262,7 +262,7 @@
           <!-- 勾选框 -->
           <input type="checkbox" :disabled="row.status !== 'COMPLETED'"
             :checked="selectedTaskIds.includes(row.taskId)" @change="toggleSelect(row)"
-            class="w-4 h-4 flex-shrink-0 accent-[#0b7cff] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            class="w-4 h-4 flex-shrink-0 accent-[var(--app-primary)] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
             :title="row.status === 'COMPLETED' ? '勾选后可合并导出 Excel' : '仅已完成任务可勾选'" />
           <!-- 状态图标 -->
           <div class="w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0"
@@ -359,7 +359,7 @@
             class="flex-1 h-9 px-3 rounded-[10px] bg-white border border-black/[0.1] text-sm outline-none text-[#1d1d1f] placeholder:text-[#aeaeb2] focus:border-[var(--app-primary)] focus:ring-2 focus:ring-[var(--app-primary)]/10 transition-all"
             @keyup.enter="addSignature" />
           <UiButton type="primary" @click="addSignature"
-            class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[#0062cc] transition-colors">
+            class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] transition-colors">
             添加
           </UiButton>
         </div>
@@ -802,7 +802,7 @@ onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
   align-items: center;
   justify-content: center;
   min-height: 142px;
-  border-color: #8ec5ff !important;
+  border-color: var(--app-primary) !important;
   border-style: dashed !important;
   border-width: 1.5px !important;
   border-radius: 14px !important;
@@ -810,8 +810,8 @@ onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
   padding: 0 !important;
 }
 :deep(.upload-flow-wrapper > div:first-of-type:hover) {
-  border-color: #0b7cff !important;
-  background: #f8fbff !important;
+  border-color: var(--app-primary) !important;
+  background: var(--app-primary-soft) !important;
 }
 :deep(.upload-flow-wrapper.upload-error > div:first-of-type) {
   border-color: #ff3b30 !important;
