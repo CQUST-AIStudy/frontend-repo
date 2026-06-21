@@ -602,3 +602,5 @@ export default {
     })
   }
 }
+
+export { apiClient }

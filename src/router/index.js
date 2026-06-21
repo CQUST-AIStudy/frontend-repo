@@ -77,6 +77,11 @@ const routes = [
         component: () => import('../views/student/WeaknessTraining.vue')
       },
       {
+        path: 'wrong-notebook',
+        name: 'WrongNotebook',
+        component: () => import('../views/student/WrongNotebook.vue')
+      },
+      {
         path: 'leetcode-practice/:id',
         name: 'LeetCodePractice',
         component: () => import('../views/student/LeetCodePractice.vue')

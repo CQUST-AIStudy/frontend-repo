@@ -57,9 +57,14 @@
               <template #title>LeetCode 拓展</template>
             </ui-menu-item>
 
+            <ui-menu-item index="/student/wrong-notebook">
+              <ui-icon><Tickets /></ui-icon>
+              <template #title>错题本</template>
+            </ui-menu-item>
+
             <ui-menu-item index="/student/weakness-training">
               <ui-icon><Finished /></ui-icon>
-              <template #title>错题本/专项训练</template>
+              <template #title>专项训练</template>
             </ui-menu-item>
 
 <!--            <ui-menu-item index="/student/ability-profile">-->
@@ -148,9 +153,14 @@
                 <template #title>LeetCode 拓展</template>
               </ui-menu-item>
 
+              <ui-menu-item index="/student/wrong-notebook">
+                <ui-icon><Tickets /></ui-icon>
+                <template #title>错题本</template>
+              </ui-menu-item>
+
               <ui-menu-item index="/student/weakness-training">
                 <ui-icon><Finished /></ui-icon>
-                <template #title>错题本/专项训练</template>
+                <template #title>专项训练</template>
               </ui-menu-item>
 
 <!--            <ui-menu-item index="/student/ability-profile">-->
@@ -252,6 +262,7 @@ import {
   Collection,
   Search,
   Finished,
+  Tickets,
   TrendCharts,
   Connection,
   Setting,
@@ -297,7 +308,8 @@ const breadcrumbs = computed(() => {
     'ai-assistant': 'AI 学习助手',
     'class-join': '教学班级',
     practice: '推荐练习',
-    'weakness-training': '错题本/专项训练',
+    'wrong-notebook': '错题本',
+    'weakness-training': '专项训练',
     'ability-profile': '能力画像',
     'knowledge-learning': '知识学习',
     'knowledge-graph': '我的学习图谱',
