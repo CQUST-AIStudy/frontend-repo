@@ -407,11 +407,31 @@ const relationGroups = computed(() => {
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+  min-height: 0;
   height: 100%;
   padding: 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  /* 内容超出时内部滚动，避免撑高工作区行高 */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.detail-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detail-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid #fff;
+}
+
+.detail-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .detail-head {
@@ -428,7 +448,8 @@ const relationGroups = computed(() => {
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
 .detail-title-wrap {
@@ -464,7 +485,8 @@ const relationGroups = computed(() => {
   gap: 6px;
   padding: 12px;
   border: 1px solid;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .mastery-head {
@@ -874,12 +896,14 @@ const relationGroups = computed(() => {
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .relation-item:hover {
   border-color: #cbd5e1;
   background: #f8fafc;
+  transform: translateX(2px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
 .relation-item:hover .relation-arrow {

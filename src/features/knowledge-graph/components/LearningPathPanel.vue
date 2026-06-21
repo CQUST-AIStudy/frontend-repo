@@ -40,7 +40,7 @@ function selectNode(node) {
     <ui-empty v-else-if="!paths.length" description="暂无薄弱知识点，学习路径已覆盖" class="panel-empty" />
 
     <ol v-else class="path-list">
-      <li v-for="(path, index) in paths" :key="path.node.id" class="path-item">
+      <li v-for="(path, index) in paths" :key="path.node.id" class="path-item" :style="{ '--path-accent': levelMeta(path.level).color }">
         <div class="path-rank">{{ index + 1 }}</div>
 
         <div class="path-body">
@@ -91,8 +91,9 @@ function selectNode(node) {
   gap: 12px;
   padding: 18px;
   border: 1px solid #edf2f7;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .panel-head {
@@ -127,12 +128,33 @@ function selectNode(node) {
 }
 
 .path-item {
+  position: relative;
   display: flex;
   gap: 12px;
-  padding: 12px;
+  padding: 13px 14px 13px 16px;
   border: 1px solid #edf2f7;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f8fafc;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  overflow: hidden;
+}
+
+.path-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--path-accent, #1270d8);
+  opacity: 0.85;
+}
+
+.path-item:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .path-rank {
@@ -143,10 +165,11 @@ function selectNode(node) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #1270d8;
+  background: linear-gradient(135deg, #1270d8, #0f5fb8);
   color: #fff;
   font-size: 13px;
   font-weight: 900;
+  box-shadow: 0 2px 6px rgba(18, 112, 216, 0.3);
 }
 
 .path-body {
@@ -176,11 +199,12 @@ function selectNode(node) {
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
 }
 
 .chain-node:hover {
   border-color: #94a3b8;
+  transform: translateY(-1px);
 }
 
 .chain-node.pre {

@@ -83,8 +83,9 @@ function startPractice(item) {
   gap: 12px;
   padding: 18px;
   border: 1px solid #edf2f7;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .panel-head {
@@ -121,10 +122,18 @@ function startPractice(item) {
 .practice-item {
   display: flex;
   gap: 14px;
-  padding: 12px;
+  padding: 13px 14px;
   border: 1px solid #edf2f7;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f8fafc;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.practice-item:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .practice-main {
@@ -235,15 +244,18 @@ function startPractice(item) {
   padding: 0 12px;
   border: 1px solid #1270d8;
   border-radius: 8px;
-  background: #1270d8;
+  background: linear-gradient(135deg, #1270d8, #0f5fb8);
   color: #fff;
   font-size: 12px;
   font-weight: 850;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  box-shadow: 0 2px 6px rgba(18, 112, 216, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .start-btn:hover {
-  background: #0f5fb8;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(18, 112, 216, 0.32);
 }
 </style>

@@ -365,8 +365,10 @@ onMounted(async () => {
   <div class="student-graph-page">
     <header class="page-header">
       <div class="page-copy">
-        <span class="page-kicker">My Learning Graph</span>
-        <h1 class="page-title">我的学习图谱</h1>
+        <div class="page-title-row">
+          <span class="page-kicker">My Learning Graph</span>
+          <h1 class="page-title">我的学习图谱</h1>
+        </div>
         <p class="page-desc">
           以你的能力画像驱动知识图谱：优势知识点上浮发光，薄弱点下沉脉冲警示。双击知识点可追溯你的代码提交版本链。
         </p>
@@ -394,10 +396,10 @@ onMounted(async () => {
             <span class="data-source-hint">图谱来源：{{ dataSourceText }} · 掌握度来自实时能力画像</span>
           </div>
           <div class="legend-chips">
-            <span class="chip good">优势</span>
-            <span class="chip medium">学习中</span>
-            <span class="chip weak">薄弱</span>
-            <span class="chip unstarted">未学习</span>
+            <span class="chip good"><i></i>优势</span>
+            <span class="chip medium"><i></i>学习中</span>
+            <span class="chip weak"><i></i>薄弱</span>
+            <span class="chip unstarted"><i></i>未学习</span>
           </div>
         </div>
 
@@ -455,31 +457,68 @@ onMounted(async () => {
 }
 
 .page-header {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 18px;
   min-width: 0;
+  padding: 12px 18px;
+  overflow: hidden;
+  border: 1px solid #dbe7f5;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f4f9ff 0%, #ffffff 55%, #eef4ff 100%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(18, 112, 216, 0.10), transparent 70%);
+  pointer-events: none;
+}
+
+.page-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .page-kicker {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(18, 112, 216, 0.1);
   color: #1270d8;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 850;
+  letter-spacing: 0.04em;
 }
 
 .page-title {
-  margin: 4px 0 0;
+  margin: 0;
   color: #0f172a;
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .page-desc {
   max-width: 760px;
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .loading-panel,
@@ -495,6 +534,9 @@ onMounted(async () => {
   grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
   gap: 16px;
   min-width: 0;
+  align-items: stretch;
+  /* 限高 + 等高：让左右两列等高于工作区，避免右侧面板过高撑开行高导致画布下方留白 */
+  height: clamp(560px, calc(100vh - 320px), 860px);
 }
 
 .graph-main {
@@ -502,6 +544,17 @@ onMounted(async () => {
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  min-height: 0;
+}
+
+/* 3D 画布填满左列高度，与右侧等高，消除下方空白 */
+.graph-main :deep(.graph-canvas-shell) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.graph-main :deep(.graph-stage) {
+  min-height: 0;
 }
 
 .graph-topline {
@@ -510,10 +563,11 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
-  padding: 14px;
+  padding: 14px 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .graph-topline h2 {
@@ -550,11 +604,19 @@ onMounted(async () => {
 .legend-chips .chip {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   min-height: 24px;
   padding: 0 10px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 850;
+}
+
+.legend-chips .chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .chip.good { background: #dcfce7; color: #15803d; }
@@ -565,6 +627,17 @@ onMounted(async () => {
 @media (max-width: 1180px) {
   .graph-workbench {
     grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  /* 单列布局取消限高，恢复画布默认最小高度，避免移动端被挤压 */
+  .graph-main :deep(.graph-canvas-shell) {
+    flex: 0 0 auto;
+    min-height: 640px;
+  }
+
+  .graph-main :deep(.graph-stage) {
+    min-height: 620px;
   }
 }
 </style>
