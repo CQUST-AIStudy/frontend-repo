@@ -1,9 +1,12 @@
 <script setup>
 import { computed, onMounted, shallowRef } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import DataStructureGraphCanvas from '@/features/knowledge-graph/components/DataStructureGraphCanvas.vue'
 import KnowledgeGraphDetailPanel from '@/features/knowledge-graph/components/KnowledgeGraphDetailPanel.vue'
 import LearningOverviewBar from '@/features/knowledge-graph/components/LearningOverviewBar.vue'
+import LearningPathPanel from '@/features/knowledge-graph/components/LearningPathPanel.vue'
+import PracticeRecommendPanel from '@/features/knowledge-graph/components/PracticeRecommendPanel.vue'
 import { GRAPH_CODE, rawGraph } from '@/features/knowledge-graph/dataStructureGraph'
 import {
   getAncestorChain,
@@ -21,10 +24,14 @@ import { getTapToken } from '@/constants/auth'
 import api from '@/api'
 import logger from '@/utils/logger'
 
+const router = useRouter()
+
 const loading = shallowRef(false)
 const errorMsg = shallowRef('')
 const profileLoading = shallowRef(true)
+const profileError = shallowRef('')
 const graphData = shallowRef(rawGraph)
+const dataSource = shallowRef('static')
 const profile = shallowRef({})
 const selectedNodeId = shallowRef(rawGraph.course.id)
 const selectedSubmissions = shallowRef([])
@@ -125,6 +132,104 @@ const highlightPaths = computed(() => {
   return { nodeIds, relationKeys }
 })
 
+// 节点提交统计缓存：nodeId → { totalSubmissions, acCount }
+const nodeSubmissionStats = shallowRef({})
+
+// 个性化学习路径：薄弱/中等节点按 score 升序，组装"前置→当前→后续"链
+const learningPaths = computed(() => {
+  if (profileLoading.value) return []
+  const ng = normalizedGraph.value
+  const map = masteryMap.value
+  const weaknesses = Array.isArray(profile.value.weaknesses) ? profile.value.weaknesses : []
+
+  // 薄弱点证据查找：优先 experimentName，其次 dimension
+  const weaknessByExp = new Map()
+  const weaknessByDim = new Map()
+  for (const w of weaknesses) {
+    const expName = w.experimentName || w.experiment
+    if (expName) weaknessByExp.set(String(expName).toLowerCase(), w)
+    if (w.dimension) weaknessByDim.set(w.dimension, w)
+  }
+
+  const candidates = []
+  for (const [nodeId, info] of Object.entries(map)) {
+    if (info.level !== 'weak' && info.level !== 'medium') continue
+    const node = ng.nodeMap.get(nodeId)
+    if (!node || node.type === 'course' || node.type === 'chapter') continue
+    candidates.push({ node, info })
+  }
+
+  // 按 score 升序，薄弱优先，取 Top 8
+  candidates.sort((a, b) => (a.info.score ?? 0) - (b.info.score ?? 0))
+  const top = candidates.slice(0, 8)
+
+  return top.map(({ node, info }) => {
+    const ctx = getNodeContext(graphData.value, node.id) || {}
+    const wExp = info.experimentName ? weaknessByExp.get(String(info.experimentName).toLowerCase()) : null
+    const wDim = info.dimension ? weaknessByDim.get(info.dimension) : null
+    const w = wExp || wDim
+    const studyTip = node.properties?.studyTip || ''
+    const evidenceDetail = w?.evidence?.detail || ''
+    const recommendation = evidenceDetail || studyTip || `建议优先复习「${node.label}」及其前置知识。`
+    return {
+      node,
+      level: info.level,
+      score: info.score,
+      dimension: info.dimension,
+      prerequisites: ctx.prerequisites || [],
+      nextNodes: ctx.nextNodes || [],
+      recommendation
+    }
+  })
+})
+
+// 推荐练习：从薄弱/中等节点的 TESTED_BY 关系找 exercise 节点，附加真实提交统计
+const practiceRecommendations = computed(() => {
+  if (profileLoading.value) return []
+  const ng = normalizedGraph.value
+  const map = masteryMap.value
+  const subMap = submissionMap.value
+  const stats = nodeSubmissionStats.value
+  const seen = new Set()
+  const result = []
+
+  // 按 masteryMap 薄弱优先遍历，收集其关联的 exercise
+  const orderedNodes = Object.entries(map)
+    .filter(([, info]) => info.level === 'weak' || info.level === 'medium')
+    .sort((a, b) => (a[1].score ?? 0) - (b[1].score ?? 0))
+
+  for (const [nodeId] of orderedNodes) {
+    const ctx = getNodeContext(graphData.value, nodeId)
+    if (!ctx) continue
+    for (const ex of (ctx.exercises || [])) {
+      if (seen.has(ex.id)) continue
+      seen.add(ex.id)
+      const props = ex.properties || {}
+      const experimentId = subMap[nodeId] || null
+      const stat = experimentId ? stats[nodeId] : null
+      const hasSubmission = experimentId != null
+      result.push({
+        id: ex.id,
+        exerciseNode: ex,
+        title: props.title || ex.label,
+        difficulty: props.difficulty || null,
+        estimatedMinutes: props.estimatedMinutes || null,
+        knowledgeLabel: ng.nodeMap.get(nodeId)?.label || '',
+        reason: props.studyTip || props.definition || `针对「${ng.nodeMap.get(nodeId)?.label}」巩固训练。`,
+        experimentId,
+        hasSubmission,
+        totalSubmissions: stat?.totalSubmissions ?? 0,
+        acCount: stat?.acCount ?? 0
+      })
+    }
+    if (result.length >= 8) break
+  }
+  return result
+})
+
+// 数据来源文案
+const dataSourceText = computed(() => dataSource.value === 'neo4j' ? 'Neo4j 图数据库' : '内置静态图谱')
+
 function selectNode(node) {
   if (!node?.id) return
   selectedNodeId.value = node.id
@@ -157,6 +262,8 @@ async function loadSubmissionsForNode(nodeId) {
       : Array.isArray(res?.data) ? res.data
       : Array.isArray(res) ? res : []
     selectedSubmissions.value = list
+    // 统计该节点提交情况，供练习推荐面板展示真实 AC
+    updateNodeSubmissionStats(nodeId, list)
   } catch (error) {
     logger.warn('[student-graph] 加载提交记录失败', error)
     submissionsError.value = '加载提交记录失败，请稍后重试'
@@ -165,9 +272,36 @@ async function loadSubmissionsForNode(nodeId) {
   }
 }
 
+// 统计某节点的提交总数与 AC 数，写入缓存（供练习推荐面板展示真实通过情况）
+function updateNodeSubmissionStats(nodeId, submissions) {
+  if (!nodeId || !Array.isArray(submissions)) return
+  let acCount = 0
+  for (const sub of submissions) {
+    const status = sub?.status || sub?.result || sub?.verdict || ''
+    const score = sub?.score
+    if (status === 'AC' || status === 'Accepted' || status === 'accepted' || Number(score) >= 100) {
+      acCount += 1
+    }
+  }
+  const next = { ...nodeSubmissionStats.value }
+  next[nodeId] = { totalSubmissions: submissions.length, acCount }
+  nodeSubmissionStats.value = next
+}
+
+// 跳转到练习页（复用现有 practice 路由，与 C 语言页 openPractice 一致）
+function openPractice(item) {
+  const knowledge = item?.knowledgeLabel || item?.exerciseNode?.label || ''
+  router.push({
+    path: '/student/practice',
+    query: knowledge ? { knowledge } : {}
+  })
+}
+
 async function fetchProfile() {
   profileLoading.value = true
+  profileError.value = ''
   try {
+    // 画像主接口（含 skillTree / weaknesses / overview）
     let res
     try {
       res = await axios.get(`${API_BASE_URL}/api/profile/me`, profileRequestConfig())
@@ -181,11 +315,25 @@ async function fetchProfile() {
         throw new Error('no student id')
       }
     }
-    profile.value = res.data?.data || res.data || {}
+    const profileData = res.data?.data || res.data || {}
+
+    // 并行拉取更细粒度的技能点掌握度（/api/profile/skill-states），失败不阻塞
+    try {
+      const skillRes = await axios.get(`${API_BASE_URL}/api/profile/skill-states`, profileRequestConfig())
+      const skillBody = skillRes.data?.data ?? skillRes.data
+      const skills = Array.isArray(skillBody?.skills) ? skillBody.skills
+        : Array.isArray(skillBody) ? skillBody : []
+      if (skills.length) profileData.skillStates = skills
+    } catch (skillErr) {
+      logger.warn('[student-graph] 加载技能点掌握度失败（降级到维度/实验级映射）', skillErr)
+    }
+
+    profile.value = profileData
   } catch (error) {
     logger.warn('[student-graph] 加载学生画像失败', error)
     // 画像失败时降级为 localStorage 手动掌握度（masteryMap 为空，画布走兜底）
     profile.value = {}
+    profileError.value = '能力画像加载失败，掌握度展示为默认值，图谱仍可浏览'
   } finally {
     profileLoading.value = false
   }
@@ -201,6 +349,7 @@ onMounted(async () => {
   try {
     const result = await loadKnowledgeGraph()
     graphData.value = result.graph
+    dataSource.value = result.source || 'static'
     selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
   } catch (error) {
     logger.warn('[student-graph] 加载图谱失败', error)
@@ -226,6 +375,8 @@ onMounted(async () => {
 
     <LearningOverviewBar :summary="overviewSummary" :loading="profileLoading" />
 
+    <ui-alert v-if="profileError" :title="profileError" type="warning" show-icon :closable="false" />
+
     <div v-if="loading" class="loading-panel">
       <ui-skeleton :rows="12" animated />
     </div>
@@ -240,6 +391,7 @@ onMounted(async () => {
           <div>
             <h2>个人知识掌握立体图谱</h2>
             <p>节点高度与辉光由掌握度驱动，红色脉冲标识薄弱知识点。</p>
+            <span class="data-source-hint">图谱来源：{{ dataSourceText }} · 掌握度来自实时能力画像</span>
           </div>
           <div class="legend-chips">
             <span class="chip good">优势</span>
@@ -277,6 +429,19 @@ onMounted(async () => {
         @select-node="selectNode"
       />
     </section>
+
+    <LearningPathPanel
+      :paths="learningPaths"
+      :loading="profileLoading"
+      @select-node="selectNode"
+    />
+
+    <PracticeRecommendPanel
+      :practices="practiceRecommendations"
+      :loading="profileLoading"
+      @select-node="selectNode"
+      @start-practice="openPractice"
+    />
   </div>
 </template>
 
@@ -362,6 +527,17 @@ onMounted(async () => {
   margin: 6px 0 0;
   color: #64748b;
   font-size: 12px;
+}
+
+.data-source-hint {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .legend-chips {

@@ -1,5 +1,5 @@
 export const GRAPH_CODE = 'data-structure-knowledge-graph'
-export const GRAPH_VERSION = '1.2.0'
+export const GRAPH_VERSION = '1.3.0'
 export const GRAPH_SOURCE = {
   system: 'frontend-repo',
   scenario: 'course-chapter-knowledge-graph',
@@ -231,6 +231,27 @@ export const rawGraph = {
       },
       related: ['structure-sequential-list', 'structure-linked-list', 'structure-hash-table']
     }),
+    makeNode({
+      id: 'exercise-complexity-analysis',
+      label: '复杂度分析练习',
+      type: 'exercise',
+      chapterId: 'chapter-foundation',
+      summary: '通过基本操作计数与渐进分析训练大 O 表示法与递推关系。',
+      properties: {
+        title: '复杂度分析入门',
+        definition: '考察基本操作计数、忽略常数低阶项、嵌套循环与递推关系的渐进分析。',
+        difficulty: 'easy',
+        estimatedMinutes: 15,
+        studyTip: '先找最内层基本操作执行次数，再看外层循环规模，最后取主导项。',
+        keywords: ['时间复杂度', '大O', '循环计数', '递推'],
+        problem: '分析以下代码段的时间复杂度：① 单层 for 循环 n 次；② 双重循环外 n 内 n；③ i 从 1 每次翻倍到 n 的循环。分别写出大 O。',
+        input: '三段代码，规模 n',
+        output: '① O(n) ② O(n²) ③ O(log n)',
+        answer: '① 单层循环执行 n 次基本操作 → O(n)。② 双重循环内层执行 n×n=n² 次 → O(n²)。③ i 翻倍 2^k≤n，循环次数 k=⌊log₂n⌋ → O(log n)。忽略常数与低阶项，只保留最高阶主导项。',
+        tags: ['复杂度', '大O', '循环计数']
+      },
+      targets: ['concept-complexity', 'operation-basic-ops']
+    }),
 
     makeNode({
       id: 'chapter-linear',
@@ -317,7 +338,13 @@ export const rawGraph = {
       properties: {
         definition: '双向链表用两个方向的链接提升操作灵活性，但增加指针空间成本。',
         studyTip: '插入删除时按四条指针更新检查，避免前后链接断裂。',
-        keywords: ['前驱指针', '后继指针', '双向遍历', '删除结点']
+        keywords: ['前驱指针', '后继指针', '双向遍历', '删除结点'],
+        complexity: {
+          access: 'O(n)', search: 'O(n)', insert: 'O(1)', delete: 'O(1)', space: 'O(n)'
+        },
+        codeLang: 'cpp',
+        codeSample: '// 在 p 结点后插入 s（双向链表）\nvoid insertAfter(Node* p, Node* s){\n  s->next = p->next;\n  s->prev = p;\n  if (p->next) p->next->prev = s;\n  p->next = s;\n}\n// 删除 p 结点\nvoid remove(Node* p){\n  p->prev->next = p->next;\n  if (p->next) p->next->prev = p->prev;\n  delete p;\n}',
+        useCases: ['LRU 缓存', '浏览器前进后退', '文本编辑器撤销/重做', '需要双向遍历的链表']
       },
       prerequisites: ['structure-linked-list'],
       related: ['structure-circular-list']
@@ -331,7 +358,13 @@ export const rawGraph = {
       properties: {
         definition: '循环链表把线性链表首尾相接，常配合尾指针提升队列类操作效率。',
         studyTip: '重点区分空表、单结点表和尾结点回连的边界。',
-        keywords: ['尾指针', '首尾相接', '循环访问', '边界处理']
+        keywords: ['尾指针', '首尾相接', '循环访问', '边界处理'],
+        complexity: {
+          access: 'O(n)', search: 'O(n)', insert: 'O(1)', delete: 'O(1)', space: 'O(n)'
+        },
+        codeLang: 'cpp',
+        codeSample: '// 仅设尾指针的循环单链表：表头为 rear->next\n// 在表头插入（O(1)）\nvoid insertFront(Node* &rear, int e){\n  Node* s = new Node{e, nullptr};\n  if (!rear){ s->next = s; rear = s; return; }\n  s->next = rear->next;   // s 指向表头\n  rear->next = s;         // 尾指针指向新表头\n}\n// 判空：rear == nullptr',
+        useCases: ['round-robin 调度', '约瑟夫环问题', '环形缓冲区', '资源轮转分配']
       },
       prerequisites: ['structure-linked-list'],
       related: ['structure-circular-queue']
@@ -345,7 +378,13 @@ export const rawGraph = {
       properties: {
         definition: '广义表是线性表的递归扩展，可用表头和表尾分解描述。',
         studyTip: '从长度、深度、表头、表尾四个角度分析题目。',
-        keywords: ['原子', '子表', '递归定义', '表头', '表尾']
+        keywords: ['原子', '子表', '递归定义', '表头', '表尾'],
+        complexity: {
+          head: 'O(1)', tail: 'O(1)', depth: 'O(n)', space: 'O(n)'
+        },
+        codeLang: 'text',
+        codeSample: '// 广义表节点：tag=0 原子 / tag=1 子表\ntypedef struct GLNode {\n  int tag;\n  union { int atom; struct { GLNode *hp, *tp; } ptr; } u;\n} GLNode;\n// 取表头：u.ptr.hp；取表尾：u.ptr.tp（仍是子表）\n// 求深度：若为原子返回0，否则 1 + max(各子表深度)',
+        useCases: ['Lisp/Scheme 列表', '多层嵌套结构表示', '稀疏矩阵十字链表', '符号表达式存储']
       },
       prerequisites: ['structure-linked-list', 'concept-recursion'],
       related: ['structure-tree']
@@ -554,6 +593,27 @@ export const rawGraph = {
       },
       targets: ['structure-stack', 'structure-queue', 'operation-stack-queue']
     }),
+    makeNode({
+      id: 'exercise-string-match',
+      label: '串匹配练习',
+      type: 'exercise',
+      chapterId: 'chapter-stack-queue-string',
+      summary: '通过朴素匹配过程与 next 数组推导训练串的模式匹配。',
+      properties: {
+        title: '串的朴素匹配与 KMP',
+        definition: '考察子串定位、匹配趟数、失配跳转和 next 数组计算。',
+        difficulty: 'medium',
+        estimatedMinutes: 20,
+        studyTip: '先手算朴素匹配每趟起点，再求 next 数组观察失配如何跳转。',
+        keywords: ['串', '模式匹配', 'KMP', 'next 数组'],
+        problem: '主串 S="ababcabcacbab"，模式 T="abcac"。用朴素匹配写出从位置 0 起每次比较的起点和匹配结果；并求 T 的 next 数组。',
+        input: 'S=ababcabcacbab，T=abcac',
+        output: '朴素匹配成功起点为 5（0 起下标）；next=[-1,0,0,0,1]',
+        answer: '朴素匹配：起点0 a==a,b==b,a≠b 失败；起点1 b≠a 失败；起点2 a≠a 失败（实际首字符a匹配但后续需重比较，按朴素算法回退主串指针）；逐位推进至起点5，T=abcac 全部匹配成功。next 数组：next[0]=-1，next[1]=0（无真前后缀），next[2]=0，next[3]=0，next[4]=1（前缀 a 与末尾 a 相等，最长相等真前后缀长度1）。',
+        tags: ['串', 'KMP', 'next', '匹配']
+      },
+      targets: ['structure-string', 'algorithm-kmp']
+    }),
 
     makeNode({
       id: 'chapter-tree',
@@ -624,7 +684,13 @@ export const rawGraph = {
       properties: {
         definition: '线索二叉树把空左指针或空右指针改造成前驱、后继线索。',
         studyTip: '先确定是哪一种遍历序列的线索，再判断 tag 标志。',
-        keywords: ['线索化', '前驱', '后继', 'tag 标志']
+        keywords: ['线索化', '前驱', '后继', 'tag 标志'],
+        complexity: {
+          build: 'O(n)', traverse: 'O(n)', space: 'O(n)'
+        },
+        codeLang: 'cpp',
+        codeSample: '// 中序线索化：利用空指针域存前驱/后继\n// ltag=0 左孩子 / ltag=1 前驱线索；rtag 同理\nvoid inThread(Node* p, Node* &pre){\n  if (!p) return;\n  inThread(p->l, pre);\n  if (!p->l){ p->ltag = 1; p->l = pre; }     // 左空→前驱\n  if (pre && !pre->r){ pre->rtag = 1; pre->r = p; } // 右空→后继\n  pre = p;\n  inThread(p->r, pre);\n}',
+        useCases: ['无栈中序遍历', '频繁前驱/后继查询', '节省栈空间遍历']
       },
       prerequisites: ['algorithm-tree-traversal'],
       related: ['structure-binary-tree']
@@ -909,7 +975,7 @@ export const rawGraph = {
         useCases: ['网络布线最小成本', '集群连接', '电路布线']
       },
       prerequisites: ['structure-graph', 'structure-heap'],
-      related: ['algorithm-shortest-path', 'structure-huffman-tree']
+      related: ['algorithm-shortest-path', 'structure-huffman-tree', 'structure-union-find']
     }),
     makeNode({
       id: 'algorithm-shortest-path',
@@ -927,7 +993,7 @@ export const rawGraph = {
         useCases: ['导航最短路径', '网络路由', '地图服务']
       },
       prerequisites: ['structure-graph', 'algorithm-bfs'],
-      related: ['algorithm-mst'],
+      related: ['algorithm-mst', 'algorithm-dynamic-programming'],
       appliesTo: ['exercise-shortest-path']
     }),
     makeNode({
@@ -978,10 +1044,10 @@ export const rawGraph = {
       label: '查找、排序与哈希',
       type: 'chapter',
       summary: '整合查找表、散列表和排序算法，形成数据处理效率优化主线。',
-      prerequisites: ['chapter-linear'],
+      prerequisites: ['chapter-tree'],
       properties: {
         order: 6,
-        definition: '查找关注定位目标，排序关注重排序列，哈希通过映射提升查找效率。',
+        definition: '查找关注定位目标，排序关注重排序列，哈希通过映射提升查找效率。查找排序哈希依赖线性表、二叉树（BST/堆）与递归分治等基础。',
         focus: '有序性、映射和排序策略',
         studyTip: '先判断数据是否有序、是否频繁更新、是否需要稳定排序。',
         keywords: ['查找', '排序', '哈希', '有序表', '稳定性']
@@ -1428,7 +1494,7 @@ export const rawGraph = {
         useCases: ['多关键字排序', '基数排序按位稳定', '保持业务原序']
       },
       prerequisites: ['concept-complexity'],
-      related: ['algorithm-radix-sort', 'algorithm-merge-sort', 'algorithm-quick-sort']
+      related: ['algorithm-radix-sort', 'algorithm-merge-sort', 'algorithm-quick-sort', 'algorithm-insertion-sort']
     }),
     makeNode({
       id: 'algorithm-dynamic-programming',

@@ -79,7 +79,7 @@ function matchDimension(text) {
 
 /**
  * 构建 nodeId → 掌握度信息 的映射
- * @param {object} profile /api/profile/me 返回体
+ * @param {object} profile /api/profile/me 返回体（可附带 skillStates: skills[] 来自 /api/profile/skill-states）
  * @param {object} graph loadKnowledgeGraph 返回的图谱 { course, nodes }
  * @param {object} manualState 可选，localStorage 手动标记 { [nodeId]: { mastery } } 作为兜底叠加
  * @returns {object} { masteryMap, dimensionMap, summary }
@@ -92,6 +92,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
 
   const skillTree = Array.isArray(profile.skillTree) ? profile.skillTree : []
   const weaknesses = Array.isArray(profile.weaknesses) ? profile.weaknesses : []
+  const skillStates = Array.isArray(profile.skillStates) ? profile.skillStates : []
 
   // 维度 → { avgMastery, level, children }
   const dimIndex = new Map()
@@ -110,6 +111,25 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       expIndex.set(lower(child.name), { ...child, dimension: dim.dimension })
       expNameNormIndex.set(normalizeName(child.name), { ...child, dimension: dim.dimension })
     }
+  }
+
+  // 技能点（skill-states）索引：归一化名 → { mastery, level, rawName }
+  // skill-states 是更细粒度的知识点掌握度，优先级最高。
+  // 兼容字段：name / skillName / knowledgePoint / point；mastery / score / value；level / status
+  const skillByName = new Map()
+  const skillByNorm = new Map()
+  for (const skill of skillStates) {
+    if (!skill || typeof skill !== 'object') continue
+    const name = skill.name || skill.skillName || skill.knowledgePoint || skill.point || skill.label
+    if (!name) continue
+    const entry = {
+      mastery: skill.mastery ?? skill.score ?? skill.value,
+      level: skill.level || skill.status,
+      dimension: skill.dimension || skill.dimensionName || null,
+      rawName: String(name)
+    }
+    skillByName.set(lower(name), entry)
+    skillByNorm.set(normalizeName(name), entry)
   }
 
   // 薄弱点索引：按 experimentName 与 dimension 建立命中
@@ -131,9 +151,35 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
 
     let result = null
 
-    // ① 实验级匹配（仅 exercise/structure/operation/algorithm 优先尝试实验名命中）
+    // ① 知识点级匹配（skill-states，优先级最高）
+    // 先用节点 label 精确匹配，再用 keywords 逐个尝试
+    const tryMatchSkill = (raw) => {
+      if (!raw) return null
+      return skillByName.get(lower(raw)) || skillByNorm.get(normalizeName(raw)) || null
+    }
+    const labelSkill = tryMatchSkill(node.label)
+    const keywordSkill = !labelSkill
+      ? (node.properties?.keywords || []).map(tryMatchSkill).find(Boolean)
+      : null
+    const matchedSkill = labelSkill || keywordSkill
+    if (matchedSkill) {
+      const rawLevel = matchedSkill.level || scoreToLevel(matchedSkill.mastery)
+      const level = normalizeLevel(rawLevel)
+      result = {
+        level,
+        score: toScore(matchedSkill.mastery, level),
+        source: 'skill',
+        dimension: matchedSkill.dimension || dim,
+        experimentId: null,
+        experimentName: matchedSkill.rawName,
+        isWeak: false,
+        evidence: null
+      }
+    }
+
+    // ② 实验级匹配（仅 exercise/structure/operation/algorithm 优先尝试实验名命中）
     const structuralTypes = ['exercise', 'structure', 'operation', 'algorithm']
-    if (structuralTypes.includes(node.type)) {
+    if (!result && structuralTypes.includes(node.type)) {
       const byExact = expIndex.get(lower(node.label))
       const byNorm = !byExact ? expNameNormIndex.get(normalizeName(node.label)) : null
       const matched = byExact || byNorm
@@ -152,7 +198,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ② 维度级匹配
+    // ③ 维度级匹配
     if (!result && dim && dimIndex.has(dim)) {
       const d = dimIndex.get(dim)
       const level = normalizeLevel(d.level || scoreToLevel(d.avgMastery))
@@ -168,7 +214,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ③ 薄弱点叠加：命中则强制标记为 weak 并携带证据
+    // ④ 薄弱点叠加：命中则强制标记为 weak 并携带证据
     if (result) {
       const wExp = result.experimentName ? weaknessByExp.get(lower(result.experimentName)) : null
       const wDim = result.dimension ? weaknessByDim.get(result.dimension) : null
@@ -181,7 +227,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ④ 手动标记兜底（profile 未命中但 localStorage 有标记）
+    // ⑤ 手动标记兜底（profile 未命中但 localStorage 有标记）
     if (!result) {
       const manual = manualState?.[node.id]
       if (manual?.mastery && manual.mastery !== 'unstarted') {

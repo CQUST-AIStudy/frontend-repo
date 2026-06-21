@@ -129,6 +129,18 @@ const masterySummary = computed(() => {
   return { ...m, meta: levelMap[m.level] || levelMap.unstarted }
 })
 
+// 掌握度数据来源标签：来自能力画像/技能点/实验/手动标记
+const SOURCE_LABELS = {
+  skill: '技能点匹配',
+  experiment: '能力画像·实验级',
+  dimension: '能力画像·维度级',
+  manual: '手动标记'
+}
+const sourceLabel = computed(() => {
+  const s = props.masteryInfo?.source
+  return s ? (SOURCE_LABELS[s] || s) : ''
+})
+
 const evidence = computed(() => props.masteryInfo?.evidence || null)
 
 function updateMastery(event) {
@@ -189,6 +201,10 @@ const relationGroups = computed(() => {
           </strong>
         </div>
         <p class="mastery-tip">{{ masterySummary.meta.tip }}</p>
+        <div v-if="sourceLabel" class="mastery-source">
+          <LucideIcon name="info" :size="12" />
+          掌握度来源：{{ sourceLabel }}
+        </div>
         <div v-if="masterySummary.dimension" class="mastery-dim">
           能力维度：{{ masterySummary.dimension }}
         </div>
@@ -198,6 +214,7 @@ const relationGroups = computed(() => {
           <span v-if="evidence.compileErrors">编译错误 {{ evidence.compileErrors }}</span>
           <span v-if="evidence.wrongAnswers">答案错误 {{ evidence.wrongAnswers }}</span>
         </div>
+        <p v-if="evidence && evidence.detail" class="mastery-evidence-text">{{ evidence.detail }}</p>
       </section>
 
       <div v-if="context.ancestorChain.length" class="breadcrumb-line">
@@ -489,6 +506,23 @@ const relationGroups = computed(() => {
   gap: 10px;
   margin-top: 2px;
   color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mastery-evidence-text {
+  margin: 2px 0 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.mastery-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
   font-size: 11px;
   font-weight: 800;
 }
