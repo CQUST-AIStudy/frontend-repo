@@ -10,7 +10,7 @@
  *   因前端项目无 "type":"module"，.js 默认按 CJS 解析；故读取源码后用 data: URL 以 ESM 加载，
  *   并把 adapter 对 './dataStructureGraph' 的相对导入替换为内联 data: URL（避免改动源文件）。
  *
- * 凭据来源（优先级：CLI 参数 > 进程环境变量 > .env.local），不硬编码：
+ * 凭据来源（优先级：CLI 参数 > 进程环境变量 > .env.local > .env），不硬编码：
  *   --url        / VUE_APP_NEO4J_URL
  *   --username   / VUE_APP_NEO4J_USERNAME
  *   --password   / VUE_APP_NEO4J_PASSWORD
@@ -19,7 +19,7 @@
  *
  * 用法：
  *   node scripts/seed-neo4j.mjs --url bolt://127.0.0.1:7687 --username neo4j --password secret --clear
- *   或在 .env.local 配好 VUE_APP_NEO4J_* 后：node scripts/seed-neo4j.mjs --clear
+ *   或在 .env.local / .env 配好 VUE_APP_NEO4J_* 后：node scripts/seed-neo4j.mjs --clear
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -61,8 +61,8 @@ function parseArgs(argv) {
   return args
 }
 
-function loadEnvLocal() {
-  const envPath = resolve(projectRoot, '.env.local')
+function loadEnvFile(fileName) {
+  const envPath = resolve(projectRoot, fileName)
   const out = {}
   if (!existsSync(envPath)) return out
   for (const line of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
@@ -70,6 +70,13 @@ function loadEnvLocal() {
     if (match) out[match[1]] = match[2]
   }
   return out
+}
+
+function loadEnvConfig() {
+  return {
+    ...loadEnvFile('.env'),
+    ...loadEnvFile('.env.local')
+  }
 }
 
 /**
@@ -106,13 +113,13 @@ async function main() {
   --clear                 写入前先 DETACH DELETE 当前 graphCode 的全部节点
   -h, --help              显示帮助
 
-凭据优先级: CLI 参数 > 进程环境变量 > .env.local`)
+凭据优先级: CLI 参数 > 进程环境变量 > .env.local > .env`)
     return
   }
 
-  const envLocal = loadEnvLocal()
+  const envConfig = loadEnvConfig()
   const pick = (cliKey, envKey, fallback) =>
-    args[cliKey] || process.env[envKey] || envLocal[envKey] || fallback
+    args[cliKey] || process.env[envKey] || envConfig[envKey] || fallback
 
   const url = pick('url', 'VUE_APP_NEO4J_URL', 'bolt://127.0.0.1:7687')
   const username = pick('username', 'VUE_APP_NEO4J_USERNAME', 'neo4j')
@@ -120,7 +127,7 @@ async function main() {
   const database = pick('database', 'VUE_APP_NEO4J_DATABASE', 'neo4j')
 
   if (!password) {
-    console.error('缺少密码。请用 --password 传入，或在 .env.local 配置 VUE_APP_NEO4J_PASSWORD。')
+    console.error('缺少密码。请用 --password 传入，或在 .env.local / .env 配置 VUE_APP_NEO4J_PASSWORD。')
     process.exit(1)
   }
 
