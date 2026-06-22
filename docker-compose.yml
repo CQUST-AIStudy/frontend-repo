@@ -1,0 +1,40 @@
+# 前端容器编排
+# 单独 compose，nginx 上游通过环境变量驱动，默认走 host.docker.internal
+# （各后端服务暴露宿主端口即可互通），与 backend-repo/docker-compose.yml 约定一致。
+#
+# 若各后端服务与前端在同一个 docker 网络中运行，把对应变量改为 service name 即可，
+# 例如 BACKEND_HOST=backend、SPIDER_HOST=spider，无需重新构建镜像。
+#
+# 启动：
+#   copy .env.docker.example .env.docker   # 按需修改
+#   docker compose --env-file .env.docker up -d --build
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cqust-frontend:latest
+    container_name: cqust-frontend
+    ports:
+      - "${FRONTEND_HOST_PORT:-8080}:80"
+    environment:
+      # Java 后端：/api 与 /rag 均经此代理（与 devServer 一致）
+      BACKEND_HOST: ${BACKEND_HOST:-host.docker.internal}
+      BACKEND_PORT: ${BACKEND_PORT:-8081}
+      # LeetCode 题目抓取与推荐
+      LEETCODE_CLAW_HOST: ${LEETCODE_CLAW_HOST:-host.docker.internal}
+      LEETCODE_CLAW_PORT: ${LEETCODE_CLAW_PORT:-10170}
+      # PTA 爬虫
+      SPIDER_HOST: ${SPIDER_HOST:-host.docker.internal}
+      SPIDER_PORT: ${SPIDER_PORT:-8100}
+      # 推荐服务
+      RECOMMENDATION_HOST: ${RECOMMENDATION_HOST:-host.docker.internal}
+      RECOMMENDATION_PORT: ${RECOMMENDATION_PORT:-8003}
+      # 错题分析服务
+      ERROR_ANALYSIS_HOST: ${ERROR_ANALYSIS_HOST:-host.docker.internal}
+      ERROR_ANALYSIS_PORT: ${ERROR_ANALYSIS_PORT:-8002}
+    extra_hosts:
+      # Linux 上兼容 host.docker.internal，访问宿主上的服务
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
