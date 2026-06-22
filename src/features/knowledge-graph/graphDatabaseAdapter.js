@@ -301,8 +301,8 @@ export function toGraphDbPayload(graph = rawGraph) {
 }
 
 export async function saveKnowledgeGraph(payload) {
-  // 连库则真写，未连库则预览；具体由 neo4jDataSource 决定
-  const { writeKnowledgeGraph } = await import('./neo4jDataSource')
+  // 前端只提交标准 payload，数据库持久化由后端 API 负责。
+  const { writeKnowledgeGraph } = await import('./knowledgeGraphDataSource')
   return writeKnowledgeGraph(payload)
 }
 

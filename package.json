@@ -9,9 +9,7 @@
     "lint": "vue-cli-service lint",
     "api:local": "node scripts/switch-api.js local",
     "api:server": "node scripts/switch-api.js server",
-    "api:status": "node scripts/switch-api.js status",
-    "seed:neo4j": "node scripts/seed-neo4j.mjs",
-    "seed:neo4j:clear": "node scripts/seed-neo4j.mjs --clear"
+    "api:status": "node scripts/switch-api.js status"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
@@ -36,7 +34,6 @@
     "lucide-vue-next": "^0.577.0",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.8",
-    "neo4j-driver": "^6.1.0",
     "pinia": "^2.1.4",
     "pinia-plugin-persistedstate": "^3.2.3",
     "three": "^0.184.0",

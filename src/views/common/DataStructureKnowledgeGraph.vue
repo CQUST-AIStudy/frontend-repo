@@ -20,12 +20,12 @@ import {
   toGraphDbPayload,
   validateGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
-import { loadKnowledgeGraph, neo4jConfig } from '@/features/knowledge-graph/neo4jDataSource'
+import { loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
-  exportGraphCypher,
   exportGraphJSON,
-  writeToNeo4j
+  saveGraphToBackend,
+  seedGraphToBackend
 } from '@/features/knowledge-graph/exportUtils'
 import logger from '@/utils/logger'
 
@@ -212,40 +212,30 @@ function handleExportJson() {
   }
 }
 
-function handleExportCypher() {
-  try {
-    exportGraphCypher(graphData.value)
-    notify('success', '已导出 Cypher 文件，可在 Neo4j Browser 执行')
-  } catch (error) {
-    logger.warn('[knowledge-graph] 导出 Cypher 失败', error)
-    notify('warning', `导出 Cypher 失败：${error?.message || error}`)
-  }
-}
-
-async function handleWriteNeo4j() {
+async function handleSaveBackend() {
   if (writing.value) return
   writing.value = true
   try {
-    const result = await writeToNeo4j(graphData.value)
+    const result = await saveGraphToBackend(graphData.value)
     if (result.success) {
-      notify('success', result.message || '已写入 Neo4j')
+      notify('success', result.message || '已保存到后端')
     } else {
-      notify('warning', result.message || '写入 Neo4j 失败')
+      notify('warning', result.message || '保存到后端失败')
     }
   } catch (error) {
-    logger.warn('[knowledge-graph] 写入 Neo4j 失败', error)
-    notify('warning', `写入 Neo4j 失败：${error?.message || error}`)
+    logger.warn('[knowledge-graph] 保存到后端失败', error)
+    notify('warning', `保存到后端失败：${error?.message || error}`)
   } finally {
     writing.value = false
   }
 }
 
-async function handleSeedNeo4j() {
+async function handleSeedBackend() {
   if (writing.value) return
   writing.value = true
   try {
-    // 把内置静态图谱全量写入 Neo4j，再重新拉取刷新为连库数据
-    const result = await writeToNeo4j(rawGraph)
+    // 把内置静态图谱提交给后端，由后端落 MySQL 后再重新拉取。
+    const result = await seedGraphToBackend(rawGraph)
     if (!result.success) {
       notify('warning', result.message || '导入种子数据失败')
       return
@@ -253,8 +243,9 @@ async function handleSeedNeo4j() {
     const reloaded = await loadKnowledgeGraph()
     graphData.value = reloaded.graph
     dataSource.value = reloaded.source
+    fallbackNotice.value = reloaded.fallbackReason || ''
     selectedNodeId.value = reloaded.graph.course?.id || selectedNodeId.value
-    notify('success', `${result.message || '已导入种子数据'}，已刷新为 Neo4j 数据`)
+    notify('success', `${result.message || '已导入种子数据'}，已刷新图谱数据`)
   } catch (error) {
     logger.warn('[knowledge-graph] 导入种子数据失败', error)
     notify('warning', `导入种子数据失败：${error?.message || error}`)
@@ -274,10 +265,8 @@ onMounted(async () => {
     const result = await loadKnowledgeGraph()
     graphData.value = result.graph
     dataSource.value = result.source
+    fallbackNotice.value = result.fallbackReason || ''
     selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
-    if (neo4jConfig.enabled && result.source !== 'neo4j') {
-      fallbackNotice.value = 'Neo4j 连接失败或未导入数据，已回退到内置静态数据'
-    }
   } catch (error) {
     logger.warn('[knowledge-graph] 加载失败', error)
     errorMsg.value = '加载知识图谱失败，请稍后重试'
@@ -307,9 +296,9 @@ onMounted(async () => {
     </header>
 
     <div class="source-bar">
-      <span class="source-tag" :class="{ neo4j: dataSource === 'neo4j' }">
-        <LucideIcon :name="dataSource === 'neo4j' ? 'database' : 'book-open'" :size="14" />
-        数据来源：{{ dataSource === 'neo4j' ? 'Neo4j' : '内置静态数据' }}
+      <span class="source-tag" :class="{ backend: dataSource === 'backend' }">
+        <LucideIcon :name="dataSource === 'backend' ? 'database' : 'book-open'" :size="14" />
+        数据来源：{{ dataSource === 'backend' ? '后端 MySQL' : '内置静态数据' }}
       </span>
       <span v-if="fallbackNotice" class="source-notice">
         <LucideIcon name="triangle-alert" :size="14" />
@@ -349,9 +338,8 @@ onMounted(async () => {
       @reset="resetFilters"
       @preview-payload="showPayloadPreview"
       @export-json="handleExportJson"
-      @export-cypher="handleExportCypher"
-      @write-neo4j="handleWriteNeo4j"
-      @seed-neo4j="handleSeedNeo4j"
+      @save-backend="handleSaveBackend"
+      @seed-backend="handleSeedBackend"
     />
 
     <div v-if="loading" class="loading-panel">
@@ -370,7 +358,7 @@ onMounted(async () => {
           <div class="graph-topline">
             <div>
               <h2>课程章节知识体系</h2>
-              <p>点击节点查看前置知识、后续知识、关联练习和图数据库写入属性。</p>
+              <p>点击节点查看前置知识、后续知识、关联练习和后端写入属性。</p>
             </div>
             <div class="type-breakdown" aria-label="节点类型统计">
               <span v-for="item in typeBreakdown" :key="item.type" :style="{ backgroundColor: item.softColor, color: item.textColor }">
@@ -506,7 +494,7 @@ onMounted(async () => {
   font-weight: 800;
 }
 
-.source-tag.neo4j {
+.source-tag.backend {
   background: #ccfbf1;
   color: #0f766e;
 }

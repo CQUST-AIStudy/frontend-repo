@@ -13,7 +13,7 @@ import {
   getNodeContext,
   normalizeGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
-import { loadKnowledgeGraph } from '@/features/knowledge-graph/neo4jDataSource'
+import { loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
   buildMasteryMap,
@@ -32,6 +32,7 @@ const profileLoading = shallowRef(true)
 const profileError = shallowRef('')
 const graphData = shallowRef(rawGraph)
 const dataSource = shallowRef('static')
+const fallbackNotice = shallowRef('')
 const profile = shallowRef({})
 const selectedNodeId = shallowRef(rawGraph.course.id)
 const selectedSubmissions = shallowRef([])
@@ -228,7 +229,7 @@ const practiceRecommendations = computed(() => {
 })
 
 // 数据来源文案
-const dataSourceText = computed(() => dataSource.value === 'neo4j' ? 'Neo4j 图数据库' : '内置静态图谱')
+const dataSourceText = computed(() => dataSource.value === 'backend' ? '后端 MySQL 图谱' : '内置静态图谱')
 
 function selectNode(node) {
   if (!node?.id) return
@@ -350,6 +351,7 @@ onMounted(async () => {
     const result = await loadKnowledgeGraph()
     graphData.value = result.graph
     dataSource.value = result.source || 'static'
+    fallbackNotice.value = result.fallbackReason || ''
     selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
   } catch (error) {
     logger.warn('[student-graph] 加载图谱失败', error)
@@ -376,6 +378,8 @@ onMounted(async () => {
     </header>
 
     <LearningOverviewBar :summary="overviewSummary" :loading="profileLoading" />
+
+    <ui-alert v-if="fallbackNotice" :title="fallbackNotice" type="warning" show-icon :closable="false" />
 
     <ui-alert v-if="profileError" :title="profileError" type="warning" show-icon :closable="false" />
 
