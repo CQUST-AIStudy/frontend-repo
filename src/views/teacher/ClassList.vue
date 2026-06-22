@@ -501,13 +501,13 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import AppModal from '../../components/AppModal.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
+import api from '../../api'
 import axios from 'axios'
 import {
   addClassStudent,
   createTeachingClass,
   deleteTeachingClass,
   getClassStudents,
-  getStudentList,
   getPtaCookieStatus,
   getTeacherPtaCredentials,
   getTeachingClasses,
@@ -1055,7 +1055,7 @@ const doAddStudent = async () => {
 
   addingStudent.value = true
   try {
-    const studentListRes = await getStudentList()
+    const studentListRes = await api.getStudentList()
     const studentList = extract(studentListRes) || []
     const inputStudentNum = addStudentForm.studentNum.trim()
     const matchedStudent = studentList.find(item =>

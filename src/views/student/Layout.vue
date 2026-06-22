@@ -263,7 +263,6 @@ import {
   Search,
   Finished,
   Tickets,
-  TrendCharts,
   Connection,
   Setting,
   Fold,
