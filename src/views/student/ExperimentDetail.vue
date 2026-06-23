@@ -113,18 +113,18 @@
           <div v-if="activeTab === 'analysis'" class="g-tab-body [padding:20px]">
             <!-- 未分析 / 空状态 -->
             <div v-if="!errorChecked && !errorLoading && !errorAnalysisData" class="g-empty [text-align:center] [padding:48px_20px]">
-              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">🔍</div>
-              <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">AI 错误代码分析</div>
-              <div class="g-empty-sub [font-size:13px] [color:#5f6368] [margin-bottom:20px]">点击下方按钮，AI将分析您的最新提交代码</div>
-              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="errorLoading" @click="runErrorAnalysis">
-                {{ errorLoading ? '分析中...' : '🔍 开始分析' }}
+              <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
+              <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">AI 错误代码分析</div>
+              <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">点击下方按钮，AI将分析您的最新提交代码</div>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="errorLoading" @click="runErrorAnalysis">
+                {{ errorLoading ? '分析中...' : '开始分析' }}
               </UiButton>
             </div>
 
             <!-- 加载中 -->
             <div v-if="errorLoading" class="g-ai-loading [padding:20px_0]">
               <ui-skeleton :rows="6" animated />
-              <div class="g-ai-loading-tip [display:flex] [align-items:center] [justify-content:center] [gap:8px] [color:#5f6368] [font-size:13px] [margin-top:16px]">
+              <div class="g-ai-loading-tip [display:flex] [align-items:center] [justify-content:center] [gap:8px] [color:#5f6368] [font-size:15px] [margin-top:16px]">
                 <ui-icon class="is-loading"><Loading /></ui-icon>
                 正在分析提交记录，预计需要10-20 秒..
               </div>
@@ -134,26 +134,26 @@
             <template v-if="errorAnalysisData && !errorLoading">
               <!-- 无提交记录 -->
               <div v-if="!errorAnalysisData.latestCode && !errorAnalysisData.latestJudgeStatus && !errorAnalysisData.errorCategories?.length" class="g-empty [text-align:center] [padding:48px_20px]">
-                <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">📭</div>
-                <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无提交记录</div>
-                <div class="g-empty-sub [font-size:13px] [color:#5f6368]">完成PTA平台实验后可使用AI错误分析功能</div>
+                <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="inbox" :size="48" /></div>
+                <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无提交记录</div>
+                <div class="g-empty-sub [font-size:15px] [color:#5f6368]">完成PTA平台实验后可使用AI错误分析功能</div>
               </div>
 
               <!-- 功能一：错误代码诊断（有提交时展示） -->
               <div v-else class="g-section [margin-bottom:16px]">
                 <div class="g-section-header [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:12px]">
-                  <span class="g-section-title [font-size:15px] [font-weight:500] [color:#202124]">
-                    🐛 代码错误诊断
-                    <span v-if="!errorAnalysisData.aiGenerated" class="g-chip c-warning [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#fef7e0] [color:#e37400] [margin-left:8px]">规则引擎</span>
+                  <span class="g-section-title [font-size:17px] [font-weight:500] [color:#202124]">
+                    代码错误诊断
+                    <span v-if="!errorAnalysisData.aiGenerated" class="g-chip c-warning [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#fef7e0] [color:#e37400] [margin-left:8px]">规则引擎</span>
                   </span>
-                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">🔄 重新分析</UiButton>
+                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:14px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">重新分析</UiButton>
                 </div>
 
                 <!-- 最新提交概况 -->
                 <div v-if="errorAnalysisData.latestCode || errorAnalysisData.latestJudgeStatus" class="g-latest-submission [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:14px]">
                   <div class="g-latest-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px]">
-                    <span class="g-latest-label [font-size:13px] [font-weight:500] [color:#202124]">📝 最新提交</span>
-                    <span v-if="errorAnalysisData.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(errorAnalysisData.latestJudgeStatus)">
+                    <span class="g-latest-label [font-size:14px] [font-weight:500] [color:#202124]">最新提交</span>
+                    <span v-if="errorAnalysisData.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(errorAnalysisData.latestJudgeStatus)">
                       判题结果：{{ judgeStatusLabel(errorAnalysisData.latestJudgeStatus) }}
                     </span>
                   </div>
@@ -162,31 +162,31 @@
 
                 <!-- 全 AC / 无错误 正面反馈 -->
                 <div v-if="!errorAnalysisData.errorCategories?.length" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
-                  <div class="g-all-clear-icon [font-size:28px] [margin-bottom:8px]">🎉</div>
-                  <div class="g-all-clear-text [font-size:15px] [font-weight:500] [color:#137333] [margin-bottom:4px]">未检测到错误，所有提交均已通过！</div>
-                  <div class="g-all-clear-sub [font-size:13px] [color:#3c4043]">以下是代码优化和进阶学习建议</div>
+                  <div class="g-all-clear-icon [margin-bottom:8px]"><LucideIcon name="party-popper" :size="28" /></div>
+                  <div class="g-all-clear-text [font-size:17px] [font-weight:500] [color:#137333] [margin-bottom:4px]">未检测到错误，所有提交均已通过！</div>
+                  <div class="g-all-clear-sub [font-size:15px] [color:#3c4043]">以下是代码优化和进阶学习建议</div>
                 </div>
 
                 <!-- 总体评估 -->
-                <div v-if="errorAnalysisData.overallAssessment" class="g-assessment [background:#f0f7ff] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:13px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
+                <div v-if="errorAnalysisData.overallAssessment" class="g-assessment [background:#f0f7ff] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
                   {{ errorAnalysisData.overallAssessment }}
                 </div>
 
                 <!-- 错误分类 + 修改建议 -->
                 <div v-for="(cat, idx) in errorAnalysisData.errorCategories" :key="idx" class="g-error-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:10px]">
                   <div class="g-error-card-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
-                    <span class="g-error-type-badge [display:inline-block] [font-size:11px] [padding:2px_8px] [border-radius:4px] [font-weight:500]" :class="errorBadgeClass(cat.type)">
+                    <span class="g-error-type-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:4px] [font-weight:500]" :class="errorBadgeClass(cat.type)">
                       {{ errorTypeLabel(cat.type) }}
                     </span>
-                    <span class="g-error-count [font-size:12px] [color:#5f6368]">{{ cat.count }}次</span>
-                    <span v-if="cat.isSystemic" class="g-chip c-danger [display:inline-block] [font-size:10px] [padding:1px_6px] [border-radius:100px] [font-weight:500] [background:#fce8e6] [color:#c5221f]">系统性问题</span>
+                    <span class="g-error-count [font-size:14px] [color:#5f6368]">{{ cat.count }}次</span>
+                    <span v-if="cat.isSystemic" class="g-chip c-danger [display:inline-block] [font-size:12px] [padding:1px_6px] [border-radius:100px] [font-weight:500] [background:#fce8e6] [color:#c5221f]">系统性问题</span>
                   </div>
-                  <div v-if="cat.rootCause" class="g-root-cause [font-size:13px] [color:#5f6368] [margin-bottom:6px]">
+                  <div v-if="cat.rootCause" class="g-root-cause [font-size:15px] [color:#5f6368] [margin-bottom:6px]">
                     <span class="g-label [font-weight:500] [color:#202124]">根本原因：</span>{{ cat.rootCause }}
                   </div>
                   <div v-if="cat.suggestions?.length" class="g-fix-suggestions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px]">
-                    <div class="g-fix-title [font-size:12px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">🔧 修改建议</div>
-                    <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:13px] [line-height:1.8] [color:#3c4043]">
+                    <div class="g-fix-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">修改建议</div>
+                    <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
                       <li v-for="(sug, si) in cat.suggestions" :key="si">{{ sug }}</li>
                     </ul>
                   </div>
@@ -197,41 +197,41 @@
               <template v-if="warningData?.triggered">
                 <div class="g-section-divider [border-top:1px_solid_#e8eaed] [margin:20px_0]"></div>
                 <div class="g-section [margin-bottom:16px]">
-                  <div class="g-section-title [font-size:15px] [font-weight:500] [color:#202124] [margin-bottom:12px]">
-                    ⚠️ AI 综合诊断与学习建议
+                  <div class="g-section-title [font-size:17px] [font-weight:500] [color:#202124] [margin-bottom:12px]">
+                    AI 综合诊断与学习建议
                   </div>
 
                   <!-- 预警消息 -->
-                  <div v-if="warningData.warningMessage" class="g-warning-alert [background:#fef7e0] [border:1px_solid_#f9d849] [padding:10px_16px] [border-radius:10px] [font-size:13px] [color:#5f6368] [margin-bottom:10px]">
-                    ⚠️ {{ warningData.warningMessage }}
+                  <div v-if="warningData.warningMessage" class="g-warning-alert [background:#fef7e0] [border:1px_solid_#f9d849] [padding:10px_16px] [border-radius:10px] [font-size:15px] [color:#5f6368] [margin-bottom:10px]">
+                    {{ warningData.warningMessage }}
                   </div>
 
                   <!-- 预警等级 + 给教师的建议 -->
                   <div class="g-warning-meta [display:flex] [gap:12px] [margin-bottom:14px] [flex-wrap:wrap]">
-                    <span class="g-level-badge [display:inline-block] [font-size:12px] [padding:3px_12px] [border-radius:100px] [font-weight:500]" :class="warningLevelClass(warningData.level)">
+                    <span class="g-level-badge [display:inline-block] [font-size:14px] [padding:3px_12px] [border-radius:100px] [font-weight:500]" :class="warningLevelClass(warningData.level)">
                       {{ warningLevelLabel(warningData.level) }}
                     </span>
-                    <span v-if="warningData.teacherNote" class="g-teacher-note [font-size:12px] [color:#5f6368] [line-height:1.6]">
-                      👨‍🏫 {{ warningData.teacherNote }}
+                    <span v-if="warningData.teacherNote" class="g-teacher-note [font-size:14px] [color:#5f6368] [line-height:1.6]">
+                      {{ warningData.teacherNote }}
                     </span>
                   </div>
 
                   <!-- 建议行动 -->
                   <div v-if="warningData.suggestedActions?.length" class="g-actions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px] [margin-bottom:14px]">
-                    <div class="g-sub-title [font-size:12px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">💡 建议行动</div>
-                    <ul class="g-action-list [margin:0] [padding-left:18px] [font-size:13px] [line-height:1.8] [color:#3c4043]">
+                    <div class="g-sub-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">建议行动</div>
+                    <ul class="g-action-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
                       <li v-for="(act, ai) in warningData.suggestedActions" :key="ai">{{ act }}</li>
                     </ul>
                   </div>
 
                   <!-- 学习建议（复用 error 分析的结果） -->
                   <div v-if="errorAnalysisData.learningSuggestions?.length" class="g-learning-section [margin-top:14px]">
-                    <div class="g-sub-title [font-size:13px] [font-weight:500] [color:#5f6368] [margin-bottom:8px]">📖 学习建议</div>
+                    <div class="g-sub-title [font-size:14px] [font-weight:500] [color:#5f6368] [margin-bottom:8px]">学习建议</div>
                     <div v-for="(ls, idx) in errorAnalysisData.learningSuggestions" :key="'ls-'+idx" class="g-learning-item [background:#e8f0fe] [border-radius:8px] [padding:10px_14px] [margin-bottom:8px]">
-                      <span class="g-priority-badge [display:inline-block] [font-size:10px] [padding:2px_8px] [border-radius:100px] [font-weight:500] [margin-right:8px]" :class="priorityBadgeClass(ls.priority)">{{ ls.priority }}</span>
-                      <span class="g-topic [font-weight:500] [font-size:13px] [color:#202124]">{{ ls.topic }}</span>
-                      <span v-if="ls.reason" class="g-reason [font-size:12px] [color:#5f6368] [margin-left:8px]">— {{ ls.reason }}</span>
-                      <div v-if="ls.suggestedResources" class="g-resource [font-size:11px] [color:#1a73e8] [margin-top:4px] [margin-left:42px]">📚 {{ ls.suggestedResources }}</div>
+                      <span class="g-priority-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:100px] [font-weight:500] [margin-right:8px]" :class="priorityBadgeClass(ls.priority)">{{ ls.priority }}</span>
+                      <span class="g-topic [font-weight:500] [font-size:15px] [color:#202124]">{{ ls.topic }}</span>
+                      <span v-if="ls.reason" class="g-reason [font-size:14px] [color:#5f6368] [margin-left:8px]">— {{ ls.reason }}</span>
+                      <div v-if="ls.suggestedResources" class="g-resource [font-size:14px] [color:#1a73e8] [margin-top:4px] [margin-left:42px]">{{ ls.suggestedResources }}</div>
                     </div>
                   </div>
                 </div>
@@ -239,18 +239,18 @@
 
               <!-- LeetCode 推荐练习入口（全 AC 和 有错误 都显示） -->
               <div class="g-leetcode-entry [margin-top:14px] [text-align:center]">
-                <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:10px_24px] [font-size:14px] [color:#1a73e8] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#e8f0fe] hover:[border-color:#1a73e8]" @click="router.push('/student/leetcode-search')">
-                  📚 前往 LeetCode 拓展推荐练习
+                <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:10px_24px] [font-size:15px] [color:#1a73e8] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#e8f0fe] hover:[border-color:#1a73e8]" @click="router.push('/student/leetcode-search')">
+                  前往 LeetCode 拓展推荐练习
                 </UiButton>
               </div>
             </template>
 
             <!-- API 调用失败 -->
             <div v-if="errorChecked && !errorLoading && !errorAnalysisData" class="g-empty [text-align:center] [padding:48px_20px]">
-              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">⚠️</div>
-              <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">分析失败</div>
-              <div class="g-empty-sub [font-size:13px] [color:#5f6368] [margin-bottom:20px]">AI 错误分析服务暂时不可用，请稍后重试</div>
-              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" :disabled="errorLoading" @click="runErrorAnalysis">🔄 重试</UiButton>
+              <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="alert-triangle" :size="48" /></div>
+              <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">分析失败</div>
+              <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">AI 错误分析服务暂时不可用，请稍后重试</div>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" :disabled="errorLoading" @click="runErrorAnalysis">重试</UiButton>
             </div>
           </div>
         </div>
@@ -365,7 +365,7 @@ async function checkAndLoadWarning(forceRefresh = false) {
 
 function showWarningPopup(data) {
   const msg = data.warningMessage || data.interventionMessage || '检测到多次错误提交，建议查看AI分析结果'
-  uiMessage.warning('⚠️ AI 学习预警：' + msg)
+  uiMessage.warning('AI 学习预警：' + msg)
 }
 
 // 点击 tab 时触发分析
@@ -443,10 +443,10 @@ function warningLevelClass(level) {
 
 function warningLevelLabel(level) {
   const labels = {
-    HIGH: '🔴 高危预警',
-    MEDIUM: '🟡 需要关注',
-    LOW: '🔵 轻度提醒',
-    OK: '🟢 表现良好',
+    HIGH: '高危预警',
+    MEDIUM: '需要关注',
+    LOW: '轻度提醒',
+    OK: '表现良好',
   }
   return labels[level] || level
 }
