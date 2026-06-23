@@ -14,6 +14,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # 演示模式：设为 true 时登录免校验密码、返回演示用户（需在 .env.docker 中开启）
+        VUE_APP_DEMO_MODE: ${VUE_APP_DEMO_MODE:-false}
     image: cqust-frontend:latest
     container_name: cqust-frontend
     ports:
