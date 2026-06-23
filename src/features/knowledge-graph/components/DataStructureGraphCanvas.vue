@@ -111,6 +111,14 @@ let submissionGroup = null
 let submissionMeshes = [] // 卫星 mesh 数组，供 raycaster 拾取
 const submissionGeometry = new THREE.SphereGeometry(0.26, 18, 14)
 
+// 渐进式展开：点击一级知识点后在其周围生成二级节点并顺时针环绕旋转
+let expandedGroup = null        // 挂到 scene 的顶层组，整体绕 Y 轴旋转
+let orbitGroup = null           // 当前展开 chapter 对应的轨道组（expandedGroup 的子节点）
+const expandedChapterId = shallowRef(null) // 当前展开的 chapter id（互斥）
+const ORBIT_RADIUS = 4.8        // 二级节点环绕半径
+const ORBIT_SPEED = 0.32        // 顺时针角速度（rad/s）
+const _orbitWorldVec = new THREE.Vector3() // 复用临时向量，避免每帧 new
+
 // 相机补间（自研轻量插值，不引第三方）
 const cameraTween = {
   active: false,
@@ -232,7 +240,6 @@ function getGlowTexture(color) {
 // 仅在构建时迭代若干步，结果固化为静态坐标，避免常驻松弛带来的漂移与持续渲染。
 function buildNodeLayout() {
   const nodes = props.nodes || []
-  const nodeMap = new Map(nodes.map(node => [node.id, node]))
   const course = nodes.find(node => node.type === 'course') || nodes[0]
   const chapters = nodes
     .filter(node => node.type === 'chapter')
@@ -242,114 +249,20 @@ function buildNodeLayout() {
       return orderA - orderB || String(a.label).localeCompare(String(b.label), 'zh-Hans-CN')
     })
 
-  const relationChapterMap = new Map()
-  for (const relation of props.relations || []) {
-    const source = nodeMap.get(relation.source)
-    const target = nodeMap.get(relation.target)
-    if (source?.type === 'chapter' && target && !target.chapterId) relationChapterMap.set(target.id, source.id)
-    if (target?.type === 'chapter' && source && !source.chapterId) relationChapterMap.set(source.id, target.id)
-  }
-
   // 锚点：course 居中，chapters 均匀分布在外圈（锚定，保持宏观结构稳定）
-  const anchor = new Map()
-  const pinned = new Set()
-  if (course) { anchor.set(course.id, new THREE.Vector2(0, 0)); pinned.add(course.id) }
+  // 二级节点不再静态布局，改在点击一级知识点时按轨道动态生成
+  const positions = new Map()
+  if (course) {
+    const yOffset = (TYPE_Y_OFFSET[course.type] || 0) + masteryYOffset(course)
+    positions.set(course.id, new THREE.Vector3(0, yOffset, 0))
+  }
   const chapterRadius = chapters.length > 5 ? 15.5 : 13
   chapters.forEach((chapter, index) => {
     const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(chapters.length, 1)
-    anchor.set(chapter.id, new THREE.Vector2(Math.cos(angle) * chapterRadius, Math.sin(angle) * chapterRadius))
-    pinned.add(chapter.id)
+    const yOffset = (TYPE_Y_OFFSET[chapter.type] || 0) + masteryYOffset(chapter)
+    positions.set(chapter.id, new THREE.Vector3(Math.cos(angle) * chapterRadius, yOffset, Math.sin(angle) * chapterRadius))
   })
 
-  // 每个自由节点归属的章节中心（用于章节引力）
-  const homeChapter = new Map()
-  const pos = new Map()
-  const vel = new Map()
-  let loose = 0
-  for (const node of nodes) {
-    if (pinned.has(node.id)) { pos.set(node.id, anchor.get(node.id).clone()); continue }
-    const chapterId = node.chapterId || relationChapterMap.get(node.id)
-    const center = anchor.get(chapterId)
-    if (center) {
-      const a = Math.random() * Math.PI * 2
-      const r = 3 + Math.random() * 2.4
-      pos.set(node.id, new THREE.Vector2(center.x + Math.cos(a) * r, center.y + Math.sin(a) * r))
-      homeChapter.set(node.id, center)
-    } else {
-      const a = Math.PI / 5 + (Math.PI * 2 * loose) / 12
-      loose += 1
-      pos.set(node.id, new THREE.Vector2(Math.cos(a) * 20, Math.sin(a) * 20))
-    }
-    vel.set(node.id, new THREE.Vector2(0, 0))
-  }
-  /* @@LAYOUT2@@ */
-  // 弹簧边：仅在自由节点之间或自由↔锚点之间建立，保持关联节点靠近
-  const springs = []
-  for (const relation of props.relations || []) {
-    if (relation.source === relation.target) continue
-    if (pos.has(relation.source) && pos.has(relation.target)) {
-      const rest = relation.type === 'CONTAINS' ? 4.6 : 5.4
-      springs.push({ a: relation.source, b: relation.target, rest })
-    }
-  }
-
-  const freeIds = nodes.filter(node => !pinned.has(node.id)).map(node => node.id)
-  const REPULSION = 26
-  const SPRING_K = 0.045
-  const GRAVITY_K = 0.022
-  const DAMPING = 0.82
-  const ITERATIONS = 220
-  const tmp = new THREE.Vector2()
-
-  for (let step = 0; step < ITERATIONS; step++) {
-    // 斥力（库仑）：所有自由节点两两排斥，避免重叠
-    for (let i = 0; i < freeIds.length; i++) {
-      const pi = pos.get(freeIds[i])
-      const fi = vel.get(freeIds[i])
-      for (let j = i + 1; j < freeIds.length; j++) {
-        const pj = pos.get(freeIds[j])
-        tmp.copy(pi).sub(pj)
-        let distSq = tmp.lengthSq()
-        if (distSq < 0.01) { tmp.set(Math.random() - 0.5, Math.random() - 0.5); distSq = 0.25 }
-        const force = REPULSION / distSq
-        tmp.normalize().multiplyScalar(force)
-        fi.add(tmp)
-        vel.get(freeIds[j]).sub(tmp)
-      }
-    }
-    // 弹簧（胡克）：关系两端按静止长度收拢/撑开
-    for (const spring of springs) {
-      const pa = pos.get(spring.a)
-      const pb = pos.get(spring.b)
-      tmp.copy(pb).sub(pa)
-      const dist = tmp.length() || 0.01
-      const force = (dist - spring.rest) * SPRING_K
-      tmp.normalize().multiplyScalar(force)
-      if (!pinned.has(spring.a)) vel.get(spring.a).add(tmp)
-      if (!pinned.has(spring.b)) vel.get(spring.b).sub(tmp)
-    }
-    // 章节引力：子节点被拉向所属章节中心，强化分簇
-    for (const id of freeIds) {
-      const home = homeChapter.get(id)
-      if (!home) continue
-      tmp.copy(home).sub(pos.get(id)).multiplyScalar(GRAVITY_K)
-      vel.get(id).add(tmp)
-    }
-    // 积分 + 阻尼
-    const cooling = 1 - step / ITERATIONS
-    for (const id of freeIds) {
-      const v = vel.get(id)
-      v.multiplyScalar(DAMPING)
-      pos.get(id).add(tmp.copy(v).multiplyScalar(0.5 * cooling + 0.08))
-    }
-  }
-
-  const positions = new Map()
-  for (const node of nodes) {
-    const p = pos.get(node.id) || new THREE.Vector2()
-    const yOffset = (TYPE_Y_OFFSET[node.type] || 0) + masteryYOffset(node)
-    positions.set(node.id, new THREE.Vector3(p.x, yOffset, p.y))
-  }
   return positions
 }
 function createNodeLabel(node, meta, size) {
@@ -484,6 +397,7 @@ function curvePoints(source, target, type, sourceRadius, targetRadius, segments)
 }
 
 // 同类型关系合并为单个 LineSegments（减少 draw call）；顶点色由暗到亮表示 source→target 方向
+// 初始视图只画 course↔chapter 的关系边；chapter→二级 的边在展开时由 orbitGroup 单独绘制
 function buildEdges() {
   const nodeById = new Map((props.nodes || []).map(node => [node.id, node]))
   const byType = new Map()
@@ -491,6 +405,11 @@ function buildEdges() {
     const s = nodePositionById.get(relation.source)
     const t = nodePositionById.get(relation.target)
     if (!s || !t || relation.source === relation.target) continue
+    // 仅保留两端都已静态布局（course/chapter）的边，跳过二级节点相关边
+    const srcNode = nodeById.get(relation.source)
+    const tgtNode = nodeById.get(relation.target)
+    if (srcNode?.type !== 'course' && srcNode?.type !== 'chapter') continue
+    if (tgtNode?.type !== 'course' && tgtNode?.type !== 'chapter') continue
     if (!byType.has(relation.type)) byType.set(relation.type, [])
     byType.get(relation.type).push({ relation, s, t })
   }
@@ -586,9 +505,10 @@ function createSceneBase() {
 
   nodeGroup = new THREE.Group()
   edgeGroup = new THREE.Group()
+  expandedGroup = new THREE.Group()
   hoverRing = createSelectionRing('#94a3b8')
   selectRing = createSelectionRing('#38bdf8')
-  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing)
+  scene.add(edgeGroup, nodeGroup, expandedGroup, hoverRing, selectRing)
 }
 
 function setupLights() {
@@ -661,6 +581,7 @@ function disposeObject(object) {
 }
 
 function clearGraphObjects() {
+  collapseChapter()
   disposeSubmissionSatellites()
   for (const group of [nodeGroup, edgeGroup]) {
     if (!group) continue
@@ -681,14 +602,169 @@ function buildGraphScene() {
   clearGraphObjects()
   nodePositionById = buildNodeLayout()
   buildEdges()
+  // 初始视图只创建 course + chapter 节点；二级节点在点击一级知识点时按轨道动态生成
   for (const node of props.nodes || []) {
-    nodeGroup.add(createNodeObject(node))
+    if (node.type === 'course' || node.type === 'chapter') {
+      nodeGroup.add(createNodeObject(node))
+    }
   }
   // 入场动画：缩放从 0 弹入
   appearAnimations = nodeObjects.map((mesh, i) => ({ mesh, delay: i * 0.012, t: 0 }))
   updateSelectionState()
   rebuildSubmissionSatellites()
   requestRender()
+}
+
+// 构建 chapter→下属二级节点 的映射（优先 node.chapterId，关系兜底）
+function buildChapterChildMap() {
+  const nodes = props.nodes || []
+  const nodeMap = new Map(nodes.map(node => [node.id, node]))
+  const relationChapterMap = new Map()
+  for (const relation of props.relations || []) {
+    const source = nodeMap.get(relation.source)
+    const target = nodeMap.get(relation.target)
+    if (source?.type === 'chapter' && target && !target.chapterId) relationChapterMap.set(target.id, source.id)
+    if (target?.type === 'chapter' && source && !source.chapterId) relationChapterMap.set(source.id, target.id)
+  }
+  const childMap = new Map()
+  for (const node of nodes) {
+    if (node.type === 'course' || node.type === 'chapter') continue
+    const chapterId = node.chapterId || relationChapterMap.get(node.id)
+    if (!chapterId) continue
+    if (!childMap.has(chapterId)) childMap.set(chapterId, [])
+    childMap.get(chapterId).push(node)
+  }
+  for (const list of childMap.values()) {
+    list.sort((a, b) => {
+      const orderA = Number(a.properties?.order || 0)
+      const orderB = Number(b.properties?.order || 0)
+      return orderA - orderB || String(a.label).localeCompare(String(b.label), 'zh-Hans-CN')
+    })
+  }
+  return childMap
+}
+
+// 折叠当前展开的 chapter：dispose 轨道内对象并从全局注册表中移除二级节点
+function collapseChapter() {
+  if (!orbitGroup && !expandedChapterId.value) {
+    expandedChapterId.value = null
+    return
+  }
+  if (orbitGroup) {
+    // 收集该轨道内的二级节点 id，从全局注册表移除
+    const childIds = new Set()
+    orbitGroup.children.forEach((child) => {
+      const node = child.userData?.node
+      if (node && child.isGroup) childIds.add(node.id)
+    })
+    for (const id of childIds) {
+      nodeObjectById.delete(id)
+      labelObjectById.delete(id)
+      const mesh = nodeObjects.find(m => m.userData?.node?.id === id)
+      if (mesh) nodeObjects = nodeObjects.filter(m => m !== mesh)
+      nodePositionById.delete(id)
+    }
+    disposeObject(orbitGroup)
+    if (orbitGroup.parent) orbitGroup.parent.remove(orbitGroup)
+    orbitGroup = null
+  }
+  expandedChapterId.value = null
+  // 移除已折叠二级节点的入场动画引用，避免对已 dispose 对象持续操作
+  appearAnimations = appearAnimations.filter(item => nodeObjects.includes(item.mesh))
+  // 移除选中态指向已折叠二级节点的引用，避免悬空 ring
+  updateSelectionState()
+  requestRender()
+}
+
+// 在 chapter 世界位置周围生成下属二级节点轨道并持续顺时针旋转
+function expandChapter(chapterId) {
+  if (!scene || !expandedGroup || !nodeObjectById.has(chapterId)) return
+  // 互斥 + 再次点击折叠
+  if (expandedChapterId.value === chapterId) { collapseChapter(); return }
+  collapseChapter()
+
+  const chapterGroup = nodeObjectById.get(chapterId)
+  const worldPos = chapterGroup.getWorldPosition(new THREE.Vector3())
+  const childMap = buildChapterChildMap()
+  const children = childMap.get(chapterId) || []
+  if (children.length === 0) return
+
+  orbitGroup = new THREE.Group()
+  orbitGroup.position.copy(worldPos)
+
+  const count = children.length
+  children.forEach((node, i) => {
+    // 从正上方起顺时针均匀分布
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / count
+    const yOffset = (TYPE_Y_OFFSET[node.type] || 0) + masteryYOffset(node)
+    const localPos = new THREE.Vector3(
+      Math.cos(angle) * ORBIT_RADIUS,
+      yOffset,
+      Math.sin(angle) * ORBIT_RADIUS
+    )
+    // createNodeObject 内部读取 nodePositionById 作为初始位置；存入世界坐标用于入场定位
+    nodePositionById.set(node.id, worldPos.clone().add(localPos))
+    const group = createNodeObject(node)
+    // createNodeObject 已将其注册进 nodeObjects/nodeObjectById/labelObjectById
+    // 改挂到轨道组：重置 group 位置为局部坐标
+    group.position.copy(localPos)
+    orbitGroup.add(group)
+  })
+
+  // 轨道边：在 orbitGroup 局部空间画 chapter(原点)→二级节点 的 CONTAINS 连线，随轨道旋转
+  buildOrbitEdges(children, count)
+
+  expandedGroup.add(orbitGroup)
+  expandedChapterId.value = chapterId
+
+  // 入场弹入
+  const childMeshes = children
+    .map(n => nodeObjectById.get(n.id)?.userData?.mesh)
+    .filter(Boolean)
+  appearAnimations.push(...childMeshes.map((mesh, i) => ({ mesh, delay: i * 0.03, t: 0 })))
+  requestRender()
+}
+
+// 在 orbitGroup 局部空间绘制 chapter→二级 的连线（与轨道一同旋转）
+function buildOrbitEdges(children, count) {
+  if (!orbitGroup) return
+  const meta = getRelationTypeMeta('CONTAINS')
+  const baseColor = new THREE.Color(meta.color)
+  const positions = []
+  const colors = []
+  const SEG = 14
+  const origin = new THREE.Vector3(0, 0, 0)
+  for (let i = 0; i < count; i++) {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / count
+    const end = new THREE.Vector3(
+      Math.cos(angle) * ORBIT_RADIUS,
+      (TYPE_Y_OFFSET[children[i].type] || 0) + masteryYOffset(children[i]),
+      Math.sin(angle) * ORBIT_RADIUS
+    )
+    const lift = 0.5
+    const mid = origin.clone().add(end).multiplyScalar(0.5)
+    mid.y += lift + Math.min(origin.distanceTo(end) * 0.05, 1.0)
+    const curve = new THREE.QuadraticBezierCurve3(origin.clone(), mid, end)
+    const pts = curve.getPoints(SEG)
+    for (let k = 0; k < pts.length - 1; k++) {
+      const p0 = pts[k]; const p1 = pts[k + 1]
+      positions.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z)
+      const f0 = 0.4 + 0.6 * (k / (pts.length - 1))
+      const f1 = 0.4 + 0.6 * ((k + 1) / (pts.length - 1))
+      const c0 = baseColor.clone().multiplyScalar(f0)
+      const c1 = baseColor.clone().multiplyScalar(f1)
+      colors.push(c0.r, c0.g, c0.b, c1.r, c1.g, c1.b)
+    }
+  }
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+  const material = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.5
+  })
+  const mesh = new THREE.LineSegments(geometry, material)
+  mesh.userData.isOrbitEdge = true
+  orbitGroup.add(mesh)
 }
 
 // 提交状态 → 颜色
@@ -719,7 +795,7 @@ function rebuildSubmissionSatellites() {
 
   submissionGroup = new THREE.Group()
   submissionMeshes = []
-  const center = group.position.clone()
+  const center = group.getWorldPosition(new THREE.Vector3())
   const subs = trace.submissions.slice().sort((a, b) => {
     const ta = new Date(a.submitTime || a.submittedAt || a.date || 0).getTime()
     const tb = new Date(b.submitTime || b.submittedAt || b.date || 0).getTime()
@@ -846,7 +922,9 @@ function updateRing(ring, nodeId, scaleOffset) {
   const node = group.userData.node
   const meta = getNodeTypeMeta(node.type)
   const size = getNodeSize(node) + scaleOffset
-  ring.position.copy(group.position)
+  // 节点可能在旋转轨道内，取世界坐标定位 ring（ring 直接挂在 scene 下）
+  group.getWorldPosition(_orbitWorldVec)
+  ring.position.copy(_orbitWorldVec)
   ring.position.y += 0.02
   ring.scale.setScalar(size)
   ring.material.color.set(meta.color)
@@ -946,6 +1024,11 @@ function handlePointerLeave() {
 function handleClick(event) {
   const node = getIntersectedNode(event)
   if (node) {
+    // 点击一级知识点 → 互斥切换展开/折叠，同时联动右侧面板
+    if (node.type === 'chapter') {
+      if (expandedChapterId.value === node.id) collapseChapter()
+      else expandChapter(node.id)
+    }
     // 单击节点 → 仅选中并联动右侧面板（相机与节点位姿不变）
     emit('select-node', node)
     return
@@ -1023,6 +1106,7 @@ function animate() {
   let dynamic = false
   if (motionEnabled.value && nodeGroup) {
     // 轻微浮动 + 选中节点发光脉冲；浮动幅度按掌握度（优势高飘、薄弱小幅度）
+    // 仅 course/chapter 浮动；二级节点靠轨道旋转提供动态感
     nodeGroup.children.forEach((group) => {
       const baseY = group.userData.baseY ?? group.position.y
       const amp = group.userData.floatAmp ?? 0.28
@@ -1030,9 +1114,14 @@ function animate() {
     })
     dynamic = true
   }
-  // 发光强度向目标平滑过渡；薄弱点红色脉冲
-  if (nodeGroup) {
-    nodeGroup.children.forEach((group) => {
+  // 轨道旋转：展开的二级节点整体绕一级知识点顺时针公转
+  if (expandedGroup && orbitGroup && motionEnabled.value && expandedGroup.children.length) {
+    orbitGroup.rotation.y -= delta * ORBIT_SPEED
+    dynamic = true
+  }
+  // 发光强度向目标平滑过渡；薄弱点红色脉冲；覆盖全部节点（含旋转中的二级节点）
+  if (nodeObjectById.size) {
+    nodeObjectById.forEach((group) => {
       const mesh = group.userData.mesh
       if (!mesh) return
       const isWeak = mesh.userData.isWeak
@@ -1129,6 +1218,9 @@ function destroyScene() {
   nodeGroup = edgeGroup = hoverRing = selectRing = raycaster = pointer = null
   submissionGroup = null
   submissionMeshes = []
+  expandedGroup = null
+  orbitGroup = null
+  expandedChapterId.value = null
   hoveredNode.value = null
   hoveredSubmission.value = null
   cameraTween.active = false
@@ -1154,7 +1246,8 @@ function zoomCamera(direction) {
 function focusNode(nodeId) {
   const group = nodeObjectById.get(nodeId)
   if (!group || !camera || !controls) return
-  const target = group.position.clone()
+  // 节点可能在旋转轨道内，取世界坐标作为聚焦目标
+  const target = group.getWorldPosition(new THREE.Vector3())
   const offset = new THREE.Vector3(7, 7.5, 10)
   startCameraTween(target.clone().add(offset), target)
 }
