@@ -561,6 +561,14 @@ export default {
     })
   },
 
+  async getLearningTracking(submissionId) {
+    const response = await apiClient.get(`/api/submissions/${submissionId}/learning-tracking`)
+    if (response?.success === false) {
+      throw createFriendlyError({ data: response }, response.message || '加载学情追踪失败')
+    }
+    return response?.data || response
+  },
+
   async gradeSubmission(id, data) {
     return apiClient.post(`/api/submissions/${id}/grade`, data)
   },
