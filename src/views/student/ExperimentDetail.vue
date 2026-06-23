@@ -64,7 +64,7 @@
                 <span class="g-toolbar-title [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
                 <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" @click="copyCode">复制</UiButton>
               </div>
-              <pre class="g-code [background:#1e1e2e] [color:#cdd6f4] [padding:20px] [border-radius:12px] [overflow-x:auto] [font-size:13px] [line-height:1.7] [max-height:600px] [overflow-y:auto] [white-space:pre-wrap] [word-break:break-all] [font-family:'Cascadia_Code',_'Fira_Code',_Consolas,_monospace] [margin:0]"><code>{{ currentExp.code }}</code></pre>
+              <CodeViewer :code="currentExp.code" language="cpp" maxHeight="500px" />
             </div>
           </div>
 
@@ -132,14 +132,21 @@
 
             <!-- 分析完成 -->
             <template v-if="errorAnalysisData && !errorLoading">
-              <!-- 功能一：错误代码诊断 -->
-              <div class="g-section [margin-bottom:16px]">
+              <!-- 无提交记录 -->
+              <div v-if="!errorAnalysisData.latestCode && !errorAnalysisData.latestJudgeStatus && !errorAnalysisData.errorCategories?.length" class="g-empty [text-align:center] [padding:48px_20px]">
+                <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">📭</div>
+                <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无提交记录</div>
+                <div class="g-empty-sub [font-size:13px] [color:#5f6368]">完成PTA平台实验后可使用AI错误分析功能</div>
+              </div>
+
+              <!-- 功能一：错误代码诊断（有提交时展示） -->
+              <div v-else class="g-section [margin-bottom:16px]">
                 <div class="g-section-header [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:12px]">
                   <span class="g-section-title [font-size:15px] [font-weight:500] [color:#202124]">
                     🐛 代码错误诊断
                     <span v-if="!errorAnalysisData.aiGenerated" class="g-chip c-warning [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#fef7e0] [color:#e37400] [margin-left:8px]">规则引擎</span>
                   </span>
-                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis">🔄 重新分析</UiButton>
+                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">🔄 重新分析</UiButton>
                 </div>
 
                 <!-- 最新提交概况 -->
@@ -150,7 +157,14 @@
                       判题结果：{{ judgeStatusLabel(errorAnalysisData.latestJudgeStatus) }}
                     </span>
                   </div>
-                  <pre v-if="errorAnalysisData.latestCode" class="g-latest-code [background:#1e1e2e] [color:#cdd6f4] [padding:12px] [border-radius:8px] [font-size:12px] [line-height:1.6] [max-height:180px] [overflow:auto] [margin:0] [font-family:'Cascadia_Code',_'Fira_Code',_Consolas,_monospace] [white-space:pre-wrap] [word-break:break-all]"><code>{{ errorAnalysisData.latestCode }}</code></pre>
+                  <CodeViewer v-if="errorAnalysisData.latestCode" :code="errorAnalysisData.latestCode" language="cpp" maxHeight="400px" />
+                </div>
+
+                <!-- 全 AC / 无错误 正面反馈 -->
+                <div v-if="!errorAnalysisData.errorCategories?.length" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
+                  <div class="g-all-clear-icon [font-size:28px] [margin-bottom:8px]">🎉</div>
+                  <div class="g-all-clear-text [font-size:15px] [font-weight:500] [color:#137333] [margin-bottom:4px]">未检测到错误，所有提交均已通过！</div>
+                  <div class="g-all-clear-sub [font-size:13px] [color:#3c4043]">以下是代码优化和进阶学习建议</div>
                 </div>
 
                 <!-- 总体评估 -->
@@ -222,7 +236,22 @@
                   </div>
                 </div>
               </template>
+
+              <!-- LeetCode 推荐练习入口（全 AC 和 有错误 都显示） -->
+              <div class="g-leetcode-entry [margin-top:14px] [text-align:center]">
+                <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:10px_24px] [font-size:14px] [color:#1a73e8] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#e8f0fe] hover:[border-color:#1a73e8]" @click="router.push('/student/leetcode-search')">
+                  📚 前往 LeetCode 拓展推荐练习
+                </UiButton>
+              </div>
             </template>
+
+            <!-- API 调用失败 -->
+            <div v-if="errorChecked && !errorLoading && !errorAnalysisData" class="g-empty [text-align:center] [padding:48px_20px]">
+              <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">⚠️</div>
+              <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">分析失败</div>
+              <div class="g-empty-sub [font-size:13px] [color:#5f6368] [margin-bottom:20px]">AI 错误分析服务暂时不可用，请稍后重试</div>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" :disabled="errorLoading" @click="runErrorAnalysis">🔄 重试</UiButton>
+            </div>
           </div>
         </div>
       </div>
@@ -233,12 +262,14 @@
 
 <script setup>
 import { useExperimentStore } from '@/store'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, ref, watch } from 'vue'
+import LoadingState from '../../components/LoadingState.vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { Loading } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
+import CodeViewer from '@/components/CodeViewer.vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import axios from 'axios'
@@ -247,6 +278,7 @@ import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 const API_BASE = API_BASE_URL
 const route = useRoute()
+const router = useRouter()
 const experimentStore = useExperimentStore()
 const loading = ref(true)
 const activeTab = ref('code')
@@ -300,15 +332,15 @@ async function generateAiComment(force) {
   finally { aiGenerating.value = false }
 }
 
-async function runErrorAnalysis() {
+async function runErrorAnalysis(forceRefresh = false) {
   errorLoading.value = true
   errorChecked.value = true
   warningData.value = null
   try {
-    const res = await api.analyzeError({ experimentId: experimentId.value })
+    const res = await api.analyzeError({ experimentId: experimentId.value, forceRefresh })
     if (res?.success && res.data) {
       errorAnalysisData.value = res.data
-      await checkAndLoadWarning()
+      await checkAndLoadWarning(forceRefresh)
     }
   } catch (e) {
     logger.error('错误分析失败:', e)
@@ -317,9 +349,9 @@ async function runErrorAnalysis() {
   }
 }
 
-async function checkAndLoadWarning() {
+async function checkAndLoadWarning(forceRefresh = false) {
   try {
-    const res = await api.getWarningAnalysis({ experimentId: experimentId.value })
+    const res = await api.getWarningAnalysis({ experimentId: experimentId.value, forceRefresh })
     if (res?.success && res.data) {
       if (res.data.triggered) {
         warningData.value = res.data

@@ -1,12 +1,16 @@
 /*
- * highlight.js 语法着色补充
+ * highlight.js 全局样式补充
  *
- * 项目通过 `highlight.js/styles/atom-one-dark.css` 引入深色主题以获得语法着色，
- * 但主题自带的 `.hljs` 背景色与内边距会覆盖各代码块组件已调好的容器样式
- *（详情面板示例代码、提交追溯代码、AI 助手 Markdown 代码块均为深色 #0f172a 容器）。
- * 这里仅保留 token 着色，把背景与内边距交还给各组件容器，避免双层背景。
+ * 基础 .hljs 规则重置背景/内边距，由组件容器控制。
+ * 语法颜色由 CodeViewer 组件内联注入（不依赖本文件的 .hljs-* 选择器）。
  */
 .hljs {
+  display: block;
+  overflow-x: auto;
   padding: 0;
+  color: #f8f8f2;
   background: transparent;
 }
+
+.hljs-emphasis { font-style: italic; }
+.hljs-strong   { font-weight: bold; }
