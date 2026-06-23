@@ -12,7 +12,10 @@ import { installUiComponents } from './components/ui'
 import { installUiIcons } from './components/ui/icons'
 import { installFeedback } from './services/feedback'
 import { AUTH_STORAGE_CLEARED_EVENT, AUTH_STORAGE_KEYS } from './constants/auth'
+import { installFetchMockAdapter } from './mock/httpMock'
 import { useUserStore } from './store'
+
+installFetchMockAdapter()
 
 const browserConsole = window.console
 const originalError = browserConsole?.error?.bind(browserConsole)

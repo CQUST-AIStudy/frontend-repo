@@ -15,11 +15,12 @@ ENV TZ=Asia/Shanghai \
 # - 关闭前端直连 Neo4j（生产应经后端 /api/knowledge-graphs 访问）
 # - 演示模式（VUE_APP_DEMO_MODE）：默认关闭；由 docker-compose build args 注入，
 #   设为 true 时登录免校验密码、返回演示用户，用于后端不可用时的纯前端演示。
+ARG VUE_APP_USE_MOCK_DATA=false
 ARG VUE_APP_DEMO_MODE=false
 
 ENV VUE_APP_API_BASE_URL="" \
     VUE_APP_RAG_API_BASE_URL="/rag" \
-    VUE_APP_USE_MOCK_DATA="false" \
+    VUE_APP_USE_MOCK_DATA="${VUE_APP_USE_MOCK_DATA}" \
     VUE_APP_SPIDER_URL="/spider" \
     VUE_APP_NEO4J_ENABLED="false" \
     VUE_APP_DEMO_MODE="${VUE_APP_DEMO_MODE}"
