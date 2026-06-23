@@ -547,6 +547,8 @@ function resolveInitialClassPrefix(prefixes) {
   if (!prefixes.length) return ''
 
   const candidates = [
+    userStore.selectedClass?.ptaGroupName,
+    userStore.selectedClass?.pta_group_name,
     userStore.selectedClass?.ptaKeyword,
     userStore.selectedClass?.name,
   ]

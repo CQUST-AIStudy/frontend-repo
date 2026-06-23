@@ -109,7 +109,7 @@
               <ui-table :data="classes" stripe>
                 <ui-table-column prop="name" label="班级" min-width="150" />
                 <ui-table-column prop="teacherName" label="教师" width="130" />
-                <ui-table-column prop="ptaKeyword" label="PTA 关键词" min-width="140" />
+                <ui-table-column prop="ptaGroupName" label="PTA 用户组" min-width="140" />
                 <ui-table-column label="同步开关" width="100">
                   <template #default="{ row }">
                     <ui-tag :type="row.syncEnabled ? 'success' : 'info'" effect="plain">
@@ -141,7 +141,7 @@
                       <ui-button
                         type="primary"
                         link
-                        :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
+                        :disabled="!row.syncEnabled || (!row.ptaGroupName && !row.ptaGroupId) || syncingClassId === row.id"
                         @click="triggerSync(row, 'incremental')"
                       >
                         增量同步
@@ -149,7 +149,7 @@
                       <ui-button
                         type="danger"
                         link
-                        :disabled="!row.syncEnabled || !row.ptaKeyword || syncingClassId === row.id"
+                        :disabled="!row.syncEnabled || (!row.ptaGroupName && !row.ptaGroupId) || syncingClassId === row.id"
                         @click="confirmFullSync(row)"
                       >
                         全量同步
@@ -175,7 +175,7 @@
             <div class="dashboard-table-wrap dashboard-table-wrap--tasks">
               <ui-table :data="recentTasks" stripe>
                 <ui-table-column prop="taskId" label="任务 ID" min-width="110" />
-                <ui-table-column prop="keyword" label="关键词" min-width="120" />
+                <ui-table-column prop="groupName" label="用户组" min-width="120" />
                 <ui-table-column label="模式" width="100">
                   <template #default="{ row }">
                     <ui-tag :type="taskModeType(row.mode)" effect="plain">{{ modeText(row.mode) }}</ui-tag>

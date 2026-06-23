@@ -185,11 +185,14 @@ function backToCourses() {
 function confirmSelect() {
   const found = classList.value.find(item => item.id === selected.value)
   if (!found) return
-  const ptaKeyword = found.ptaKeyword || found.pta_keyword || found.classKeyword || found.class_keyword || found.name
+  const ptaGroupId = found.ptaGroupId || found.pta_group_id || ''
+  const ptaGroupName = found.ptaGroupName || found.pta_group_name || ''
   userStore.setSelectedClass({
     id: found.id,
     name: found.name,
-    ptaKeyword
+    ptaGroupId,
+    ptaGroupName,
+    ptaKeyword: ptaGroupName || found.ptaKeyword || found.pta_keyword || ''
   })
   router.replace('/teacher/dashboard')
 }

@@ -109,7 +109,7 @@ const normalizeTeacherClassScope = (options) => {
   if (options && typeof options === 'object') {
     return {
       classId: options.classId ?? null,
-      classKeyword: options.classKeyword ?? options.ptaKeyword ?? options.class ?? null,
+      classKeyword: options.classKeyword ?? options.ptaGroupName ?? options.ptaKeyword ?? options.class ?? null,
       scope: options.scope === 'all' ? 'all' : 'class'
     }
   }
@@ -120,7 +120,7 @@ const normalizePtaKeyword = (value) => String(value || '').replace(/[\s\u3000]+/
 
 const getClassPtaKeyword = (cls) => {
   if (!cls || typeof cls !== 'object') return ''
-  return cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
+  return cls.ptaGroupName || cls.pta_group_name || cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
 }
 
 const isNumericClassId = (value) => /^\d+$/.test(String(value ?? '').trim())

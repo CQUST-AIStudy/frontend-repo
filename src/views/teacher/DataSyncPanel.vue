@@ -29,9 +29,9 @@
               <span v-else class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,75,63,0.08)] text-[#c44b3f]">未选择教学班</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-[13px] text-[#6e6e73]">同步关键词</span>
-              <span v-if="currentKeyword" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)]">{{ currentKeyword }}</span>
-              <span v-else class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.08)] text-[#c49a3c]">未设置（请在班级管理中配置PTA关键词）</span>
+              <span class="text-[13px] text-[#6e6e73]">PTA 用户组</span>
+              <span v-if="currentGroupLabel" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)]">{{ currentGroupLabel }}</span>
+              <span v-else class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.08)] text-[#c49a3c]">未设置（请在班级管理中配置 PTA 用户组名）</span>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-[13px] text-[#6e6e73]">Cookie</span>
@@ -87,11 +87,11 @@
               已开启强制更新：将跳过冷却限制，请谨慎使用以保护 PTA 平台。
             </div>
           </div>
-          <!-- Sync keyword panel -->
+          <!-- Sync user group panel -->
           <div class="mb-3.5 p-3.5 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06]">
             <div class="flex flex-col gap-1 mb-2.5">
-              <span class="text-[14px] font-semibold text-[#1d1d1f]">同步关键词</span>
-              <span class="text-[12px] text-[#6e6e73]">可按当前班级临时覆盖 PTA 搜索关键词；提交同步时会同时保存到该班级配置。</span>
+              <span class="text-[14px] font-semibold text-[#1d1d1f]">PTA 用户组名</span>
+              <span class="text-[12px] text-[#6e6e73]">可按当前班级临时覆盖 PTA 用户组名；提交同步时会同时保存到该班级配置。</span>
             </div>
             <UiInput v-model="syncKeyword" placeholder="例如：计科25数据结构" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
           </div>
@@ -198,7 +198,7 @@
               <thead>
                 <tr class="bg-[#f9f9fb]">
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">任务ID</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">关键词</th>
+                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">用户组</th>
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">模式</th>
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">状态</th>
                   <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">来源</th>
@@ -209,7 +209,7 @@
               <tbody>
                 <tr v-for="row in taskHistory" :key="row.task_id" class="border-b border-black/[0.04] last:border-b-0 hover:bg-[#f5f5f7]/60">
                   <td class="px-3 py-2 text-[#1d1d1f]">{{ row.task_id }}</td>
-                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.keyword }}</td>
+                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</td>
                   <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></td>
                   <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="row.status==='SUCCESS' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : row.status==='FAILED' ? 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]' : 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]'">{{ row.status }}</span></td>
                   <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></td>
@@ -304,7 +304,7 @@
             </div>
             <div class="flex gap-2.5 py-1.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f] min-w-[70px]">提交记录</span>
-              <span class="text-[#6e6e73]">冷却 4 小时，拉取最新提交</span>
+              <span class="text-[#6e6e73]">冷却 24 小时，拉取最新提交</span>
             </div>
             <div class="flex gap-2.5 py-1.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f] min-w-[70px]">导出数据</span>
@@ -398,7 +398,9 @@ const selectedClassId = computed(() => {
   const id = Number(userStore.selectedClass?.id)
   return Number.isInteger(id) && id > 0 ? id : null
 })
-const currentKeyword = computed(() => userStore.selectedClass?.ptaKeyword || userStore.selectedClass?.name || '')
+const currentKeyword = computed(() => userStore.selectedClass?.ptaGroupName || userStore.selectedClass?.pta_group_name || '')
+const currentGroupId = computed(() => userStore.selectedClass?.ptaGroupId || userStore.selectedClass?.pta_group_id || '')
+const currentGroupLabel = computed(() => currentKeyword.value || currentGroupId.value)
 
 const cookieStatus = ref('UNKNOWN')
 const spiderAlive = ref(false)
@@ -506,7 +508,7 @@ async function loadCooldown() {
     cooldownInfo.value = null
     return
   }
-  const keyword = syncKeyword.value.trim() || currentKeyword.value
+  const keyword = syncKeyword.value.trim() || currentKeyword.value || currentGroupId.value
   if (!selectedClassId.value) {
     uiMessage.warning('请先选择当前教学班')
     return
@@ -547,16 +549,17 @@ function clearTempCredential() {
 
 async function triggerSync(mode) {
   const keyword = syncKeyword.value.trim() || currentKeyword.value
+  const groupId = currentGroupId.value
   if (!selectedClassId.value) {
     uiMessage.warning('请先选择当前教学班')
     return
   }
-  if (!keyword) {
-    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+  if (!keyword && !groupId) {
+    uiMessage.warning('请先在班级管理中配置 PTA 用户组名')
     return
   }
-  if (!keyword || !String(keyword).trim()) {
-    uiMessage.warning('请先在班级管理中配置 PTA 同步关键词')
+  if ((!keyword || !String(keyword).trim()) && (!groupId || !String(groupId).trim())) {
+    uiMessage.warning('请先在班级管理中配置 PTA 用户组名')
     return
   }
   await probeSpiderHealth()
@@ -596,26 +599,13 @@ async function triggerSync(mode) {
     }
 
     const payload = {
-      ptaKeyword: keyword,
+      ptaGroupId: groupId,
+      ptaGroupName: keyword,
       mode,
       force: forceMode.value,
       ...(username ? { ptaUsername: username, ptaPassword: password } : {})
     }
-    let res
-    if (spiderAlive.value && plannedCredentialSource.value !== 'bound') {
-      res = await axios.post(spiderApi('/crawl'), {
-        keyword,
-        class_id: selectedClassId.value,
-        mode,
-        force: forceMode.value,
-        credential_source: plannedCredentialSource.value,
-        force_selenium_login: plannedCredentialSource.value === 'temporary',
-        headless: false,
-        ...(username ? { username, password } : {})
-      }, spiderRequestConfig({ timeout: 30000 }))
-    } else {
-      res = await triggerPtaSync(selectedClassId.value, payload)
-    }
+    const res = await triggerPtaSync(selectedClassId.value, payload)
     const r = res?.data || res
 
     // 冷却拦截

@@ -284,7 +284,7 @@ const submitForm = async () => {
   try {
     const selectedKeywords = classList.value
       .filter(item => formData.classes.some(classId => String(classId) === String(item.id)))
-      .map(item => normalizePtaKeyword(item.ptaKeyword || item.name || ''))
+      .map(item => normalizePtaKeyword(item.ptaGroupName || item.ptaKeyword || item.name || ''))
       .filter(Boolean)
     const payload = {
       ...formData,
@@ -328,7 +328,8 @@ const loadClassList = async () => {
     classList.value = list.map(c => ({
       id: c.id,
       name: c.name || c.className || `班级${c.id}`,
-      ptaKeyword: normalizePtaKeyword(c.ptaKeyword || c.pta_keyword || c.name || c.className || '')
+      ptaGroupName: normalizePtaKeyword(c.ptaGroupName || c.pta_group_name || ''),
+      ptaKeyword: normalizePtaKeyword(c.ptaGroupName || c.pta_group_name || c.ptaKeyword || c.pta_keyword || c.name || c.className || '')
     }))
   } catch (error) {
     logger.error('加载班级列表失败:', error)
