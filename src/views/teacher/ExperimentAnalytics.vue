@@ -25,7 +25,7 @@
         <UiSelect
           v-model="selectedExp"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
-          @change="loadAnalytics"
+          @change="onExperimentChange"
         >
           <UiOption :value="null" disabled>选择实验</UiOption>
           <UiOption
@@ -837,8 +837,14 @@ function renderComparisonChart() {
   })
 }
 
-function onClassChange() {
+function onClassChange(value) {
+  selectedClass.value = value ?? ''
   loadExperiments()
+}
+
+function onExperimentChange(value) {
+  selectedExp.value = value ?? null
+  loadAnalytics()
 }
 
 function toggleComparison() {
