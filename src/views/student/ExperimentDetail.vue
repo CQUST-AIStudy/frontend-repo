@@ -37,9 +37,18 @@
               </div>
               <p v-if="publishedGrading.finalReviewComment" class="mt-3 max-w-4xl whitespace-pre-line text-sm leading-7 text-[#33453a]">{{ publishedGrading.finalReviewComment }}</p>
             </div>
-            <UiButton v-if="publishedGrading.hasReport" :disabled="downloadingPublishedReport" @click="downloadPublishedReport" class="h-10 rounded-lg border-none bg-[#15803d] px-5 text-sm text-white disabled:opacity-50">
+            <UiButton v-if="publishedGrading.reportAvailable" :disabled="downloadingPublishedReport" @click="downloadPublishedReport" class="h-10 rounded-lg border-none bg-[#15803d] px-5 text-sm text-white disabled:opacity-50">
               {{ downloadingPublishedReport ? '下载中...' : '下载批注报告' }}
             </UiButton>
+          </div>
+          <div v-if="publishedGrading.errorDemonstrations?.length" class="mt-5 border-t border-[#d8ebde] pt-5">
+            <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-[#1f5130]">
+              <LucideIcon name="play" :size="16" />老师发布的错误演示
+            </div>
+            <ErrorDemonstrationPlayer
+              :demonstrations="publishedGrading.errorDemonstrations"
+              readonly
+            />
           </div>
         </section>
 
@@ -145,6 +154,7 @@ import api from '@/api'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import ErrorAnalysisPanel from './components/ErrorAnalysisPanel.vue'
+import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 
 const API_BASE = API_BASE_URL
 const route = useRoute()

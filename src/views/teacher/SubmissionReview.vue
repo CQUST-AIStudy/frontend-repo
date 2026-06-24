@@ -129,6 +129,27 @@
         ></textarea>
       </div>
 
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-6">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="m-0 text-lg font-semibold text-[#1d1d1f]">错误演示</h2>
+            <p class="mb-0 mt-1 text-xs leading-5 text-[#6e6e73]">根据评分批注中的真实代码锚点还原执行状态，发布成绩后学生可查看同一演示。</p>
+          </div>
+          <span v-if="detail.errorDemonstrations?.length" class="rounded-lg bg-[#eef6ff] px-3 py-1.5 text-xs font-medium text-[#1677ff]">
+            已生成 {{ detail.errorDemonstrations.length }} 个可视化
+          </span>
+        </div>
+        <ErrorDemonstrationPlayer
+          v-if="detail.errorDemonstrations?.length"
+          :demonstrations="detail.errorDemonstrations"
+        />
+        <div v-else class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
+          <LucideIcon name="circle-check" :size="24" class="mb-2 text-[#16a34a]" />
+          <div class="text-sm font-medium text-[#334155]">没有可演示的代码错误</div>
+          <div class="mt-1 text-xs text-[#8b96a8]">仅当评分证据包含可定位的越界、指针或运行时错误时生成，避免用随机动画误导学生。</div>
+        </div>
+      </div>
+
       <!-- Score Dimensions -->
       <div class="mb-5">
         <div class="text-base font-semibold text-[#1d1d1f] mb-4 pb-2 border-b-2 border-black/[0.06]">评分维度（点击筛选证据）</div>
@@ -375,6 +396,7 @@ import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { ChatDotRound, Edit } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
+import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 import {
   downloadSubmissionReport,
   generateFinalReview,
