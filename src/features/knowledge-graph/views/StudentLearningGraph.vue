@@ -1,26 +1,24 @@
 <script setup>
 import { computed, onMounted, shallowRef } from 'vue'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 import DataStructureGraphCanvas from '@/features/knowledge-graph/components/DataStructureGraphCanvas.vue'
 import KnowledgeGraphDetailPanel from '@/features/knowledge-graph/components/KnowledgeGraphDetailPanel.vue'
 import LearningOverviewBar from '@/features/knowledge-graph/components/LearningOverviewBar.vue'
 import LearningPathPanel from '@/features/knowledge-graph/components/LearningPathPanel.vue'
 import PracticeRecommendPanel from '@/features/knowledge-graph/components/PracticeRecommendPanel.vue'
-import { GRAPH_CODE, rawGraph } from '@/features/knowledge-graph/dataStructureGraph'
+import { GRAPH_CODE } from '@/features/knowledge-graph/dataStructureGraph'
 import {
   getAncestorChain,
   getNodeContext,
   normalizeGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
-import { loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
+import { createEmptyKnowledgeGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
+import { loadStudentLearningProfile } from '@/features/knowledge-graph/studentLearningProfileDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
   buildMasteryMap,
   buildSubmissionMap
 } from '@/features/knowledge-graph/studentProfileAdapter'
-import { API_BASE_URL } from '@/config/runtime'
-import { getTapToken } from '@/constants/auth'
 import api from '@/api'
 import logger from '@/utils/logger'
 
@@ -30,25 +28,17 @@ const loading = shallowRef(false)
 const errorMsg = shallowRef('')
 const profileLoading = shallowRef(true)
 const profileError = shallowRef('')
-const graphData = shallowRef(rawGraph)
-const dataSource = shallowRef('static')
+const graphData = shallowRef(createEmptyKnowledgeGraph())
+const dataSource = shallowRef('empty')
 const fallbackNotice = shallowRef('')
 const profile = shallowRef({})
-const selectedNodeId = shallowRef(rawGraph.course.id)
+const selectedNodeId = shallowRef('')
 const selectedSubmissions = shallowRef([])
 const submissionsLoading = shallowRef(false)
 const submissionsError = shallowRef('')
 const selectedSubmission = shallowRef(null)
 
 const { state: learningState, update: updateLearningState } = useStateForGraph(GRAPH_CODE)
-
-function profileRequestConfig() {
-  const tapToken = getTapToken()
-  return {
-    withCredentials: true,
-    headers: tapToken ? { Authorization: `Bearer ${tapToken}` } : undefined
-  }
-}
 
 const normalizedGraph = computed(() => normalizeGraph(graphData.value))
 
@@ -229,7 +219,11 @@ const practiceRecommendations = computed(() => {
 })
 
 // 数据来源文案
-const dataSourceText = computed(() => dataSource.value === 'backend' ? '后端 MySQL 图谱' : '内置静态图谱')
+const dataSourceText = computed(() => {
+  if (dataSource.value === 'local') return '浏览器本地图谱'
+  if (dataSource.value === 'static') return '内置初始图谱'
+  return '暂无图谱数据'
+})
 
 function selectNode(node) {
   if (!node?.id) return
@@ -302,34 +296,8 @@ async function fetchProfile() {
   profileLoading.value = true
   profileError.value = ''
   try {
-    // 画像主接口（含 skillTree / weaknesses / overview）
-    let res
-    try {
-      res = await axios.get(`${API_BASE_URL}/api/profile/me`, profileRequestConfig())
-    } catch {
-      // 降级：用学号请求
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-      const usernum = userInfo.usernum || userInfo.studentId
-      if (usernum) {
-        res = await axios.get(`${API_BASE_URL}/api/profile/student/${usernum}`, profileRequestConfig())
-      } else {
-        throw new Error('no student id')
-      }
-    }
-    const profileData = res.data?.data || res.data || {}
-
-    // 并行拉取更细粒度的技能点掌握度（/api/profile/skill-states），失败不阻塞
-    try {
-      const skillRes = await axios.get(`${API_BASE_URL}/api/profile/skill-states`, profileRequestConfig())
-      const skillBody = skillRes.data?.data ?? skillRes.data
-      const skills = Array.isArray(skillBody?.skills) ? skillBody.skills
-        : Array.isArray(skillBody) ? skillBody : []
-      if (skills.length) profileData.skillStates = skills
-    } catch (skillErr) {
-      logger.warn('[student-graph] 加载技能点掌握度失败（降级到维度/实验级映射）', skillErr)
-    }
-
-    profile.value = profileData
+    const result = await loadStudentLearningProfile()
+    profile.value = result.profile || {}
   } catch (error) {
     logger.warn('[student-graph] 加载学生画像失败', error)
     // 画像失败时降级为 localStorage 手动掌握度（masteryMap 为空，画布走兜底）
@@ -350,7 +318,7 @@ onMounted(async () => {
   try {
     const result = await loadKnowledgeGraph()
     graphData.value = result.graph
-    dataSource.value = result.source || 'static'
+    dataSource.value = result.source || 'empty'
     fallbackNotice.value = result.fallbackReason || ''
     selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
   } catch (error) {

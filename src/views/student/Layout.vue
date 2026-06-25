@@ -287,8 +287,7 @@ const menuItems = [
   {
     group: 'knowledge', icon: Connection, label: '知识体系',
     children: [
-      { path: '/student/knowledge-graph', label: '我的学习图谱' },
-      { path: '/student/knowledge-learning', label: '知识学习' }
+      { path: '/student/knowledge-graph', label: '我的学习图谱' }
     ]
   }
 ]
@@ -379,7 +378,7 @@ const breadcrumbs = computed(() => {
     'wrong-notebook': '错题本',
     'weakness-training': '专项训练',
     'ability-profile': '能力画像',
-    'knowledge-learning': '知识学习',
+    'knowledge-learning': '我的学习图谱',
     'knowledge-graph': '我的学习图谱',
     'leetcode-search': 'LeetCode 拓展',
     'leetcode-practice': 'LeetCode 练习',

@@ -61,14 +61,14 @@ function addRelation(list, seen, source, target, type, properties = {}) {
   })
 }
 
-function buildRelations(nodes) {
+function buildRelations(nodes, courseId) {
   const relations = []
   const seen = new Set()
   const nodeMap = new Map(nodes.map(node => [node.id, node]))
 
   for (const node of nodes) {
-    if (node.type === 'chapter' && node.id !== rawGraph.course.id) {
-      addRelation(relations, seen, rawGraph.course.id, node.id, 'CONTAINS', {
+    if (courseId && node.type === 'chapter' && node.id !== courseId) {
+      addRelation(relations, seen, courseId, node.id, 'CONTAINS', {
         scope: 'course-chapter'
       })
     }
@@ -110,13 +110,14 @@ function buildRelations(nodes) {
 }
 
 export function normalizeGraph(graph = rawGraph) {
-  const course = normalizeNode(graph.course || rawGraph.course)
+  const sourceGraph = graph || rawGraph
+  const course = normalizeNode(sourceGraph.course || {})
   const nodes = [
     course,
-    ...(Array.isArray(graph.nodes) ? graph.nodes : []).map(normalizeNode)
+    ...(Array.isArray(sourceGraph.nodes) ? sourceGraph.nodes : []).map(normalizeNode)
   ].filter(node => node.id && node.label)
 
-  const relations = Array.isArray(graph.relations) && graph.relations.length > 0
+  const relations = Array.isArray(sourceGraph.relations) && sourceGraph.relations.length > 0
     ? graph.relations.map(relation => ({
         id: String(relation.id || makeRelationId(relation.source, relation.target, relation.type)),
         source: String(relation.source || '').trim(),
@@ -124,7 +125,7 @@ export function normalizeGraph(graph = rawGraph) {
         type: String(relation.type || '').trim(),
         properties: cloneProperties(relation.properties)
       }))
-    : buildRelations(nodes)
+    : buildRelations(nodes, course.id)
 
   const nodeMap = new Map(nodes.map(node => [node.id, node]))
   const outgoingByNodeId = new Map()
@@ -138,7 +139,7 @@ export function normalizeGraph(graph = rawGraph) {
   }
 
   return {
-    metadata: cloneProperties(graph.metadata),
+    metadata: cloneProperties(sourceGraph.metadata),
     course,
     nodes,
     relations,
@@ -301,7 +302,7 @@ export function toGraphDbPayload(graph = rawGraph) {
 }
 
 export async function saveKnowledgeGraph(payload) {
-  // 前端只提交标准 payload，数据库持久化由后端 API 负责。
+  // 前端只提交标准 payload，持久化由当前图谱数据源负责。
   const { writeKnowledgeGraph } = await import('./knowledgeGraphDataSource')
   return writeKnowledgeGraph(payload)
 }
