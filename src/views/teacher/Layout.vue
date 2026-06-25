@@ -227,7 +227,7 @@
           '!box-border !h-[calc(100vh-64px)] !h-[calc(100dvh-64px)] !min-h-0 !overflow-hidden !p-4': isAiChatPage
         }"
       >
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component, route: slotRoute }">
           <transition
             mode="out-in"
             enter-active-class="transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
@@ -237,7 +237,7 @@
             leave-from-class="translate-y-0 opacity-100"
             leave-to-class="-translate-y-1 opacity-0"
           >
-            <component :is="Component" />
+            <component :is="Component" :key="slotRoute.fullPath + (userStore.selectedClass?.id || '')" />
           </transition>
         </router-view>
       </UiMain>

@@ -316,6 +316,9 @@ const filterFallback = ref(false)
 const comparisonItems = ref([])
 const errorMessage = ref('')
 
+// Request sequence counter to prevent race conditions
+let requestSeq = 0
+
 const distChartRef = ref(null)
 const accChartRef = ref(null)
 const compChartRef = ref(null)
@@ -329,7 +332,12 @@ const problemAccuracy = computed(() => {
   return Array.isArray(items) ? items : []
 })
 
-const activeClassLabel = computed(() => selectedClass.value || '全部实验')
+const activeClassLabel = computed(() => {
+  if (selectedClass.value) return selectedClass.value
+  // When no class prefix is selected, try to show the actual teaching class name
+  const clsName = userStore.selectedClass?.name
+  return clsName ? `${clsName}（全部实验）` : '全部实验'
+})
 const comparisonScopeLabel = computed(() => selectedClass.value ? `${selectedClass.value} 范围` : '全部实验范围')
 const comparisonSummary = computed(() => (
   `${comparisonScopeLabel.value}内共有 ${experiments.value.length} 个可分析实验，当前展示 ${comparisonItems.value.length} 个有对比指标的实验。`
@@ -347,7 +355,11 @@ const scopeDescription = computed(() => {
   const scope = scopeInfo.value
   if (!scope) return ''
   const parts = []
-  if (scope.className) parts.push(`班级：${scope.className}`)
+  const teachingCls = userStore.selectedClass?.name
+  if (teachingCls && teachingCls !== scope.className) {
+    parts.push(`当前教学班：${teachingCls}`)
+  }
+  if (scope.className) parts.push(`数据班级：${scope.className}`)
   if (scope.courseName) parts.push(`课程：${scope.courseName}`)
   parts.push('范围：仅数据结构实验，已排除 C 语言数据')
   if (scope.rosterCount != null) parts.push(`名单人数：${safeNumber(scope.rosterCount)}`)
@@ -584,6 +596,11 @@ function disposeDetailCharts() {
   accChart = null
 }
 
+function clearDetailData() {
+  data.value = null
+  disposeDetailCharts()
+}
+
 async function loadClassPrefixes() {
   try {
     const res = await getClassPrefixes()
@@ -597,25 +614,29 @@ async function loadClassPrefixes() {
 }
 
 async function loadExperiments({ autoSelect = true } = {}) {
+  const seq = ++requestSeq
   loading.value = true
   filterFallback.value = false
   errorMessage.value = ''
+  // Clear stale data immediately so old scope info isn't shown during loading
+  clearDetailData()
 
   try {
     let list = normalizeExperimentList(await getAnalyticsExperiments(selectedClass.value || undefined))
+    if (seq !== requestSeq) return // stale request, discard
 
     if (!list.length && selectedClass.value) {
       filterFallback.value = true
       selectedClass.value = ''
       list = normalizeExperimentList(await getAnalyticsExperiments())
+      if (seq !== requestSeq) return
     }
 
     experiments.value = list
 
     if (!experiments.value.length) {
       selectedExp.value = null
-      data.value = null
-      disposeDetailCharts()
+      clearDetailData()
       return
     }
 
@@ -625,67 +646,86 @@ async function loadExperiments({ autoSelect = true } = {}) {
     }
 
     if (!showComparison.value && selectedExp.value) {
-      await loadAnalytics()
+      await loadAnalytics(seq)
     } else {
-      data.value = null
-      disposeDetailCharts()
+      clearDetailData()
     }
 
     if (showComparison.value) {
-      await loadComparison()
+      await loadComparison(seq)
     }
   } catch (error) {
+    if (seq !== requestSeq) return
     experiments.value = []
     selectedExp.value = null
     data.value = null
     errorMessage.value = getErrorText(error, EXPERIMENT_LIST_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
-    loading.value = false
+    if (seq === requestSeq) {
+      loading.value = false
+    }
   }
 }
 
-async function loadAnalytics() {
+async function loadAnalytics(parentSeq = 0) {
   if (!selectedExp.value) {
-    data.value = null
-    disposeDetailCharts()
+    clearDetailData()
     return
   }
 
+  const seq = parentSeq ?? ++requestSeq
   loading.value = true
   errorMessage.value = ''
+  // Clear stale data before fetching new
+  clearDetailData()
   try {
     const res = await getExperimentAnalytics(selectedExp.value)
+    if (seq !== requestSeq) return // stale request, discard
     data.value = normalizePayload(res)
     await nextTick()
+    if (seq !== requestSeq) return // stale after nextTick
     renderDistChart()
     renderAccChart()
   } catch (error) {
+    if (seq !== requestSeq) return
     data.value = null
     errorMessage.value = getErrorText(error, EXPERIMENT_ANALYTICS_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
-    loading.value = false
+    if (seq === requestSeq) {
+      loading.value = false
+    }
   }
 }
 
-async function loadComparison() {
+async function loadComparison(parentSeq = 0) {
+  const seq = parentSeq ?? ++requestSeq
   compLoading.value = true
   errorMessage.value = ''
 
   try {
+    if (seq !== requestSeq) {
+      compLoading.value = false
+      return
+    }
     const res = await getExperimentComparison(selectedClass.value || undefined)
+    if (seq !== requestSeq) return
     comparisonItems.value = alignComparisonItems(res)
   } catch (error) {
+    if (seq !== requestSeq) return
     comparisonItems.value = []
     errorMessage.value = getErrorText(error, EXPERIMENT_COMPARISON_ERROR_TEXT)
     compChart?.dispose()
     compChart = null
   } finally {
-    compLoading.value = false
+    if (seq === requestSeq) {
+      compLoading.value = false
+    }
   }
 
   await nextTick()
+  if (seq !== requestSeq) return
   renderComparisonChart()
 }
 
@@ -839,11 +879,15 @@ function renderComparisonChart() {
 
 function onClassChange(value) {
   selectedClass.value = value ?? ''
+  // Immediately clear stale data and charts so old scope/numbers aren't shown
+  clearDetailData()
   loadExperiments()
 }
 
 function onExperimentChange(value) {
   selectedExp.value = value ?? null
+  // Clear stale data before loading new experiment
+  clearDetailData()
   loadAnalytics()
 }
 
@@ -858,10 +902,27 @@ function handleResize() {
 }
 
 watch(showComparison, async value => {
+  // Cancel any inflight requests and reset both loading flags
+  ++requestSeq
+  loading.value = false
+  compLoading.value = false
   if (value) {
     await loadComparison()
   } else if (selectedExp.value) {
     await loadAnalytics()
+  }
+})
+
+// React to global teaching class changes (e.g. store updated without full navigation)
+watch(() => userStore.selectedClass?.id, async (newId, oldId) => {
+  // Only refresh if the class actually changed and prefixes are already loaded
+  if (newId !== oldId && classPrefixes.value.length > 0) {
+    const newPrefix = resolveInitialClassPrefix(classPrefixes.value)
+    if (newPrefix !== selectedClass.value) {
+      selectedClass.value = newPrefix
+      clearDetailData()
+      await loadExperiments()
+    }
   }
 })
 
