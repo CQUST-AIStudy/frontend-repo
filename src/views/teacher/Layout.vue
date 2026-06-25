@@ -244,7 +244,7 @@
 
       <!-- Footer -->
       <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
-        智能学情分析与个性化实验能力提升平台 · 教师工作空间
+        智能个性画像与个性化实验能力提升平台 · 教师工作空间
       </UiFooter>
     </div>
   </div>

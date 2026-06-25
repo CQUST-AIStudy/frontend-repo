@@ -39,16 +39,17 @@ const langLabel = computed(() => {
   return labels[props.language] || props.language || 'code'
 })
 
-// ── 语法高亮色（内联注入，不依赖外部 CSS） ──
+// ── 浅色主题语法高亮色（GitHub Light 风格） ──
 const COLOR = {
-  keyword:  '#ff79c6',  // int return if for while
-  type:     '#8be9fd',  // 类型 / 内置函数
-  string:   '#f1fa8c',  // "hello"
-  number:   '#bd93f9',  // 123
-  func:     '#50fa7b',  // 函数名
-  meta:     '#ffb86c',  // #include
-  comment:  '#6272a4',  // //
-  plain:    '#e8e8e8',  // 默认
+  keyword:  '#cf222e',  // int return if for while — 红色
+  type:     '#8250df',  // 类型 / 类名 — 紫色
+  string:   '#0a3069',  // "hello" — 深蓝
+  number:   '#0550ae',  // 123 — 蓝色
+  func:     '#8250df',  // 函数名 — 紫色
+  meta:     '#cf222e',  // #include — 红色
+  comment:  '#6e7781',  // // — 灰色
+  builtin:  '#0550ae',  // 内置函数 — 蓝色
+  plain:    '#24292f',  // 默认文字 — 深灰
 }
 
 function hljsToInline(html) {
@@ -56,7 +57,7 @@ function hljsToInline(html) {
     keyword:   COLOR.keyword,
     'selector-tag': COLOR.keyword,
     tag:       COLOR.keyword,
-    'built_in': COLOR.type,
+    'built_in': COLOR.builtin,
     type:      COLOR.type,
     class:     COLOR.type,
     name:      COLOR.type,
@@ -79,9 +80,8 @@ function hljsToInline(html) {
     doctag:    COLOR.meta,
     comment:   COLOR.comment,
     quote:     COLOR.comment,
-    deletion:  '#ff5555',
+    deletion:  '#cf222e',
   }
-  // Match <span class="hljs-xxx..."> and inject style
   return html.replace(/<span class="hljs-([a-z_-]+)(?:\s[^"]*)?"/g, (full, token) => {
     const c = map[token]
     return c ? `${full.slice(0, -1)} style="color:${c}"` : full
@@ -108,7 +108,6 @@ async function copyCode() {
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
   } catch {
-    // fallback
     const ta = document.createElement('textarea')
     ta.value = props.code
     document.body.appendChild(ta)
@@ -123,50 +122,51 @@ async function copyCode() {
 
 <style scoped>
 .code-viewer {
-  background: #1e1e2e;
-  border-radius: 10px;
+  background: #ffffff;
+  border-radius: 8px;
   overflow: hidden;
-  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.65;
-  border: 1px solid #2d2d3f;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, 'SF Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+  border: 1px solid #d0d7de;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .code-viewer__toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 14px;
-  background: #252537;
-  border-bottom: 1px solid #2d2d3f;
+  padding: 8px 16px;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
 }
 
 .code-viewer__lang {
   font-size: 11px;
-  color: #8b8ba0;
+  color: #57606a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .code-viewer__copy {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: none;
-  border: 1px solid #3d3d55;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
   border-radius: 6px;
   padding: 3px 10px;
   font-size: 11px;
-  color: #8b8ba0;
+  color: #57606a;
   cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
 }
 .code-viewer__copy:hover {
-  background: #353550;
-  color: #c0c0d0;
-  border-color: #505070;
+  background: #f3f4f6;
+  color: #24292f;
+  border-color: #afb8c1;
 }
 
 .code-viewer__body {
@@ -185,39 +185,38 @@ async function copyCode() {
   transition: background 0.1s;
 }
 .code-viewer__line:hover {
-  background: rgba(255,255,255,0.03);
+  background: #f6f8fa;
 }
 
 .code-viewer__gutter {
   user-select: none;
   text-align: right;
-  padding: 0 12px 0 8px;
-  color: #858585;
+  padding: 0 12px 0 12px;
+  color: #8c959f;
   font-size: 12px;
-  min-width: 44px;
+  min-width: 48px;
   width: 1%;
   white-space: nowrap;
   vertical-align: top;
-  border-right: 1px solid #2d2d3f;
-  background: #1a1a2a;
+  border-right: 1px solid #d0d7de;
+  background: #f6f8fa;
 }
 .code-viewer__gutter::before {
   content: attr(data-line);
 }
 
 .code-viewer__content {
-  padding: 0 14px;
+  padding: 0 16px;
   white-space: pre;
   vertical-align: top;
   width: 99%;
-  color: #e8e8e8;
+  color: #24292f;
 }
 
 .code-viewer__empty {
-  padding: 24px;
+  padding: 32px;
   text-align: center;
-  color: #5f5f78;
+  color: #8c959f;
   font-size: 13px;
 }
 </style>
-

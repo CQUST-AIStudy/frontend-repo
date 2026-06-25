@@ -173,6 +173,11 @@
                 {{ item }}
               </ui-breadcrumb-item>
             </ui-breadcrumb>
+            <div class="[display:flex] [align-items:center] [gap:8px] [font-size:12px] [color:#5f6368] [margin-left:12px] [padding-left:12px] [border-left:1px_solid_#e5e5e7]">
+              <span>当前课程：<strong class="[color:#1d1d1f]">数据结构</strong></span>
+              <span class="[color:#d1d1d6]">|</span>
+              <span>当前班级：<strong class="[color:#1d1d1f]">{{ headerClassName }}</strong></span>
+            </div>
           </div>
 
           <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
@@ -213,7 +218,7 @@
         </ui-main>
 
         <ui-footer class="layout-footer student-layout-footer [text-align:center] [color:#8ca0b3] [padding:7px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_rgba(126,_157,_183,_0.12)] [flex-shrink:0]">
-          智能学情分析与个性化实验能力提升平台 © 2025
+          智能个性画像与个性化实验能力提升平台 © 2025
         </ui-footer>
       </ui-container>
     </ui-container>
@@ -257,6 +262,10 @@ const {
 
 const userInfo = computed(() => userStore.userInfo || {})
 
+const headerClassName = computed(() => {
+  return userInfo.value?.class || userInfo.value?.className || '数据结构 1 班'
+})
+
 // ── Menu data ──────────────────────────────────────────────
 const menuItems = [
   { path: '/student/dashboard', icon: HomeFilled, label: '首页' },
@@ -265,7 +274,16 @@ const menuItems = [
     children: [
       { path: '/student/experiments', label: '实验列表' },
       { path: '/student/class-join', label: '教学班级' },
-      { path: '/student/learning-analysis', label: '学情分析' }
+      { path: '/student/learning-analysis', label: '个性画像' }
+    ]
+  },
+  {
+    group: 'personalized', icon: Collection, label: '个性化学习',
+    children: [
+      { path: '/student/practice', label: '推荐练习' },
+      { path: '/student/leetcode-search', label: 'LeetCode 拓展' },
+      { path: '/student/wrong-notebook', label: '错题本' },
+      { path: '/student/weakness-training', label: '专项训练' }
     ]
   },
   {
@@ -273,15 +291,6 @@ const menuItems = [
     children: [
       { path: '/student/ai-assistant', label: 'AI 学习助手' },
       { path: '/student/ai-report', label: 'AI 报告生成' }
-    ]
-  },
-  {
-    group: 'practice', icon: Collection, label: '能力提升',
-    children: [
-      { path: '/student/practice', label: '推荐练习' },
-      { path: '/student/leetcode-search', label: 'LeetCode 拓展' },
-      { path: '/student/wrong-notebook', label: '错题本' },
-      { path: '/student/weakness-training', label: '专项训练' }
     ]
   },
   {
@@ -370,7 +379,7 @@ const breadcrumbs = computed(() => {
     dashboard: '首页',
     experiments: '实验列表',
     'experiment-detail': '实验详情',
-    'learning-analysis': '学情分析',
+    'learning-analysis': '个性画像',
     'ai-report': 'AI 报告生成',
     'ai-assistant': 'AI 学习助手',
     'class-join': '教学班级',

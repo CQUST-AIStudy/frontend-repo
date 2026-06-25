@@ -185,7 +185,7 @@
         </ui-main>
 
         <ui-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
-          智能学情分析与个性化实验能力提升平台 - 管理后台 © 2025
+          智能个性画像与个性化实验能力提升平台 - 管理后台 © 2025
         </ui-footer>
       </ui-container>
     </ui-container>

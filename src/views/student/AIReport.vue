@@ -230,40 +230,6 @@
       </ui-row>
     </div>
 
-    <!-- 心得体会输入对话框-->
-    <ui-dialog v-model="showExperienceDialog" title="填写实验信息" width="600px">
-      <div class="experience-dialog-content [padding:10px]">
-
-        <ui-form :model="experienceForm" label-width="100px">
-          <ui-form-item label="实验机房名称">
-            <ui-input v-model="labRoomName" placeholder="请输入实验机房名称，例如：计算机学院机房A101"></ui-input>
-          </ui-form-item>
-
-          <ui-form-item label="上机时间">
-            <ui-date-picker v-model="labTime" type="datetime" placeholder="请选择上机时间" format="YYYY-MM-DD"
-                            value-format="YYYY-MM-DD" class="[width:100%]"></ui-date-picker>
-          </ui-form-item>
-
-          <ui-form-item label="实验心得体会">
-            <ui-input v-model="experienceContent" type="textarea" :rows="8" placeholder="请在此输入您的实验心得体会.."
-                      resize="none"></ui-input>
-            <div class="experience-tips [display:flex] [align-items:center] [margin-top:8px] [color:#909399] [font-size:13px]">
-              <ui-icon>
-                <ChatLineRound />
-              </ui-icon>
-              <span>可以包括对实验过程的思考、遇到的困难及解决方法、对知识点的理解等内容</span>
-            </div>
-          </ui-form-item>
-        </ui-form>
-      </div>
-
-      <template #footer>
-        <span class="dialog-footer [display:flex] [justify-content:flex-end] [gap:10px]">
-          <ui-button @click="cancelExperienceInput">取消</ui-button>
-          <ui-button type="primary" @click="submitExperienceAndGenerateReport">提交并生成报告</ui-button>
-        </span>
-      </template>
-    </ui-dialog>
   </div>
 </template>
 
@@ -271,10 +237,10 @@
 import { useExperimentStore, useUserStore } from '@/store'
 import { computed, onMounted, ref } from 'vue'
 import logger from '@/utils/logger'
-import { message as uiMessage, messageBox } from '@/services/feedback'
+import { message as uiMessage } from '@/services/feedback'
 import {
   MagicStick, View, Download, Timer, Calendar, DocumentChecked, Warning,
-  WarningFilled, Stopwatch, DataLine, Reading, Back, Select, ChatLineRound
+  WarningFilled, Stopwatch, DataLine, Reading, Back, Select
 } from '@/components/ui/icons'
 import { DocxGenerator } from '../../utils/docxGenerator'
 import { marked } from 'marked'
@@ -294,18 +260,6 @@ const selectedExperiment = ref(null)
 const isReportViewVisible = ref(false)
 const reportData = ref({})
 
-
-// 心得体会对话框相关变量
-const showExperienceDialog = ref(false)
-const experienceContent = ref('')
-const tempUserData = ref(null) // 临时存储用户数据
-const labRoomName = ref('') // 实验机房名称
-const labTime = ref('') // 上机时间
-const experienceForm = computed(() => ({
-  labRoomName: labRoomName.value,
-  labTime: labTime.value,
-  experienceContent: experienceContent.value
-}))
 
 // 过滤后的实验列表
 const filteredExperiments = computed(() => {
@@ -414,58 +368,17 @@ const generateReport = async () => {
     aiComment: selectedExperiment.value.aiComment
   }
 
-  // 保存用户数据到临时变量
-  tempUserData.value = userData
-
-  // 打开心得体会输入对话框
-  experienceContent.value = '' // 清空之前的输入
-  showExperienceDialog.value = true
-}
-
-// 取消填写心得体会
-const cancelExperienceInput = () => {
-  messageBox.confirm('确定要取消填写心得体会吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '返回填写',
-    type: 'warning'
-  }).then(() => {
-    showExperienceDialog.value = false
-    tempUserData.value = null
-    experienceContent.value = ''
-  }).catch(() => {
-  })
-}
-
-// 提交心得体会并生成报告
-const submitExperienceAndGenerateReport = async () => {
-  if (!experienceContent.value.trim()) {
-    uiMessage.warning('请填写实验心得体会')
-    return
-  }
-
-  if (!tempUserData.value) {
-    uiMessage.error('数据异常，请重试')
-    showExperienceDialog.value = false
-    return
-  }
-
-  // 添加心得体会到用户数据
-  tempUserData.value.experience = experienceContent.value
-  tempUserData.value.labName = labRoomName.value
-  tempUserData.value.labTime = labTime.value
-  tempUserData.value.courseName = "数据结构"
-  tempUserData.value.teacherName = selectedExperiment.value.teacherName || ''
-  tempUserData.value.summary = experienceContent.value
-
-  // 关闭对话框
-  showExperienceDialog.value = false
+  // 直接生成报告，无需填写额外信息
+  userData.courseName = "数据结构"
+  userData.teacherName = selectedExperiment.value.teacherName || ''
+  userData.summary = ''
 
   try {
     loading.value = true
-    logger.debug('生成实验报告，用户数据', tempUserData.value)
+    logger.debug('生成实验报告，用户数据', userData)
 
     // 调用AI生成报告
-    const result = await experimentStore.generateAIReport(selectedExperiment.value.id, tempUserData.value)
+    const result = await experimentStore.generateAIReport(selectedExperiment.value.id, userData)
 
     if (result.success && result.report) {
       // 更新当前选中的实验报告
@@ -496,7 +409,6 @@ const submitExperienceAndGenerateReport = async () => {
     logger.error('生成报告异常:', error)
   } finally {
     loading.value = false
-    tempUserData.value = null
   }
 }
 
