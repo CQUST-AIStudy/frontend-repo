@@ -5,15 +5,6 @@ import { clearAuthStorage, getTapToken, setSessionToken, setUserInfo } from '../
 import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 
-// 演示模式必须显式通过本地环境变量开启，避免真实账号被伪登录状态覆盖。
-const DEMO_MODE = process.env.VUE_APP_DEMO_MODE === 'true'
-
-const DEMO_USERS = {
-  teacher: { id: 1, username: 'demo_teacher', name: '演示教师', role: 'teacher', level: 'normal' },
-  student: { id: 2, username: 'demo_student', name: '演示学生', role: 'student', studentId: 'S2024001', classId: 1, className: '演示班级' },
-  admin:   { id: 3, username: 'demo_admin',   name: '演示管理员', role: 'admin' },
-}
-
 function normalizeUserInfo(userInfo, teacherLevel) {
   const normalized = { ...(userInfo || {}) }
   const role = String(normalized.role || '').toLowerCase()
@@ -44,17 +35,6 @@ export const useUserStore = defineStore('user', {
     async login(username, password, teacherLevel) {
       this.loading = true
       try {
-        if (DEMO_MODE) {
-          const role = teacherLevel === 'student' ? 'student' : teacherLevel === 'admin' ? 'admin' : 'teacher'
-          const rawUserInfo = { ...DEMO_USERS[role] }
-          const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
-          this.userInfo = userInfo
-          this.token = 'demo_token'
-          setSessionToken(this.token)
-          setUserInfo(this.userInfo)
-          return { success: true, message: '演示模式登录成功', user: userInfo }
-        }
-
         const res = await api.login(username, password, teacherLevel)
         if (!(res && res.success)) {
           return { success: false, message: getFriendlyResponseMessage(res, '用户名或密码不正确，请检查后重试'), details: res }

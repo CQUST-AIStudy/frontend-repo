@@ -1,10 +1,6 @@
-import { getMockTeachingClasses } from '../../mock/teachingClasses'
-import { USE_MOCK_DATA, tapClient } from './client'
+import { tapClient } from './client'
 
 export function getTeachingClasses() {
-  if (USE_MOCK_DATA) {
-    return getMockTeachingClasses()
-  }
   return tapClient.get('/api/classes')
 }
 

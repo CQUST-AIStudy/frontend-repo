@@ -4,8 +4,7 @@ import {
   GRAPH_VERSION,
   RELATION_TYPES,
   getNodeTypeMeta,
-  getRelationTypeMeta,
-  rawGraph
+  getRelationTypeMeta
 } from './dataStructureGraph'
 
 function cloneProperties(value) {
@@ -109,8 +108,8 @@ function buildRelations(nodes, courseId) {
   return relations
 }
 
-export function normalizeGraph(graph = rawGraph) {
-  const sourceGraph = graph || rawGraph
+export function normalizeGraph(graph = null) {
+  const sourceGraph = graph || {}
   const course = normalizeNode(sourceGraph.course || {})
   const nodes = [
     course,
@@ -118,7 +117,7 @@ export function normalizeGraph(graph = rawGraph) {
   ].filter(node => node.id && node.label)
 
   const relations = Array.isArray(sourceGraph.relations) && sourceGraph.relations.length > 0
-    ? graph.relations.map(relation => ({
+    ? sourceGraph.relations.map(relation => ({
         id: String(relation.id || makeRelationId(relation.source, relation.target, relation.type)),
         source: String(relation.source || '').trim(),
         target: String(relation.target || '').trim(),
@@ -149,7 +148,7 @@ export function normalizeGraph(graph = rawGraph) {
   }
 }
 
-export function validateGraph(graph = rawGraph) {
+export function validateGraph(graph = null) {
   const normalized = normalizeGraph(graph)
   const errors = []
   const nodeIds = new Set()
@@ -181,7 +180,7 @@ export function validateGraph(graph = rawGraph) {
     }
   })
 
-  if (!nodeIds.has(normalized.course.id)) {
+  if (!normalized.course?.id || !nodeIds.has(normalized.course.id)) {
     errors.push('课程根节点不存在')
   }
 
@@ -195,7 +194,7 @@ export function validateGraph(graph = rawGraph) {
   }
 }
 
-export function getGraphStats(graph = rawGraph) {
+export function getGraphStats(graph = null) {
   const normalized = normalizeGraph(graph)
   const nodeTypeCounts = normalized.nodes.reduce((acc, node) => {
     acc[node.type] = (acc[node.type] || 0) + 1
@@ -218,7 +217,7 @@ export function getGraphStats(graph = rawGraph) {
   }
 }
 
-export function getAncestorChain(graph = rawGraph, nodeId) {
+export function getAncestorChain(graph = null, nodeId) {
   const normalized = normalizeGraph(graph)
   const node = normalized.nodeMap.get(nodeId)
   if (!node) return []
@@ -232,7 +231,7 @@ export function getAncestorChain(graph = rawGraph, nodeId) {
   return [normalized.course, chapter, node].filter(Boolean)
 }
 
-export function getNodeContext(graph = rawGraph, nodeId) {
+export function getNodeContext(graph = null, nodeId) {
   const normalized = normalizeGraph(graph)
   const node = normalized.nodeMap.get(nodeId)
   if (!node) return null
@@ -270,27 +269,29 @@ export function getNodeContext(graph = rawGraph, nodeId) {
   }
 }
 
-export function toGraphDbPayload(graph = rawGraph) {
+export function toGraphDbPayload(graph = null) {
   const normalized = normalizeGraph(graph)
+  const nodes = normalized.nodes.map((node) => ({
+    id: node.id,
+    label: node.label,
+    type: node.type,
+    properties: {
+      ...cloneProperties(node.properties),
+      summary: node.summary,
+      chapterId: node.chapterId,
+      prerequisites: [...node.prerequisites],
+      related: [...node.related],
+      appliesTo: [...node.appliesTo],
+      targets: [...node.targets]
+    }
+  }))
   return {
     graphCode: GRAPH_CODE,
     version: GRAPH_VERSION,
     source: GRAPH_SOURCE,
     metadata: normalized.metadata,
-    nodes: normalized.nodes.map((node) => ({
-      id: node.id,
-      label: node.label,
-      type: node.type,
-      properties: {
-        ...cloneProperties(node.properties),
-        summary: node.summary,
-        chapterId: node.chapterId,
-        prerequisites: [...node.prerequisites],
-        related: [...node.related],
-        appliesTo: [...node.appliesTo],
-        targets: [...node.targets]
-      }
-    })),
+    course: nodes.find(node => node.type === 'course') || null,
+    nodes,
     relations: normalized.relations.map((relation) => ({
       id: relation.id,
       source: relation.source,
@@ -299,12 +300,6 @@ export function toGraphDbPayload(graph = rawGraph) {
       properties: cloneProperties(relation.properties)
     }))
   }
-}
-
-export async function saveKnowledgeGraph(payload) {
-  // 前端只提交标准 payload，持久化由当前图谱数据源负责。
-  const { writeKnowledgeGraph } = await import('./knowledgeGraphDataSource')
-  return writeKnowledgeGraph(payload)
 }
 
 export { getNodeTypeMeta, getRelationTypeMeta }

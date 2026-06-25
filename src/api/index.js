@@ -1,6 +1,5 @@
 import logger from '@/utils/logger'
 import axios from 'axios'
-import { installAxiosMockAdapter } from '../mock/httpMock'
 import {
   clearAuthStorage,
   getTapToken,
@@ -15,7 +14,6 @@ import {
   getFriendlyErrorMessage
 } from '../utils/errorMessage'
 
-installAxiosMockAdapter(axios)
 axios.defaults.withCredentials = true
 
 const apiClient = axios.create({

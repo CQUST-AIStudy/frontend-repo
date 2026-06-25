@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { message as uiMessage } from '@/services/feedback'
-import { installAxiosMockAdapter, USE_GLOBAL_MOCK_DATA } from '../../mock/httpMock'
 import {
   clearAuthStorage,
   clearTapAuth,
@@ -13,9 +12,6 @@ import { API_BASE_URL } from '../../config/runtime'
 import { createFriendlyError } from '../../utils/errorMessage'
 
 export const TAP_BASE = API_BASE_URL
-export const USE_MOCK_DATA = USE_GLOBAL_MOCK_DATA
-
-installAxiosMockAdapter(axios)
 
 export const tapClient = axios.create({
   baseURL: TAP_BASE,

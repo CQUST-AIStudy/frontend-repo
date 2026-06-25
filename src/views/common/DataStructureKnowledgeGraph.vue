@@ -19,12 +19,10 @@ import {
   toGraphDbPayload,
   validateGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
-import { createEmptyKnowledgeGraph, getStaticSeedGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
+import { createEmptyKnowledgeGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
-  exportGraphJSON,
-  saveGraphToLocal,
-  seedGraphToLocal
+  exportGraphJSON
 } from '@/features/knowledge-graph/exportUtils'
 import logger from '@/utils/logger'
 
@@ -39,7 +37,6 @@ const relationType = shallowRef('all')
 const selectedNodeId = shallowRef('')
 const collapsedChapterIds = shallowRef([])
 const payloadVisible = shallowRef(false)
-const writing = shallowRef(false)
 const resultMessage = shallowRef(null)
 
 const { state: learningState, update: updateLearningState } = useStateForGraph(GRAPH_CODE)
@@ -190,7 +187,7 @@ function resetFilters() {
   nodeType.value = 'all'
   relationType.value = 'all'
   collapsedChapterIds.value = []
-  selectedNodeId.value = graphData.value.course.id
+  selectedNodeId.value = graphData.value.course?.id || ''
 }
 
 function showPayloadPreview() {
@@ -208,52 +205,6 @@ function handleExportJson() {
   } catch (error) {
     logger.warn('[knowledge-graph] 导出 JSON 失败', error)
     notify('warning', `导出 JSON 失败：${error?.message || error}`)
-  }
-}
-
-async function handleSaveLocal() {
-  if (writing.value) return
-  writing.value = true
-  try {
-    const result = await saveGraphToLocal(graphData.value)
-    if (result.success) {
-      notify('success', result.message || '已保存到本地')
-    } else {
-      notify('warning', result.message || '保存到本地失败')
-    }
-  } catch (error) {
-    logger.warn('[knowledge-graph] 保存到本地失败', error)
-    notify('warning', `保存到本地失败：${error?.message || error}`)
-  } finally {
-    writing.value = false
-  }
-}
-
-async function handleSeedLocal() {
-  if (writing.value) return
-  writing.value = true
-  try {
-    const seedGraph = getStaticSeedGraph()
-    if (!seedGraph) {
-      notify('warning', '没有可用的内置图谱种子数据')
-      return
-    }
-    const result = await seedGraphToLocal(seedGraph)
-    if (!result.success) {
-      notify('warning', result.message || '导入内置图谱失败')
-      return
-    }
-    const reloaded = await loadKnowledgeGraph()
-    graphData.value = reloaded.graph
-    dataSource.value = reloaded.source
-    fallbackNotice.value = reloaded.fallbackReason || ''
-    selectedNodeId.value = reloaded.graph.course?.id || selectedNodeId.value
-    notify('success', `${result.message || '已导入内置图谱'}，已刷新图谱数据`)
-  } catch (error) {
-    logger.warn('[knowledge-graph] 导入内置图谱失败', error)
-    notify('warning', `导入内置图谱失败：${error?.message || error}`)
-  } finally {
-    writing.value = false
   }
 }
 
@@ -289,7 +240,7 @@ onMounted(async () => {
           按课程章节组织导论、线性表、栈队列串、树、图、查找排序哈希等知识点，串联概念、结构、算法、操作与练习。
         </p>
       </div>
-      <div class="contract-card">
+      <div v-if="hasGraphData" class="contract-card">
         <span :class="['contract-dot', { valid: validation.valid }]"></span>
         <div>
           <strong>{{ validation.valid ? '课程图谱契约校验通过' : '课程图谱契约存在问题' }}</strong>
@@ -299,9 +250,9 @@ onMounted(async () => {
     </header>
 
     <div class="source-bar">
-      <span class="source-tag" :class="{ backend: dataSource === 'local' }">
-        <LucideIcon :name="dataSource === 'local' ? 'database' : dataSource === 'static' ? 'book-open' : 'circle-slash'" :size="14" />
-        数据来源：{{ dataSource === 'local' ? '浏览器本地' : dataSource === 'static' ? '内置初始图谱' : '暂无图谱数据' }}
+      <span class="source-tag" :class="{ backend: dataSource === 'backend' }">
+        <LucideIcon :name="dataSource === 'backend' ? 'database' : 'circle-slash'" :size="14" />
+        数据来源：{{ dataSource === 'backend' ? '真实接口' : '暂无图谱数据' }}
       </span>
       <span v-if="fallbackNotice" class="source-notice">
         <LucideIcon name="triangle-alert" :size="14" />
@@ -316,7 +267,7 @@ onMounted(async () => {
       </transition>
     </div>
 
-    <section class="stats-grid" aria-label="知识图谱统计">
+    <section v-if="hasGraphData" class="stats-grid" aria-label="知识图谱统计">
       <article v-for="item in statCards" :key="item.label" class="stat-card">
         <span class="stat-icon" :style="{ backgroundColor: item.bg, color: item.color }">
           <LucideIcon :name="item.icon" :size="18" />
@@ -329,6 +280,7 @@ onMounted(async () => {
     </section>
 
     <KnowledgeGraphToolbar
+      v-if="hasGraphData"
       v-model:search-keyword="searchKeyword"
       v-model:node-type="nodeType"
       v-model:relation-type="relationType"
@@ -337,12 +289,9 @@ onMounted(async () => {
       :relation-type-options="relationTypeOptions"
       :chapter-options="chapterOptions"
       :data-source="dataSource"
-      :writing="writing"
       @reset="resetFilters"
       @preview-payload="showPayloadPreview"
       @export-json="handleExportJson"
-      @save-local="handleSaveLocal"
-      @seed-local="handleSeedLocal"
     />
 
     <div v-if="loading" class="loading-panel">
@@ -361,7 +310,7 @@ onMounted(async () => {
           <div class="graph-topline">
             <div>
               <h2>课程章节知识体系</h2>
-              <p>点击节点查看前置知识、后续知识、关联练习和本地图谱属性。</p>
+              <p>点击节点查看前置知识、后续知识、关联练习和图谱属性。</p>
             </div>
             <div class="type-breakdown" aria-label="节点类型统计">
               <span v-for="item in typeBreakdown" :key="item.type" :style="{ backgroundColor: item.softColor, color: item.textColor }">

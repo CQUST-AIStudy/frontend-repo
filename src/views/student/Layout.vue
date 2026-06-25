@@ -308,7 +308,7 @@ const activeMenu = computed(() => {
   const path = route.path
   // Map detail pages to their parent menu path
   if (path.startsWith('/student/experiment-detail')) return '/student/experiments'
-  if (path.startsWith('/student/leetcode-practice') || path.startsWith('/student/leetcode-demo')) return '/student/leetcode-search'
+  if (path.startsWith('/student/leetcode-practice')) return '/student/leetcode-search'
   return path
 })
 
@@ -382,7 +382,6 @@ const breadcrumbs = computed(() => {
     'knowledge-graph': '我的学习图谱',
     'leetcode-search': 'LeetCode 拓展',
     'leetcode-practice': 'LeetCode 练习',
-    'leetcode-demo': 'LeetCode Demo',
     profile: '个人设置'
   }
   const paths = route.path.split('/').filter(Boolean)

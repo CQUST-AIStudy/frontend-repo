@@ -32,11 +32,7 @@ const props = defineProps({
   },
   dataSource: {
     type: String,
-    default: 'static'
-  },
-  writing: {
-    type: Boolean,
-    default: false
+    default: 'empty'
   }
 })
 
@@ -47,9 +43,7 @@ const emit = defineEmits([
   'update:collapsedChapterIds',
   'reset',
   'preview-payload',
-  'export-json',
-  'save-local',
-  'seed-local'
+  'export-json'
 ])
 
 function updateSearch(event) {
@@ -109,24 +103,6 @@ function isCollapsed(chapterId) {
       <button type="button" class="tool-button" @click="emit('export-json')">
         <LucideIcon name="braces" :size="15" />
         导出 JSON
-      </button>
-      <button
-        type="button"
-        class="tool-button"
-        :disabled="writing"
-        @click="emit('seed-local')"
-      >
-        <LucideIcon :name="writing ? 'loader' : 'database-zap'" :size="15" />
-        导入内置图谱
-      </button>
-      <button
-        type="button"
-        class="tool-button primary"
-        :disabled="writing"
-        @click="emit('save-local')"
-      >
-        <LucideIcon :name="writing ? 'loader' : 'database'" :size="15" />
-        {{ writing ? '保存中…' : '保存到本地' }}
       </button>
       <button type="button" class="tool-button ghost" @click="emit('preview-payload')">
         <LucideIcon name="code" :size="15" />

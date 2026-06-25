@@ -220,8 +220,7 @@ const practiceRecommendations = computed(() => {
 
 // 数据来源文案
 const dataSourceText = computed(() => {
-  if (dataSource.value === 'local') return '浏览器本地图谱'
-  if (dataSource.value === 'static') return '内置初始图谱'
+  if (dataSource.value === 'backend') return '真实接口'
   return '暂无图谱数据'
 })
 
@@ -300,9 +299,8 @@ async function fetchProfile() {
     profile.value = result.profile || {}
   } catch (error) {
     logger.warn('[student-graph] 加载学生画像失败', error)
-    // 画像失败时降级为 localStorage 手动掌握度（masteryMap 为空，画布走兜底）
     profile.value = {}
-    profileError.value = '能力画像加载失败，掌握度展示为默认值，图谱仍可浏览'
+    profileError.value = '能力画像加载失败，请稍后重试'
   } finally {
     profileLoading.value = false
   }
