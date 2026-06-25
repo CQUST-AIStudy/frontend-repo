@@ -98,8 +98,7 @@ const routes = [
       // },
       {
         path: 'knowledge-learning',
-        name: 'KnowledgeLearning',
-        component: () => import('../views/student/KnowledgeGraph.vue')
+        redirect: '/student/knowledge-graph'
       },
       {
         path: 'knowledge-graph',

@@ -48,8 +48,8 @@ const emit = defineEmits([
   'reset',
   'preview-payload',
   'export-json',
-  'save-backend',
-  'seed-backend'
+  'save-local',
+  'seed-local'
 ])
 
 function updateSearch(event) {
@@ -114,23 +114,23 @@ function isCollapsed(chapterId) {
         type="button"
         class="tool-button"
         :disabled="writing"
-        @click="emit('seed-backend')"
+        @click="emit('seed-local')"
       >
         <LucideIcon :name="writing ? 'loader' : 'database-zap'" :size="15" />
-        导入种子数据
+        导入内置图谱
       </button>
       <button
         type="button"
         class="tool-button primary"
         :disabled="writing"
-        @click="emit('save-backend')"
+        @click="emit('save-local')"
       >
         <LucideIcon :name="writing ? 'loader' : 'database'" :size="15" />
-        {{ writing ? '保存中…' : '保存到后端' }}
+        {{ writing ? '保存中…' : '保存到本地' }}
       </button>
       <button type="button" class="tool-button ghost" @click="emit('preview-payload')">
         <LucideIcon name="code" :size="15" />
-        预览写库数据
+        预览图谱数据
       </button>
     </div>
 

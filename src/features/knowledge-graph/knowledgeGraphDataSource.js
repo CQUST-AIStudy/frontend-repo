@@ -1,13 +1,9 @@
 /**
- * 知识图谱后端数据源。
+ * 知识图谱前端本地数据源。
  *
- * 前端只调用后端 API，不直连数据库；MySQL 表结构、事务和持久化由后端负责。
- * 默认接口约定：
- * - GET  /api/knowledge-graphs/{graphCode}
- * - PUT  /api/knowledge-graphs/{graphCode}
- * - POST /api/knowledge-graphs/{graphCode}/seed
+ * 图谱本体数据保存在浏览器 localStorage 中，不依赖后端 /api/knowledge-graphs。
+ * 学生画像、提交记录等个性化数据仍由各自真实接口提供。
  */
-import { tapClient } from '@/api/tap/client'
 import logger from '@/utils/logger'
 import {
   GRAPH_CODE,
@@ -17,14 +13,43 @@ import {
 } from './dataStructureGraph'
 import { toGraphDbPayload, validateGraph } from './graphDatabaseAdapter'
 
-const API_BASE = '/api/knowledge-graphs'
+const STORAGE_SCHEMA_VERSION = 1
+const STATIC_GRAPH_FALLBACK_MESSAGE = '尚未保存本地图谱，已使用内置初始图谱'
 
-function unwrapApiPayload(response) {
-  const body = response?.data ?? response
-  if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'data')) {
-    return body.data
+export const USE_STATIC_GRAPH_FALLBACK = true
+
+export function getStaticSeedGraph() {
+  return rawGraph
+}
+
+export function createEmptyKnowledgeGraph() {
+  return {
+    metadata: {
+      title: '数据结构课程知识图谱',
+      description: '',
+      domain: 'computer-science',
+      architecture: 'course-chapter',
+      audience: 'student-and-teacher'
+    },
+    course: null,
+    nodes: [],
+    relations: []
   }
-  return body
+}
+
+function graphStorageKey(graphCode = GRAPH_CODE) {
+  return `kg:${graphCode || GRAPH_CODE}:graph:v1`
+}
+
+function hasLocalStorage() {
+  return typeof window !== 'undefined' && Boolean(window.localStorage)
+}
+
+function unwrapLocalPayload(value) {
+  if (!value || typeof value !== 'object') return null
+  if (value.payload && typeof value.payload === 'object') return value.payload
+  if (value.graph && typeof value.graph === 'object') return toGraphDbPayload(value.graph)
+  return value
 }
 
 function toArray(value) {
@@ -125,123 +150,173 @@ function buildGraphFromPayload(payload) {
 
   const validation = validateGraph(graph)
   if (!validation.valid) {
-    logger.warn('[knowledge-graph] 后端图谱契约校验失败', validation.errors)
+    logger.warn('[knowledge-graph] 本地图谱契约校验失败', validation.errors)
     return null
   }
 
   return graph
 }
 
+function buildStorageEnvelope(payload, graphCode = GRAPH_CODE) {
+  return {
+    schemaVersion: STORAGE_SCHEMA_VERSION,
+    graphCode,
+    graphVersion: GRAPH_VERSION,
+    source: 'localStorage',
+    updatedAt: new Date().toISOString(),
+    payload
+  }
+}
+
 function getErrorMessage(error) {
   return error?.friendlyMessage || error?.message || String(error)
 }
 
-function getFailureMessage(response, fallback) {
-  return response?.message || response?.error || fallback
+function getCounts(payload) {
+  return {
+    nodes: Array.isArray(payload?.nodes) ? payload.nodes.length : 0,
+    relations: Array.isArray(payload?.relations) ? payload.relations.length : 0
+  }
 }
 
-export async function fetchKnowledgeGraph(graphCode = GRAPH_CODE) {
+function readLocalPayload(graphCode = GRAPH_CODE) {
+  if (!hasLocalStorage()) return null
+  const text = window.localStorage.getItem(graphStorageKey(graphCode))
+  if (!text) return null
   try {
-    const response = await tapClient.get(`${API_BASE}/${encodeURIComponent(graphCode)}`)
-    const graph = buildGraphFromPayload(unwrapApiPayload(response))
-    if (!graph) {
-      logger.warn('[knowledge-graph] 后端未返回可用图谱，回退静态数据')
-      return null
-    }
-    return graph
+    return unwrapLocalPayload(JSON.parse(text))
   } catch (error) {
-    logger.warn('[knowledge-graph] 加载后端图谱失败，回退静态数据', error)
+    logger.warn('[knowledge-graph] 读取本地图谱缓存失败', error)
     return null
   }
 }
 
+function writeLocalPayload(payload, graphCode = GRAPH_CODE) {
+  if (!hasLocalStorage()) {
+    throw new Error('浏览器本地存储不可用')
+  }
+  window.localStorage.setItem(
+    graphStorageKey(graphCode),
+    JSON.stringify(buildStorageEnvelope(payload, graphCode))
+  )
+}
+
+export async function fetchKnowledgeGraph(graphCode = GRAPH_CODE) {
+  const payload = readLocalPayload(graphCode)
+  if (!payload) return null
+
+  const graph = buildGraphFromPayload(payload)
+  if (!graph) {
+    logger.warn('[knowledge-graph] 本地未返回可用图谱')
+    return null
+  }
+  return graph
+}
+
 /**
- * 加载知识图谱：后端 MySQL API 优先，失败/空/结构不合法时自动回退静态 rawGraph。
- * @returns {Promise<{ source: 'backend'|'static', graph: object, fallbackReason?: string }>}
+ * 加载知识图谱：浏览器本地存储优先；本地无数据时使用内置初始图谱。
+ * @returns {Promise<{ source: 'local'|'static'|'empty', graph: object, fallbackReason?: string }>}
  */
 export async function loadKnowledgeGraph() {
-  const graph = await fetchKnowledgeGraph()
-  if (graph) {
-    return { source: 'backend', graph }
+  try {
+    const graph = await fetchKnowledgeGraph()
+    if (graph) {
+      return { source: 'local', graph }
+    }
+    if (USE_STATIC_GRAPH_FALLBACK) {
+      return {
+        source: 'static',
+        graph: rawGraph,
+        fallbackReason: STATIC_GRAPH_FALLBACK_MESSAGE
+      }
+    }
+  } catch (error) {
+    logger.warn('[knowledge-graph] 加载本地图谱失败', error)
+    return {
+      source: 'empty',
+      graph: createEmptyKnowledgeGraph(),
+      fallbackReason: `加载本地图谱失败：${getErrorMessage(error)}`
+    }
   }
+
   return {
-    source: 'static',
-    graph: rawGraph,
-    fallbackReason: '后端图谱数据不可用，已回退到内置静态图谱'
+    source: 'empty',
+    graph: createEmptyKnowledgeGraph(),
+    fallbackReason: '暂无可用知识图谱数据'
   }
 }
 
 export async function writeKnowledgeGraph(payload) {
   const graphCode = payload?.graphCode || GRAPH_CODE
-  const nodes = Array.isArray(payload?.nodes) ? payload.nodes : []
-  const relations = Array.isArray(payload?.relations) ? payload.relations : []
+  const graph = buildGraphFromPayload(payload)
 
-  try {
-    const response = await tapClient.put(`${API_BASE}/${encodeURIComponent(graphCode)}`, payload)
-    if (response?.success === false) {
-      return {
-        success: false,
-        mode: 'backend',
-        written: false,
-        error: getFailureMessage(response, '后端返回保存失败'),
-        message: `保存到后端失败：${getFailureMessage(response, '后端返回保存失败')}`
-      }
-    }
-    const data = unwrapApiPayload(response)
-    return {
-      success: true,
-      mode: 'backend',
-      written: true,
-      data,
-      counts: data?.counts || { nodes: nodes.length, relations: relations.length },
-      message: `已提交 ${nodes.length} 个节点、${relations.length} 条关系到后端。`
-    }
-  } catch (error) {
-    logger.warn('[knowledge-graph] 保存到后端失败', error)
+  if (!graph) {
     return {
       success: false,
-      mode: 'backend',
+      mode: 'local',
+      written: false,
+      error: 'invalid graph payload',
+      message: '保存到本地失败：图谱数据结构不完整或校验未通过'
+    }
+  }
+
+  const normalizedPayload = toGraphDbPayload(graph)
+  const counts = getCounts(normalizedPayload)
+
+  try {
+    writeLocalPayload(normalizedPayload, graphCode)
+    return {
+      success: true,
+      mode: 'local',
+      written: true,
+      data: normalizedPayload,
+      counts,
+      message: `已保存到浏览器本地存储：${counts.nodes} 个节点、${counts.relations} 条关系。`
+    }
+  } catch (error) {
+    logger.warn('[knowledge-graph] 保存到本地失败', error)
+    return {
+      success: false,
+      mode: 'local',
       written: false,
       error: getErrorMessage(error),
-      message: `保存到后端失败：${getErrorMessage(error)}`
+      message: `保存到本地失败：${getErrorMessage(error)}`
     }
   }
 }
 
-export async function seedKnowledgeGraph(graph = rawGraph) {
-  const payload = toGraphDbPayload(graph)
-  const graphCode = payload.graphCode || GRAPH_CODE
-  const nodes = Array.isArray(payload.nodes) ? payload.nodes : []
-  const relations = Array.isArray(payload.relations) ? payload.relations : []
-
-  try {
-    const response = await tapClient.post(`${API_BASE}/${encodeURIComponent(graphCode)}/seed`, payload)
-    if (response?.success === false) {
-      return {
-        success: false,
-        mode: 'backend',
-        written: false,
-        error: getFailureMessage(response, '后端返回导入失败'),
-        message: `导入种子数据失败：${getFailureMessage(response, '后端返回导入失败')}`
-      }
-    }
-    const data = unwrapApiPayload(response)
-    return {
-      success: true,
-      mode: 'backend',
-      written: true,
-      data,
-      counts: data?.counts || { nodes: nodes.length, relations: relations.length },
-      message: `已提交种子图谱：${nodes.length} 个节点、${relations.length} 条关系。`
-    }
-  } catch (error) {
-    logger.warn('[knowledge-graph] 导入种子图谱到后端失败', error)
+export async function seedKnowledgeGraph(graph = getStaticSeedGraph()) {
+  if (!graph) {
     return {
       success: false,
-      mode: 'backend',
+      mode: 'local',
+      written: false,
+      error: 'missing seed graph',
+      message: '导入内置图谱失败：没有可用种子数据'
+    }
+  }
+  const payload = toGraphDbPayload(graph)
+  const graphCode = payload.graphCode || GRAPH_CODE
+  const counts = getCounts(payload)
+
+  try {
+    writeLocalPayload(payload, graphCode)
+    return {
+      success: true,
+      mode: 'local',
+      written: true,
+      data: payload,
+      counts,
+      message: `已导入内置图谱到本地：${counts.nodes} 个节点、${counts.relations} 条关系。`
+    }
+  } catch (error) {
+    logger.warn('[knowledge-graph] 导入内置图谱到本地失败', error)
+    return {
+      success: false,
+      mode: 'local',
       written: false,
       error: getErrorMessage(error),
-      message: `导入种子数据失败：${getErrorMessage(error)}`
+      message: `导入内置图谱失败：${getErrorMessage(error)}`
     }
   }
 }
