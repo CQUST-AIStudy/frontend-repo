@@ -134,7 +134,7 @@ const translate = async () => {
   } catch (e) {
     const msg = e.message || ''
     if (msg.includes('DEEPL_API_KEY')) {
-      error.value = '翻译服务未配置 API Key，当前使用模拟翻译模式'
+      error.value = '翻译服务未配置 API Key，无法生成翻译结果，请联系管理员配置后重试'
     } else if (msg.includes('document not found')) {
       error.value = '文档未找到，请刷新文档列表后重试'
     } else if (msg.includes('no text to translate')) {

@@ -350,13 +350,13 @@ const weaknessCards = computed(() => {
       .filter(practice => !weakQuestions.some(question => question.problemId === practice.problemId))
       .filter(practice => matchesWeakness(practice, weakness))
       .slice(0, 6)
-    const fallbackPractices = normalizedPractices.value
+    const supplementaryPractices = normalizedPractices.value
       .filter(practice => practice.launchMode === 'leetcode')
       .filter(practice => !exactMatches.some(item => item.problemId === practice.problemId))
       .filter(practice => !relatedPractices.some(item => item.problemId === practice.problemId))
       .slice(0, 8)
 
-    const practicePool = dedupePractices([...exactMatches, ...relatedPractices, ...fallbackPractices]).slice(0, 8)
+    const practicePool = dedupePractices([...exactMatches, ...relatedPractices, ...supplementaryPractices]).slice(0, 8)
     const existingPlan = trainingState.value.plans?.[experimentId] || null
     const selectedProblemIds = existingPlan?.selectedProblemIds?.length
       ? existingPlan.selectedProblemIds

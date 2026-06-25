@@ -206,14 +206,7 @@ const stats = reactive({
   averageScore: 0
 })
 
-const activityList = ref([
-  {
-    title: '等待同步学习数据',
-    content: '当前页面会优先展示最近一次登录后的本地信息，学习数据加载后会自动更新。',
-    time: '刚刚',
-    color: '#409eff'
-  }
-])
+const activityList = ref([])
 
 const profileForm = reactive({
   name: '',
@@ -380,8 +373,8 @@ async function loadProfile() {
         }))
       }
     }
-  } catch {
-    // Ignore and keep the fallback data already shown on the page.
+  } catch (error) {
+    uiMessage.error(getFriendlyErrorMessage(error, '个人信息加载失败，请稍后重试'))
   } finally {
     loading.value = false
   }
