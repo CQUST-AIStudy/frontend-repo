@@ -503,8 +503,8 @@ const prepareReportData = () => {
     submitTime: selectedExperiment.value.submitTime,
     deadline: selectedExperiment.value.deadline,
     plagiarismRate: selectedExperiment.value.plagiarismRate,
-    labName: reportMeta.labName || labRoomName.value || '',
-    labTime: reportMeta.labTime || labTime.value || '',
+    labName: reportMeta.labName || reportMeta.labRoomName || selectedExperiment.value.labName || selectedExperiment.value.labRoomName || '',
+	labTime: reportMeta.labTime || selectedExperiment.value.labTime || '',
     teacherName: selectedExperiment.value.teacherName || '',
   }
   // 提取其他章节
