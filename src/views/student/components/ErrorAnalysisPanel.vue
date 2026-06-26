@@ -2,7 +2,7 @@
   <div class="error-analysis-panel">
     <!-- 空状态：无提交记录 -->
     <div v-if="!submissions || submissions.length === 0" class="g-empty [text-align:center] [padding:48px_20px]">
-      <div class="g-empty-icon [font-size:48px] [margin-bottom:12px]">🔍</div>
+      <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
       <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无提交记录</div>
       <div class="g-empty-sub [font-size:13px] [color:#5f6368]">请先提交代码到PTA平台，系统将自动分析错误并提供学习建议</div>
     </div>
@@ -13,7 +13,7 @@
       <div class="g-toolbar [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [flex-wrap:wrap] [gap:12px]">
         <div class="g-toolbar-left [display:flex] [align-items:center] [gap:12px]">
           <span class="g-toolbar-title [font-size:14px] [font-weight:500] [color:#202124]">
-            📊 提交记录 ({{ submissions.length }})
+            提交记录 ({{ submissions.length }})
           </span>
           <span v-if="errorCount > 0" class="g-chip c-warn [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#fef7e0] [color:#e37400]">
             {{ errorCount }} 个错误
@@ -27,7 +27,7 @@
           :disabled="analyzing"
           @click="runAnalysis"
         >
-          {{ analyzing ? '分析中...' : (hasResult ? '🔄 重新分析' : '🔍 AI 错误分析') }}
+          {{ analyzing ? '分析中...' : (hasResult ? '重新分析' : 'AI 错误分析') }}
         </button>
       </div>
 
@@ -90,7 +90,7 @@
 
         <!-- 错误类别 -->
         <div v-if="result.errorCategories && result.errorCategories.length > 0" class="g-error-categories">
-          <div class="g-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:12px]">📋 错误分类详情</div>
+          <div class="g-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:12px]">错误分类详情</div>
           <div
             v-for="(cat, ci) in result.errorCategories"
             :key="ci"
@@ -99,7 +99,7 @@
             <div class="g-cat-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
               <span class="g-cat-type [font-size:13px] [font-weight:600] [color:#202124]">{{ cat.type }}</span>
               <span class="g-cat-count [font-size:11px] [color:#5f6368] [background:#f1f3f4] [padding:2px_8px] [border-radius:4px]">{{ cat.count }} 次</span>
-              <span v-if="cat.isSystemic" class="g-systemic-badge [font-size:11px] [color:#d93025] [background:#fce8e6] [padding:2px_8px] [border-radius:4px]">⚠ 系统性问题</span>
+              <span v-if="cat.isSystemic" class="g-systemic-badge [font-size:11px] [color:#d93025] [background:#fce8e6] [padding:2px_8px] [border-radius:4px]">系统性问题</span>
             </div>
             <div v-if="cat.rootCause" class="g-root-cause [font-size:13px] [color:#5f6368] [margin-bottom:8px]">
               <strong>根因：</strong>{{ cat.rootCause }}
@@ -108,7 +108,7 @@
               <li v-for="(issue, ii) in cat.specificIssues" :key="ii">{{ issue }}</li>
             </ul>
             <div v-if="cat.suggestions && cat.suggestions.length > 0" class="g-suggestions [margin-top:10px] [padding-top:10px] [border-top:1px_solid_#e8eaed]">
-              <div class="g-suggestion-label [font-size:12px] [font-weight:500] [color:#1a73e8] [margin-bottom:4px]">💡 改进建议：</div>
+              <div class="g-suggestion-label [font-size:12px] [font-weight:500] [color:#1a73e8] [margin-bottom:4px]">改进建议：</div>
               <ul class="g-suggestion-list [margin:0] [padding-left:18px] [font-size:13px] [color:#1a73e8] [line-height:1.8]">
                 <li v-for="(sug, si) in cat.suggestions" :key="si">{{ sug }}</li>
               </ul>
@@ -118,7 +118,7 @@
 
         <!-- 学习建议 -->
         <div v-if="result.learningSuggestions && result.learningSuggestions.length > 0" class="g-learning-suggestions [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:16px] [margin-bottom:12px]">
-          <div class="g-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:12px]">📚 个性化学习建议</div>
+          <div class="g-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:12px]">个性化学习建议</div>
           <div
             v-for="(ls, li) in result.learningSuggestions"
             :key="li"
@@ -133,7 +133,7 @@
               <div class="g-learning-topic [font-size:13px] [font-weight:500] [color:#202124]">{{ ls.topic }}</div>
               <div class="g-learning-reason [font-size:12px] [color:#5f6368] [margin-top:2px]">{{ ls.reason }}</div>
               <div v-if="ls.suggestedResources" class="g-learning-resource [font-size:12px] [color:#1a73e8] [margin-top:2px]">
-                📖 {{ ls.suggestedResources }}
+                {{ ls.suggestedResources }}
               </div>
             </div>
           </div>
@@ -142,7 +142,7 @@
         <!-- 干预提示 -->
         <div v-if="result.interventionTriggered" class="g-intervention [background:#fef7e0] [border:1px_solid_#e37400] [border-radius:10px] [padding:16px] [margin-bottom:12px]">
           <div class="g-intervention-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
-            <span class="g-intervention-icon [font-size:18px]">⚠️</span>
+            <span class="g-intervention-icon [font-size:18px]"><LucideIcon name="alert-triangle" :size="18" /></span>
             <span class="g-intervention-title [font-size:14px] [font-weight:600] [color:#e37400]">教学干预建议</span>
           </div>
           <div class="g-intervention-message [font-size:13px] [color:#5f6368] [line-height:1.8]">
@@ -164,6 +164,7 @@ import { computed, ref, watch } from 'vue'
 import api from '@/api'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
+import LucideIcon from '@/components/LucideIcon.vue'
 
 const props = defineProps({
   experimentId: { type: Number, required: true },
@@ -212,21 +213,20 @@ function statusColor(status) {
 function statusLabel(status) {
   const s = (status || '').toUpperCase()
   const map = {
-    ACCEPTED: '✅ 通过',
-    AC: '✅ 通过',
-    COMPILE_ERROR: '❌ 编译错误',
-    RUNTIME_ERROR: '💥 运行错误',
-    WRONG_ANSWER: '❓ 答案错误',
-    TIME_LIMIT_EXCEEDED: '⏱ 超时',
-    MEMORY_LIMIT_EXCEEDED: '📦 内存超限',
-    UNKNOWN: '⏳ 未知'
+    ACCEPTED: '通过',
+    AC: '通过',
+    COMPILE_ERROR: '编译错误',
+    RUNTIME_ERROR: '运行错误',
+    WRONG_ANSWER: '答案错误',
+    TIME_LIMIT_EXCEEDED: '超时',
+    MEMORY_LIMIT_EXCEEDED: '内存超限',
+    UNKNOWN: '未知'
   }
-  return map[s] || status || '⏳ 未知'
+  return map[s] || status || '未知'
 }
 
 function severityIcon(severity) {
-  const map = { HIGH: '🔴', MEDIUM: '🟡', LOW: '🟢' }
-  return map[severity] || '🟢'
+  return ''
 }
 
 function severityLabel(severity) {

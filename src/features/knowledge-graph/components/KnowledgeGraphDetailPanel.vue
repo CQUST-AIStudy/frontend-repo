@@ -3,7 +3,8 @@ import { computed, ref } from 'vue'
 import hljs from 'highlight.js/lib/common'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { getNodeTypeMeta, getRelationTypeMeta } from '../graphDatabaseAdapter'
-import { MASTERY_LEVELS } from '../learningState'
+import { MASTERY_LEVELS, getMasteryMeta } from '../learningState'
+import SubmissionTracePanel from './SubmissionTracePanel.vue'
 
 const props = defineProps({
   context: {
@@ -13,10 +14,23 @@ const props = defineProps({
   learningState: {
     type: Object,
     default: () => ({})
-  }
+  },
+  // 当前节点的画像掌握度信息 { level, score, isWeak, evidence, dimension, experimentName }
+  masteryInfo: {
+    type: Object,
+    default: null
+  },
+  // 提交记录列表
+  submissions: {
+    type: Array,
+    default: () => []
+  },
+  submissionsLoading: { type: Boolean, default: false },
+  submissionsError: { type: String, default: '' },
+  selectedSubmission: { type: Object, default: null }
 })
 
-const emit = defineEmits(['update-state'])
+const emit = defineEmits(['update-state', 'select-submission', 'select-node'])
 
 const context = computed(() => props.context || null)
 const node = computed(() => props.context?.node || null)
@@ -88,6 +102,47 @@ const nodeState = computed(() => {
   return props.learningState?.[id] || { mastery: 'unstarted', favorite: false, note: '' }
 })
 
+// 学习状态掌握度的可视化数据：进度条百分比 + 徽章配色
+const MASTERY_VISUAL = {
+  unstarted: { percent: 0, softBg: '#f1f5f9' },
+  learning: { percent: 55, softBg: '#fef3c7' },
+  mastered: { percent: 100, softBg: '#dcfce7' }
+}
+
+const masteryMeta = computed(() => getMasteryMeta(nodeState.value?.mastery || 'unstarted'))
+const masteryColor = computed(() => masteryMeta.value.color)
+const masteryLabel = computed(() => masteryMeta.value.label)
+const masteryVisual = computed(() => MASTERY_VISUAL[nodeState.value?.mastery || 'unstarted'] || MASTERY_VISUAL.unstarted)
+const masteryPercent = computed(() => masteryVisual.value.percent)
+const masterySoftBg = computed(() => masteryVisual.value.softBg)
+
+// 画像掌握度摘要
+const masterySummary = computed(() => {
+  const m = props.masteryInfo
+  if (!m) return null
+  const levelMap = {
+    good: { label: '已掌握', color: '#22c55e', bg: '#dcfce7', icon: 'badge-check', tip: '已掌握，可挑战进阶练习' },
+    medium: { label: '学习中', color: '#f59e0b', bg: '#fef3c7', icon: 'book-open', tip: '正在学习，继续巩固' },
+    weak: { label: '薄弱', color: '#ef4444', bg: '#fee2e2', icon: 'triangle-alert', tip: '建议重点复习' },
+    unstarted: { label: '未学习', color: '#94a3b8', bg: '#f1f5f9', icon: 'circle', tip: '尚未开始学习' }
+  }
+  return { ...m, meta: levelMap[m.level] || levelMap.unstarted }
+})
+
+// 掌握度数据来源标签：来自能力画像/技能点/实验/手动标记
+const SOURCE_LABELS = {
+  skill: '技能点匹配',
+  experiment: '能力画像·实验级',
+  dimension: '能力画像·维度级',
+  manual: '手动标记'
+}
+const sourceLabel = computed(() => {
+  const s = props.masteryInfo?.source
+  return s ? (SOURCE_LABELS[s] || s) : ''
+})
+
+const evidence = computed(() => props.masteryInfo?.evidence || null)
+
 function updateMastery(event) {
   emit('update-state', { mastery: event.target.value })
 }
@@ -98,6 +153,12 @@ function toggleFavorite() {
 
 function updateNote(event) {
   emit('update-state', { note: event.target.value })
+}
+
+// 点击关系项 → 跳转选中对应节点，联动画布与面板
+function selectRelationNode(item) {
+  if (!item?.id) return
+  emit('select-node', item)
 }
 
 const relationGroups = computed(() => {
@@ -128,20 +189,78 @@ const relationGroups = computed(() => {
 
       <p class="detail-summary">{{ node.summary || '暂无简介' }}</p>
 
+      <!-- 学习画像优缺点摘要 -->
+      <section v-if="masterySummary" class="mastery-summary" :style="{ backgroundColor: masterySummary.meta.bg, borderColor: masterySummary.meta.color }">
+        <div class="mastery-head">
+          <span class="mastery-tag" :style="{ color: masterySummary.meta.color }">
+            <LucideIcon :name="masterySummary.meta.icon" :size="14" />
+            {{ masterySummary.meta.label }}
+          </span>
+          <strong v-if="masterySummary.score != null" class="mastery-score" :style="{ color: masterySummary.meta.color }">
+            {{ masterySummary.score }}分
+          </strong>
+        </div>
+        <p class="mastery-tip">{{ masterySummary.meta.tip }}</p>
+        <div v-if="sourceLabel" class="mastery-source">
+          <LucideIcon name="info" :size="12" />
+          掌握度来源：{{ sourceLabel }}
+        </div>
+        <div v-if="masterySummary.dimension" class="mastery-dim">
+          能力维度：{{ masterySummary.dimension }}
+        </div>
+        <div v-if="evidence" class="mastery-evidence">
+          <span>提交 {{ evidence.totalSubmissions || 0 }}</span>
+          <span>AC {{ evidence.acCount || 0 }}</span>
+          <span v-if="evidence.compileErrors">编译错误 {{ evidence.compileErrors }}</span>
+          <span v-if="evidence.wrongAnswers">答案错误 {{ evidence.wrongAnswers }}</span>
+        </div>
+        <p v-if="evidence && evidence.detail" class="mastery-evidence-text">{{ evidence.detail }}</p>
+      </section>
+
       <div v-if="context.ancestorChain.length" class="breadcrumb-line">
         <span v-for="(item, index) in context.ancestorChain" :key="item.id">
           {{ item.label }}<i v-if="index < context.ancestorChain.length - 1">/</i>
         </span>
       </div>
 
+      <dl class="property-list">
+        <div v-if="node.properties.definition">
+          <dt>定义</dt>
+          <dd>{{ node.properties.definition }}</dd>
+        </div>
+        <div v-if="node.properties.studyTip">
+          <dt>学习建议</dt>
+          <dd>{{ node.properties.studyTip }}</dd>
+        </div>
+        <div v-if="node.properties.difficulty">
+          <dt>练习难度</dt>
+          <dd>{{ node.properties.difficulty }}</dd>
+        </div>
+        <div v-if="node.properties.estimatedMinutes">
+          <dt>建议时长</dt>
+          <dd>{{ node.properties.estimatedMinutes }} 分钟</dd>
+        </div>
+      </dl>
+
       <section class="learning-state-section">
         <div class="relation-title">
           <LucideIcon name="bookmark" :size="15" />
           学习状态
         </div>
+        <div class="mastery-meter">
+          <div class="mastery-bar">
+            <div
+              class="mastery-bar-fill"
+              :style="{ width: masteryPercent + '%', backgroundColor: masteryColor }"
+            ></div>
+          </div>
+          <span class="mastery-badge" :style="{ color: masteryColor, backgroundColor: masterySoftBg }">
+            {{ masteryLabel }}
+          </span>
+        </div>
         <div class="state-row">
           <label class="state-field">
-            <span>掌握度</span>
+            <span>调整掌握度</span>
             <select :value="nodeState.mastery" @change="updateMastery">
               <option v-for="option in MASTERY_LEVELS" :key="option.value" :value="option.value">
                 {{ option.label }}
@@ -167,25 +286,6 @@ const relationGroups = computed(() => {
           ></textarea>
         </label>
       </section>
-
-      <dl class="property-list">
-        <div v-if="node.properties.definition">
-          <dt>定义</dt>
-          <dd>{{ node.properties.definition }}</dd>
-        </div>
-        <div v-if="node.properties.studyTip">
-          <dt>学习建议</dt>
-          <dd>{{ node.properties.studyTip }}</dd>
-        </div>
-        <div v-if="node.properties.difficulty">
-          <dt>练习难度</dt>
-          <dd>{{ node.properties.difficulty }}</dd>
-        </div>
-        <div v-if="node.properties.estimatedMinutes">
-          <dt>建议时长</dt>
-          <dd>{{ node.properties.estimatedMinutes }} 分钟</dd>
-        </div>
-      </dl>
 
       <div v-if="keywords.length" class="keyword-list">
         <span v-for="keyword in keywords" :key="keyword">{{ keyword }}</span>
@@ -261,14 +361,30 @@ const relationGroups = computed(() => {
         </div>
         <ui-empty v-if="group.items.length === 0" description="暂无数据" class="mini-empty" />
         <div v-else class="relation-list">
-          <article v-for="item in group.items" :key="item.id" class="relation-item">
-            <span :style="{ backgroundColor: getNodeTypeMeta(item.type).softColor, color: getNodeTypeMeta(item.type).textColor }">
+          <button
+            v-for="item in group.items"
+            :key="item.id"
+            type="button"
+            class="relation-item"
+            :title="`跳转到「${item.label}」`"
+            @click="selectRelationNode(item)"
+          >
+            <span class="relation-type" :style="{ backgroundColor: getNodeTypeMeta(item.type).softColor, color: getNodeTypeMeta(item.type).textColor }">
               {{ getNodeTypeMeta(item.type).label }}
             </span>
-            <strong>{{ item.label }}</strong>
-          </article>
+            <strong class="relation-label">{{ item.label }}</strong>
+            <LucideIcon name="chevron-right" :size="14" class="relation-arrow" />
+          </button>
         </div>
       </section>
+
+      <SubmissionTracePanel
+        :submissions="submissions"
+        :loading="submissionsLoading"
+        :error="submissionsError"
+        :selected-submission="selectedSubmission"
+        @select-submission="(s) => emit('select-submission', s)"
+      />
 
       <section class="relation-section">
         <div class="relation-title">
@@ -291,11 +407,31 @@ const relationGroups = computed(() => {
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+  min-height: 0;
   height: 100%;
   padding: 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  /* 内容超出时内部滚动，避免撑高工作区行高 */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.detail-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detail-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid #fff;
+}
+
+.detail-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .detail-head {
@@ -312,7 +448,8 @@ const relationGroups = computed(() => {
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
 .detail-title-wrap {
@@ -342,6 +479,76 @@ const relationGroups = computed(() => {
   line-height: 1.7;
 }
 
+.mastery-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.mastery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mastery-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.mastery-score {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.mastery-tip {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mastery-dim {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mastery-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mastery-evidence-text {
+  margin: 2px 0 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.mastery-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .breadcrumb-line {
   display: flex;
   flex-wrap: wrap;
@@ -360,15 +567,17 @@ const relationGroups = computed(() => {
 .property-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   margin: 0;
 }
 
 .property-list div {
-  padding: 10px;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
-  background: #f8fafc;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: transparent;
+}
+
+.property-list div:last-child {
+  border-bottom: 0;
 }
 
 .property-list dt {
@@ -408,10 +617,37 @@ const relationGroups = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
-  background: #f8fafc;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.mastery-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mastery-bar {
+  flex: 1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+.mastery-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.mastery-badge {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .state-row {
@@ -575,10 +811,9 @@ const relationGroups = computed(() => {
 }
 
 .exercise-section {
-  padding: 12px;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  background: #fffbeb;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .exercise-problem {
@@ -652,14 +887,30 @@ const relationGroups = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
   padding: 9px;
   border: 1px solid #edf2f7;
   border-radius: 8px;
   background: #fff;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.relation-item span {
+.relation-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translateX(2px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.relation-item:hover .relation-arrow {
+  color: var(--app-primary, #1270d8);
+}
+
+.relation-type {
   flex-shrink: 0;
   padding: 3px 6px;
   border-radius: 6px;
@@ -667,12 +918,19 @@ const relationGroups = computed(() => {
   font-weight: 800;
 }
 
-.relation-item strong {
+.relation-label {
   overflow: hidden;
   color: #0f172a;
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.relation-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: #94a3b8;
+  transition: color 0.15s ease;
 }
 
 .mini-empty {

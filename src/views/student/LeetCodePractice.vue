@@ -244,6 +244,7 @@ import { tags as syntaxTags } from '@lezer/highlight'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '@/api'
+import { wrongNotebookApi } from '@/api/wrongNotebook'
 import { persistClawProblemBySlug } from '../../api/leetcodeClaw'
 import { getCurrentStudentId as readCurrentStudentId } from '../../constants/auth'
 import {
@@ -1281,6 +1282,26 @@ async function submitCode() {
         uiMessage.success('答案通过')
       } else {
         uiMessage.error('答案未通过，请查看详细反馈')
+      }
+
+      // 错题本回写:若来自错题本入口,把本次评测结果同步到错题行
+      if (route.query.from === 'notebook' && route.query.notebookId) {
+        try {
+          const r = await wrongNotebookApi.retry(Number(route.query.notebookId), {
+            judgeStatus: normalizedResult.accepted ? 'ACCEPTED' : 'WRONG_ANSWER',
+            code: code.value,
+            runtimeMs: null,
+            memoryKb: null
+          })
+          const data = r?.data ?? r
+          if (data?.justResolved) {
+            uiMessage.success('恭喜!连续 AC 两次,该题已标记为已掌握')
+          } else if (normalizedResult.accepted && typeof data?.newConsecutiveAcCount === 'number') {
+            uiMessage.success(`已记入错题本:连续 AC ${data.newConsecutiveAcCount}/2`)
+          }
+        } catch (e) {
+          logger.warn('错题本回执失败:', e)
+        }
       }
     } else {
       uiMessage.error('提交失败: ' + (response.message || '未知错误'))

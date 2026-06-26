@@ -10,80 +10,79 @@
         </div>
 
         <ui-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.ui-scrollbar__bar.is-vertical]:[width:4px] [&_.ui-scrollbar__bar.is-vertical]:[right:2px] [&_.ui-scrollbar__thumb]:[background:rgba(0,_0,_0,_0.1)] [&_.ui-scrollbar__thumb]:[border-radius:4px]">
-          <ui-menu
-            :default-active="activeMenu"
-            class="layout-menu [border-right:none] ![background:transparent] [--ui-menu-bg-color:transparent] [--ui-menu-text-color:#6e6e73] [--ui-menu-active-color:var(--app-primary)] [--ui-menu-hover-bg-color:rgba(0,_0,_0,_0.04)] [--ui-menu-hover-text-color:#1d1d1f] [padding:8px] [&_.ui-menu-item]:[border-radius:8px] [&_.ui-menu-item]:[margin:2px_0] [&_.ui-menu-item]:[height:40px] [&_.ui-menu-item]:[line-height:40px] [&_.ui-menu-item]:[font-size:13.5px] [&_.ui-menu-item]:[transition:all_0.2s] [&_.ui-menu-item.is-active]:![background:var(--app-primary-soft)] [&_.ui-menu-item.is-active]:![color:var(--app-primary)] [&_.ui-menu-item.is-active]:[font-weight:600] [&_.ui-menu-item.is-active::before]:[position:absolute] [&_.ui-menu-item.is-active::before]:[left:0] [&_.ui-menu-item.is-active::before]:[top:50%] [&_.ui-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.ui-menu-item.is-active::before]:[width:3px] [&_.ui-menu-item.is-active::before]:[height:18px] [&_.ui-menu-item.is-active::before]:[background:var(--app-primary)] [&_.ui-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.ui-menu-item:hover]:![background:rgba(0,_0,_0,_0.04)] [&_.ui-icon]:[font-size:18px]"
-            :collapse="collapsed"
-            router
-            :collapse-transition="false"
-          >
-            <ui-menu-item index="/student/dashboard">
-              <ui-icon><HomeFilled /></ui-icon>
-              <template #title>首页</template>
-            </ui-menu-item>
+          <nav class="[padding:8px] [display:flex] [flex-direction:column] [gap:2px]" :class="{ '[items:center]': collapsed }">
+            <template v-for="item in menuItems" :key="item.path || item.group">
+              <!-- Single item -->
+              <router-link
+                v-if="!item.children"
+                :to="item.path"
+                class="nav-item [display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:#6e6e73] [transition:all_0.2s] [position:relative]"
+                :class="{
+                  '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600] [&::before]:[content:\'\'] [&::before]:[position:absolute] [&::before]:[left:0] [&::before]:[top:50%] [&::before]:[transform:translateY(-50%)] [&::before]:[width:3px] [&::before]:[height:18px] [&::before]:[background:var(--app-primary)] [&::before]:[border-radius:0_3px_3px_0]': isItemActive(item.path),
+                  'hover:[background:rgba(0,_0,_0,_0.04)] hover:[color:#1d1d1f]': !isItemActive(item.path)
+                }"
+              >
+                <component :is="item.icon" class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]" />
+                <span v-if="!collapsed" class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.label }}</span>
+              </router-link>
 
-            <ui-menu-item index="/student/experiments">
-              <ui-icon><Notebook /></ui-icon>
-              <template #title>实验列表</template>
-            </ui-menu-item>
+              <!-- Group with children -->
+              <div v-else class="[width:100%]">
+                <UiButton
+                  class="nav-group-btn [display:flex] [align-items:center] [overflow:hidden] [font-size:13.5px] [font-weight:500] [transition:all_0.2s] [cursor:pointer] ![min-height:0] ![height:40px] ![width:100%] ![justify-content:flex-start] ![gap:10px] ![padding:0_12px] ![border-radius:8px] ![border:none] ![shadow:none]"
+                  :class="getGroupButtonClass(item)"
+                  @click="toggleGroup(item.group)"
+                >
+                  <component :is="item.icon" class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]" />
+                  <span v-if="!collapsed" class="[flex:1] [text-align:left] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.label }}</span>
+                  <svg v-if="!collapsed" class="[width:12px] [height:12px] [flex-shrink:0] [transition:transform_0.2s]" :class="{ '[transform:rotate(90deg)]': openGroups[item.group] }" viewBox="0 0 12 12" fill="none">
+                    <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </UiButton>
+                <transition
+                  enter-active-class="[transition:all_0.2s_ease-out] [overflow:hidden]"
+                  enter-from-class="[max-height:0] [opacity:0]"
+                  enter-to-class="[max-height:300px] [opacity:1]"
+                  leave-active-class="[transition:all_0.15s_ease-in] [overflow:hidden]"
+                  leave-from-class="[max-height:300px] [opacity:1]"
+                  leave-to-class="[max-height:0] [opacity:0]"
+                >
+                  <div
+                    v-if="openGroups[item.group] && !collapsed"
+                    class="[position:relative] [margin-top:2px] [margin-left:28px] [padding-left:12px] [padding-top:2px] [padding-bottom:2px] [display:flex] [flex-direction:column] [gap:1px] before:[content:''] before:[position:absolute] before:[left:0] before:[top:4px] before:[bottom:4px] before:[width:1px] before:[background:rgba(0,_0,_0,_0.08)]"
+                  >
+                    <router-link
+                      v-for="child in item.children"
+                      :key="child.path"
+                      :to="child.path"
+                      class="nav-child-item [display:flex] [align-items:center] [position:relative] [height:30px] [padding:0_10px] [border-radius:6px] [text-decoration:none] [font-size:12.5px] [color:#6e6e73] [transition:all_0.15s]"
+                      :class="{
+                        '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isChildActive(child.path),
+                        'hover:[background:rgba(0,_0,_0,_0.035)] hover:[color:#1d1d1f]': !isChildActive(child.path)
+                      }"
+                    >
+                      <span class="[position:absolute] [left:-15px] [top:50%] [transform:translateY(-50%)] [width:6px] [height:6px] [border-radius:50%] [border:1px_solid_rgba(0,_0,_0,_0.12)] [background:#f6f6f8] [transition:all_0.15s]" :class="{ '![border-color:var(--app-primary)] ![background:var(--app-primary)]': isChildActive(child.path) }"></span>
+                      <span class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ child.label }}</span>
+                    </router-link>
+                  </div>
+                </transition>
+              </div>
+            </template>
 
-            <ui-menu-item index="/student/learning-analysis">
-              <ui-icon><DataAnalysis /></ui-icon>
-              <template #title>学情分析</template>
-            </ui-menu-item>
+            <div class="[height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
-            <ui-menu-item index="/student/ai-report">
-              <ui-icon><Document /></ui-icon>
-              <template #title>AI 报告生成</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/ai-assistant">
-              <ui-icon><ChatDotRound /></ui-icon>
-              <template #title>AI 学习助手</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/class-join">
-              <ui-icon><UserFilled /></ui-icon>
-              <template #title>教学班级</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/practice">
-              <ui-icon><Collection /></ui-icon>
-              <template #title>推荐练习</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/leetcode-search">
-              <ui-icon><Search /></ui-icon>
-              <template #title>LeetCode 拓展</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/weakness-training">
-              <ui-icon><Finished /></ui-icon>
-              <template #title>错题本/专项训练</template>
-            </ui-menu-item>
-
-<!--            <ui-menu-item index="/student/ability-profile">-->
-<!--              <ui-icon><TrendCharts /></ui-icon>-->
-<!--              <template #title>能力画像</template>-->
-<!--            </ui-menu-item>-->
-
-            <ui-menu-item index="/student/knowledge-graph">
-              <ui-icon><Connection /></ui-icon>
-              <template #title>知识图谱</template>
-            </ui-menu-item>
-
-            <ui-menu-item index="/student/knowledge-learning">
-              <ui-icon><Connection /></ui-icon>
-              <template #title>知识学习</template>
-            </ui-menu-item>
-
-            <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
-
-            <ui-menu-item index="/student/profile">
-              <ui-icon><Setting /></ui-icon>
-              <template #title>个人设置</template>
-            </ui-menu-item>
-          </ui-menu>
+            <router-link
+              to="/student/profile"
+              class="nav-item [display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:#6e6e73] [transition:all_0.2s] [position:relative]"
+              :class="{
+                '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600] [&::before]:[content:\'\'] [&::before]:[position:absolute] [&::before]:[left:0] [&::before]:[top:50%] [&::before]:[transform:translateY(-50%)] [&::before]:[width:3px] [&::before]:[height:18px] [&::before]:[background:var(--app-primary)] [&::before]:[border-radius:0_3px_3px_0]': isItemActive('/student/profile'),
+                'hover:[background:rgba(0,_0,_0,_0.04)] hover:[color:#1d1d1f]': !isItemActive('/student/profile')
+              }"
+            >
+              <ui-icon class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]"><Setting /></ui-icon>
+              <span v-if="!collapsed" class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">个人设置</span>
+            </router-link>
+          </nav>
         </ui-scrollbar>
       </ui-aside>
 
@@ -101,80 +100,62 @@
           </div>
 
           <ui-scrollbar class="menu-scrollbar">
-            <ui-menu
-              :default-active="activeMenu"
-              class="layout-menu"
-              router
-              :collapse-transition="false"
-              @select="closeMobileMenu"
-            >
-              <ui-menu-item index="/student/dashboard">
-                <ui-icon><HomeFilled /></ui-icon>
-                <template #title>首页</template>
-              </ui-menu-item>
+            <nav class="[padding:8px] [display:flex] [flex-direction:column] [gap:2px]">
+              <template v-for="item in menuItems" :key="item.path || item.group">
+                <router-link
+                  v-if="!item.children"
+                  :to="item.path"
+                  class="[display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:#6e6e73] [transition:all_0.2s]"
+                  :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isItemActive(item.path), 'hover:[background:rgba(0,_0,_0,_0.04)]': !isItemActive(item.path) }"
+                  @click="closeMobileMenu"
+                >
+                  <component :is="item.icon" class="[font-size:18px] [flex-shrink:0]" />
+                  <span>{{ item.label }}</span>
+                </router-link>
 
-              <ui-menu-item index="/student/experiments">
-                <ui-icon><Notebook /></ui-icon>
-                <template #title>实验列表</template>
-              </ui-menu-item>
+                <div v-else>
+                  <UiButton
+                    class="[display:flex] [align-items:center] [overflow:hidden] [font-size:13.5px] [font-weight:500] [transition:all_0.2s] [cursor:pointer] ![min-height:0] ![height:40px] ![width:100%] ![justify-content:flex-start] ![gap:10px] ![padding:0_12px] ![border-radius:8px] ![border:none] ![shadow:none]"
+                    :class="getGroupButtonClass(item)"
+                    @click="toggleGroup(item.group)"
+                  >
+                    <component :is="item.icon" class="[font-size:18px] [flex-shrink:0]" />
+                    <span class="[flex:1] [text-align:left]">{{ item.label }}</span>
+                    <svg class="[width:12px] [height:12px] [flex-shrink:0] [transition:transform_0.2s]" :class="{ '[transform:rotate(90deg)]': openGroups[item.group] }" viewBox="0 0 12 12" fill="none">
+                      <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </UiButton>
+                  <div
+                    v-if="openGroups[item.group]"
+                    class="[position:relative] [margin-top:2px] [margin-left:28px] [padding-left:12px] [padding-top:2px] [padding-bottom:2px] [display:flex] [flex-direction:column] [gap:1px] before:[content:''] before:[position:absolute] before:[left:0] before:[top:4px] before:[bottom:4px] before:[width:1px] before:[background:rgba(0,_0,_0,_0.08)]"
+                  >
+                    <router-link
+                      v-for="child in item.children"
+                      :key="child.path"
+                      :to="child.path"
+                      class="[display:flex] [align-items:center] [position:relative] [height:30px] [padding:0_10px] [border-radius:6px] [text-decoration:none] [font-size:12.5px] [color:#6e6e73] [transition:all_0.15s]"
+                      :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isChildActive(child.path), 'hover:[background:rgba(0,_0,_0,_0.035)] hover:[color:#1d1d1f]': !isChildActive(child.path) }"
+                      @click="closeMobileMenu"
+                    >
+                      <span class="[position:absolute] [left:-15px] [top:50%] [transform:translateY(-50%)] [width:6px] [height:6px] [border-radius:50%] [border:1px_solid_rgba(0,_0,_0,_0.12)] [background:#f6f6f8]" :class="{ '![border-color:var(--app-primary)] ![background:var(--app-primary)]': isChildActive(child.path) }"></span>
+                      <span>{{ child.label }}</span>
+                    </router-link>
+                  </div>
+                </div>
+              </template>
 
-              <ui-menu-item index="/student/learning-analysis">
-                <ui-icon><DataAnalysis /></ui-icon>
-                <template #title>学情分析</template>
-              </ui-menu-item>
+              <div class="[height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
 
-              <ui-menu-item index="/student/ai-report">
-                <ui-icon><Document /></ui-icon>
-                <template #title>AI 报告生成</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/ai-assistant">
-                <ui-icon><ChatDotRound /></ui-icon>
-                <template #title>AI 学习助手</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/class-join">
-                <ui-icon><UserFilled /></ui-icon>
-                <template #title>教学班级</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/practice">
-                <ui-icon><Collection /></ui-icon>
-                <template #title>推荐练习</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/leetcode-search">
-                <ui-icon><Search /></ui-icon>
-                <template #title>LeetCode 拓展</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/weakness-training">
-                <ui-icon><Finished /></ui-icon>
-                <template #title>错题本/专项训练</template>
-              </ui-menu-item>
-
-<!--            <ui-menu-item index="/student/ability-profile">-->
-<!--              <ui-icon><TrendCharts /></ui-icon>-->
-<!--              <template #title>能力画像</template>-->
-<!--            </ui-menu-item>-->
-
-              <ui-menu-item index="/student/knowledge-graph">
-                <ui-icon><Connection /></ui-icon>
-                <template #title>知识图谱</template>
-              </ui-menu-item>
-
-              <ui-menu-item index="/student/knowledge-learning">
-                <ui-icon><Connection /></ui-icon>
-                <template #title>知识学习</template>
-              </ui-menu-item>
-
-              <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
-
-              <ui-menu-item index="/student/profile">
-                <ui-icon><Setting /></ui-icon>
-                <template #title>个人设置</template>
-              </ui-menu-item>
-            </ui-menu>
+              <router-link
+                to="/student/profile"
+                class="[display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:#6e6e73] [transition:all_0.2s]"
+                :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isItemActive('/student/profile') }"
+                @click="closeMobileMenu"
+              >
+                <ui-icon class="[font-size:18px] [flex-shrink:0]"><Setting /></ui-icon>
+                <span>个人设置</span>
+              </router-link>
+            </nav>
           </ui-scrollbar>
         </div>
       </ui-drawer>
@@ -192,6 +173,11 @@
                 {{ item }}
               </ui-breadcrumb-item>
             </ui-breadcrumb>
+            <div class="[display:flex] [align-items:center] [gap:8px] [font-size:12px] [color:#5f6368] [margin-left:12px] [padding-left:12px] [border-left:1px_solid_#e5e5e7]">
+              <span>当前课程：<strong class="[color:#1d1d1f]">数据结构</strong></span>
+              <span class="[color:#d1d1d6]">|</span>
+              <span>当前班级：<strong class="[color:#1d1d1f]">{{ headerClassName }}</strong></span>
+            </div>
           </div>
 
           <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
@@ -232,7 +218,7 @@
         </ui-main>
 
         <ui-footer class="layout-footer student-layout-footer [text-align:center] [color:#8ca0b3] [padding:7px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_rgba(126,_157,_183,_0.12)] [flex-shrink:0]">
-          智能学情分析与个性化实验能力提升平台 © 2025
+          智能个性画像与个性化实验能力提升平台 © 2025
         </ui-footer>
       </ui-container>
     </ui-container>
@@ -241,22 +227,16 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, reactive, watch } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   HomeFilled,
   Notebook,
-  DataAnalysis,
-  Document,
   ChatDotRound,
   Collection,
-  Search,
-  Finished,
-  TrendCharts,
   Connection,
   Setting,
   Fold,
-  UserFilled,
   ArrowDown,
   Menu as MenuIcon,
   SwitchButton
@@ -282,31 +262,142 @@ const {
 
 const userInfo = computed(() => userStore.userInfo || {})
 
-const activeMenu = computed(() => {
-  if (route.name === 'ExperimentDetail') return '/student/experiments'
-  return route.path
+const headerClassName = computed(() => {
+  return userInfo.value?.class || userInfo.value?.className || '数据结构 1 班'
 })
 
+// ── Menu data ──────────────────────────────────────────────
+const menuItems = [
+  { path: '/student/dashboard', icon: HomeFilled, label: '首页' },
+  {
+    group: 'course', icon: Notebook, label: '课程学习',
+    children: [
+      { path: '/student/experiments', label: '实验列表' },
+      { path: '/student/class-join', label: '教学班级' },
+      { path: '/student/learning-analysis', label: '个性画像' }
+    ]
+  },
+  {
+    group: 'personalized', icon: Collection, label: '个性化学习',
+    children: [
+      { path: '/student/practice', label: '推荐练习' },
+      { path: '/student/leetcode-search', label: 'LeetCode 拓展' },
+      { path: '/student/wrong-notebook', label: '错题本' },
+      { path: '/student/weakness-training', label: '专项训练' }
+    ]
+  },
+  {
+    group: 'ai', icon: ChatDotRound, label: 'AI 智能助手',
+    children: [
+      { path: '/student/ai-assistant', label: 'AI 学习助手' },
+      { path: '/student/ai-report', label: 'AI 报告生成' }
+    ]
+  },
+  {
+    group: 'knowledge', icon: Connection, label: '知识体系',
+    children: [
+      { path: '/student/knowledge-graph', label: '我的学习图谱' }
+    ]
+  }
+]
+
+// ── Group expand/collapse state ────────────────────────────
+const openGroups = reactive(
+  menuItems
+    .filter((item) => item.children)
+    .reduce((groups, item) => ({ ...groups, [item.group]: false }), {})
+)
+
+function toggleGroup(group) {
+  openGroups[group] = !openGroups[group]
+}
+
+// ── Active menu detection ──────────────────────────────────
+const activeMenu = computed(() => {
+  const path = route.path
+  // Map detail pages to their parent menu path
+  if (path.startsWith('/student/experiment-detail')) return '/student/experiments'
+  if (path.startsWith('/student/leetcode-practice')) return '/student/leetcode-search'
+  return path
+})
+
+// Flatten all leaf menu paths
+const allMenuPaths = computed(() =>
+  menuItems.flatMap((item) =>
+    item.children ? item.children.map((child) => child.path) : [item.path]
+  )
+)
+
+// Best-match active path (handles nested sub-routes)
+const activeMenuPath = computed(() => {
+  const paths = allMenuPaths.value
+  return paths
+    .filter((p) => activeMenu.value === p || activeMenu.value.startsWith(`${p}/`))
+    .sort((a, b) => b.length - a.length)[0] || activeMenu.value
+})
+
+function isItemActive(path) {
+  return activeMenuPath.value === path
+}
+
+function isChildActive(path) {
+  return activeMenuPath.value === path
+}
+
+function isGroupActive(item) {
+  return (item.children || []).some((child) => isChildActive(child.path))
+}
+
+function getGroupButtonClass(item) {
+  const active = isGroupActive(item)
+  const open = openGroups[item.group]
+  if (active) {
+    return '![border-color:rgba(var(--app-primary-rgb),_0.25)] ![background:rgba(var(--app-primary-rgb),_0.09)] ![color:var(--app-primary)]'
+  }
+  if (open) {
+    return '![border-color:rgba(0,_0,_0,_0.08)] ![background:rgba(255,_255,_255,_0.75)] ![color:#1d1d1f]'
+  }
+  return '![border-color:rgba(0,_0,_0,_0.06)] ![background:rgba(255,_255,_255,_0.45)] ![color:#5f6368] hover:![border-color:rgba(0,_0,_0,_0.1)] hover:![background:rgba(255,_255,_255,_0.75)] hover:![color:#1d1d1f]'
+}
+
+// Auto-open the active group
+const activeGroupKey = computed(() =>
+  menuItems.find((item) => item.children && isGroupActive(item))?.group || ''
+)
+
+function syncActiveGroup() {
+  if (activeGroupKey.value) {
+    openGroups[activeGroupKey.value] = true
+  }
+}
+
+watch(activeGroupKey, syncActiveGroup, { immediate: true })
+
+// ── Breadcrumbs ────────────────────────────────────────────
 const breadcrumbs = computed(() => {
   const pathMap = {
     dashboard: '首页',
     experiments: '实验列表',
     'experiment-detail': '实验详情',
-    'learning-analysis': '学情分析',
+    'learning-analysis': '个性画像',
     'ai-report': 'AI 报告生成',
     'ai-assistant': 'AI 学习助手',
     'class-join': '教学班级',
     practice: '推荐练习',
-    'weakness-training': '错题本/专项训练',
+    'wrong-notebook': '错题本',
+    'weakness-training': '专项训练',
     'ability-profile': '能力画像',
-    'knowledge-learning': '知识学习',
-    'knowledge-graph': '知识图谱',
+    'knowledge-learning': '我的学习图谱',
+    'knowledge-graph': '我的学习图谱',
+    'leetcode-search': 'LeetCode 拓展',
+    'leetcode-practice': 'LeetCode 练习',
     profile: '个人设置'
   }
   const paths = route.path.split('/').filter(Boolean)
   return paths[0] === 'student' ? paths.slice(1).map((part) => pathMap[part] || part) : []
 })
 
+// ── User dropdown ──────────────────────────────────────────
 function handleCommand(command) {
   if (command === 'profile') {
     router.push('/student/profile')

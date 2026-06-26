@@ -42,9 +42,8 @@ function writeAll(graphCode, state) {
   if (typeof window === 'undefined' || !window.localStorage) return
   try {
     window.localStorage.setItem(storageKey(graphCode), JSON.stringify(state))
-  } catch (error) {
+  } catch {
     // 容量超限或隐私模式，静默失败
-    console.warn('[learningState] 写入 localStorage 失败', error)
   }
 }
 

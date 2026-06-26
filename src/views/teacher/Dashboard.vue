@@ -138,13 +138,13 @@ let classChart = null
 
 const userInfo = computed(() => {
   try {
-    return JSON.parse(localStorage.getItem('userInfo') || '{}') || { name: '教师用户' }
+    return JSON.parse(localStorage.getItem('userInfo') || '{}') || {}
   } catch {
-    return { name: '教师用户' }
+    return {}
   }
 })
 
-const displayName = computed(() => userInfo.value.name || '教师')
+const displayName = computed(() => userInfo.value.name || userInfo.value.username || '教师')
 
 const selectedClass = computed(() => {
   try {
@@ -283,7 +283,7 @@ function deriveExperimentsFromSubmissions(rows) {
   return Array.from(byExperiment.values())
 }
 
-function syncExperimentFallback() {
+function syncExperimentsFromSubmissions() {
   if (allExperiments.value.length > 0) return
   const derived = deriveExperimentsFromSubmissions(allSubmissionRows.value)
   if (derived.length > 0) {
@@ -446,7 +446,7 @@ function handleResize() {
 onMounted(async () => {
   window.addEventListener('resize', handleResize)
   await Promise.all([loadExperiments(), loadSubmissions(), loadClassCount()])
-  syncExperimentFallback()
+  syncExperimentsFromSubmissions()
   setTimeout(initClassChart, 0)
 })
 

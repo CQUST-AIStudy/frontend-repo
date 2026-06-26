@@ -3,7 +3,7 @@
     <UiPageHeader
       class="my-page-header"
       title="AI 教学建议"
-      description="基于课程真实数据生成教学分析。当 AI 服务异常时，页面会自动展示本地兜底建议。"
+      description="基于课程真实数据生成教学分析。AI 服务异常时将显示错误提示，请稍后重试。"
     />
 
     <div class="flex flex-col gap-5 mb-10 py-2.5">
@@ -49,7 +49,7 @@
             >
               {{ loading ? 'AI 分析中...' : '生成 AI 教学建议' }}
             </UiButton>
-            <span class="text-[12px] text-[#86868b]">如果后端返回 401/500，页面会切换为本地分析结果。</span>
+            <span class="text-[12px] text-[#86868b]">如果后端返回 401/500，页面会显示错误提示，请稍后重试。</span>
           </div>
         </div>
       </div>
@@ -70,16 +70,15 @@
         <span class="text-[#c49a3c] text-lg shrink-0"><LucideIcon name="alert-triangle" :size="18" /></span>
         <div class="flex-1">
           <div class="text-[14px] font-medium text-[#c49a3c]">{{ errorMessage }}</div>
-          <div class="text-[13px] text-[#6e6e73] mt-1">页面已使用当前课程数据生成本地兜底建议，便于你继续查看分析结果。</div>
+          <div class="text-[13px] text-[#6e6e73] mt-1">AI 教学建议暂不可用，请检查后端鉴权或模型服务状态后重试。</div>
         </div>
       </div>
 
       <!-- Result Card -->
-      <div v-if="aiContent || loading || errorMessage" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div v-if="aiContent || loading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <div class="flex items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <div class="flex items-center gap-2.5">
             <span class="text-[15px] font-semibold text-[#1d1d1f]">AI 教学建议</span>
-            <span v-if="usingFallback" class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">本地兜底</span>
           </div>
           <UiButton
             v-if="aiContent && !loading"
@@ -95,7 +94,7 @@
             <div class="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-[var(--app-primary)] to-[#5856d6] flex items-center justify-center text-white text-[13px] font-bold shrink-0">AI</div>
             <div class="flex flex-col gap-1">
               <span class="font-bold text-[14px] text-[#1d1d1f]">教学分析助手</span>
-              <span class="text-[12px] text-[#86868b]">{{ loading ? '正在整理建议...' : usingFallback ? '当前展示本地兜底分析' : '已返回模型分析结果' }}</span>
+              <span class="text-[12px] text-[#86868b]">{{ loading ? '正在整理建议...' : '已返回模型分析结果' }}</span>
             </div>
           </div>
 
@@ -133,7 +132,6 @@ const router = useRouter()
 const dataLoading = ref(false)
 const aiContent = ref('')
 const errorMessage = ref('')
-const usingFallback = ref(false)
 
 const analysisForm = reactive({
   content: ['learning_status', 'knowledge_points', 'improvement']
@@ -286,51 +284,8 @@ const buildPrompt = () => {
   })
 }
 
-const buildFallbackRecommendation = () => {
-  const data = courseData.value
-  if (!data) {
-    return [
-      '## 当前可用信息有限',
-      '',
-      '- 课程基础数据暂未加载完成，建议先检查实验列表和学生提交接口。',
-      '- 如果 AI 服务持续报错，请确认后端鉴权和模型服务状态。',
-      '- 页面保留了本地兜底逻辑，后续可再次点击生成。'
-    ].join('\n')
-  }
-
-  const lowCompletionText = data.lowCompletionExps.length
-    ? data.lowCompletionExps.map(item => `- ${item.name}：完成率 ${item.completionRate}%`).join('\n')
-    : '- 暂无明显低完成率实验。'
-
-  const lowScoreText = data.lowScoreExps.length
-    ? data.lowScoreExps.map(item => `- ${item.name}：平均分 ${item.averageScore}`).join('\n')
-    : '- 暂无明显低分实验。'
-
-  return [
-    '## 课程整体判断',
-    '',
-    `- 当前共覆盖${data.studentCount} 名学生、${data.totalExperiments} 个实验。`,
-    `- 平均提交率约为${data.avgSubmissionRate}% 。若该数值持续偏低，优先排查实验节奏和作业说明是否清晰。`,
-    '',
-    '## 需要重点关注的实验',
-    '',
-    lowCompletionText,
-    '',
-    '## 成绩风险点',
-    '',
-    lowScoreText,
-    '',
-    '## 建议动作',
-    '',
-    '- 对低完成率实验补充操作演示或拆分为更小的阶段任务。',
-    '- 对低分实验安排一次集中讲评，优先解释高频错误和评分标准。',
-    '- 在下次实验发布前增加预习材料和完成示例，降低首次上手成本。',
-    '- 对成绩分层明显的班级，分别准备基础巩固题和拔高题。'
-  ].join('\n')
-}
-
 const formatAiErrorMessage = (error) => {
-  return getFriendlyErrorMessage(error, 'AI 服务请求失败，已切换为本地分析摘要')
+  return getFriendlyErrorMessage(error, 'AI 服务请求失败，请稍后重试')
 }
 
 const generateRecommendation = async () => {
@@ -342,7 +297,6 @@ const generateRecommendation = async () => {
 
   loading.value = true
   errorMessage.value = ''
-  usingFallback.value = false
   aiContent.value = ''
 
   try {
@@ -355,8 +309,7 @@ const generateRecommendation = async () => {
   } catch (error) {
     logger.error('生成失败:', error)
     errorMessage.value = formatAiErrorMessage(error)
-    usingFallback.value = true
-    aiContent.value = buildFallbackRecommendation()
+    aiContent.value = ''
     uiMessage.warning(errorMessage.value)
   } finally {
     loading.value = false

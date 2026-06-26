@@ -65,6 +65,13 @@ module.exports = {
           '^/error-analysis': '',
         },
       },
+      '/knowledge-graph': {
+        target: 'http://127.0.0.1:10171',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/knowledge-graph': '',
+        },
+      },
     },
     client: {
       overlay: false,

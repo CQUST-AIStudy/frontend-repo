@@ -58,11 +58,6 @@
               <ui-icon><Setting /></ui-icon>
               <template #title>个人设置</template>
             </ui-menu-item>
-
-            <ui-menu-item index="/admin/knowledge-graph">
-              <ui-icon><Connection /></ui-icon>
-              <template #title>知识图谱</template>
-            </ui-menu-item>
           </ui-menu>
         </ui-scrollbar>
       </ui-aside>
@@ -129,11 +124,6 @@
                 <ui-icon><Setting /></ui-icon>
                 <template #title>个人设置</template>
               </ui-menu-item>
-
-              <ui-menu-item index="/admin/knowledge-graph">
-                <ui-icon><Connection /></ui-icon>
-                <template #title>知识图谱</template>
-              </ui-menu-item>
             </ui-menu>
           </ui-scrollbar>
         </div>
@@ -195,7 +185,7 @@
         </ui-main>
 
         <ui-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
-          智能学情分析与个性化实验能力提升平台 - 管理后台 © 2025
+          智能个性画像与个性化实验能力提升平台 - 管理后台 © 2025
         </ui-footer>
       </ui-container>
     </ui-container>
@@ -210,7 +200,7 @@ import { useUserStore } from '../../store'
 import {
   HomeFilled, User, OfficeBuilding, DocumentCopy, DataAnalysis,
   Setting, Fold, ArrowDown, SwitchButton, WarningFilled,
-  Menu as MenuIcon, TrendCharts, Connection
+  Menu as MenuIcon, TrendCharts
 } from '@/components/ui/icons'
 import { getPtaCookieStatus } from '../../api/tap'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'

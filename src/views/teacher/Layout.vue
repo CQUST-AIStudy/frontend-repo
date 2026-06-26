@@ -227,7 +227,7 @@
           '!box-border !h-[calc(100vh-64px)] !h-[calc(100dvh-64px)] !min-h-0 !overflow-hidden !p-4': isAiChatPage
         }"
       >
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component, route: slotRoute }">
           <transition
             mode="out-in"
             enter-active-class="transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
@@ -237,14 +237,14 @@
             leave-from-class="translate-y-0 opacity-100"
             leave-to-class="-translate-y-1 opacity-0"
           >
-            <component :is="Component" />
+            <component :is="Component" :key="slotRoute.fullPath + (userStore.selectedClass?.id || '')" />
           </transition>
         </router-view>
       </UiMain>
 
       <!-- Footer -->
       <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[#aeaeb2] text-[12px] py-3 px-4 border-t border-black/[0.06]">
-        智能学情分析与个性化实验能力提升平台 · 教师工作空间
+        智能个性画像与个性化实验能力提升平台 · 教师工作空间
       </UiFooter>
     </div>
   </div>
@@ -356,8 +356,7 @@ const menuItems = [
       { path: '/teacher/document-center', label: '文档中心' },
       { path: '/teacher/bilingual-read', label: '双语阅读' },
       { path: '/teacher/summary-card', label: 'AI 精读' },
-      { path: '/teacher/ai-organize', label: '智能整理' },
-      { path: '/teacher/knowledge-graph', label: '知识图谱' }
+      { path: '/teacher/ai-organize', label: '智能整理' }
     ]
   },
   { path: '/teacher/course-analysis', icon: DataAnalysis, label: '课程分析', permission: ['view_course_classes', 'analyze_course_classes'] },
@@ -470,7 +469,7 @@ function onClickOutside(e) {
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
 
-  const canOpenWithoutClass = ['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank', '/teacher/knowledge-graph'].includes(route.path)
+  const canOpenWithoutClass = ['/teacher/class-list', '/teacher/profile', '/teacher/leetcode-bank'].includes(route.path)
   if (!userStore.selectedClass && !canOpenWithoutClass) {
     router.replace('/teacher/select-class')
     return

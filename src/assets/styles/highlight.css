@@ -1,0 +1,17 @@
+/*
+ * highlight.js 全局样式补充
+ *
+ * 基础 .hljs 规则重置背景/内边距，由组件容器控制。
+ * 语法颜色由 CodeViewer 组件内联注入（不依赖本文件的 .hljs-* 选择器）。
+ * 浅色主题：默认深色文字，背景透明由组件容器提供。
+ */
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0;
+  color: #24292f;
+  background: transparent;
+}
+
+.hljs-emphasis { font-style: italic; }
+.hljs-strong   { font-weight: bold; }

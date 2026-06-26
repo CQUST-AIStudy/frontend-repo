@@ -4,8 +4,7 @@ import {
   GRAPH_VERSION,
   RELATION_TYPES,
   getNodeTypeMeta,
-  getRelationTypeMeta,
-  rawGraph
+  getRelationTypeMeta
 } from './dataStructureGraph'
 
 function cloneProperties(value) {
@@ -61,14 +60,14 @@ function addRelation(list, seen, source, target, type, properties = {}) {
   })
 }
 
-function buildRelations(nodes) {
+function buildRelations(nodes, courseId) {
   const relations = []
   const seen = new Set()
   const nodeMap = new Map(nodes.map(node => [node.id, node]))
 
   for (const node of nodes) {
-    if (node.type === 'chapter' && node.id !== rawGraph.course.id) {
-      addRelation(relations, seen, rawGraph.course.id, node.id, 'CONTAINS', {
+    if (courseId && node.type === 'chapter' && node.id !== courseId) {
+      addRelation(relations, seen, courseId, node.id, 'CONTAINS', {
         scope: 'course-chapter'
       })
     }
@@ -109,22 +108,23 @@ function buildRelations(nodes) {
   return relations
 }
 
-export function normalizeGraph(graph = rawGraph) {
-  const course = normalizeNode(graph.course || rawGraph.course)
+export function normalizeGraph(graph = null) {
+  const sourceGraph = graph || {}
+  const course = normalizeNode(sourceGraph.course || {})
   const nodes = [
     course,
-    ...(Array.isArray(graph.nodes) ? graph.nodes : []).map(normalizeNode)
+    ...(Array.isArray(sourceGraph.nodes) ? sourceGraph.nodes : []).map(normalizeNode)
   ].filter(node => node.id && node.label)
 
-  const relations = Array.isArray(graph.relations) && graph.relations.length > 0
-    ? graph.relations.map(relation => ({
+  const relations = Array.isArray(sourceGraph.relations) && sourceGraph.relations.length > 0
+    ? sourceGraph.relations.map(relation => ({
         id: String(relation.id || makeRelationId(relation.source, relation.target, relation.type)),
         source: String(relation.source || '').trim(),
         target: String(relation.target || '').trim(),
         type: String(relation.type || '').trim(),
         properties: cloneProperties(relation.properties)
       }))
-    : buildRelations(nodes)
+    : buildRelations(nodes, course.id)
 
   const nodeMap = new Map(nodes.map(node => [node.id, node]))
   const outgoingByNodeId = new Map()
@@ -138,7 +138,7 @@ export function normalizeGraph(graph = rawGraph) {
   }
 
   return {
-    metadata: cloneProperties(graph.metadata),
+    metadata: cloneProperties(sourceGraph.metadata),
     course,
     nodes,
     relations,
@@ -148,7 +148,7 @@ export function normalizeGraph(graph = rawGraph) {
   }
 }
 
-export function validateGraph(graph = rawGraph) {
+export function validateGraph(graph = null) {
   const normalized = normalizeGraph(graph)
   const errors = []
   const nodeIds = new Set()
@@ -180,7 +180,7 @@ export function validateGraph(graph = rawGraph) {
     }
   })
 
-  if (!nodeIds.has(normalized.course.id)) {
+  if (!normalized.course?.id || !nodeIds.has(normalized.course.id)) {
     errors.push('课程根节点不存在')
   }
 
@@ -194,7 +194,7 @@ export function validateGraph(graph = rawGraph) {
   }
 }
 
-export function getGraphStats(graph = rawGraph) {
+export function getGraphStats(graph = null) {
   const normalized = normalizeGraph(graph)
   const nodeTypeCounts = normalized.nodes.reduce((acc, node) => {
     acc[node.type] = (acc[node.type] || 0) + 1
@@ -217,7 +217,7 @@ export function getGraphStats(graph = rawGraph) {
   }
 }
 
-export function getAncestorChain(graph = rawGraph, nodeId) {
+export function getAncestorChain(graph = null, nodeId) {
   const normalized = normalizeGraph(graph)
   const node = normalized.nodeMap.get(nodeId)
   if (!node) return []
@@ -231,7 +231,7 @@ export function getAncestorChain(graph = rawGraph, nodeId) {
   return [normalized.course, chapter, node].filter(Boolean)
 }
 
-export function getNodeContext(graph = rawGraph, nodeId) {
+export function getNodeContext(graph = null, nodeId) {
   const normalized = normalizeGraph(graph)
   const node = normalized.nodeMap.get(nodeId)
   if (!node) return null
@@ -269,27 +269,29 @@ export function getNodeContext(graph = rawGraph, nodeId) {
   }
 }
 
-export function toGraphDbPayload(graph = rawGraph) {
+export function toGraphDbPayload(graph = null) {
   const normalized = normalizeGraph(graph)
+  const nodes = normalized.nodes.map((node) => ({
+    id: node.id,
+    label: node.label,
+    type: node.type,
+    properties: {
+      ...cloneProperties(node.properties),
+      summary: node.summary,
+      chapterId: node.chapterId,
+      prerequisites: [...node.prerequisites],
+      related: [...node.related],
+      appliesTo: [...node.appliesTo],
+      targets: [...node.targets]
+    }
+  }))
   return {
     graphCode: GRAPH_CODE,
     version: GRAPH_VERSION,
     source: GRAPH_SOURCE,
     metadata: normalized.metadata,
-    nodes: normalized.nodes.map((node) => ({
-      id: node.id,
-      label: node.label,
-      type: node.type,
-      properties: {
-        ...cloneProperties(node.properties),
-        summary: node.summary,
-        chapterId: node.chapterId,
-        prerequisites: [...node.prerequisites],
-        related: [...node.related],
-        appliesTo: [...node.appliesTo],
-        targets: [...node.targets]
-      }
-    })),
+    course: nodes.find(node => node.type === 'course') || null,
+    nodes,
     relations: normalized.relations.map((relation) => ({
       id: relation.id,
       source: relation.source,
@@ -298,12 +300,6 @@ export function toGraphDbPayload(graph = rawGraph) {
       properties: cloneProperties(relation.properties)
     }))
   }
-}
-
-export async function saveKnowledgeGraph(payload) {
-  // 连库则真写，未连库则预览；具体由 neo4jDataSource 决定
-  const { writeKnowledgeGraph } = await import('./neo4jDataSource')
-  return writeKnowledgeGraph(payload)
 }
 
 export { getNodeTypeMeta, getRelationTypeMeta }

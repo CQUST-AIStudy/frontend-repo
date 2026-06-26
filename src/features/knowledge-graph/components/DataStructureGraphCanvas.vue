@@ -1,12 +1,5 @@
 <script setup>
-import * as THREE from 'three'
-import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch, nextTick } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { getNodeTypeMeta, getRelationTypeMeta } from '../graphDatabaseAdapter'
 import { getMasteryMeta } from '../learningState'
@@ -17,37 +10,97 @@ const props = defineProps({
   selectedNodeId: { type: String, default: '' },
   highlightPaths: { type: Object, default: null },
   chapterChildCounts: { type: Object, default: () => ({}) },
-  learningState: { type: Object, default: () => ({}) }
+  learningState: { type: Object, default: () => ({}) },
+  // 个人学习模式：nodeId → { level, score, isWeak, evidence, experimentId }
+  masteryMap: { type: Object, default: () => ({}) },
+  // 当前选中节点的提交版本链数据 { nodeId, submissions: [...] }
+  submissionTrace: { type: Object, default: null }
 })
 
-const emit = defineEmits(['select-node'])
+const emit = defineEmits(['select-node', 'trace-node', 'select-submission'])
 
+// ───────── 视图常量 ─────────
+const VB_W = 1600
+const VB_H = 1200
+const VB_X = -VB_W / 2
+const VB_Y = -VB_H / 2
+const viewBoxStr = `${VB_X} ${VB_Y} ${VB_W} ${VB_H}`
+
+// 节点半径（像素，对应原 3D 版的 SIZE_BY_TYPE×16 比例放大）
+const RADIUS_BY_TYPE = {
+  course: 46,
+  chapter: 30,
+  concept: 18,
+  structure: 19,
+  algorithm: 18,
+  operation: 16,
+  exercise: 15
+}
+
+const CHAPTER_RADIUS_DEFAULT = 400
+const CHAPTER_RADIUS_LARGE = 460   // chapters.length > 5
+const ORBIT_RADIUS_MIN = 140
+const ORBIT_RADIUS_MAX = 240
+const SCALE_MIN = 0.4
+const SCALE_MAX = 3.0
+const SCALE_STEP = 1.12
+const DRAG_THRESHOLD = 4
+
+// ───────── refs ─────────
 const shellRef = ref(null)
-const sceneRef = ref(null)
-const hoveredNode = shallowRef(null)
-const isFullscreen = shallowRef(false)
+const stageRef = ref(null)
+const svgRef = ref(null)
+const isFullscreen = ref(false)
 const motionEnabled = ref(true)
-const bloomEnabled = ref(true)
+const hoveredNode = shallowRef(null)
+const hoveredSubmission = shallowRef(null)
+const expandedChapterId = ref('')   // 当前展开的 chapter id（互斥单值）
+
+const viewport = reactive({ x: 0, y: 0, scale: 1 })
+const isDragging = ref(false)
+const dragState = {
+  startX: 0,
+  startY: 0,
+  vx: 0,
+  vy: 0,
+  moved: false
+}
+
 const hasGraphData = computed(() => props.nodes.length > 0)
 
+// ───────── 图例 ─────────
 const nodeTypeLegend = computed(() => {
-  const typeSet = new Set(props.nodes.map(node => node.type).filter(Boolean))
-  return Array.from(typeSet).map(type => ({ type, ...getNodeTypeMeta(type) }))
+  const typeSet = new Set(props.nodes.map((node) => node.type).filter(Boolean))
+  return Array.from(typeSet).map((type) => ({ type, ...getNodeTypeMeta(type) }))
 })
 
 const relationTypeLegend = computed(() => {
-  const typeSet = new Set(props.relations.map(relation => relation.type).filter(Boolean))
-  return Array.from(typeSet).map(type => ({ type, ...getRelationTypeMeta(type) }))
+  const typeSet = new Set(props.relations.map((relation) => relation.type).filter(Boolean))
+  return Array.from(typeSet).map((type) => ({ type, ...getRelationTypeMeta(type) }))
 })
 
-// 悬浮卡片增强信息：类型 / 复杂度摘要 / 掌握度
-const hoveredMeta = computed(() => hoveredNode.value ? getNodeTypeMeta(hoveredNode.value.type) : null)
+// ───────── tooltip 计算属性（与原 3D 版一致） ─────────
+const hoveredMeta = computed(() =>
+  hoveredNode.value ? getNodeTypeMeta(hoveredNode.value.type) : null
+)
+
 const hoveredMastery = computed(() => {
   const id = hoveredNode.value?.id
+  const m = id ? props.masteryMap?.[id] : null
+  if (m) {
+    return {
+      value: m.level === 'good' ? 'mastered' : m.level === 'medium' ? 'learning' : m.level === 'weak' ? 'learning' : 'unstarted',
+      label: m.level === 'good' ? '已掌握' : m.level === 'medium' ? '学习中' : m.level === 'weak' ? '薄弱' : '未学习',
+      color: m.level === 'good' ? '#22c55e' : m.level === 'medium' ? '#f59e0b' : m.level === 'weak' ? '#ef4444' : '#94a3b8',
+      score: m.score,
+      isWeak: m.isWeak
+    }
+  }
   const state = id ? props.learningState?.[id] : null
   if (!state || !state.mastery || state.mastery === 'unstarted') return null
   return getMasteryMeta(state.mastery)
 })
+
 const hoveredComplexity = computed(() => {
   const c = hoveredNode.value?.properties?.complexity
   if (!c || typeof c !== 'object') return []
@@ -56,65 +109,14 @@ const hoveredComplexity = computed(() => {
     .slice(0, 3)
     .map(([k, v]) => `${k} ${v}`)
 })
-let scene = null
-let camera = null
-let renderer = null
-let composer = null
-let bloomPass = null
-let renderPass = null
-let labelRenderer = null
-let controls = null
-let clock = null
-let animationId = 0
-let resizeObserver = null
-let nodeGroup = null
-let edgeGroup = null
-let hoverRing = null
-let selectRing = null
-let raycaster = null
-let pointer = null
-let needsRender = true
-let elapsed = 0
 
-// 共享资源：按类型缓存几何体与光晕贴图，避免每节点独立创建（性能）
-const geometryByType = new Map()
-const glowTextureByType = new Map()
-const edgeMeshByType = new Map()
-
-let nodeObjects = []
-let nodeObjectById = new Map()
-let nodePositionById = new Map()
-let labelObjectById = new Map()
-let appearAnimations = []
-let initialCameraPosition = null
-let initialControlTarget = null
-
-// 相机补间（自研轻量插值，不引第三方）
-const cameraTween = {
-  active: false,
-  t: 0,
-  duration: 0.62,
-  fromPos: new THREE.Vector3(),
-  toPos: new THREE.Vector3(),
-  fromTarget: new THREE.Vector3(),
-  toTarget: new THREE.Vector3()
+// ───────── 工具函数 ─────────
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value))
 }
 
-const SIZE_BY_TYPE = {
-  course: 2.8, chapter: 1.75, concept: 1.08,
-  structure: 1.16, algorithm: 1.08, operation: 0.95, exercise: 0.86
-}
-
-const TYPE_Y_OFFSET = {
-  course: 0, chapter: 0.85, concept: 1.2,
-  structure: 0.9, algorithm: 0.5, operation: 0.1, exercise: -0.4
-}
-function makeColor(color, fallback = '#1270d8') {
-  return new THREE.Color(color || fallback)
-}
-
-function isSelected(nodeId) {
-  return nodeId && nodeId === props.selectedNodeId
+function getNodeRadius(node) {
+  return RADIUS_BY_TYPE[node?.type] || RADIUS_BY_TYPE.concept
 }
 
 function hasHighlight() {
@@ -135,67 +137,60 @@ function isRelationHighlighted(relation) {
 }
 
 function getMasteryColor(nodeId) {
+  const m = props.masteryMap?.[nodeId]
+  if (m) {
+    if (m.level === 'good') return '#22c55e'
+    if (m.level === 'medium') return '#f59e0b'
+    if (m.level === 'weak') return '#ef4444'
+  }
   const state = props.learningState?.[nodeId]
   if (!state || !state.mastery || state.mastery === 'unstarted') return null
   return getMasteryMeta(state.mastery).color
 }
 
-function getNodeSize(node) {
-  return SIZE_BY_TYPE[node?.type] || SIZE_BY_TYPE.concept
+function getMasteryScore(nodeId) {
+  const m = props.masteryMap?.[nodeId]
+  if (m && typeof m.score === 'number') return clamp(m.score, 0, 100)
+  return null
 }
 
-function getContainerSize() {
-  const rect = sceneRef.value?.getBoundingClientRect()
-  return {
-    width: Math.max(320, Math.floor(rect?.width || 0)),
-    height: Math.max(360, Math.floor(rect?.height || 0))
-  }
+function isWeakNode(nodeId) {
+  const m = props.masteryMap?.[nodeId]
+  return !!(m && (m.isWeak || m.level === 'weak'))
 }
 
-function requestRender() {
-  needsRender = true
-}
-
-// 按类型共享球体几何（7 种），避免每节点独立 geometry
-function getGeometryForType(type) {
-  if (!geometryByType.has(type)) {
-    const size = SIZE_BY_TYPE[type] || SIZE_BY_TYPE.concept
-    geometryByType.set(type, new THREE.SphereGeometry(size, 36, 24))
-  }
-  return geometryByType.get(type)
-}
-
-// 按颜色共享光晕贴图（同色仅生成一张 CanvasTexture）
-function getGlowTexture(color) {
-  if (glowTextureByType.has(color)) return glowTextureByType.get(color)
-  const canvas = document.createElement('canvas')
-  canvas.width = 128
-  canvas.height = 128
-  const context = canvas.getContext('2d')
-  const gradient = context.createRadialGradient(64, 64, 5, 64, 64, 64)
-  gradient.addColorStop(0, 'rgba(255,255,255,0.95)')
-  gradient.addColorStop(0.28, `${color}99`)
-  gradient.addColorStop(1, `${color}00`)
-  context.fillStyle = gradient
-  context.fillRect(0, 0, 128, 128)
-  const texture = new THREE.CanvasTexture(canvas)
-  glowTextureByType.set(color, texture)
-  return texture
-}
-// 力导向布局：章节按 order 在外圈锚定，章节内子节点用斥力+弹簧+章节引力收敛后冻结。
-// 仅在构建时迭代若干步，结果固化为静态坐标，避免常驻松弛带来的漂移与持续渲染。
-function buildNodeLayout() {
+// ───────── 一级布局：course 居中 + chapters 环形 ─────────
+function buildBasePositions() {
+  const positions = new Map()
   const nodes = props.nodes || []
-  const nodeMap = new Map(nodes.map(node => [node.id, node]))
-  const course = nodes.find(node => node.type === 'course') || nodes[0]
+  if (nodes.length === 0) return positions
+
+  const course = nodes.find((node) => node.type === 'course') || nodes[0]
   const chapters = nodes
-    .filter(node => node.type === 'chapter')
+    .filter((node) => node.type === 'chapter')
     .sort((a, b) => {
       const orderA = Number(a.properties?.order || 0)
       const orderB = Number(b.properties?.order || 0)
       return orderA - orderB || String(a.label).localeCompare(String(b.label), 'zh-Hans-CN')
     })
 
+  if (course) positions.set(course.id, { x: 0, y: 0 })
+
+  const radius = chapters.length > 5 ? CHAPTER_RADIUS_LARGE : CHAPTER_RADIUS_DEFAULT
+  chapters.forEach((chapter, index) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(chapters.length, 1)
+    positions.set(chapter.id, {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius
+    })
+  })
+  return positions
+}
+
+// chapter→下属二级节点 的映射（与原 3D 版逻辑一致）
+function buildChapterChildMap() {
+  const nodes = props.nodes || []
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]))
   const relationChapterMap = new Map()
   for (const relation of props.relations || []) {
     const source = nodeMap.get(relation.source)
@@ -203,754 +198,397 @@ function buildNodeLayout() {
     if (source?.type === 'chapter' && target && !target.chapterId) relationChapterMap.set(target.id, source.id)
     if (target?.type === 'chapter' && source && !source.chapterId) relationChapterMap.set(source.id, target.id)
   }
-
-  // 锚点：course 居中，chapters 均匀分布在外圈（锚定，保持宏观结构稳定）
-  const anchor = new Map()
-  const pinned = new Set()
-  if (course) { anchor.set(course.id, new THREE.Vector2(0, 0)); pinned.add(course.id) }
-  const chapterRadius = chapters.length > 5 ? 15.5 : 13
-  chapters.forEach((chapter, index) => {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(chapters.length, 1)
-    anchor.set(chapter.id, new THREE.Vector2(Math.cos(angle) * chapterRadius, Math.sin(angle) * chapterRadius))
-    pinned.add(chapter.id)
-  })
-
-  // 每个自由节点归属的章节中心（用于章节引力）
-  const homeChapter = new Map()
-  const pos = new Map()
-  const vel = new Map()
-  let loose = 0
+  const childMap = new Map()
   for (const node of nodes) {
-    if (pinned.has(node.id)) { pos.set(node.id, anchor.get(node.id).clone()); continue }
+    if (node.type === 'course' || node.type === 'chapter') continue
     const chapterId = node.chapterId || relationChapterMap.get(node.id)
-    const center = anchor.get(chapterId)
-    if (center) {
-      const a = Math.random() * Math.PI * 2
-      const r = 3 + Math.random() * 2.4
-      pos.set(node.id, new THREE.Vector2(center.x + Math.cos(a) * r, center.y + Math.sin(a) * r))
-      homeChapter.set(node.id, center)
-    } else {
-      const a = Math.PI / 5 + (Math.PI * 2 * loose) / 12
-      loose += 1
-      pos.set(node.id, new THREE.Vector2(Math.cos(a) * 20, Math.sin(a) * 20))
-    }
-    vel.set(node.id, new THREE.Vector2(0, 0))
+    if (!chapterId) continue
+    if (!childMap.has(chapterId)) childMap.set(chapterId, [])
+    childMap.get(chapterId).push(node)
   }
-  /* @@LAYOUT2@@ */
-  // 弹簧边：仅在自由节点之间或自由↔锚点之间建立，保持关联节点靠近
-  const springs = []
-  for (const relation of props.relations || []) {
-    if (relation.source === relation.target) continue
-    if (pos.has(relation.source) && pos.has(relation.target)) {
-      const rest = relation.type === 'CONTAINS' ? 4.6 : 5.4
-      springs.push({ a: relation.source, b: relation.target, rest })
-    }
+  for (const list of childMap.values()) {
+    list.sort((a, b) => {
+      const orderA = Number(a.properties?.order || 0)
+      const orderB = Number(b.properties?.order || 0)
+      return orderA - orderB || String(a.label).localeCompare(String(b.label), 'zh-Hans-CN')
+    })
   }
-
-  const freeIds = nodes.filter(node => !pinned.has(node.id)).map(node => node.id)
-  const REPULSION = 26
-  const SPRING_K = 0.045
-  const GRAVITY_K = 0.022
-  const DAMPING = 0.82
-  const ITERATIONS = 220
-  const tmp = new THREE.Vector2()
-
-  for (let step = 0; step < ITERATIONS; step++) {
-    // 斥力（库仑）：所有自由节点两两排斥，避免重叠
-    for (let i = 0; i < freeIds.length; i++) {
-      const pi = pos.get(freeIds[i])
-      const fi = vel.get(freeIds[i])
-      for (let j = i + 1; j < freeIds.length; j++) {
-        const pj = pos.get(freeIds[j])
-        tmp.copy(pi).sub(pj)
-        let distSq = tmp.lengthSq()
-        if (distSq < 0.01) { tmp.set(Math.random() - 0.5, Math.random() - 0.5); distSq = 0.25 }
-        const force = REPULSION / distSq
-        tmp.normalize().multiplyScalar(force)
-        fi.add(tmp)
-        vel.get(freeIds[j]).sub(tmp)
-      }
-    }
-    // 弹簧（胡克）：关系两端按静止长度收拢/撑开
-    for (const spring of springs) {
-      const pa = pos.get(spring.a)
-      const pb = pos.get(spring.b)
-      tmp.copy(pb).sub(pa)
-      const dist = tmp.length() || 0.01
-      const force = (dist - spring.rest) * SPRING_K
-      tmp.normalize().multiplyScalar(force)
-      if (!pinned.has(spring.a)) vel.get(spring.a).add(tmp)
-      if (!pinned.has(spring.b)) vel.get(spring.b).sub(tmp)
-    }
-    // 章节引力：子节点被拉向所属章节中心，强化分簇
-    for (const id of freeIds) {
-      const home = homeChapter.get(id)
-      if (!home) continue
-      tmp.copy(home).sub(pos.get(id)).multiplyScalar(GRAVITY_K)
-      vel.get(id).add(tmp)
-    }
-    // 积分 + 阻尼
-    const cooling = 1 - step / ITERATIONS
-    for (const id of freeIds) {
-      const v = vel.get(id)
-      v.multiplyScalar(DAMPING)
-      pos.get(id).add(tmp.copy(v).multiplyScalar(0.5 * cooling + 0.08))
-    }
-  }
-
-  const positions = new Map()
-  for (const node of nodes) {
-    const p = pos.get(node.id) || new THREE.Vector2()
-    positions.set(node.id, new THREE.Vector3(p.x, TYPE_Y_OFFSET[node.type] || 0, p.y))
-  }
-  return positions
+  return childMap
 }
-function createNodeLabel(node, meta, size) {
-  const element = document.createElement('button')
-  element.type = 'button'
-  element.className = `graph-node-label graph-node-label-${node.type || 'concept'}`
-  element.textContent = node.label
-  element.style.setProperty('--node-color', meta.color)
-  element.style.setProperty('--node-soft-color', meta.softColor)
-  element.title = node.summary || node.label
 
+// ───────── 计算属性：布局缓存 ─────────
+const basePositions = computed(() => buildBasePositions())
+const chapterChildMap = computed(() => buildChapterChildMap())
+
+const expandedChildren = computed(() => {
+  if (!expandedChapterId.value) return []
+  return chapterChildMap.value.get(expandedChapterId.value) || []
+})
+
+const expandedPositions = computed(() => {
+  const m = new Map()
+  if (!expandedChapterId.value) return m
+  const parent = basePositions.value.get(expandedChapterId.value)
+  if (!parent) return m
+  const children = expandedChildren.value
+  const n = children.length
+  if (n === 0) return m
+  const r = clamp(110 + 12 * n, ORBIT_RADIUS_MIN, ORBIT_RADIUS_MAX)
+  children.forEach((child, i) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / n
+    m.set(child.id, {
+      x: parent.x + Math.cos(angle) * r,
+      y: parent.y + Math.sin(angle) * r
+    })
+  })
+  return m
+})
+
+const nodePositions = computed(() => {
+  const m = new Map(basePositions.value)
+  expandedPositions.value.forEach((p, id) => m.set(id, p))
+  return m
+})
+
+// 一级节点（course + chapter）：始终可见，入场仅在首次挂载触发
+const baseNodes = computed(() =>
+  props.nodes.filter((node) => node.type === 'course' || node.type === 'chapter')
+)
+
+// 二级节点：仅当前展开 chapter 的子节点
+const expandedNodes = computed(() => {
+  if (!expandedChapterId.value) return []
+  const ids = new Set(expandedPositions.value.keys())
+  return props.nodes.filter((node) => ids.has(node.id))
+})
+
+// 一级关系边（两端都是 course/chapter）：始终可见，无入场延迟
+const baseEdges = computed(() => {
+  const baseIds = new Set(baseNodes.value.map((n) => n.id))
+  return (props.relations || []).filter((r) => baseIds.has(r.source) && baseIds.has(r.target))
+})
+
+// chapter → 二级 的边：随二级节点同步淡入
+const expandedEdges = computed(() => {
+  if (!expandedChapterId.value) return []
+  const expandedIds = new Set(expandedPositions.value.keys())
+  const baseIds = new Set(baseNodes.value.map((n) => n.id))
+  return (props.relations || []).filter((r) => {
+    const sBase = baseIds.has(r.source)
+    const tBase = baseIds.has(r.target)
+    const sExp = expandedIds.has(r.source)
+    const tExp = expandedIds.has(r.target)
+    return (sBase && tExp) || (sExp && tBase) || (sExp && tExp)
+  })
+})
+
+const viewportTransform = computed(
+  () => `translate(${viewport.x} ${viewport.y}) scale(${viewport.scale})`
+)
+
+// ───────── 边路径 ─────────
+function edgePath(rel) {
+  const s = nodePositions.value.get(rel.source)
+  const t = nodePositions.value.get(rel.target)
+  if (!s || !t) return ''
+  const dx = t.x - s.x
+  const dy = t.y - s.y
+  const dist = Math.hypot(dx, dy) || 1
+  const ux = dx / dist
+  const uy = dy / dist
+  const sourceNode = props.nodes.find((n) => n.id === rel.source)
+  const targetNode = props.nodes.find((n) => n.id === rel.target)
+  const sr = sourceNode ? getNodeRadius(sourceNode) : 18
+  const tr = targetNode ? getNodeRadius(targetNode) : 18
+  const sx = s.x + ux * sr * 0.92
+  const sy = s.y + uy * sr * 0.92
+  const ex = t.x - ux * tr * 1.02
+  const ey = t.y - uy * tr * 1.02
+  const mx = (sx + ex) / 2
+  const my = (sy + ey) / 2
+  // SVG y 轴向下，"向上凸"取负 lift
+  const lift = rel.type === 'CONTAINS' ? Math.min(dist * 0.05 + 16, 60) : Math.min(dist * 0.08 + 30, 100)
+  return `M ${sx.toFixed(2)} ${sy.toFixed(2)} Q ${mx.toFixed(2)} ${(my - lift).toFixed(2)} ${ex.toFixed(2)} ${ey.toFixed(2)}`
+}
+
+function edgeColor(rel) {
+  const meta = getRelationTypeMeta(rel.type)
+  return meta?.color || '#94a3b8'
+}
+
+function edgeOpacity(rel) {
+  if (hasHighlight()) {
+    return isRelationHighlighted(rel)
+      ? (rel.type === 'CONTAINS' ? 0.7 : 0.85)
+      : 0.12
+  }
+  return rel.type === 'CONTAINS' ? 0.55 : 0.8
+}
+
+function edgeStrokeWidth(rel) {
+  return rel.type === 'CONTAINS' ? 1.5 : 1.8
+}
+
+// ───────── 节点视觉计算 ─────────
+function nodeMeta(node) {
+  return getNodeTypeMeta(node.type)
+}
+
+function nodeBodyFill(node) {
+  return nodeMeta(node).color
+}
+
+function nodeBodyStroke(node) {
+  if (node.id === props.selectedNodeId) return 'var(--app-primary-strong)'
+  if (isWeakNode(node.id)) return '#ef4444'
+  return 'rgba(255, 255, 255, 0.7)'
+}
+
+function nodeBodyStrokeWidth(node) {
+  if (node.id === props.selectedNodeId) return 3
+  return 1.5
+}
+
+function nodeHaloFill(node) {
+  if (isWeakNode(node.id)) return '#ef4444'
+  return nodeMeta(node).color
+}
+
+// 掌握度环周长：基于节点半径的 1.18 倍
+function masteryRingRadius(node) {
+  return getNodeRadius(node) * 1.18
+}
+
+function masteryRingDasharray(node) {
+  const score = getMasteryScore(node.id)
+  if (score == null) return null
+  const r = masteryRingRadius(node)
+  const C = 2 * Math.PI * r
+  const dash = (score / 100) * C
+  return `${dash.toFixed(2)} ${(C - dash).toFixed(2)}`
+}
+
+function nodeOpacity(node) {
+  if (hasHighlight() && !isNodeHighlighted(node.id)) return 0.22
+  return 1
+}
+
+function nodeIsWeakClass(node) {
+  return isWeakNode(node.id) ? 'is-weak' : ''
+}
+
+function nodeIsSelectedClass(node) {
+  return node.id === props.selectedNodeId ? 'is-selected' : ''
+}
+
+// label 文本字号：随节点类型变化
+function nodeLabelFontSize(node) {
+  if (node.type === 'course') return 18
+  if (node.type === 'chapter') return 14
+  return 12
+}
+
+function nodeLabelOffsetY(node) {
+  return getNodeRadius(node) + 18
+}
+
+// ───────── 提交版本链卫星 ─────────
+function submissionColor(sub) {
+  const status = String(sub.status || sub.judgeStatus || '').toLowerCase()
+  const score = Number(sub.score)
+  if (status.includes('ac') || status.includes('accept') || status.includes('completed') || status.includes('graded')) return '#22c55e'
+  if (status.includes('ce') || status.includes('compile') || status.includes('error')) return '#ef4444'
+  if (!Number.isNaN(score) && score >= 70) return '#22c55e'
+  if (!Number.isNaN(score) && score >= 40) return '#f59e0b'
+  if (status.includes('wa') || status.includes('wrong') || status.includes('reject')) return '#f59e0b'
+  return '#94a3b8'
+}
+
+function formatTime(sub) {
+  const t = sub.submitTime || sub.submittedAt || sub.date
+  if (!t) return '未知时间'
+  const d = new Date(t)
+  if (Number.isNaN(d.getTime())) return String(t)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+const satelliteLayout = computed(() => {
+  const trace = props.submissionTrace
+  if (!trace || !Array.isArray(trace.submissions) || trace.submissions.length === 0) {
+    return { points: [], polyline: '' }
+  }
+  const center = nodePositions.value.get(trace.nodeId)
+  if (!center) return { points: [], polyline: '' }
+
+  const centerNode = props.nodes.find((n) => n.id === trace.nodeId)
+  const baseR = centerNode ? getNodeRadius(centerNode) : 28
+  // 卫星轨道半径 = 节点半径 × 1.8，并保证最小可视半径
+  const orbitR = Math.max(baseR * 1.8, 56)
+
+  const subs = trace.submissions.slice().sort((a, b) => {
+    const ta = new Date(a.submitTime || a.submittedAt || a.date || 0).getTime()
+    const tb = new Date(b.submitTime || b.submittedAt || b.date || 0).getTime()
+    return ta - tb
+  })
+  const count = Math.min(subs.length, 20)
+  const showSubs = subs.slice(-count)
+
+  const points = []
+  const linePts = []
+  showSubs.forEach((sub, i) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i) / Math.max(count, 1)
+    const cx = center.x + Math.cos(angle) * orbitR
+    const cy = center.y + Math.sin(angle) * orbitR
+    points.push({
+      key: sub.id || sub.submissionId || `${sub.experimentId || ''}-${i}`,
+      cx,
+      cy,
+      color: submissionColor(sub),
+      submission: sub
+    })
+    linePts.push(`${cx.toFixed(2)},${cy.toFixed(2)}`)
+  })
+
+  return { points, polyline: linePts.join(' ') }
+})
+
+// ───────── 一级展开/折叠（核心交互） ─────────
+function toggleChapter(chapterId) {
+  expandedChapterId.value = expandedChapterId.value === chapterId ? '' : chapterId
+}
+
+// ───────── 节点交互 ─────────
+function handleNodeClick(node) {
+  if (dragState.moved) return   // 拖拽尾部不算点击
   if (node.type === 'chapter') {
-    const count = props.chapterChildCounts?.[node.id] ?? 0
-    if (count > 0) {
-      const badge = document.createElement('span')
-      badge.className = 'chapter-badge'
-      badge.textContent = String(count)
-      element.appendChild(badge)
-    }
+    toggleChapter(node.id)
   }
-
-  const label = new CSS2DObject(element)
-  label.position.set(0, size + 0.48, 0)
-  label.userData.node = node
-  labelObjectById.set(node.id, label)
-  return label
-}
-
-function createMasteryRing(size, color) {
-  const geometry = new THREE.TorusGeometry(size + 0.34, 0.06, 10, 64)
-  const material = new THREE.MeshBasicMaterial({
-    color: color || '#22c55e', transparent: true, opacity: 0.92, depthWrite: false
-  })
-  const ring = new THREE.Mesh(geometry, material)
-  ring.rotation.x = -Math.PI / 2
-  ring.visible = Boolean(color)
-  return ring
-}
-
-function createNodeObject(node) {
-  const meta = getNodeTypeMeta(node.type)
-  const size = getNodeSize(node)
-  const group = new THREE.Group()
-  const color = makeColor(meta.color)
-  const selected = isSelected(node.id)
-
-  // 几何共享、材质按节点克隆（color/emissive 独立，可单独高亮）
-  const geometry = getGeometryForType(node.type)
-  const material = new THREE.MeshPhysicalMaterial({
-    color,
-    roughness: 0.4,
-    metalness: 0.12,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.25,
-    sheen: 0.4,
-    sheenColor: color.clone().lerp(new THREE.Color('#ffffff'), 0.5),
-    emissive: color,
-    emissiveIntensity: selected ? 0.5 : 0.22
-  })
-  const mesh = new THREE.Mesh(geometry, material)
-  mesh.castShadow = node.type === 'course' || node.type === 'chapter'
-  mesh.receiveShadow = false
-  mesh.userData.node = node
-  mesh.userData.baseEmissiveIntensity = material.emissiveIntensity
-  group.add(mesh)
-
-  // 光晕：共享贴图，材质独立（控制透明度/缩放）
-  const glowMaterial = new THREE.SpriteMaterial({
-    map: getGlowTexture(meta.color),
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    opacity: selected ? 0.85 : 0.5
-  })
-  const glow = new THREE.Sprite(glowMaterial)
-  glow.scale.setScalar(size * (selected ? 5.3 : 4.1))
-  glow.position.set(0, -size * 0.18, 0)
-  group.add(glow)
-
-  const masteryRing = createMasteryRing(size, getMasteryColor(node.id))
-  group.add(masteryRing)
-
-  group.add(createNodeLabel(node, meta, size))
-
-  const position = nodePositionById.get(node.id) || new THREE.Vector3()
-  group.position.copy(position)
-  group.userData.node = node
-  group.userData.mesh = mesh
-  group.userData.glow = glow
-  group.userData.masteryRing = masteryRing
-  group.userData.baseY = position.y
-  group.userData.floatPhase = Math.random() * Math.PI * 2
-
-  nodeObjects.push(mesh)
-  nodeObjectById.set(node.id, group)
-  return group
-}
-// 边曲线点：两节点间二次贝塞尔，按节点半径回退端点，CONTAINS 抬升较低
-function curvePoints(source, target, type, sourceRadius, targetRadius, segments) {
-  const dir = target.clone().sub(source).normalize()
-  const start = source.clone().add(dir.clone().multiplyScalar(sourceRadius * 0.92))
-  const end = target.clone().sub(dir.clone().multiplyScalar(targetRadius * 1.02))
-  const mid = start.clone().add(end).multiplyScalar(0.5)
-  const lift = type === 'CONTAINS' ? 0.5 : 1.4
-  mid.y += lift + Math.min(start.distanceTo(end) * 0.05, 1.4)
-  return new THREE.QuadraticBezierCurve3(start, mid, end).getPoints(segments)
-}
-
-// 同类型关系合并为单个 LineSegments（减少 draw call）；顶点色由暗到亮表示 source→target 方向
-function buildEdges() {
-  const nodeById = new Map((props.nodes || []).map(node => [node.id, node]))
-  const byType = new Map()
-  for (const relation of props.relations || []) {
-    const s = nodePositionById.get(relation.source)
-    const t = nodePositionById.get(relation.target)
-    if (!s || !t || relation.source === relation.target) continue
-    if (!byType.has(relation.type)) byType.set(relation.type, [])
-    byType.get(relation.type).push({ relation, s, t })
-  }
-
-  for (const [type, items] of byType) {
-    const baseColor = new THREE.Color(getRelationTypeMeta(type).color)
-    const positions = []
-    const colors = []
-    const ranges = []
-    const SEG = 22
-    for (const { relation, s, t } of items) {
-      const sr = getNodeSize(nodeById.get(relation.source))
-      const tr = getNodeSize(nodeById.get(relation.target))
-      const pts = curvePoints(s, t, type, sr, tr, SEG)
-      const startVertex = positions.length / 3
-      for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[i]; const p1 = pts[i + 1]
-        positions.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z)
-        const f0 = 0.4 + 0.6 * (i / (pts.length - 1))
-        const f1 = 0.4 + 0.6 * ((i + 1) / (pts.length - 1))
-        const c0 = baseColor.clone().multiplyScalar(f0)
-        const c1 = baseColor.clone().multiplyScalar(f1)
-        colors.push(c0.r, c0.g, c0.b, c1.r, c1.g, c1.b)
-      }
-      ranges.push({ relation, start: startVertex, count: positions.length / 3 - startVertex })
-    }
-    const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
-    const material = new THREE.LineBasicMaterial({
-      vertexColors: true, transparent: true, opacity: type === 'CONTAINS' ? 0.5 : 0.8
-    })
-    const mesh = new THREE.LineSegments(geometry, material)
-    mesh.userData = { type, baseColors: Float32Array.from(colors), ranges }
-    edgeGroup.add(mesh)
-    edgeMeshByType.set(type, mesh)
-  }
-}
-function createSelectionRing(color = '#1270d8') {
-  const geometry = new THREE.TorusGeometry(1, 0.04, 10, 80)
-  const material = new THREE.MeshBasicMaterial({
-    color, transparent: true, opacity: 0.95, depthWrite: false
-  })
-  const ring = new THREE.Mesh(geometry, material)
-  ring.rotation.x = Math.PI / 2
-  ring.visible = false
-  return ring
-}
-
-function createSceneBase() {
-  scene = new THREE.Scene()
-  // 深色背景：让 Bloom 辉光更突出（白底会被泛白冲淡）；标签是 CSS 叠层，深底不影响可读性
-  scene.background = new THREE.Color('#0a1124')
-  scene.fog = new THREE.Fog('#0a1124', 46, 104)
-
-  camera = new THREE.PerspectiveCamera(46, 1, 0.1, 240)
-  initialCameraPosition = new THREE.Vector3(0, 26, 38)
-  initialControlTarget = new THREE.Vector3(0, 0, 0)
-  camera.position.copy(initialCameraPosition)
-
-  const { width, height } = getContainerSize()
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-  renderer.setSize(width, height)
-  renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap
-  renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.05
-  sceneRef.value.appendChild(renderer.domElement)
-
-  labelRenderer = new CSS2DRenderer()
-  labelRenderer.setSize(width, height)
-  labelRenderer.domElement.className = 'graph-label-layer'
-  sceneRef.value.appendChild(labelRenderer.domElement)
-
-  controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
-  controls.dampingFactor = 0.08
-  controls.minDistance = 12
-  controls.maxDistance = 92
-  controls.maxPolarAngle = Math.PI * 0.49
-  controls.target.copy(initialControlTarget)
-  controls.addEventListener('change', requestRender)
-
-  raycaster = new THREE.Raycaster()
-  pointer = new THREE.Vector2()
-  clock = new THREE.Clock()
-
-  setupLights()
-  setupGround()
-  setupComposer(width, height)
-
-  nodeGroup = new THREE.Group()
-  edgeGroup = new THREE.Group()
-  hoverRing = createSelectionRing('#94a3b8')
-  selectRing = createSelectionRing('#38bdf8')
-  scene.add(edgeGroup, nodeGroup, hoverRing, selectRing)
-}
-function setupLights() {
-  const ambient = new THREE.HemisphereLight('#cfe6ff', '#0a1124', 1.15)
-  scene.add(ambient)
-
-  // 单一关键光投影（仅 course/chapter 接收 castShadow），shadow map 降到 1024 控成本
-  const keyLight = new THREE.DirectionalLight('#ffffff', 2.0)
-  keyLight.position.set(16, 30, 20)
-  keyLight.castShadow = true
-  keyLight.shadow.mapSize.width = 1024
-  keyLight.shadow.mapSize.height = 1024
-  keyLight.shadow.camera.near = 1
-  keyLight.shadow.camera.far = 90
-  keyLight.shadow.camera.left = -40
-  keyLight.shadow.camera.right = 40
-  keyLight.shadow.camera.top = 40
-  keyLight.shadow.camera.bottom = -40
-  keyLight.shadow.bias = -0.0008
-  scene.add(keyLight)
-
-  const rim = new THREE.DirectionalLight('#60a5fa', 0.8)
-  rim.position.set(-22, 14, -18)
-  scene.add(rim)
-}
-
-function setupGround() {
-  const grid = new THREE.GridHelper(64, 36, '#1e3a8a', '#162447')
-  grid.position.y = -1.4
-  grid.material.transparent = true
-  grid.material.opacity = 0.5
-  scene.add(grid)
-
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(36, 80),
-    new THREE.MeshStandardMaterial({ color: '#0d1730', transparent: true, opacity: 0.7, roughness: 0.9 })
-  )
-  floor.rotation.x = -Math.PI / 2
-  floor.position.y = -1.44
-  floor.receiveShadow = true
-  scene.add(floor)
-}
-
-function setupComposer(width, height) {
-  composer = new EffectComposer(renderer)
-  renderPass = new RenderPass(scene, camera)
-  composer.addPass(renderPass)
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 0.62, 0.7, 0.82)
-  composer.addPass(bloomPass)
-  composer.addPass(new OutputPass())
-  composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-  composer.setSize(width, height)
-  bloomPass.enabled = bloomEnabled.value
-}
-function isSharedGeometry(geometry) {
-  for (const g of geometryByType.values()) if (g === geometry) return true
-  return false
-}
-
-function isSharedTexture(texture) {
-  for (const t of glowTextureByType.values()) if (t === texture) return true
-  return false
-}
-
-function disposeMaterial(material) {
-  if (Array.isArray(material)) { material.forEach(disposeMaterial); return }
-  if (!material) return
-  if (material.map && !isSharedTexture(material.map)) material.map.dispose()
-  material.dispose?.()
-}
-
-// 释放对象自有资源，但保留按类型共享的几何体与光晕贴图（跨重建复用）
-function disposeObject(object) {
-  object.traverse((child) => {
-    if (child.geometry && !isSharedGeometry(child.geometry)) child.geometry.dispose()
-    if (child.material) disposeMaterial(child.material)
-    if (child.element?.remove) child.element.remove()
-  })
-}
-
-function clearGraphObjects() {
-  for (const group of [nodeGroup, edgeGroup]) {
-    if (!group) continue
-    while (group.children.length) {
-      disposeObject(group.children.pop())
-    }
-  }
-  nodeObjects = []
-  nodeObjectById = new Map()
-  nodePositionById = new Map()
-  labelObjectById = new Map()
-  edgeMeshByType.clear()
-  appearAnimations = []
-}
-
-function buildGraphScene() {
-  if (!scene || !nodeGroup || !edgeGroup || !hasGraphData.value) return
-  clearGraphObjects()
-  nodePositionById = buildNodeLayout()
-  buildEdges()
-  for (const node of props.nodes || []) {
-    nodeGroup.add(createNodeObject(node))
-  }
-  // 入场动画：缩放从 0 弹入
-  appearAnimations = nodeObjects.map((mesh, i) => ({ mesh, delay: i * 0.012, t: 0 }))
-  updateSelectionState()
-  requestRender()
-}
-function updateNodeVisual(group, options = {}) {
-  const { selected = false, hovered = false } = options
-  const mesh = group?.userData?.mesh
-  const glow = group?.userData?.glow
-  if (!mesh || !glow) return
-
-  const nodeId = group.userData.node?.id
-  const dimmed = hasHighlight() && !isNodeHighlighted(nodeId)
-  group.userData.dimmed = dimmed
-  group.userData.selected = selected
-  const targetScale = dimmed ? 0.9 : selected ? 1.2 : hovered ? 1.1 : 1
-  group.userData.targetScale = targetScale
-  mesh.material.transparent = dimmed
-  mesh.material.opacity = dimmed ? 0.16 : 1
-  const baseEmissive = mesh.userData.baseEmissiveIntensity || 0.22
-  mesh.userData.emissiveTarget = dimmed ? baseEmissive * 0.35 : selected ? 0.85 : hovered ? 0.5 : baseEmissive
-  glow.material.opacity = dimmed ? 0.08 : selected ? 0.95 : hovered ? 0.72 : 0.5
-
-  const label = labelObjectById.get(nodeId)
-  if (label?.element) {
-    label.element.style.opacity = dimmed ? '0.22' : ''
-    label.element.classList.toggle('is-selected', selected)
-  }
-}
-
-function updateRing(ring, nodeId, scaleOffset) {
-  if (!ring) return
-  const group = nodeObjectById.get(nodeId)
-  if (!group) { ring.visible = false; return }
-  const node = group.userData.node
-  const meta = getNodeTypeMeta(node.type)
-  const size = getNodeSize(node) + scaleOffset
-  ring.position.copy(group.position)
-  ring.position.y += 0.02
-  ring.scale.setScalar(size)
-  ring.material.color.set(meta.color)
-  ring.visible = true
-}
-
-function updateSelectionState() {
-  nodeObjectById.forEach((group, nodeId) => {
-    updateNodeVisual(group, {
-      selected: isSelected(nodeId),
-      hovered: hoveredNode.value?.id === nodeId
-    })
-  })
-  updateRing(selectRing, props.selectedNodeId, 0.34)
-  updateRing(hoverRing, hoveredNode.value?.id, 0.2)
-  updateEdgeHighlight()
-  requestRender()
-}
-// 高亮：对每个合并边 mesh，按 relation 所在顶点区间缩放颜色（非高亮调暗）
-function updateEdgeHighlight() {
-  if (!edgeGroup) return
-  const highlightOn = hasHighlight()
-  edgeMeshByType.forEach((mesh) => {
-    const { baseColors, ranges } = mesh.userData
-    const attr = mesh.geometry.getAttribute('color')
-    const arr = attr.array
-    for (const range of ranges) {
-      const factor = !highlightOn || isRelationHighlighted(range.relation) ? 1 : 0.14
-      const begin = range.start * 3
-      const stop = (range.start + range.count) * 3
-      for (let i = begin; i < stop; i++) arr[i] = baseColors[i] * factor
-    }
-    attr.needsUpdate = true
-    mesh.material.opacity = highlightOn ? (mesh.userData.type === 'CONTAINS' ? 0.4 : 0.7) : (mesh.userData.type === 'CONTAINS' ? 0.5 : 0.8)
-  })
-}
-
-function updateLearningStateVisuals() {
-  nodeObjectById.forEach((group, nodeId) => {
-    const ring = group.userData.masteryRing
-    if (!ring) return
-    const color = getMasteryColor(nodeId)
-    if (color) {
-      ring.material.color.set(color)
-      ring.visible = true
-    } else {
-      ring.visible = false
-    }
-  })
-  requestRender()
-}
-
-function setPointerFromEvent(event) {
-  const rect = renderer.domElement.getBoundingClientRect()
-  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
-  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-}
-
-function getIntersectedNode(event) {
-  if (!raycaster || !camera || !renderer) return null
-  setPointerFromEvent(event)
-  raycaster.setFromCamera(pointer, camera)
-  const intersects = raycaster.intersectObjects(nodeObjects, false)
-  return intersects[0]?.object?.userData?.node || null
-}
-
-function handlePointerMove(event) {
-  const node = getIntersectedNode(event)
-  if (node?.id === hoveredNode.value?.id) return
-  hoveredNode.value = node || null
-  renderer.domElement.style.cursor = node ? 'pointer' : 'grab'
-  updateSelectionState()
-}
-
-function handlePointerLeave() {
-  hoveredNode.value = null
-  if (renderer?.domElement) renderer.domElement.style.cursor = 'grab'
-  updateSelectionState()
-}
-
-function handleClick(event) {
-  const node = getIntersectedNode(event)
-  if (!node) return
   emit('select-node', node)
 }
 
-function handleDblClick(event) {
-  const node = getIntersectedNode(event)
-  if (!node) return
+function handleNodeDblClick(node) {
   emit('select-node', node)
+  emit('trace-node', node)
   focusNode(node.id)
 }
-function resizeScene() {
-  if (!camera || !renderer || !labelRenderer) return
-  const { width, height } = getContainerSize()
-  camera.aspect = width / height
-  camera.updateProjectionMatrix()
-  renderer.setSize(width, height)
-  labelRenderer.setSize(width, height)
-  composer?.setSize(width, height)
-  bloomPass?.setSize(width, height)
-  requestRender()
+
+function handleNodeEnter(node) {
+  hoveredNode.value = node
+  hoveredSubmission.value = null
 }
 
-// 自研相机补间：缓动插值 position 与 target，避免引第三方 tween
-function startCameraTween(toPos, toTarget) {
-  if (!camera || !controls) return
-  cameraTween.fromPos.copy(camera.position)
-  cameraTween.toPos.copy(toPos)
-  cameraTween.fromTarget.copy(controls.target)
-  cameraTween.toTarget.copy(toTarget)
-  cameraTween.t = 0
-  cameraTween.active = true
-  requestRender()
-}
-
-function easeInOutCubic(x) {
-  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2
-}
-
-function advanceCameraTween(delta) {
-  if (!cameraTween.active) return
-  cameraTween.t = Math.min(1, cameraTween.t + delta / cameraTween.duration)
-  const k = easeInOutCubic(cameraTween.t)
-  camera.position.lerpVectors(cameraTween.fromPos, cameraTween.toPos, k)
-  controls.target.lerpVectors(cameraTween.fromTarget, cameraTween.toTarget, k)
-  if (cameraTween.t >= 1) cameraTween.active = false
-}
-
-// 入场弹入动画推进；返回是否仍在进行
-function advanceAppear(delta) {
-  if (!appearAnimations.length) return false
-  let active = false
-  for (const item of appearAnimations) {
-    if (item.delay > 0) { item.delay -= delta; active = true; continue }
-    if (item.t >= 1) continue
-    item.t = Math.min(1, item.t + delta * 2.4)
-    const k = 1 - Math.pow(1 - item.t, 3)
-    item.mesh.parent.scale.setScalar(k)
-    active = true
-  }
-  if (!active) appearAnimations = []
-  return active
-}
-
-function animate() {
-  animationId = window.requestAnimationFrame(animate)
-  const delta = clock ? clock.getDelta() : 0.016
-  elapsed += delta
-
-  let dynamic = false
-  if (motionEnabled.value && nodeGroup) {
-    // 轻微浮动 + 选中节点发光脉冲
-    nodeGroup.children.forEach((group) => {
-      const baseY = group.userData.baseY ?? group.position.y
-      group.position.y = baseY + Math.sin(elapsed * 0.9 + group.userData.floatPhase) * 0.12
-    })
-    dynamic = true
-  }
-  // 发光强度向目标平滑过渡（即便静止也短暂渲染到位）
-  if (nodeGroup) {
-    nodeGroup.children.forEach((group) => {
-      const mesh = group.userData.mesh
-      if (!mesh) return
-      const target = (mesh.userData.emissiveTarget ?? mesh.material.emissiveIntensity)
-        + (group.userData.selected ? Math.sin(elapsed * 3) * 0.18 : 0)
-      const cur = mesh.material.emissiveIntensity
-      if (Math.abs(cur - target) > 0.002) {
-        mesh.material.emissiveIntensity = cur + (target - cur) * Math.min(1, delta * 8)
-        dynamic = true
-      }
-      const ts = group.userData.targetScale ?? 1
-      if (Math.abs(mesh.scale.x - ts) > 0.002) {
-        mesh.scale.setScalar(mesh.scale.x + (ts - mesh.scale.x) * Math.min(1, delta * 10))
-        dynamic = true
-      }
-    })
-  }
-  if (hoverRing?.visible) { hoverRing.rotation.z += delta * 0.8; dynamic = true }
-  if (selectRing?.visible) { selectRing.rotation.z -= delta * 0.5; dynamic = true }
-  if (advanceAppear(delta)) dynamic = true
-  if (cameraTween.active) { advanceCameraTween(delta); dynamic = true }
-
-  const controlsActive = controls?.update() || false
-
-  // 按需渲染：仅在有动态/交互/显式请求时执行渲染，空闲时跳过 GPU 开销
-  if (needsRender || dynamic || controlsActive) {
-    if (bloomPass && bloomPass.enabled) {
-      composer.render()
-    } else {
-      renderer.render(scene, camera)
-    }
-    labelRenderer.render(scene, camera)
-    needsRender = false
-  }
-}
-async function initScene() {
-  await nextTick()
-  if (!sceneRef.value || !hasGraphData.value || scene) return
-  createSceneBase()
-  buildGraphScene()
-  resizeObserver = new ResizeObserver(resizeScene)
-  resizeObserver.observe(sceneRef.value)
-  renderer.domElement.style.cursor = 'grab'
-  renderer.domElement.addEventListener('pointermove', handlePointerMove)
-  renderer.domElement.addEventListener('pointerleave', handlePointerLeave)
-  renderer.domElement.addEventListener('click', handleClick)
-  renderer.domElement.addEventListener('dblclick', handleDblClick)
-  animate()
-}
-
-function destroyScene() {
-  window.cancelAnimationFrame(animationId)
-  animationId = 0
-  resizeObserver?.disconnect()
-  resizeObserver = null
-
-  if (renderer?.domElement) {
-    renderer.domElement.removeEventListener('pointermove', handlePointerMove)
-    renderer.domElement.removeEventListener('pointerleave', handlePointerLeave)
-    renderer.domElement.removeEventListener('click', handleClick)
-    renderer.domElement.removeEventListener('dblclick', handleDblClick)
-  }
-
-  controls?.removeEventListener('change', requestRender)
-  controls?.dispose()
-  clearGraphObjects()
-
-  if (scene) {
-    scene.traverse((child) => {
-      if (child === scene) return
-      if (child.geometry) child.geometry.dispose()
-      if (child.material) disposeMaterial(child.material)
-    })
-  }
-
-  // 释放共享几何与贴图
-  geometryByType.forEach(geometry => geometry.dispose())
-  geometryByType.clear()
-  glowTextureByType.forEach(texture => texture.dispose())
-  glowTextureByType.clear()
-
-  composer?.dispose?.()
-  bloomPass?.dispose?.()
-  renderer?.dispose()
-  renderer?.forceContextLoss?.()
-  renderer?.domElement?.remove()
-  labelRenderer?.domElement?.remove()
-
-  scene = camera = renderer = composer = bloomPass = renderPass = null
-  labelRenderer = controls = clock = null
-  nodeGroup = edgeGroup = hoverRing = selectRing = raycaster = pointer = null
+function handleNodeLeave() {
   hoveredNode.value = null
-  cameraTween.active = false
-}
-function resetCamera() {
-  if (!camera || !controls || !initialCameraPosition || !initialControlTarget) return
-  startCameraTween(initialCameraPosition.clone(), initialControlTarget.clone())
 }
 
-function zoomCamera(direction) {
-  if (!camera || !controls) return
-  const target = controls.target.clone()
-  const distance = camera.position.distanceTo(target)
-  const nextDistance = THREE.MathUtils.clamp(
-    distance * (direction === 'in' ? 0.82 : 1.18),
-    controls.minDistance,
-    controls.maxDistance
-  )
-  const vector = camera.position.clone().sub(target).normalize().multiplyScalar(nextDistance)
-  startCameraTween(target.clone().add(vector), target)
+function handleSatelliteClick(submission) {
+  if (dragState.moved) return
+  emit('select-submission', submission)
+}
+
+function handleSatelliteEnter(submission) {
+  hoveredSubmission.value = submission
+  hoveredNode.value = null
+}
+
+function handleSatelliteLeave() {
+  hoveredSubmission.value = null
+}
+
+// ───────── viewport：拖拽与缩放 ─────────
+function svgPointToWorld(clientX, clientY) {
+  const svg = svgRef.value
+  if (!svg) return { sx: 0, sy: 0, wx: 0, wy: 0 }
+  const rect = svg.getBoundingClientRect()
+  // DOM 像素 → SVG 用户坐标（viewBox 单位）
+  const sx = ((clientX - rect.left) / rect.width) * VB_W + VB_X
+  const sy = ((clientY - rect.top) / rect.height) * VB_H + VB_Y
+  // viewport 逆变换：得到内容空间坐标
+  const wx = (sx - viewport.x) / viewport.scale
+  const wy = (sy - viewport.y) / viewport.scale
+  return { sx, sy, wx, wy, rect }
+}
+
+function onSvgMousedown(event) {
+  // 只响应左键
+  if (event.button !== 0) return
+  isDragging.value = true
+  dragState.startX = event.clientX
+  dragState.startY = event.clientY
+  dragState.vx = viewport.x
+  dragState.vy = viewport.y
+  dragState.moved = false
+}
+
+function onSvgMousemove(event) {
+  if (!isDragging.value) return
+  const dxPx = event.clientX - dragState.startX
+  const dyPx = event.clientY - dragState.startY
+  if (!dragState.moved && Math.hypot(dxPx, dyPx) > DRAG_THRESHOLD) {
+    dragState.moved = true
+  }
+  // 把屏幕像素增量换算到 SVG 用户坐标增量（与 viewBox 1:1 不依赖 scale，因为 translate 在 scale 外侧）
+  const svg = svgRef.value
+  if (!svg) return
+  const rect = svg.getBoundingClientRect()
+  const scaleX = VB_W / rect.width
+  const scaleY = VB_H / rect.height
+  viewport.x = dragState.vx + dxPx * scaleX
+  viewport.y = dragState.vy + dyPx * scaleY
+}
+
+function onSvgMouseup() {
+  isDragging.value = false
+}
+
+function onSvgMouseleave() {
+  isDragging.value = false
+}
+
+function onSvgWheel(event) {
+  if (!svgRef.value) return
+  const { sx, sy, wx, wy } = svgPointToWorld(event.clientX, event.clientY)
+  const factor = event.deltaY < 0 ? SCALE_STEP : 1 / SCALE_STEP
+  const next = clamp(viewport.scale * factor, SCALE_MIN, SCALE_MAX)
+  if (next === viewport.scale) return
+  viewport.x = sx - wx * next
+  viewport.y = sy - wy * next
+  viewport.scale = next
+}
+
+// ───────── 工具栏 ─────────
+function resetView() {
+  viewport.x = 0
+  viewport.y = 0
+  viewport.scale = 1
+}
+
+function zoomBy(direction) {
+  const factor = direction === 'in' ? SCALE_STEP : 1 / SCALE_STEP
+  const next = clamp(viewport.scale * factor, SCALE_MIN, SCALE_MAX)
+  if (next === viewport.scale) return
+  // 以 SVG viewBox 中心 (0,0) 为锚点等比缩放：保持锚点对应的内容坐标不动
+  const ratio = next / viewport.scale
+  viewport.x *= ratio
+  viewport.y *= ratio
+  viewport.scale = next
 }
 
 function focusNode(nodeId) {
-  const group = nodeObjectById.get(nodeId)
-  if (!group || !camera || !controls) return
-  const target = group.position.clone()
-  const offset = new THREE.Vector3(7, 7.5, 10)
-  startCameraTween(target.clone().add(offset), target)
+  const p = nodePositions.value.get(nodeId)
+  if (!p) return
+  // 让节点居中：viewport.x + p.x * scale = 0 → viewport.x = -p.x * scale
+  viewport.x = -p.x * viewport.scale
+  viewport.y = -p.y * viewport.scale
 }
 
 function focusSelectedNode() {
-  focusNode(props.selectedNodeId || hoveredNode.value?.id)
-}
-
-function toggleBloom() {
-  bloomEnabled.value = !bloomEnabled.value
-  if (bloomPass) bloomPass.enabled = bloomEnabled.value
-  requestRender()
+  const id = props.selectedNodeId || hoveredNode.value?.id
+  if (id) focusNode(id)
 }
 
 function toggleMotion() {
   motionEnabled.value = !motionEnabled.value
-  requestRender()
 }
 
 async function toggleFullscreen() {
@@ -965,41 +603,24 @@ async function toggleFullscreen() {
 
 function handleFullscreenChange() {
   isFullscreen.value = document.fullscreenElement === shellRef.value
-  nextTick(resizeScene)
 }
-watch(
-  () => [props.nodes, props.relations],
-  async () => {
-    if (!hasGraphData.value) {
-      destroyScene()
-      return
-    }
-    if (!scene) {
-      await initScene()
-      return
-    }
-    buildGraphScene()
-  },
-  { deep: true }
-)
 
-watch(() => props.selectedNodeId, () => updateSelectionState())
-watch(() => props.highlightPaths, () => updateSelectionState())
-watch(() => props.learningState, () => updateLearningStateVisuals(), { deep: true })
-watch(
-  () => props.chapterChildCounts,
-  () => { if (scene) buildGraphScene() },
-  { deep: true }
-)
+// ───────── 展开后自动平移到 chapter 居中（保持 scale） ─────────
+watch(expandedChapterId, async (chapterId) => {
+  if (!chapterId) return
+  await nextTick()
+  focusNode(chapterId)
+})
 
 onMounted(() => {
   document.addEventListener('fullscreenchange', handleFullscreenChange)
-  initScene()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  destroyScene()
+  if (document.fullscreenElement === shellRef.value) {
+    document.exitFullscreen?.()
+  }
 })
 </script>
 
@@ -1008,30 +629,238 @@ onBeforeUnmount(() => {
     <ui-empty v-if="!hasGraphData" description="暂无知识图谱数据" class="graph-empty" />
 
     <template v-else>
-      <div class="graph-stage">
-        <div ref="sceneRef" class="graph-scene" aria-label="数据结构 3D 知识图谱"></div>
+      <div ref="stageRef" class="graph-stage">
+        <svg
+          ref="svgRef"
+          class="graph-svg"
+          :class="{ paused: !motionEnabled, dragging: isDragging }"
+          :viewBox="viewBoxStr"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label="数据结构 2D 知识图谱"
+          @mousedown="onSvgMousedown"
+          @mousemove="onSvgMousemove"
+          @mouseup="onSvgMouseup"
+          @mouseleave="onSvgMouseleave"
+          @wheel.prevent="onSvgWheel"
+        >
+          <defs>
+            <filter id="kgNodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+              <feOffset dx="0" dy="2" result="offsetblur" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.25" />
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <g class="viewport" :transform="viewportTransform">
+            <!-- 一级关系边：course/chapter 之间 -->
+            <g class="edges edges--base">
+              <path
+                v-for="rel in baseEdges"
+                :key="rel.id"
+                :d="edgePath(rel)"
+                :stroke="edgeColor(rel)"
+                :stroke-width="edgeStrokeWidth(rel)"
+                :opacity="edgeOpacity(rel)"
+                fill="none"
+                stroke-linecap="round"
+              />
+            </g>
+
+            <!-- 展开层：chapter→二级 边 + 二级节点，整体淡入；二级 idx 重新从 0 起 -->
+            <g v-if="expandedChapterId" class="expanded-layer" :key="`exp-${expandedChapterId}`">
+              <g class="edges edges--expanded">
+                <path
+                  v-for="(rel, i) in expandedEdges"
+                  :key="rel.id"
+                  class="edge-expanded"
+                  :style="{ '--idx': i }"
+                  :d="edgePath(rel)"
+                  :stroke="edgeColor(rel)"
+                  :stroke-width="edgeStrokeWidth(rel)"
+                  :opacity="edgeOpacity(rel)"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+              </g>
+            </g>
+
+            <!-- 卫星链：选中节点 + 提交版本 -->
+            <g v-if="satelliteLayout.points.length" class="satellites" :key="`sat-${props.submissionTrace?.nodeId || ''}`">
+              <polyline
+                v-if="satelliteLayout.points.length > 1"
+                :points="satelliteLayout.polyline"
+                fill="none"
+                stroke="#c2703e"
+                stroke-opacity="0.55"
+                stroke-width="1.4"
+              />
+              <g
+                v-for="(p, i) in satelliteLayout.points"
+                :key="p.key"
+                class="satellite"
+                :style="{ '--idx': i }"
+                :transform="`translate(${p.cx},${p.cy})`"
+                @click.stop="handleSatelliteClick(p.submission)"
+                @mouseenter.stop="handleSatelliteEnter(p.submission)"
+                @mouseleave.stop="handleSatelliteLeave"
+              >
+                <circle class="satellite-halo" r="9" :fill="p.color" />
+                <circle class="satellite-body" r="5" :fill="p.color" stroke="#fff" stroke-width="1.2" />
+              </g>
+            </g>
+
+            <!-- 一级节点层：course + chapter，始终在场 -->
+            <g class="nodes nodes--base">
+              <g
+                v-for="(node, i) in baseNodes"
+                :key="node.id"
+                class="node node--base"
+                :class="[
+                  `node--${node.type}`,
+                  nodeIsWeakClass(node),
+                  nodeIsSelectedClass(node)
+                ]"
+                :style="{ '--idx': i }"
+                :transform="`translate(${(nodePositions.get(node.id) || { x: 0, y: 0 }).x},${(nodePositions.get(node.id) || { x: 0, y: 0 }).y})`"
+                :opacity="nodeOpacity(node)"
+                @click.stop="handleNodeClick(node)"
+                @dblclick.stop="handleNodeDblClick(node)"
+                @mouseenter.stop="handleNodeEnter(node)"
+                @mouseleave.stop="handleNodeLeave"
+              >
+                <circle
+                  v-if="node.id === props.selectedNodeId"
+                  class="select-ring"
+                  :r="getNodeRadius(node) * 1.45"
+                  fill="none"
+                  stroke="var(--app-primary)"
+                  stroke-width="2"
+                  stroke-dasharray="4 6"
+                />
+                <circle
+                  class="halo"
+                  :r="getNodeRadius(node) * 1.55"
+                  :fill="nodeHaloFill(node)"
+                />
+                <circle
+                  class="body"
+                  :r="getNodeRadius(node)"
+                  :fill="nodeBodyFill(node)"
+                  :stroke="nodeBodyStroke(node)"
+                  :stroke-width="nodeBodyStrokeWidth(node)"
+                  filter="url(#kgNodeShadow)"
+                />
+                <circle
+                  v-if="masteryRingDasharray(node)"
+                  class="mastery-ring"
+                  :r="masteryRingRadius(node)"
+                  fill="none"
+                  :stroke="getMasteryColor(node.id) || '#22c55e'"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  :stroke-dasharray="masteryRingDasharray(node)"
+                  transform="rotate(-90)"
+                />
+                <text
+                  class="label"
+                  text-anchor="middle"
+                  :y="nodeLabelOffsetY(node)"
+                  :font-size="nodeLabelFontSize(node)"
+                >{{ node.label }}</text>
+                <g
+                  v-if="node.type === 'chapter' && (props.chapterChildCounts?.[node.id] ?? 0) > 0"
+                  class="chapter-badge"
+                  :transform="`translate(${getNodeRadius(node) * 0.78}, ${-getNodeRadius(node) * 0.78})`"
+                >
+                  <circle r="11" :fill="nodeMeta(node).color" stroke="#fff" stroke-width="1.5" />
+                  <text text-anchor="middle" y="4" font-size="11" fill="#fff" font-weight="900">
+                    {{ props.chapterChildCounts[node.id] }}
+                  </text>
+                </g>
+              </g>
+            </g>
+
+            <!-- 二级节点层：与展开 chapter 同生命周期，idx 重新从 0 起 -->
+            <g v-if="expandedChapterId" class="nodes nodes--expanded" :key="`exp-nodes-${expandedChapterId}`">
+              <g
+                v-for="(node, i) in expandedNodes"
+                :key="node.id"
+                class="node node--expanded"
+                :class="[
+                  `node--${node.type}`,
+                  nodeIsWeakClass(node),
+                  nodeIsSelectedClass(node)
+                ]"
+                :style="{ '--idx': i }"
+                :transform="`translate(${(nodePositions.get(node.id) || { x: 0, y: 0 }).x},${(nodePositions.get(node.id) || { x: 0, y: 0 }).y})`"
+                :opacity="nodeOpacity(node)"
+                @click.stop="handleNodeClick(node)"
+                @dblclick.stop="handleNodeDblClick(node)"
+                @mouseenter.stop="handleNodeEnter(node)"
+                @mouseleave.stop="handleNodeLeave"
+              >
+                <circle
+                  v-if="node.id === props.selectedNodeId"
+                  class="select-ring"
+                  :r="getNodeRadius(node) * 1.45"
+                  fill="none"
+                  stroke="var(--app-primary)"
+                  stroke-width="2"
+                  stroke-dasharray="4 6"
+                />
+                <circle
+                  class="halo"
+                  :r="getNodeRadius(node) * 1.55"
+                  :fill="nodeHaloFill(node)"
+                />
+                <circle
+                  class="body"
+                  :r="getNodeRadius(node)"
+                  :fill="nodeBodyFill(node)"
+                  :stroke="nodeBodyStroke(node)"
+                  :stroke-width="nodeBodyStrokeWidth(node)"
+                  filter="url(#kgNodeShadow)"
+                />
+                <circle
+                  v-if="masteryRingDasharray(node)"
+                  class="mastery-ring"
+                  :r="masteryRingRadius(node)"
+                  fill="none"
+                  :stroke="getMasteryColor(node.id) || '#22c55e'"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  :stroke-dasharray="masteryRingDasharray(node)"
+                  transform="rotate(-90)"
+                />
+                <text
+                  class="label"
+                  text-anchor="middle"
+                  :y="nodeLabelOffsetY(node)"
+                  :font-size="nodeLabelFontSize(node)"
+                >{{ node.label }}</text>
+              </g>
+            </g>
+          </g>
+        </svg>
 
         <div class="graph-tools" aria-label="图谱视角工具">
-          <button type="button" class="graph-tool-button" title="重置视角" @click="resetCamera">
+          <button type="button" class="graph-tool-button" title="重置视角" @click="resetView">
             <LucideIcon name="rotate-cw" :size="16" />
           </button>
-          <button type="button" class="graph-tool-button" title="放大" @click="zoomCamera('in')">
+          <button type="button" class="graph-tool-button" title="放大" @click="zoomBy('in')">
             <LucideIcon name="zoom-in" :size="16" />
           </button>
-          <button type="button" class="graph-tool-button" title="缩小" @click="zoomCamera('out')">
+          <button type="button" class="graph-tool-button" title="缩小" @click="zoomBy('out')">
             <LucideIcon name="zoom-out" :size="16" />
           </button>
           <button type="button" class="graph-tool-button" title="聚焦选中节点" @click="focusSelectedNode">
             <LucideIcon name="crosshair" :size="16" />
-          </button>
-          <button
-            type="button"
-            class="graph-tool-button"
-            :class="{ active: bloomEnabled }"
-            title="辉光开关"
-            @click="toggleBloom"
-          >
-            <LucideIcon name="sparkles" :size="16" />
           </button>
           <button
             type="button"
@@ -1062,9 +891,23 @@ onBeforeUnmount(() => {
           </span>
         </div>
 
+        <div v-else-if="hoveredSubmission" class="node-tooltip">
+          <span class="tooltip-type" style="background:var(--app-primary-soft);color:var(--app-primary-strong)">
+            提交记录
+          </span>
+          <strong>{{ hoveredSubmission.experimentName || '提交' }}</strong>
+          <span class="tooltip-summary">
+            {{ formatTime(hoveredSubmission) }} · {{ hoveredSubmission.status || '已提交' }}
+          </span>
+          <span v-if="hoveredSubmission.score != null" class="tooltip-mastery" style="color:#22c55e">
+            <LucideIcon name="award" :size="12" />
+            得分 {{ hoveredSubmission.score }}
+          </span>
+        </div>
+
         <div class="graph-hint">
           <LucideIcon name="mouse-pointer-click" :size="14" />
-          拖拽旋转 · 滚轮缩放 · 单击查看 · 双击聚焦
+          拖拽平移 · 滚轮缩放 · 单击查看 · 双击追溯提交
         </div>
       </div>
 
@@ -1094,12 +937,12 @@ onBeforeUnmount(() => {
   min-width: 0;
   min-height: 640px;
   overflow: hidden;
-  border: 1px solid #1e293b;
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
   background:
-    radial-gradient(circle at 50% 16%, rgba(56, 189, 248, 0.16), transparent 42%),
-    linear-gradient(180deg, #0b1226, #0a1020);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    radial-gradient(circle at 50% 14%, rgba(194, 112, 62, 0.1), transparent 46%),
+    linear-gradient(180deg, #fffcf7, #faf6ef);
+  box-shadow: var(--app-shadow);
 }
 
 .graph-canvas-shell.fullscreen {
@@ -1114,87 +957,227 @@ onBeforeUnmount(() => {
   min-height: 620px;
 }
 
-.graph-scene {
+/* SVG 主画布 */
+.graph-svg {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-}
-
-.graph-scene :deep(canvas) {
-  display: block;
   width: 100%;
   height: 100%;
-  outline: none;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
 }
 
-.graph-scene :deep(.graph-label-layer) {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+.graph-svg.dragging {
+  cursor: grabbing;
+}
+
+/* viewport：所有内容在它内部 */
+.viewport {
+  transition: transform 0s; /* 拖拽实时；点击聚焦由外部覆盖 transition */
+}
+
+/* 边 */
+.edges path {
   pointer-events: none;
-}
-/* @@STYLE2@@ */
-
-.graph-scene :deep(.graph-node-label) {
-  max-width: 100px;
-  min-height: 24px;
-  padding: 3px 9px;
-  overflow: hidden;
-  border: 1px solid rgba(148, 197, 255, 0.28);
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.45);
-  color: #e2e8f0;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.35;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  backdrop-filter: blur(6px);
-  pointer-events: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
-.graph-scene :deep(.graph-node-label.is-selected) {
-  border-color: var(--node-color);
-  box-shadow: 0 0 0 2px var(--node-color), 0 8px 20px rgba(2, 6, 23, 0.5);
+/* 节点容器 */
+.node {
+  cursor: pointer;
+  transform-origin: center;
+  transform-box: fill-box;
+  transition: opacity 0.25s ease;
 }
 
-.graph-scene :deep(.graph-node-label-course) {
-  max-width: 140px;
-  min-height: 30px;
-  padding: 5px 13px;
-  background: rgba(18, 112, 216, 0.94);
-  border-color: rgba(125, 211, 252, 0.6);
-  color: #fff;
-  font-size: 14px;
+/* 一级节点：首屏入场，按全局索引 30ms 错峰 */
+.node--base {
+  animation: nodePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--idx, 0) * 30ms);
 }
 
-.graph-scene :deep(.graph-node-label-chapter) {
-  position: relative;
-  max-width: 118px;
-  color: #f1f5f9;
+/* 二级节点：与展开 chapter 同生命周期；idx 重新从 0 起，18ms 错峰，整体 240ms 内出齐 */
+.node--expanded {
+  animation: nodePop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--idx, 0) * 18ms);
 }
 
-.graph-scene :deep(.chapter-badge) {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: var(--node-color);
-  color: #fff;
-  font-size: 11px;
+/* chapter→二级 边：与节点同步淡入 + 描线生长，避免"线先到位、球后弹出"的卡顿观感 */
+.edge-expanded {
+  animation: edgeDraw 0.32s ease-out backwards;
+  animation-delay: calc(var(--idx, 0) * 18ms);
+}
+
+/* 卫星：选中节点时按 idx 18ms 错峰淡入 */
+.satellite {
+  cursor: pointer;
+  animation: satellitePop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--idx, 0) * 18ms);
+}
+
+.node:hover .body {
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.node--course .body,
+.node--chapter .body {
   font-weight: 900;
-  box-shadow: 0 2px 6px rgba(2, 6, 23, 0.4);
 }
-/* @@STYLE3@@ */
+
+/* 节点主体悬停外发光（通过 stroke 颜色变化提示） */
+.node:hover .body {
+  stroke-width: 2.4;
+}
+
+/* 选中环 */
+.select-ring {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: selBreath 2.4s ease-in-out infinite;
+}
+
+/* 光晕 */
+.halo {
+  opacity: 0.16;
+  transform-origin: center;
+  transform-box: fill-box;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.node:hover .halo {
+  opacity: 0.28;
+}
+
+.node.is-selected .halo {
+  opacity: 0.36;
+}
+
+/* 薄弱点红色脉冲 */
+.node.is-weak .halo {
+  opacity: 0.32;
+  animation: weakPulse 1.6s ease-in-out infinite;
+}
+
+/* 掌握度环 */
+.mastery-ring {
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+/* 标签 */
+.label {
+  fill: var(--app-text);
+  font-family: inherit;
+  font-weight: 800;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #fffcf7;
+  stroke-width: 3.2;
+  stroke-linejoin: round;
+}
+
+.node--course .label {
+  font-weight: 900;
+  fill: #b56535;
+}
+
+.node--chapter .label {
+  font-weight: 900;
+}
+
+/* chapter 徽章 */
+.chapter-badge {
+  pointer-events: none;
+}
+
+.chapter-badge text {
+  font-family: inherit;
+}
+
+/* 卫星 */
+.satellite-halo {
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.satellite:hover .satellite-halo {
+  opacity: 0.4;
+}
+
+.satellite-body {
+  transition: transform 0.18s ease;
+}
+
+.satellite:hover .satellite-body {
+  transform: scale(1.25);
+}
+
+/* 动画 */
+@keyframes nodePop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes satellitePop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes edgeDraw {
+  from {
+    opacity: 0;
+    stroke-dasharray: 1 240;
+    stroke-dashoffset: 240;
+  }
+  to {
+    opacity: 1;
+    stroke-dasharray: 240 240;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes selBreath {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes weakPulse {
+  0%, 100% {
+    opacity: 0.22;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.18);
+  }
+}
+
+/* 动效暂停 */
+.graph-svg.paused .node,
+.graph-svg.paused .halo,
+.graph-svg.paused .select-ring,
+.graph-svg.paused .edge-expanded,
+.graph-svg.paused .satellite {
+  animation-play-state: paused;
+}
 
 .graph-tools {
   position: absolute;
@@ -1205,11 +1188,11 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 8px;
   padding: 8px;
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.4);
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: rgba(255, 252, 247, 0.88);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
 }
 
 .graph-tool-button {
@@ -1219,22 +1202,22 @@ onBeforeUnmount(() => {
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--app-radius-sm);
   background: transparent;
-  color: #cbd5e1;
+  color: var(--app-text-secondary);
   cursor: pointer;
   transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .graph-tool-button:hover {
-  background: rgba(56, 189, 248, 0.16);
-  color: #7dd3fc;
+  background: rgba(194, 112, 62, 0.14);
+  color: var(--app-primary);
   transform: translateY(-1px);
 }
 
 .graph-tool-button.active {
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+  background: rgba(194, 112, 62, 0.18);
+  color: var(--app-primary-strong);
 }
 
 .node-tooltip {
@@ -1247,11 +1230,12 @@ onBeforeUnmount(() => {
   gap: 6px;
   width: min(290px, calc(100% - 36px));
   padding: 12px;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.82);
-  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.46);
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: rgba(255, 252, 247, 0.92);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
 }
 
 .node-tooltip .tooltip-type {
@@ -1264,7 +1248,7 @@ onBeforeUnmount(() => {
 
 .node-tooltip strong {
   overflow: hidden;
-  color: #f1f5f9;
+  color: var(--app-text);
   font-size: 14px;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1274,7 +1258,7 @@ onBeforeUnmount(() => {
 .node-tooltip .tooltip-summary {
   display: -webkit-box;
   overflow: hidden;
-  color: #94a3b8;
+  color: var(--app-text-secondary);
   font-size: 12px;
   line-height: 1.55;
   -webkit-box-orient: vertical;
@@ -1290,8 +1274,8 @@ onBeforeUnmount(() => {
 .tooltip-chips span {
   padding: 2px 7px;
   border-radius: 6px;
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
   font-size: 11px;
   font-weight: 700;
 }
@@ -1303,7 +1287,6 @@ onBeforeUnmount(() => {
   font-size: 12px;
   font-weight: 800;
 }
-/* @@STYLE4@@ */
 
 .graph-hint {
   position: absolute;
@@ -1316,14 +1299,15 @@ onBeforeUnmount(() => {
   max-width: calc(100% - 100px);
   min-height: 34px;
   padding: 0 12px;
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.7);
-  color: #cbd5e1;
+  background: rgba(255, 252, 247, 0.88);
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.35);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
 }
 
 .graph-legend {
@@ -1336,8 +1320,8 @@ onBeforeUnmount(() => {
   gap: 10px 16px;
   min-height: 52px;
   padding: 10px 16px;
-  border-top: 1px solid rgba(56, 189, 248, 0.16);
-  background: rgba(11, 18, 38, 0.86);
+  border-top: 1px solid var(--app-border);
+  background: rgba(255, 252, 247, 0.9);
   backdrop-filter: blur(10px);
 }
 
@@ -1354,7 +1338,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #cbd5e1;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -1364,7 +1348,7 @@ onBeforeUnmount(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(148, 197, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(120, 90, 50, 0.1);
 }
 
 .legend-line-item i {

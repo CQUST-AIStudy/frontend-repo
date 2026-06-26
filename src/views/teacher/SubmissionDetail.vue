@@ -344,6 +344,16 @@
                 </div>
               </div>
             </div>
+
+            <!-- 学情追踪 Tab -->
+            <div v-if="tabLoaded.tracking">
+              <div v-show="activeTab === 'tracking'">
+                <LearningTracking
+                  :student-id="submission.studentId"
+                  :experiment-id="submission.experimentId"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -411,6 +421,7 @@ import {
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import ReportGenerator from '../../components/ReportGenerator.vue'
+import LearningTracking from './components/LearningTracking.vue'
 import { DocxGenerator } from '../../utils/docxGenerator'
 import html2canvas from 'html2canvas';
 
@@ -431,12 +442,14 @@ const loading = ref(true)
 const activeTab = ref('code')
 const submissionId = computed(() => String(route.params.id))
 const submission = ref({})
+const tabLoaded = ref({ code: true, report: false, performance: false, tracking: false })
 
 // Tab definitions
 const mainTabs = [
   { name: 'code', label: '代码' },
   { name: 'report', label: '实验报告' },
-  { name: 'performance', label: '学生表现' }
+  { name: 'performance', label: '学生表现' },
+  { name: 'tracking', label: '学情追踪' }
 ]
 
 // Dropdown states
@@ -1240,6 +1253,9 @@ onMounted(() => {
   let reportComponentInitialized = false;
 
   watch(() => activeTab.value, (newTab) => {
+    // 标记 Tab 已加载（用于 v-if 懒加载）
+    tabLoaded.value[newTab] = true
+
     if (newTab === 'report' && submission.value) {
       prepareReportData();
 

@@ -46,6 +46,7 @@ const paths = {
   Stopwatch: 'M12 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 10v5l3 1M9 2h6',
   SwitchButton: 'M12 3v9M6.4 6.4a9 9 0 1 0 13.2 0',
   Timer: 'M12 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 10v4l3 2M9 2h6',
+  Tickets: 'M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8zM12 6v12',
   TrendCharts: 'M4 18l6-6 4 4 6-10M15 6h5v5',
   UploadFilled: 'M12 17V5M7 10l5-5 5 5M5 20h14',
   User: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
@@ -125,6 +126,7 @@ export const Setting = icon('Setting')
 export const Stopwatch = icon('Stopwatch')
 export const SwitchButton = icon('SwitchButton')
 export const Timer = icon('Timer')
+export const Tickets = icon('Tickets')
 export const TrendCharts = icon('TrendCharts')
 export const UploadFilled = icon('UploadFilled')
 export const User = icon('User')
@@ -182,6 +184,7 @@ export const icons = {
   Stopwatch,
   SwitchButton,
   Timer,
+  Tickets,
   TrendCharts,
   UploadFilled,
   User,

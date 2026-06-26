@@ -497,8 +497,11 @@ const syncClassListFromSelectedClass = () => {
   classList.value = selectedClass?.id
     ? [{
         id: selectedClass.id,
-        name: selectedClass.name || selectedClass.ptaKeyword || '当前班级',
-        ptaKeyword: selectedClass.ptaKeyword
+        name: selectedClass.name || selectedClass.ptaGroupName || selectedClass.ptaKeyword || '当前班级',
+        ptaGroupName: selectedClass.ptaGroupName || selectedClass.pta_group_name || '',
+        ptaKeyword: selectedClass.ptaGroupName
+          || selectedClass.pta_group_name
+          || selectedClass.ptaKeyword
           || selectedClass.pta_keyword
           || selectedClass.classKeyword
           || selectedClass.class_keyword

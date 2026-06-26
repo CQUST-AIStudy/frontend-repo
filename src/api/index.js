@@ -107,7 +107,7 @@ const normalizeTeacherClassScope = (options) => {
   if (options && typeof options === 'object') {
     return {
       classId: options.classId ?? null,
-      classKeyword: options.classKeyword ?? options.ptaKeyword ?? options.class ?? null,
+      classKeyword: options.classKeyword ?? options.ptaGroupName ?? options.ptaKeyword ?? options.class ?? null,
       scope: options.scope === 'all' ? 'all' : 'class'
     }
   }
@@ -118,7 +118,7 @@ const normalizePtaKeyword = (value) => String(value || '').replace(/[\s\u3000]+/
 
 const getClassPtaKeyword = (cls) => {
   if (!cls || typeof cls !== 'object') return ''
-  return cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
+  return cls.ptaGroupName || cls.pta_group_name || cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
 }
 
 const isNumericClassId = (value) => /^\d+$/.test(String(value ?? '').trim())
@@ -148,10 +148,10 @@ const resolveTeacherClassKeyword = (options) => {
 const buildTeacherClassParams = (options) => {
   const normalized = normalizeTeacherClassScope(options)
   if (normalized.scope === 'all') return { scope: 'all' }
-  const classKeyword = resolveTeacherClassKeyword(options)
-  if (classKeyword) return { class: classKeyword }
   const classId = resolveTeacherClassId(options)
-  return classId ? { classId } : undefined
+  if (classId) return { classId }
+  const classKeyword = resolveTeacherClassKeyword(options)
+  return classKeyword ? { class: classKeyword } : undefined
 }
 
 const buildExperimentParams = (options) => {
@@ -559,6 +559,14 @@ export default {
     })
   },
 
+  async getLearningTracking(submissionId) {
+    const response = await apiClient.get(`/api/submissions/${submissionId}/learning-tracking`)
+    if (response?.success === false) {
+      throw createFriendlyError({ data: response }, response.message || '加载学情追踪失败')
+    }
+    return response?.data || response
+  },
+
   async gradeSubmission(id, data) {
     return apiClient.post(`/api/submissions/${id}/grade`, data)
   },
@@ -602,3 +610,5 @@ export default {
     })
   }
 }
+
+export { apiClient }

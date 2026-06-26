@@ -1,11 +1,19 @@
 import { tapClient } from './client'
 
+export function getMyProfile() {
+  return tapClient.get('/api/profile/me', { timeout: 30000 })
+}
+
 export function getClassProfile() {
   return tapClient.get('/api/profile/class', { timeout: 30000 })
 }
 
 export function getStudentProfile(studentId) {
   return tapClient.get(`/api/profile/student/${encodeURIComponent(studentId)}`, { timeout: 30000 })
+}
+
+export function getProfileSkillStates() {
+  return tapClient.get('/api/profile/skill-states', { timeout: 30000 })
 }
 
 export function getPtaCookieStatus() {

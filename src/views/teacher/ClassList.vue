@@ -124,7 +124,7 @@
               <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayDescription(cls) }}</span>
             </div>
             <div class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/80 border border-[#e8eef6] min-h-[100px]">
-              <span class="text-xs font-semibold text-[#8092a6]">同步关键词</span>
+              <span class="text-xs font-semibold text-[#8092a6]">PTA 用户组</span>
               <span class="font-medium text-[#24384f] text-sm leading-relaxed break-words">{{ displayPtaKeyword(cls) }}</span>
             </div>
           </div>
@@ -230,15 +230,15 @@
           <div class="flex-1 h-px bg-black/[0.06]"></div>
         </div>
 
-        <!-- PTA keyword -->
+        <!-- PTA user group -->
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 关键词</label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 用户组名</label>
           <UiInput
-            v-model="classForm.ptaKeyword"
+            v-model="classForm.ptaGroupName"
             placeholder="例如：计科23 数据结构"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
-          <p class="mt-1.5 text-xs text-[#7b8ba0]">填写后可自动从PTA 同步该班级的实验数据。</p>
+          <p class="mt-1.5 text-xs text-[#7b8ba0]">填写 PTA 用户组名后，可自动同步该用户组授权的实验数据。</p>
         </div>
         <!-- Sync toggle -->
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#dce7f2] bg-[#f8fbff] px-4 py-3">
@@ -371,11 +371,11 @@
           当前未绑定PTA 账号；若本次留空，则只会尝试现有 Cookie。
         </div>
 
-        <!-- Sync keyword -->
+        <!-- Sync user group -->
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">同步关键词</label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">PTA 用户组名</label>
           <UiInput
-            v-model="syncForm.ptaKeyword"
+            v-model="syncForm.ptaGroupName"
             autocomplete="off"
             placeholder="例如：计科5数据结构"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
@@ -501,13 +501,13 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import AppModal from '../../components/AppModal.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
+import api from '../../api'
 import axios from 'axios'
 import {
   addClassStudent,
   createTeachingClass,
   deleteTeachingClass,
   getClassStudents,
-  getStudentList,
   getPtaCookieStatus,
   getTeacherPtaCredentials,
   getTeachingClasses,
@@ -536,7 +536,7 @@ const classForm = reactive({
   grade: '',
   courseName: '',
   description: '',
-  ptaKeyword: '',
+  ptaGroupName: '',
   syncEnabled: false
 })
 const classRules = {
@@ -566,7 +566,7 @@ const cookieSubmitting = ref(false)
 const cookieSubmitResult = ref(null)
 const syncDialogVisible = ref(false)
 const syncDialogClass = ref(null)
-const syncForm = reactive({ ptaKeyword: '', ptaUsername: '', ptaPassword: '' })
+const syncForm = reactive({ ptaGroupName: '', ptaUsername: '', ptaPassword: '' })
 const syncTempCredentialSubmitted = ref(false)
 const boundPtaUsername = ref('')
 const hasBoundPtaCredentials = ref(false)
@@ -623,10 +623,6 @@ const spiderRequestConfig = (options = {}) => ({
   ...options
 })
 
-function spiderApi(path) {
-  return `${spiderUrl.value}${path}`
-}
-
 async function probeSpiderHealth() {
   const candidates = []
   const push = (url) => {
@@ -668,13 +664,19 @@ const cleanText = (value, fallback = '未设置') => {
 }
 
 const studentCountValue = (cls) => Number(cls?.studentCount || 0)
-const hasPtaConfig = (cls) => !isCorruptedText(cls?.ptaKeyword) && !!String(cls?.ptaKeyword || '').trim()
+const getPtaGroupName = (cls) => cls?.ptaGroupName || cls?.pta_group_name || ''
+const getPtaGroupId = (cls) => cls?.ptaGroupId || cls?.pta_group_id || ''
+const hasPtaConfig = (cls) => {
+  const groupName = getPtaGroupName(cls)
+  const groupId = getPtaGroupId(cls)
+  return (!isCorruptedText(groupName) && !!String(groupName || '').trim()) || !!String(groupId || '').trim()
+}
 
 const displayClassCode = (cls) => cleanText(cls?.classCode, '未生成')
 const displayClassName = (cls) => cleanText(cls?.name, displayClassCode(cls) === '未生成' ? '未命名班级' : `班级 ${displayClassCode(cls)}`)
 const displayCourseName = (cls) => cleanText(cls?.courseName, '课程信息待补充')
 const displayDescription = (cls) => cleanText(cls?.description, '暂无描述')
-const displayPtaKeyword = (cls) => cleanText(cls?.ptaKeyword, '未配置')
+const displayPtaKeyword = (cls) => cleanText(getPtaGroupName(cls), '未配置')
 const displayJoinPassword = (cls) => cleanText(cls?.joinPassword, '未设置')
 const displayGrade = (cls) => {
   const grade = cleanText(cls?.grade, '')
@@ -691,12 +693,12 @@ const filteredStudents = computed(() => {
   )
 })
 
-const resolvePtaKeyword = () => (classForm.ptaKeyword || classForm.name || '').trim()
-const canToggleClassSync = computed(() => !!classForm.ptaKeyword.trim())
+const resolvePtaGroupName = () => (classForm.ptaGroupName || '').trim()
+const canToggleClassSync = computed(() => !!resolvePtaGroupName())
 const isClassSyncActive = computed(() => canToggleClassSync.value && !!classForm.syncEnabled)
 const syncToggleStatusText = computed(() => isClassSyncActive.value ? '已开启' : '已关闭')
 const syncToggleHelpText = computed(() => {
-  if (!canToggleClassSync.value) return '填写 PTA 关键词后可开启定时同步。'
+  if (!canToggleClassSync.value) return '填写 PTA 用户组名后可开启定时同步。'
   return isClassSyncActive.value ? '每天凌晨自动同步一次。' : '需要时可开启自动同步。'
 })
 const syncSwitchClasses = computed(() => [
@@ -729,7 +731,9 @@ function toggleClassSync() {
 const toSelectedClass = (cls) => ({
   id: cls.id,
   name: displayClassName(cls),
-  ptaKeyword: cls.ptaKeyword || cls.pta_keyword || cls.classKeyword || cls.class_keyword || cls.name || ''
+  ptaGroupId: getPtaGroupId(cls),
+  ptaGroupName: getPtaGroupName(cls),
+  ptaKeyword: getPtaGroupName(cls) || cls.ptaKeyword || cls.pta_keyword || ''
 })
 
 // Sync tag styling
@@ -774,7 +778,7 @@ const openCreateDialog = () => {
     grade: '',
     courseName: '',
     description: '',
-    ptaKeyword: '',
+    ptaGroupName: '',
     syncEnabled: false
   })
   resetFields()
@@ -790,7 +794,7 @@ const editClass = (cls) => {
     grade: cleanText(cls.grade, ''),
     courseName: cleanText(cls.courseName, ''),
     description: cleanText(cls.description, ''),
-    ptaKeyword: cleanText(cls.ptaKeyword, ''),
+    ptaGroupName: cleanText(getPtaGroupName(cls), ''),
     syncEnabled: !!cls.syncEnabled
   })
   resetFields()
@@ -806,7 +810,7 @@ const submitClassForm = async () => {
 
   submitting.value = true
   try {
-    const ptaKeyword = resolvePtaKeyword()
+    const ptaGroupName = resolvePtaGroupName()
     if (editingClass.value) {
       await updateTeachingClass(editingClass.value.id, {
         name: classForm.name,
@@ -814,23 +818,24 @@ const submitClassForm = async () => {
         grade: classForm.grade,
         courseName: classForm.courseName,
         description: classForm.description,
-        ptaKeyword,
+        ptaGroupName,
         syncEnabled: classForm.syncEnabled
       })
       uiMessage.success('班级更新成功')
     } else {
-      const res = await createTeachingClass({ ...classForm, ptaKeyword })
+      const res = await createTeachingClass({ ...classForm, ptaGroupName })
       const created = extract(res)
       if (created?.id) {
         userStore.setSelectedClass(toSelectedClass({
           ...created,
-          ptaKeyword: created.ptaKeyword || ptaKeyword || created.name
+          ptaGroupName: created.ptaGroupName || ptaGroupName || created.name,
+          ptaKeyword: created.ptaGroupName || ptaGroupName || created.ptaKeyword || ''
         }))
       }
       uiMessage.success('班级创建成功')
-      if (ptaKeyword && created?.id) {
+      if (ptaGroupName && created?.id) {
         try {
-          await triggerPtaSync(created.id)
+          await triggerPtaSync(created.id, { ptaGroupName })
           uiMessage.success('已自动触发PTA 数据同步')
         } catch (syncError) {
           uiMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '数据同步服务可能未启动'}`)
@@ -930,11 +935,12 @@ const clearSyncTempCredential = () => {
 const triggerSyncForClass = async () => {
   const cls = syncDialogClass.value
   if (!cls) return
-  const keyword = syncForm.ptaKeyword.trim()
+  const ptaGroupName = syncForm.ptaGroupName.trim()
+  const ptaGroupId = getPtaGroupId(cls)
   const draftUsername = syncForm.ptaUsername.trim()
   const draftPassword = syncForm.ptaPassword
-  if (!keyword) {
-    uiMessage.warning('请输入本次同步使用的 PTA 关键词')
+  if (!ptaGroupName && !ptaGroupId) {
+    uiMessage.warning('请输入本次同步使用的 PTA 用户组名')
     return
   }
   if ((draftUsername && !draftPassword) || (!draftUsername && draftPassword)) {
@@ -956,28 +962,19 @@ const triggerSyncForClass = async () => {
       return
     }
 
-    const res = spiderAlive && credentialSource !== 'bound'
-      ? await axios.post(spiderApi('/crawl'), {
-        keyword,
-        class_id: cls.id,
-        mode: 'incremental',
-        force: true,
-        credential_source: credentialSource,
-        force_selenium_login: credentialSource === 'temporary',
-        headless: false,
-        ...(username ? { username, password } : {})
-      }, spiderRequestConfig({ timeout: 30000 }))
-      : await triggerPtaSync(cls.id, {
-        ptaKeyword: keyword,
+    const res = await triggerPtaSync(cls.id, {
+        ptaGroupId,
+        ptaGroupName,
         mode: 'incremental',
         force: true,
         ...(username ? { ptaUsername: username, ptaPassword: password } : {})
       })
     const data = extract(res) || {}
-    cls.ptaKeyword = keyword
+    cls.ptaGroupId = ptaGroupId
+    cls.ptaGroupName = ptaGroupName
     cls.syncStatus = 'RUNNING'
     syncDialogVisible.value = false
-    syncForm.ptaKeyword = ''
+    syncForm.ptaGroupName = ''
     clearSyncTempCredential()
     uiMessage.success(`同步任务已提交，本次使用${credentialSourceText(data?.credentialSource || data?.credential_source || plannedSyncCredentialSource.value)}`)
   } catch (error) {
@@ -1055,7 +1052,7 @@ const doAddStudent = async () => {
 
   addingStudent.value = true
   try {
-    const studentListRes = await getStudentList()
+    const studentListRes = await api.getStudentList()
     const studentList = extract(studentListRes) || []
     const inputStudentNum = addStudentForm.studentNum.trim()
     const matchedStudent = studentList.find(item =>
@@ -1126,7 +1123,7 @@ const loadBoundCredentials = async () => {
 
 const openSyncDialog = (cls) => {
   syncDialogClass.value = cls
-  syncForm.ptaKeyword = cls?.ptaKeyword || cls?.name || ''
+  syncForm.ptaGroupName = getPtaGroupName(cls)
   clearSyncTempCredential()
   syncDialogVisible.value = true
 }

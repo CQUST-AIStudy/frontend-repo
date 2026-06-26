@@ -1,0 +1,118 @@
+# 前端 nginx 配置模板
+# 放到 /etc/nginx/templates/default.conf.template，由 nginx 官方镜像的
+# 20-envsubst-on-templates 入口脚本在容器启动时做变量替换。
+# envsubst 默认只替换已导出到环境中的 ${VAR}，nginx 自身的 $uri/$host/$scheme
+# 等不被替换（官方镜像已通过 defined-envs 机制保护，此处变量名均为大写专用名）。
+#
+# 上游地址全部由环境变量驱动（默认 host.docker.internal），与 vue.config.js
+# 的 devServer proxy 一一对应，使前端容器与各后端容器解耦兼容。
+
+server {
+    listen       80;
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # 上传文件（题目附件、文档等）
+    client_max_body_size 100m;
+
+    # gzip 压缩静态资源
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml text/xml image/svg+xml;
+    gzip_min_length 1024;
+
+    # ---- 反向代理：/api -> backend (默认 8081) ----
+    # 保留 /api 前缀，与 devServer 行为一致
+    location /api/ {
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 180s;
+    }
+
+    # ---- 反向代理：/rag -> backend (默认 8081，后端再代理 rag-service) ----
+    # RAG 含 SSE 流式接口 /rag/chat/stream，需关闭缓冲并放长超时
+    location /rag/ {
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # SSE：禁用缓冲，支持长连接
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Connection "";
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    # ---- 反向代理：/leetcode-claw -> LeetCodeClaw (默认 10170)，去掉前缀 ----
+    location /leetcode-claw/ {
+        rewrite ^/leetcode-claw(/.*)$ $1 break;
+        proxy_pass http://${LEETCODE_CLAW_HOST}:${LEETCODE_CLAW_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+
+    # ---- 反向代理：/spider -> spider-repo / PTA-Claw (默认 8100)，去掉前缀 ----
+    location /spider/ {
+        rewrite ^/spider(/.*)$ $1 break;
+        proxy_pass http://${SPIDER_HOST}:${SPIDER_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+    }
+
+    # ---- 反向代理：/recommend -> recommendation-service (默认 8003)，去掉前缀 ----
+    location /recommend/ {
+        rewrite ^/recommend(/.*)$ $1 break;
+        proxy_pass http://${RECOMMENDATION_HOST}:${RECOMMENDATION_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+
+    # ---- 反向代理：/error-analysis -> error-analysis-service (默认 8002)，去掉前缀 ----
+    location /error-analysis/ {
+        rewrite ^/error-analysis(/.*)$ $1 break;
+        proxy_pass http://${ERROR_ANALYSIS_HOST}:${ERROR_ANALYSIS_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 180s;
+    }
+
+    # ---- 反向代理：/knowledge-graph -> knowledge-graph-service (默认 10171)，去掉前缀 ----
+    location /knowledge-graph/ {
+        rewrite ^/knowledge-graph(/.*)$ $1 break;
+        proxy_pass http://${KNOWLEDGE_GRAPH_HOST}:${KNOWLEDGE_GRAPH_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+
+    # ---- SPA history 路由回退 ----
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

@@ -1,6 +1,6 @@
 <template>
   <div class="learning-analysis-container">
-    <UiPageHeader class="my-page-header [padding:20px]" title="学习分析" description="基于您的PTA平台提交数据的AI深度分析" />
+    <UiPageHeader class="my-page-header [padding:20px]" title="个性画像" description="基于您的PTA平台提交数据的AI深度分析" />
 
     <loading-state :loading="loading">
       <div class="analysis-content [display:flex] [flex-direction:column] [gap:20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
@@ -19,13 +19,27 @@
           </ui-col>
         </ui-row>
 
-        <ui-alert
-          v-if="profileData.analyticsFallback"
-          type="info"
-          :closable="false"
-          title="当前仅同步到实验成绩数据，掌握度图表按实验得分展示；提交效率需等待 PTA 提交明细同步后生成。"
-          show-icon
-        />
+        <!-- 快捷入口 -->
+        <div class="quick-actions [display:flex] [gap:12px] [flex-wrap:wrap] [margin-bottom:4px]">
+          <a href="https://pintia.cn" target="_blank" rel="noopener noreferrer"
+             class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#e8f0fe] [color:#1a73e8] [border:1px_solid_#c2d7f6] hover:[background:#d2e3fc] hover:[border-color:#1a73e8]">
+            <span style="font-size:18px">🚀</span>
+            <span>PTA 平台推题</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
+          </a>
+          <router-link to="/student/practice"
+             class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#e6f4ea] [color:#1e8e3e] [border:1px_solid_#ceead6] hover:[background:#ceead6] hover:[border-color:#1e8e3e]">
+            <span style="font-size:18px">💡</span>
+            <span>LeetCode 推荐题目</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
+          </router-link>
+          <router-link to="/student/practice"
+             class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#fef7e0] [color:#e37400] [border:1px_solid_#fdecc8] hover:[background:#fdecc8] hover:[border-color:#e37400]">
+            <span style="font-size:18px">📝</span>
+            <span>个性化推荐练习</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
+          </router-link>
+        </div>
 
         <!-- 雷达图+ 趋势 -->
         <ui-row :gutter="20" class="chart-row [margin-top:0] [margin-bottom:0] [margin-bottom:20px]">
@@ -88,7 +102,7 @@
           </div>
         </ui-card>
 
-        <!-- AI智能学情分析 -->
+        <!-- AI智能个性画像 -->
         <ui-alert
           v-else-if="classCompareUnavailableReason"
           class="class-compare-alert [margin-top:20px]"
@@ -103,7 +117,7 @@
             <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [align-items:flex-start] [gap:16px] [gap:10px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
               <div class="ai-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
                 <ui-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></ui-icon>
-                <span>AI智能学情分析</span>
+                <span>AI智能个性画像</span>
               </div>
               <ui-tag type="success" effect="dark">基于真实数据</ui-tag>
             </div>
@@ -218,10 +232,15 @@
             <div v-if="aiSuggestions.recommendedProblems?.length" class="sug-section">
               <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📌 推荐练习方向</h4>
               <div class="sug-rec-list [display:flex] [gap:8px] [flex-wrap:wrap]">
-                <span v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i"
-                      class="sug-rec-chip [display:inline-block] [font-size:13px] [padding:6px_14px] [border-radius:100px] [background:#e8f0fe] [color:#1a73e8] [font-weight:500]">
+                <router-link v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i" to="/student/practice"
+                      class="sug-rec-chip [display:inline-block] [font-size:13px] [padding:6px_14px] [border-radius:100px] [background:#e8f0fe] [color:#1a73e8] [font-weight:500] [text-decoration:none] [cursor:pointer] hover:[background:#d2e3fc]">
                   📌 {{ rec }}
-                </span>
+                </router-link>
+              </div>
+              <div class="[margin-top:10px]">
+                <router-link to="/student/practice" class="[font-size:13px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
+                  👉 前往个性化练习，针对性提升 →
+                </router-link>
               </div>
             </div>
 
@@ -399,51 +418,6 @@ async function fetchStudentAnalytics(studentId) {
   }
 }
 
-function scoreValue(value) {
-  const number = Number(value)
-  if (!Number.isFinite(number)) return 0
-  return Math.max(0, Math.min(100, Math.round(number * 10) / 10))
-}
-
-function average(values) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0
-}
-
-function buildProfileFromAnalytics(payload, studentId) {
-  const experiments = (payload.experiments || []).map((item) => ({
-    experimentId: item.experimentId,
-    name: item.name || `实验${item.experimentId}`,
-    mastery: scoreValue(item.myScore)
-  }))
-  const firstHalf = experiments.slice(0, Math.ceil(experiments.length / 2)).map((item) => item.mastery)
-  const secondHalf = experiments.slice(Math.ceil(experiments.length / 2)).map((item) => item.mastery)
-  const change = average(secondHalf) - average(firstHalf)
-  const radarItems = experiments.length > 8 ? experiments.slice(-8) : experiments
-
-  return {
-    analyticsFallback: true,
-    studentId,
-    overview: {
-      totalSubmissions: 0,
-      totalAc: 0,
-      overallAcRate: 0,
-      experimentsCovered: experiments.length,
-      totalExperiments: experiments.length
-    },
-    radar: {
-      dimensions: radarItems.map((item) => shortName(item.name)),
-      scores: radarItems.map((item) => item.mastery)
-    },
-    trend: {
-      direction: change > 5 ? 'up' : change < -5 ? 'down' : 'flat',
-      series: experiments
-    },
-    skillTree: [],
-    weaknesses: [],
-    patterns: []
-  }
-}
-
 function setEmptyChart(chart, message) {
   chart.setOption({
     graphic: [{
@@ -498,9 +472,10 @@ async function fetchAiLearningSuggestions() {
         count: Math.max(1, Math.round((100 - w.mastery) / 10))
       })
     }
-    // 如果没有薄弱点数据，用默认值
     if (!errorHistory.length) {
-      errorHistory.push({ errorType: 'COMPILE_ERROR', count: 0 })
+      aiSuggestions.value = null
+      aiSuggestionsError.value = '暂无错误历史数据，暂无法生成个性化学习建议'
+      return
     }
 
     const payload = {
@@ -517,13 +492,13 @@ async function fetchAiLearningSuggestions() {
     } else if (res?.code === 200 && res?.data) {
       aiSuggestions.value = res.data
     } else {
-      // 服务不可用，用本地 fallback
-      aiSuggestions.value = buildFallbackSuggestions()
+      aiSuggestions.value = null
+      aiSuggestionsError.value = 'AI 学习建议暂不可用，请稍后重试'
     }
   } catch (e) {
     logger.warn('AI 学习建议获取失败:', e)
-    // 服务不可用时显示本地建议
-    aiSuggestions.value = buildFallbackSuggestions()
+    aiSuggestions.value = null
+    aiSuggestionsError.value = 'AI 学习建议暂不可用，请稍后重试'
   } finally {
     aiSuggestionsLoading.value = false
   }
@@ -535,31 +510,6 @@ function resolveStudentName() {
     return userInfo.name || userInfo.username || ''
   } catch {
     return ''
-  }
-}
-
-function buildFallbackSuggestions() {
-  const weaknesses = profileData.value?.weaknesses || []
-  const weakPoints = weaknesses.slice(0, 3).map(w => ({
-    tagName: w.dimension || w.experimentName || '基础知识',
-    severity: w.mastery < 40 ? 'HIGH' : w.mastery < 70 ? 'MEDIUM' : 'LOW',
-    reason: `${w.experimentName || ''} 掌握度仅${Math.round(w.mastery)}分，建议重点练习`
-  }))
-
-  const studyPlan = weakPoints.map((wp) => ({
-    topic: `${wp.tagName}专项提升`,
-    priority: wp.severity,
-    suggestedResources: '教材相关章节 + PTA平台练习题',
-    estimatedTime: wp.severity === 'HIGH' ? '2小时' : wp.severity === 'MEDIUM' ? '1小时' : '30分钟'
-  }))
-
-  return {
-    suggestionId: `local_${Date.now()}`,
-    weakPoints,
-    studyPlan,
-    recommendedProblems: ['PTA同类题目练习', '教材课后习题', 'LeetCode相关题型'],
-    summaryMessage: `根据学习分析，建议优先巩固${weakPoints.slice(0, 2).map(w => w.tagName).join('和')}等薄弱知识点。持续练习，每天进步一点点！加油！💪`,
-    aiGenerated: false
   }
 }
 
@@ -580,7 +530,6 @@ async function loadData() {
       const analyticsPayload = await fetchStudentAnalytics(studentId)
       if (analyticsPayload?.experiments?.length) {
         classData.value = analyticsPayload
-        profileData.value = buildProfileFromAnalytics(analyticsPayload, studentId)
       }
     }
     loading.value = false

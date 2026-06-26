@@ -8,7 +8,6 @@ import KnowledgeGraphToolbar from '@/features/knowledge-graph/components/Knowled
 import {
   GRAPH_CODE,
   nodeTypeOptions,
-  rawGraph,
   relationTypeOptions
 } from '@/features/knowledge-graph/dataStructureGraph'
 import {
@@ -20,27 +19,24 @@ import {
   toGraphDbPayload,
   validateGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
-import { loadKnowledgeGraph, neo4jConfig } from '@/features/knowledge-graph/neo4jDataSource'
+import { createEmptyKnowledgeGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
-  exportGraphCypher,
-  exportGraphJSON,
-  writeToNeo4j
+  exportGraphJSON
 } from '@/features/knowledge-graph/exportUtils'
 import logger from '@/utils/logger'
 
 const loading = shallowRef(false)
 const errorMsg = shallowRef('')
 const fallbackNotice = shallowRef('')
-const dataSource = shallowRef('static')
-const graphData = shallowRef(rawGraph)
+const dataSource = shallowRef('empty')
+const graphData = shallowRef(createEmptyKnowledgeGraph())
 const searchKeyword = shallowRef('')
 const nodeType = shallowRef('all')
 const relationType = shallowRef('all')
-const selectedNodeId = shallowRef(rawGraph.course.id)
+const selectedNodeId = shallowRef('')
 const collapsedChapterIds = shallowRef([])
 const payloadVisible = shallowRef(false)
-const writing = shallowRef(false)
 const resultMessage = shallowRef(null)
 
 const { state: learningState, update: updateLearningState } = useStateForGraph(GRAPH_CODE)
@@ -191,7 +187,7 @@ function resetFilters() {
   nodeType.value = 'all'
   relationType.value = 'all'
   collapsedChapterIds.value = []
-  selectedNodeId.value = graphData.value.course.id
+  selectedNodeId.value = graphData.value.course?.id || ''
 }
 
 function showPayloadPreview() {
@@ -212,57 +208,6 @@ function handleExportJson() {
   }
 }
 
-function handleExportCypher() {
-  try {
-    exportGraphCypher(graphData.value)
-    notify('success', '已导出 Cypher 文件，可在 Neo4j Browser 执行')
-  } catch (error) {
-    logger.warn('[knowledge-graph] 导出 Cypher 失败', error)
-    notify('warning', `导出 Cypher 失败：${error?.message || error}`)
-  }
-}
-
-async function handleWriteNeo4j() {
-  if (writing.value) return
-  writing.value = true
-  try {
-    const result = await writeToNeo4j(graphData.value)
-    if (result.success) {
-      notify('success', result.message || '已写入 Neo4j')
-    } else {
-      notify('warning', result.message || '写入 Neo4j 失败')
-    }
-  } catch (error) {
-    logger.warn('[knowledge-graph] 写入 Neo4j 失败', error)
-    notify('warning', `写入 Neo4j 失败：${error?.message || error}`)
-  } finally {
-    writing.value = false
-  }
-}
-
-async function handleSeedNeo4j() {
-  if (writing.value) return
-  writing.value = true
-  try {
-    // 把内置静态图谱全量写入 Neo4j，再重新拉取刷新为连库数据
-    const result = await writeToNeo4j(rawGraph)
-    if (!result.success) {
-      notify('warning', result.message || '导入种子数据失败')
-      return
-    }
-    const reloaded = await loadKnowledgeGraph()
-    graphData.value = reloaded.graph
-    dataSource.value = reloaded.source
-    selectedNodeId.value = reloaded.graph.course?.id || selectedNodeId.value
-    notify('success', `${result.message || '已导入种子数据'}，已刷新为 Neo4j 数据`)
-  } catch (error) {
-    logger.warn('[knowledge-graph] 导入种子数据失败', error)
-    notify('warning', `导入种子数据失败：${error?.message || error}`)
-  } finally {
-    writing.value = false
-  }
-}
-
 function handleUpdateState(patch) {
   if (!selectedNodeId.value) return
   updateLearningState(selectedNodeId.value, patch)
@@ -274,10 +219,8 @@ onMounted(async () => {
     const result = await loadKnowledgeGraph()
     graphData.value = result.graph
     dataSource.value = result.source
+    fallbackNotice.value = result.fallbackReason || ''
     selectedNodeId.value = result.graph.course?.id || selectedNodeId.value
-    if (neo4jConfig.enabled && result.source !== 'neo4j') {
-      fallbackNotice.value = 'Neo4j 连接失败或未导入数据，已回退到内置静态数据'
-    }
   } catch (error) {
     logger.warn('[knowledge-graph] 加载失败', error)
     errorMsg.value = '加载知识图谱失败，请稍后重试'
@@ -297,19 +240,19 @@ onMounted(async () => {
           按课程章节组织导论、线性表、栈队列串、树、图、查找排序哈希等知识点，串联概念、结构、算法、操作与练习。
         </p>
       </div>
-      <div class="contract-card">
+      <div v-if="hasGraphData" class="contract-card">
         <span :class="['contract-dot', { valid: validation.valid }]"></span>
         <div>
           <strong>{{ validation.valid ? '课程图谱契约校验通过' : '课程图谱契约存在问题' }}</strong>
-          <p>{{ validation.valid ? '可生成 graphCode、nodes、relations 标准写库预览 payload' : validation.errors[0] }}</p>
+          <p>{{ validation.valid ? '可生成 graphCode、nodes、relations 标准图谱预览 payload' : validation.errors[0] }}</p>
         </div>
       </div>
     </header>
 
     <div class="source-bar">
-      <span class="source-tag" :class="{ neo4j: dataSource === 'neo4j' }">
-        <LucideIcon :name="dataSource === 'neo4j' ? 'database' : 'book-open'" :size="14" />
-        数据来源：{{ dataSource === 'neo4j' ? 'Neo4j' : '内置静态数据' }}
+      <span class="source-tag" :class="{ backend: dataSource === 'backend' }">
+        <LucideIcon :name="dataSource === 'backend' ? 'database' : 'circle-slash'" :size="14" />
+        数据来源：{{ dataSource === 'backend' ? '真实接口' : '暂无图谱数据' }}
       </span>
       <span v-if="fallbackNotice" class="source-notice">
         <LucideIcon name="triangle-alert" :size="14" />
@@ -324,7 +267,7 @@ onMounted(async () => {
       </transition>
     </div>
 
-    <section class="stats-grid" aria-label="知识图谱统计">
+    <section v-if="hasGraphData" class="stats-grid" aria-label="知识图谱统计">
       <article v-for="item in statCards" :key="item.label" class="stat-card">
         <span class="stat-icon" :style="{ backgroundColor: item.bg, color: item.color }">
           <LucideIcon :name="item.icon" :size="18" />
@@ -337,6 +280,7 @@ onMounted(async () => {
     </section>
 
     <KnowledgeGraphToolbar
+      v-if="hasGraphData"
       v-model:search-keyword="searchKeyword"
       v-model:node-type="nodeType"
       v-model:relation-type="relationType"
@@ -345,13 +289,9 @@ onMounted(async () => {
       :relation-type-options="relationTypeOptions"
       :chapter-options="chapterOptions"
       :data-source="dataSource"
-      :writing="writing"
       @reset="resetFilters"
       @preview-payload="showPayloadPreview"
       @export-json="handleExportJson"
-      @export-cypher="handleExportCypher"
-      @write-neo4j="handleWriteNeo4j"
-      @seed-neo4j="handleSeedNeo4j"
     />
 
     <div v-if="loading" class="loading-panel">
@@ -370,7 +310,7 @@ onMounted(async () => {
           <div class="graph-topline">
             <div>
               <h2>课程章节知识体系</h2>
-              <p>点击节点查看前置知识、后续知识、关联练习和图数据库写入属性。</p>
+              <p>点击节点查看前置知识、后续知识、关联练习和图谱属性。</p>
             </div>
             <div class="type-breakdown" aria-label="节点类型统计">
               <span v-for="item in typeBreakdown" :key="item.type" :style="{ backgroundColor: item.softColor, color: item.textColor }">
@@ -394,6 +334,7 @@ onMounted(async () => {
           :context="selectedContext"
           :learning-state="learningState"
           @update-state="handleUpdateState"
+          @select-node="selectNode"
         />
       </section>
     </template>
@@ -505,7 +446,7 @@ onMounted(async () => {
   font-weight: 800;
 }
 
-.source-tag.neo4j {
+.source-tag.backend {
   background: #ccfbf1;
   color: #0f766e;
 }

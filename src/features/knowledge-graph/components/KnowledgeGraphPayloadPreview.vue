@@ -29,14 +29,14 @@ const dialogVisible = computed({
 <template>
   <ui-dialog
     v-model="dialogVisible"
-    title="图数据库写入 Payload 预览"
+    title="图谱 Payload 预览"
     width="760px"
   >
     <div class="payload-preview">
       <div class="preview-alert" :class="{ valid: validation?.valid }">
         <LucideIcon :name="validation?.valid ? 'check' : 'triangle-alert'" :size="18" />
-        <span v-if="validation?.valid">数据契约校验通过。当前仅为前端预览模式，未写入图数据库。</span>
-        <span v-else>数据契约存在问题，请先修复后再提交给后端写库接口。</span>
+        <span v-if="validation?.valid">数据契约校验通过。当前为前端本地保存使用的图谱数据预览。</span>
+        <span v-else>数据契约存在问题，请先修复后再保存到本地。</span>
       </div>
 
       <ul v-if="validation?.errors?.length" class="error-list">
