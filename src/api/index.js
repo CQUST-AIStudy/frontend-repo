@@ -148,10 +148,10 @@ const resolveTeacherClassKeyword = (options) => {
 const buildTeacherClassParams = (options) => {
   const normalized = normalizeTeacherClassScope(options)
   if (normalized.scope === 'all') return { scope: 'all' }
-  const classKeyword = resolveTeacherClassKeyword(options)
-  if (classKeyword) return { class: classKeyword }
   const classId = resolveTeacherClassId(options)
-  return classId ? { classId } : undefined
+  if (classId) return { classId }
+  const classKeyword = resolveTeacherClassKeyword(options)
+  return classKeyword ? { class: classKeyword } : undefined
 }
 
 const buildExperimentParams = (options) => {
