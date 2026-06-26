@@ -46,14 +46,17 @@
           <span class="text-xs text-[#64748b]">第 {{ activeStep.order }} 步 / 共 {{ steps.length }} 步</span>
         </div>
 
-        <div v-if="activeStep.memory?.length" class="mb-4 rounded-lg border border-[#dce3ec] bg-[#fbfcfe] p-4">
-          <div class="mb-3 text-xs font-semibold text-[#475569]">内存状态</div>
-          <div class="flex flex-wrap items-end gap-1.5">
-            <div v-for="cell in activeStep.memory" :key="cell.label" class="text-center">
-              <div class="mb-1 text-[11px] text-[#64748b]">{{ cell.label }}</div>
-              <div class="flex h-12 min-w-14 items-center justify-center rounded border px-2 text-sm font-semibold transition-colors"
-                :class="cell.outOfBounds ? 'border-dashed border-[#ef4444] bg-[#fff1f2] text-[#dc2626]' : cell.active ? 'border-[var(--app-primary)] bg-[var(--app-primary-soft)] text-[var(--app-primary)]' : 'border-[#cbd5e1] bg-white text-[#334155]'">
-                {{ cell.value }}
+        <div class="mb-4">
+          <PythonTutorRenderer v-if="activeStep.state" :state="activeStep.state" :height="240" />
+          <div v-else-if="activeStep.memory?.length" class="rounded-lg border border-[#dce3ec] bg-[#fbfcfe] p-4">
+            <div class="mb-3 text-xs font-semibold text-[#475569]">内存状态</div>
+            <div class="flex flex-wrap items-end gap-1.5">
+              <div v-for="cell in activeStep.memory" :key="cell.label" class="text-center">
+                <div class="mb-1 text-[11px] text-[#64748b]">{{ cell.label }}</div>
+                <div class="flex h-12 min-w-14 items-center justify-center rounded border px-2 text-sm font-semibold transition-colors"
+                  :class="cell.outOfBounds ? 'border-dashed border-[#ef4444] bg-[#fff1f2] text-[#dc2626]' : cell.active ? 'border-[var(--app-primary)] bg-[var(--app-primary-soft)] text-[var(--app-primary)]' : 'border-[#cbd5e1] bg-white text-[#334155]'">
+                  {{ cell.value }}
+                </div>
               </div>
             </div>
           </div>
@@ -164,6 +167,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
+import PythonTutorRenderer from '@/components/grading/PythonTutorRenderer.vue'
 
 const props = defineProps({
   demonstrations: { type: Array, default: () => [] },
