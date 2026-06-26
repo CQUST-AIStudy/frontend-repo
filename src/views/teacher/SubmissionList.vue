@@ -216,11 +216,13 @@ import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { Download, Edit, Refresh } from '@/components/ui/icons'
 import api from '../../api'
+import { useUserStore } from '../../store'
 import AppPagination from '../../components/AppPagination.vue'
 import LucideIcon from '../../components/LucideIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const experimentId = computed(() =>
   route.params.experimentId ? Number(route.params.experimentId) : null
@@ -236,6 +238,18 @@ const submissions = ref([])
 const experimentOptions = ref([])
 const tableLoading = ref(false)
 const selectedRows = ref([])
+
+const getSelectedClassQuery = () => {
+  const selectedClass = userStore.selectedClass || {}
+  return {
+    classId: selectedClass.id,
+    classKeyword: selectedClass.ptaKeyword
+      || selectedClass.pta_keyword
+      || selectedClass.classKeyword
+      || selectedClass.class_keyword
+      || selectedClass.name
+  }
+}
 
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -418,7 +432,10 @@ const normalizeStatus = (item) => {
 const loadSubmissions = async () => {
   tableLoading.value = true
   try {
-    const params = experimentId.value ? { experimentId: experimentId.value } : {}
+    const params = {
+      ...getSelectedClassQuery(),
+      ...(experimentId.value ? { experimentId: experimentId.value } : {})
+    }
     const raw = await api.getAllStudentExperiments(params)
     const list = Array.isArray(raw) ? raw : raw?.data || []
     const data = list.map((item) => {
@@ -454,7 +471,7 @@ const loadSubmissions = async () => {
 
 const loadExperimentOptions = async () => {
   try {
-    const res = await api.getTeacherExperimentList()
+    const res = await api.getTeacherExperimentList(getSelectedClassQuery())
     if (Array.isArray(res)) {
       experimentOptions.value = res
     } else if (Array.isArray(res?.data)) {
