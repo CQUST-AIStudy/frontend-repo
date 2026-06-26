@@ -9,7 +9,8 @@
  * 1. 维度级：节点 label/keywords/summary 命中能力维度关键字 → 取该维度 avgMastery/level
  * 2. 实验级：exercise/structure 节点进一步命中 skillTree.children[].name（实验名）→ 取实验级 mastery（粒度更细）
  * 3. 薄弱点：命中 profile.weaknesses（按 experimentName/dimension 关键字）→ 标记 isWeak 并携带 evidence
- * 4. 优先级：实验级 > 维度级 > 默认 unlearned
+ * 4. 后端题目完成进度：节点带 progressPercent / learningStatus 时优先使用
+ * 5. 优先级：后端进度 > 技能点级 > 实验级 > 维度级 > 手动标记
  *
  * 预留：若后端在节点 properties 增加 knowledgePointId / dimensionTag 字段，优先用 ID 直匹配，关键字映射降级为兜底。
  */
@@ -47,6 +48,56 @@ function scoreToLevel(score) {
 function toScore(value, level) {
   if (typeof value === 'number' && !Number.isNaN(value)) return value
   return LEVEL_SCORE[level] ?? 0
+}
+
+function clampPercent(value) {
+  const percent = Number(value)
+  if (!Number.isFinite(percent)) return 0
+  return Math.max(0, Math.min(100, Math.round(percent)))
+}
+
+function hasBackendProgress(node) {
+  return Number.isFinite(Number(node?.progressPercent)) || Boolean(node?.learningStatus)
+}
+
+function progressToLevel(node) {
+  const status = lower(node?.learningStatus)
+  const percent = clampPercent(node?.progressPercent)
+  if (['mastered', 'learned', 'completed', 'done', 'finished', '已学习'].includes(status) || percent >= 100) {
+    return 'good'
+  }
+  if (['learning', 'in_progress', 'studying', '学习中'].includes(status) || percent > 0) {
+    return 'medium'
+  }
+  return 'unstarted'
+}
+
+function buildProgressEntry(node, dimension) {
+  const percent = clampPercent(node?.progressPercent)
+  const completed = Number(node?.completedExerciseCount)
+  const total = Number(node?.totalExerciseCount)
+  const completedExerciseCount = Number.isFinite(completed) ? completed : 0
+  const totalExerciseCount = Number.isFinite(total) ? total : 0
+  const evidence = totalExerciseCount > 0
+    ? {
+        completedExerciseCount,
+        totalExerciseCount,
+        detail: `已完成 ${completedExerciseCount}/${totalExerciseCount} 个关联练习`
+      }
+    : null
+
+  return {
+    level: progressToLevel(node),
+    score: percent,
+    source: 'progress',
+    dimension,
+    experimentId: node?.properties?.experimentId || null,
+    experimentName: node?.type === 'exercise' ? node.label : null,
+    isWeak: false,
+    evidence,
+    learningStatus: node?.learningStatus || '',
+    learningStatusLabel: node?.learningStatusLabel || ''
+  }
 }
 
 function lower(s) {
@@ -88,11 +139,11 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
   const masteryMap = {}
   const dimensionMap = {} // nodeId → 维度名
 
-  if (!profile || !graph) return { masteryMap, dimensionMap, summary: buildSummary(profile, masteryMap) }
+  if (!graph) return { masteryMap, dimensionMap, summary: buildSummary(profile, masteryMap) }
 
-  const skillTree = Array.isArray(profile.skillTree) ? profile.skillTree : []
-  const weaknesses = Array.isArray(profile.weaknesses) ? profile.weaknesses : []
-  const skillStates = Array.isArray(profile.skillStates) ? profile.skillStates : []
+  const skillTree = Array.isArray(profile?.skillTree) ? profile.skillTree : []
+  const weaknesses = Array.isArray(profile?.weaknesses) ? profile.weaknesses : []
+  const skillStates = Array.isArray(profile?.skillStates) ? profile.skillStates : []
 
   // 维度 → { avgMastery, level, children }
   const dimIndex = new Map()
@@ -151,7 +202,12 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
 
     let result = null
 
-    // ① 知识点级匹配（skill-states，优先级最高）
+    // ① 后端自动进度：由题目完成记录计算，优先级最高
+    if (hasBackendProgress(node)) {
+      result = buildProgressEntry(node, dim)
+    }
+
+    // ② 知识点级匹配（skill-states）：后端进度缺失时使用
     // 先用节点 label 精确匹配，再用 keywords 逐个尝试
     const tryMatchSkill = (raw) => {
       if (!raw) return null
@@ -162,7 +218,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       ? (node.properties?.keywords || []).map(tryMatchSkill).find(Boolean)
       : null
     const matchedSkill = labelSkill || keywordSkill
-    if (matchedSkill) {
+    if (!result && matchedSkill) {
       const rawLevel = matchedSkill.level || scoreToLevel(matchedSkill.mastery)
       const level = normalizeLevel(rawLevel)
       result = {
@@ -177,7 +233,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ② 实验级匹配（仅 exercise/structure/operation/algorithm 优先尝试实验名命中）
+    // ③ 实验级匹配（仅 exercise/structure/operation/algorithm 优先尝试实验名命中）
     const structuralTypes = ['exercise', 'structure', 'operation', 'algorithm']
     if (!result && structuralTypes.includes(node.type)) {
       const byExact = expIndex.get(lower(node.label))
@@ -198,7 +254,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ③ 维度级匹配
+    // ④ 维度级匹配
     if (!result && dim && dimIndex.has(dim)) {
       const d = dimIndex.get(dim)
       const level = normalizeLevel(d.level || scoreToLevel(d.avgMastery))
@@ -214,12 +270,15 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ④ 薄弱点叠加：命中则强制标记为 weak 并携带证据
+    // ⑤ 薄弱点叠加：画像来源可降级为 weak；后端进度不覆盖自动状态
     if (result) {
       const wExp = result.experimentName ? weaknessByExp.get(lower(result.experimentName)) : null
       const wDim = result.dimension ? weaknessByDim.get(result.dimension) : null
       const w = wExp || wDim
-      if (w) {
+      if (w && result.source === 'progress') {
+        result.isWeak = true
+        if (!result.evidence) result.evidence = w.evidence || null
+      } else if (w) {
         result.isWeak = true
         result.level = 'weak'
         result.score = Math.min(result.score, toScore(null, 'weak'))
@@ -227,7 +286,7 @@ export function buildMasteryMap(profile, graph, manualState = {}) {
       }
     }
 
-    // ⑤ 手动标记兜底（profile 未命中但 localStorage 有标记）
+    // ⑥ 手动标记兜底（profile 未命中但 localStorage 有标记）
     if (!result) {
       const manual = manualState?.[node.id]
       if (manual?.mastery && manual.mastery !== 'unstarted') {
@@ -266,8 +325,8 @@ function normalizeName(name) {
  */
 export function buildSubmissionMap(profile, graph) {
   const map = {}
-  if (!profile || !graph) return map
-  const skillTree = Array.isArray(profile.skillTree) ? profile.skillTree : []
+  if (!graph) return map
+  const skillTree = Array.isArray(profile?.skillTree) ? profile.skillTree : []
   const expByName = new Map()
   const expByNorm = new Map()
   for (const dim of skillTree) {
@@ -278,6 +337,11 @@ export function buildSubmissionMap(profile, graph) {
     }
   }
   for (const node of (graph.nodes || [])) {
+    const directExperimentId = node.properties?.experimentId
+    if (directExperimentId != null && directExperimentId !== '') {
+      map[node.id] = directExperimentId
+      continue
+    }
     if (!['exercise', 'structure', 'operation', 'algorithm'].includes(node.type)) continue
     const matched = expByName.get(lower(node.label)) || expByNorm.get(normalizeName(node.label))
     if (matched?.experimentId) map[node.id] = matched.experimentId

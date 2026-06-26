@@ -109,10 +109,28 @@ const MASTERY_VISUAL = {
   mastered: { percent: 100, softBg: '#dcfce7' }
 }
 
-const masteryMeta = computed(() => getMasteryMeta(nodeState.value?.mastery || 'unstarted'))
+function progressLevelToMastery(level) {
+  if (level === 'good') return 'mastered'
+  if (level === 'medium' || level === 'weak') return 'learning'
+  return 'unstarted'
+}
+
+const effectiveMastery = computed(() => {
+  if (props.masteryInfo?.source === 'progress') {
+    return progressLevelToMastery(props.masteryInfo.level)
+  }
+  return nodeState.value?.mastery || 'unstarted'
+})
+
+const masteryMeta = computed(() => getMasteryMeta(effectiveMastery.value))
 const masteryColor = computed(() => masteryMeta.value.color)
 const masteryLabel = computed(() => masteryMeta.value.label)
-const masteryVisual = computed(() => MASTERY_VISUAL[nodeState.value?.mastery || 'unstarted'] || MASTERY_VISUAL.unstarted)
+const masteryVisual = computed(() => {
+  const base = MASTERY_VISUAL[effectiveMastery.value] || MASTERY_VISUAL.unstarted
+  if (props.masteryInfo?.source !== 'progress') return base
+  const percent = Math.max(0, Math.min(100, Math.round(Number(props.masteryInfo.score) || 0)))
+  return { ...base, percent }
+})
 const masteryPercent = computed(() => masteryVisual.value.percent)
 const masterySoftBg = computed(() => masteryVisual.value.softBg)
 
@@ -128,9 +146,11 @@ const masterySummary = computed(() => {
   }
   return { ...m, meta: levelMap[m.level] || levelMap.unstarted }
 })
+const scoreUnit = computed(() => props.masteryInfo?.source === 'progress' ? '%' : '分')
 
 // 掌握度数据来源标签：来自能力画像/技能点/实验/手动标记
 const SOURCE_LABELS = {
+  progress: '题目完成记录',
   skill: '技能点匹配',
   experiment: '能力画像·实验级',
   dimension: '能力画像·维度级',
@@ -197,7 +217,7 @@ const relationGroups = computed(() => {
             {{ masterySummary.meta.label }}
           </span>
           <strong v-if="masterySummary.score != null" class="mastery-score" :style="{ color: masterySummary.meta.color }">
-            {{ masterySummary.score }}分
+            {{ masterySummary.score }}{{ scoreUnit }}
           </strong>
         </div>
         <p class="mastery-tip">{{ masterySummary.meta.tip }}</p>
@@ -209,8 +229,9 @@ const relationGroups = computed(() => {
           能力维度：{{ masterySummary.dimension }}
         </div>
         <div v-if="evidence" class="mastery-evidence">
-          <span>提交 {{ evidence.totalSubmissions || 0 }}</span>
-          <span>AC {{ evidence.acCount || 0 }}</span>
+          <span v-if="evidence.totalExerciseCount != null">练习 {{ evidence.completedExerciseCount || 0 }}/{{ evidence.totalExerciseCount }}</span>
+          <span v-if="evidence.totalSubmissions != null">提交 {{ evidence.totalSubmissions || 0 }}</span>
+          <span v-if="evidence.acCount != null">AC {{ evidence.acCount || 0 }}</span>
           <span v-if="evidence.compileErrors">编译错误 {{ evidence.compileErrors }}</span>
           <span v-if="evidence.wrongAnswers">答案错误 {{ evidence.wrongAnswers }}</span>
         </div>

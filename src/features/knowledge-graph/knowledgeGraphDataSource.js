@@ -17,9 +17,9 @@ export function createEmptyKnowledgeGraph() {
   }
 }
 
-export async function fetchKnowledgeGraph() {
+export async function fetchKnowledgeGraph(userId = '') {
   try {
-    const data = await fetchGraph(GRAPH_CODE)
+    const data = await fetchGraph(GRAPH_CODE, { userId })
     if (data && (data.nodes || data.course)) {
       return data
     }
@@ -30,8 +30,8 @@ export async function fetchKnowledgeGraph() {
   }
 }
 
-export async function loadKnowledgeGraph() {
-  const graph = await fetchKnowledgeGraph()
+export async function loadKnowledgeGraph(options = {}) {
+  const graph = await fetchKnowledgeGraph(options.userId || '')
   if (graph) {
     return { source: 'backend', graph }
   }

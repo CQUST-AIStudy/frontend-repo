@@ -24,7 +24,7 @@ function readLocalUserInfo() {
   }
 }
 
-function resolveCurrentStudentId() {
+export function resolveCurrentStudentId() {
   const userInfo = readLocalUserInfo()
   return userInfo.usernum || userInfo.studentId || ''
 }

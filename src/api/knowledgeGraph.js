@@ -12,11 +12,29 @@ const knowledgeGraphClient = axios.create({
 /**
  * 获取完整知识图谱
  * @param {string} graphCode 图谱唯一标识
+ * @param {object} options 可选参数
+ * @param {string} options.userId 当前学生编号，用于返回自动进度字段
  * @returns {Promise<object>} { metadata, course, nodes, relations }
  */
-export function fetchGraph(graphCode = 'data-structure-knowledge-graph') {
+export function fetchGraph(graphCode = 'data-structure-knowledge-graph', options = {}) {
+  const params = {}
+  if (options?.userId) params.userId = options.userId
   return knowledgeGraphClient
-    .get(`/api/graphs/${graphCode}`)
+    .get(`/api/graphs/${graphCode}`, { params })
+    .then(res => res.data)
+}
+
+/**
+ * 获取当前学生在图谱上的自动进度
+ * @param {string} graphCode 图谱唯一标识
+ * @param {string} userId 当前学生编号
+ * @returns {Promise<object>} { graphCode, userId, nodes }
+ */
+export function fetchGraphProgress(graphCode = 'data-structure-knowledge-graph', userId = '') {
+  const params = {}
+  if (userId) params.userId = userId
+  return knowledgeGraphClient
+    .get(`/api/graphs/${graphCode}/progress`, { params })
     .then(res => res.data)
 }
 
