@@ -1,4 +1,6 @@
+import { fetchGraph } from '../../api/knowledgeGraph'
 import { GRAPH_CODE, GRAPH_SOURCE, GRAPH_VERSION } from './dataStructureGraph'
+import logger from '@/utils/logger'
 
 export function createEmptyKnowledgeGraph() {
   return {
@@ -15,12 +17,21 @@ export function createEmptyKnowledgeGraph() {
   }
 }
 
-export async function fetchKnowledgeGraph() {
-  return null
+export async function fetchKnowledgeGraph(userId = '') {
+  try {
+    const data = await fetchGraph(GRAPH_CODE, { userId })
+    if (data && (data.nodes || data.course)) {
+      return data
+    }
+    return null
+  } catch (err) {
+    logger.warn('[knowledgeGraph] fetchKnowledgeGraph failed:', err?.message || err)
+    return null
+  }
 }
 
-export async function loadKnowledgeGraph() {
-  const graph = await fetchKnowledgeGraph()
+export async function loadKnowledgeGraph(options = {}) {
+  const graph = await fetchKnowledgeGraph(options.userId || '')
   if (graph) {
     return { source: 'backend', graph }
   }

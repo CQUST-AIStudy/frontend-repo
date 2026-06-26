@@ -13,7 +13,10 @@ import {
   normalizeGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
 import { createEmptyKnowledgeGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
-import { loadStudentLearningProfile } from '@/features/knowledge-graph/studentLearningProfileDataSource'
+import {
+  loadStudentLearningProfile,
+  resolveCurrentStudentId
+} from '@/features/knowledge-graph/studentLearningProfileDataSource'
 import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
   buildMasteryMap,
@@ -32,6 +35,7 @@ const graphData = shallowRef(createEmptyKnowledgeGraph())
 const dataSource = shallowRef('empty')
 const fallbackNotice = shallowRef('')
 const profile = shallowRef({})
+const progressUserId = shallowRef('')
 const selectedNodeId = shallowRef('')
 const selectedSubmissions = shallowRef([])
 const submissionsLoading = shallowRef(false)
@@ -64,6 +68,14 @@ const visibleRelations = computed(() => normalizedGraph.value.relations)
 const selectedContext = computed(() => getNodeContext(graphData.value, selectedNodeId.value))
 
 const selectedMasteryInfo = computed(() => masteryMap.value[selectedNodeId.value] || null)
+
+const hasBackendProgress = computed(() =>
+  normalizedGraph.value.nodes.some(node =>
+    Number.isFinite(Number(node.progressPercent)) || Boolean(node.learningStatus)
+  )
+)
+
+const overviewLoading = computed(() => profileLoading.value && !hasBackendProgress.value)
 
 // 提交版本链数据（传给 3D 画布渲染卫星）
 const submissionTrace = computed(() => {
@@ -196,8 +208,8 @@ const practiceRecommendations = computed(() => {
       if (seen.has(ex.id)) continue
       seen.add(ex.id)
       const props = ex.properties || {}
-      const experimentId = subMap[nodeId] || null
-      const stat = experimentId ? stats[nodeId] : null
+      const experimentId = subMap[ex.id] || subMap[nodeId] || null
+      const stat = experimentId ? (stats[ex.id] || stats[nodeId]) : null
       const hasSubmission = experimentId != null
       result.push({
         id: ex.id,
@@ -223,6 +235,10 @@ const dataSourceText = computed(() => {
   if (dataSource.value === 'backend') return '真实接口'
   return '暂无图谱数据'
 })
+
+const masterySourceText = computed(() =>
+  hasBackendProgress.value ? '进度来自题目完成记录' : '掌握度来自实时能力画像'
+)
 
 function selectNode(node) {
   if (!node?.id) return
@@ -313,8 +329,9 @@ function handleUpdateState(patch) {
 
 onMounted(async () => {
   loading.value = true
+  progressUserId.value = resolveCurrentStudentId()
   try {
-    const result = await loadKnowledgeGraph()
+    const result = await loadKnowledgeGraph({ userId: progressUserId.value })
     graphData.value = result.graph
     dataSource.value = result.source || 'empty'
     fallbackNotice.value = result.fallbackReason || ''
@@ -338,12 +355,12 @@ onMounted(async () => {
           <h1 class="page-title">我的学习图谱</h1>
         </div>
         <p class="page-desc">
-          以你的能力画像驱动知识图谱：优势知识点上浮发光，薄弱点下沉脉冲警示。双击知识点可追溯你的代码提交版本链。
+          以你的题目完成记录和能力画像驱动知识图谱：优势知识点上浮发光，薄弱点下沉脉冲警示。双击知识点可追溯你的代码提交版本链。
         </p>
       </div>
     </header>
 
-    <LearningOverviewBar :summary="overviewSummary" :loading="profileLoading" />
+    <LearningOverviewBar :summary="overviewSummary" :loading="overviewLoading" />
 
     <ui-alert v-if="fallbackNotice" :title="fallbackNotice" type="warning" show-icon :closable="false" />
 
@@ -363,7 +380,7 @@ onMounted(async () => {
           <div>
             <h2>个人知识掌握立体图谱</h2>
             <p>节点高度与辉光由掌握度驱动，红色脉冲标识薄弱知识点。</p>
-            <span class="data-source-hint">图谱来源：{{ dataSourceText }} · 掌握度来自实时能力画像</span>
+            <span class="data-source-hint">图谱来源：{{ dataSourceText }} · {{ masterySourceText }}</span>
           </div>
           <div class="legend-chips">
             <span class="chip good"><i></i>优势</span>
