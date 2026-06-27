@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import LucideIcon from '@/components/LucideIcon.vue'
 
 const props = defineProps({
@@ -20,6 +21,13 @@ const props = defineProps({
 const emit = defineEmits(['update:visible'])
 
 const payloadText = computed(() => JSON.stringify(props.payload || {}, null, 2))
+const highlightedPayload = computed(() => {
+  try {
+    return hljs.highlight(payloadText.value, { language: 'json' }).value
+  } catch {
+    return payloadText.value
+  }
+})
 const dialogVisible = computed({
   get: () => props.visible,
   set: value => emit('update:visible', value)
@@ -43,7 +51,7 @@ const dialogVisible = computed({
         <li v-for="error in validation.errors" :key="error">{{ error }}</li>
       </ul>
 
-      <pre>{{ payloadText }}</pre>
+      <pre class="markdown-code-block"><code class="hljs language-json" v-html="highlightedPayload"></code></pre>
     </div>
   </ui-dialog>
 </template>
@@ -90,9 +98,15 @@ pre {
   margin: 0;
   padding: 14px;
   border-radius: 8px;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #24292f;
   font-size: 12px;
   line-height: 1.6;
+}
+
+pre code {
+  background: transparent;
+  color: inherit;
 }
 </style>

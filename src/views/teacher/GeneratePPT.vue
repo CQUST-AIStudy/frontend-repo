@@ -153,8 +153,8 @@
             <div class="p-4">
               <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-2">{{ slide.title }}</h3>
               <p v-if="slide.isTitle" class="m-0 text-[13px] text-[#6e6e73]">{{ pptTypeText }}</p>
-              <div v-else-if="slide.isCode" class="overflow-auto rounded-[10px] bg-[#1d1d1f] text-[#f5f5f7] p-3.5">
-                <pre class="m-0 text-[12px] leading-relaxed"><code>{{ slide.content }}</code></pre>
+              <div v-else-if="slide.isCode" class="overflow-auto rounded-[10px] bg-[#f6f8fa] text-[#24292f] p-3.5 border border-[#d0d7de]">
+                <pre class="markdown-code-block m-0 text-[12px] leading-relaxed"><code class="hljs" v-html="highlightSlideCode(slide.content)"></code></pre>
               </div>
               <div v-else class="text-[13px] text-[#424245] leading-[1.8]" v-html="formatSlideContent(slide.content)"></div>
             </div>
@@ -175,6 +175,7 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import { message as uiMessage } from '@/services/feedback'
 import { chatSend } from '../../api/tap'
 import { useFormValidation } from '../../composables/useFormValidation'
@@ -308,6 +309,16 @@ function parseSlides(text) {
 
 function formatSlideContent(content) {
   return renderSafeMarkdown(content)
+}
+
+function highlightSlideCode(code) {
+  const source = String(code ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
 }
 
 async function generatePPT() {

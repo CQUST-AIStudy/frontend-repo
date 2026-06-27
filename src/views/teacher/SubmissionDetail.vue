@@ -140,15 +140,15 @@
                   <div class="flex-1 p-4 overflow-auto">
                     <!-- Full source panel -->
                     <div v-show="activeQuestionTab === 'full'">
-                      <pre class="bg-[#f5f7fa] rounded-lg p-4 overflow-x-auto font-mono leading-relaxed text-sm whitespace-pre-wrap max-h-[500px] overflow-y-auto m-0"><code>{{ submission.code }}</code></pre>
+                      <CodeViewer :code="submission.code" language="cpp" maxHeight="500px" />
                     </div>
                     <!-- Per-question panels -->
                     <div v-for="(question, index) in parsedQuestions" :key="'q'+index" v-show="activeQuestionTab === String(index)">
-                      <pre class="bg-[#f5f7fa] rounded-lg p-4 overflow-x-auto font-mono leading-relaxed text-sm whitespace-pre-wrap max-h-[500px] overflow-y-auto m-0"><code>{{ question.code }}</code></pre>
+                      <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
 
                       <div v-if="question.testResults" class="mt-4 p-3 bg-[#f8f8f8] rounded-lg">
                         <h4 class="text-sm font-semibold text-[#1d1d1f] m-0 mb-2">测试结果</h4>
-                        <pre class="m-0 whitespace-pre-wrap break-words text-[13px] leading-[1.6] font-mono text-[#1d1d1f]">{{ formatTestResults(question.testResults) }}</pre>
+                        <pre class="markdown-code-block m-0 text-[13px] leading-[1.6]"><code class="hljs" v-html="highlightText(formatTestResults(question.testResults))"></code></pre>
                       </div>
 
                       <!-- Divider with label -->
@@ -200,7 +200,7 @@
                     :class="codeResult.success ? 'bg-[#6b8f6b]/10 text-[#6b8f6b]' : 'bg-[#c44b3f]/10 text-[#c44b3f]'"
                   >{{ codeResult.success ? '运行成功' : '运行失败' }}</span>
                 </div>
-                <pre class="bg-[#f5f7fa] rounded-lg p-4 font-mono max-h-[200px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed m-0">{{ codeResult.output }}</pre>
+                <pre class="markdown-code-block m-0 max-h-[200px] overflow-y-auto text-sm leading-relaxed"><code class="hljs" v-html="highlightText(codeResult.output)"></code></pre>
               </div>
             </div>
 
@@ -395,7 +395,7 @@
           <div class="text-sm text-[#1d1d1f]"><strong>提交时间：</strong>{{ selectedHistory.time }}</div>
           <div class="text-sm text-[#1d1d1f] mt-1"><strong>描述：</strong>{{ selectedHistory.content }}</div>
         </div>
-        <pre class="bg-[#f5f7fa] rounded-lg p-4 overflow-x-auto font-mono leading-relaxed text-sm whitespace-pre-wrap max-h-[500px] overflow-y-auto m-0"><code>{{ selectedHistory.code }}</code></pre>
+        <CodeViewer :code="selectedHistory.code" language="cpp" maxHeight="500px" />
       </div>
     </AppModal>
   </div>
@@ -408,10 +408,21 @@ import logger from '@/utils/logger'
 import { message as uiMessage, loading as uiLoading } from '@/services/feedback'
 import api from '../../api'
 import AppModal from '../../components/AppModal.vue'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
+import CodeViewer from '@/components/CodeViewer.vue'
+import hljs from 'highlight.js/lib/common'
 import * as echarts from 'echarts/core'
 import axios from 'axios'
+
+function highlightText(value) {
+  const source = String(value ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
+}
 import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import {
   TitleComponent,
@@ -606,9 +617,7 @@ const updateQuestionComment = (index, comment) => {
 }
 
 const renderMarkdown = (text) => {
-  if (!text) return ''
-  const rawHtml = marked.parse(text)
-  return DOMPurify.sanitize(rawHtml)
+  return renderSafeMarkdown(text)
 }
 
 const splitAiRemarksToQuestions = () => {

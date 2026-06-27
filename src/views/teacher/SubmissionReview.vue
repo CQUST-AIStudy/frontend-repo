@@ -287,7 +287,7 @@
               <span v-if="eb.confidence && eb.kind !== 'vlm_failed'" class="text-xs text-[#aeaeb2]">置信度 {{ (eb.confidence * 100).toFixed(1) }}%</span>
             </div>
 
-            <pre v-if="eb.kind !== 'vlm_failed'" class="m-0 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#1d1d1f] bg-[#f9f9f9] rounded-[10px] p-3">{{ (eb.content || '').slice(0, 500) }}</pre>
+            <pre v-if="eb.kind !== 'vlm_failed'" class="markdown-code-block m-0 text-[13px] leading-relaxed"><code class="hljs" v-html="highlightText((eb.content || '').slice(0, 500))"></code></pre>
 
             <div v-if="eb.kind === 'vlm_failed'" class="flex items-start gap-2 mt-1 text-[13px] text-[#6e6e73] bg-[#f5f5f7] rounded-[10px] p-3">
               <LucideIcon name="image" :size="16" class="shrink-0 mt-0.5 text-[var(--app-primary)]" />
@@ -393,9 +393,20 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import { message as uiMessage } from '@/services/feedback'
 import { ChatDotRound, Edit } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
+
+function highlightText(value) {
+  const source = String(value ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
+}
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 import {
   downloadSubmissionReport,

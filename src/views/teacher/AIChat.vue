@@ -1,17 +1,9 @@
 <script setup>
-import MarkdownIt from 'markdown-it'
-import DOMPurify from 'dompurify'
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { messageBox } from '@/services/feedback'
 import { useTeacherAiChatStore } from '../../store/teacherAiChat'
-
-const md = new MarkdownIt({
-  html: false,
-  linkify: true,
-  typographer: true,
-  breaks: true
-})
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 
 const store = useTeacherAiChatStore()
 const { messages, draft, loading, streaming } = storeToRefs(store)
@@ -47,7 +39,7 @@ const statusText = computed(() => {
   return '可继续提问'
 })
 
-const renderMarkdown = (text) => DOMPurify.sanitize(md.render(text || ''))
+const renderMarkdown = (text) => renderSafeMarkdown(text || '')
 
 const lastAssistantPreview = computed(() => {
   const lastAssistant = [...messages.value].reverse().find(item => item.role === 'assistant' && item.content)
@@ -646,9 +638,10 @@ onMounted(scrollToBottom)
   margin: 12px 0;
   padding: 14px 16px;
   overflow-x: auto;
-  border-radius: 14px;
-  background: #111827;
-  color: #e5edff;
+  border-radius: 8px;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #24292f;
 }
 
 .markdown-body :deep(pre code) {

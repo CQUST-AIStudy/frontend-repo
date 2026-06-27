@@ -813,13 +813,15 @@ const relationGroups = computed(() => {
   overflow: auto;
   padding: 12px;
   border-radius: 8px;
-  background: #0f172a;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #24292f;
 }
 
 .code-block code {
   display: block;
   background: transparent;
-  color: #e2e8f0;
+  color: inherit;
   font-size: 12px;
   line-height: 1.6;
   white-space: pre;

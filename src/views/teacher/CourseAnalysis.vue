@@ -85,8 +85,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import { message as uiMessage } from '@/services/feedback'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import * as echarts from 'echarts'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '../../api'
 
 const classComparisonChartRef = ref(null)
@@ -131,7 +130,7 @@ const submissionsData = ref([])
 
 const renderedAiContent = computed(() => {
   if (!aiContent.value) return ''
-  return DOMPurify.sanitize(marked.parse(aiContent.value))
+  return renderSafeMarkdown(aiContent.value)
 })
 
 // 加载所有数据

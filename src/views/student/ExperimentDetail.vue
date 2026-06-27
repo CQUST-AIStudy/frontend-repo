@@ -96,7 +96,7 @@
                 正在调用 DeepSeek 分析代码，预计需要10-20 秒..
               </div>
             </div>
-            <div v-else-if="hasAiComment" class="g-ai-content markdown-body [background:#f8f9fa] [padding:24px] [border-radius:12px] [border:1px_solid_#e8eaed] [font-size:14px] [line-height:1.8] [color:#202124] [&_h1]:[color:#202124] [&_h1]:[margin:20px_0_10px] [&_h1]:[font-size:16px] [&_h2]:[color:#202124] [&_h2]:[margin:20px_0_10px] [&_h2]:[font-size:16px] [&_h3]:[color:#202124] [&_h3]:[margin:20px_0_10px] [&_h3]:[font-size:16px] [&_h3]:[font-size:15px] [&_p]:[margin:8px_0] [&_p]:[line-height:1.8] [&_ul]:[padding-left:20px] [&_ul]:[margin:8px_0] [&_ol]:[padding-left:20px] [&_ol]:[margin:8px_0] [&_li]:[margin:4px_0] [&_strong]:[color:#1a73e8] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#1e1e2e] [&_pre]:[color:#cdd6f4] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_blockquote]:[border-left:4px_solid_#1a73e8] [&_blockquote]:[padding:8px_16px] [&_blockquote]:[margin:10px_0] [&_blockquote]:[background:#e8f0fe] [&_blockquote]:[border-radius:0_8px_8px_0] [&_blockquote]:[color:#5f6368]" v-html="renderedAiComment"></div>
+            <div v-else-if="hasAiComment" class="g-ai-content markdown-body [background:#f8f9fa] [padding:24px] [border-radius:12px] [border:1px_solid_#e8eaed] [font-size:14px] [line-height:1.8] [color:#202124] [&_h1]:[color:#202124] [&_h1]:[margin:20px_0_10px] [&_h1]:[font-size:16px] [&_h2]:[color:#202124] [&_h2]:[margin:20px_0_10px] [&_h2]:[font-size:16px] [&_h3]:[color:#202124] [&_h3]:[margin:20px_0_10px] [&_h3]:[font-size:16px] [&_h3]:[font-size:15px] [&_p]:[margin:8px_0] [&_p]:[line-height:1.8] [&_ul]:[padding-left:20px] [&_ul]:[margin:8px_0] [&_ol]:[padding-left:20px] [&_ol]:[margin:8px_0] [&_li]:[margin:4px_0] [&_strong]:[color:#1a73e8] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_blockquote]:[border-left:4px_solid_#1a73e8] [&_blockquote]:[padding:8px_16px] [&_blockquote]:[margin:10px_0] [&_blockquote]:[background:#e8f0fe] [&_blockquote]:[border-radius:0_8px_8px_0] [&_blockquote]:[color:#5f6368]" v-html="renderedAiComment"></div>
             <div v-else class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="bot" :size="48" /></div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">{{ isCompleted ? '暂无AI点评' : '请先完成实验' }}</div>
@@ -279,8 +279,7 @@ import { message as uiMessage } from '@/services/feedback'
 import { Loading } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import CodeViewer from '@/components/CodeViewer.vue'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import axios from 'axios'
 import api from '@/api'
 import { API_BASE_URL } from '../../config/runtime'
@@ -323,7 +322,7 @@ const aiCommentRaw = computed(() => localAiComment.value || currentExp.value?.ai
 const hasAiComment = computed(() => {
   const c = aiCommentRaw.value; return c && c.trim() && !c.includes('暂时还没有生成AI点评')
 })
-const renderedAiComment = computed(() => hasAiComment.value ? DOMPurify.sanitize(marked(aiCommentRaw.value)) : '')
+const renderedAiComment = computed(() => hasAiComment.value ? renderSafeMarkdown(aiCommentRaw.value) : '')
 
 function copyCode() {
   if (currentExp.value?.code) { navigator.clipboard.writeText(currentExp.value.code); uiMessage.success('代码已复制') }

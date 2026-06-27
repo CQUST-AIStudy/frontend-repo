@@ -37,7 +37,7 @@
           <span class="inline-flex items-center gap-1.5 text-[#dc2626]"><span class="h-2.5 w-2.5 rounded-sm bg-[#ef4444]"></span>错误写法</span>
           <span class="inline-flex items-center gap-1.5 text-[#15803d]"><span class="h-2.5 w-2.5 rounded-sm bg-[#22c55e]"></span>正确写法</span>
         </div>
-        <pre class="m-0 overflow-x-auto rounded-lg border border-[#bbdfc5] bg-[#f3fbf5] p-3 font-mono text-[13px] leading-6 text-[#166534]"><code>{{ current.correctedCode }}</code></pre>
+        <pre class="markdown-code-block m-0 text-[13px] leading-6"><code class="hljs" v-html="highlightText(current.correctedCode)"></code></pre>
       </div>
 
       <div class="p-5">
@@ -135,7 +135,7 @@
       <div class="grid gap-4 md:grid-cols-3">
         <div v-for="frame in compareFrames" :key="frame.order" class="rounded-lg border p-4" :class="frameClass(frame.type)">
           <div class="mb-2 text-xs font-semibold uppercase tracking-wide">{{ frame.label }}</div>
-          <pre class="m-0 max-h-64 overflow-auto whitespace-pre-wrap font-mono text-sm leading-6"><code>{{ frame.content }}</code></pre>
+          <pre class="markdown-code-block m-0 max-h-64 overflow-auto text-sm leading-6"><code class="hljs" v-html="highlightText(frame.content)"></code></pre>
         </div>
       </div>
       <div v-if="current.explanation" class="mt-4 rounded-lg border border-[#fecaca] bg-[#fff7f7] px-4 py-3 text-sm leading-6 text-[#b91c1c]">
@@ -166,8 +166,19 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import LucideIcon from '@/components/LucideIcon.vue'
 import PythonTutorRenderer from '@/components/grading/PythonTutorRenderer.vue'
+
+function highlightText(value) {
+  const source = String(value ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
+}
 
 const props = defineProps({
   demonstrations: { type: Array, default: () => [] },

@@ -1326,9 +1326,10 @@ onMounted(() => {
   margin: 10px 0;
   padding: 0;
   overflow-x: auto;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid #d0d7de;
   border-radius: 10px;
-  background: #0f172a;
+  background: #f6f8fa;
+  color: #24292f;
 }
 
 .assistant-markdown :deep(.markdown-code-block code) {
@@ -1336,7 +1337,7 @@ onMounted(() => {
   min-width: max-content;
   padding: 12px 14px;
   background: transparent;
-  color: #e5edf7;
+  color: inherit;
   font-family: Consolas, "SFMono-Regular", "Liberation Mono", Menlo, monospace;
   font-size: 13px;
   line-height: 1.62;

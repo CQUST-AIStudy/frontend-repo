@@ -89,12 +89,12 @@
           {{ selectedLog.url }}
         </ui-descriptions-item>
         <ui-descriptions-item label="请求参数" v-if="selectedLog.params">
-          <pre>{{ selectedLog.params }}</pre>
+          <pre class="markdown-code-block"><code class="hljs" v-html="highlightText(selectedLog.params)"></code></pre>
         </ui-descriptions-item>
         <ui-descriptions-item label="错误堆栈" v-if="selectedLog.stackTrace">
           <ui-collapse>
             <ui-collapse-item title="查看错误堆栈信息">
-              <pre class="stack-trace [font-family:monospace] [white-space:pre-wrap] [background-color:#f5f5f5] [padding:10px] [border-radius:4px] [color:#666] [font-size:12px] [max-height:300px] [overflow-y:auto]">{{ selectedLog.stackTrace }}</pre>
+              <pre class="markdown-code-block [max-height:300px] [overflow-y:auto] [font-size:12px]"><code class="hljs" v-html="highlightText(selectedLog.stackTrace)"></code></pre>
             </ui-collapse-item>
           </ui-collapse>
         </ui-descriptions-item>
@@ -116,10 +116,21 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { Search } from '@/components/ui/icons'
 import api from '../../api'
+
+function highlightText(value) {
+  const source = String(value ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
+}
 
 const loading = ref(false)
 const searchKeyword = ref('')

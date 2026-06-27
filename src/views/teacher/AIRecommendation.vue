@@ -121,8 +121,7 @@ import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { Loading } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '../../api'
 import { buildStructuredPrompt, chatSend } from '../../api/tap'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
@@ -163,7 +162,7 @@ function buildExperimentItems(items, options = {}) {
 
 const renderedContent = computed(() => {
   if (!aiContent.value) return ''
-  return DOMPurify.sanitize(marked.parse(aiContent.value))
+  return renderSafeMarkdown(aiContent.value)
 })
 
 const loadCourseData = async () => {

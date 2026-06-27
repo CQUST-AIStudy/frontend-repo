@@ -23,7 +23,7 @@
             <div class="formatted-content [font-size:15px] [line-height:1.85] [color:#374151] [background:#f8fafc] [padding:18px_20px] [border-radius:8px] [border-left:4px_solid_#409eff] [overflow:visible]" v-html="renderedProblemText"></div>
           </div>
           
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="showSeparateExamples">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="showSeparateExamples">
             <h3>示例</h3>
             <div class="examples-container [background:#f8f9fa] [padding:16px] [border-radius:8px]">
               <div 
@@ -47,7 +47,7 @@
             </div>
           </div>
 
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]" v-if="problem.constraints">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="problem.constraints">
             <h3>提示</h3>
             <div class="constraints-content [background:#fff3cd] [padding:12px] [border-radius:6px] [border-left:4px_solid_#ffc107] [font-size:13px]" v-html="renderedConstraints"></div>
           </div>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- 官方题解 -->
-        <div v-if="showSolution" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#1f2937] [&_pre]:[color:#e5e7eb] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
+        <div v-if="showSolution" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
           <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
             <h3>&#23448;&#26041;&#39064;&#35299;</h3>
             <ui-empty v-if="!hasSolutionContent" description="&#26242;&#26080;&#39064;&#35299;&#20869;&#23481;" :image-size="96" />
@@ -77,7 +77,7 @@
                     :label="getLanguageLabel(lang)"
                     :name="lang"
                   >
-                    <pre class="solution-code-block [background:#1f2937] [color:#e5e7eb] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code :class="getCodeLanguageClass(lang)" v-html="renderHighlightedCode(codeBlock, lang)"></code></pre>
+                    <pre class="solution-code-block [background:#f6f8fa] [color:#24292f] [padding:16px] [border-radius:8px] [overflow-x:auto] [font-family:'Courier_New',_monospace] [font-size:14px] [line-height:1.6] [margin:0]"><code :class="getCodeLanguageClass(lang)" v-html="renderHighlightedCode(codeBlock, lang)"></code></pre>
                   </ui-tab-pane>
                 </ui-tabs>
               </section>
@@ -237,7 +237,6 @@ import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
 import { java } from '@codemirror/lang-java'
 import { cpp } from '@codemirror/lang-cpp'
-import { oneDark } from '@codemirror/theme-one-dark'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { EditorView } from '@codemirror/view'
 import { tags as syntaxTags } from '@lezer/highlight'
@@ -359,8 +358,8 @@ const typeIntroducerWords = new Set([
 const codeEditorTheme = EditorView.theme({
   '&': {
     height: '100%',
-    backgroundColor: '#111827',
-    color: '#d1d5db',
+    backgroundColor: '#ffffff',
+    color: '#24292f',
     fontSize: '14px'
   },
   '.cm-scroller': {
@@ -370,57 +369,57 @@ const codeEditorTheme = EditorView.theme({
   '.cm-content': {
     minHeight: '100%',
     padding: '14px 0',
-    caretColor: '#93c5fd'
+    caretColor: '#1d4ed8'
   },
   '.cm-line': {
     padding: '0 18px 0 12px'
   },
   '.cm-gutters': {
-    backgroundColor: '#111827',
-    color: '#64748b',
-    borderRight: '1px solid rgba(148, 163, 184, 0.14)'
+    backgroundColor: '#f6f8fa',
+    color: '#8c959f',
+    borderRight: '1px solid #d0d7de'
   },
   '.cm-lineNumbers .cm-gutterElement': {
     padding: '0 12px 0 14px'
   },
   '.cm-activeLine': {
-    backgroundColor: 'rgba(59, 130, 246, 0.10)'
+    backgroundColor: 'rgba(59, 130, 246, 0.06)'
   },
   '.cm-activeLineGutter': {
-    backgroundColor: 'rgba(59, 130, 246, 0.14)',
-    color: '#cbd5e1'
+    backgroundColor: 'rgba(59, 130, 246, 0.10)',
+    color: '#24292f'
   },
   '&.cm-focused': {
     outline: 'none'
   },
   '&.cm-focused .cm-cursor': {
-    borderLeftColor: '#93c5fd'
+    borderLeftColor: '#1d4ed8'
   },
   '&.cm-focused .cm-selectionBackground, & .cm-selectionBackground, & .cm-content ::selection': {
-    backgroundColor: 'rgba(59, 130, 246, 0.32)'
+    backgroundColor: 'rgba(59, 130, 246, 0.18)'
   },
   '.cm-matchingBracket': {
-    backgroundColor: 'rgba(250, 204, 21, 0.16)',
-    outline: '1px solid rgba(250, 204, 21, 0.34)'
+    backgroundColor: 'rgba(250, 204, 21, 0.20)',
+    outline: '1px solid rgba(250, 204, 21, 0.45)'
   },
   '.cm-nonmatchingBracket': {
-    backgroundColor: 'rgba(239, 68, 68, 0.20)',
-    outline: '1px solid rgba(239, 68, 68, 0.42)'
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    outline: '1px solid rgba(239, 68, 68, 0.40)'
   }
-}, { dark: true })
+}, { dark: false })
 
 const codeEditorHighlightStyle = HighlightStyle.define([
-  { tag: [syntaxTags.keyword, syntaxTags.modifier, syntaxTags.controlKeyword, syntaxTags.definitionKeyword], color: '#c084fc', fontWeight: '600' },
-  { tag: [syntaxTags.variableName, syntaxTags.self], color: '#bfdbfe' },
-  { tag: [syntaxTags.function(syntaxTags.variableName), syntaxTags.function(syntaxTags.propertyName)], color: '#7dd3fc' },
-  { tag: [syntaxTags.definition(syntaxTags.variableName), syntaxTags.className, syntaxTags.typeName], color: '#fbbf24' },
-  { tag: [syntaxTags.number, syntaxTags.integer, syntaxTags.float, syntaxTags.bool, syntaxTags.null, syntaxTags.atom], color: '#fca5a5' },
-  { tag: [syntaxTags.string, syntaxTags.docString, syntaxTags.character, syntaxTags.regexp, syntaxTags.special(syntaxTags.string)], color: '#86efac' },
-  { tag: [syntaxTags.comment, syntaxTags.lineComment, syntaxTags.blockComment, syntaxTags.docComment], color: '#64748b', fontStyle: 'italic' },
-  { tag: [syntaxTags.operator, syntaxTags.operatorKeyword, syntaxTags.compareOperator, syntaxTags.logicOperator, syntaxTags.arithmeticOperator], color: '#67e8f9' },
-  { tag: [syntaxTags.punctuation, syntaxTags.bracket, syntaxTags.separator], color: '#94a3b8' },
-  { tag: syntaxTags.annotation, color: '#f472b6' },
-  { tag: syntaxTags.invalid, color: '#fecaca', textDecoration: 'underline wavy #ef4444' }
+  { tag: [syntaxTags.keyword, syntaxTags.modifier, syntaxTags.controlKeyword, syntaxTags.definitionKeyword], color: '#cf222e', fontWeight: '600' },
+  { tag: [syntaxTags.variableName, syntaxTags.self], color: '#24292f' },
+  { tag: [syntaxTags.function(syntaxTags.variableName), syntaxTags.function(syntaxTags.propertyName)], color: '#8250df' },
+  { tag: [syntaxTags.definition(syntaxTags.variableName), syntaxTags.className, syntaxTags.typeName], color: '#8250df' },
+  { tag: [syntaxTags.number, syntaxTags.integer, syntaxTags.float, syntaxTags.bool, syntaxTags.null, syntaxTags.atom], color: '#0550ae' },
+  { tag: [syntaxTags.string, syntaxTags.docString, syntaxTags.character, syntaxTags.regexp, syntaxTags.special(syntaxTags.string)], color: '#0a3069' },
+  { tag: [syntaxTags.comment, syntaxTags.lineComment, syntaxTags.blockComment, syntaxTags.docComment], color: '#6e7781', fontStyle: 'italic' },
+  { tag: [syntaxTags.operator, syntaxTags.operatorKeyword, syntaxTags.compareOperator, syntaxTags.logicOperator, syntaxTags.arithmeticOperator], color: '#0550ae' },
+  { tag: [syntaxTags.punctuation, syntaxTags.bracket, syntaxTags.separator], color: '#24292f' },
+  { tag: syntaxTags.annotation, color: '#cf222e' },
+  { tag: syntaxTags.invalid, color: '#cf222e', textDecoration: 'underline wavy #cf222e' }
 ])
 
 const missingStarterCodeTemplates = {
@@ -446,7 +445,6 @@ public:
 // 编辑器配置
 const editorExtensions = computed(() => ([
   getLanguageExtension(),
-  oneDark,
   codeEditorTheme,
   syntaxHighlighting(codeEditorHighlightStyle),
   EditorView.lineWrapping,
@@ -1711,9 +1709,9 @@ watch(() => route.params.id, () => {
   margin: 22px 0;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #263244;
-  background: #111827;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 :deep(.md-code-block + .md-code-block) {
@@ -1726,9 +1724,9 @@ watch(() => route.params.id, () => {
   justify-content: space-between;
   min-height: 34px;
   padding: 0 14px;
-  background: #0f172a;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
-  color: #cbd5e1;
+  background: #eaeef2;
+  border-bottom: 1px solid #d0d7de;
+  color: #57606a;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -1745,15 +1743,15 @@ watch(() => route.params.id, () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #64748b;
+  background: #8c959f;
 }
 
 :deep(.md-code-block pre) {
   margin: 0;
   padding: 18px 20px;
   overflow-x: auto;
-  background: #1f2937;
-  color: #e5e7eb;
+  background: #f6f8fa;
+  color: #24292f;
   font-size: 14px;
   line-height: 1.72;
   tab-size: 4;
@@ -1764,13 +1762,14 @@ watch(() => route.params.id, () => {
   min-width: max-content;
   font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
   white-space: pre;
+  color: inherit;
 }
 
 .code-editor {
-  border-color: #1e293b;
+  border-color: #d0d7de;
   border-radius: 8px;
-  background: #111827;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 28px rgba(15, 23, 42, 0.10);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .code-editor :deep(.cm-editor) {
@@ -1786,9 +1785,9 @@ watch(() => route.params.id, () => {
 }
 
 .solution-code-block {
-  border: 1px solid #263244;
-  background: #111827;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   tab-size: 4;
 }
 
@@ -1797,54 +1796,55 @@ watch(() => route.params.id, () => {
   min-width: max-content;
   font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
   white-space: pre;
+  color: #24292f;
 }
 
 :deep(.code-token.token-keyword) {
-  color: #c084fc;
+  color: #cf222e;
   font-weight: 600;
 }
 
 :deep(.code-token.token-identifier) {
-  color: #dbeafe;
+  color: #24292f;
 }
 
 :deep(.code-token.token-type) {
-  color: #fbbf24;
+  color: #8250df;
   font-weight: 600;
 }
 
 :deep(.code-token.token-function) {
-  color: #7dd3fc;
+  color: #8250df;
 }
 
 :deep(.code-token.token-builtin) {
-  color: #60a5fa;
+  color: #0550ae;
 }
 
 :deep(.code-token.token-constant),
 :deep(.code-token.token-number) {
-  color: #fca5a5;
+  color: #0550ae;
 }
 
 :deep(.code-token.token-string) {
-  color: #86efac;
+  color: #0a3069;
 }
 
 :deep(.code-token.token-comment) {
-  color: #64748b;
+  color: #6e7781;
   font-style: italic;
 }
 
 :deep(.code-token.token-decorator) {
-  color: #f472b6;
+  color: #cf222e;
 }
 
 :deep(.code-token.token-operator) {
-  color: #67e8f9;
+  color: #0550ae;
 }
 
 :deep(.code-token.token-punctuation) {
-  color: #94a3b8;
+  color: #24292f;
 }
 
 :deep(.md-code-block.language-python .md-code-header span::before) {

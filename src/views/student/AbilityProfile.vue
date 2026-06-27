@@ -148,8 +148,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { DataAnalysis, Finished, List as ListIcon, TrendCharts } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { message as uiMessage } from '@/services/feedback'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { API_BASE_URL } from '../../config/runtime'
 import { getTapToken } from '../../constants/auth'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
@@ -205,8 +204,7 @@ const trendTagType = computed(() => {
 // Markdown渲染
 const renderedFeedback = computed(() => {
   if (!profile.value.feedback) return ''
-  const rawHtml = marked(profile.value.feedback)
-  return DOMPurify.sanitize(rawHtml)
+  return renderSafeMarkdown(profile.value.feedback)
 })
 
 function masteryColor(v) { return v >= 70 ? '#67C23A' : v >= 40 ? '#E6A23C' : '#F56C6C' }

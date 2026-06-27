@@ -20,7 +20,7 @@
 
       <ui-card shadow="never" class="[margin-top:16px] [border-radius:16px] [border:1px_solid_#e8eef6]">
         <template #header>原始响应</template>
-        <pre class="[margin:0] [padding:14px] [border-radius:12px] [background:#0f172a] [color:#e2e8f0] [font-size:13px] [overflow:auto]">{{ formattedHealth }}</pre>
+        <pre class="markdown-code-block [font-size:13px]"><code class="hljs" v-html="highlightText(formattedHealth)"></code></pre>
       </ui-card>
     </loading-state>
 
@@ -117,13 +117,23 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import hljs from 'highlight.js/lib/common'
 import LoadingState from '../../components/LoadingState.vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   crawlAllLeetCodeProblems,
   getCrawlJobStatus,
-  getLeetCodeClawHealth
-} from '../../api/leetcodeClaw'
+  getLeetCodeClawHealth} from '../../api/leetcodeClaw'
+
+function highlightText(value) {
+  const source = String(value ?? '')
+  if (!source) return ''
+  try {
+    return hljs.highlightAuto(source).value
+  } catch {
+    return source
+  }
+}
 
 const loading = ref(false)
 const health = ref(null)

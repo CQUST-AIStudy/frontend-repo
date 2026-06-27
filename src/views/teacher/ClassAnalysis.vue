@@ -402,8 +402,7 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import {DataAnalysis} from '@/components/ui/icons'
-import {marked} from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '../../api'
 import {buildStructuredPrompt, chatSend} from '../../api/tap'
 import AppModal from '../../components/AppModal.vue'
@@ -522,7 +521,7 @@ const aiAdvice = reactive({
 const aiAdviceLoading = ref(false)
 const aiAdviceContent = ref('')
 const aiAdviceError = ref('')
-const renderedAiAdvice = computed(() => aiAdviceContent.value ? DOMPurify.sanitize(marked.parse(aiAdviceContent.value)) : '')
+const renderedAiAdvice = computed(() => aiAdviceContent.value ? renderSafeMarkdown(aiAdviceContent.value) : '')
 
 // 根据学生数据更新AI建议
 const updateAiAdvice = () => {

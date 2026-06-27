@@ -209,7 +209,7 @@
 
                 <div class="experiment-code [margin-top:20px]" v-if="selectedExperiment.code">
                   <h3>实验代码</h3>
-                  <pre class="code-display [background-color:#f5f7fa] [border-radius:4px] [padding:16px] [overflow-x:auto] [font-family:monospace] [line-height:1.5] [padding:15px] [font-family:'Courier_New',_monospace] [white-space:pre-wrap] [font-size:14px] [max-height:500px] [overflow-y:auto]"><code>{{ selectedExperiment.code }}</code></pre>
+                  <CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
                 </div>
 
                 <div class="ai-comment [margin-top:20px]" v-if="selectedExperiment.aiComment">
@@ -243,15 +243,14 @@ import {
   WarningFilled, Stopwatch, DataLine, Reading, Back, Select
 } from '@/components/ui/icons'
 import { DocxGenerator } from '../../utils/docxGenerator'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
+import CodeViewer from '@/components/CodeViewer.vue'
 
 const experimentStore = useExperimentStore()
 const userStore = useUserStore()
 
 function renderMarkdown(text) {
-  if (!text) return ''
-  return DOMPurify.sanitize(marked(text))
+  return renderSafeMarkdown(text)
 }
 
 const loading = ref(false)
