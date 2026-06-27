@@ -1,9 +1,12 @@
 import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
-import { clearAuthStorage, getTapToken, setSessionToken, setUserInfo } from '../constants/auth'
+import { clearAuthStorage, getTapToken, setSessionToken, setTapToken, setTapUser, setUserInfo } from '../constants/auth'
 import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
+import { MOCK_USERS, MOCK_TAP_TOKEN, MOCK_TOKEN } from '../constants/mockUsers'
+
+const USE_MOCK_DATA = process.env.VUE_APP_USE_MOCK_DATA === 'true'
 
 function normalizeUserInfo(userInfo, teacherLevel) {
   const normalized = { ...(userInfo || {}) }
@@ -35,6 +38,25 @@ export const useUserStore = defineStore('user', {
     async login(username, password, teacherLevel) {
       this.loading = true
       try {
+        // Mock 模式：不调用任何真实登录 API，直接构造假用户并写入状态与存储。
+        // 触发条件：构建期注入 VUE_APP_USE_MOCK_DATA=true。
+        if (USE_MOCK_DATA) {
+          const role = (teacherLevel || 'student').toLowerCase()
+          const rawUserInfo = MOCK_USERS[role] || MOCK_USERS.student
+          const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
+
+          this.userInfo = userInfo
+          this.token = MOCK_TOKEN
+
+          setSessionToken(this.token)
+          setUserInfo(this.userInfo)
+          // 写入假 TAP token / TAP user，使 getTapToken() 非空，跳过 restoreTapSession() 真实换票。
+          setTapToken(MOCK_TAP_TOKEN)
+          setTapUser({ userId: rawUserInfo.id, role: rawUserInfo.role, username: rawUserInfo.username })
+
+          return { success: true, message: '登录成功（mock）', user: userInfo }
+        }
+
         const res = await api.login(username, password, teacherLevel)
         if (!(res && res.success)) {
           return { success: false, message: getFriendlyResponseMessage(res, '用户名或密码不正确，请检查后重试'), details: res }
