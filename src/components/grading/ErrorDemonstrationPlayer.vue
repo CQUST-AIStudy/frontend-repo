@@ -13,8 +13,66 @@
       </select>
     </header>
 
+    <!-- CODE_HIGHLIGHT 工作流：代码行高亮 + 点击弹窗 D3 动画 -->
+    <div v-if="current.workflow === 'CODE_HIGHLIGHT'" class="grid gap-0 lg:grid-cols-[minmax(0,0.95fr)_minmax(440px,1.05fr)]">
+      <div class="border-b border-[#e8edf4] p-5 lg:border-b-0 lg:border-r">
+        <div class="mb-3 flex items-center justify-between">
+          <span class="text-sm font-semibold text-[#172033]">代码（C）</span>
+          <span class="text-xs text-[#dc2626]">{{ current.title }}</span>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-[#dce3ec] bg-[#fbfcfe] font-mono text-[13px] leading-7">
+          <div
+            v-for="(line, index) in sourceLines"
+            :key="`ch-${index}`"
+            class="grid grid-cols-[36px_1fr] gap-2 border-l-[3px] px-2 transition-colors"
+            :class="codeHighlightLineClass(index + 1)"
+          >
+            <span class="select-none text-right text-[#9aa5b5]">{{ index + 1 }}</span>
+            <div class="flex items-center gap-2 whitespace-pre-wrap">
+              <code class="text-[#1f2937]">{{ line || ' ' }}</code>
+              <button
+                v-if="lineErrorRange(index + 1)"
+                type="button"
+                class="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2 py-0.5 text-[11px] font-semibold text-[#dc2626] hover:bg-[#fecaca]"
+                @click="openRangeModal(lineErrorRange(index + 1))"
+              >
+                <LucideIcon name="play" :size="10" /> {{ lineErrorRange(index + 1).label || '演示' }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-3 text-xs font-medium">
+          <span class="inline-flex items-center gap-1.5 text-[#dc2626]"><span class="h-2.5 w-2.5 rounded-sm bg-[#ef4444]"></span>点击红线位置播放动画</span>
+        </div>
+      </div>
+
+      <div class="p-5">
+        <div class="mb-4 rounded-lg border border-[#fecaca] bg-[#fff7f7] p-4">
+          <div class="mb-1 text-xs font-semibold text-[#dc2626]">错误说明</div>
+          <p class="m-0 text-sm leading-6 text-[#7f1d1d]">{{ current.explanation }}</p>
+        </div>
+        <div class="mb-4 rounded-lg border border-[#bbdfc5] bg-[#f3fbf5] p-4">
+          <div class="mb-1 text-xs font-semibold text-[#15803d]">修正写法</div>
+          <pre class="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-sm leading-6 text-[#166534]"><code>{{ current.correctedCode }}</code></pre>
+        </div>
+        <button
+          type="button"
+          class="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--app-primary)] px-4 text-sm text-white"
+          @click="openFirstRangeModal"
+        >
+          <LucideIcon name="play" :size="16" /> 查看错误动画演示
+        </button>
+      </div>
+
+      <footer class="col-span-full border-t border-[#e8edf4] bg-[#fbfcfe] px-5 py-4">
+        <div class="rounded-lg border border-[#bfdbfe] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
+          <span class="font-semibold">提示：</span>点击代码中红色波浪线标注处，即可弹出动态 D3 动画，查看错误发生时的执行路径。
+        </div>
+      </footer>
+    </div>
+
     <!-- PYTHON_TUTOR 工作流：代码执行可视化 -->
-    <div v-if="current.workflow === 'PYTHON_TUTOR'" class="grid gap-0 lg:grid-cols-[minmax(0,0.95fr)_minmax(440px,1.05fr)]">
+    <div v-else-if="current.workflow === 'PYTHON_TUTOR'" class="grid gap-0 lg:grid-cols-[minmax(0,0.95fr)_minmax(440px,1.05fr)]">
       <div class="border-b border-[#e8edf4] p-5 lg:border-b-0 lg:border-r">
         <div class="mb-3 flex items-center justify-between">
           <span class="text-sm font-semibold text-[#172033]">代码（C）</span>
@@ -161,6 +219,35 @@
         {{ current.explanation }}
       </div>
     </div>
+
+    <!-- CODE_HIGHLIGHT 弹窗：D3 动画 iframe -->
+    <div
+      v-if="modalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.55)] p-4 backdrop-blur-sm"
+      @click.self="closeModal"
+    >
+      <div class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#e8edf4] px-5 py-4">
+          <h3 class="m-0 text-base font-semibold text-[#172033]">{{ current.title }}</h3>
+          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]" @click="closeModal">
+            <LucideIcon name="x" :size="18" />
+          </button>
+        </div>
+        <div class="flex-1 overflow-hidden bg-[#f8fafc] p-1">
+          <iframe
+            v-if="current.popupHtml"
+            :srcdoc="current.popupHtml"
+            class="h-[55vh] w-full rounded-xl border-0"
+            sandbox="allow-scripts"
+            title="错误动画演示"
+          ></iframe>
+          <div v-else class="flex h-[55vh] items-center justify-center text-sm text-[#64748b]">暂无动画内容</div>
+        </div>
+        <div class="border-t border-[#e8edf4] px-5 py-4">
+          <p class="m-0 text-sm leading-6 text-[#334155]">{{ current.explanation }}</p>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -188,10 +275,11 @@ const props = defineProps({
 const activeIndex = ref(0)
 const stepIndex = ref(0)
 const playing = ref(false)
+const modalOpen = ref(false)
 let timer = null
 
 const items = computed(() => props.demonstrations || [])
-const current = computed(() => items.value[activeIndex.value] || { steps: [], sourceCode: '', correctedCode: '', frames: [], workflow: 'GENERIC_HIGHLIGHT' })
+const current = computed(() => items.value[activeIndex.value] || { steps: [], sourceCode: '', correctedCode: '', frames: [], workflow: 'GENERIC_HIGHLIGHT', errorRanges: [], popupHtml: '' })
 const steps = computed(() => current.value.frames || [])
 const activeStep = computed(() => steps.value[stepIndex.value] || { order: 0, variables: {}, memory: [], explanation: '', line: 0, error: false })
 const sourceLines = computed(() => String(current.value.sourceCode || '').split('\n'))
@@ -221,6 +309,32 @@ function frameClass(type) {
     case 'analysis': return 'border-[#bfdbfe] bg-[#f5f9ff]'
     default: return 'border-[#dce3ec] bg-[#fbfcfe]'
   }
+}
+
+function lineErrorRange(lineNumber) {
+  const ranges = current.value.errorRanges || []
+  return ranges.find(r => lineNumber >= (r.startLine || 1) && lineNumber <= (r.endLine || lineNumber)) || null
+}
+
+function codeHighlightLineClass(lineNumber) {
+  const range = lineErrorRange(lineNumber)
+  if (range) return 'border-l-[#ef4444] bg-[#fff1f2] cursor-pointer'
+  if (lineNumber === current.value.errorLine) return 'border-l-[#ef4444] bg-[#fff1f2]'
+  if (lineNumber >= current.value.highlightStartLine && lineNumber <= current.value.highlightEndLine) return 'border-l-[var(--app-primary)] bg-[var(--app-primary-soft)]'
+  return 'border-l-transparent hover:bg-[rgba(37,99,235,0.04)]'
+}
+
+function openRangeModal(range) {
+  if (!range) return
+  modalOpen.value = true
+}
+
+function openFirstRangeModal() {
+  modalOpen.value = true
+}
+
+function closeModal() {
+  modalOpen.value = false
 }
 
 watch(activeIndex, () => reset())
