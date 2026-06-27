@@ -462,7 +462,10 @@ import {
   TitleComponent,
   TooltipComponent,
   LegendComponent,
-  GridComponent
+  GridComponent,
+  MarkPointComponent,
+  MarkLineComponent,
+  GraphicComponent
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import ReportGenerator from '../../components/ReportGenerator.vue'
@@ -475,6 +478,9 @@ echarts.use([
   TooltipComponent,
   LegendComponent,
   GridComponent,
+  MarkPointComponent,
+  MarkLineComponent,
+  GraphicComponent,
   LineChart,
   BarChart,
   PieChart,
@@ -966,7 +972,131 @@ const loadStudentPerformance = async () => {
   }
 }
 
+// 图表主题色（与项目橙棕主色体系一致）
+const CHART_PRIMARY = '#c2703e'
+const CHART_SUCCESS = '#6b8f6b'
+const CHART_WARNING = '#c49a3c'
+const CHART_DANGER = '#c44b3f'
+const CHART_SOFT = '#a89b87'
+const CHART_GRID = '#f0ebe2'
+const CHART_BORDER = '#e8dfcf'
+const CHART_TEXT = '#6e6e73'
+
+// 缓存学生表现数据，供 initCharts 初始化时填充（解决 init 与异步加载的顺序问题）
+let perfData = null
+
+const truncateLabel = (str, len = 6) => {
+  if (!str) return ''
+  return str.length > len ? str.slice(0, len) + '…' : str
+}
+
+const emptyGraphic = (text) => [{
+  type: 'text',
+  left: 'center',
+  top: 'middle',
+  style: { text, fill: CHART_SOFT, fontSize: 14 }
+}]
+
+const buildScoreOption = (labels, scores, classAvg) => {
+  const empty = !scores || scores.length === 0
+  return {
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['成绩', '班级平均'], top: 0, textStyle: { color: CHART_TEXT } },
+    grid: { left: 16, right: 24, top: 40, bottom: 16, containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      boundaryGap: true,
+      axisLabel: {
+        color: CHART_TEXT,
+        formatter: (v) => truncateLabel(v, 6),
+        rotate: labels && labels.length > 4 ? 30 : 0,
+        hideOverlap: true
+      },
+      axisLine: { lineStyle: { color: CHART_BORDER } },
+      axisTick: { alignWithLabel: true }
+    },
+    yAxis: {
+      type: 'value',
+      name: '分数',
+      min: 0,
+      max: 100,
+      nameTextStyle: { color: CHART_SOFT },
+      axisLabel: { color: CHART_TEXT },
+      splitLine: { lineStyle: { color: CHART_GRID } }
+    },
+    graphic: empty ? emptyGraphic('暂无成绩数据') : undefined,
+    series: [
+      {
+        name: '成绩',
+        type: 'line',
+        smooth: true,
+        data: scores,
+        symbolSize: 7,
+        itemStyle: { color: CHART_PRIMARY },
+        lineStyle: { color: CHART_PRIMARY, width: 2.5 },
+        markPoint: {
+          symbolSize: 44,
+          data: [
+            { type: 'max', name: '最高分' },
+            { type: 'min', name: '最低分' }
+          ]
+        },
+        markLine: {
+          data: [{ type: 'average', name: '平均' }],
+          lineStyle: { color: CHART_PRIMARY, type: 'dashed' },
+          label: { color: CHART_PRIMARY }
+        }
+      },
+      {
+        name: '班级平均',
+        type: 'line',
+        smooth: true,
+        data: classAvg,
+        symbolSize: 5,
+        itemStyle: { color: CHART_SOFT },
+        lineStyle: { color: CHART_SOFT, type: 'dashed', width: 1.5 }
+      }
+    ]
+  }
+}
+
+const buildCompletionOption = (completed, pending, notSubmitted) => {
+  const raw = [
+    { value: completed, name: '已完成', itemStyle: { color: CHART_SUCCESS } },
+    { value: pending, name: '进行中', itemStyle: { color: CHART_WARNING } },
+    { value: notSubmitted, name: '未提交', itemStyle: { color: CHART_DANGER } }
+  ]
+  // 移除 0 值项，避免空扇区与失效图例占位
+  const data = raw.filter(d => d.value > 0)
+  const empty = data.length === 0
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: {
+      orient: 'horizontal',
+      bottom: 0,
+      left: 'center',
+      data: data.map(d => d.name),
+      textStyle: { color: CHART_TEXT }
+    },
+    graphic: empty ? emptyGraphic('暂无完成情况数据') : undefined,
+    series: [{
+      name: '完成情况',
+      type: 'pie',
+      radius: ['42%', '70%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderColor: '#fff', borderWidth: 2 },
+      label: { formatter: '{b}\n{d}%', color: '#424245', fontSize: 12 },
+      labelLine: { length: 10, length2: 10 },
+      data
+    }]
+  }
+}
+
 const updatePerformanceCharts = (studentSubs, allData) => {
+  perfData = { studentSubs, allData }
+
   const scored = studentSubs.filter(s => s.score > 0).sort((a, b) => {
     const nameA = a.experimentName || ''
     const nameB = b.experimentName || ''
@@ -980,36 +1110,22 @@ const updatePerformanceCharts = (studentSubs, allData) => {
     expAvgs[name].push(s.score)
   })
 
-  if (scoreChartContainer.value && scoreChart) {
+  if (scoreChart) {
     const labels = scored.map(s => s.experimentName || '实验')
     const scores = scored.map(s => s.score)
     const classAvg = labels.map(name => {
       const arr = expAvgs[name]
       return arr ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0
     })
-    scoreChart.setOption({
-      xAxis: { data: labels },
-      series: [
-        { name: '成绩', data: scores },
-        { name: '班级平均', data: classAvg }
-      ]
-    })
+    scoreChart.setOption(buildScoreOption(labels, scores, classAvg), true)
   }
 
-  if (completionChartContainer.value && completionChart) {
+  if (completionChart) {
     const completed = studentSubs.filter(s => s.status === 'completed').length
     const pending = studentSubs.length - completed
     const allExpCount = new Set(allData.map(s => s.experimentId)).size
     const notSubmitted = Math.max(0, allExpCount - studentSubs.length)
-    completionChart.setOption({
-      series: [{
-        data: [
-          { value: completed, name: '已完成', itemStyle: { color: '#67C23A' } },
-          { value: pending, name: '进行中', itemStyle: { color: '#E6A23C' } },
-          { value: notSubmitted, name: '未提交', itemStyle: { color: '#F56C6C' } }
-        ]
-      }]
-    })
+    completionChart.setOption(buildCompletionOption(completed, pending, notSubmitted), true)
   }
 }
 
@@ -1018,67 +1134,17 @@ const initCharts = () => {
 
   if (scoreChartContainer.value) {
     scoreChart = echarts.init(scoreChartContainer.value)
-    const scoreOption = {
-      tooltip: { trigger: 'axis' },
-      xAxis: {
-        type: 'category',
-        data: ['实验1', '实验2', '实验3', '当前实验', '实验5']
-      },
-      yAxis: { type: 'value', name: '分数', min: 0, max: 100 },
-      series: [
-        {
-          name: '成绩',
-          type: 'line',
-          data: [82, 88, 75, submission.value.score || 0, null],
-          markPoint: {
-            data: [
-              { type: 'max', name: '最高分' },
-              { type: 'min', name: '最低分' }
-            ]
-          }
-        },
-        {
-          name: '班级平均',
-          type: 'line',
-          data: [75, 78, 72, 80, null],
-          lineStyle: { type: 'dashed' }
-        }
-      ]
-    }
-    scoreChart.setOption(scoreOption)
+    scoreChart.setOption(buildScoreOption([], [], []))
   }
 
   if (completionChartContainer.value) {
     completionChart = echarts.init(completionChartContainer.value)
-    const completionOption = {
-      tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        data: ['按时完成', '逾期完成', '未完成']
-      },
-      series: [
-        {
-          name: '完成情况',
-          type: 'pie',
-          radius: '70%',
-          center: ['50%', '60%'],
-          data: [
-            { value: 4, name: '按时完成', itemStyle: { color: '#67C23A' } },
-            { value: 1, name: '逾期完成', itemStyle: { color: '#E6A23C' } },
-            { value: 0, name: '未完成', itemStyle: { color: '#F56C6C' } }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          }
-        }
-      ]
-    }
-    completionChart.setOption(completionOption)
+    completionChart.setOption(buildCompletionOption(0, 0, 0))
+  }
+
+  // 若异步数据已先于 init 到达，立即填充
+  if (perfData) {
+    updatePerformanceCharts(perfData.studentSubs, perfData.allData)
   }
 }
 
