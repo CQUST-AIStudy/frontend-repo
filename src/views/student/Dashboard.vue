@@ -5,7 +5,7 @@
     <div class="dash-center [flex:1] [min-width:0] [display:flex] [flex-direction:column] [gap:16px]">
 
       <!-- 模块1: 欢迎问候卡片 -->
-      <div class="dash-card [background:linear-gradient(135deg,_#f8fafd_0%,_#ffffff_100%)] [border-radius:16px] [padding:24px_28px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [display:flex] [align-items:center] [justify-content:space-between] [border:1px_solid_#eef1f5]">
+      <div class="dash-card dash-welcome [padding:24px_28px] [display:flex] [align-items:center] [justify-content:space-between]">
         <div>
           <div class="[font-size:24px] [font-weight:700] [color:#1a1a2e]">你好，{{ studentName }} <span style="font-size:26px">🙋</span></div>
           <div class="[font-size:14px] [color:#8c959f] [margin-top:6px]">今天也要加油学习哦！</div>
@@ -15,8 +15,23 @@
         </div>
       </div>
 
+      <!-- 错误条 -->
+      <div v-if="loadError" class="dash-card [background:#fef2f2] [border-color:#fecaca] [padding:14px_20px] [display:flex] [align-items:center] [gap:12px]">
+        <span class="[font-size:18px]">⚠️</span>
+        <span class="[font-size:13px] [color:#b91c1c] [flex:1]">部分数据加载失败，请稍后重试。</span>
+        <UiButton class="[background:#fff] [border:1px_solid_#fecaca] [border-radius:100px] [padding:5px_16px] [font-size:12px] [color:#b91c1c] [font-weight:600] [cursor:pointer] hover:[background:#fee2e2]" @click="loadData">重试</UiButton>
+      </div>
+
+      <!-- Loading 骨架 -->
+      <template v-if="loading">
+        <div class="dash-card [padding:20px_24px]"><UiSkeleton :rows="4" /></div>
+        <div class="dash-card [padding:20px_24px]"><UiSkeleton :rows="3" /></div>
+        <div class="dash-card [padding:20px_24px]"><UiSkeleton :rows="5" /></div>
+      </template>
+
+      <template v-else>
       <!-- 模块2: 当前最紧急的实验 -->
-      <div class="dash-card-urgent [background:linear-gradient(135deg,_#fffbeb_0%,_#fef7ed_50%,_#fff8f0_100%)] [border-radius:16px] [padding:20px_24px] [border:1px_solid_#fde4c2] [box-shadow:0_1px_4px_rgba(245,158,11,0.06)]">
+      <div v-if="urgentExperiment" class="dash-card-urgent [padding:20px_24px]">
         <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:16px]">
           <span class="[width:26px] [height:26px] [border-radius:50%] [background:#fef3c7] [display:flex] [align-items:center] [justify-content:center] [font-size:14px]">🔥</span>
           <span class="[font-size:13px] [font-weight:700] [color:#92400e]">当前最紧急的实验</span>
@@ -25,19 +40,19 @@
         <div class="[display:flex] [gap:24px]">
           <div class="[flex:1]">
             <div class="[font-size:17px] [font-weight:700] [color:#1a1a2e] [margin-bottom:6px]">
-              {{ urgentExperiment?.name || '暂无实验' }}
-              <span class="[font-size:11px] [padding:2px_10px] [border-radius:100px] [background:linear-gradient(135deg,_#fef3c7,_#fde4c2)] [color:#b45309] [font-weight:600] [margin-left:8px] [border:1px_solid_#fde4c2]">部分测试未通过</span>
+              {{ urgentExperiment.name }}
+              <span v-if="urgentFailCount > 0" class="[font-size:11px] [padding:2px_10px] [border-radius:100px] [background:linear-gradient(135deg,_#fef3c7,_#fde4c2)] [color:#b45309] [font-weight:600] [margin-left:8px] [border:1px_solid_#fde4c2]">部分测试未通过</span>
             </div>
             <div class="[font-size:12px] [color:#6b7280] [margin-bottom:8px] [line-height:1.7]">
-              所属实验：{{ urgentExperiment?.name || '--' }} · 题目数：{{ urgentExperiment?.problemCount || 0 }} · 最近提交：{{ formatTime(urgentExperiment?.submitTime) || '暂无' }}
+              所属实验：{{ urgentExperiment.name }} · 题目数：{{ urgentExperiment.problemCount || 0 }} · 最近提交：{{ formatTime(urgentExperiment.submitTime) || '暂无' }}
             </div>
             <div class="[display:flex] [align-items:center] [gap:16px] [margin-bottom:14px]">
-              <span class="[font-size:13px] [color:#1a1a2e]">通过率：<strong class="[color:#b45309]">{{ urgentPassRate }}%</strong> ({{ urgentExperiment?.acceptedProblemCount || 0 }}/{{ urgentExperiment?.problemCount || 0 }})</span>
-              <span class="[font-size:13px] [color:#ef4444] [font-weight:600]">未通过 {{ urgentFailCount }} 个测试点</span>
+              <span class="[font-size:13px] [color:#1a1a2e]">通过率：<strong class="[color:#b45309]">{{ urgentPassRate }}%</strong> ({{ urgentExperiment.acceptedProblemCount || 0 }}/{{ urgentExperiment.problemCount || 0 }})</span>
+              <span v-if="urgentFailCount > 0" class="[font-size:13px] [color:#ef4444] [font-weight:600]">未通过 {{ urgentFailCount }} 个测试点</span>
             </div>
             <div class="[display:flex] [gap:10px]">
-              <UiButton class="[background:linear-gradient(135deg,_#f59e0b,_#d97706)] [color:#fff] [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(245,158,11,0.25)] hover:[background:linear-gradient(135deg,_#d97706,_#b45309)] hover:[box-shadow:0_4px_12px_rgba(245,158,11,0.35)]" @click="nav('/student/experiment-detail/' + urgentExperiment?.id)">继续修改</UiButton>
-              <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:8px_22px] [font-size:13px] [color:#6b7280] [font-weight:500] [cursor:pointer] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="nav('/student/experiment-detail/' + urgentExperiment?.id)">查看错误详情</UiButton>
+              <UiButton class="[background:linear-gradient(135deg,_#f59e0b,_#d97706)] [color:#fff] [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(245,158,11,0.25)] hover:[background:linear-gradient(135deg,_#d97706,_#b45309)] hover:[box-shadow:0_4px_12px_rgba(245,158,11,0.35)]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">继续修改</UiButton>
+              <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:8px_22px] [font-size:13px] [color:#6b7280] [font-weight:500] [cursor:pointer] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">查看错误详情</UiButton>
             </div>
           </div>
           <div class="[display:flex] [align-items:center] [gap:14px] [flex-shrink:0]">
@@ -48,34 +63,31 @@
       </div>
 
       <!-- 模块3: 最近未解决的错误 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:20px_24px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
+      <div v-if="recentErrors.length" class="dash-card [padding:20px_24px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:14px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">最近未解决的错误（{{ recentErrors.length }}）</span>
           <a class="[font-size:13px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/wrong-notebook')">查看全部 →</a>
         </div>
         <div class="[display:flex] [flex-direction:column]">
-          <template v-if="recentErrors.length">
-            <div v-for="(err, i) in recentErrors" :key="err.id || i"
-                 class="[display:flex] [align-items:center] [gap:14px] [padding:14px_0]"
-                 :class="{ '[border-bottom:1px_solid_#f3f4f6]': i < recentErrors.length - 1 }">
-              <span class="[font-size:20px] [flex-shrink:0] [width:36px] [height:36px] [border-radius:10px] [display:flex] [align-items:center] [justify-content:center]" :class="errIconBg(err)">{{ errIcon(err) }}</span>
-              <div class="[flex:1] [min-width:0]">
-                <div class="[font-size:14px] [font-weight:600] [color:#1a1a2e]">{{ err.problemTitle || '未知题目' }}
-                  <span class="[font-size:12px] [color:#8c959f] [font-weight:400]" v-if="err.experimentName">· {{ err.experimentName }}</span>
-                </div>
-                <div class="[font-size:12px] [color:#6b7280] [margin-top:2px]" v-if="errDesc(err)">{{ errDesc(err) }}</div>
-                <div class="[font-size:11px] [color:#9ca3af] [margin-top:2px]">提交时间 {{ formatTime(err.lastWrongAt) }}</div>
+          <div v-for="(err, i) in recentErrors" :key="err.id || i"
+               class="[display:flex] [align-items:center] [gap:14px] [padding:14px_0]"
+               :class="{ '[border-bottom:1px_solid_#f3f4f6]': i < recentErrors.length - 1 }">
+            <span class="[font-size:20px] [flex-shrink:0] [width:36px] [height:36px] [border-radius:10px] [display:flex] [align-items:center] [justify-content:center]" :class="errIconBg(err)">{{ errIcon(err) }}</span>
+            <div class="[flex:1] [min-width:0]">
+              <div class="[font-size:14px] [font-weight:600] [color:#1a1a2e]">{{ err.problemTitle || '未知题目' }}
+                <span class="[font-size:12px] [color:#8c959f] [font-weight:400]" v-if="err.experimentName">· {{ err.experimentName }}</span>
               </div>
-              <span :class="errTagClass(err)" class="[font-size:11px] [padding:3px_10px] [border-radius:100px] [font-weight:600] [flex-shrink:0] [letter-spacing:0.01em]">{{ errTagText(err) }}</span>
-              <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:500] hover:[background:#eff6ff] hover:[border-color:#3b82f6]" @click="nav('/student/wrong-notebook')">查看详情</UiButton>
+              <div class="[font-size:12px] [color:#6b7280] [margin-top:2px]" v-if="errDesc(err)">{{ errDesc(err) }}</div>
+              <div class="[font-size:11px] [color:#9ca3af] [margin-top:2px]">提交时间 {{ formatTime(err.lastWrongAt) }}</div>
             </div>
-          </template>
-          <div v-else class="[text-align:center] [padding:20px] [color:#9ca3af] [font-size:13px]">暂无未解决的错误</div>
+            <span :class="errTagClass(err)" class="[font-size:11px] [padding:3px_10px] [border-radius:100px] [font-weight:600] [flex-shrink:0] [letter-spacing:0.01em]">{{ errTagText(err) }}</span>
+            <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:500] hover:[background:#eff6ff] hover:[border-color:#3b82f6]" @click="nav('/student/wrong-notebook')">查看详情</UiButton>
+          </div>
         </div>
       </div>
 
       <!-- 模块4: 今日推荐练习 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:20px_24px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
+      <div v-if="practiceRecommendations.length" class="dash-card [padding:20px_24px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">今日推荐练习（基于你的薄弱点）</span>
           <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#6b7280] [cursor:pointer] [font-weight:500] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="refreshRecommendations" :disabled="recLoading">🔄 换一批</UiButton>
@@ -83,9 +95,9 @@
         <div class="[font-size:12px] [color:#6b7280] [margin-bottom:14px] [padding:8px_12px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4ff)] [border-radius:8px] [border:1px_solid_#e8edf5]">
           💡 推荐原因：{{ recReason || '根据你的学习数据，为你推荐以下针对性练习' }}
         </div>
-        <div class="[display:grid] [grid-template-columns:repeat(3,_1fr)] [gap:12px]">
+        <div class="rec-grid [display:grid] [grid-template-columns:repeat(3,_1fr)] [gap:12px]">
           <div v-for="(rec, i) in practiceRecommendations" :key="i"
-               class="[padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#c8ddf5] hover:[background:#fff] hover:[box-shadow:0_4px_12px_rgba(59,130,246,0.08)]" @click="goToPractice(rec)">
+               class="rec-item [padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#c8ddf5] hover:[background:#fff] hover:[box-shadow:0_6px_16px_rgba(59,130,246,0.1)]" @click="goToPractice(rec)">
             <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
               <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#eff6ff] [color:#3b82f6]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source }}</span>
               <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : rec.tag }}</span>
@@ -98,9 +110,9 @@
       </div>
 
       <!-- 模块5: 快速入口 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:18px_20px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
+      <div class="dash-card [padding:18px_20px]">
         <div class="[font-size:15px] [font-weight:700] [color:#1a1a2e] [margin-bottom:14px]">快速入口</div>
-        <div class="[display:grid] [grid-template-columns:repeat(6,_1fr)] [gap:8px]">
+        <div class="quick-grid [display:grid] [grid-template-columns:repeat(6,_1fr)] [gap:8px]">
           <div v-for="q in quickEntries" :key="q.label"
                class="[display:flex] [flex-direction:column] [align-items:center] [gap:8px] [padding:12px_4px] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] hover:[transform:translateY(-2px)]"
                @click="nav(q.path)">
@@ -109,12 +121,19 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
 
     <!-- ====== 右侧固定信息侧边栏 ====== -->
-    <div class="dash-right [width:320px] [flex-shrink:0] [display:flex] [flex-direction:column] [gap:14px]">
+    <div class="dash-right [display:flex] [flex-direction:column] [gap:14px]">
+      <!-- Loading 骨架 -->
+      <template v-if="loading">
+        <div class="dash-card [padding:18px]"><UiSkeleton :rows="5" /></div>
+        <div class="dash-card [padding:18px]"><UiSkeleton :rows="4" /></div>
+      </template>
+      <template v-else>
       <!-- 卡片1: 本周实验日历 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:18px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
+      <div class="dash-card [padding:18px]">
         <div class="[margin-bottom:12px]">
           <div class="[font-size:15px] [font-weight:700] [color:#1a1a2e] [margin-bottom:8px]">本周实验日历</div>
           <div class="[display:flex] [gap:6px] [align-items:center] [font-size:10px] [color:#8c959f] [flex-wrap:wrap]">
@@ -139,27 +158,29 @@
             </div>
           </div>
         </div>
-        <div class="[display:flex] [flex-direction:column] [gap:6px] [margin-bottom:10px]">
-          <div v-for="ev in calendarEvents" :key="ev.name"
-               class="[display:flex] [align-items:center] [gap:6px] [padding:5px_8px] [border-radius:8px] [cursor:pointer] [transition:all_0.15s] hover:[background:#f9fafb]"
-               @click="nav('/student/experiments')">
-            <span class="[font-size:11px] [color:#6b7280] [flex-shrink:0] [width:38px] [font-weight:500]">{{ ev.date }}</span>
-            <span class="[font-size:12px] [color:#1a1a2e] [flex:1] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-weight:500]">{{ ev.name }}</span>
-            <span class="[font-size:10px] [color:#ef4444] [font-weight:600] [flex-shrink:0]">{{ ev.countdown }}</span>
+        <template v-if="calendarEvents.length">
+          <div class="[display:flex] [flex-direction:column] [gap:6px] [margin-bottom:10px]">
+            <div v-for="ev in calendarEvents" :key="ev.name"
+                 class="[display:flex] [align-items:center] [gap:6px] [padding:5px_8px] [border-radius:8px] [cursor:pointer] [transition:all_0.15s] hover:[background:#f9fafb]"
+                 @click="nav('/student/experiments')">
+              <span class="[font-size:11px] [color:#6b7280] [flex-shrink:0] [width:38px] [font-weight:500]">{{ ev.date }}</span>
+              <span class="[font-size:12px] [color:#1a1a2e] [flex:1] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-weight:500]">{{ ev.name }}</span>
+              <span class="[font-size:10px] [color:#ef4444] [font-weight:600] [flex-shrink:0]">{{ ev.countdown }}</span>
+            </div>
           </div>
-        </div>
-        <div class="[text-align:right]">
-          <a class="[font-size:11px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/experiments')">查看全部日程 →</a>
-        </div>
+          <div class="[text-align:right]">
+            <a class="[font-size:11px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/experiments')">查看全部日程 →</a>
+          </div>
+        </template>
       </div>
 
       <!-- 卡片2: 学习数据概览 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:18px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
-        <div class="[display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
+      <div v-if="hasWeeklyStats" class="dash-card [padding:18px]">
+        <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">学习数据概览（本周）</span>
           <a class="[font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/learning-analysis')">查看详情</a>
         </div>
-        <div class="[display:grid] [grid-template-columns:repeat(4,_1fr)] [gap:8px] [margin-bottom:14px]">
+        <div class="stats-grid [display:grid] [grid-template-columns:repeat(4,_1fr)] [gap:8px] [margin-bottom:14px]">
           <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4f8)] [border-radius:10px] [border:1px_solid_#eef1f5]">
             <div class="[font-size:19px] [font-weight:800] [color:#1a1a2e]">{{ weeklyStats?.experimentDone || '0/0' }}</div><div class="[font-size:10px] [color:#8c959f] [margin-top:2px] [font-weight:500]">实验完成数</div>
           </div>
@@ -178,8 +199,8 @@
       </div>
 
       <!-- 卡片3: 最新反馈 -->
-      <div class="dash-card [background:#fff] [border-radius:16px] [padding:18px] [box-shadow:0_1px_3px_rgba(0,0,0,0.05)] [border:1px_solid_#f0f0f3]">
-        <div class="[display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:10px]">
+      <div v-if="feedbackList.length" class="dash-card [padding:18px]">
+        <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:10px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">最新反馈</span>
           <a class="[font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/ai-report')">查看全部</a>
         </div>
@@ -195,11 +216,12 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
 
     <!-- 回到顶部 -->
     <transition name="fade">
-      <div v-if="showBackTop" class="[position:fixed] [bottom:28px] [right:28px] [width:42px] [height:42px] [border-radius:50%] [background:#fff] [box-shadow:0_2px_12px_rgba(0,0,0,0.1)] [display:flex] [align-items:center] [justify-content:center] [cursor:pointer] [z-index:200] [border:1px_solid_#e5e7eb] hover:[box-shadow:0_4px_16px_rgba(0,0,0,0.15)] hover:[transform:translateY(-2px)] [transition:all_0.2s]" @click="scrollToTop">
+      <div v-if="showBackTop" class="[position:fixed] [bottom:28px] [right:28px] [width:42px] [height:42px] [border-radius:50%] [background:#fff] [box-shadow:0_2px_12px_rgba(0,0,0,0.1)] [display:flex] [align-items:center] [justify-content:center] [cursor:pointer] [z-index:200] [border:1px_solid_#e5e7eb] [transition:all_0.2s] hover:[box-shadow:0_4px_16px_rgba(0,0,0,0.15)] hover:[transform:translateY(-2px)]" @click="scrollToTop">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg>
       </div>
     </transition>
@@ -217,6 +239,7 @@ import api, { apiClient } from '@/api'
 const router = useRouter()
 const experimentStore = useExperimentStore()
 const loading = ref(true)
+const loadError = ref(false)
 const profileData = ref({})
 const studentName = ref('')
 const className = ref('')
@@ -370,6 +393,13 @@ const urgentCountdown = computed(() => {
   return countdownText(e.deadline)
 })
 
+// 仅当 weekly-stats 接口真实返回数据时显示学习数据卡片
+const hasWeeklyStats = computed(() => {
+  const w = weeklyStats.value
+  if (!w) return false
+  return w.experimentDone != null || w.accuracy != null || w.submissions != null || w.studyHours != null
+})
+
 function formatTime(t) {
   if (!t) return ''
   try {
@@ -489,6 +519,7 @@ function formatDateShort(t) {
 
 async function loadData() {
   loading.value = true
+  loadError.value = false
   try {
     await experimentStore.fetchExperimentList()
     const [profileRes, wrongRes, weeklyRes, feedbackRes] = await Promise.allSettled([
@@ -513,16 +544,7 @@ async function loadData() {
     if (weeklyRes.status === 'fulfilled' && weeklyRes.value) {
       weeklyStats.value = weeklyRes.value?.data || weeklyRes.value || null
     } else {
-      const list = experimentStore.experimentList
-      const arr = Array.isArray(list) ? list : []
-      const done = arr.filter(e => e.status === 'completed').length
-      weeklyStats.value = {
-        experimentDone: `${done}/${arr.length}`,
-        accuracy: profileData.value?.overview?.overallAcRate || 0,
-        submissions: profileData.value?.overview?.totalSubmissions || 0,
-        studyHours: profileData.value?.studyTime || 0,
-        chartData: { dates: [], values: [] }
-      }
+      weeklyStats.value = null
     }
     if (feedbackRes.status === 'fulfilled' && feedbackRes.value) {
       const fdata = feedbackRes.value?.data || feedbackRes.value || {}
@@ -535,6 +557,7 @@ async function loadData() {
     setTimeout(() => { initUrgentRing(); initWeeklyChart() }, 300)
   } catch (e) {
     logger.error('Dashboard loadData error:', e)
+    loadError.value = true
     loading.value = false
     await nextTick()
     setTimeout(() => { initUrgentRing(); initWeeklyChart() }, 300)
@@ -547,7 +570,26 @@ onBeforeUnmount(() => { window.removeEventListener('scroll', handleScroll); wind
 </script>
 
 <style scoped>
+/* 统一卡片基类 */
+.dash-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #f0f0f3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.dash-welcome {
+  background: linear-gradient(135deg, #fbfdff 0%, #ffffff 100%);
+  border: 1px solid #eef1f5;
+}
+.dash-card-urgent {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef7ed 50%, #fff8f0 100%);
+  border-radius: 16px;
+  border: 1px solid #fde4c2;
+  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.06);
+}
+
 .dash-right {
+  width: 100%;
   position: sticky;
   top: 16px;
   align-self: flex-start;
@@ -556,6 +598,22 @@ onBeforeUnmount(() => { window.removeEventListener('scroll', handleScroll); wind
 }
 .dash-right::-webkit-scrollbar { width: 4px; }
 .dash-right::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* 响应式：窄屏右侧栏堆叠到主内容下方 */
+@media (min-width: 1101px) {
+  .dash-right { width: 320px; flex-shrink: 0; }
+}
+@media (max-width: 1100px) {
+  .dash-page { flex-direction: column; }
+  .dash-right { position: static; max-height: none; }
+  .rec-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 760px) {
+  .rec-grid { grid-template-columns: 1fr !important; }
+  .quick-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
 </style>
