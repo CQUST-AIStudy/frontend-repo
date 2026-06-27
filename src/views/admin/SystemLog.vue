@@ -38,14 +38,9 @@
 
         <ui-table :data="filteredLogs" :aria-busy="loading" border class="[width:100%]">
           <ui-table-column prop="timestamp" label="时间" width="180" sortable />
-          <ui-table-column label="级别" width="100">
+          <ui-table-column label="级别" width="70">
             <template #default="scope">
-              <ui-tag
-                :type="getLogLevelType(scope.row.level)"
-                size="small"
-              >
-                {{ scope.row.level }}
-              </ui-tag>
+              <ui-status-dot :type="getLogLevelType(scope.row.level)" :content="scope.row.level" />
             </template>
           </ui-table-column>
           <ui-table-column prop="category" label="分类" width="120" />

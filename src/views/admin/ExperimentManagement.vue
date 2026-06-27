@@ -59,11 +59,9 @@
             </template>
           </ui-table-column>
           <ui-table-column prop="submissionCount" label="提交数" width="100" />
-          <ui-table-column label="状态" width="100">
+          <ui-table-column label="状态" width="70">
             <template #default="scope">
-              <ui-tag :type="getStatusType(scope.row.status)">
-                {{ getStatusText(scope.row.status) }}
-              </ui-tag>
+              <ui-status-dot :type="getStatusType(scope.row.status)" :content="getStatusText(scope.row.status)" />
             </template>
           </ui-table-column>
           <ui-table-column label="操作" width="220" fixed="right">

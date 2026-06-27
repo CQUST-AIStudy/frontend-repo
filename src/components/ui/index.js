@@ -296,7 +296,7 @@ export const UiTag = defineComponent({
     return () => h('span', {
       ...attrs,
       class: cls(
-        'ui-tag inline-flex h-[26px] items-center rounded-full px-3 text-[12px] font-medium leading-none',
+        'ui-tag inline-flex h-[26px] items-center whitespace-nowrap rounded-full px-3 text-[12px] font-medium leading-none',
         props.size === 'small' && 'h-[22px] px-2 text-[11px]',
         props.size === 'large' && 'h-8 px-3.5 text-[13px]',
         tone.value,
@@ -1366,9 +1366,101 @@ export const UiDrawer = defineComponent({
 
 export const UiTooltip = defineComponent({
   name: 'UiTooltip',
-  props: { content: String, placement: String },
+  props: { content: String, placement: { type: String, default: 'top' } },
   setup(props, { attrs, slots }) {
-    return () => h('span', { ...attrs, title: props.content, class: cls('ui-tooltip inline-flex', attrs.class) }, slots.default?.())
+    const visible = ref(false)
+    const triggerRef = ref(null)
+    const coords = reactive({ left: 0, top: 0 })
+    let hideTimer = null
+    const clearHide = () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null } }
+    const position = () => {
+      const el = triggerRef.value
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      const gap = 8
+      // 浮层预估宽度，用于水平居中；以 trigger 宽度兜底
+      const width = Math.max(r.width, 32)
+      let left = r.left + r.width / 2 - width / 2
+      let top = r.top - gap
+      if (props.placement === 'bottom') {
+        top = r.bottom + gap
+      } else if (props.placement === 'left') {
+        left = r.left - width - gap
+        top = r.top + r.height / 2
+      } else if (props.placement === 'right') {
+        left = r.right + gap
+        top = r.top + r.height / 2
+      }
+      // 边界保护
+      const maxLeft = window.innerWidth - width - 8
+      left = Math.max(8, Math.min(left, maxLeft))
+      coords.left = left
+      coords.top = top
+    }
+    const show = () => { clearHide(); visible.value = true; nextTick(position) }
+    const hide = () => { clearHide(); hideTimer = setTimeout(() => { visible.value = false }, 80) }
+    onUnmounted(clearHide)
+    return () => h('span', {
+      ...attrs,
+      ref: triggerRef,
+      class: cls('ui-tooltip inline-flex', attrs.class),
+      onMouseenter: show,
+      onMouseleave: hide,
+      onFocus: show,
+      onBlur: hide
+    }, [
+      slots.default?.(),
+      h(Teleport, { to: 'body' }, [
+        h(Transition, { name: 'ui-fade' }, () => visible.value && props.content && h('div', {
+          class: 'ui-tooltip__pop fixed z-[3000] max-w-[280px] rounded-md px-2.5 py-1.5 text-[12px] font-medium leading-snug shadow-[0_4px_16px_rgba(15,23,42,0.18)] pointer-events-none',
+          style: {
+            left: `${coords.left}px`,
+            top: `${coords.top}px`,
+            background: 'var(--app-text, #0f172a)',
+            color: 'var(--app-surface, #fffcf7)',
+            transform: props.placement === 'top' || props.placement === 'bottom'
+              ? 'translateY(0)'
+              : 'translateY(-50%)'
+          },
+          onMouseenter: show,
+          onMouseleave: hide
+        }, props.content))
+      ])
+    ])
+  }
+})
+
+export const UiStatusDot = defineComponent({
+  name: 'UiStatusDot',
+  props: {
+    type: { type: String, default: 'info' },
+    content: String,
+    size: { type: [String, Number], default: 9 },
+    placement: { type: String, default: 'top' }
+  },
+  setup(props, { attrs }) {
+    const color = computed(() => ({
+      success: '#16a34a',
+      warning: '#d97706',
+      danger: '#dc2626',
+      info: '#64748b',
+      primary: '#007aff'
+    }[normalizeType(props.type)] || '#64748b'))
+    const px = computed(() => `${props.size}px`)
+    return () => h(UiTooltip, {
+      content: props.content,
+      placement: props.placement,
+      ...attrs,
+      class: 'inline-flex items-center justify-center'
+    }, () => h('span', {
+      class: 'ui-status-dot inline-block rounded-full',
+      style: {
+        width: px.value,
+        height: px.value,
+        background: color.value,
+        boxShadow: `0 0 0 3px ${color.value}26`
+      }
+    }))
   }
 })
 
@@ -1793,6 +1885,7 @@ export const uiComponents = {
   UiSpace,
   UiStep,
   UiSteps,
+  UiStatusDot,
   UiSubMenu,
   UiSwitch,
   UiTabPane,

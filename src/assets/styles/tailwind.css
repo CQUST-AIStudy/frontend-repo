@@ -3765,3 +3765,14 @@
     background: #ffffff !important;
   }
 }
+
+/* 浮动 tooltip 淡入过渡（UiTooltip / UiDialog / UiDrawer 共用） */
+.ui-fade-enter-active,
+.ui-fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.ui-fade-enter-from,
+.ui-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-2px);
+}

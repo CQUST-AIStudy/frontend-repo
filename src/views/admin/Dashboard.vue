@@ -66,11 +66,9 @@
             <div class="dashboard-table-wrap dashboard-table-wrap--api">
               <ui-table :data="apiServices" stripe>
                 <ui-table-column prop="name" label="服务" min-width="120" />
-                <ui-table-column label="状态" width="110">
+                <ui-table-column label="状态" width="70">
                   <template #default="{ row }">
-                    <ui-tag :type="serviceStatusType(row.status)" effect="dark">
-                      {{ serviceStatusText(row.status) }}
-                    </ui-tag>
+                    <ui-status-dot :type="serviceStatusType(row.status)" :content="serviceStatusText(row.status)" />
                   </template>
                 </ui-table-column>
                 <ui-table-column prop="provider" label="Provider" width="120" />
@@ -110,18 +108,18 @@
                 <ui-table-column prop="name" label="班级" min-width="150" />
                 <ui-table-column prop="teacherName" label="教师" width="130" />
                 <ui-table-column prop="ptaGroupName" label="PTA 用户组" min-width="140" />
-                <ui-table-column label="同步开关" width="100">
+                <ui-table-column label="同步开关" width="70">
                   <template #default="{ row }">
-                    <ui-tag :type="row.syncEnabled ? 'success' : 'info'" effect="plain">
-                      {{ row.syncEnabled ? '已开启' : '未开启' }}
-                    </ui-tag>
+                    <ui-tooltip :content="row.syncEnabled ? '已开启' : '未开启'" placement="top">
+                      <ui-icon :class="row.syncEnabled ? 'text-[#16a34a]' : 'text-[#cbd5e1]'" class="text-[18px]">
+                        <SwitchButton />
+                      </ui-icon>
+                    </ui-tooltip>
                   </template>
                 </ui-table-column>
-                <ui-table-column label="状态" width="110">
+                <ui-table-column label="状态" width="70">
                   <template #default="{ row }">
-                    <ui-tag :type="syncStatusType(row.syncStatus)" effect="dark">
-                      {{ syncStatusText(row.syncStatus) }}
-                    </ui-tag>
+                    <ui-status-dot :type="syncStatusType(row.syncStatus)" :content="syncStatusText(row.syncStatus)" />
                   </template>
                 </ui-table-column>
                 <ui-table-column label="上次成功更新" min-width="165">
@@ -181,9 +179,9 @@
                     <ui-tag :type="taskModeType(row.mode)" effect="plain">{{ modeText(row.mode) }}</ui-tag>
                   </template>
                 </ui-table-column>
-                <ui-table-column label="状态" width="100">
+                <ui-table-column label="状态" width="70">
                   <template #default="{ row }">
-                    <ui-tag :type="syncStatusType(row.status)" effect="dark">{{ syncStatusText(row.status) }}</ui-tag>
+                    <ui-status-dot :type="syncStatusType(row.status)" :content="syncStatusText(row.status)" />
                   </template>
                 </ui-table-column>
                 <ui-table-column label="增量结果" min-width="240">
