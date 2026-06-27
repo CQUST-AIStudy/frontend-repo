@@ -517,7 +517,7 @@ import {
   triggerPtaSync,
   updateTeachingClass
 } from '../../api/tap'
-import { getFriendlyErrorMessage } from '../../utils/errorMessage'
+import { extractErrorPayload, getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -548,6 +548,15 @@ const { errors, validate, resetFields } = useFormValidation(classRules)
 
 const syncingMap = reactive({})
 const importingMap = reactive({})
+
+const CLASS_DELETE_CONFLICT = 'CLASS_DELETE_CONFLICT'
+
+const isClassDeleteConflict = (error) => {
+  const payload = extractErrorPayload(error)
+  return payload?.code === CLASS_DELETE_CONFLICT || error?.code === CLASS_DELETE_CONFLICT
+}
+
+const isDialogCancel = (error) => error === 'cancel' || error === 'close' || error?.action === 'cancel' || error?.action === 'close'
 
 const studentDialogVisible = ref(false)
 const currentClass = ref(null)
@@ -867,7 +876,29 @@ const confirmDelete = (cls) => {
       uiMessage.success('删除成功')
       await loadClasses()
     } catch (error) {
-      uiMessage.error(error.message || '删除失败')
+      if (!isClassDeleteConflict(error)) {
+        uiMessage.error(getFriendlyErrorMessage(error, '删除失败'))
+        return
+      }
+
+      try {
+        await messageBox.confirm(
+          `班级"${displayClassName(cls)}"仍关联已发布作业。继续删除会同步清理该班级的已发布作业、学生提交/练习状态和 PTA 同步记录，且不可恢复。确认继续？`,
+          '确认强制删除',
+          {
+            confirmButtonText: '继续删除',
+            cancelButtonText: '取消',
+            type: 'error'
+          }
+        )
+        await deleteTeachingClass(cls.id, { force: true })
+        uiMessage.success('删除成功')
+        await loadClasses()
+      } catch (forceError) {
+        if (!isDialogCancel(forceError)) {
+          uiMessage.error(getFriendlyErrorMessage(forceError, '删除失败'))
+        }
+      }
     }
   }).catch(() => {})
 }

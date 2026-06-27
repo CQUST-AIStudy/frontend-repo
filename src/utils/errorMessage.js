@@ -25,6 +25,10 @@ const GENERIC_FALLBACK_MESSAGES = new Set([
   '请求失败，请稍后重试'
 ])
 
+const BUSINESS_CODE_MESSAGES = {
+  CLASS_DELETE_CONFLICT: '该班级下还有已发布作业，暂时不能删除。请先删除或下线该班级关联的作业后再重试。'
+}
+
 const FRIENDLY_PATTERNS = [
   {
     pattern: /(invalid|incorrect|wrong|bad).*(username|password|credential)|user.*not.*found|account.*not.*found|password.*incorrect|用户名或密码|账号或密码|密码错误|用户不存在|账户不存在|账号不存在/i,
@@ -135,6 +139,14 @@ export function extractErrorPayload(error) {
   )
 }
 
+function extractErrorCode(error) {
+  const payload = extractErrorPayload(error)
+  if (payload && typeof payload === 'object') {
+    return normalizeText(payload.code || payload.errorCode || payload.error_code)
+  }
+  return normalizeText(error?.code)
+}
+
 export function extractErrorMessage(error) {
   if (!error) return ''
   if (typeof error === 'string') return error
@@ -234,6 +246,11 @@ function mapRawMessage(rawMessage, status) {
 
 export function getFriendlyErrorMessage(error, fallbackMessage = DEFAULT_ERROR_MESSAGE) {
   if (error && typeof error === 'object' && error.friendlyMessage) return error.friendlyMessage
+
+  const errorCode = extractErrorCode(error)
+  if (errorCode && BUSINESS_CODE_MESSAGES[errorCode]) {
+    return BUSINESS_CODE_MESSAGES[errorCode]
+  }
 
   const status = getErrorStatus(error)
   const raw = normalizeRawMessage(extractErrorMessage(error))

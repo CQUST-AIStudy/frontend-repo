@@ -114,10 +114,19 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import api from '../../api'
-import { getFriendlyErrorMessage } from '../../utils/errorMessage'
+import { extractErrorPayload, getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
 const classes = ref([])
+
+const CLASS_DELETE_CONFLICT = 'CLASS_DELETE_CONFLICT'
+
+const isClassDeleteConflict = (error) => {
+  const payload = extractErrorPayload(error)
+  return payload?.code === CLASS_DELETE_CONFLICT || error?.code === CLASS_DELETE_CONFLICT
+}
+
+const isDialogCancel = (error) => error === 'cancel' || error === 'close' || error?.action === 'cancel' || error?.action === 'close'
 
 // 过滤表单
 const filterForm = reactive({
@@ -249,6 +258,28 @@ const deleteClass = (cls) => {
       await loadClasses()
       uiMessage.success('班级删除成功')
     } catch (error) {
+      if (isClassDeleteConflict(error)) {
+        try {
+          await messageBox.confirm(
+              `班级 ${cls.name} 仍关联已发布作业。继续删除会同步清理该班级的已发布作业、学生提交/练习状态和 PTA 同步记录，且不可恢复。确认继续？`,
+              '确认强制删除',
+              {
+                confirmButtonText: '继续删除',
+                cancelButtonText: '取消',
+                type: 'error'
+              }
+          )
+          await api.deleteClass(cls.id, { force: true })
+          await loadClasses()
+          uiMessage.success('班级删除成功')
+        } catch (forceError) {
+          if (!isDialogCancel(forceError)) {
+            logger.error('强制删除班级失败:', forceError)
+            uiMessage.error(getFriendlyErrorMessage(forceError, '删除班级失败'))
+          }
+        }
+        return
+      }
       logger.error('删除班级失败:', error)
       uiMessage.error(getFriendlyErrorMessage(error, '删除班级失败'))
     }

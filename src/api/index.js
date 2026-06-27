@@ -451,8 +451,10 @@ export default {
     return apiClient.put(`/api/classes/${id}`, data)
   },
 
-  async deleteClass(id) {
-    return apiClient.delete(`/api/classes/${id}`)
+  async deleteClass(id, options = {}) {
+    return apiClient.delete(`/api/classes/${id}`, {
+      params: { force: options.force === true }
+    })
   },
 
   async getClassStudents(id) {

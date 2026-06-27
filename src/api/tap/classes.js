@@ -12,8 +12,10 @@ export function updateTeachingClass(id, data) {
   return tapClient.put(`/api/classes/${id}`, data)
 }
 
-export function deleteTeachingClass(id) {
-  return tapClient.delete(`/api/classes/${id}`)
+export function deleteTeachingClass(id, options = {}) {
+  return tapClient.delete(`/api/classes/${id}`, {
+    params: { force: options.force === true }
+  })
 }
 
 export function getClassStudents(classId) {
