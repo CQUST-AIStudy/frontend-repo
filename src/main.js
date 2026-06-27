@@ -13,6 +13,7 @@ import { installUiIcons } from './components/ui/icons'
 import { installFeedback } from './services/feedback'
 import { AUTH_STORAGE_CLEARED_EVENT, AUTH_STORAGE_KEYS } from './constants/auth'
 import { useUserStore } from './store'
+import { useThemeStore } from './store/theme'
 
 const browserConsole = window.console
 const originalError = browserConsole?.error?.bind(browserConsole)
@@ -39,6 +40,9 @@ window.addEventListener(AUTH_STORAGE_CLEARED_EVENT, () => {
   userStore.resetAuthState()
   localStorage.removeItem(AUTH_STORAGE_KEYS.PINIA_USER)
 })
+
+// 应用启动前先从 localStorage 恢复并应用外观主题，避免首屏闪烁
+useThemeStore().applyTheme()
 
 app.use(router)
 app.mount('#app')

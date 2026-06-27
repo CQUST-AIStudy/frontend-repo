@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 启用 class 策略的 dark 变体（由 useThemeStore 切换 html.dark） */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../../../index.html";
 @source "../../../public/index.html";
 @source "../../**/*.{vue,js}";
@@ -101,6 +104,49 @@
     --ui-card-bg-color: var(--app-surface);
   }
 
+  /* 深色模式：覆盖 :root 的 --app-* 为深色调色板。
+     --app-primary 不在此写死，由 useThemeStore 注入的用户主题色覆盖。 */
+  .dark {
+    --app-bg: #1a1714;
+    --app-surface: #232019;
+    --app-surface-strong: #2a2620;
+    --app-surface-muted: #1f1c17;
+    --app-border: #3a342b;
+    --app-border-strong: #4a4238;
+    --app-text: #ece4d6;
+    --app-text-secondary: #b3a695;
+    --app-text-soft: #847866;
+    --app-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --app-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --app-layout-header: #232019;
+    --app-layout-main: #1a1714;
+    --app-sidebar-bg: rgba(26, 23, 20, 0.82);
+
+    /* 同步 Tailwind @theme 令牌，使 bg-app-* / text-app-* 工具类跟随深色 */
+    --color-app-bg: var(--app-bg);
+    --color-app-surface: var(--app-surface);
+    --color-app-surface-strong: var(--app-surface-strong);
+    --color-app-surface-muted: var(--app-surface-muted);
+    --color-app-border: var(--app-border);
+    --color-app-border-strong: var(--app-border-strong);
+    --color-app-text: var(--app-text);
+    --color-app-text-secondary: var(--app-text-secondary);
+    --color-app-text-soft: var(--app-text-soft);
+
+    --ui-bg-color: var(--app-surface);
+    --ui-bg-color-overlay: var(--app-surface);
+    --ui-fill-color-blank: var(--app-surface);
+    --ui-fill-color-light: var(--app-surface-muted);
+    --ui-card-bg-color: var(--app-surface);
+    --ui-card-border-color: var(--app-border);
+    --ui-border-color: rgba(0, 0, 0, 0.3);
+    --ui-border-color-light: rgba(0, 0, 0, 0.2);
+    --ui-border-color-lighter: rgba(0, 0, 0, 0.12);
+    --ui-text-color-primary: var(--app-text);
+    --ui-text-color-regular: var(--app-text-secondary);
+    --ui-text-color-secondary: var(--app-text-soft);
+  }
+
   html,
   body,
   #app {
@@ -109,6 +155,10 @@
 
   html {
     background: #faf6ef;
+  }
+
+  html.dark {
+    background: var(--app-bg);
   }
 
   body {

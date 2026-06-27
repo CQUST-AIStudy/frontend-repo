@@ -102,6 +102,9 @@
             </UiButton>
           </div>
         </div>
+
+        <!-- Appearance settings -->
+        <AppearanceSettings />
       </div>
     </div>
   </div>
@@ -120,6 +123,7 @@ import {
 } from '../../api/tap'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import { useFormValidation } from '../../composables/useFormValidation'
+import AppearanceSettings from '../../components/AppearanceSettings.vue'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL_WITH_SLASH,

@@ -84,6 +84,8 @@
               </div>
             </div>
           </ui-card>
+
+          <AppearanceSettings class="appearance-card-wrap rounded-[18px] overflow-hidden" />
         </section>
 
         <section class="profile-side [display:flex] [flex-direction:column] [gap:14px] [min-height:0]">
@@ -181,6 +183,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import LoadingState from '../../components/LoadingState.vue'
+import AppearanceSettings from '../../components/AppearanceSettings.vue'
 import { useUserStore } from '../../store'
 import api from '../../api'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'

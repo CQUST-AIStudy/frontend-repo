@@ -97,6 +97,8 @@
             <ui-button native-type="button" @click="resetPasswordForm">重置</ui-button>
           </div>
         </ui-card>
+
+        <AppearanceSettings class="mt-[20px]" />
       </ui-col>
     </ui-row>
   </div>
@@ -108,6 +110,7 @@ import { useRouter } from 'vue-router'
 import { message as uiMessage } from '@/services/feedback'
 import api from '../../api'
 import { useUserStore } from '../../store'
+import AppearanceSettings from '../../components/AppearanceSettings.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
