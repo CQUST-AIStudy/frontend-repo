@@ -1375,6 +1375,18 @@ onMounted(() => {
     // 标记 Tab 已加载（用于 v-if 懒加载）
     tabLoaded.value[newTab] = true
 
+    if (newTab === 'performance') {
+      nextTick(() => {
+        // 容器此前处于 display:none，init 时宽度为 0；此处按真实宽度重排
+        if (!scoreChart && scoreChartContainer.value) {
+          initCharts()
+        } else {
+          scoreChart?.resize()
+          completionChart?.resize()
+        }
+      })
+    }
+
     if (newTab === 'report' && submission.value) {
       prepareReportData();
 
