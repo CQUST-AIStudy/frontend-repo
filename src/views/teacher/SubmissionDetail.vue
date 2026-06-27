@@ -241,16 +241,26 @@
             <!-- 学生表现 Tab -->
             <div v-show="activeTab === 'performance'">
               <div class="mb-5">
-                <h3 class="text-base font-semibold text-[#1d1d1f] m-0">学习表现分析</h3>
+                <h3 class="flex items-center gap-2 text-base font-semibold text-[#1d1d1f] m-0">
+                  <LucideIcon name="line-chart" :size="18" class="text-[var(--app-primary)]" />
+                  学习表现分析
+                </h3>
+                <p class="mt-1 text-[13px] text-[#6e6e73] m-0">基于实验成绩、完成情况与多维评分的综合分析</p>
               </div>
 
               <div class="grid grid-cols-2 gap-5 mb-5">
                 <div class="rounded-[16px] border border-black/[0.06] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
-                  <div class="text-sm font-medium text-[#6e6e73] mb-3">实验成绩趋势</div>
+                  <div class="flex items-center gap-2 text-sm font-medium text-[#6e6e73] mb-3">
+                    <LucideIcon name="activity" :size="15" class="text-[var(--app-primary)]" />
+                    实验成绩趋势
+                  </div>
                   <div class="h-[320px] w-full" ref="scoreChartContainer"></div>
                 </div>
                 <div class="rounded-[16px] border border-black/[0.06] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
-                  <div class="text-sm font-medium text-[#6e6e73] mb-3">实验完成情况</div>
+                  <div class="flex items-center gap-2 text-sm font-medium text-[#6e6e73] mb-3">
+                    <LucideIcon name="pie-chart" :size="15" class="text-[var(--app-primary)]" />
+                    实验完成情况
+                  </div>
                   <div class="h-[320px] w-full" ref="completionChartContainer"></div>
                 </div>
               </div>
@@ -264,40 +274,58 @@
                 <!-- Descriptions as key-value grid -->
                 <div class="grid grid-cols-3 gap-4 mb-5">
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">平均成绩</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="trending-up" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">平均成绩</div>
+                    </div>
                     <div class="text-lg font-semibold" :class="getScoreClass(studentPerformance.averageScore)">{{ studentPerformance.averageScore }}</div>
                   </div>
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">实验完成率</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="check-circle" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">实验完成率</div>
+                    </div>
                     <div class="text-lg font-semibold text-[#1d1d1f]">{{ studentPerformance.completionRate }}%</div>
                   </div>
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">班级排名</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="trophy" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">班级排名</div>
+                    </div>
                     <div class="text-lg font-semibold text-[#1d1d1f]">第{{ studentPerformance.classRank }} 名</div>
                   </div>
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">作业提交及时性</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="clock" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">作业提交及时性</div>
+                    </div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'p'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.punctuality) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="starClass(studentPerformance.punctuality, i)" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.punctuality }}</span>
                     </div>
                   </div>
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">代码质量评分</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="code" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">代码质量评分</div>
+                    </div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'cq'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.codeQuality) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="starClass(studentPerformance.codeQuality, i)" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.codeQuality }}</span>
                     </div>
                   </div>
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
-                    <div class="text-[12px] text-[#6e6e73] mb-1">沟通参与度</div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <LucideIcon name="message-circle" :size="14" class="text-[var(--app-primary)]" />
+                      <div class="text-[12px] text-[#6e6e73]">沟通参与度</div>
+                    </div>
                     <div class="flex items-center gap-0.5 mt-1">
                       <template v-for="i in 5" :key="'pa'+i">
-                        <svg class="w-4 h-4" :class="i <= Math.round(studentPerformance.participation) ? 'text-[#c49a3c]' : 'text-black/10'" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-4 h-4" :class="starClass(studentPerformance.participation, i)" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                       </template>
                       <span class="text-xs text-[#6e6e73] ml-1">{{ studentPerformance.participation }}</span>
                     </div>
@@ -307,7 +335,11 @@
                 <!-- AI点评 -->
                 <div class="mt-5">
                   <h4 class="text-sm font-semibold text-[#1d1d1f] mb-2">AI助教点评</h4>
-                  <div class="p-4 bg-[#f5f7fa] rounded-xl leading-relaxed text-sm text-[#1d1d1f]" v-html="renderMarkdown(submission.aiRemarks)"></div>
+                  <div v-if="hasAiRemarks" class="p-4 bg-[#f5f7fa] rounded-xl leading-relaxed text-sm text-[#1d1d1f]" v-html="renderMarkdown(submission.aiRemarks)"></div>
+                  <div v-else class="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed border-[#e8dfcf] bg-[#faf6ef] text-center">
+                    <LucideIcon name="sparkles" :size="22" class="mb-2 text-[var(--app-primary)] opacity-50" />
+                    <span class="text-sm text-[#a89b87]">AI 助教暂未生成点评</span>
+                  </div>
                 </div>
 
                 <!-- Divider -->
@@ -338,8 +370,9 @@
                       </div>
                     </div>
                   </div>
-                  <div v-else class="flex flex-col items-center justify-center py-10 text-[#aeaeb2]">
-                    <span class="text-sm">暂无学习建议，请点击'生成综合评估报告'生成</span>
+                  <div v-else class="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed border-[#e8dfcf] bg-[#faf6ef] text-center">
+                    <LucideIcon name="lightbulb" :size="22" class="mb-2 text-[var(--app-primary)] opacity-50" />
+                    <span class="text-sm text-[#a89b87]">暂无学习建议</span>
                   </div>
                 </div>
               </div>
@@ -410,6 +443,7 @@ import api from '../../api'
 import AppModal from '../../components/AppModal.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import CodeViewer from '@/components/CodeViewer.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import hljs from 'highlight.js/lib/common'
 import * as echarts from 'echarts/core'
 import axios from 'axios'
@@ -755,6 +789,16 @@ const getScoreClass = (score) => {
   if (score >= 60) return 'text-[#c49a3c]'
   return 'text-[#c44b3f]'
 }
+
+// 星级评分着色：按分值分级，>=4 优秀绿、>=3 中等黄、<3 偏弱橙
+const starClass = (value, i) => {
+  if (i > Math.round(value)) return 'text-black/10'
+  if (value >= 4) return 'text-[var(--app-success)]'
+  if (value >= 3) return 'text-[#c49a3c]'
+  return 'text-[var(--app-warning)]'
+}
+
+const hasAiRemarks = computed(() => !!(submission.value.aiRemarks && submission.value.aiRemarks.trim()))
 
 const loadSubmissionDetail = async () => {
   loading.value = true
