@@ -9,26 +9,26 @@
     <!-- 流程引导卡片 -->
     <div class="bg-white rounded-[12px] border border-[#e5e7eb] shadow-[0_6px_18px_rgba(15,23,42,0.04)] mb-6 overflow-hidden">
       <!-- 流程步骤指示器 -->
-      <div class="flex bg-[#fbfcfe] border-b border-[#edf0f5] px-6 py-4">
+      <div class="flex bg-[#fbfcfe] border-b border-[#edf0f5] px-6 py-4 max-[768px]:flex-col max-[768px]:items-stretch max-[768px]:gap-2">
         <div class="flex-1 flex items-center justify-center gap-4 relative" :class="{ 'active': true, 'completed': false }">
           <div class="w-7 h-7 rounded-[8px] bg-[var(--app-primary)] text-white flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10 shadow-[0_4px_10px_rgba(var(--app-primary-rgb),0.18)]">1</div>
-          <div class="w-[170px]">
+          <div class="w-[170px] max-[768px]:w-auto">
             <div class="text-[13px] font-semibold text-[var(--app-primary)]">配置批改参数</div>
             <div class="text-[11px] text-[#9aa4b2]">选择评分标准和期望分数</div>
           </div>
-          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[var(--app-primary)] -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[var(--app-primary)] -translate-y-1/2 max-[768px]:hidden"></div>
         </div>
         <div class="flex-1 flex items-center justify-center gap-4 relative">
           <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">2</div>
-          <div class="w-[170px]">
+          <div class="w-[170px] max-[768px]:w-auto">
             <div class="text-[13px] font-semibold text-[#1d1d1f]">上传作业文件</div>
             <div class="text-[11px] text-[#9aa4b2]">支持 PDF、DOC 格式</div>
           </div>
-          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[#e5e7eb] -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-[calc(50%+104px)] right-[-22px] h-px bg-[#e5e7eb] -translate-y-1/2 max-[768px]:hidden"></div>
         </div>
         <div class="flex-1 flex items-center justify-center gap-4 relative">
           <div class="w-7 h-7 rounded-[8px] bg-[#eef2f7] text-[#667085] flex items-center justify-center text-[13px] font-semibold flex-shrink-0 relative z-10">3</div>
-          <div class="w-[170px]">
+          <div class="w-[170px] max-[768px]:w-auto">
             <div class="text-[13px] font-semibold text-[#1d1d1f]">AI 自动批改</div>
             <div class="text-[11px] text-[#9aa4b2]">等待 AI 处理完成</div>
           </div>

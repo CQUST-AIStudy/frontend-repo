@@ -173,7 +173,7 @@
                 {{ item }}
               </ui-breadcrumb-item>
             </ui-breadcrumb>
-            <div class="[display:flex] [align-items:center] [gap:8px] [font-size:12px] [color:var(--app-text-secondary)] [margin-left:12px] [padding-left:12px] [border-left:1px_solid_var(--app-border-soft)]">
+            <div class="[display:flex] [align-items:center] [gap:8px] [font-size:12px] [color:var(--app-text-secondary)] [margin-left:12px] [padding-left:12px] [border-left:1px_solid_var(--app-border-soft)] max-[768px]:hidden">
               <span>当前课程：<strong class="[color:var(--app-text)]">数据结构</strong></span>
               <span class="[color:var(--app-text-soft)]">|</span>
               <span>当前班级：<strong class="[color:var(--app-text)]">{{ headerClassName }}</strong></span>

@@ -16,7 +16,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-[280px_1fr] gap-5">
+      <div class="grid grid-cols-[280px_1fr] gap-5 max-[768px]:grid-cols-1">
         <!-- 左侧区域：学生信息、统计数据及小卡片 -->
         <div class="flex flex-col gap-4">
           <!-- 学生基本信息卡片 -->
@@ -248,7 +248,7 @@
                 <p class="mt-1 text-[13px] text-[#6e6e73] m-0">基于实验成绩、完成情况与多维评分的综合分析</p>
               </div>
 
-              <div class="grid grid-cols-2 gap-5 mb-5">
+              <div class="grid grid-cols-2 gap-5 mb-5 max-[640px]:grid-cols-1">
                 <div class="rounded-[16px] border border-black/[0.06] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
                   <div class="flex items-center gap-2 text-sm font-medium text-[#6e6e73] mb-3">
                     <LucideIcon name="activity" :size="15" class="text-[var(--app-primary)]" />
@@ -272,7 +272,7 @@
                 </div>
 
                 <!-- Descriptions as key-value grid -->
-                <div class="grid grid-cols-3 gap-4 mb-5">
+                <div class="grid grid-cols-3 gap-4 mb-5 max-[768px]:grid-cols-2 max-[480px]:grid-cols-1">
                   <div class="bg-[#f9f9fb] rounded-xl p-4">
                     <div class="flex items-center gap-1.5 mb-1">
                       <LucideIcon name="trending-up" :size="14" class="text-[var(--app-primary)]" />

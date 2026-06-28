@@ -162,7 +162,7 @@
             <Fold v-else />
           </UiButton>
 
-          <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-[var(--app-glass)] border border-[var(--app-border-soft)]">
+          <div class="min-w-0 px-3.5 py-2.5 rounded-xl bg-[var(--app-glass)] border border-[var(--app-border-soft)] max-[768px]:hidden">
             <nav class="flex items-center gap-1.5 text-[13px] text-[var(--app-text-secondary)] whitespace-nowrap overflow-hidden">
               <router-link to="/teacher/dashboard" class="hover:text-[var(--app-primary)] transition-colors">首页</router-link>
               <template v-for="(item, index) in breadcrumbs" :key="index">
@@ -174,13 +174,13 @@
         </div>
 
         <div class="flex items-center gap-3 min-w-0 shrink-0">
-          <UiButton v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[var(--app-primary-tint-8)] text-[var(--app-primary)] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[var(--app-primary-tint-15)] max-w-[min(280px,32vw)]">
+          <UiButton v-if="selectedClassName" @click="switchClass" class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-[var(--app-primary-tint-8)] text-[var(--app-primary)] text-[13px] font-semibold cursor-pointer transition-colors hover:bg-[var(--app-primary-tint-15)] max-w-[min(280px,32vw)] max-[768px]:max-w-[40vw]">
             <School class="w-4 h-4 shrink-0" />
             <span class="truncate">{{ selectedClassName }}</span>
             <ArrowDown class="w-3 h-3 shrink-0" />
           </UiButton>
 
-          <span class="inline-flex items-center h-[30px] px-3 rounded-full text-[12px] font-bold" :class="teacherLevelClass">{{ teacherLevelText }}</span>
+          <span class="inline-flex items-center h-[30px] px-3 rounded-full text-[12px] font-bold max-[768px]:hidden" :class="teacherLevelClass">{{ teacherLevelText }}</span>
 
           <!-- User Dropdown -->
           <div class="relative" ref="dropdownRef">

@@ -130,7 +130,7 @@
       </ui-drawer>
 
       <ui-container class="layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [min-width:0] [background:var(--app-layout-main)]">
-        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:var(--app-glass-header)] [display:flex] [align-items:center] [justify-content:space-between] [padding:0_28px] [min-height:78px] [border-bottom:1px_solid_var(--app-border-soft)] [gap:18px] [backdrop-filter:blur(14px)]">
+        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:var(--app-glass-header)] [display:flex] [align-items:center] [justify-content:space-between] [padding:0_28px] [min-height:78px] [border-bottom:1px_solid_var(--app-border-soft)] [gap:18px] [backdrop-filter:blur(14px)] max-[768px]:[padding:0_16px] max-[768px]:[min-height:58px]">
           <div class="header-left [display:flex] [align-items:center] [gap:14px] [min-width:0]">
             <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:40px] [height:40px] [flex:0_0_40px] [cursor:pointer] [font-size:20px] [color:var(--app-text-secondary)] [border-radius:14px] [transition:all_0.2s_ease] hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-primary)]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
