@@ -102,6 +102,35 @@
     --ui-fill-color-light: #faf6ef;
     --ui-card-border-color: var(--app-border);
     --ui-card-bg-color: var(--app-surface);
+
+    /* —— 跟随主题的半透明玻璃表面（color-mix，浅色白底玻璃、深色由 .dark 覆盖为深底玻璃）—— */
+    --app-glass:           rgba(255, 255, 255, 0.95);
+    --app-glass:           color-mix(in srgb, var(--app-surface) 95%, transparent);
+    --app-glass-strong:    rgba(255, 255, 255, 0.92);
+    --app-glass-strong:    color-mix(in srgb, var(--app-surface) 92%, transparent);
+    --app-glass-header:    rgba(255, 255, 255, 0.85);
+    --app-glass-header:    color-mix(in srgb, var(--app-surface) 85%, transparent);
+    --app-glass-aside:     var(--app-sidebar-bg);
+
+    /* —— 输入框 / 表格底 —— */
+    --app-input-bg:        rgba(250, 246, 239, 0.8);
+    --app-input-bg:        color-mix(in srgb, var(--app-surface-muted) 80%, transparent);
+    --app-input-bg-focus:  var(--app-surface);
+    --app-table-header-bg: rgba(250, 246, 239, 0.6);
+    --app-table-header-bg: color-mix(in srgb, var(--app-surface-muted) 60%, transparent);
+    --app-table-row-bg:    var(--app-surface);
+
+    /* —— 软边框 / 分隔线（浅色：深色文字叠透明；深色由 .dark 反转为白叠透明）—— */
+    --app-border-soft:     rgba(0, 0, 0, 0.06);
+    --app-border-soft:     color-mix(in srgb, var(--app-text) 6%, transparent);
+    --app-border-softer:   rgba(0, 0, 0, 0.04);
+    --app-border-softer:   color-mix(in srgb, var(--app-text) 4%, transparent);
+
+    /* —— 主题色派生（复用 store 注入的 --app-primary-rgb，主题色一改自动跟随）—— */
+    --app-primary-tint-8:  rgba(var(--app-primary-rgb), 0.08);
+    --app-primary-tint-12: rgba(var(--app-primary-rgb), 0.12);
+    --app-primary-tint-15: rgba(var(--app-primary-rgb), 0.15);
+    --app-primary-tint-50: rgba(var(--app-primary-rgb), 0.5);
   }
 
   /* 深色模式：覆盖 :root 的 --app-* 为深色调色板。
@@ -145,6 +174,23 @@
     --ui-text-color-primary: var(--app-text);
     --ui-text-color-regular: var(--app-text-secondary);
     --ui-text-color-secondary: var(--app-text-soft);
+
+    /* 深色模式：玻璃面用 surface/surface-strong 叠透明，自动变深底玻璃 */
+    --app-glass:           color-mix(in srgb, var(--app-surface) 88%, transparent);
+    --app-glass-strong:    color-mix(in srgb, var(--app-surface-strong) 90%, transparent);
+    --app-glass-header:    color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+    --app-glass-aside:     var(--app-sidebar-bg);
+
+    --app-input-bg:        color-mix(in srgb, var(--app-surface-muted) 70%, transparent);
+    --app-input-bg-focus:  var(--app-surface-strong);
+    --app-table-header-bg: color-mix(in srgb, var(--app-surface-strong) 60%, transparent);
+    --app-table-row-bg:    var(--app-surface);
+
+    /* 深色下软边框反转为“白叠透明”，保证在深底上可见 */
+    --app-border-soft:     color-mix(in srgb, var(--app-text) 10%, transparent);
+    --app-border-softer:   color-mix(in srgb, var(--app-text) 6%, transparent);
+
+    /* 主题色派生变量表达式两端一致，无需在 .dark 重复 */
   }
 
   html,
@@ -154,7 +200,7 @@
   }
 
   html {
-    background: #faf6ef;
+    background: var(--app-bg);
   }
 
   html.dark {
@@ -214,7 +260,7 @@
   }
 
   ::selection {
-    background: rgba(194, 112, 62, 0.16);
+    background: rgba(var(--app-primary-rgb), 0.16);
   }
 
   ::-webkit-scrollbar {
@@ -242,13 +288,13 @@
 @layer components {
   .ui-card,
   .app-panel {
-    border: 0.5px solid rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.95);
+    border: 0.5px solid var(--app-border-soft);
+    background: var(--app-glass);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     border-radius: 20px;
     box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.03),
+      0 0 0 0.5px var(--app-border-softer),
       0 4px 16px rgba(0, 0, 0, 0.06),
       0 1px 3px rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -295,20 +341,20 @@
 
   .ui-button--primary {
     border: none;
-    background: linear-gradient(180deg, #d48a55 0%, #b56535 100%);
-    box-shadow: 0 2px 8px rgba(194, 112, 62, 0.25), 0 1px 3px rgba(194, 112, 62, 0.15);
+    background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary-strong) 100%);
+    box-shadow: 0 2px 8px rgba(var(--app-primary-rgb), 0.25), 0 1px 3px rgba(var(--app-primary-rgb), 0.15);
   }
 
   .ui-button--primary:hover,
   .ui-button--primary:focus {
-    background: linear-gradient(180deg, #da9460 0%, #c2703e 100%);
-    box-shadow: 0 4px 16px rgba(194, 112, 62, 0.35), 0 2px 6px rgba(194, 112, 62, 0.2);
+    background: linear-gradient(180deg, var(--app-primary) 0%, var(--app-primary) 100%);
+    box-shadow: 0 4px 16px rgba(var(--app-primary-rgb), 0.35), 0 2px 6px rgba(var(--app-primary-rgb), 0.2);
     transform: translateY(-1px);
   }
 
   .ui-button--primary:active {
     transform: scale(0.96) translateY(0);
-    box-shadow: 0 1px 4px rgba(194, 112, 62, 0.2);
+    box-shadow: 0 1px 4px rgba(var(--app-primary-rgb), 0.2);
   }
 
   .ui-button--success {
@@ -353,13 +399,13 @@
   .ui-button.is-plain {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
-    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border: 0.5px solid var(--app-border-soft);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .ui-button.is-plain:hover {
     background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(194, 112, 62, 0.3);
+    border-color: rgba(var(--app-primary-rgb), 0.3);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transform: translateY(-1px);
   }
@@ -374,8 +420,8 @@
   .ui-date-editor.ui-input__wrapper {
     min-height: 40px !important;
     border-radius: 10px !important;
-    background: rgba(250, 246, 239, 0.8) !important;
-    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1) !important;
+    background: var(--app-input-bg) !important;
+    box-shadow: inset 0 0 0 0.5px var(--app-border-soft) !important;
     transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   }
 
@@ -383,14 +429,14 @@
   .ui-textarea__inner:hover,
   .ui-select__wrapper:hover {
     background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: inset 0 0 0 0.5px var(--app-border-soft) !important;
   }
 
   .ui-input__wrapper.is-focus,
   .ui-select__wrapper.is-focused,
   .ui-textarea__inner:focus {
-    background: #ffffff !important;
-    box-shadow: 0 0 0 4px rgba(194, 112, 62, 0.15), inset 0 0 0 1px rgba(194, 112, 62, 0.5) !important;
+    background: var(--app-input-bg-focus) !important;
+    box-shadow: 0 0 0 4px var(--app-primary-tint-15), inset 0 0 0 1px var(--app-primary-tint-50) !important;
   }
 
   .ui-dialog {
@@ -426,8 +472,8 @@
   }
 
   .ui-tag--primary {
-    background: rgba(194, 112, 62, 0.1);
-    color: #c2703e;
+    background: rgba(var(--app-primary-rgb), 0.1);
+    color: var(--app-primary);
   }
 
   .ui-tag--success {
@@ -446,14 +492,14 @@
   }
 
   .ui-table {
-    --ui-table-border-color: rgba(0, 0, 0, 0.04);
-    --ui-table-header-bg-color: rgba(250, 246, 239, 0.6);
+    --ui-table-border-color: var(--app-border-softer);
+    --ui-table-header-bg-color: var(--app-table-header-bg);
     --ui-table-tr-bg-color: transparent;
-    --ui-table-row-hover-bg-color: rgba(194, 112, 62, 0.04);
+    --ui-table-row-hover-bg-color: var(--app-primary-tint-8);
     overflow: hidden;
     border-radius: 16px;
     border: none;
-    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 0 0 0.5px var(--app-border-soft);
   }
 
   .ui-table th.ui-table__cell {
@@ -471,7 +517,7 @@
   }
 
   .ui-table--striped .ui-table__body tr.ui-table__row--striped td.ui-table__cell {
-    background: rgba(250, 246, 239, 0.4);
+    background: var(--app-table-header-bg);
   }
 
   .ui-table th.ui-table__cell {
@@ -491,13 +537,13 @@
 
   .ui-tabs__active-bar {
     border-radius: 999px;
-    background: #c2703e;
+    background: var(--app-primary);
     height: 3px;
   }
 
   .ui-tabs__nav-wrap::after {
     height: 0.5px;
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--app-border-soft);
   }
 
   .ui-tabs__item {
@@ -552,17 +598,17 @@
   }
 
   .apple-card {
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--app-glass);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    border: 0.5px solid var(--app-border-soft);
     border-radius: var(--app-radius-lg);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0.5px 2px rgba(0, 0, 0, 0.02);
   }
 
   .apple-stat-card {
-    background: #ffffff;
-    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    background: var(--app-surface);
+    border: 0.5px solid var(--app-border-soft);
     border-radius: var(--app-radius-lg);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0.5px 2px rgba(0, 0, 0, 0.02);
     padding: 20px;
@@ -574,29 +620,29 @@
   }
 
   .apple-hero-gradient {
-    background: linear-gradient(135deg, #c2703e 0%, #d4a843 100%);
+    background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-strong) 100%);
     border: none;
     border-radius: var(--app-radius-xl);
-    box-shadow: 0 8px 24px rgba(194, 112, 62, 0.2), 0 2px 8px rgba(194, 112, 62, 0.1);
+    box-shadow: 0 8px 24px rgba(var(--app-primary-rgb), 0.2), 0 2px 8px rgba(var(--app-primary-rgb), 0.1);
     color: #ffffff;
   }
 
   .apple-panel {
-    background: #ffffff;
-    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    background: var(--app-glass-strong);
+    border: 0.5px solid var(--app-border-soft);
     border-radius: var(--app-radius-xl);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0.5px 2px rgba(0, 0, 0, 0.02);
     padding: 22px;
   }
 
   .apple-panel .ui-table {
-    --ui-table-border-color: rgba(0, 0, 0, 0.06);
-    --ui-table-header-bg-color: #f7f2ea;
-    --ui-table-row-hover-bg-color: rgba(194, 112, 62, 0.04);
+    --ui-table-border-color: var(--app-border-soft);
+    --ui-table-header-bg-color: var(--app-surface-muted);
+    --ui-table-row-hover-bg-color: var(--app-primary-tint-8);
   }
 
   .apple-panel .ui-table th {
-    background: #f7f2ea;
+    background: var(--app-surface-muted);
     font-weight: 600;
     color: var(--app-text-secondary);
     font-size: 12px;
@@ -608,7 +654,7 @@
   }
 
   .apple-btn-primary {
-    background: #c2703e;
+    background: var(--app-primary);
     color: #ffffff;
     border: none;
     border-radius: 999px;
@@ -620,12 +666,12 @@
   }
 
   .apple-btn-primary:hover {
-    background: #a85c30;
-    box-shadow: 0 2px 8px rgba(194, 112, 62, 0.3);
+    background: var(--app-primary-strong);
+    box-shadow: 0 2px 8px rgba(var(--app-primary-rgb), 0.3);
   }
 
   .apple-link {
-    color: #c2703e;
+    color: var(--app-primary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -633,7 +679,7 @@
   }
 
   .apple-link:hover {
-    color: #a85c30;
+    color: var(--app-primary-strong);
   }
 
   .panel-title {
@@ -651,7 +697,7 @@
   }
 
   .panel-link {
-    color: #c2703e;
+    color: var(--app-primary);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -659,7 +705,7 @@
   }
 
   .panel-link:hover {
-    color: #a85c30;
+    color: var(--app-primary-strong);
   }
 }
 
@@ -1065,7 +1111,7 @@
   
   .layout-main {
     min-width: 0;
-    background: #faf6ef;
+    background: var(--app-layout-main);
   }
   
   .header-left {
@@ -1095,7 +1141,7 @@
     transition: all 0.2s;
   }
 
-  .fold-icon:hover { background: rgba(194, 112, 62, 0.08); color: #c2703e; }
+  .fold-icon:hover { background: var(--app-primary-tint-8); color: var(--app-primary); }
   
   .header-right {
     display: flex;
@@ -1119,8 +1165,8 @@
     transition: all 0.2s;
   }
 
-  .header-icon:hover { background: rgba(194, 112, 62, 0.08); color: #c2703e; }
-  
+  .header-icon:hover { background: var(--app-primary-tint-8); color: var(--app-primary); }
+
   .user-info {
     display: flex;
     align-items: center;
@@ -1130,15 +1176,15 @@
     transition: background 0.2s;
     gap: 8px;
   }
-  
-  .user-info:hover { background: rgba(0, 0, 0, 0.04); }
-  
-  .username { font-size: 14px; color: #3d3529; font-weight: 500; }
 
-  .arrow-icon { font-size: 12px; color: #a89b87; }
-  
+  .user-info:hover { background: var(--app-border-softer); }
+
+  .username { font-size: 14px; color: var(--app-text); font-weight: 500; }
+
+  .arrow-icon { font-size: 12px; color: var(--app-text-soft); }
+
   .layout-content {
-    background: #faf6ef;
+    background: var(--app-layout-main);
     padding: 24px;
     min-width: 0;
     min-height: calc(100vh - 120px);
@@ -1149,11 +1195,11 @@
 
   .layout-footer {
     text-align: center;
-    color: #a89b87;
+    color: var(--app-text-soft);
     padding: 12px;
     font-size: 13px;
-    background: #faf6ef;
-    border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+    background: var(--app-layout-main);
+    border-top: 0.5px solid var(--app-border-soft);
   }
 
   .page-slide-enter-active,
@@ -2851,8 +2897,8 @@
   .tab-item:hover { color: var(--app-text); }
   
   .tab-item.active {
-    color: #c2703e; font-weight: 500;
-    border-bottom-color: #c2703e;
+    color: var(--app-primary); font-weight: 500;
+    border-bottom-color: var(--app-primary);
   }
   
   /* src/views/teacher/TeacherAIManagement.vue */
@@ -2874,13 +2920,13 @@
 
   .layout-menu .ui-menu-item:hover,
   .layout-menu .ui-sub-menu__title:hover {
-    background: rgba(0, 0, 0, 0.04) !important;
+    background: var(--app-border-softer) !important;
     color: var(--app-text) !important;
   }
 
   .layout-menu .ui-menu-item.is-active {
-    background: rgba(194, 112, 62, 0.12) !important;
-    color: #c2703e !important;
+    background: var(--app-primary-tint-12) !important;
+    color: var(--app-primary) !important;
     font-weight: 600 !important;
     box-shadow: none !important;
   }
@@ -2894,10 +2940,10 @@
   /* macOS-style page header */
   .page-header {
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--app-glass);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border: 0.5px solid var(--app-border-soft);
     box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.06),
       0 1px 3px rgba(0, 0, 0, 0.04);
@@ -2908,13 +2954,13 @@
   /* macOS-style alert */
   .ui-alert {
     border-radius: 14px !important;
-    border: 0.5px solid rgba(0, 0, 0, 0.06) !important;
+    border: 0.5px solid var(--app-border-soft) !important;
     padding: 16px 20px !important;
   }
 
   /* macOS-style divider */
   .ui-divider {
-    border-color: rgba(0, 0, 0, 0.06) !important;
+    border-color: var(--app-border-soft) !important;
   }
 
   /* macOS-style switch */
@@ -2937,8 +2983,8 @@
 /* Tailwind CSS 4 visual hardening: keep late in source order and inside Tailwind layers. */
 @layer base {
   :root {
-    --app-layout-header: #ffffff;
-    --app-layout-main: #faf6ef;
+    --app-layout-header: var(--app-glass-header);
+    --app-layout-main: var(--app-bg);
     --app-sidebar-bg: rgba(250, 246, 239, 0.82);
   }
 }
@@ -2946,7 +2992,7 @@
 @layer components {
 .app-shell {
   color: var(--app-text);
-  background: #faf6ef;
+  background: var(--app-bg);
 }
 
 .layout-main {
@@ -2971,8 +3017,8 @@
   height: auto !important;
   gap: 16px !important;
   padding: 12px 24px !important;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06) !important;
-  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 0.5px solid var(--app-border-soft) !important;
+  background: var(--app-glass-header) !important;
   box-shadow: none !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
@@ -2982,7 +3028,7 @@
   background: var(--app-sidebar-bg) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-right: 0.5px solid rgba(0, 0, 0, 0.06) !important;
+  border-right: 0.5px solid var(--app-border-soft) !important;
 }
 
 .layout-drawer .layout-aside,
@@ -3035,7 +3081,7 @@
 .fold-icon:hover,
 .header-icon:hover {
   color: var(--app-primary) !important;
-  background: rgba(194, 112, 62, 0.08) !important;
+  background: var(--app-primary-tint-8) !important;
 }
 
 .user-info {
@@ -3045,10 +3091,10 @@
   min-width: 0;
   min-height: 38px;
   padding: 5px 10px !important;
-  border: 0.5px solid rgba(0, 0, 0, 0.06) !important;
+  border: 0.5px solid var(--app-border-soft) !important;
   border-radius: 10px !important;
   color: var(--app-text) !important;
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: var(--app-glass) !important;
 }
 
 .username,
@@ -3083,11 +3129,11 @@
 .comment-card,
 .ai-comment-card,
 .teacher-comment-card {
-  border: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+  border: 0.5px solid var(--app-border-soft) !important;
   border-radius: 20px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: var(--app-glass) !important;
   box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.03),
+    0 0 0 0.5px var(--app-border-softer),
     0 4px 16px rgba(0, 0, 0, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.04) !important;
   backdrop-filter: blur(24px) saturate(200%) !important;
@@ -3101,7 +3147,7 @@
 }
 
 .ui-alert {
-  border: 0.5px solid rgba(0, 0, 0, 0.06) !important;
+  border: 0.5px solid var(--app-border-soft) !important;
   border-radius: var(--app-radius-md) !important;
 }
 
@@ -3133,31 +3179,31 @@
 .ui-textarea__inner,
 .ui-select__wrapper,
 .ui-date-editor.ui-input__wrapper {
-  background: #faf6ef !important;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1) inset !important;
+  background: var(--app-input-bg) !important;
+  box-shadow: 0 0 0 0.5px var(--app-border-soft) inset !important;
 }
 
 .ui-input__wrapper:hover,
 .ui-textarea__inner:hover,
 .ui-select__wrapper:hover {
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15) inset !important;
+  box-shadow: 0 0 0 0.5px var(--app-border-soft) inset !important;
 }
 
 .ui-table {
-  --ui-table-border-color: rgba(0, 0, 0, 0.04);
-  --ui-table-header-bg-color: rgba(250, 246, 239, 0.6);
-  --ui-table-tr-bg-color: #ffffff;
-  --ui-table-row-hover-bg-color: rgba(194, 112, 62, 0.04);
+  --ui-table-border-color: var(--app-border-softer);
+  --ui-table-header-bg-color: var(--app-table-header-bg);
+  --ui-table-tr-bg-color: var(--app-table-row-bg);
+  --ui-table-row-hover-bg-color: var(--app-primary-tint-8);
   border: none;
   border-radius: 16px !important;
   color: var(--app-text);
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 0.5px var(--app-border-soft);
   overflow: hidden;
 }
 
 .ui-table th.ui-table__cell {
   color: var(--app-text-secondary) !important;
-  background: #f7f2ea !important;
+  background: var(--app-table-header-bg) !important;
   font-weight: 600 !important;
 }
 
@@ -3194,9 +3240,9 @@
 
 .ui-dialog {
   max-width: calc(100vw - 24px) !important;
-  border: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+  border: 0.5px solid var(--app-border-soft) !important;
   border-radius: 20px !important;
-  background: #ffffff !important;
+  background: var(--app-surface) !important;
   box-shadow:
     0 32px 64px rgba(0, 0, 0, 0.15),
     0 12px 24px rgba(0, 0, 0, 0.08) !important;
@@ -3208,9 +3254,9 @@
   overflow: hidden;
   margin-bottom: 22px !important;
   padding: 24px 28px;
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  border: 0.5px solid var(--app-border-soft);
   border-radius: var(--app-radius-xl);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--app-glass-strong);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0.5px 2px rgba(0, 0, 0, 0.02);
@@ -3342,9 +3388,9 @@
   max-width: 100%;
   min-height: 46px;
   padding: 6px 8px !important;
-  border: 0.5px solid rgba(0, 0, 0, 0.06) !important;
+  border: 0.5px solid var(--app-border-soft) !important;
   border-radius: 10px !important;
-  background: #ffffff !important;
+  background: var(--app-surface) !important;
 }
 
 .user-cell__details {
@@ -3598,7 +3644,7 @@
   /* Logo area - frosted glass sidebar consistent */
   .logo-container {
     min-height: 60px;
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 0.5px solid var(--app-border-soft);
     background: var(--app-sidebar-bg);
   }
 
@@ -3615,13 +3661,13 @@
 
   /* Page header alias (inherits from B layer .page-header glass definition) */
   .my-page-header {
-    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border: 0.5px solid var(--app-border-soft);
     border-radius: var(--app-radius-xl);
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--app-glass);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.03),
+      0 0 0 0.5px var(--app-border-softer),
       0 4px 16px rgba(0, 0, 0, 0.06),
       0 1px 3px rgba(0, 0, 0, 0.04);
   }
@@ -3629,13 +3675,13 @@
   /* Card aliases (inherit glass from A/B layer .ui-card, no flat override) */
   .panel-card,
   .summary-card {
-    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border: 0.5px solid var(--app-border-soft);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--app-glass);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.03),
+      0 0 0 0.5px var(--app-border-softer),
       0 4px 16px rgba(0, 0, 0, 0.06),
       0 1px 3px rgba(0, 0, 0, 0.04);
     transition: box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -3645,7 +3691,7 @@
   .panel-card:hover,
   .summary-card:hover {
     box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 0 0 0.5px var(--app-border-soft),
       0 8px 32px rgba(0, 0, 0, 0.08),
       0 2px 6px rgba(0, 0, 0, 0.04);
   }
@@ -3661,14 +3707,14 @@
   }
 
   .nav-item:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--app-border-softer);
     color: var(--app-text);
   }
 
   .router-link-active.nav-item,
   .router-link-exact-active.nav-item {
-    background: rgba(194, 112, 62, 0.12);
-    color: #c2703e;
+    background: var(--app-primary-tint-12);
+    color: var(--app-primary);
     font-weight: 600;
   }
 }
@@ -3676,14 +3722,14 @@
 /* Admin dashboard readability hardening: solid macOS-style surfaces. */
 @layer components {
   .admin-dashboard {
-    color: #111827 !important;
+    color: var(--app-text) !important;
   }
 
   .admin-dashboard .my-page-header {
-    background: #ffffff !important;
+    background: var(--app-surface) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border-color: rgba(17, 24, 39, 0.08) !important;
+    border-color: var(--app-border-soft) !important;
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
       0 12px 30px rgba(15, 23, 42, 0.08) !important;
@@ -3691,9 +3737,9 @@
 
   .admin-dashboard .hero-card.ui-card,
   .admin-dashboard .panel-card.ui-card {
-    background: #ffffff !important;
-    color: #111827 !important;
-    border: 1px solid #e5e7eb !important;
+    background: var(--app-surface) !important;
+    color: var(--app-text) !important;
+    border: 1px solid var(--app-border) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     box-shadow:
@@ -3722,7 +3768,7 @@
     z-index: 0;
     background:
       linear-gradient(135deg, var(--admin-hero-tint, rgba(194, 112, 62, 0.1)), rgba(255, 255, 255, 0) 58%),
-      #ffffff;
+      var(--app-surface);
   }
 
   .admin-dashboard .hero-card.hero-card-ai {
@@ -3750,26 +3796,26 @@
     position: relative;
     z-index: 2;
     background: transparent !important;
-    color: #111827 !important;
+    color: var(--app-text) !important;
   }
 
   .admin-dashboard .panel-card.ui-card .ui-card__header {
-    background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    background: var(--app-surface) !important;
+    border-bottom: 1px solid var(--app-border) !important;
   }
 
   .admin-dashboard .panel-card.ui-card .ui-card__body {
-    background: #ffffff !important;
+    background: var(--app-surface) !important;
   }
 
   .admin-dashboard .hero-label,
   .admin-dashboard .panel-title {
-    color: #111827 !important;
+    color: var(--app-text) !important;
     font-weight: 800 !important;
   }
 
   .admin-dashboard .hero-value {
-    color: #0f172a !important;
+    color: var(--app-text) !important;
     font-weight: 800 !important;
     text-shadow: none !important;
   }
@@ -3779,16 +3825,16 @@
   .admin-dashboard .status-label,
   .admin-dashboard .muted,
   .admin-dashboard .table-text-wrap {
-    color: #475569 !important;
+    color: var(--app-text-secondary) !important;
   }
 
   .admin-dashboard .hero-chip-row .ui-tag,
   .admin-dashboard .hero-status-row .ui-tag {
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08) inset !important;
+    box-shadow: 0 0 0 1px var(--app-border-soft) inset !important;
   }
 
   .admin-dashboard .hero-card .ui-progress-bar__outer {
-    background: #e5e7eb !important;
+    background: var(--app-border) !important;
   }
 
   .admin-dashboard .hero-card .ui-progress-bar__inner {
@@ -3796,23 +3842,23 @@
   }
 
   .admin-dashboard .status-item {
-    color: #1f2937 !important;
+    color: var(--app-text) !important;
   }
 
   .admin-dashboard .ui-table {
-    --ui-table-header-bg-color: #f8fafc;
-    --ui-table-tr-bg-color: #ffffff;
-    background: #ffffff !important;
+    --ui-table-header-bg-color: var(--app-surface-muted);
+    --ui-table-tr-bg-color: var(--app-surface);
+    background: var(--app-surface) !important;
   }
 
   .admin-dashboard .ui-table th.ui-table__cell {
-    color: #475569 !important;
-    background: #f8fafc !important;
+    color: var(--app-text-secondary) !important;
+    background: var(--app-surface-muted) !important;
   }
 
   .admin-dashboard .ui-table td.ui-table__cell {
-    color: #111827 !important;
-    background: #ffffff !important;
+    color: var(--app-text) !important;
+    background: var(--app-surface) !important;
   }
 }
 
