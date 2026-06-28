@@ -13,7 +13,7 @@ import { useThemeStore } from './store/theme'
 const themeStore = useThemeStore()
 // 主题状态变更时实时同步到 documentElement
 watch(
-  () => [themeStore.mode, themeStore.primaryColor, themeStore.bgColor, themeStore.textColor],
+  () => [themeStore.primaryColor, themeStore.bgColor, themeStore.textColor],
   () => themeStore.applyTheme()
 )
 </script>

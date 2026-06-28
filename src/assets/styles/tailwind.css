@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* 启用 class 策略的 dark 变体（由 useThemeStore 切换 html.dark） */
-@custom-variant dark (&:where(.dark, .dark *));
-
 @source "../../../index.html";
 @source "../../../public/index.html";
 @source "../../**/*.{vue,js}";
@@ -103,7 +100,7 @@
     --ui-card-border-color: var(--app-border);
     --ui-card-bg-color: var(--app-surface);
 
-    /* —— 跟随主题的半透明玻璃表面（color-mix，浅色白底玻璃、深色由 .dark 覆盖为深底玻璃）—— */
+    /* —— 跟随主题的半透明玻璃表面（color-mix，浅色白底玻璃）—— */
     --app-glass:           rgba(255, 255, 255, 0.95);
     --app-glass:           color-mix(in srgb, var(--app-surface) 95%, transparent);
     --app-glass-strong:    rgba(255, 255, 255, 0.92);
@@ -120,7 +117,7 @@
     --app-table-header-bg: color-mix(in srgb, var(--app-surface-muted) 60%, transparent);
     --app-table-row-bg:    var(--app-surface);
 
-    /* —— 软边框 / 分隔线（浅色：深色文字叠透明；深色由 .dark 反转为白叠透明）—— */
+    /* —— 软边框 / 分隔线（深色文字叠透明）—— */
     --app-border-soft:     rgba(0, 0, 0, 0.06);
     --app-border-soft:     color-mix(in srgb, var(--app-text) 6%, transparent);
     --app-border-softer:   rgba(0, 0, 0, 0.04);
@@ -133,66 +130,6 @@
     --app-primary-tint-50: rgba(var(--app-primary-rgb), 0.5);
   }
 
-  /* 深色模式：覆盖 :root 的 --app-* 为深色调色板。
-     --app-primary 不在此写死，由 useThemeStore 注入的用户主题色覆盖。 */
-  .dark {
-    --app-bg: #1a1714;
-    --app-surface: #232019;
-    --app-surface-strong: #2a2620;
-    --app-surface-muted: #1f1c17;
-    --app-border: #3a342b;
-    --app-border-strong: #4a4238;
-    --app-text: #ece4d6;
-    --app-text-secondary: #b3a695;
-    --app-text-soft: #847866;
-    --app-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-    --app-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --app-layout-header: #232019;
-    --app-layout-main: #1a1714;
-    --app-sidebar-bg: rgba(26, 23, 20, 0.82);
-
-    /* 同步 Tailwind @theme 令牌，使 bg-app-* / text-app-* 工具类跟随深色 */
-    --color-app-bg: var(--app-bg);
-    --color-app-surface: var(--app-surface);
-    --color-app-surface-strong: var(--app-surface-strong);
-    --color-app-surface-muted: var(--app-surface-muted);
-    --color-app-border: var(--app-border);
-    --color-app-border-strong: var(--app-border-strong);
-    --color-app-text: var(--app-text);
-    --color-app-text-secondary: var(--app-text-secondary);
-    --color-app-text-soft: var(--app-text-soft);
-
-    --ui-bg-color: var(--app-surface);
-    --ui-bg-color-overlay: var(--app-surface);
-    --ui-fill-color-blank: var(--app-surface);
-    --ui-fill-color-light: var(--app-surface-muted);
-    --ui-card-bg-color: var(--app-surface);
-    --ui-card-border-color: var(--app-border);
-    --ui-border-color: rgba(0, 0, 0, 0.3);
-    --ui-border-color-light: rgba(0, 0, 0, 0.2);
-    --ui-border-color-lighter: rgba(0, 0, 0, 0.12);
-    --ui-text-color-primary: var(--app-text);
-    --ui-text-color-regular: var(--app-text-secondary);
-    --ui-text-color-secondary: var(--app-text-soft);
-
-    /* 深色模式：玻璃面用 surface/surface-strong 叠透明，自动变深底玻璃 */
-    --app-glass:           color-mix(in srgb, var(--app-surface) 88%, transparent);
-    --app-glass-strong:    color-mix(in srgb, var(--app-surface-strong) 90%, transparent);
-    --app-glass-header:    color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
-    --app-glass-aside:     var(--app-sidebar-bg);
-
-    --app-input-bg:        color-mix(in srgb, var(--app-surface-muted) 70%, transparent);
-    --app-input-bg-focus:  var(--app-surface-strong);
-    --app-table-header-bg: color-mix(in srgb, var(--app-surface-strong) 60%, transparent);
-    --app-table-row-bg:    var(--app-surface);
-
-    /* 深色下软边框反转为“白叠透明”，保证在深底上可见 */
-    --app-border-soft:     color-mix(in srgb, var(--app-text) 10%, transparent);
-    --app-border-softer:   color-mix(in srgb, var(--app-text) 6%, transparent);
-
-    /* 主题色派生变量表达式两端一致，无需在 .dark 重复 */
-  }
-
   html,
   body,
   #app {
@@ -200,10 +137,6 @@
   }
 
   html {
-    background: var(--app-bg);
-  }
-
-  html.dark {
     background: var(--app-bg);
   }
 

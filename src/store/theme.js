@@ -3,7 +3,6 @@ import logger from '@/utils/logger'
 
 // 默认外观配置（与 tailwind.css :root 中的浅色基调一致）
 export const DEFAULT_THEME = Object.freeze({
-  mode: 'light',
   primaryColor: '#c2703e',
   bgColor: '#faf6ef',
   textColor: '#3d3529'
@@ -40,19 +39,9 @@ export const useThemeStore = defineStore('theme', {
   persist: {
     key: 'theme',
     storage: localStorage,
-    paths: ['mode', 'primaryColor', 'bgColor', 'textColor']
-  },
-  getters: {
-    isDark: (state) => state.mode === 'dark'
+    paths: ['primaryColor', 'bgColor', 'textColor']
   },
   actions: {
-    setMode(mode) {
-      this.mode = mode === 'dark' ? 'dark' : 'light'
-      this.applyTheme()
-    },
-    toggleMode() {
-      this.setMode(this.mode === 'dark' ? 'light' : 'dark')
-    },
     setPrimary(color) {
       this.primaryColor = toHex(color) || DEFAULT_THEME.primaryColor
       this.applyTheme()
@@ -66,7 +55,6 @@ export const useThemeStore = defineStore('theme', {
       this.applyTheme()
     },
     reset() {
-      this.mode = DEFAULT_THEME.mode
       this.primaryColor = DEFAULT_THEME.primaryColor
       this.bgColor = DEFAULT_THEME.bgColor
       this.textColor = DEFAULT_THEME.textColor
@@ -74,16 +62,15 @@ export const useThemeStore = defineStore('theme', {
     },
     /**
      * 将当前主题状态同步到 document.documentElement：
-     * - 切换 .dark 类（深色模式）
+     * - 清除历史遗留的 .dark 类（已移除深色模式）
      * - 始终注入用户主题色及其派生档位
-     * - 仅浅色模式注入用户自定义背景色/字体色；深色模式移除这两项内联变量，
-     *   让 tailwind.css 中 .dark 块的预设深色调色板生效。
+     * - 始终注入用户自定义背景色/字体色
      */
     applyTheme() {
       if (typeof document === 'undefined') return
       const root = document.documentElement
       try {
-        root.classList.toggle('dark', this.mode === 'dark')
+        root.classList.remove('dark')
 
         const primary = toHex(this.primaryColor) || DEFAULT_THEME.primaryColor
         const primaryRgb = hexToRgb(primary)
@@ -103,25 +90,15 @@ export const useThemeStore = defineStore('theme', {
           root.style.setProperty('--ui-color-primary-light-9', mixHex(primary, '#ffffff', 0.92))
         }
 
-        // 背景色：仅浅色模式注入；深色模式交给 .dark 预设
-        if (this.mode === 'light') {
-          const bg = toHex(this.bgColor) || DEFAULT_THEME.bgColor
-          root.style.setProperty('--app-bg', bg)
-          root.style.setProperty('--color-app-bg', bg)
-          root.style.setProperty('--app-layout-main', bg)
+        const bg = toHex(this.bgColor) || DEFAULT_THEME.bgColor
+        root.style.setProperty('--app-bg', bg)
+        root.style.setProperty('--color-app-bg', bg)
+        root.style.setProperty('--app-layout-main', bg)
 
-          const text = toHex(this.textColor) || DEFAULT_THEME.textColor
-          root.style.setProperty('--app-text', text)
-          root.style.setProperty('--color-app-text', text)
-          root.style.setProperty('--ui-text-color-primary', text)
-        } else {
-          root.style.removeProperty('--app-bg')
-          root.style.removeProperty('--color-app-bg')
-          root.style.removeProperty('--app-layout-main')
-          root.style.removeProperty('--app-text')
-          root.style.removeProperty('--color-app-text')
-          root.style.removeProperty('--ui-text-color-primary')
-        }
+        const text = toHex(this.textColor) || DEFAULT_THEME.textColor
+        root.style.setProperty('--app-text', text)
+        root.style.setProperty('--color-app-text', text)
+        root.style.setProperty('--ui-text-color-primary', text)
       } catch (error) {
         logger.warn('应用主题失败:', error?.message || error)
       }
