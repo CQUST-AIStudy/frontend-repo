@@ -91,14 +91,42 @@ export const useThemeStore = defineStore('theme', {
         }
 
         const bg = toHex(this.bgColor) || DEFAULT_THEME.bgColor
+        const bgRgb = hexToRgb(bg)
         root.style.setProperty('--app-bg', bg)
         root.style.setProperty('--color-app-bg', bg)
         root.style.setProperty('--app-layout-main', bg)
+        // 背景色派生：卡片表面比背景更亮，保持浅色层次
+        const bgSurface = mixHex(bg, '#ffffff', 0.55)
+        const bgSurfaceStrong = mixHex(bg, '#ffffff', 0.65)
+        const bgSurfaceMuted = mixHex(bg, '#ffffff', 0.3)
+        root.style.setProperty('--app-surface', bgSurface)
+        root.style.setProperty('--app-surface-strong', bgSurfaceStrong)
+        root.style.setProperty('--app-surface-muted', bgSurfaceMuted)
+        root.style.setProperty('--color-app-surface', bgSurface)
+        root.style.setProperty('--color-app-surface-strong', bgSurfaceStrong)
+        root.style.setProperty('--color-app-surface-muted', bgSurfaceMuted)
+        // 侧边栏跟随背景色（半透明），玻璃/输入框/表格底由 color-mix 自动联动
+        if (bgRgb) {
+          root.style.setProperty('--app-sidebar-bg', `rgba(${bgRgb.join(', ')}, 0.82)`)
+        }
 
         const text = toHex(this.textColor) || DEFAULT_THEME.textColor
         root.style.setProperty('--app-text', text)
         root.style.setProperty('--color-app-text', text)
         root.style.setProperty('--ui-text-color-primary', text)
+        // 字体色派生：次级/更柔和文字（向白色靠拢）
+        const textSecondary = mixHex(text, '#ffffff', 0.45)
+        const textSoft = mixHex(text, '#ffffff', 0.65)
+        root.style.setProperty('--app-text-secondary', textSecondary)
+        root.style.setProperty('--app-text-soft', textSoft)
+        root.style.setProperty('--color-app-text-secondary', textSecondary)
+        root.style.setProperty('--color-app-text-soft', textSoft)
+        root.style.setProperty('--ui-text-color-regular', textSecondary)
+        root.style.setProperty('--ui-text-color-secondary', textSoft)
+        // 边框派生：基于背景向黑色靠拢
+        const appBorder = mixHex(bg, '#000000', 0.1)
+        root.style.setProperty('--app-border', appBorder)
+        root.style.setProperty('--color-app-border', appBorder)
       } catch (error) {
         logger.warn('应用主题失败:', error?.message || error)
       }

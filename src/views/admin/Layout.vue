@@ -1,18 +1,18 @@
 <template>
   <div class="admin-layout [width:100%] [min-height:100vh] [min-height:100dvh] [overflow-x:hidden]">
     <ui-container class="layout-container [min-height:100vh] [min-height:100dvh]">
-      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:rgba(246,_246,_248,_0.82)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_rgba(0,_0,_0,_0.06)] [backdrop-filter:blur(20px)_saturate(180%)]">
-        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_rgba(0,_0,_0,_0.06)]">
-          <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_rgba(0,_0,_0,_0.08)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
+      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--app-sidebar-bg)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_var(--app-border-soft)] [backdrop-filter:blur(20px)_saturate(180%)]">
+        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_var(--app-border-soft)]">
+          <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_var(--app-border-soft)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
           <transition name="fade-text">
-            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:#1d1d1f] [white-space:nowrap] [letter-spacing:-0.01em]">系统管理后台</span>
+            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:var(--app-text)] [white-space:nowrap] [letter-spacing:-0.01em]">系统管理后台</span>
           </transition>
         </div>
 
-        <ui-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.ui-scrollbar__bar.is-vertical]:[width:4px] [&_.ui-scrollbar__bar.is-vertical]:[right:2px] [&_.ui-scrollbar__thumb]:[background:rgba(0,_0,_0,_0.1)] [&_.ui-scrollbar__thumb]:[border-radius:4px]">
+        <ui-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.ui-scrollbar__bar.is-vertical]:[width:4px] [&_.ui-scrollbar__bar.is-vertical]:[right:2px] [&_.ui-scrollbar__thumb]:[background:var(--app-border-strong)] [&_.ui-scrollbar__thumb]:[border-radius:4px]">
           <ui-menu
             :default-active="activeMenu"
-            class="layout-menu [border-right:none] ![background:transparent] [--ui-menu-bg-color:transparent] [--ui-menu-text-color:#6e6e73] [--ui-menu-active-color:var(--app-primary)] [--ui-menu-hover-bg-color:rgba(0,_0,_0,_0.04)] [--ui-menu-hover-text-color:#1d1d1f] [padding:8px] [&_.ui-menu-item]:[border-radius:8px] [&_.ui-menu-item]:[margin:2px_0] [&_.ui-menu-item]:[height:40px] [&_.ui-menu-item]:[line-height:40px] [&_.ui-menu-item]:[font-size:13.5px] [&_.ui-menu-item]:[transition:all_0.2s] [&_.ui-menu-item.is-active]:![background:var(--app-primary-soft)] [&_.ui-menu-item.is-active]:![color:var(--app-primary)] [&_.ui-menu-item.is-active]:[font-weight:600] [&_.ui-menu-item.is-active::before]:[position:absolute] [&_.ui-menu-item.is-active::before]:[left:0] [&_.ui-menu-item.is-active::before]:[top:50%] [&_.ui-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.ui-menu-item.is-active::before]:[width:3px] [&_.ui-menu-item.is-active::before]:[height:18px] [&_.ui-menu-item.is-active::before]:[background:var(--app-primary)] [&_.ui-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.ui-menu-item:hover]:![background:rgba(0,_0,_0,_0.04)] [&_.ui-icon]:[font-size:18px]"
+            class="layout-menu [border-right:none] ![background:transparent] [--ui-menu-bg-color:transparent] [--ui-menu-text-color:var(--app-text-secondary)] [--ui-menu-active-color:var(--app-primary)] [--ui-menu-hover-bg-color:var(--app-primary-tint-8)] [--ui-menu-hover-text-color:var(--app-text)] [padding:8px] [&_.ui-menu-item]:[border-radius:8px] [&_.ui-menu-item]:[margin:2px_0] [&_.ui-menu-item]:[height:40px] [&_.ui-menu-item]:[line-height:40px] [&_.ui-menu-item]:[font-size:13.5px] [&_.ui-menu-item]:[transition:all_0.2s] [&_.ui-menu-item.is-active]:![background:var(--app-primary-soft)] [&_.ui-menu-item.is-active]:![color:var(--app-primary)] [&_.ui-menu-item.is-active]:[font-weight:600] [&_.ui-menu-item.is-active::before]:[position:absolute] [&_.ui-menu-item.is-active::before]:[left:0] [&_.ui-menu-item.is-active::before]:[top:50%] [&_.ui-menu-item.is-active::before]:[transform:translateY(-50%)] [&_.ui-menu-item.is-active::before]:[width:3px] [&_.ui-menu-item.is-active::before]:[height:18px] [&_.ui-menu-item.is-active::before]:[background:var(--app-primary)] [&_.ui-menu-item.is-active::before]:[border-radius:0_3px_3px_0] [&_.ui-menu-item:hover]:![background:var(--app-primary-tint-8)] [&_.ui-icon]:[font-size:18px]"
             :collapse="collapsed"
             router
             :collapse-transition="false"
@@ -52,7 +52,7 @@
               <template #title>LeetCodeClaw</template>
             </ui-menu-item>
 
-            <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
+            <div class="menu-divider [height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>
 
             <ui-menu-item index="/admin/profile">
               <ui-icon><Setting /></ui-icon>
@@ -118,7 +118,7 @@
                 <template #title>LeetCodeClaw</template>
               </ui-menu-item>
 
-              <div class="menu-divider [height:1px] [background:rgba(0,_0,_0,_0.06)] [margin:10px_12px]"></div>
+              <div class="menu-divider [height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>
 
               <ui-menu-item index="/admin/profile">
                 <ui-icon><Setting /></ui-icon>
@@ -129,10 +129,10 @@
         </div>
       </ui-drawer>
 
-      <ui-container class="layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [min-width:0] [background:#f8f9fa] [background:transparent]">
-        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:#fff] [display:flex] [align-items:center] [justify-content:space-between] [box-shadow:0_1px_2px_rgba(60,64,67,0.1)] [padding:0_24px] [height:56px] [border-bottom:1px_solid_#dadce0] [gap:16px] [box-shadow:0_1px_2px_rgba(60,_64,_67,_0.1)] [min-height:56px] [gap:18px] [min-height:78px] [padding:0_28px] [border-bottom:1px_solid_rgba(126,_157,_183,_0.14)] [background:rgba(248,_251,_253,_0.72)] [backdrop-filter:blur(14px)]">
-          <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
-            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:20px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="toggleNavigation">
+      <ui-container class="layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [min-width:0] [background:var(--app-layout-main)]">
+        <ui-header class="layout-header [position:relative] [z-index:2000] [overflow:visible] [background:var(--app-glass-header)] [display:flex] [align-items:center] [justify-content:space-between] [padding:0_28px] [min-height:78px] [border-bottom:1px_solid_var(--app-border-soft)] [gap:18px] [backdrop-filter:blur(14px)]">
+          <div class="header-left [display:flex] [align-items:center] [gap:14px] [min-width:0]">
+            <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:40px] [height:40px] [flex:0_0_40px] [cursor:pointer] [font-size:20px] [color:var(--app-text-secondary)] [border-radius:14px] [transition:all_0.2s_ease] hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-primary)]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
               <Fold v-else />
             </ui-icon>
@@ -148,19 +148,19 @@
             <!-- PTA Cookie 过期告警 -->
             <ui-tooltip v-if="ptaCookieExpired" content="PTA Cookie 已过期，数据同步暂停" placement="bottom">
               <ui-badge is-dot type="danger">
-                <ui-icon class="header-icon [color:#ea4335] [display:inline-flex] [align-items:center] [justify-content:center] [width:36px] [height:36px] [flex:0_0_36px] [cursor:pointer] [font-size:18px] [color:#5f6368] [border-radius:8px] [transition:all_0.2s] hover:[background:#f1f3f4] hover:[color:#202124] [width:40px] [height:40px] [border-radius:14px] [color:#5d7288] [transition:all_0.2s_ease] hover:[background:rgba(18,_112,_216,_0.08)] hover:[color:#1270d8]" @click="goToCookieAlert">
+                <ui-icon class="header-icon [color:var(--app-danger)] [display:inline-flex] [align-items:center] [justify-content:center] [width:40px] [height:40px] [flex:0_0_40px] [cursor:pointer] [font-size:18px] [border-radius:14px] [transition:all_0.2s_ease] hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-primary)]" @click="goToCookieAlert">
                   <WarningFilled />
                 </ui-icon>
               </ui-badge>
             </ui-tooltip>
 
             <ui-dropdown class="[z-index:2200]" trigger="click" @command="handleCommand">
-              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:4px_8px] [border-radius:8px] [transition:background_0.2s] [gap:8px] hover:[background:#f1f3f4] [gap:10px] [padding:6px_10px] [border-radius:16px] [background:rgba(255,_255,_255,_0.64)] [border:1px_solid_rgba(126,_157,_183,_0.14)] [flex-shrink:0]">
+              <div class="user-info [display:flex] [align-items:center] [cursor:pointer] [padding:6px_10px] [border-radius:16px] [transition:all_0.2s] [gap:10px] [background:var(--app-glass)] [border:1px_solid_var(--app-border-soft)] [flex-shrink:0] hover:[border-color:var(--app-primary-tint-50)] hover:[box-shadow:var(--app-shadow-soft)]">
                 <ui-avatar :size="34">
                   <span>{{ (userInfo.name || '管')[0] }}</span>
                 </ui-avatar>
-                <span class="username [font-size:14px] [color:#202124] [font-weight:500] [color:#16324a] [font-size:13px] [font-weight:700]">{{ userInfo.name || '管理员' }}</span>
-                <ui-icon class="arrow-icon [font-size:12px] [color:#9aa0a6] [color:#8ca0b3]"><ArrowDown /></ui-icon>
+                <span class="username [font-size:13px] [font-weight:700] [color:var(--app-text)]">{{ userInfo.name || '管理员' }}</span>
+                <ui-icon class="arrow-icon [font-size:12px] [color:var(--app-text-soft)]"><ArrowDown /></ui-icon>
               </div>
               <template #dropdown>
                 <ui-dropdown-menu>
@@ -176,7 +176,7 @@
           </div>
         </ui-header>
 
-        <ui-main class="layout-content [background:#f8f9fa] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
+        <ui-main class="layout-content [background:var(--app-layout-main)] [padding:24px] [min-width:0] [min-height:calc(100vh_-_120px)] [min-height:calc(100dvh_-_120px)] [overflow-y:auto] [overflow-x:hidden] [padding:24px_28px_28px] [min-height:calc(100vh_-_138px)] [min-height:calc(100dvh_-_138px)]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -184,7 +184,7 @@
           </router-view>
         </ui-main>
 
-        <ui-footer class="layout-footer [text-align:center] [color:#9aa0a6] [padding:12px] [font-size:13px] [background:#f8f9fa] [border-top:1px_solid_#dadce0] [padding:12px_16px_18px] [color:#8ca0b3] [font-size:12px] [background:transparent]">
+        <ui-footer class="layout-footer [text-align:center] [color:var(--app-text-soft)] [padding:12px_16px_18px] [font-size:12px] [background:transparent] [border-top:1px_solid_var(--app-border-soft)]">
           智能个性画像与个性化实验能力提升平台 - 管理后台 © 2025
         </ui-footer>
       </ui-container>

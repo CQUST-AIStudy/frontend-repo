@@ -4,33 +4,33 @@
 
     <div class="grid grid-cols-[1fr_2fr] gap-5 max-[768px]:grid-cols-1 px-5">
       <!-- Left column: Profile card -->
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 h-fit">
-        <div class="flex flex-col items-center pb-5 border-b border-[#f0f0f0]">
-          <img :src="avatarUrl" class="w-[100px] h-[100px] rounded-full object-cover border-2 border-black/[0.06]" alt="avatar" />
+      <div class="rounded-[20px] border border-[var(--app-border-soft)] bg-[var(--app-surface)] backdrop-blur-[20px] shadow-[var(--app-shadow-soft)] p-6 h-fit">
+        <div class="flex flex-col items-center pb-5 border-b border-[var(--app-border-soft)]">
+          <img :src="avatarUrl" class="w-[100px] h-[100px] rounded-full object-cover border-2 border-[var(--app-border-soft)]" alt="avatar" />
           <h3 class="mt-2.5 mb-1 text-lg font-semibold">{{ displayName }}</h3>
-          <p class="m-0 text-sm text-[#aeaeb2]">{{ roleText }}</p>
+          <p class="m-0 text-sm text-[var(--app-text-soft)]">{{ roleText }}</p>
         </div>
 
         <div class="mt-5">
           <div class="flex justify-between mb-4 items-center">
-            <span class="text-xs font-semibold text-[#8092a6]">用户名</span>
-            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.username }}</span>
+            <span class="text-xs font-semibold text-[var(--app-text-secondary)]">用户名</span>
+            <span class="text-sm font-medium text-[var(--app-text)] leading-[1.7] break-words">{{ userInfo.username }}</span>
           </div>
           <div class="flex justify-between mb-4 items-center">
-            <span class="text-xs font-semibold text-[#8092a6]">角色</span>
-            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ roleText }}</span>
+            <span class="text-xs font-semibold text-[var(--app-text-secondary)]">角色</span>
+            <span class="text-sm font-medium text-[var(--app-text)] leading-[1.7] break-words">{{ roleText }}</span>
           </div>
           <div class="flex justify-between mb-4 items-center">
-            <span class="text-xs font-semibold text-[#8092a6]">工号/学号</span>
-            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.usernum || '未设置' }}</span>
+            <span class="text-xs font-semibold text-[var(--app-text-secondary)]">工号/学号</span>
+            <span class="text-sm font-medium text-[var(--app-text)] leading-[1.7] break-words">{{ userInfo.usernum || '未设置' }}</span>
           </div>
           <div class="flex justify-between mb-4 items-center">
-            <span class="text-xs font-semibold text-[#8092a6]">电子邮箱</span>
-            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.email || '未设置' }}</span>
+            <span class="text-xs font-semibold text-[var(--app-text-secondary)]">电子邮箱</span>
+            <span class="text-sm font-medium text-[var(--app-text)] leading-[1.7] break-words">{{ userInfo.email || '未设置' }}</span>
           </div>
           <div class="flex justify-between mb-4 items-center">
-            <span class="text-xs font-semibold text-[#8092a6]">班级</span>
-            <span class="text-sm font-medium text-[#24384f] leading-[1.7] break-words">{{ userInfo.class || '未设置' }}</span>
+            <span class="text-xs font-semibold text-[var(--app-text-secondary)]">班级</span>
+            <span class="text-sm font-medium text-[var(--app-text)] leading-[1.7] break-words">{{ userInfo.class || '未设置' }}</span>
           </div>
         </div>
       </div>
@@ -38,66 +38,66 @@
       <!-- Right column -->
       <div class="flex flex-col gap-5">
         <!-- PTA binding card -->
-        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
-          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-black/[0.06]">
-            <span class="font-semibold text-[#1d1d1f]">绑定 PTA 账号</span>
+        <div class="rounded-[20px] border border-[var(--app-border-soft)] bg-[var(--app-surface)] backdrop-blur-[20px] shadow-[var(--app-shadow-soft)] p-6">
+          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-[var(--app-border-soft)]">
+            <span class="font-semibold text-[var(--app-text)]">绑定 PTA 账号</span>
           </div>
 
-          <p class="mb-3 text-[13px] leading-[1.7] text-[#6e6e73]">
+          <p class="mb-3 text-[13px] leading-[1.7] text-[var(--app-text-secondary)]">
             绑定后，PTA 数据同步会优先使用此账号登录；在同步页面临时输入的账号密码会覆盖本次任务。
           </p>
 
-          <div v-if="hasBoundCredential" class="mb-4 px-3 py-2.5 rounded-[10px] bg-[#e6f4ea] text-[#1e8e3e] text-[13px]">
+          <div v-if="hasBoundCredential" class="mb-4 px-3 py-2.5 rounded-[10px] bg-[var(--app-primary-tint-8)] text-[var(--app-success)] text-[13px]">
             当前已绑定 PTA 账号：<strong>{{ ptaCredential.ptaUsername }}</strong>
           </div>
-          <div v-else class="mb-4 px-3 py-2.5 rounded-[10px] bg-[#fef7e0] text-[#b26a00] text-[13px]">
+          <div v-else class="mb-4 px-3 py-2.5 rounded-[10px] bg-[var(--app-primary-tint-12)] text-[var(--app-warning)] text-[13px]">
             当前未绑定 PTA 账号。
           </div>
 
           <div class="mb-4">
-            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 账号</label>
-            <UiInput v-model="ptaForm.ptaUsername" type="text" placeholder="请输入教师自己的 PTA 登录账号" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
+            <label class="block text-[13px] font-medium text-[var(--app-text-secondary)] mb-2">PTA 账号</label>
+            <UiInput v-model="ptaForm.ptaUsername" type="text" placeholder="请输入教师自己的 PTA 登录账号" class="w-full h-10 px-3 rounded-[10px] bg-[var(--app-input-bg)] shadow-[inset_0_0_0_0.5px_var(--app-border-strong)] focus:bg-[var(--app-input-bg-focus)] focus:shadow-[0_0_0_4px_var(--app-primary-tint-15),inset_0_0_0_1px_var(--app-primary-tint-50)] transition-all outline-none text-sm" />
           </div>
           <div class="mb-4">
-            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">PTA 密码</label>
-            <UiInput v-model="ptaForm.ptaPassword" type="password" placeholder="请输入 PTA 登录密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
+            <label class="block text-[13px] font-medium text-[var(--app-text-secondary)] mb-2">PTA 密码</label>
+            <UiInput v-model="ptaForm.ptaPassword" type="password" placeholder="请输入 PTA 登录密码" class="w-full h-10 px-3 rounded-[10px] bg-[var(--app-input-bg)] shadow-[inset_0_0_0_0.5px_var(--app-border-strong)] focus:bg-[var(--app-input-bg-focus)] focus:shadow-[0_0_0_4px_var(--app-primary-tint-15),inset_0_0_0_1px_var(--app-primary-tint-50)] transition-all outline-none text-sm" />
           </div>
           <div class="flex gap-3">
-            <UiButton :disabled="savingPtaCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="savePtaCredential">
+            <UiButton :disabled="savingPtaCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[var(--app-primary-strong)] to-[var(--app-primary)] shadow-[0_2px_8px_var(--app-primary-tint-50)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="savePtaCredential">
               {{ savingPtaCredential ? '保存中...' : '保存绑定' }}
             </UiButton>
-            <UiButton :disabled="!hasBoundCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="clearPtaCredential">
+            <UiButton :disabled="!hasBoundCredential" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[var(--app-text)] bg-[var(--app-input-bg)] hover:bg-[var(--app-surface-muted)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="clearPtaCredential">
               解除绑定
             </UiButton>
           </div>
         </div>
 
         <!-- Change password card -->
-        <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
-          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-black/[0.06]">
-            <span class="font-semibold text-[#1d1d1f]">修改密码</span>
+        <div class="rounded-[20px] border border-[var(--app-border-soft)] bg-[var(--app-surface)] backdrop-blur-[20px] shadow-[var(--app-shadow-soft)] p-6">
+          <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-[var(--app-border-soft)]">
+            <span class="font-semibold text-[var(--app-text)]">修改密码</span>
           </div>
 
           <div class="mb-4">
-            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">当前密码</label>
-            <UiInput v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
-            <p v-if="passwordErrors.oldPassword" class="text-[12px] text-[#c44b3f] mt-1.5">{{ passwordErrors.oldPassword }}</p>
+            <label class="block text-[13px] font-medium text-[var(--app-text-secondary)] mb-2">当前密码</label>
+            <UiInput v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" class="w-full h-10 px-3 rounded-[10px] bg-[var(--app-input-bg)] shadow-[inset_0_0_0_0.5px_var(--app-border-strong)] focus:bg-[var(--app-input-bg-focus)] focus:shadow-[0_0_0_4px_var(--app-primary-tint-15),inset_0_0_0_1px_var(--app-primary-tint-50)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.oldPassword" class="text-[12px] text-[var(--app-danger)] mt-1.5">{{ passwordErrors.oldPassword }}</p>
           </div>
           <div class="mb-4">
-            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">新密码</label>
-            <UiInput v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
-            <p v-if="passwordErrors.newPassword" class="text-[12px] text-[#c44b3f] mt-1.5">{{ passwordErrors.newPassword }}</p>
+            <label class="block text-[13px] font-medium text-[var(--app-text-secondary)] mb-2">新密码</label>
+            <UiInput v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" class="w-full h-10 px-3 rounded-[10px] bg-[var(--app-input-bg)] shadow-[inset_0_0_0_0.5px_var(--app-border-strong)] focus:bg-[var(--app-input-bg-focus)] focus:shadow-[0_0_0_4px_var(--app-primary-tint-15),inset_0_0_0_1px_var(--app-primary-tint-50)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.newPassword" class="text-[12px] text-[var(--app-danger)] mt-1.5">{{ passwordErrors.newPassword }}</p>
           </div>
           <div class="mb-4">
-            <label class="block text-[13px] font-medium text-[#6e6e73] mb-2">确认新密码</label>
-            <UiInput v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm" />
-            <p v-if="passwordErrors.confirmPassword" class="text-[12px] text-[#c44b3f] mt-1.5">{{ passwordErrors.confirmPassword }}</p>
+            <label class="block text-[13px] font-medium text-[var(--app-text-secondary)] mb-2">确认新密码</label>
+            <UiInput v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" class="w-full h-10 px-3 rounded-[10px] bg-[var(--app-input-bg)] shadow-[inset_0_0_0_0.5px_var(--app-border-strong)] focus:bg-[var(--app-input-bg-focus)] focus:shadow-[0_0_0_4px_var(--app-primary-tint-15),inset_0_0_0_1px_var(--app-primary-tint-50)] transition-all outline-none text-sm" />
+            <p v-if="passwordErrors.confirmPassword" class="text-[12px] text-[var(--app-danger)] mt-1.5">{{ passwordErrors.confirmPassword }}</p>
           </div>
           <div class="flex gap-3">
-            <UiButton :disabled="changingPassword" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="changePassword">
+            <UiButton :disabled="changingPassword" class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[var(--app-primary-strong)] to-[var(--app-primary)] shadow-[0_2px_8px_var(--app-primary-tint-50)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50" @click="changePassword">
               {{ changingPassword ? '修改中...' : '修改密码' }}
             </UiButton>
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordForm">
+            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[var(--app-text)] bg-[var(--app-input-bg)] hover:bg-[var(--app-surface-muted)] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordForm">
               重置
             </UiButton>
           </div>

@@ -8,8 +8,8 @@
 
     <ui-row :gutter="20" class="[margin-bottom:20px]">
       <ui-col :span="8">
-        <ui-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_14px_34px_rgba(22,_48,_79,_0.06)]">
-          <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_#f0f0f0] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:#909399]">
+        <ui-card class="profile-card [margin-bottom:20px] [padding:20px] [border-radius:20px] [border:1px_solid_var(--app-border)] [box-shadow:var(--app-shadow-soft)]">
+          <div class="profile-header [display:flex] [flex-direction:column] [align-items:center] [padding-bottom:20px] [border-bottom:1px_solid_var(--app-border-soft)] [&_h3]:[margin:10px_0_5px] [&_h3]:[font-size:18px] [&_p]:[margin:0] [&_p]:[font-size:14px] [&_p]:[color:var(--app-text-secondary)]">
             <ui-avatar :size="100" :src="userInfo.avatar" />
             <h3>{{ userInfo.name || '管理员' }}</h3>
             <p>{{ userInfo.role === 'admin' ? '系统管理员' : '未知角色' }}</p>
@@ -17,30 +17,30 @@
 
           <div class="profile-info [margin-top:20px]">
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">用户ID</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.id }}</span>
+              <span class="info-label [color:var(--app-text-secondary)] [margin-right:5px] [font-size:12px] [font-weight:600]">用户ID</span>
+              <span class="info-value [color:var(--app-text)] [font-weight:500] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.id }}</span>
             </div>
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">部门</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.department || '未设置' }}</span>
+              <span class="info-label [color:var(--app-text-secondary)] [margin-right:5px] [font-size:12px] [font-weight:600]">部门</span>
+              <span class="info-value [color:var(--app-text)] [font-weight:500] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.department || '未设置' }}</span>
             </div>
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">电子邮箱</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email || '未设置' }}</span>
+              <span class="info-label [color:var(--app-text-secondary)] [margin-right:5px] [font-size:12px] [font-weight:600]">电子邮箱</span>
+              <span class="info-value [color:var(--app-text)] [font-weight:500] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.email || '未设置' }}</span>
             </div>
 
             <div class="info-item [display:flex] [justify-content:space-between] [margin-bottom:15px] [align-items:center]">
-              <span class="info-label [color:#909399] [color:#606266] [margin-right:5px] [font-size:12px] [font-weight:600] [color:#8092a6]">联系电话</span>
-              <span class="info-value [color:#303133] [font-weight:500] [color:#24384f] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone || '未设置' }}</span>
+              <span class="info-label [color:var(--app-text-secondary)] [margin-right:5px] [font-size:12px] [font-weight:600]">联系电话</span>
+              <span class="info-value [color:var(--app-text)] [font-weight:500] [font-size:14px] [line-height:1.7] [word-break:break-word]">{{ userInfo.phone || '未设置' }}</span>
             </div>
           </div>
         </ui-card>
       </ui-col>
 
       <ui-col :span="16">
-        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
+        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_var(--app-border)] [box-shadow:var(--app-shadow-soft)]">
           <template #header>
             <div class="card-header [font-weight:600] [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <span>修改个人信息</span>
@@ -71,7 +71,7 @@
           </div>
         </ui-card>
 
-        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_#dbe4ef] [box-shadow:0_12px_32px_rgba(48,_72,_104,_0.06)] [border-radius:20px] [border:1px_solid_#dbe5ef] [box-shadow:0_12px_30px_rgba(28,_52,_84,_0.06)]">
+        <ui-card class="form-card [margin-bottom:20px] [border-radius:22px] [border:1px_solid_var(--app-border)] [box-shadow:var(--app-shadow-soft)]">
           <template #header>
             <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <span>修改密码</span>
