@@ -76,6 +76,10 @@ export function getSubmissionDetail(id) {
   return tapClient.get(`/api/grading/submissions/${id}`)
 }
 
+export function getSubmissionErrorDemonstrations(id) {
+  return tapClient.get(`/api/grading/submissions/${id}/error-demonstrations`)
+}
+
 export function overrideSubmissionScore(id, data) {
   return tapClient.put(`/api/grading/submissions/${id}/scores`, data)
 }

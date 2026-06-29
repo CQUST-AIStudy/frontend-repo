@@ -139,8 +139,13 @@
             已生成 {{ detail.errorDemonstrations.length }} 个可视化
           </span>
         </div>
+        <div v-if="demonstrationsLoading" class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
+          <LucideIcon name="loader" :size="24" class="animate-spin text-[var(--app-primary)] mb-2" />
+          <div class="text-sm font-medium text-[#334155]">正在生成可视化演示...</div>
+          <div class="mt-1 text-xs text-[#8b96a8]">首次加载需要解析代码并调用模型生成动画，请稍候</div>
+        </div>
         <ErrorDemonstrationPlayer
-          v-if="detail.errorDemonstrations?.length"
+          v-else-if="detail.errorDemonstrations?.length"
           :demonstrations="detail.errorDemonstrations"
         />
         <div v-else class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
@@ -386,6 +391,16 @@
         <span class="text-sm text-[#6e6e73]">加载中...</span>
       </div>
     </div>
+
+    <!-- Error State -->
+    <div v-else-if="loadError" class="h-[200px] flex items-center justify-center">
+      <div class="flex flex-col items-center gap-3 text-center max-w-md">
+        <LucideIcon name="triangle-alert" :size="40" class="text-[#c44b3f]" />
+        <div class="text-sm font-medium text-[#1d1d1f]">页面加载失败</div>
+        <div class="text-xs text-[#6e6e73]">{{ loadError }}</div>
+        <UiButton @click="loadDetail" class="h-8 px-4 rounded-lg text-xs bg-[var(--app-primary)] text-white border-none">重新加载</UiButton>
+      </div>
+    </div>
   </div>
 </div>
 </template>
@@ -412,6 +427,7 @@ import {
   downloadSubmissionReport,
   generateFinalReview,
   getSubmissionDetail,
+  getSubmissionErrorDemonstrations,
   getGradingMatchCandidates,
   confirmSubmissionStudent,
   overrideSubmissionScore,
@@ -424,6 +440,7 @@ const route = useRoute()
 const subId = route.params.id
 const detail = ref(null)
 const loading = ref(false)
+const loadError = ref('')
 const dimensions = ref({})
 
 const finalReview = ref('')
@@ -432,6 +449,7 @@ const generatingReview = ref(false)
 const savingReview = ref(false)
 const publishingReport = ref(false)
 const downloadingReport = ref(false)
+const demonstrationsLoading = ref(false)
 const matchCandidates = ref([])
 const selectedStudentId = ref('')
 const confirmingMatch = ref(false)
@@ -700,6 +718,7 @@ async function downloadReport() {
 
 async function loadDetail() {
   loading.value = true
+  loadError.value = ''
   try {
     const res = await getSubmissionDetail(subId)
     detail.value = res?.data || res
@@ -733,10 +752,29 @@ async function loadDetail() {
         dimensions.value = {}
       }
     }
+
+    // 错误演示单独异步加载，避免生成动画阻塞详情页渲染
+    fetchErrorDemonstrations()
   } catch (error) {
-    uiMessage.error(error.message)
+    loadError.value = error?.message || '加载失败，请检查网络或稍后重试'
+    uiMessage.error(loadError.value)
   } finally {
     loading.value = false
+  }
+}
+
+async function fetchErrorDemonstrations() {
+  if (!detail.value?.submissionId) return
+  demonstrationsLoading.value = true
+  try {
+    const res = await getSubmissionErrorDemonstrations(detail.value.submissionId)
+    const demos = res?.data || res || []
+    detail.value.errorDemonstrations = demos
+  } catch (error) {
+    console.warn('获取错误演示失败:', error)
+    detail.value.errorDemonstrations = []
+  } finally {
+    demonstrationsLoading.value = false
   }
 }
 
