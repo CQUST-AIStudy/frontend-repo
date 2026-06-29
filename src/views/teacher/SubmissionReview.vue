@@ -324,7 +324,7 @@
     <Teleport to="body">
       <div v-if="overrideVisible" class="fixed inset-0 z-[9999] flex items-center justify-center">
         <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" @click="overrideVisible = false"></div>
-        <div class="relative w-[500px] max-w-[90vw] rounded-[20px] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.2)] p-6 animate-[modalIn_0.2s_ease]">
+        <div class="relative w-[560px] max-w-[90vw] max-h-[85vh] overflow-y-auto rounded-[20px] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.2)] p-6 animate-[modalIn_0.2s_ease]">
           <h3 class="text-lg font-semibold text-[#1d1d1f] m-0 mb-5">修改评分</h3>
           <div class="space-y-4">
             <div class="flex items-center gap-3">
@@ -347,6 +347,40 @@
                 placeholder="输入修改后的评语"
                 class="flex-1 px-4 py-3 rounded-[12px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-y min-h-[80px]"
               ></textarea>
+            </div>
+            <!-- Inline Annotation Editor -->
+            <div v-if="overrideForm.annotations.length > 0" class="border-t border-black/[0.06] pt-4">
+              <div class="text-sm font-semibold text-[#1d1d1f] mb-3">批注修改 <span class="text-xs font-normal text-[#aeaeb2]">(修改后会重新生成批注报告)</span></div>
+              <div class="space-y-3">
+                <div
+                  v-for="(ann, idx) in overrideForm.annotations"
+                  :key="idx"
+                  class="rounded-[12px] border border-black/[0.06] bg-[#f9f9f9] p-3"
+                >
+                  <div class="flex items-center gap-2 mb-2">
+                    <button
+                      v-for="t in ['CHECK', 'CROSS', 'WAVE']"
+                      :key="t"
+                      @click="ann.type = t"
+                      class="h-[28px] px-3 rounded-full text-xs font-bold border transition-all"
+                      :class="ann.type === t
+                        ? (t === 'CHECK' ? 'bg-[#34c759] text-white border-[#34c759]'
+                           : t === 'CROSS' ? 'bg-[#ff3b30] text-white border-[#ff3b30]'
+                           : 'bg-[#ff9500] text-white border-[#ff9500]')
+                        : 'bg-white text-[#6e6e73] border-black/[0.08]'"
+                    >
+                      {{ t === 'CHECK' ? '✓ 正确' : t === 'CROSS' ? '✗ 错误' : '〰 警示' }}
+                    </button>
+                    <span class="text-xs text-[#aeaeb2] ml-auto truncate max-w-[200px]" :title="ann.anchor_text">{{ ann.anchor_text }}</span>
+                  </div>
+                  <textarea
+                    v-model="ann.note"
+                    rows="2"
+                    placeholder="批注内容"
+                    class="w-full px-3 py-2 rounded-[8px] bg-white shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:shadow-[0_0_0_3px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-xs resize-y"
+                  ></textarea>
+                </div>
+              </div>
             </div>
             <div class="flex gap-3">
               <label class="w-[70px] text-sm text-[#6e6e73] shrink-0 pt-2.5">修改原因</label>
@@ -461,7 +495,7 @@ const matchStatusText = computed(() => detail.value?.matchStatus === 'AMBIGUOUS'
 
 const overrideVisible = ref(false)
 const overriding = ref(false)
-const overrideForm = ref({ dimensionId: null, newScore: 0, maxScore: 0, newComment: '', reason: '' })
+const overrideForm = ref({ dimensionId: null, newScore: 0, maxScore: 0, newComment: '', reason: '', annotations: [] })
 const previewImageUrl = ref(null)
 
 const activeDimFilter = ref('all')
@@ -600,12 +634,14 @@ function dimSupportClass(index) {
 }
 
 function startOverride(score) {
+  const anns = parseAnnotations(score.annotationsJson)
   overrideForm.value = {
     dimensionId: score.dimensionId,
     newScore: score.score || 0,
     maxScore: score.maxScore,
     newComment: score.comment || '',
     reason: '',
+    annotations: anns.map(a => ({ ...a })),
   }
   overrideVisible.value = true
 }
@@ -613,13 +649,18 @@ function startOverride(score) {
 async function submitOverride() {
   overriding.value = true
   try {
-    await overrideSubmissionScore(subId, {
+    const payload = {
       dimensionId: overrideForm.value.dimensionId,
       newScore: overrideForm.value.newScore,
       newComment: overrideForm.value.newComment,
       reason: overrideForm.value.reason,
-    })
-    uiMessage.success('评分已修改')
+    }
+    // Include annotations if any were edited
+    if (overrideForm.value.annotations.length > 0) {
+      payload.newAnnotationsJson = JSON.stringify(overrideForm.value.annotations)
+    }
+    await overrideSubmissionScore(subId, payload)
+    uiMessage.success('评分已修改，批注报告已更新')
     overrideVisible.value = false
     await loadDetail()
   } catch (error) {

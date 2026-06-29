@@ -45,10 +45,11 @@ export function draftRubricFromTemplate(file, extra = {}) {
   })
 }
 
-export function createGradingTask(formData) {
+export function createGradingTask(formData, onProgress) {
   return tapClient.post('/api/grading/tasks', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
-    timeout: 120000,
+    timeout: 300000,
+    onUploadProgress: onProgress,
   })
 }
 

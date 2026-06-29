@@ -206,7 +206,7 @@
             class="h-11 px-7 rounded-[10px] text-[14px] font-semibold text-white bg-[var(--app-primary)] shadow-[0_8px_18px_rgba(var(--app-primary-rgb),0.24)] hover:bg-[var(--app-primary-strong)] active:scale-[0.98] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
             <span v-if="submitting" class="inline-flex items-center gap-2">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              处理中...
+              {{ uploadProgress > 0 && uploadProgress < 100 ? `上传中 ${uploadProgress}%` : '处理中...' }}
             </span>
             <span v-else class="inline-flex items-center gap-2">
               <LucideIcon name="send" :size="18" />
@@ -317,8 +317,8 @@
               class="h-8 px-3 rounded-lg bg-[#e8f8ed] text-[#30d158] text-[12px] font-medium border-none cursor-pointer hover:bg-[#d4f5e0] transition-colors">
               导出报告
             </button>
-            <button @click="confirmDeleteTask(row.taskId)" :disabled="row.status === 'PROCESSING'"
-              class="h-8 px-3 rounded-lg bg-[#f5f5f7] text-[#6e6e73] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <button @click="confirmDeleteTask(row)"
+              class="h-8 px-3 rounded-lg bg-[#f5f5f7] text-[#6e6e73] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors">
               删除
             </button>
           </div>
@@ -388,6 +388,7 @@ const rubrics = ref([])
 const tasks = ref([])
 const loading = ref(false)
 const submitting = ref(false)
+const uploadProgress = ref(0)
 const fileList = ref([])
 const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchName: '' })
@@ -661,14 +662,18 @@ function fileTypeBadgeClass(file) {
   return 'bg-[#667085]'
 }
 
-async function confirmDeleteTask(id) {
+async function confirmDeleteTask(row) {
+  const isProcessing = row.status === 'PROCESSING'
+  const msg = isProcessing
+    ? '该任务正在批改中，删除后正在处理的提交将被中止。确定删除此批改任务？删除后不可恢复'
+    : '确定删除此批改任务？删除后不可恢复'
   try {
-    await messageBox.confirm('确定删除此批改任务？删除后不可恢复', '确认删除', {
+    await messageBox.confirm(msg, '确认删除', {
       confirmButtonText: '删除',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    deleteTask(id)
+    deleteTask(row.taskId)
   } catch {
     // user cancelled
   }
@@ -698,6 +703,7 @@ async function submitTask() {
     return
   }
   submitting.value = true
+  uploadProgress.value = 0
   try {
     const fd = new FormData()
     fileList.value.forEach(f => fd.append('files', f.raw || f.file || f))
@@ -712,7 +718,11 @@ async function submitTask() {
     if (createForm.value.batchName?.trim()) {
       fd.append('batchName', createForm.value.batchName.trim())
     }
-    await createGradingTask(fd)
+    await createGradingTask(fd, (progressEvent) => {
+      if (progressEvent.total) {
+        uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+      }
+    })
     uiMessage.success('批改任务已创建，AI 正在处理中...')
     clearSelectedFiles()
     createForm.value.teacherSignature = ''
@@ -721,6 +731,7 @@ async function submitTask() {
     loadBatches()
   } catch (e) { uiMessage.error('创建失败: ' + e.message) }
   submitting.value = false
+  uploadProgress.value = 0
 }
 
 async function loadTasks() {
