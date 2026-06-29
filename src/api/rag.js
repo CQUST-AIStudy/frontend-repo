@@ -1,5 +1,5 @@
 import { getTapToken } from '../constants/auth'
-import { buildRagApiUrl } from '../config/runtime'
+import { buildRagApiUrl, RAG_API_BASE_URL } from '../config/runtime'
 import { restoreTapSession } from './tap'
 
 const AUTH_ERROR_MESSAGE = '登录已过期，请重新登录'
@@ -18,7 +18,15 @@ async function refreshTapToken() {
   return data?.accessToken || null
 }
 
-async function ensureTapToken({ force = false } = {}) {
+function isProxyRagRequest(path = '') {
+  return String(path || '').startsWith('/')
+    && !/^https?:\/\//.test(String(RAG_API_BASE_URL || ''))
+    && String(RAG_API_BASE_URL || '').startsWith('/rag')
+}
+
+async function ensureTapToken(path, { force = false } = {}) {
+  if (isProxyRagRequest(path)) return null
+
   const token = getTapToken()
   if (token && !force) return token
 
@@ -43,7 +51,14 @@ function authHeaders(extra = {}, token = getTapToken()) {
   }
 }
 
-function buildAuthorizedOptions(options, token) {
+function buildAuthorizedOptions(path, options, token) {
+  if (isProxyRagRequest(path)) {
+    return {
+      ...options,
+      credentials: options.credentials || 'include'
+    }
+  }
+
   return {
     ...options,
     credentials: options.credentials || 'include',
@@ -53,12 +68,13 @@ function buildAuthorizedOptions(options, token) {
 
 async function fetchRagWithAuth(path, options = {}) {
   const url = buildRagApiUrl(path)
-  let token = await ensureTapToken()
-  let response = await fetch(url, buildAuthorizedOptions(options, token))
+  const isProxyRequest = isProxyRagRequest(path)
+  let token = await ensureTapToken(path)
+  let response = await fetch(url, buildAuthorizedOptions(path, options, token))
 
-  if (response.status === 401) {
-    token = await ensureTapToken({ force: true })
-    response = await fetch(url, buildAuthorizedOptions(options, token))
+  if (!isProxyRequest && response.status === 401) {
+    token = await ensureTapToken(path, { force: true })
+    response = await fetch(url, buildAuthorizedOptions(path, options, token))
   }
 
   return response
