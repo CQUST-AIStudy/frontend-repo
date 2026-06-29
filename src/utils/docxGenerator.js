@@ -63,7 +63,7 @@ export class DocxGenerator {
             new Paragraph({
               alignment: AlignmentType.CENTER,
               spacing: { after: 80 },
-              children: [new TextRun({ text: '重庆科技大学', font: 'SimHei', size: 32, bold: true })],
+              children: [new TextRun({ text: 'AI大学', font: 'SimHei', size: 32, bold: true })],
             }),
             new Paragraph({
               alignment: AlignmentType.CENTER,

@@ -106,7 +106,7 @@
       <div v-else class="report-preview [padding:20px] [background:#fff]">
         <div class="report-container [max-width:1024px] [margin:0_auto] [padding:20px] [background:#fff]">
           <div class="report-title [text-align:center] [margin-bottom:24px]">
-            <div class="university-name [font-family:var(--font-page)] [font-size:30px] [font-weight:700] [color:#111827]">重庆科技大学</div>
+            <div class="university-name [font-family:var(--font-page)] [font-size:30px] [font-weight:700] [color:#111827]">AI大学</div>
             <div class="report-type [font-family:var(--font-page)] [font-size:30px] [font-weight:700] [color:#111827] [margin-top:8px]">上机实验报告</div>
           </div>
 
