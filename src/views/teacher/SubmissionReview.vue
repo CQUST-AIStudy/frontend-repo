@@ -80,12 +80,15 @@
           <span class="font-semibold text-[#1d1d1f]">教师总评</span>
           <div class="flex gap-2 flex-wrap">
             <UiButton
-              @click="downloadReport"
-              :disabled="downloadingReport || !detail?.hasDownloadableReport"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#6b8f6b] bg-[rgba(107,143,107,0.08)] hover:bg-[rgba(107,143,107,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="isReportFailed ? preGenerateResources() : downloadReport()"
+              :disabled="downloadingReport || isReportGenerating || (!detail?.hasDownloadableReport && !isReportFailed)"
+              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="isReportFailed
+                ? 'text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)]'
+                : 'text-[#6b8f6b] bg-[rgba(107,143,107,0.08)] hover:bg-[rgba(107,143,107,0.15)]'"
             >
-              <span v-if="downloadingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
-              下载批注报告
+              <span v-if="downloadingReport || preGeneratingResources" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              {{ isReportFailed ? '重新生成批注报告' : (isReportGenerating ? '批注报告生成中...' : '下载批注报告') }}
             </UiButton>
             <UiButton
               @click="generateReview"
@@ -139,10 +142,22 @@
             已生成 {{ detail.errorDemonstrations.length }} 个可视化
           </span>
         </div>
-        <div v-if="demonstrationsLoading" class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
+        <div v-if="demonstrationsLoading || isDemoGenerating" class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
           <LucideIcon name="loader" :size="24" class="animate-spin text-[var(--app-primary)] mb-2" />
           <div class="text-sm font-medium text-[#334155]">正在生成可视化演示...</div>
           <div class="mt-1 text-xs text-[#8b96a8]">首次加载需要解析代码并调用模型生成动画，请稍候</div>
+        </div>
+        <div v-else-if="isDemoFailed" class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#fca5a5] bg-[#fef2f2] px-5 text-center">
+          <LucideIcon name="alert-circle" :size="24" class="mb-2 text-[#dc2626]" />
+          <div class="text-sm font-medium text-[#334155]">可视化演示生成失败</div>
+          <UiButton
+            @click="preGenerateResources"
+            :disabled="preGeneratingResources"
+            class="mt-3 h-8 px-3 rounded-lg text-xs font-medium text-white bg-[#dc2626] hover:bg-[#b91d1d] border-none disabled:opacity-50"
+          >
+            <span v-if="preGeneratingResources" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span>
+            重新生成
+          </UiButton>
         </div>
         <ErrorDemonstrationPlayer
           v-else-if="detail.errorDemonstrations?.length"
@@ -441,7 +456,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import hljs from 'highlight.js/lib/common'
 import { message as uiMessage } from '@/services/feedback'
 import { ChatDotRound, Edit } from '@/components/ui/icons'
@@ -465,6 +480,7 @@ import {
   getGradingMatchCandidates,
   confirmSubmissionStudent,
   overrideSubmissionScore,
+  preGenerateSubmissionResources,
   publishSubmission,
   revokeSubmissionPublication,
   saveFinalReview,
@@ -484,8 +500,10 @@ const savingReview = ref(false)
 const publishingReport = ref(false)
 const downloadingReport = ref(false)
 const demonstrationsLoading = ref(false)
+const preGeneratingResources = ref(false)
 const matchCandidates = ref([])
 const selectedStudentId = ref('')
+let detailPollTimer = null
 const confirmingMatch = ref(false)
 
 const matchConfirmed = computed(() => ['AUTO_CONFIRMED', 'MANUAL_CONFIRMED'].includes(detail.value?.matchStatus))
@@ -525,6 +543,13 @@ const preferredReportLabel = computed(() => {
     pdf: '评分报告 PDF',
   }[type] || '报告文件'
 })
+
+const reportStatus = computed(() => detail.value?.annotatedReportStatus || 'PENDING')
+const demoStatus = computed(() => detail.value?.errorDemonstrationsStatus || 'PENDING')
+const isReportGenerating = computed(() => reportStatus.value === 'GENERATING')
+const isReportFailed = computed(() => reportStatus.value === 'FAILED')
+const isDemoGenerating = computed(() => demoStatus.value === 'GENERATING')
+const isDemoFailed = computed(() => demoStatus.value === 'FAILED')
 
 // 建立 evidenceId -> dimensionId 列表 的映射，用于在证据卡片上显示「支持 xx 维度」
 const evidenceDimMap = computed(() => {
@@ -757,9 +782,27 @@ async function downloadReport() {
   }
 }
 
+async function preGenerateResources() {
+  preGeneratingResources.value = true
+  try {
+    const res = await preGenerateSubmissionResources(subId)
+    const data = res?.data || res
+    detail.value = { ...detail.value, ...data }
+    uiMessage.success('正在重新生成资源，请稍候')
+  } catch (error) {
+    uiMessage.error(`生成失败: ${error.message}`)
+  } finally {
+    preGeneratingResources.value = false
+  }
+}
+
 async function loadDetail() {
   loading.value = true
   loadError.value = ''
+  if (detailPollTimer) {
+    clearTimeout(detailPollTimer)
+    detailPollTimer = null
+  }
   try {
     const res = await getSubmissionDetail(subId)
     detail.value = res?.data || res
@@ -794,8 +837,15 @@ async function loadDetail() {
       }
     }
 
-    // 错误演示单独异步加载，避免生成动画阻塞详情页渲染
-    fetchErrorDemonstrations()
+    // 错误演示单独异步加载；若后端正在批量预生成，则跳过避免重复调用
+    if (!isDemoGenerating.value && !isDemoFailed.value) {
+      fetchErrorDemonstrations()
+    }
+
+    // 资源生成中时每 4 秒轮询一次状态
+    if (isReportGenerating.value || isDemoGenerating.value) {
+      detailPollTimer = setTimeout(loadDetail, 4000)
+    }
   } catch (error) {
     loadError.value = error?.message || '加载失败，请检查网络或稍后重试'
     uiMessage.error(loadError.value)
@@ -820,4 +870,10 @@ async function fetchErrorDemonstrations() {
 }
 
 onMounted(loadDetail)
+onUnmounted(() => {
+  if (detailPollTimer) {
+    clearTimeout(detailPollTimer)
+    detailPollTimer = null
+  }
+})
 </script>

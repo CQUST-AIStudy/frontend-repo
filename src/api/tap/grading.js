@@ -89,6 +89,10 @@ export function retryGradingSubmission(id) {
   return tapClient.post(`/api/grading/submissions/${id}/retry`)
 }
 
+export function preGenerateSubmissionResources(id) {
+  return tapClient.post(`/api/grading/submissions/${id}/pre-generate`)
+}
+
 export function downloadSubmissionReport(id) {
   return tapClient.get(`/api/grading/reports/${id}`, { responseType: 'blob' })
 }
