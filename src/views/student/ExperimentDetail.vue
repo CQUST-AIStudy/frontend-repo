@@ -63,7 +63,7 @@
 
           <!-- 代码 -->
           <div v-if="activeTab === 'code'" class="g-tab-body [padding:20px]">
-            <div v-if="!currentExp.code || !isCompleted" class="g-empty [text-align:center] [padding:48px_20px]">
+            <div v-if="(!currentExp.problems || !currentExp.problems.length) && (!currentExp.code || !isCompleted)" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="file-code" :size="48" /></div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无代码提交</div>
               <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="goToPTA">前往PTA平台完成实验</UiButton>
@@ -73,7 +73,25 @@
                 <span class="g-toolbar-title [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
                 <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" @click="copyCode">复制</UiButton>
               </div>
-              <CodeViewer :code="currentExp.code" language="cpp" maxHeight="500px" />
+              <!-- 按题分割展示：题目(题号+标题+题面) + 代码 -->
+              <div v-if="currentExp.problems && currentExp.problems.length" class="flex flex-col gap-4">
+                <div v-for="(problem, index) in currentExp.problems" :key="index" class="rounded-xl border border-[#e8eaed] overflow-hidden">
+                  <div class="p-4 bg-[#f8f9fa] border-b border-[#e8eaed]">
+                    <div class="flex items-baseline gap-2 mb-2">
+                      <span class="text-sm font-semibold text-[#1a73e8]">第{{ problem.number || (index + 1) }}题</span>
+                      <span v-if="problem.problemNo" class="text-xs text-[#5f6368]">题号：{{ problem.problemNo }}</span>
+                      <span v-if="problem.problemTitle" class="text-sm font-medium text-[#202124]">{{ problem.problemTitle }}</span>
+                    </div>
+                    <div v-if="problem.statementMd" class="markdown-body text-[13px] leading-[1.7] text-[#202124] [&_p]:[margin:8px_0] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:12px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px] [&_li]:[margin:4px_0]" v-html="renderSafeMarkdown(problem.statementMd)"></div>
+                  </div>
+                  <div class="p-3">
+                    <CodeViewer v-if="problem.code" :code="problem.code" language="cpp" maxHeight="500px" />
+                    <div v-else class="text-center py-6 text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 兜底：无结构化题目时退回单块代码展示 -->
+              <CodeViewer v-else-if="currentExp.code" :code="currentExp.code" language="cpp" maxHeight="500px" />
             </div>
           </div>
 

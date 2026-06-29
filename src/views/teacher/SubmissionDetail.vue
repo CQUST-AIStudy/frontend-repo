@@ -120,7 +120,7 @@
               </div>
 
               <!-- 题目列表显示 -->
-              <div v-if="submission.code">
+              <div v-if="submission.code || (submission.problems && submission.problems.length)">
                 <!-- Question sub-tabs (left position) -->
                 <div class="flex border border-black/[0.06] rounded-xl overflow-hidden mb-5">
                   <div class="flex flex-col border-r border-black/[0.06] bg-[#f9f9fb] min-w-[100px]">
@@ -144,6 +144,15 @@
                     </div>
                     <!-- Per-question panels -->
                     <div v-for="(question, index) in parsedQuestions" :key="'q'+index" v-show="activeQuestionTab === String(index)">
+                      <!-- 题目信息：题号 + 标题 + 题面 -->
+                      <div v-if="question.problemTitle || question.statementMd" class="mb-4 p-4 bg-[#f9f9fb] rounded-lg">
+                        <div class="flex items-baseline gap-2 mb-2">
+                          <span class="text-sm font-semibold text-[var(--app-primary)]">第{{ question.number }}题</span>
+                          <span v-if="question.problemNo" class="text-xs text-[#6e6e73]">题号：{{ question.problemNo }}</span>
+                          <span v-if="question.problemTitle" class="text-sm font-medium text-[#1d1d1f]">{{ question.problemTitle }}</span>
+                        </div>
+                        <div v-if="question.statementMd" class="markdown-body text-[13px] leading-[1.7] text-[#1d1d1f] [&_p]:[margin:8px_0] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px] [&_li]:[margin:4px_0]" v-html="renderMarkdown(question.statementMd)"></div>
+                      </div>
                       <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
 
                       <div v-if="question.testResults" class="mt-4 p-3 bg-[#f8f8f8] rounded-lg">
@@ -592,7 +601,25 @@ const reportGeneratorRef = ref(null)
 // 解析提交代码，按题目分割
 const parseQuestionCode = () => {
   parsedQuestions.value = []
-  if (!submission.value || !submission.value.code) return
+  if (!submission.value) return
+
+  // 结构化数据兜底：后端未返回合并 code 但有 problems（如学生未提交代码）时，直接用 problems 构造
+  const structuredProblems = submission.value.problems
+  const hasStructured = Array.isArray(structuredProblems) && structuredProblems.length > 0
+  if (!submission.value.code && hasStructured) {
+    parsedQuestions.value = structuredProblems.map((p, idx) => ({
+      number: p.number ?? (idx + 1),
+      problemNo: p.problemNo ?? null,
+      problemTitle: p.problemTitle ?? null,
+      statementMd: p.statementMd ?? null,
+      code: p.code ?? '',
+      testResults: null,
+      comment: '',
+      saving: false
+    }))
+    activeQuestionTab.value = parsedQuestions.value.length ? String(0) : 'full'
+    return
+  }
 
   const code = submission.value.code
   const questions = []
@@ -643,6 +670,20 @@ const parseQuestionCode = () => {
       comment: '',
       saving: false
     }]
+  }
+
+  // 增富：用后端结构化 problems 按 number 匹配，补充题目标题/题面（不影响 testResults/评语/序号）
+  if (hasStructured) {
+    const byNumber = {}
+    structuredProblems.forEach(p => { if (p.number != null) byNumber[p.number] = p })
+    parsedQuestions.value.forEach(q => {
+      const p = byNumber[q.number]
+      if (p) {
+        q.problemNo = p.problemNo ?? null
+        q.problemTitle = p.problemTitle ?? null
+        q.statementMd = p.statementMd ?? null
+      }
+    })
   }
 }
 
