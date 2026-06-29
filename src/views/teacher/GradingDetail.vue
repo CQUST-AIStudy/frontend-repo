@@ -540,6 +540,7 @@ function statusType(status) {
   return {
     PENDING: 'info',
     PROCESSING: 'warning',
+    FINALIZING: 'warning',
     SCORED: 'success',
     COMPLETED: 'success',
     FAILED: 'danger',
@@ -551,6 +552,7 @@ function statusText(status) {
   return {
     PENDING: '等待中',
     PROCESSING: '处理中',
+    FINALIZING: '生成资源中',
     SCORED: '已评分',
     COMPLETED: '已完成',
     FAILED: '失败',
