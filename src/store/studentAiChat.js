@@ -124,6 +124,7 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
     activeConversationId: null,
     userInput: '',
     streamingConversationIds: {},
+    abortControllers: {},
     assistantMode: DEFAULT_MODE,
     webEnabled: false,
     selectedCourseSpaceId: null,
@@ -420,8 +421,12 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
       const active = this.conversations.find((item) => item.id === conversationId) || conversation
       const payload = this.buildAssistantPayload(text, active, userMessage.id)
 
+      const controller = new AbortController()
+      this.abortControllers = { ...this.abortControllers, [conversationId]: controller }
+
       try {
         await streamAssistantChat(payload, {
+          signal: controller.signal,
           onRetrieval: ({ sources, usedWeb, effectiveMode, coverageScore }) => {
             this.updateAssistantMessageInConversation(conversationId, assistantId, {
               citations: normalizeSourcesForDisplay(sources || []),
@@ -447,19 +452,67 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
           },
         })
       } catch (error) {
-        const friendlyMessage = formatStudentAssistantError(error?.message, mode)
-        if (this.activeConversationId === conversationId) {
-          this.assistantNotice = friendlyMessage
-        }
-        uiMessage.warning(friendlyMessage)
-        const target = this.conversations.find((item) => item.id === conversationId)
-        const current = target?.messages.find((message) => message.id === assistantId)
-        if (current && !current.content) {
-          this.updateAssistantMessageInConversation(conversationId, assistantId, { content: friendlyMessage })
+        const aborted = controller.signal.aborted
+          || error?.name === 'AbortError'
+          || /aborted/i.test(String(error?.message || ''))
+        if (aborted) {
+          // 用户主动停止：保留已流式输出的内容，不弹错误提示。
+        } else {
+          const friendlyMessage = formatStudentAssistantError(error?.message, mode)
+          if (this.activeConversationId === conversationId) {
+            this.assistantNotice = friendlyMessage
+          }
+          uiMessage.warning(friendlyMessage)
+          const target = this.conversations.find((item) => item.id === conversationId)
+          const current = target?.messages.find((message) => message.id === assistantId)
+          if (current && !current.content) {
+            this.updateAssistantMessageInConversation(conversationId, assistantId, { content: friendlyMessage })
+          }
         }
       } finally {
+        const nextControllers = { ...this.abortControllers }
+        delete nextControllers[conversationId]
+        this.abortControllers = nextControllers
         this.setConversationTyping(conversationId, false)
       }
-    }
+    },
+
+    stopGeneration(conversationId = this.activeConversationId) {
+      const controller = this.abortControllers?.[conversationId]
+      if (controller) {
+        try {
+          controller.abort()
+        } catch {
+          // 忽略中断异常。
+        }
+      }
+      this.setConversationTyping(conversationId, false)
+    },
+
+    deleteConversation(conversationId) {
+      if (!conversationId) return
+      const conversation = this.conversations.find((item) => item.id === conversationId)
+      if (!conversation) return
+      if (this.isConversationTyping(conversationId)) {
+        this.stopGeneration(conversationId)
+      }
+      let next = this.conversations.filter((item) => item.id !== conversationId)
+      if (this.activeConversationId === conversationId) {
+        if (next.length > 0) {
+          this.switchConversation(next[0].id)
+        } else {
+          const fresh = buildConversation({
+            mode: this.assistantMode,
+            webEnabled: this.effectiveWebEnabled,
+            selectedCourseSpaceId: this.selectedCourseSpaceId,
+          })
+          next = [fresh]
+          this.activeConversationId = fresh.id
+          this.userInput = ''
+          this.assistantNotice = ''
+        }
+      }
+      this.conversations = trimConversations(next)
+    },
   }
 })
