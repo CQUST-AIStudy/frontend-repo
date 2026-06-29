@@ -8,6 +8,7 @@ import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/
 import {
   ChatDotRound,
   Close,
+  Connection,
   Delete,
   Document,
   Menu,
@@ -29,6 +30,7 @@ const {
 } = storeToRefs(chatStore)
 
 const chatContainer = ref(null)
+const assistantInputRef = ref(null)
 const historyQuery = ref('')
 const historyVisible = ref(true)
 const courseSpaces = ref([])
@@ -50,10 +52,17 @@ const modeCards = [
   },
   {
     value: 'rag',
-    title: 'RAG 模式',
+    title: 'RAG 问答',
     desc: '知识库问答',
     icon: Reading,
     tone: 'purple'
+  },
+  {
+    value: 'web',
+    title: '联网搜索',
+    desc: '检索最新网络信息',
+    icon: Connection,
+    tone: 'blue'
   }
 ]
 
@@ -196,14 +205,34 @@ async function sendMessage() {
     return
   }
   await chatStore.sendMessage()
+  resetInputHeight()
   await scrollToBottom()
+}
+
+function stopGenerating() {
+  chatStore.stopGeneration()
+}
+
+function autoResize() {
+  const textarea = assistantInputRef.value
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  const next = Math.min(160, textarea.scrollHeight)
+  textarea.style.height = `${next}px`
+}
+
+function resetInputHeight() {
+  const textarea = assistantInputRef.value
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
 }
 
 function useQuickPrompt(prompt) {
   chatStore.setInput(prompt)
   nextTick(() => {
-    const textarea = document.querySelector('.assistant-input')
-    if (textarea) textarea.focus()
+    autoResize()
+    assistantInputRef.value?.focus()
   })
 }
 
@@ -255,8 +284,23 @@ async function clearAllConversations() {
   }
 }
 
+async function removeConversation(id) {
+  if (!id) return
+  try {
+    await messageBox.confirm('删除该会话及其聊天记录？', '提示', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.deleteConversation(id)
+    await scrollToBottom()
+  } catch {
+    // 用户取消删除。
+  }
+}
+
 function onKeyDown(event) {
-  if (event.key === 'Enter' && event.ctrlKey) {
+  if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
     event.preventDefault()
     sendMessage()
   }
@@ -264,6 +308,9 @@ function onKeyDown(event) {
 
 watch(messages, scrollToBottom, { deep: true })
 watch(isTyping, scrollToBottom)
+watch(userInput, () => {
+  nextTick(autoResize)
+})
 watch(selectedCourseSpaceId, (value) => {
   chatStore.setCourseSpace(value)
 })
@@ -271,6 +318,7 @@ watch(selectedCourseSpaceId, (value) => {
 onMounted(() => {
   chatStore.ensureActiveConversation()
   fetchCourseSpaces()
+  autoResize()
   scrollToBottom()
 })
 </script>
@@ -319,7 +367,17 @@ onMounted(() => {
           :class="{ 'history-item--active': item.id === activeConversation?.id }"
           @click="switchConversation(item.id)"
         >
-          <span class="history-title">{{ item.title }}</span>
+          <span class="history-title-row">
+            <span class="history-title">{{ item.title }}</span>
+            <button
+              type="button"
+              class="history-remove"
+              title="删除该会话"
+              @click.stop="removeConversation(item.id)"
+            >
+              <Delete />
+            </button>
+          </span>
           <span class="history-preview">{{ lastMessagePreview(item) }}</span>
           <span class="history-meta">
             <span>{{ modeLabel(item.mode) }}{{ item.webEnabled ? ' · 联网' : '' }}</span>
@@ -473,6 +531,12 @@ onMounted(() => {
               <strong>{{ message.role === 'user' ? '我' : 'AI 助手' }}</strong>
               <span>{{ message.time }}</span>
               <span v-if="message.role === 'ai' && message.usedWeb" class="web-badge">联网</span>
+              <span
+                v-if="message.role === 'ai' && message.coverageScore > 0"
+                class="coverage-badge"
+              >
+                引用覆盖率 {{ Math.round(message.coverageScore * 100) }}%
+              </span>
             </div>
             <div class="message-bubble">
               <p v-if="message.role === 'user'" class="plain-message">
@@ -495,19 +559,26 @@ onMounted(() => {
                 >
                   <Document />
                   <div class="source-copy">
-                    <a
-                      v-if="cite.url"
-                      :href="cite.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      [{{ cite.index }}] {{ cite.docName || '联网资料' }}
-                    </a>
-                    <span v-else>[{{ cite.index }}] {{ cite.docName || '引用资料' }}</span>
+                    <div class="source-head">
+                      <span
+                        class="source-tag"
+                        :class="(cite.source === 'web' || cite.url) ? 'source-tag--web' : 'source-tag--kb'"
+                      >
+                        {{ (cite.source === 'web' || cite.url) ? '联网' : '知识库' }}
+                      </span>
+                      <a
+                        v-if="cite.url"
+                        :href="cite.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        [{{ cite.index }}] {{ cite.docName || '联网资料' }}
+                      </a>
+                      <span v-else>[{{ cite.index }}] {{ cite.docName || '引用资料' }}</span>
+                    </div>
                     <small v-if="cite.chapterPath || cite.pageRange">
                       {{ [cite.chapterPath, cite.pageRange].filter(Boolean).join(' | ') }}
                     </small>
-                    <small v-else-if="cite.source === 'web' || cite.url">联网来源</small>
                   </div>
                 </div>
               </div>
@@ -538,10 +609,11 @@ onMounted(() => {
         </div>
 
         <textarea
+          ref="assistantInputRef"
           v-model="userInput"
           class="assistant-input"
-          rows="3"
-          placeholder="输入你的问题，按 Ctrl + Enter 发送"
+          placeholder="输入你的问题，Enter 发送，Shift + Enter 换行"
+          @input="autoResize"
           @keydown="onKeyDown"
         ></textarea>
 
@@ -551,9 +623,17 @@ onMounted(() => {
             <span>RAG 模式需要先选择课程空间</span>
           </div>
           <ui-button
+            v-if="isTyping"
+            type="button"
+            class="send-button stop-button"
+            @click="stopGenerating"
+          >
+            停止生成
+          </ui-button>
+          <ui-button
+            v-else
             type="primary"
             :disabled="!canSend"
-            :loading="isTyping"
             class="send-button"
             @click="sendMessage"
           >
@@ -715,10 +795,45 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
 .history-title {
+  flex: 1;
   color: #1d1d1f;
   font-size: 13px;
   font-weight: 700;
+}
+
+.history-remove {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #9aa4b2;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.history-item:hover .history-remove,
+.history-item--active .history-remove {
+  opacity: 1;
+}
+
+.history-remove:hover {
+  background: #ffe0dd;
+  color: #d92d20;
 }
 
 .history-preview {
@@ -816,7 +931,7 @@ onMounted(() => {
 
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -875,6 +990,11 @@ onMounted(() => {
 .mode-card--purple .mode-icon {
   background: #ede9fe;
   color: #7c3aed;
+}
+
+.mode-card--blue .mode-icon {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .mode-copy {
@@ -1077,6 +1197,14 @@ onMounted(() => {
   font-weight: 700;
 }
 
+.coverage-badge {
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+
 .message-bubble {
   min-width: 0;
   width: fit-content;
@@ -1127,6 +1255,31 @@ onMounted(() => {
   min-width: 0;
   flex-direction: column;
   gap: 2px;
+}
+
+.source-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.source-tag {
+  flex: 0 0 auto;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.source-tag--web {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.source-tag--kb {
+  background: #ede9fe;
+  color: #7c3aed;
 }
 
 .source-copy a {
@@ -1223,6 +1376,17 @@ onMounted(() => {
 
 .send-button {
   min-width: 82px;
+}
+
+.stop-button {
+  border-color: #ffe0dd;
+  background: #fff7f6;
+  color: #d92d20;
+  box-shadow: none;
+}
+
+.stop-button:hover {
+  background: #ffe0dd;
 }
 
 .assistant-markdown {
