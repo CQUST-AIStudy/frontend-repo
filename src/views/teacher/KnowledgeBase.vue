@@ -18,7 +18,7 @@
         <div>
           <div class="font-medium text-[#1d1d1f] text-sm">当前班级：{{ currentClassName }}</div>
           <div class="text-sm text-[#6e6e73] mt-1">
-            <span v-if="hasClassScopedSpaces">当前仅展示绑定到该班级的课程空间，知识问答会按当前班级作用域执行。</span>
+            <span v-if="hasClassScopedSpaces">当前仅展示绑定到该班级的课程空间。</span>
             <span v-else>当前班级还没有专属课程空间，暂时展示你名下的全部课程空间。</span>
           </div>
         </div>
@@ -234,58 +234,8 @@
           </div>
         </div>
         </div>
-        <!-- Chat Tab -->
-        <div v-else-if="activeTab === 'chat'" key="chat" class="tab-panel chat-tab-panel">
-          <div class="knowledge-chat-shell">
-            <div ref="chatMessagesRef" class="knowledge-chat-messages">
-              <div v-if="chatMessages.length === 0" class="knowledge-chat-empty text-center text-[#6b7280]">
-              <ChatDotRound class="w-12 h-12 text-[#c3cad6] mx-auto mb-3" />
-              <p class="text-sm">向当前课程知识库提问，回答会基于已上传并处理完成的资料生成。</p>
-              <div class="mt-4 flex flex-wrap gap-2 justify-center">
-                <UiButton v-for="suggestion in suggestions" :key="suggestion" @click="askQuestion(suggestion)" class="h-[30px] px-3 rounded-full text-xs font-medium text-[#1d1d1f] bg-white border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:bg-[#f5f5f7] active:scale-[0.96] transition-all cursor-pointer">
-                  {{ suggestion }}
-                </UiButton>
-              </div>
-            </div>
-
-              <div v-for="(msg, idx) in chatMessages" :key="idx" class="mb-3 flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
-              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm leading-[1.7]" :class="msg.role === 'user' ? 'bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] text-white' : 'bg-white border border-black/[0.06] text-[#1d1d1f]'">
-                <div v-if="msg.role === 'user'">{{ msg.content }}</div>
-                <div v-else v-html="renderMarkdown(msg.content)"></div>
-                <div v-if="msg.citations && msg.citations.length" class="mt-2 pt-2 border-t border-black/[0.06]">
-                  <span class="text-xs text-[#6b7280] mr-1">引用来源：</span>
-                  <span v-for="citation in msg.citations" :key="citation.index" class="inline-block text-xs bg-[#f0f5ff] text-[var(--app-primary)] px-1.5 py-0.5 rounded m-0.5">
-                    [{{ citation.index }}] {{ citation.docName }} {{ citation.chapterPath }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-              <div v-if="chatLoading" class="mb-3 flex justify-start">
-              <div class="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-sm bg-white border border-black/[0.06]">
-                <span class="text-[#6b7280] italic">AI 正在思考...</span>
-              </div>
-            </div>
-            </div>
-
-            <div class="knowledge-chat-composer">
-            <textarea
-              v-model="chatInput"
-              rows="2"
-              placeholder="输入问题，例如：什么是二叉搜索树？"
-              :disabled="chatLoading"
-              @keydown.enter.ctrl="sendChat"
-              class="flex-1 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-none"
-            ></textarea>
-            <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!chatInput.trim() || chatLoading" @click="sendChat">
-              {{ chatLoading ? '发送中...' : '发送' }}
-            </UiButton>
-            </div>
-          </div>
-        </div>
-
         <!-- Annotations Tab -->
-        <div v-else key="annotations" class="tab-panel">
+        <div v-else-if="activeTab === 'annotations'" key="annotations" class="tab-panel">
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-4">
           <div class="flex justify-between items-center gap-3 mb-4">
             <span class="font-semibold text-[15px] text-[#1d1d1f]">知识分块（{{ chunks.length }}）</span>
@@ -377,9 +327,9 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { ArrowLeft, Calendar, ChatDotRound, MoreFilled, Plus, Reading, UploadFilled } from '@/components/ui/icons'
+import { ArrowLeft, Calendar, MoreFilled, Plus, Reading, UploadFilled } from '@/components/ui/icons'
 import AppModal from '../../components/AppModal.vue'
 import { useUserStore } from '@/store'
 import {
@@ -391,18 +341,15 @@ import {
   getCourseSpaceDocuments,
   getCourseSpaceDocumentStatusSummary,
   getCourseSpaces,
-  normalizeSourcesForDisplay,
   rebuildCourseSpaceBm25,
   reprocessAllCourseSpaceDocuments,
   reprocessCourseSpaceDocument,
-  streamRagChat,
   updateCourseSpace,
   uploadCourseSpaceDocument,
 } from '@/api/rag'
 import { getTeachingClasses } from '@/api/tap'
 import { formatDate } from '@/utils/dateUtils'
 import { getFriendlyErrorMessage } from '@/utils/errorMessage'
-import { renderSafeMarkdown, sanitizeHtml } from '@/utils/safeHtml'
 
 const userStore = useUserStore()
 const spaces = ref([])
@@ -414,7 +361,6 @@ const spaceDropdownId = ref(null)
 
 const detailTabs = [
   { name: 'docs', label: '文档管理' },
-  { name: 'chat', label: '知识问答' },
   { name: 'annotations', label: '分块标注' },
 ]
 
@@ -438,12 +384,6 @@ const uploading = ref(false)
 const uploadDocType = ref('textbook')
 const chunks = ref([])
 const chunksLoading = ref(false)
-
-const chatMessages = ref([])
-const chatInput = ref('')
-const chatLoading = ref(false)
-const chatMessagesRef = ref(null)
-const suggestions = ['什么是二叉搜索树？', '链表和数组的区别是什么？', 'Dijkstra 算法的时间复杂度是多少？']
 
 const dialogVisible = ref(false)
 const editingSpace = ref(null)
@@ -564,11 +504,6 @@ function setActiveTab(tabName) {
   activeTab.value = tabName
 }
 
-function renderMarkdown(text) {
-  const html = renderSafeMarkdown(text)
-  return sanitizeHtml(html.replace(/\[(\d+)\]/g, '<sup class="text-[#c2703e] cursor-pointer">[$1]</sup>'))
-}
-
 async function loadSpaces() {
   loading.value = true
   try {
@@ -594,14 +529,12 @@ function backToList() {
   activeTab.value = 'docs'
   documents.value = []
   chunks.value = []
-  chatMessages.value = []
   docStatusSummary.value = emptyDocSummary()
 }
 
 function selectSpace(space) {
   selectedSpace.value = space
   activeTab.value = 'docs'
-  chatMessages.value = []
   docStatusSummary.value = emptyDocSummary()
   loadDocuments()
 }
@@ -957,61 +890,6 @@ async function addAnnotation(chunkId, type) {
   }
 }
 
-function askQuestion(question) {
-  chatInput.value = question
-  sendChat()
-}
-
-async function sendChat() {
-  const question = chatInput.value.trim()
-  if (!question || !selectedSpace.value || chatLoading.value) return
-
-  chatMessages.value.push({ role: 'user', content: question })
-  chatInput.value = ''
-  chatLoading.value = true
-  scrollToBottom()
-
-  try {
-    const messageIndex = chatMessages.value.length
-    chatMessages.value.push({ role: 'assistant', content: '', citations: [] })
-
-    await streamRagChat({
-      query: question,
-      knowledgeBaseIds: [String(selectedSpace.value.id)],
-      mode: selectedSpace.value.defaultMode === 'open' ? 'open' : 'strict',
-      options: {
-        topK: 10,
-        rerankTopN: 3,
-        scoreThreshold: 0,
-        enableRerank: true,
-        temperature: 0.7,
-        maxTokens: 1024,
-      },
-    }, {
-      onRetrieval: ({ sources }) => {
-        chatMessages.value[messageIndex].citations = normalizeSourcesForDisplay(sources || [])
-        scrollToBottom()
-      },
-      onDelta: ({ content }) => {
-        chatMessages.value[messageIndex].content += content || ''
-        scrollToBottom()
-      },
-    })
-  } catch (e) {
-    chatMessages.value.push({ role: 'assistant', content: `网络错误: ${e.message}` })
-  }
-
-  chatLoading.value = false
-  scrollToBottom()
-}
-
-function scrollToBottom() {
-  nextTick(() => {
-    const el = chatMessagesRef.value
-    if (el) el.scrollTop = el.scrollHeight
-  })
-}
-
 watch(activeTab, async (tab) => {
   if (!selectedSpace.value) return
   if (tab === 'docs') {
@@ -1074,7 +952,7 @@ onUnmounted(() => {
   display: grid;
   width: min(100%, 360px);
   height: 48px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   flex: 0 0 auto;
   gap: 4px;
   margin-bottom: 16px;
@@ -1090,7 +968,7 @@ onUnmounted(() => {
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc((100% - 8px) / 3);
+  width: calc((100% - 8px) / 2);
   border: 1px solid rgba(194, 112, 62, 0.16);
   border-radius: 11px;
   background: #ffffff;
@@ -1148,51 +1026,6 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-.chat-tab-panel {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-}
-
-.knowledge-chat-shell {
-  display: flex;
-  width: 100%;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
-  background: #ffffff;
-}
-
-.knowledge-chat-messages {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  background: #f8fafc;
-}
-
-.knowledge-chat-empty {
-  display: flex;
-  min-height: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.knowledge-chat-composer {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 12px;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
-  background: #ffffff;
-}
-
 .tab-panel-enter-active,
 .tab-panel-leave-active {
   transition: opacity 180ms ease, transform 180ms ease;
@@ -1223,11 +1056,6 @@ onUnmounted(() => {
 @media (max-width: 640px) {
   .detail-tabs {
     width: 100%;
-  }
-
-  .knowledge-chat-composer {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 </style>
