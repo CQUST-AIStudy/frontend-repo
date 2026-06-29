@@ -192,7 +192,6 @@
 
           <div v-else class="overflow-x-auto" :aria-busy="docsLoading">
             <ui-table :data="documents" :loading="docsLoading" empty-text="暂无文档，请先上传课程资料" class="w-full text-sm">
-              <ui-table-column prop="id" label="任务 ID" width="140" />
               <ui-table-column prop="documentId" label="文档 ID" width="140" />
               <ui-table-column label="文档名称" min-width="260">
                 <template #default="{ row }">
@@ -206,11 +205,15 @@
               </ui-table-column>
               <ui-table-column label="状态" width="120">
                 <template #default="{ row }">
-                    <span :class="statusBadgeClass(row.status)" class="text-xs px-2 py-0.5 rounded-full font-medium">{{ statusLabel(row.status) }}</span>
+                    <span :class="statusBadgeClass(row.status)" class="inline-flex items-center whitespace-nowrap text-xs px-2 py-0.5 rounded-full font-medium">{{ statusLabel(row.status) }}</span>
                 </template>
               </ui-table-column>
               <ui-table-column prop="chunkCount" label="分块数" width="100" />
-              <ui-table-column prop="createdAt" label="创建时间" min-width="170" />
+              <ui-table-column label="创建时间" min-width="170">
+                <template #default="{ row }">
+                  <span class="whitespace-nowrap">{{ formatDocumentTimestamp(row.createdAt) }}</span>
+                </template>
+              </ui-table-column>
               <ui-table-column label="错误信息" min-width="180">
                 <template #default="{ row }">
                   <span v-if="row.errorMessage" class="text-xs text-[#d93025] bg-[#fef0f0] px-2 py-1 rounded">{{ row.errorMessage }}</span>
@@ -397,6 +400,7 @@ import {
   uploadCourseSpaceDocument,
 } from '@/api/rag'
 import { getTeachingClasses } from '@/api/tap'
+import { formatDate } from '@/utils/dateUtils'
 import { getFriendlyErrorMessage } from '@/utils/errorMessage'
 import { renderSafeMarkdown, sanitizeHtml } from '@/utils/safeHtml'
 
@@ -543,6 +547,12 @@ function documentType(row) {
 
 function documentName(row) {
   return row?.fileName || row?.filename || row?.name || row?.metadata?.fileName || row?.documentId || row?.id || '未命名文档'
+}
+
+function formatDocumentTimestamp(value) {
+  if (!value) return '-'
+  const formatted = formatDate(value, 'YYYY-MM-DD HH:mm:ss')
+  return formatted || String(value)
 }
 
 function toggleSpaceDropdown(id) {

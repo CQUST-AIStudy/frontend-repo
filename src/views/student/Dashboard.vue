@@ -7,17 +7,27 @@
       <!-- 模块1: 欢迎问候卡片 -->
       <div class="dash-card dash-welcome [padding:24px_28px] [display:flex] [align-items:center] [justify-content:space-between]">
         <div>
-          <div class="[font-size:24px] [font-weight:700] [color:#1a1a2e]">你好，{{ studentName }} <span style="font-size:26px">🙋</span></div>
+          <div class="[font-size:24px] [font-weight:700] [color:#1a1a2e] [display:flex] [align-items:center] [gap:8px]">
+            <span>你好，{{ studentName }}</span>
+            <span class="[width:30px] [height:30px] [border-radius:10px] [display:inline-flex] [align-items:center] [justify-content:center] [background:#eff6ff] [color:#3b82f6]">
+              <LucideIcon name="sparkles" :size="16" :stroke-width="2.2" />
+            </span>
+          </div>
           <div class="[font-size:14px] [color:#8c959f] [margin-top:6px]">今天也要加油学习哦！</div>
         </div>
-        <div class="[width:120px] [height:80px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#eef6ff,_#e3effb)] [border-radius:12px] [border:1px_solid_#d6e6f5]">
-          <svg width="72" height="60" viewBox="0 0 72 60" fill="none"><rect x="4" y="36" width="64" height="5" rx="2" fill="#c8ddf5"/><rect x="10" y="24" width="52" height="16" rx="3" fill="#3b82f6"/><rect x="14" y="26" width="44" height="3" rx="1" fill="#fff" opacity="0.6"/><rect x="14" y="31" width="30" height="3" rx="1" fill="#fff" opacity="0.35"/><circle cx="36" cy="14" r="8" fill="#fbbf8c"/><rect x="32" y="22" width="8" height="4" rx="2" fill="#fbbf8c"/><rect x="29" y="20" width="14" height="4" rx="2" fill="#2d3142"/></svg>
+        <div class="[position:relative] [width:120px] [height:80px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#eef6ff,_#e3effb)] [border-radius:12px] [border:1px_solid_#d6e6f5] [color:#3b82f6]">
+          <LucideIcon name="book-open" :size="34" :stroke-width="2" />
+          <span class="[position:absolute] [top:14px] [right:18px] [width:24px] [height:24px] [border-radius:8px] [display:flex] [align-items:center] [justify-content:center] [background:#3b82f6] [color:#fff] [box-shadow:0_4px_10px_rgba(59,130,246,0.2)]">
+            <LucideIcon name="sparkles" :size="13" :stroke-width="2.2" />
+          </span>
         </div>
       </div>
 
       <!-- 错误条 -->
       <div v-if="loadError" class="dash-card [background:#fef2f2] [border-color:#fecaca] [padding:14px_20px] [display:flex] [align-items:center] [gap:12px]">
-        <span class="[font-size:18px]">⚠️</span>
+        <span class="[width:28px] [height:28px] [border-radius:10px] [display:flex] [align-items:center] [justify-content:center] [background:#fff] [color:#dc2626]">
+          <LucideIcon name="alert-triangle" :size="16" :stroke-width="2.2" />
+        </span>
         <span class="[font-size:13px] [color:#b91c1c] [flex:1]">部分数据加载失败，请稍后重试。</span>
         <UiButton class="[background:#fff] [border:1px_solid_#fecaca] [border-radius:100px] [padding:5px_16px] [font-size:12px] [color:#b91c1c] [font-weight:600] [cursor:pointer] hover:[background:#fee2e2]" @click="loadData">重试</UiButton>
       </div>
@@ -33,9 +43,14 @@
       <!-- 模块2: 当前最紧急的实验 -->
       <div v-if="urgentExperiment" class="dash-card-urgent [padding:20px_24px]">
         <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:16px]">
-          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#fef3c7] [display:flex] [align-items:center] [justify-content:center] [font-size:14px]">🔥</span>
+          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#fef3c7] [display:flex] [align-items:center] [justify-content:center] [color:#d97706]">
+            <LucideIcon name="flame" :size="14" :stroke-width="2.1" />
+          </span>
           <span class="[font-size:13px] [font-weight:700] [color:#92400e]">当前最紧急的实验</span>
-          <span v-if="urgentCountdown" class="[font-size:12px] [color:#b45309] [font-weight:600] [margin-left:auto] [background:#fef3c7] [padding:3px_10px] [border-radius:100px]">⏱ {{ urgentCountdown }}</span>
+          <span v-if="urgentCountdown" class="[font-size:12px] [color:#b45309] [font-weight:600] [margin-left:auto] [background:#fef3c7] [padding:3px_10px] [border-radius:100px] [display:inline-flex] [align-items:center] [gap:4px]">
+            <LucideIcon name="clock" :size="12" :stroke-width="2.2" />
+            {{ urgentCountdown }}
+          </span>
         </div>
         <div class="[display:flex] [gap:24px]">
           <div class="[flex:1]">
@@ -51,13 +66,15 @@
               <span v-if="urgentFailCount > 0" class="[font-size:13px] [color:#ef4444] [font-weight:600]">未通过 {{ urgentFailCount }} 个测试点</span>
             </div>
             <div class="[display:flex] [gap:10px]">
-              <UiButton class="[background:linear-gradient(135deg,_#f59e0b,_#d97706)] [color:#fff] [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(245,158,11,0.25)] hover:[background:linear-gradient(135deg,_#d97706,_#b45309)] hover:[box-shadow:0_4px_12px_rgba(245,158,11,0.35)]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">继续修改</UiButton>
+              <UiButton class="[background:linear-gradient(135deg,_#f59e0b,_#d97706)] text-white [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(245,158,11,0.25)] hover:[background:linear-gradient(135deg,_#d97706,_#b45309)] hover:[box-shadow:0_4px_12px_rgba(245,158,11,0.35)]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">继续修改</UiButton>
               <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:8px_22px] [font-size:13px] [color:#6b7280] [font-weight:500] [cursor:pointer] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">查看错误详情</UiButton>
             </div>
           </div>
           <div class="[display:flex] [align-items:center] [gap:14px] [flex-shrink:0]">
             <div ref="urgentRingRef" class="[width:90px] [height:90px]"></div>
-            <svg width="56" height="48" viewBox="0 0 56 48" fill="none"><rect x="2" y="2" width="52" height="38" rx="4" fill="#fef9f0" stroke="#fde4c2" stroke-width="1"/><rect x="8" y="8" width="40" height="24" rx="2" fill="#fff"/><path d="M22 22l3 3 6-6" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="40" r="4" fill="#fde4c2"/></svg>
+            <div class="[width:56px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [border:1px_solid_#fde4c2] [color:#d97706]">
+              <LucideIcon name="clipboard-check" :size="26" :stroke-width="2" />
+            </div>
           </div>
         </div>
       </div>
@@ -72,7 +89,9 @@
           <div v-for="(err, i) in recentErrors" :key="err.id || i"
                class="[display:flex] [align-items:center] [gap:14px] [padding:14px_0]"
                :class="{ '[border-bottom:1px_solid_#f3f4f6]': i < recentErrors.length - 1 }">
-            <span class="[font-size:20px] [flex-shrink:0] [width:36px] [height:36px] [border-radius:10px] [display:flex] [align-items:center] [justify-content:center]" :class="errIconBg(err)">{{ errIcon(err) }}</span>
+            <span class="[flex-shrink:0] [width:36px] [height:36px] [border-radius:10px] [display:flex] [align-items:center] [justify-content:center]" :style="errIconStyle(err)">
+              <LucideIcon :name="errIcon(err)" :size="18" :stroke-width="2.1" />
+            </span>
             <div class="[flex:1] [min-width:0]">
               <div class="[font-size:14px] [font-weight:600] [color:#1a1a2e]">{{ err.problemTitle || '未知题目' }}
                 <span class="[font-size:12px] [color:#8c959f] [font-weight:400]" v-if="err.experimentName">· {{ err.experimentName }}</span>
@@ -90,10 +109,20 @@
       <div v-if="practiceRecommendations.length" class="dash-card [padding:20px_24px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">今日推荐练习（基于你的薄弱点）</span>
-          <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#6b7280] [cursor:pointer] [font-weight:500] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="refreshRecommendations" :disabled="recLoading">🔄 换一批</UiButton>
+          <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#6b7280] [cursor:pointer] [font-weight:500] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="refreshRecommendations" :disabled="recLoading">
+            <span class="[display:inline-flex] [align-items:center] [gap:6px]">
+              <span class="[display:inline-flex]" :class="{ 'dash-spin': recLoading }">
+                <LucideIcon name="refresh" :size="14" :stroke-width="2.1" />
+              </span>
+              换一批
+            </span>
+          </UiButton>
         </div>
-        <div class="[font-size:12px] [color:#6b7280] [margin-bottom:14px] [padding:8px_12px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4ff)] [border-radius:8px] [border:1px_solid_#e8edf5]">
-          💡 推荐原因：{{ recReason || '根据你的学习数据，为你推荐以下针对性练习' }}
+        <div class="[font-size:12px] [color:#6b7280] [margin-bottom:14px] [padding:8px_12px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4ff)] [border-radius:8px] [border:1px_solid_#e8edf5] [display:flex] [align-items:center] [gap:8px]">
+          <span class="[display:inline-flex] [color:#eab308]">
+            <LucideIcon name="lightbulb" :size="14" :stroke-width="2.2" />
+          </span>
+          <span>推荐原因：{{ recReason || '根据你的学习数据，为你推荐以下针对性练习' }}</span>
         </div>
         <div class="rec-grid [display:grid] [grid-template-columns:repeat(3,_1fr)] [gap:12px]">
           <div v-for="(rec, i) in practiceRecommendations" :key="i"
@@ -104,8 +133,12 @@
             </div>
             <div class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [display:inline-block] [margin-bottom:12px] [font-weight:500]" :class="rec._diffClass">{{ rec._diffLabel }}</div>
             <div class="[font-size:14px] [font-weight:700] [color:#1a1a2e] [margin-bottom:14px] [line-height:1.4]">{{ rec.title }}</div>
-            <UiButton class="[width:100%] [background:linear-gradient(135deg,_#3b82f6,_#2563eb)] [color:#fff] [border:none] [border-radius:100px] [padding:7px_0] [font-size:12px] [cursor:pointer] [font-weight:600] hover:[background:linear-gradient(135deg,_#2563eb,_#1d4ed8)]" @click.stop="goToPractice(rec)">开始练习</UiButton>
-          </div>
+            <UiButton
+                class="w-full text-white border-none rounded-full py-[7px] text-[12px] cursor-pointer font-semibold bg-[linear-gradient(135deg,_#3b82f6,_#2563eb)] hover:bg-[linear-gradient(135deg,_#2563eb,_#1d4ed8)]"
+                @click.stop="goToPractice(rec)"
+            >
+              开始练习
+            </UiButton>          </div>
         </div>
       </div>
 
@@ -116,7 +149,9 @@
           <div v-for="q in quickEntries" :key="q.label"
                class="[display:flex] [flex-direction:column] [align-items:center] [gap:8px] [padding:12px_4px] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] hover:[transform:translateY(-2px)]"
                @click="nav(q.path)">
-            <span class="[width:42px] [height:42px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [font-size:20px] [box-shadow:0_2px_6px_rgba(0,0,0,0.06)]" :style="{ background: q.bg, color: q.color }">{{ q.icon }}</span>
+            <span class="[width:42px] [height:42px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [box-shadow:0_2px_6px_rgba(0,0,0,0.06)]" :style="{ background: q.bg, color: q.color }">
+              <LucideIcon :name="q.iconName" :size="20" :stroke-width="2.1" />
+            </span>
             <span class="[font-size:11px] [color:#4b5563] [font-weight:600]">{{ q.label }}</span>
           </div>
         </div>
@@ -208,7 +243,9 @@
           <div v-for="(fb, i) in feedbackList" :key="i"
                class="[display:flex] [align-items:flex-start] [gap:10px] [padding:10px_0]"
                :class="{ '[border-bottom:1px_solid_#f3f4f6]': i < feedbackList.length - 1 }">
-            <span class="[font-size:16px] [flex-shrink:0] [margin-top:1px] [width:28px] [height:28px] [border-radius:8px] [display:flex] [align-items:center] [justify-content:center] [background:#f3f4f6]">{{ fb.icon }}</span>
+            <span class="[flex-shrink:0] [margin-top:1px] [width:28px] [height:28px] [border-radius:8px] [display:flex] [align-items:center] [justify-content:center]" :style="feedbackIconStyle(fb)">
+              <LucideIcon :name="feedbackIconName(fb)" :size="15" :stroke-width="2.1" />
+            </span>
             <div class="[flex:1]">
               <div class="[font-size:12px] [color:#1a1a2e] [line-height:1.5] [font-weight:500]">{{ fb.msg }}</div>
               <div class="[font-size:10px] [color:#9ca3af] [margin-top:2px]">{{ fb.time }}</div>
@@ -235,6 +272,7 @@ import logger from '@/utils/logger'
 import { useExperimentStore } from '../../store'
 import * as echarts from 'echarts'
 import api, { apiClient } from '@/api'
+import LucideIcon from '@/components/LucideIcon.vue'
 
 const router = useRouter()
 const experimentStore = useExperimentStore()
@@ -258,42 +296,64 @@ let weeklyChart = null
 function nav(path) { router.push(path) }
 
 // ── 错误条目渲染辅助 ──
-function errIcon(err) {
+function errType(err) {
   const t = err.errorType || err.judgeStatus || ''
-  if (t.includes('运行') || t.includes('RUNTIME')) return '🐛'
-  if (t.includes('输出') || t.includes('WRONG')) return '📂'
-  return '📋'
+  if (t.includes('运行') || t.includes('RUNTIME')) return 'runtime'
+  if (t.includes('输出') || t.includes('WRONG')) return 'wrong'
+  return 'default'
 }
-function errIconBg(err) {
-  const t = err.errorType || err.judgeStatus || ''
-  if (t.includes('运行') || t.includes('RUNTIME')) return '[background:#fef2f2]'
-  if (t.includes('输出') || t.includes('WRONG')) return '[background:#fff7ed]'
-  return '[background:#f0f9ff]'
+function errIcon(err) {
+  if (errType(err) === 'runtime') return 'bug'
+  if (errType(err) === 'wrong') return 'circle-x'
+  return 'alert-triangle'
+}
+function errIconStyle(err) {
+  if (errType(err) === 'runtime') return { background: '#fef2f2', color: '#dc2626' }
+  if (errType(err) === 'wrong') return { background: '#fff7ed', color: '#ea580c' }
+  return { background: '#fef9f0', color: '#b45309' }
 }
 function errTagClass(err) {
-  const t = err.errorType || err.judgeStatus || ''
-  if (t.includes('运行') || t.includes('RUNTIME')) return '[background:#fef2f2] [color:#dc2626]'
-  if (t.includes('输出') || t.includes('WRONG')) return '[background:#fff7ed] [color:#ea580c]'
+  if (errType(err) === 'runtime') return '[background:#fef2f2] [color:#dc2626]'
+  if (errType(err) === 'wrong') return '[background:#fff7ed] [color:#ea580c]'
   return '[background:#fef9f0] [color:#b45309]'
 }
 function errTagText(err) {
-  const t = err.errorType || err.judgeStatus || ''
-  if (t.includes('运行') || t.includes('RUNTIME')) return '运行错误'
-  if (t.includes('输出') || t.includes('WRONG')) return '输出错误'
+  if (errType(err) === 'runtime') return '运行错误'
+  if (errType(err) === 'wrong') return '输出错误'
   return err.judgeStatus || '未通过'
 }
 function errDesc(err) {
   return err.errorMessage || err.errorDesc || err.reason || ''
 }
 
+function feedbackTone(fb) {
+  const source = `${fb.icon || ''} ${fb.type || ''} ${fb.category || ''} ${fb.msg || ''}`
+  if (source.includes('AI') || source.includes('分析') || source.includes('建议')) return 'insight'
+  if (source.includes('完成') || source.includes('通过') || source.includes('优秀')) return 'success'
+  if (source.includes('截止') || source.includes('提醒') || source.includes('逾期')) return 'warning'
+  return 'default'
+}
+function feedbackIconName(fb) {
+  if (feedbackTone(fb) === 'insight') return 'lightbulb'
+  if (feedbackTone(fb) === 'success') return 'circle-check'
+  if (feedbackTone(fb) === 'warning') return 'clock'
+  return 'message-square'
+}
+function feedbackIconStyle(fb) {
+  if (feedbackTone(fb) === 'insight') return { background: '#eff6ff', color: '#2563eb' }
+  if (feedbackTone(fb) === 'success') return { background: '#ecfdf5', color: '#059669' }
+  if (feedbackTone(fb) === 'warning') return { background: '#fff7ed', color: '#ea580c' }
+  return { background: '#f3f4f6', color: '#6b7280' }
+}
+
 // ── 快捷入口（静态配置） ──
 const quickEntries = [
-  { icon: '📋', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#eff6ff,#dbeafe)', color: '#2563eb' },
-  { icon: '📕', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
-  { icon: '✅', label: '推荐练习', path: '/student/practice', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
-  { icon: '🎯', label: '专项训练', path: '/student/weakness-training', bg: 'linear-gradient(135deg,#faf5ff,#ede9fe)', color: '#7c3aed' },
-  { icon: '🧠', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
-  { icon: '🤖', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#eff6ff,#bfdbfe)', color: '#3b82f6' }
+  { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#eff6ff,#dbeafe)', color: '#2563eb' },
+  { iconName: 'circle-x', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
+  { iconName: 'check', label: '推荐练习', path: '/student/practice', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
+  { iconName: 'target', label: '专项训练', path: '/student/weakness-training', bg: 'linear-gradient(135deg,#faf5ff,#ede9fe)', color: '#7c3aed' },
+  { iconName: 'brain', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
+  { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#eff6ff,#bfdbfe)', color: '#3b82f6' }
 ]
 
 // ── 日历 ──
@@ -598,6 +658,15 @@ onBeforeUnmount(() => { window.removeEventListener('scroll', handleScroll); wind
 }
 .dash-right::-webkit-scrollbar { width: 4px; }
 .dash-right::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+.dash-spin {
+  animation: dash-spin 0.9s linear infinite;
+}
+
+@keyframes dash-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
