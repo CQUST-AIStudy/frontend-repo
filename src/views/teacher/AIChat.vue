@@ -73,10 +73,6 @@ const classScopedSpaces = computed(() => {
   )
 })
 
-const selectedCourseSpace = computed(() => {
-  return courseSpaces.value.find((item) => String(item.id) === String(selectedCourseSpaceId.value)) || null
-})
-
 const visibleMessages = computed(() => {
   return messages.value.filter((message) => {
     return message.role !== 'ai' || message.content || message.citations?.length
@@ -130,11 +126,9 @@ const canClearConversation = computed(() => {
   return !isTyping.value && (messages.value.length > 0 || !!userInput.value.trim())
 })
 
-const currentModeText = computed(() => {
-  if (assistantMode.value === 'web') return '联网模式'
-  if (assistantMode.value === 'rag') return effectiveWebEnabled.value ? 'RAG 模式 · 联网已开启' : 'RAG 模式'
-  return effectiveWebEnabled.value ? 'AI 聊天 · 联网已开启' : 'AI 聊天'
-})
+const currentModeCard = computed(() =>
+  modeCards.find((card) => card.value === assistantMode.value) || modeCards[0]
+)
 
 const modeSummaryText = computed(() => {
   if (assistantMode.value === 'web') return '当前模式：联网搜索 + AI 回答'
@@ -146,12 +140,6 @@ const modeSummaryText = computed(() => {
   return effectiveWebEnabled.value
     ? '当前模式：AI 聊天 + 联网增强'
     : '当前模式：正常 AI 聊天'
-})
-
-const selectedSpaceSummary = computed(() => {
-  if (assistantMode.value !== 'rag') return effectiveWebEnabled.value ? '联网检索可用' : '普通问答无需课程空间'
-  if (!selectedCourseSpaceId.value) return '请选择课程空间'
-  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
 })
 
 function buildCourseSpaceLabel(courseSpace) {
@@ -259,6 +247,10 @@ function useQuickPrompt(prompt) {
 
 function selectMode(mode) {
   chatStore.setAssistantMode(mode)
+}
+
+function toggleAssistantMode() {
+  selectMode(assistantMode.value === 'ai' ? 'rag' : 'ai')
 }
 
 function toggleWeb(value) {
@@ -466,58 +458,6 @@ onMounted(() => {
         </ui-button>
       </header>
 
-      <div class="mode-panel">
-        <div class="mode-title">选择模式</div>
-        <div class="mode-grid">
-          <button
-            v-for="card in modeCards"
-            :key="card.value"
-            type="button"
-            class="mode-card"
-            :class="[`mode-card--${card.tone}`, { 'mode-card--active': assistantMode === card.value }]"
-            @click="selectMode(card.value)"
-          >
-            <span class="mode-icon">
-              <component :is="card.icon" />
-            </span>
-            <span class="mode-copy">
-              <strong>{{ card.title }}</strong>
-              <span>{{ card.desc }}</span>
-            </span>
-          </button>
-        </div>
-
-        <div class="mode-options">
-          <label class="web-toggle">
-            <span>
-              <strong>联网搜索</strong>
-              <small>AI 聊天与 RAG 可用，开启后检索最新信息</small>
-            </span>
-            <ui-switch
-              :model-value="effectiveWebEnabled"
-              :disabled="assistantMode === 'web'"
-              @update:modelValue="toggleWeb"
-            />
-          </label>
-
-          <div v-if="assistantMode === 'rag'" class="course-select-wrap">
-            <Notebook />
-            <ui-select
-              v-model="selectedCourseSpaceId"
-              placeholder="选择课程空间"
-              class="course-select"
-            >
-              <ui-option
-                v-for="item in courseSpaces"
-                :key="item.id"
-                :label="buildCourseSpaceLabel(item)"
-                :value="item.id"
-              />
-            </ui-select>
-          </div>
-        </div>
-      </div>
-
       <div ref="chatContainer" class="chat-panel">
         <div
           v-if="showPromptSuggestions"
@@ -628,9 +568,46 @@ onMounted(() => {
       </div>
 
       <footer class="composer">
-        <div class="composer-summary">
-          <span>{{ currentModeText }}</span>
-          <span>{{ selectedSpaceSummary }}</span>
+        <div class="composer-toolbar">
+          <div v-if="assistantMode === 'rag'" class="course-select-wrap">
+            <Notebook />
+            <ui-select
+              v-model="selectedCourseSpaceId"
+              placeholder="选择课程空间"
+              class="course-select"
+            >
+              <ui-option
+                v-for="item in courseSpaces"
+                :key="item.id"
+                :label="buildCourseSpaceLabel(item)"
+                :value="item.id"
+              />
+            </ui-select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button
+              type="button"
+              class="mode-toggle"
+              :class="[`mode-toggle--${currentModeCard.tone}`, 'mode-toggle--active']"
+              :title="`点击切换到 ${assistantMode === 'ai' ? 'RAG 问答' : 'AI 聊天'}`"
+              @click="toggleAssistantMode"
+            >
+              <component :is="currentModeCard.icon" />
+              <span>{{ currentModeCard.title }}</span>
+            </button>
+
+            <button
+              type="button"
+              class="web-button"
+              :class="{ 'web-button--active': effectiveWebEnabled }"
+              :disabled="assistantMode === 'web'"
+              @click="toggleWeb(!effectiveWebEnabled)"
+            >
+              <Search />
+              <span>联网搜索</span>
+            </button>
+          </div>
         </div>
 
         <textarea
@@ -941,142 +918,68 @@ onMounted(() => {
   box-shadow: none;
 }
 
-.mode-panel {
-  flex: 0 0 auto;
-  border-bottom: 1px solid #e6eaf0;
-  padding: 10px 18px;
-}
-
-.mode-title {
-  margin-bottom: 8px;
-  color: #4b5563;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.mode-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.mode-card {
+.composer-toolbar {
   display: flex;
-  min-height: 58px;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #e6eaf0;
-  border-radius: 8px;
-  background: #fbfdff;
-  padding: 10px 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.mode-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(22, 48, 79, 0.08);
-}
-
-.mode-card--active.mode-card--green {
-  border-color: #86efac;
-  background: #f0fdf4;
-}
-
-.mode-card--active.mode-card--purple {
-  border-color: #c4b5fd;
-  background: #f5f3ff;
-}
-
-.mode-card--active.mode-card--blue {
-  border-color: #93c5fd;
-  background: #eff6ff;
-}
-
-.mode-icon {
-  display: inline-flex;
-  width: 34px;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  border-radius: 8px;
-  background: #edf5ff;
-  color: var(--app-primary);
-  font-size: 18px;
-}
-
-.mode-card--green .mode-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.mode-card--purple .mode-icon {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.mode-card--blue .mode-icon {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.mode-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.mode-copy strong {
-  color: #1d1d1f;
-  font-size: 14px;
-}
-
-.mode-copy span {
-  color: #6e6e73;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.mode-options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 8px;
-}
-
-.web-toggle {
-  display: flex;
-  min-width: 0;
-  flex: 1;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  color: #4b5563;
+  flex-wrap: wrap;
 }
 
-.web-toggle span {
+.toolbar-actions {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.web-toggle strong {
+.mode-toggle,
+.web-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fff;
+  color: #4b5563;
   font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
-.web-toggle small {
-  color: #8b95a1;
-  font-size: 12px;
+.mode-toggle:hover,
+.web-button:hover {
+  border-color: #c7d2e0;
+}
+
+.mode-toggle--active.mode-toggle--green {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.mode-toggle--active.mode-toggle--purple {
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.web-button--active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.web-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .course-select-wrap {
   display: flex;
-  width: min(420px, 48%);
+  width: min(280px, 50%);
   align-items: center;
   gap: 8px;
   color: #7c3aed;
