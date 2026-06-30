@@ -50,7 +50,7 @@
           <a @click="goToExperiments" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl">
-          <UiTable class="w-full text-left text-[13px]">
+          <table class="w-full text-left text-[13px]">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
@@ -70,7 +70,7 @@
                 <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无实验数据</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
       </div>
 
@@ -84,7 +84,7 @@
           <a @click="goToSubmissions" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl mt-4">
-          <UiTable class="w-full text-left text-[13px]">
+          <table class="w-full text-left text-[13px]">
             <thead>
               <tr class="border-b border-black/[0.06]">
                 <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[110px]">学生</th>
@@ -104,7 +104,7 @@
                 <td colspan="4" class="py-8 text-center text-[#aeaeb2] text-[13px]">暂无提交数据</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
         </div>
       </div>
     </div>
