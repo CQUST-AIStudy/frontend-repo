@@ -429,6 +429,46 @@ const normalizeStatus = (item) => {
   return 'not_started'
 }
 
+const getStatusPriority = (status) => {
+  const priorities = {
+    graded: 4,
+    submitted: 3,
+    rejected: 2,
+    not_started: 1
+  }
+  return priorities[status] || 0
+}
+
+const isLaterSubmission = (candidate, current) => {
+  const candidateTime = getSubmitTimestamp(candidate.submitTime)
+  const currentTime = getSubmitTimestamp(current.submitTime)
+
+  if (candidateTime !== currentTime) {
+    return candidateTime > currentTime
+  }
+
+  const candidateStatusPriority = getStatusPriority(candidate.status)
+  const currentStatusPriority = getStatusPriority(current.status)
+  if (candidateStatusPriority !== currentStatusPriority) {
+    return candidateStatusPriority > currentStatusPriority
+  }
+
+  return Number(candidate.score ?? -1) > Number(current.score ?? -1)
+}
+
+const aggregateLatestSubmissions = (items) => {
+  const latestSubmissionMap = new Map()
+
+  items.forEach((item) => {
+    const current = latestSubmissionMap.get(item.id)
+    if (!current || isLaterSubmission(item, current)) {
+      latestSubmissionMap.set(item.id, item)
+    }
+  })
+
+  return Array.from(latestSubmissionMap.values())
+}
+
 const loadSubmissions = async () => {
   tableLoading.value = true
   try {
@@ -456,9 +496,9 @@ const loadSubmissions = async () => {
       }
     })
 
-    submissions.value = data
+    submissions.value = aggregateLatestSubmissions(data)
     if (experimentId.value) {
-      const current = data.find((d) => d.experimentId === experimentId.value)
+      const current = submissions.value.find((d) => d.experimentId === experimentId.value)
       if (current) experimentName.value = current.experimentName || ''
     }
   } catch (error) {

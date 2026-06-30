@@ -451,6 +451,7 @@ import { message as uiMessage, loading as uiLoading } from '@/services/feedback'
 import api from '../../api'
 import AppModal from '../../components/AppModal.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
+import { parseSubmissionQuestions } from '@/utils/submissionQuestionParser.mjs'
 import CodeViewer from '@/components/CodeViewer.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import hljs from 'highlight.js/lib/common'
@@ -533,6 +534,72 @@ const normalizeSubmitTime = (value) => {
   return raw
 }
 
+const getSubmitTimestamp = (value) => {
+  const normalized = normalizeSubmitTime(value)
+  if (!normalized) return -1
+  return new Date(normalized).getTime()
+}
+
+const normalizeSubmissionStatus = (status, score) => {
+  if (status === 'completed') {
+    return Number(score) > 0 ? 'graded' : 'submitted'
+  }
+  if (['submitted', 'graded', 'rejected', 'not_started'].includes(status)) {
+    return status
+  }
+  return 'not_started'
+}
+
+const getStatusPriority = (status) => {
+  const priorities = {
+    graded: 4,
+    submitted: 3,
+    rejected: 2,
+    not_started: 1
+  }
+  return priorities[status] || 0
+}
+
+const pickLatestSubmissionRecords = (items) => {
+  const latestMap = new Map()
+
+  items.forEach((item) => {
+    const normalizedItem = {
+      ...item,
+      submitTime: normalizeSubmitTime(item.submitTime || item.date),
+      normalizedStatus: normalizeSubmissionStatus(item.status, item.score)
+    }
+    const key = `${normalizeStudentId(normalizedItem.studentId)}-${normalizedItem.experimentId}`
+    const current = latestMap.get(key)
+
+    if (!current) {
+      latestMap.set(key, normalizedItem)
+      return
+    }
+
+    const timeDiff = getSubmitTimestamp(normalizedItem.submitTime) - getSubmitTimestamp(current.submitTime)
+    if (timeDiff > 0) {
+      latestMap.set(key, normalizedItem)
+      return
+    }
+    if (timeDiff < 0) {
+      return
+    }
+
+    const statusDiff = getStatusPriority(normalizedItem.normalizedStatus) - getStatusPriority(current.normalizedStatus)
+    if (statusDiff > 0) {
+      latestMap.set(key, normalizedItem)
+      return
+    }
+
+    if (statusDiff === 0 && Number(normalizedItem.score ?? -1) > Number(current.score ?? -1)) {
+      latestMap.set(key, normalizedItem)
+    }
+  })
+
+  return Array.from(latestMap.values())
+}
+
 const formatDateTime = (value) => {
   const normalized = normalizeSubmitTime(value)
   if (!normalized) return ''
@@ -599,9 +666,16 @@ const reportData = ref({})
 const reportGeneratorRef = ref(null)
 
 // 解析提交代码，按题目分割
+/* eslint-disable no-unreachable */
 const parseQuestionCode = () => {
   parsedQuestions.value = []
   if (!submission.value) return
+  parsedQuestions.value = parseSubmissionQuestions({
+    code: submission.value.code,
+    problems: submission.value.problems
+  })
+  activeQuestionTab.value = parsedQuestions.value.length ? '0' : 'full'
+  return
 
   // 结构化数据兜底：后端未返回合并 code 但有 problems（如学生未提交代码）时，直接用 problems 构造
   const structuredProblems = submission.value.problems
@@ -687,6 +761,7 @@ const parseQuestionCode = () => {
   }
 }
 
+/* eslint-enable no-unreachable */
 const formatTestResults = (resultsText) => {
   if (!resultsText) return ''
   return String(resultsText)
@@ -893,12 +968,8 @@ const loadSubmissionHistory = async () => {
       submissionHistory.value = []
       return
     }
-    const studentSubs = allData
+    const studentSubs = pickLatestSubmissionRecords(allData)
       .filter(s => String(s.studentId) === String(studentId))
-      .map(s => ({
-        ...s,
-        submitTime: normalizeSubmitTime(s.submitTime || s.date)
-      }))
       .sort((a, b) => {
         const left = a.submitTime ? new Date(a.submitTime).getTime() : -1
         const right = b.submitTime ? new Date(b.submitTime).getTime() : -1
