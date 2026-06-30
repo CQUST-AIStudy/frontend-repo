@@ -1,535 +1,1202 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { messageBox } from '@/services/feedback'
-import { useTeacherAiChatStore } from '../../store/teacherAiChat'
+import { message as uiMessage, messageBox } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
+import { getCourseSpaces } from '../../api/rag'
+import { useTeacherAiChatStore } from '../../store/teacherAiChat'
+import { formatStudentAssistantError } from '../../store/studentAiChat'
+import { useUserStore } from '@/store'
+import {
+  ChatDotRound,
+  Close,
+  Connection,
+  Delete,
+  Document,
+  Menu,
+  Notebook,
+  Plus,
+  Reading,
+  Search,
+  Warning
+} from '@/components/ui/icons'
 
-const store = useTeacherAiChatStore()
-const { messages, draft, loading, streaming } = storeToRefs(store)
+const chatStore = useTeacherAiChatStore()
+const userStore = useUserStore()
+const {
+  userInput,
+  isTyping,
+  isAnyTyping,
+  selectedCourseSpaceId,
+  assistantMode,
+  assistantNotice
+} = storeToRefs(chatStore)
 
-const messagesRef = ref(null)
-const textareaRef = ref(null)
-const composerPlaceholder = '输入教学问题，例如：帮我给“图的遍历”设计一个 20 分钟课堂讲解结构。'
+const chatContainer = ref(null)
+const assistantInputRef = ref(null)
+const historyQuery = ref('')
+const historyVisible = ref(true)
+const allSpaces = ref([])
+const courseSpaces = ref([])
 
-const suggestions = [
-  '帮我设计一个“二叉树遍历”实验课的提问链路',
-  '帮我生成“栈和队列”课堂讲解提纲',
-  '帮我检索最近的 Transformer 教学应用论文',
-  '帮我润色一段给学生的实验反馈'
+const quickPrompts = [
+  { label: '实验设计', prompt: '帮我设计一个"二叉树遍历"实验课的提问链路。' },
+  { label: '课堂讲解', prompt: '帮我生成"栈和队列"的课堂讲解提纲。' },
+  { label: '错误分析', prompt: '学生在链表反转题上常犯哪些错误？如何针对性讲解？' },
+  { label: '反馈润色', prompt: '帮我润色一段给学生的实验反馈，语气鼓励且具体。' }
 ]
 
-const suggestionMeta = [
-  { category: '实验设计', title: '搭建提问链路' },
-  { category: '课堂讲解', title: '生成讲解提纲' },
-  { category: '论文检索', title: '查找教学资料' },
-  { category: '反馈润色', title: '优化学生反馈' }
+const modeCards = [
+  {
+    value: 'ai',
+    title: 'AI 聊天',
+    desc: '自由问答',
+    icon: ChatDotRound,
+    tone: 'green'
+  },
+  {
+    value: 'rag',
+    title: 'RAG 问答',
+    desc: '知识库问答',
+    icon: Reading,
+    tone: 'purple'
+  },
+  {
+    value: 'web',
+    title: '联网搜索',
+    desc: '检索最新网络信息',
+    icon: Connection,
+    tone: 'blue'
+  }
 ]
 
-const suggestionCards = computed(() =>
-  suggestions.map((prompt, index) => ({
-    prompt,
-    ...(suggestionMeta[index] || { category: '教学助手', title: '快速提问' })
-  }))
-)
+const messages = computed(() => chatStore.messages)
+const conversations = computed(() => chatStore.sortedConversations)
+const effectiveWebEnabled = computed(() => chatStore.effectiveWebEnabled)
+const activeConversation = computed(() => chatStore.activeConversation)
 
-const statusText = computed(() => {
-  if (loading.value) return '生成中'
-  if (streaming.value) return '输出中'
-  return '可继续提问'
+const currentClassId = computed(() => {
+  const id = Number(userStore.selectedClass?.id)
+  return Number.isFinite(id) && id > 0 ? id : null
 })
 
-const renderMarkdown = (text) => renderSafeMarkdown(text || '')
-
-const lastAssistantPreview = computed(() => {
-  const lastAssistant = [...messages.value].reverse().find(item => item.role === 'assistant' && item.content)
-  if (!lastAssistant) return ''
-  return lastAssistant.content.replace(/\s+/g, ' ').slice(0, 56)
+const classScopedSpaces = computed(() => {
+  if (!currentClassId.value) return []
+  return allSpaces.value.filter((space) =>
+    Array.isArray(space.boundClassIds) && space.boundClassIds.includes(currentClassId.value)
+  )
 })
 
-function autoResize() {
-  const el = textareaRef.value
-  if (!el) return
-  el.style.height = 'auto'
-  el.style.height = Math.min(el.scrollHeight, 140) + 'px'
+const selectedCourseSpace = computed(() => {
+  return courseSpaces.value.find((item) => String(item.id) === String(selectedCourseSpaceId.value)) || null
+})
+
+const visibleMessages = computed(() => {
+  return messages.value.filter((message) => {
+    return message.role !== 'ai' || message.content || message.citations?.length
+  })
+})
+
+const filteredConversations = computed(() => {
+  const query = historyQuery.value.trim().toLowerCase()
+  if (!query) return conversations.value
+  return conversations.value.filter((item) => {
+    const haystack = [
+      item.title,
+      item.messages?.map((message) => message.content).join(' ')
+    ].join(' ').toLowerCase()
+    return haystack.includes(query)
+  })
+})
+
+const showPromptSuggestions = computed(() => {
+  return !isTyping.value && !messages.value.some((message) => message.role === 'user')
+})
+
+const showTypingHint = computed(() => {
+  const lastMessage = messages.value[messages.value.length - 1]
+  return isTyping.value && lastMessage?.role === 'ai' && !lastMessage.content && !lastMessage.citations?.length
+})
+
+const canSend = computed(() => {
+  if (!userInput.value.trim() || isTyping.value) return false
+  if (assistantMode.value === 'rag' && !selectedCourseSpaceId.value) return false
+  return true
+})
+
+const canClearConversation = computed(() => {
+  return !isTyping.value && (messages.value.length > 0 || !!userInput.value.trim())
+})
+
+const currentModeText = computed(() => {
+  if (assistantMode.value === 'web') return '联网模式'
+  if (assistantMode.value === 'rag') return effectiveWebEnabled.value ? 'RAG 模式 · 联网已开启' : 'RAG 模式'
+  return effectiveWebEnabled.value ? 'AI 聊天 · 联网已开启' : 'AI 聊天'
+})
+
+const modeSummaryText = computed(() => {
+  if (assistantMode.value === 'web') return '当前模式：联网搜索 + AI 回答'
+  if (assistantMode.value === 'rag') {
+    return effectiveWebEnabled.value
+      ? '当前模式：RAG 问答 + 联网补充'
+      : '当前模式：RAG 知识库问答'
+  }
+  return effectiveWebEnabled.value
+    ? '当前模式：AI 聊天 + 联网增强'
+    : '当前模式：正常 AI 聊天'
+})
+
+const selectedSpaceSummary = computed(() => {
+  if (assistantMode.value !== 'rag') return effectiveWebEnabled.value ? '联网检索可用' : '普通问答无需课程空间'
+  if (!selectedCourseSpaceId.value) return '请选择课程空间'
+  return `当前空间：${buildCourseSpaceLabel(selectedCourseSpace.value)}`
+})
+
+function buildCourseSpaceLabel(courseSpace) {
+  if (!courseSpace) return ''
+  const parts = [courseSpace.courseName, courseSpace.name, courseSpace.term].filter(Boolean)
+  const scope = courseSpace.docVisibility === 'class'
+    ? '班级授权'
+    : courseSpace.docVisibility === 'public'
+      ? '公开'
+      : null
+  if (scope) parts.push(scope)
+  return parts.join(' / ') || `课程空间 ${courseSpace.id}`
 }
 
-function scrollToBottom() {
+function formatConversationTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const today = new Date()
+  if (date.toDateString() === today.toDateString()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+  return `${date.getMonth() + 1}-${date.getDate()}`
+}
+
+function modeLabel(mode) {
+  if (mode === 'rag') return 'RAG'
+  if (mode === 'web') return '联网'
+  return 'AI'
+}
+
+function lastMessagePreview(conversation) {
+  if (chatStore.isConversationTyping(conversation.id)) return '正在生成...'
+  const last = [...(conversation.messages || [])].reverse().find((message) => message.content)
+  return last?.content || '暂无消息'
+}
+
+function conversationStatusText(conversation) {
+  return chatStore.isConversationTyping(conversation.id)
+    ? '正在生成'
+    : formatConversationTime(conversation.updatedAt)
+}
+
+async function scrollToBottom() {
+  await nextTick()
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+  }
+}
+
+async function fetchCourseSpaces() {
+  try {
+    const spaces = await getCourseSpaces()
+    allSpaces.value = Array.isArray(spaces) ? spaces : []
+    // 按当前班级过滤：有班级专属空间则只展示这些，否则回退全部。
+    courseSpaces.value = classScopedSpaces.value.length > 0 ? classScopedSpaces.value : allSpaces.value
+    if (!selectedCourseSpaceId.value && courseSpaces.value.length > 0 && assistantMode.value === 'rag') {
+      chatStore.setCourseSpace(courseSpaces.value[0].id)
+    }
+  } catch (error) {
+    const friendlyMessage = formatStudentAssistantError(error?.message, assistantMode.value)
+    chatStore.setAssistantNotice(friendlyMessage)
+    uiMessage.warning(friendlyMessage)
+    allSpaces.value = []
+    courseSpaces.value = []
+  }
+}
+
+async function sendMessage() {
+  if (!canSend.value && assistantMode.value === 'rag' && !selectedCourseSpaceId.value) {
+    uiMessage.warning('请先选择课程空间，再使用 RAG 模式提问。')
+    return
+  }
+  await chatStore.sendMessage()
+  resetInputHeight()
+  await scrollToBottom()
+}
+
+function stopGenerating() {
+  chatStore.stopGeneration()
+}
+
+function autoResize() {
+  const textarea = assistantInputRef.value
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  const next = Math.min(160, textarea.scrollHeight)
+  textarea.style.height = `${next}px`
+}
+
+function resetInputHeight() {
+  const textarea = assistantInputRef.value
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
+}
+
+function useQuickPrompt(prompt) {
+  chatStore.setInput(prompt)
   nextTick(() => {
-    if (!messagesRef.value) return
-    messagesRef.value.scrollTop = messagesRef.value.scrollHeight
+    autoResize()
+    assistantInputRef.value?.focus()
   })
 }
 
-function applySuggestion(text) {
-  store.setDraft(text)
-  nextTick(autoResize)
+function selectMode(mode) {
+  chatStore.setAssistantMode(mode)
+}
+
+function toggleWeb(value) {
+  chatStore.setWebEnabled(value)
+}
+
+function newConversation() {
+  chatStore.createConversation()
+  scrollToBottom()
+}
+
+function switchConversation(id) {
+  chatStore.switchConversation(id)
+  scrollToBottom()
 }
 
 async function clearConversation() {
+  if (!canClearConversation.value) return
   try {
-    await messageBox.confirm('清空当前 AI 对话记录？', '提示', {
+    await messageBox.confirm('清空当前 AI 聊天记录和输入草稿？', '提示', {
       confirmButtonText: '清空',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    store.clearMessages()
-  } catch (error) {
-    // User cancelled the confirmation dialog.
+    chatStore.clearMessages()
+    await scrollToBottom()
+  } catch {
+    // 用户取消清空。
   }
 }
 
-async function send() {
-  await store.sendMessage(draft.value)
-  nextTick(autoResize)
+async function clearAllConversations() {
+  if (isAnyTyping.value || conversations.value.length <= 1) return
+  try {
+    await messageBox.confirm('清空所有本地历史聊天记录？该操作不可恢复。', '提示', {
+      confirmButtonText: '全部清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.clearAllConversations()
+    await scrollToBottom()
+  } catch {
+    // 用户取消清空。
+  }
+}
+
+async function removeConversation(id) {
+  if (!id) return
+  try {
+    await messageBox.confirm('删除该会话及其聊天记录？', '提示', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    chatStore.deleteConversation(id)
+    await scrollToBottom()
+  } catch {
+    // 用户取消删除。
+  }
 }
 
 function onKeyDown(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
+  if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
     event.preventDefault()
-    send()
+    sendMessage()
   }
 }
 
-watch(() => [messages.value.length, loading.value, streaming.value], scrollToBottom, { immediate: true })
-onMounted(scrollToBottom)
+watch(messages, scrollToBottom, { deep: true })
+watch(isTyping, scrollToBottom)
+watch(userInput, () => {
+  nextTick(autoResize)
+})
+// 当前班级变化时重新过滤课程空间（切班会重挂组件，此处作双保险）。
+watch(currentClassId, () => {
+  courseSpaces.value = classScopedSpaces.value.length > 0 ? classScopedSpaces.value : allSpaces.value
+})
+watch(selectedCourseSpaceId, (value) => {
+  chatStore.setCourseSpace(value)
+})
+
+onMounted(() => {
+  chatStore.ensureActiveConversation()
+  fetchCourseSpaces()
+  autoResize()
+  scrollToBottom()
+})
 </script>
 
 <template>
-  <div class="ai-chat-page">
-    <section class="assistant-toolbar">
-      <div class="toolbar-copy">
-        <span class="toolbar-kicker">AI 助教</span>
-        <h1>AI 教学对话助手</h1>
-        <p>支持教学问答、论文检索、课程设计讨论。离开页面后请求会继续执行，返回本页可查看结果。</p>
+  <div class="assistant-shell">
+    <aside
+      class="history-panel"
+      :class="{ 'history-panel--hidden': !historyVisible }"
+    >
+      <div class="history-head">
+        <div>
+          <h3>历史聊天</h3>
+          <p>{{ conversations.length }} 个本地会话</p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          title="收起历史"
+          @click="historyVisible = false"
+        >
+          <Close />
+        </button>
       </div>
 
-      <div class="toolbar-meta">
-        <div class="meta-pill">
-          <span>消息</span>
-          <strong>{{ messages.length }}</strong>
+      <div class="history-search">
+        <Search />
+        <input
+          v-model="historyQuery"
+          type="search"
+          placeholder="搜索历史记录"
+        />
+      </div>
+
+      <button type="button" class="new-chat-button" @click="newConversation">
+        <Plus />
+        新建对话
+      </button>
+
+      <div class="history-list">
+        <button
+          v-for="item in filteredConversations"
+          :key="item.id"
+          type="button"
+          class="history-item"
+          :class="{ 'history-item--active': item.id === activeConversation?.id }"
+          @click="switchConversation(item.id)"
+        >
+          <span class="history-title-row">
+            <span class="history-title">{{ item.title }}</span>
+            <button
+              type="button"
+              class="history-remove"
+              title="删除该会话"
+              @click.stop="removeConversation(item.id)"
+            >
+              <Delete />
+            </button>
+          </span>
+          <span class="history-preview">{{ lastMessagePreview(item) }}</span>
+          <span class="history-meta">
+            <span>{{ modeLabel(item.mode) }}{{ item.webEnabled ? ' · 联网' : '' }}</span>
+            <span
+              :class="{ 'history-status--typing': chatStore.isConversationTyping(item.id) }"
+            >
+              {{ conversationStatusText(item) }}
+            </span>
+          </span>
+        </button>
+
+        <div v-if="!filteredConversations.length" class="history-empty">
+          未找到历史记录
         </div>
-        <div class="meta-pill">
-          <span>状态</span>
-          <strong>{{ statusText }}</strong>
+      </div>
+
+      <button
+        type="button"
+        class="clear-all-button"
+        :disabled="isAnyTyping || conversations.length <= 1"
+        @click="clearAllConversations"
+      >
+        <Delete />
+        清空所有记录
+      </button>
+    </aside>
+
+    <section class="assistant-main">
+      <ui-alert
+        v-if="assistantNotice"
+        class="assistant-alert"
+        type="warning"
+        :closable="false"
+        :title="assistantNotice"
+        show-icon
+      />
+
+      <header class="assistant-header">
+        <div class="header-title">
+          <button
+            v-if="!historyVisible"
+            type="button"
+            class="icon-button history-toggle"
+            title="展开历史"
+            @click="historyVisible = true"
+          >
+            <Menu />
+          </button>
+          <div class="min-w-0">
+            <h2>AI 助教</h2>
+            <p>{{ modeSummaryText }}，聊天记录会自动保存到本地。</p>
+          </div>
         </div>
-        <UiButton
+        <ui-button
+          type="button"
+          :disabled="!canClearConversation"
           class="clear-button"
-          :disabled="loading || streaming || !messages.length"
           @click="clearConversation"
         >
-          清空会话
-        </UiButton>
-      </div>
-    </section>
-
-    <section class="chat-workbench" :aria-busy="loading || streaming">
-      <header class="chat-header">
-        <div class="chat-title">
-          <span class="status-dot" :class="{ active: loading || streaming }"></span>
-          <div>
-            <h2>教师端 AI 对话</h2>
-            <p>{{ loading || streaming ? '正在生成回答，离开页面后也会继续处理。' : '可直接追问、续问或粘贴教学材料。' }}</p>
-          </div>
-        </div>
-        <div class="session-summary">
-          <span v-if="messages.length" class="session-tag">已保存本次会话</span>
-          <span v-if="lastAssistantPreview" class="session-preview">{{ lastAssistantPreview }}</span>
-        </div>
+          清空当前对话
+        </ui-button>
       </header>
 
-      <div
-        ref="messagesRef"
-        class="messages-panel"
-        :class="{ 'messages-panel--empty': !messages.length }"
-      >
-        <template v-if="messages.length">
-          <div
-            v-for="(msg, index) in messages"
-            :key="`${msg.role}-${msg.createdAt || index}`"
-            :class="['message-row', msg.role]"
-          >
-            <div class="message-avatar">
-              <span>{{ msg.role === 'assistant' ? 'AI' : '我' }}</span>
-            </div>
-            <div class="message-main">
-              <div class="message-meta">
-                <strong>{{ msg.role === 'assistant' ? '教学助手' : '教师' }}</strong>
-                <span>{{ msg.role === 'assistant' ? '回答' : '提问' }}</span>
-              </div>
-              <div class="message-bubble">
-                <p v-if="msg.role === 'user'" class="plain-text">{{ msg.content }}</p>
-                <div
-                  v-else
-                  class="markdown-body"
-                  v-html="renderMarkdown(msg.content)"
-                ></div>
-
-                <div v-if="msg.papers?.length" class="papers-grid">
-                  <a
-                    v-for="(paper, paperIndex) in msg.papers"
-                    :key="`${paper.link || paper.title}-${paperIndex}`"
-                    :href="paper.link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="paper-card"
-                  >
-                    <div class="paper-head">
-                      <span>0{{ paperIndex + 1 }}</span>
-                      <span>查看论文</span>
-                    </div>
-                    <strong>{{ paper.title }}</strong>
-                    <p>{{ paper.authors || '作者信息暂缺' }}</p>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="loading" class="message-row assistant pending-row">
-            <div class="message-avatar">
-              <span>AI</span>
-            </div>
-            <div class="message-main">
-              <div class="message-meta">
-                <strong>教学助手</strong>
-                <span>处理中</span>
-              </div>
-              <div class="message-bubble pending-bubble">
-                <div class="typing-line">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <p>正在整理答案与参考资料...</p>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <div v-else class="empty-workbench">
-          <div class="empty-copy">
-            <span>推荐提问</span>
-            <h3>从一个具体教学问题开始</h3>
-            <p>选择一个场景快速填入问题，也可以直接在底部输入框中粘贴材料或追问。</p>
-          </div>
-
-          <div class="suggestion-grid">
-            <UiButton
-              v-for="card in suggestionCards"
-              :key="card.prompt"
-              type="button"
-              class="suggestion-card"
-              @click="applySuggestion(card.prompt)"
-            >
-              <span class="suggestion-category">{{ card.category }}</span>
-              <strong>{{ card.title }}</strong>
-              <span class="suggestion-prompt">{{ card.prompt }}</span>
-            </UiButton>
-          </div>
-        </div>
-      </div>
-
-      <div class="composer-panel">
-        <div v-if="messages.length" class="quick-strip">
-          <UiButton
-            v-for="item in suggestions"
-            :key="`quick-${item}`"
+      <div class="mode-panel">
+        <div class="mode-title">选择模式</div>
+        <div class="mode-grid">
+          <button
+            v-for="card in modeCards"
+            :key="card.value"
             type="button"
-            class="quick-chip"
-            @click="applySuggestion(item)"
+            class="mode-card"
+            :class="[`mode-card--${card.tone}`, { 'mode-card--active': assistantMode === card.value }]"
+            @click="selectMode(card.value)"
           >
-            {{ item }}
-          </UiButton>
+            <span class="mode-icon">
+              <component :is="card.icon" />
+            </span>
+            <span class="mode-copy">
+              <strong>{{ card.title }}</strong>
+              <span>{{ card.desc }}</span>
+            </span>
+          </button>
         </div>
 
-        <div class="composer-box">
-          <textarea
-            ref="textareaRef"
-            v-model="draft"
-            rows="1"
-            class="composer-textarea"
-            :placeholder="composerPlaceholder"
-            @keydown="onKeyDown"
-            @input="autoResize"
-          ></textarea>
-          <div class="composer-actions">
-            <span>Enter 发送，Shift+Enter 换行</span>
-            <UiButton
-              type="button"
-              :disabled="!draft.trim() || loading || streaming"
-              class="send-button"
-              @click="send"
+        <div class="mode-options">
+          <label class="web-toggle">
+            <span>
+              <strong>联网搜索</strong>
+              <small>AI 聊天与 RAG 可用，开启后检索最新信息</small>
+            </span>
+            <ui-switch
+              :model-value="effectiveWebEnabled"
+              :disabled="assistantMode === 'web'"
+              @update:modelValue="toggleWeb"
+            />
+          </label>
+
+          <div v-if="assistantMode === 'rag'" class="course-select-wrap">
+            <Notebook />
+            <ui-select
+              v-model="selectedCourseSpaceId"
+              placeholder="选择课程空间"
+              class="course-select"
             >
-              {{ loading || streaming ? '生成中...' : '发送问题' }}
-            </UiButton>
+              <ui-option
+                v-for="item in courseSpaces"
+                :key="item.id"
+                :label="buildCourseSpaceLabel(item)"
+                :value="item.id"
+              />
+            </ui-select>
           </div>
         </div>
       </div>
+
+      <div ref="chatContainer" class="chat-panel">
+        <div
+          v-if="showPromptSuggestions"
+          class="prompt-suggestions"
+        >
+          <div class="suggestion-copy">
+            <h3>从教学问题开始</h3>
+            <p>选择一个提示词开始，或直接输入你的问题。RAG 模式会优先使用课程空间资料。</p>
+          </div>
+
+          <div class="prompt-grid">
+            <button
+              v-for="q in quickPrompts"
+              :key="q.label"
+              type="button"
+              class="prompt-card"
+              @click="useQuickPrompt(q.prompt)"
+            >
+              <strong>{{ q.label }}</strong>
+              <span>{{ q.prompt }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-for="(message, index) in visibleMessages"
+          :key="message.id || index"
+          class="message-row"
+          :class="message.role === 'user' ? 'message-row--user' : 'message-row--ai'"
+        >
+          <div class="avatar">
+            {{ message.role === 'user' ? '我' : 'AI' }}
+          </div>
+          <div class="message-main">
+            <div class="message-meta">
+              <strong>{{ message.role === 'user' ? '我' : 'AI 助手' }}</strong>
+              <span>{{ message.time }}</span>
+              <span v-if="message.role === 'ai' && message.usedWeb" class="web-badge">联网</span>
+              <span
+                v-if="message.role === 'ai' && message.coverageScore > 0"
+                class="coverage-badge"
+              >
+                引用覆盖率 {{ Math.round(message.coverageScore * 100) }}%
+              </span>
+            </div>
+            <div class="message-bubble">
+              <p v-if="message.role === 'user'" class="plain-message">
+                {{ message.content }}
+              </p>
+              <div
+                v-else
+                class="assistant-markdown"
+                v-html="renderSafeMarkdown(message.content)"
+              />
+
+              <div
+                v-if="message.citations && message.citations.length"
+                class="source-list"
+              >
+                <div
+                  v-for="cite in message.citations"
+                  :key="`${message.id || index}-${cite.index}`"
+                  class="source-item"
+                >
+                  <Document />
+                  <div class="source-copy">
+                    <div class="source-head">
+                      <span
+                        class="source-tag"
+                        :class="(cite.source === 'web' || cite.url) ? 'source-tag--web' : 'source-tag--kb'"
+                      >
+                        {{ (cite.source === 'web' || cite.url) ? '联网' : '知识库' }}
+                      </span>
+                      <a
+                        v-if="cite.url"
+                        :href="cite.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        [{{ cite.index }}] {{ cite.docName || '联网资料' }}
+                      </a>
+                      <span v-else>[{{ cite.index }}] {{ cite.docName || '引用资料' }}</span>
+                    </div>
+                    <small v-if="cite.chapterPath || cite.pageRange">
+                      {{ [cite.chapterPath, cite.pageRange].filter(Boolean).join(' | ') }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showTypingHint" class="message-row message-row--ai">
+          <div class="avatar">AI</div>
+          <div class="message-main">
+            <div class="message-meta">
+              <strong>AI 助手</strong>
+              <span>正在生成</span>
+            </div>
+            <div class="message-bubble typing-bubble">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="composer">
+        <div class="composer-summary">
+          <span>{{ currentModeText }}</span>
+          <span>{{ selectedSpaceSummary }}</span>
+        </div>
+
+        <textarea
+          ref="assistantInputRef"
+          v-model="userInput"
+          class="assistant-input"
+          placeholder="输入你的问题，Enter 发送，Shift + Enter 换行"
+          @input="autoResize"
+          @keydown="onKeyDown"
+        ></textarea>
+
+        <div class="composer-actions">
+          <div class="composer-warning" :class="{ visible: assistantMode === 'rag' && !selectedCourseSpaceId }">
+            <Warning />
+            <span>RAG 模式需要先选择课程空间</span>
+          </div>
+          <ui-button
+            v-if="isTyping"
+            type="button"
+            class="send-button stop-button"
+            @click="stopGenerating"
+          >
+            停止生成
+          </ui-button>
+          <ui-button
+            v-else
+            type="primary"
+            :disabled="!canSend"
+            class="send-button"
+            @click="sendMessage"
+          >
+            发送
+          </ui-button>
+        </div>
+      </footer>
     </section>
   </div>
 </template>
 
 <style scoped>
-.ai-chat-page {
+.assistant-shell {
   display: flex;
-  box-sizing: border-box;
   height: 100%;
-  max-height: 100%;
   min-height: 0;
-  flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   overflow: hidden;
   color: #1d1d1f;
 }
 
-.assistant-toolbar {
+.history-panel {
   display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 10px 14px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  backdrop-filter: blur(14px);
-}
-
-.toolbar-copy {
-  min-width: 0;
-}
-
-.toolbar-kicker {
-  display: none;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(194, 112, 62, 0.08);
-  color: var(--app-primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.toolbar-copy h1 {
-  margin: 0 0 3px;
-  color: #0f172a;
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: 0;
-}
-
-.toolbar-copy p {
-  max-width: 760px;
-  margin: 0;
-  overflow: hidden;
-  color: #64748b;
-  font-size: 13px;
-  line-height: 1.45;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.toolbar-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-.meta-pill {
-  display: flex;
-  min-width: auto;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 10px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 10px;
-  background: #f8fafc;
-}
-
-.meta-pill span {
-  color: #64748b;
-  font-size: 12px;
-}
-
-.meta-pill strong {
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.clear-button,
-.send-button {
-  border: none;
-  background: linear-gradient(180deg, #d49068 0%, var(--app-primary) 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(194, 112, 62, 0.25);
-}
-
-.clear-button {
-  min-width: 86px;
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 10px;
-  background: #e8f2ff;
-  color: var(--app-primary);
-  box-shadow: none;
-}
-
-.chat-workbench {
-  display: flex;
-  max-height: 100%;
+  width: 250px;
+  min-width: 250px;
   min-height: 0;
-  flex: 1;
   flex-direction: column;
+  gap: 12px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 22px;
+  border: 1px solid #e6eaf0;
+  border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 14px;
+  transition: width 0.2s ease, min-width 0.2s ease, opacity 0.2s ease;
 }
 
-.chat-header {
+.history-panel--hidden {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+}
+
+.history-head {
   display: flex;
-  flex: 0 0 auto;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  gap: 10px;
 }
 
-.chat-title {
-  display: flex;
-  min-width: 0;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  margin-top: 8px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  background: #94a3b8;
-  box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.16);
-}
-
-.status-dot.active {
-  background: #16a34a;
-  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.14);
-}
-
-.chat-title h2 {
+.history-head h3,
+.assistant-header h2 {
   margin: 0;
-  color: #0f172a;
-  font-size: 17px;
+  color: #1d1d1f;
+  font-size: 18px;
   font-weight: 800;
   line-height: 1.35;
 }
 
-.chat-title p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 13px;
+.history-head p,
+.assistant-header p {
+  margin: 2px 0 0;
+  color: #8b95a1;
+  font-size: 12px;
   line-height: 1.5;
 }
 
-.session-summary {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-.session-tag {
+.icon-button {
   display: inline-flex;
+  width: 32px;
+  height: 32px;
   align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(194, 112, 62, 0.08);
-  color: var(--app-primary);
-  font-size: 12px;
-  font-weight: 700;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fff;
+  color: #667085;
+  cursor: pointer;
 }
 
-.session-preview {
-  max-width: 320px;
+.icon-button:hover {
+  border-color: #bcd6ff;
+  color: var(--app-primary);
+}
+
+.history-search {
+  display: flex;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #8b95a1;
+}
+
+.history-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #1d1d1f;
+  font-size: 13px;
+}
+
+.new-chat-button,
+.clear-all-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #d7e6ff;
+  border-radius: 8px;
+  background: #f5f9ff;
+  color: var(--app-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.history-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  min-height: 78px;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: #f7f9fc;
+}
+
+.history-item--active {
+  border-color: #cfe3ff;
+  background: #eaf4ff;
+}
+
+.history-title,
+.history-preview {
   overflow: hidden;
-  color: #64748b;
-  font-size: 12px;
-  text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.messages-panel {
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.history-title {
   flex: 1;
-  height: 0;
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.history-remove {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #9aa4b2;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.history-item:hover .history-remove,
+.history-item--active .history-remove {
+  opacity: 1;
+}
+
+.history-remove:hover {
+  background: #ffe0dd;
+  color: #d92d20;
+}
+
+.history-preview {
+  color: #6e6e73;
+  font-size: 12px;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #8b95a1;
+  font-size: 11px;
+}
+
+.history-status--typing {
+  color: var(--app-primary);
+  font-weight: 700;
+}
+
+.history-empty {
+  border: 1px dashed #d8dee8;
+  border-radius: 8px;
+  padding: 18px 10px;
+  color: #8b95a1;
+  text-align: center;
+  font-size: 13px;
+}
+
+.clear-all-button {
+  border-color: #ffe0dd;
+  background: #fff7f6;
+  color: #d92d20;
+}
+
+.clear-all-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.assistant-main {
+  display: flex;
+  min-width: 0;
   min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e6eaf0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.assistant-alert {
+  margin: 12px 12px 0;
+}
+
+.assistant-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e6eaf0;
+  padding: 14px 18px;
+}
+
+.header-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.clear-button {
+  min-height: 36px;
+  border-radius: 8px;
+  border-color: #e6eaf0;
+  background: #fff;
+  color: #606266;
+  box-shadow: none;
+}
+
+.mode-panel {
+  flex: 0 0 auto;
+  border-bottom: 1px solid #e6eaf0;
+  padding: 10px 18px;
+}
+
+.mode-title {
+  margin-bottom: 8px;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mode-card {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.mode-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(22, 48, 79, 0.08);
+}
+
+.mode-card--active.mode-card--green {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.mode-card--active.mode-card--purple {
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+}
+
+.mode-card--active.mode-card--blue {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.mode-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #edf5ff;
+  color: var(--app-primary);
+  font-size: 18px;
+}
+
+.mode-card--green .mode-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.mode-card--purple .mode-icon {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.mode-card--blue .mode-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.mode-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mode-copy strong {
+  color: #1d1d1f;
+  font-size: 14px;
+}
+
+.mode-copy span {
+  color: #6e6e73;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.mode-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.web-toggle {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #4b5563;
+}
+
+.web-toggle span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.web-toggle strong {
+  font-size: 13px;
+}
+
+.web-toggle small {
+  color: #8b95a1;
+  font-size: 12px;
+}
+
+.course-select-wrap {
+  display: flex;
+  width: min(420px, 48%);
+  align-items: center;
+  gap: 8px;
+  color: #7c3aed;
+}
+
+.course-select {
+  width: 100%;
+}
+
+.chat-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
   overflow-y: auto;
-  padding: 20px 22px 12px;
+  padding: 18px;
   background:
-    linear-gradient(180deg, rgba(248, 251, 255, 0.8) 0%, rgba(255, 255, 255, 0) 38%),
+    linear-gradient(180deg, rgba(248, 251, 255, 0.9) 0%, rgba(255, 255, 255, 0) 38%),
     #ffffff;
 }
 
-.messages-panel--empty {
-  display: grid;
+.prompt-suggestions {
+  margin: auto;
+  display: flex;
+  width: min(860px, 100%);
+  flex-direction: column;
   align-items: center;
+  gap: 22px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.suggestion-copy h3 {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.suggestion-copy p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: #6e6e73;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.prompt-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.prompt-card {
+  display: flex;
+  min-height: 92px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prompt-card:hover {
+  border-color: rgba(194, 112, 62, 0.4);
+  background: #f4f9ff;
+}
+
+.prompt-card strong {
+  color: #1d1d1f;
+  font-size: 15px;
+}
+
+.prompt-card span {
+  margin-top: 10px;
+  color: #6e6e73;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .message-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 18px;
 }
 
-.message-row.user {
+.message-row--user {
   flex-direction: row-reverse;
 }
 
-.message-avatar {
+.avatar {
   display: flex;
   width: 34px;
   height: 34px;
-  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: #334155;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--app-primary) 0%, #5856d6 100%);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
 }
 
-.message-row.assistant .message-avatar {
-  background: linear-gradient(135deg, var(--app-primary) 0%, #5856d6 100%);
-}
-
-.message-row.user .message-avatar {
-  background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
+.message-row--user .avatar {
+  background: #1f2937;
 }
 
 .message-main {
   display: flex;
-  max-width: min(820px, calc(100% - 52px));
+  max-width: min(760px, 78%);
+  min-width: 0;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
 }
 
-.message-row.user .message-main {
+.message-row--user .message-main {
   align-items: flex-end;
 }
 
@@ -537,319 +1204,177 @@ onMounted(scrollToBottom)
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #64748b;
-  font-size: 12px;
-}
-
-.message-row.user .message-meta {
-  justify-content: flex-end;
+  color: #8b95a1;
+  font-size: 11px;
 }
 
 .message-meta strong {
-  color: #0f172a;
+  color: #4b5563;
+}
+
+.web-badge {
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+
+.coverage-badge {
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 2px 6px;
+  font-weight: 700;
 }
 
 .message-bubble {
+  min-width: 0;
   width: fit-content;
   max-width: 100%;
-  padding: 13px 15px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e9edf3;
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  color: #202124;
+  font-size: 14px;
+  line-height: 1.65;
 }
 
-.message-row.user .message-bubble {
-  border-color: rgba(194, 112, 62, 0.2);
+.message-row--user .message-bubble {
+  border-color: var(--app-primary);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 4px;
   background: var(--app-primary);
   color: #fff;
 }
 
-.plain-text {
+.plain-message {
   margin: 0;
-  line-height: 1.75;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-.pending-bubble {
+.source-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #64748b;
+  margin-top: 10px;
+  border-top: 1px solid rgba(126, 157, 183, 0.2);
+  padding-top: 10px;
 }
 
-.pending-bubble p {
-  margin: 0;
-  font-size: 13px;
-}
-
-.typing-line {
+.source-item {
   display: flex;
-  gap: 6px;
-}
-
-.typing-line span {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #60a5fa;
-  animation: typing-bounce 0.8s infinite alternate;
-}
-
-.typing-line span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-line span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-.markdown-body {
-  color: #1f2937;
-  font-size: 14px;
-  line-height: 1.75;
-  overflow-wrap: anywhere;
-}
-
-.markdown-body :deep(p) {
-  margin: 0 0 10px;
-}
-
-.markdown-body :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.markdown-body :deep(ul),
-.markdown-body :deep(ol) {
-  margin: 10px 0;
-  padding-left: 20px;
-}
-
-.markdown-body :deep(code) {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.08);
-  color: #1d4ed8;
-  font-size: 13px;
-}
-
-.markdown-body :deep(pre) {
-  margin: 12px 0;
-  padding: 14px 16px;
-  overflow-x: auto;
-  border-radius: 8px;
-  background: #f6f8fa;
-  border: 1px solid #d0d7de;
-  color: #24292f;
-}
-
-.markdown-body :deep(pre code) {
-  padding: 0;
-  background: transparent;
-  color: inherit;
-}
-
-.markdown-body :deep(blockquote) {
-  margin: 12px 0;
-  padding: 10px 14px;
-  border-left: 4px solid #60a5fa;
-  border-radius: 10px;
-  background: rgba(96, 165, 250, 0.08);
-}
-
-.markdown-body :deep(a) {
-  color: #1d4ed8;
-  word-break: break-all;
-}
-
-.papers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.paper-card {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(194, 112, 62, 0.16);
-  border-radius: 14px;
-  background: #f8fbff;
-  text-decoration: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.paper-card:hover {
-  border-color: rgba(194, 112, 62, 0.32);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
-  transform: translateY(-1px);
-}
-
-.paper-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
   color: #64748b;
   font-size: 12px;
-}
-
-.paper-head span:first-child {
-  color: var(--app-primary);
-  font-weight: 800;
-}
-
-.paper-card strong {
-  color: #0f172a;
   line-height: 1.5;
 }
 
-.paper-card p {
-  margin: 0;
-  color: #64748b;
-  font-size: 12px;
+.source-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.empty-workbench {
-  display: grid;
-  gap: 20px;
-  padding: 24px 8px 28px;
-}
-
-.empty-copy {
-  max-width: 680px;
-}
-
-.empty-copy span {
-  display: inline-flex;
+.source-head {
+  display: flex;
   align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(107, 143, 107, 0.1);
-  color: #15803d;
-  font-size: 12px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.source-tag {
+  flex: 0 0 auto;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-.empty-copy h3 {
-  margin: 12px 0 8px;
-  color: #0f172a;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 0;
+.source-tag--web {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
-.empty-copy p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.7;
+.source-tag--kb {
+  background: #ede9fe;
+  color: #7c3aed;
 }
 
-.suggestion-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+.source-copy a {
+  color: #0b63ce;
+  text-decoration: none;
+  word-break: break-word;
 }
 
-.suggestion-card {
-  min-height: 132px;
-  justify-content: flex-start;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
-  background: #ffffff;
-  color: #0f172a;
-  text-align: left;
-  white-space: normal;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+.source-copy a:hover {
+  text-decoration: underline;
 }
 
-.suggestion-card:hover {
-  border-color: rgba(194, 112, 62, 0.32);
-  background: #f8fbff;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+.source-copy small {
+  color: #8b95a1;
 }
 
-.suggestion-category {
-  color: var(--app-primary);
-  font-size: 12px;
-  font-weight: 800;
+.typing-bubble {
+  display: inline-flex;
+  min-width: 78px;
+  gap: 5px;
 }
 
-.suggestion-card strong {
-  color: #0f172a;
-  font-size: 15px;
-  line-height: 1.4;
-}
-
-.suggestion-prompt {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.55;
-  white-space: normal;
-}
-
-.composer-panel {
-  flex: 0 0 auto;
-  padding: 0 18px 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 26%);
-}
-
-.quick-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 0 2px 12px;
-}
-
-.quick-chip {
-  flex: 0 0 auto;
-  min-height: 32px;
-  padding: 7px 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+.typing-bubble span {
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
-  background: #f8fafc;
-  color: #475569;
+  background: #8ca0b3;
+  animation: typing-bounce 0.8s infinite alternate;
+}
+
+.typing-bubble span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.typing-bubble span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.composer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #e6eaf0;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+.composer-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8b95a1;
   font-size: 12px;
-  box-shadow: none;
 }
 
-.quick-chip:hover {
-  border-color: rgba(194, 112, 62, 0.28);
-  color: var(--app-primary);
-}
-
-.composer-box {
-  padding: 13px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-}
-
-.composer-textarea {
+.assistant-input {
   width: 100%;
-  min-height: 42px;
-  max-height: 140px;
+  min-height: 92px;
   resize: none;
-  border: none;
-  background: transparent;
-  color: #0f172a;
-  font-size: 15px;
-  line-height: 1.65;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #1d1d1f;
+  font-size: 14px;
+  line-height: 1.6;
   outline: none;
 }
 
-.composer-textarea::placeholder {
-  color: #94a3b8;
+.assistant-input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .composer-actions {
@@ -857,18 +1382,155 @@ onMounted(scrollToBottom)
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
-.composer-actions span {
-  color: #64748b;
+.composer-warning {
+  display: inline-flex;
+  visibility: hidden;
+  align-items: center;
+  gap: 6px;
+  color: #d97706;
   font-size: 12px;
 }
 
+.composer-warning.visible {
+  visibility: visible;
+}
+
 .send-button {
-  min-width: 108px;
-  border-radius: 999px;
+  min-width: 82px;
+}
+
+.stop-button {
+  border-color: #ffe0dd;
+  background: #fff7f6;
+  color: #d92d20;
+  box-shadow: none;
+}
+
+.stop-button:hover {
+  background: #ffe0dd;
+}
+
+.assistant-markdown {
+  color: #202124;
+  font-size: 14px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.assistant-markdown :deep(p) {
+  margin: 0 0 8px;
+}
+
+.assistant-markdown :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.assistant-markdown :deep(h1),
+.assistant-markdown :deep(h2),
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  margin: 12px 0 8px;
+  color: #111827;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.assistant-markdown :deep(h1) {
+  font-size: 18px;
+}
+
+.assistant-markdown :deep(h2) {
+  font-size: 16px;
+}
+
+.assistant-markdown :deep(h3),
+.assistant-markdown :deep(h4) {
+  font-size: 15px;
+}
+
+.assistant-markdown :deep(ul),
+.assistant-markdown :deep(ol) {
+  margin: 8px 0;
+  padding-left: 22px;
+}
+
+.assistant-markdown :deep(li) {
+  margin: 3px 0;
+}
+
+.assistant-markdown :deep(blockquote) {
+  margin: 10px 0;
+  padding: 9px 12px;
+  border-left: 3px solid #60a5fa;
+  border-radius: 8px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #475569;
+}
+
+.assistant-markdown :deep(a) {
+  color: #0b63ce;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(table) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.assistant-markdown :deep(th),
+.assistant-markdown :deep(td) {
+  padding: 7px 9px;
+  border: 1px solid #d8dee8;
+  white-space: nowrap;
+}
+
+.assistant-markdown :deep(th) {
+  background: #eef3f8;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.assistant-markdown :deep(:not(pre) > code) {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #1d4ed8;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.92em;
+  word-break: break-word;
+}
+
+.assistant-markdown :deep(.markdown-code-block) {
+  max-width: 100%;
+  margin: 10px 0;
+  padding: 0;
+  overflow-x: auto;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  background: #f6f8fa;
+  color: #24292f;
+}
+
+.assistant-markdown :deep(.markdown-code-block code) {
+  display: block;
+  min-width: max-content;
+  padding: 12px 14px;
+  background: transparent;
+  color: inherit;
+  font-family: Consolas, "SFMono-Regular", "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.62;
+  overflow-wrap: normal;
+  tab-size: 2;
+  white-space: pre;
 }
 
 @keyframes typing-bounce {
@@ -883,107 +1545,74 @@ onMounted(scrollToBottom)
   }
 }
 
-@media (max-width: 1200px) {
-  .suggestion-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 1080px) {
+  .assistant-shell {
+    position: relative;
   }
-}
 
-@media (max-width: 900px) {
-  .assistant-toolbar,
-  .chat-header {
-    flex-direction: column;
+  .history-panel {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    box-shadow: 0 18px 42px rgba(22, 48, 79, 0.18);
+  }
+
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-options {
     align-items: stretch;
+    flex-direction: column;
   }
 
-  .toolbar-meta {
+  .course-select-wrap {
     width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .meta-pill {
-    flex: 1 1 120px;
-  }
-
-  .clear-button {
-    flex: 1 1 160px;
-  }
-
-  .session-summary {
-    align-items: flex-start;
-  }
-
-  .session-preview {
-    max-width: 100%;
-    text-align: left;
   }
 }
 
 @media (max-width: 640px) {
-  .ai-chat-page {
-    gap: 12px;
+  .assistant-shell {
+    gap: 0;
   }
 
-  .assistant-toolbar {
-    padding: 16px;
-    border-radius: 18px;
+  .assistant-header,
+  .mode-panel,
+  .composer {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
-  .toolbar-copy h1 {
-    font-size: 20px;
+  .assistant-header {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .chat-workbench {
-    min-height: 0;
-    border-radius: 18px;
+  .clear-button {
+    width: 100%;
   }
 
-  .chat-header {
-    padding: 14px 16px;
+  .chat-panel {
+    padding: 14px 12px;
   }
 
-  .messages-panel {
-    padding: 16px 14px 10px;
-  }
-
-  .message-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-  }
-
-  .message-main {
-    max-width: calc(100% - 42px);
-  }
-
-  .message-bubble {
-    padding: 12px 13px;
-    border-radius: 14px;
-  }
-
-  .empty-workbench {
-    padding: 18px 0 24px;
-  }
-
-  .empty-copy h3 {
-    font-size: 21px;
-  }
-
-  .suggestion-grid {
+  .prompt-grid {
     grid-template-columns: 1fr;
   }
 
-  .suggestion-card {
-    min-height: 112px;
+  .message-main {
+    max-width: calc(100% - 44px);
   }
 
-  .composer-panel {
-    padding: 0 12px 12px;
-  }
-
+  .composer-summary,
   .composer-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .composer-warning {
+    visibility: visible;
+    min-height: 18px;
   }
 
   .send-button {
