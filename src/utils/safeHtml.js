@@ -84,8 +84,28 @@ export function sanitizeHtml(html) {
   return DOMPurify.sanitize(String(html ?? ''))
 }
 
-export function renderSafeMarkdown(content) {
+function normalizeLatexMathExpression(expression) {
+  return String(expression ?? '')
+    .replace(/\\leq?/g, '<=')
+    .replace(/\\geq?/g, '>=')
+    .replace(/\\neq/g, '!=')
+    .replace(/\\times|\\cdot/g, '*')
+    .replace(/\\infty/g, 'inf')
+    .replace(/\\ldots/g, '...')
+    .trim()
+}
+
+function normalizeProblemStatementMarkdown(content) {
   const text = String(content ?? '')
+  if (!text) return ''
+
+  return text
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_, expression) => normalizeLatexMathExpression(expression))
+    .replace(/\$([^\n$]+?)\$/g, (_, expression) => normalizeLatexMathExpression(expression))
+}
+
+export function renderSafeMarkdown(content) {
+  const text = normalizeProblemStatementMarkdown(content)
   if (!text) return ''
   return sanitizeHtml(markdown.render(text))
 }
