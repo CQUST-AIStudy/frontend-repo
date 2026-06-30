@@ -11,7 +11,6 @@ import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
 import {
   ChatDotRound,
   Close,
-  Connection,
   Delete,
   Document,
   Menu,
@@ -54,13 +53,6 @@ const modeCards = [
     desc: '知识库问答',
     icon: Reading,
     tone: 'purple'
-  },
-  {
-    value: 'web',
-    title: '联网搜索',
-    desc: '检索最新网络信息',
-    icon: Connection,
-    tone: 'blue'
   }
 ]
 
@@ -107,16 +99,8 @@ const showPromptSuggestions = computed(() => {
   return !isTyping.value && !messages.value.some((message) => message.role === 'user')
 })
 
-// 课程名回退链：选中课程空间 → 当前班级绑定的首个课程空间 → 班级名 → 默认"数据结构"
-const courseName = computed(() => {
-  return selectedCourseSpace.value?.courseName
-    || classScopedSpaces.value[0]?.courseName
-    || userStore.selectedClass?.name
-    || '数据结构'
-})
-
-// 预制询问：按课程名生成 40 条候选池，每次空会话随机抽取 4 条
-const quickPromptPool = computed(() => buildQuickPromptPool(courseName.value, 'teacher'))
+// 预制询问：C 语言 + 数据结构杂糅主题 40 条候选池，每次空会话随机抽取 4 条
+const quickPromptPool = computed(() => buildQuickPromptPool('teacher'))
 const displayedQuickPrompts = ref([])
 
 function refreshQuickPrompts() {
@@ -124,7 +108,7 @@ function refreshQuickPrompts() {
 }
 
 watch(
-  [courseName, showPromptSuggestions],
+  showPromptSuggestions,
   () => {
     if (showPromptSuggestions.value) refreshQuickPrompts()
   },
