@@ -5,6 +5,7 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { getKnowledgeBases } from '../../api/rag'
 import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/studentAiChat'
+import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
 import {
   ChatDotRound,
   Close,
@@ -34,13 +35,6 @@ const assistantInputRef = ref(null)
 const historyQuery = ref('')
 const historyVisible = ref(true)
 const courseSpaces = ref([])
-
-const quickPrompts = [
-  { label: '顺序表和链表', prompt: '请解释顺序表和链表的区别，并给出适用场景。' },
-  { label: '树的遍历', prompt: '前序、中序、后序遍历分别是什么？如何记忆？' },
-  { label: '复杂度分析', prompt: '如何分析一个算法的时间复杂度和空间复杂度？' },
-  { label: '代码优化', prompt: '我应该如何优化一个查找算法？请给我常见思路。' }
-]
 
 const modeCards = [
   {
@@ -96,6 +90,29 @@ const filteredConversations = computed(() => {
 const showPromptSuggestions = computed(() => {
   return !isTyping.value && !messages.value.some((message) => message.role === 'user')
 })
+
+// 课程名回退链：选中课程空间 → 列表首个课程空间 → 默认"数据结构"
+const courseName = computed(() => {
+  return selectedCourseSpace.value?.courseName
+    || courseSpaces.value[0]?.courseName
+    || '数据结构'
+})
+
+// 预制询问：按课程名生成 40 条候选池，每次空会话随机抽取 4 条
+const quickPromptPool = computed(() => buildQuickPromptPool(courseName.value, 'student'))
+const displayedQuickPrompts = ref([])
+
+function refreshQuickPrompts() {
+  displayedQuickPrompts.value = samplePrompts(quickPromptPool.value, 4)
+}
+
+watch(
+  [courseName, showPromptSuggestions],
+  () => {
+    if (showPromptSuggestions.value) refreshQuickPrompts()
+  },
+  { immediate: true }
+)
 
 const showTypingHint = computed(() => {
   const lastMessage = messages.value[messages.value.length - 1]
@@ -505,7 +522,7 @@ onMounted(() => {
 
           <div class="prompt-grid">
             <button
-              v-for="q in quickPrompts"
+              v-for="q in displayedQuickPrompts"
               :key="q.label"
               type="button"
               class="prompt-card"

@@ -7,6 +7,7 @@ import { getCourseSpaces } from '../../api/rag'
 import { useTeacherAiChatStore } from '../../store/teacherAiChat'
 import { formatStudentAssistantError } from '../../store/studentAiChat'
 import { useUserStore } from '@/store'
+import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
 import {
   ChatDotRound,
   Close,
@@ -38,13 +39,6 @@ const historyQuery = ref('')
 const historyVisible = ref(true)
 const allSpaces = ref([])
 const courseSpaces = ref([])
-
-const quickPrompts = [
-  { label: '实验设计', prompt: '帮我设计一个"二叉树遍历"实验课的提问链路。' },
-  { label: '课堂讲解', prompt: '帮我生成"栈和队列"的课堂讲解提纲。' },
-  { label: '错误分析', prompt: '学生在链表反转题上常犯哪些错误？如何针对性讲解？' },
-  { label: '反馈润色', prompt: '帮我润色一段给学生的实验反馈，语气鼓励且具体。' }
-]
 
 const modeCards = [
   {
@@ -112,6 +106,30 @@ const filteredConversations = computed(() => {
 const showPromptSuggestions = computed(() => {
   return !isTyping.value && !messages.value.some((message) => message.role === 'user')
 })
+
+// 课程名回退链：选中课程空间 → 当前班级绑定的首个课程空间 → 班级名 → 默认"数据结构"
+const courseName = computed(() => {
+  return selectedCourseSpace.value?.courseName
+    || classScopedSpaces.value[0]?.courseName
+    || userStore.selectedClass?.name
+    || '数据结构'
+})
+
+// 预制询问：按课程名生成 40 条候选池，每次空会话随机抽取 4 条
+const quickPromptPool = computed(() => buildQuickPromptPool(courseName.value, 'teacher'))
+const displayedQuickPrompts = ref([])
+
+function refreshQuickPrompts() {
+  displayedQuickPrompts.value = samplePrompts(quickPromptPool.value, 4)
+}
+
+watch(
+  [courseName, showPromptSuggestions],
+  () => {
+    if (showPromptSuggestions.value) refreshQuickPrompts()
+  },
+  { immediate: true }
+)
 
 const showTypingHint = computed(() => {
   const lastMessage = messages.value[messages.value.length - 1]
@@ -528,7 +546,7 @@ onMounted(() => {
 
           <div class="prompt-grid">
             <button
-              v-for="q in quickPrompts"
+              v-for="q in displayedQuickPrompts"
               :key="q.label"
               type="button"
               class="prompt-card"
