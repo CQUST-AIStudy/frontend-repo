@@ -8,13 +8,16 @@ import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/
 import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
 import {
   ChatDotRound,
+  Check,
   Close,
+  CopyDocument,
   Delete,
   Document,
   Menu,
   Notebook,
   Plus,
   Reading,
+  Refresh,
   Search,
   Warning
 } from '@/components/ui/icons'
@@ -62,6 +65,45 @@ const visibleMessages = computed(() => {
     return message.role !== 'ai' || message.content || message.citations?.length
   })
 })
+
+// 复制 / 重试 相关状态与逻辑
+const copiedId = ref(null)
+let copyTimer = null
+
+function showActions(message) {
+  if (isTyping.value) return false
+  if (message.role === 'user') return true
+  return !!(message.content || message.citations?.length)
+}
+
+async function copyMessage(message) {
+  const text = String(message.content || '')
+  if (!text) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    copiedId.value = message.id
+    if (copyTimer) clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => { copiedId.value = null }, 1500)
+  } catch {
+    uiMessage.warning('复制失败，请手动选择文本复制。')
+  }
+}
+
+function retryMessage(message) {
+  if (isTyping.value) return
+  chatStore.retryAssistantMessage(message.id)
+}
 
 const filteredConversations = computed(() => {
   const query = historyQuery.value.trim().toLowerCase()
@@ -524,6 +566,33 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div
+              v-if="showActions(message)"
+              class="message-actions"
+              :class="{ 'message-actions--user': message.role === 'user' }"
+            >
+              <button
+                type="button"
+                class="action-btn"
+                :title="copiedId === message.id ? '已复制' : '复制'"
+                @click="copyMessage(message)"
+              >
+                <component :is="copiedId === message.id ? Check : CopyDocument" />
+                <span>{{ copiedId === message.id ? '已复制' : '复制' }}</span>
+              </button>
+              <button
+                v-if="message.role === 'ai'"
+                type="button"
+                class="action-btn"
+                title="重新生成"
+                :disabled="isTyping"
+                @click="retryMessage(message)"
+              >
+                <Refresh />
+                <span>重试</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1136,6 +1205,52 @@ onMounted(() => {
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.message-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.message-row:hover .message-actions,
+.message-actions:focus-within {
+  opacity: 1;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7785;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.action-btn:hover:not(:disabled) {
+  color: var(--app-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+.action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.action-btn :deep(svg) {
+  width: 14px;
+  height: 14px;
+}
+.message-row--user .action-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+.message-row--user .action-btn:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .source-list {

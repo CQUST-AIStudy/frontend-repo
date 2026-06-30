@@ -421,9 +421,13 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
       const active = this.conversations.find((item) => item.id === conversationId) || conversation
       const payload = this.buildAssistantPayload(text, active, userMessage.id)
 
+      await this.streamAssistantResponse({ conversationId, assistantId, payload, mode })
+    },
+
+    // 共用的流式生成逻辑：供 sendMessage 与 retryAssistantMessage 复用。
+    async streamAssistantResponse({ conversationId, assistantId, payload, mode }) {
       const controller = new AbortController()
       this.abortControllers = { ...this.abortControllers, [conversationId]: controller }
-
       try {
         await streamAssistantChat(payload, {
           signal: controller.signal,
@@ -439,13 +443,13 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
             this.appendAssistantContentInConversation(conversationId, assistantId, content || '')
           },
           onDone: ({ conversationId: serverConversationId, usedWeb, effectiveMode }) => {
-            const current = this.conversations.find((item) => item.id === active.id)
+            const current = this.conversations.find((item) => item.id === conversationId)
             if (current) {
               this.touchConversation(current.id, {
                 serverConversationId: serverConversationId || current.serverConversationId,
               })
             }
-            this.updateAssistantMessageInConversation(active.id, assistantId, {
+            this.updateAssistantMessageInConversation(conversationId, assistantId, {
               usedWeb: !!usedWeb,
               effectiveMode: effectiveMode || mode,
             })
@@ -475,6 +479,68 @@ export const useStudentAiChatStore = defineStore('studentAiChat', {
         this.abortControllers = nextControllers
         this.setConversationTyping(conversationId, false)
       }
+    },
+
+    // 原位重新生成指定 AI 回复：清空其内容，用对应的上一条用户问题重新流式生成。
+    async retryAssistantMessage(assistantId) {
+      if (!assistantId) return
+      const conversation = this.conversations.find((item) =>
+        item.messages.some((message) => message.id === assistantId))
+      if (!conversation) return
+      const conversationId = conversation.id
+      if (this.isConversationTyping(conversationId)) return
+
+      const messages = conversation.messages
+      const aiIndex = messages.findIndex((message) => message.id === assistantId)
+      if (aiIndex < 0) return
+      const aiMessage = messages[aiIndex]
+      if (aiMessage.role !== 'ai') return
+
+      let userIndex = -1
+      for (let i = aiIndex - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') { userIndex = i; break }
+      }
+      if (userIndex < 0) {
+        uiMessage.warning('未找到对应的问题，无法重试。')
+        return
+      }
+      const userMessage = messages[userIndex]
+      const text = String(userMessage.content || '').trim()
+      if (!text) return
+
+      this.updateAssistantMessageInConversation(conversationId, assistantId, {
+        content: '',
+        citations: [],
+        usedWeb: false,
+        effectiveMode: aiMessage.mode,
+        coverageScore: 0,
+      })
+      this.assistantNotice = ''
+      this.setConversationTyping(conversationId, true)
+
+      const mode = aiMessage.mode || this.currentMode
+      const enableWebSearch = mode === 'web' || !!aiMessage.webEnabled
+      const historyMessages = messages.slice(0, userIndex)
+      const payload = {
+        query: text,
+        mode,
+        enableWebSearch,
+        knowledgeBaseIds: mode === 'rag' && conversation.selectedCourseSpaceId
+          ? [String(conversation.selectedCourseSpaceId)]
+          : [],
+        conversationId: conversation.serverConversationId || null,
+        history: normalizeHistory(historyMessages),
+        options: {
+          topK: 10,
+          rerankTopN: 3,
+          scoreThreshold: 0,
+          enableRerank: true,
+          temperature: 0.7,
+          maxTokens: 1024,
+        },
+      }
+
+      await this.streamAssistantResponse({ conversationId, assistantId, payload, mode })
     },
 
     stopGeneration(conversationId = this.activeConversationId) {
