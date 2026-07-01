@@ -1,4 +1,5 @@
-import { tapClient } from './client'
+import { tapClient, TAP_BASE } from './client'
+import { getTapToken } from '../../constants/auth'
 
 export function getRubrics(subject) {
   return tapClient.get('/api/grading/rubrics', { params: subject ? { subject } : {} })
@@ -55,6 +56,70 @@ export function createGradingTask(formData, onProgress) {
 
 export function getGradingTasks(page = 0, size = 20, status) {
   return tapClient.get('/api/grading/tasks', { params: { page, size, ...(status ? { status } : {}) } })
+}
+
+/**
+ * 订阅某个批改任务的实时进度（SSE，fetch + Bearer，参考 rag.js 的流式读取）。
+ * handlers: { onOpen, onProgress(submissionProgress), onTask(taskSnapshot), onError(err) }
+ * 返回 { close } 用于关闭连接。
+ */
+export function streamGradingProgress(taskId, handlers = {}) {
+  const controller = new AbortController()
+  const token = getTapToken()
+
+  const run = async () => {
+    try {
+      const resp = await fetch(`${TAP_BASE}/api/grading/tasks/${taskId}/progress/stream`, {
+        method: 'GET',
+        headers: {
+          Accept: 'text/event-stream',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        signal: controller.signal
+      })
+      if (!resp.ok || !resp.body) {
+        throw new Error(`progress stream failed: ${resp.status}`)
+      }
+      const reader = resp.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let done = false
+      while (!done) {
+        const chunk = await reader.read()
+        done = chunk.done
+        if (chunk.value) {
+          buffer += decoder.decode(chunk.value, { stream: true })
+          const parts = buffer.split(/\n\n/)
+          buffer = parts.pop() || ''
+          parts.forEach(part => dispatchGradingSse(part, handlers))
+        }
+      }
+      if (buffer.trim()) dispatchGradingSse(buffer, handlers)
+    } catch (e) {
+      if (!controller.signal.aborted) handlers.onError?.(e)
+    }
+  }
+  run()
+  return { close: () => controller.abort() }
+}
+
+function dispatchGradingSse(block, handlers) {
+  const lines = block.split(/\n/)
+  const eventLine = lines.find(line => line.startsWith('event:'))
+  const dataLines = lines.filter(line => line.startsWith('data:'))
+  const event = eventLine ? eventLine.slice(6).trim() : 'message'
+  const rawData = dataLines.map(line => line.slice(5).trim()).join('\n')
+  let data = {}
+  try {
+    data = rawData ? JSON.parse(rawData) : {}
+  } catch {
+    data = {}
+  }
+  if (event === 'progress') handlers.onProgress?.(data)
+  else if (event === 'task') handlers.onTask?.(data)
+  else if (event === 'open') handlers.onOpen?.(data)
+  else handlers.onMessage?.(event, data)
 }
 
 export function getGradingTaskDetail(id) {
