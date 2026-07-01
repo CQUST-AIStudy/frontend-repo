@@ -267,12 +267,12 @@
           <!-- 状态图标 -->
           <div class="w-11 h-11 rounded-[10px] flex items-center justify-center flex-shrink-0"
             :class="{
-              'bg-[#fff3e0] text-[#c49a3c]': row.status === 'PROCESSING',
+              'bg-[#fff3e0] text-[#c49a3c]': row.status === 'PROCESSING' || row.status === 'FINALIZING',
               'bg-[#e8f8ed] text-[#30d158]': row.status === 'COMPLETED',
               'bg-[#f5f5f7] text-[#6e6e73]': row.status === 'PENDING',
               'bg-[#ffeeed] text-[#c44b3f]': row.status === 'FAILED'
             }">
-            <LucideIcon v-if="row.status === 'PROCESSING'" name="loader" :size="20" />
+            <LucideIcon v-if="row.status === 'PROCESSING' || row.status === 'FINALIZING'" name="loader" :size="20" />
             <LucideIcon v-else-if="row.status === 'COMPLETED'" name="check" :size="20" />
             <LucideIcon v-else-if="row.status === 'FAILED'" name="alert-triangle" :size="20" />
             <LucideIcon v-else name="clock" :size="20" />
@@ -288,18 +288,22 @@
               <span>{{ formatTime(row.createdAt) }}</span>
               <span>{{ row.totalCount }} 份作业</span>
             </div>
+            <div v-if="rowStageText(row)" class="mt-1 text-[12px] text-[var(--app-primary)] truncate flex items-center gap-1">
+              <LucideIcon name="loader" :size="12" class="animate-spin" />
+              <span class="truncate">{{ rowStageText(row) }}</span>
+            </div>
           </div>
 
           <!-- 进度 -->
           <div class="flex items-center gap-2">
             <div class="w-20 h-1 bg-[#e5e5ea] rounded-full overflow-hidden">
               <div class="h-full rounded-full transition-all duration-300"
-                :style="{ width: `${row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0}%` }"
+                :style="{ width: `${rowDisplayPercent(row)}%` }"
                 :class="row.failedCount > 0 ? 'bg-[#c44b3f]' : row.status === 'COMPLETED' ? 'bg-[#30d158]' : 'bg-[var(--app-primary)]'">
               </div>
             </div>
             <span class="text-[12px] font-medium text-[#6e6e73] w-10 text-right">
-              {{ row.totalCount ? Math.round((row.completedCount + row.failedCount) / row.totalCount * 100) : 0 }}%
+              {{ rowDisplayPercent(row) }}%
             </span>
           </div>
 
@@ -378,7 +382,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, messageBox } from '@/services/feedback'
-import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList, getGradingBatches, exportGradingBatchExcel, exportMergedGradingExcel } from '@/api/tap'
+import { getRubrics, normalizeRubricList, getGradingTasks, createGradingTask, retryGradingTask, exportGradingTask, deleteGradingTask, getTeacherSignatures, addTeacherSignature, deleteTeacherSignature, normalizeSignatureList, getGradingBatches, exportGradingBatchExcel, exportMergedGradingExcel, streamGradingProgress } from '@/api/tap'
 import LucideIcon from '@/components/LucideIcon.vue'
 import AppModal from '@/components/AppModal.vue'
 import RubricManager from '@/components/RubricManager.vue'
@@ -395,6 +399,92 @@ const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherS
 const userStore = useUserStore()
 const formErrors = ref({ rubricId: '', teacherSignature: '', files: '' })
 let refreshTimer = null
+
+// ---- 实时进度（SSE）----
+// taskId -> { percent, stageLabel, student, status, completedCount, failedCount, totalCount, subPercent }
+const liveProgress = ref({})
+// taskId -> { close, errored? }
+const progressStreams = {}
+
+function isActiveTaskStatus(s) {
+  return s === 'PENDING' || s === 'PROCESSING' || s === 'FINALIZING'
+}
+
+function openProgressStream(taskId) {
+  progressStreams[taskId] = streamGradingProgress(taskId, {
+    onProgress(d) {
+      const cur = liveProgress.value[taskId] || {}
+      liveProgress.value[taskId] = {
+        ...cur,
+        stageLabel: d.stageLabel,
+        student: d.studentName,
+        subPercent: typeof d.percent === 'number' ? d.percent : cur.subPercent
+      }
+    },
+    onTask(d) {
+      const cur = liveProgress.value[taskId] || {}
+      liveProgress.value[taskId] = {
+        ...cur,
+        status: d.status,
+        completedCount: d.completedCount,
+        failedCount: d.failedCount,
+        totalCount: d.totalCount
+      }
+      const row = tasks.value.find(t => t.taskId === taskId)
+      if (row) {
+        row.status = d.status
+        if (typeof d.completedCount === 'number') row.completedCount = d.completedCount
+        if (typeof d.failedCount === 'number') row.failedCount = d.failedCount
+        if (d.totalCount) row.totalCount = d.totalCount
+      }
+      if (d.status === 'COMPLETED' || d.status === 'FAILED') {
+        if (progressStreams[taskId]) { progressStreams[taskId].close?.(); delete progressStreams[taskId] }
+        loadTasks({ silent: true })
+        loadBatches()
+      }
+    },
+    onError() {
+      // SSE 不可用时标记为已失败，回退到 5s 轮询，避免反复重连。
+      progressStreams[taskId] = { close: () => {}, errored: true }
+    }
+  })
+}
+
+function syncProgressStreams() {
+  const activeIds = new Set(tasks.value.filter(t => isActiveTaskStatus(t.status)).map(t => t.taskId))
+  activeIds.forEach(id => { if (!progressStreams[id]) openProgressStream(id) })
+  Object.keys(progressStreams).forEach(idStr => {
+    const id = Number(idStr)
+    if (!activeIds.has(id)) {
+      progressStreams[id].close?.()
+      delete progressStreams[id]
+    }
+  })
+}
+
+function closeAllProgressStreams() {
+  Object.values(progressStreams).forEach(s => s.close?.())
+  Object.keys(progressStreams).forEach(k => delete progressStreams[k])
+}
+
+function rowDisplayPercent(row) {
+  const lp = liveProgress.value[row.taskId]
+  const total = (lp?.totalCount ?? row.totalCount) || 0
+  const completed = (lp?.completedCount ?? row.completedCount) || 0
+  const failed = (lp?.failedCount ?? row.failedCount) || 0
+  let base = total ? ((completed + failed) / total) * 100 : 0
+  if (lp && typeof lp.subPercent === 'number' && total && (completed + failed) < total) {
+    base += (lp.subPercent / 100) * (1 / total) * 100
+  }
+  return Math.min(100, Math.round(base))
+}
+
+function rowStageText(row) {
+  const lp = liveProgress.value[row.taskId]
+  if (row.status === 'FINALIZING' || lp?.status === 'FINALIZING') return '生成批注报告与演示动画中…'
+  if (!lp || !lp.stageLabel || !isActiveTaskStatus(row.status)) return ''
+  return lp.student ? `${lp.student} · ${lp.stageLabel}` : lp.stageLabel
+}
 
 // ---- 批次与多选导出 ----
 const batches = ref([]) // [{batchId, displayCode, name, taskCount, completedTaskCount, createdAt}]
@@ -734,16 +824,22 @@ async function submitTask() {
   uploadProgress.value = 0
 }
 
-async function loadTasks() {
-  loading.value = true
+async function loadTasks(opts = {}) {
+  const silent = opts.silent === true
+  // 后台刷新（轮询 / SSE 触发）保持静默，不切换整页 loading，避免列表反复"闪一下"。
+  if (!silent) loading.value = true
   try {
     const res = await getGradingTasks()
     const data = res?.data ?? res
     tasks.value = data?.content || (Array.isArray(data) ? data : [])
     const completedIds = new Set(tasks.value.filter(t => t.status === 'COMPLETED').map(t => t.taskId))
     selectedTaskIds.value = selectedTaskIds.value.filter(id => completedIds.has(id))
-  } catch (e) { uiMessage.error('加载任务列表失败: ' + e.message) }
-  loading.value = false
+    syncProgressStreams()
+  } catch (e) {
+    if (!silent) uiMessage.error('加载任务列表失败: ' + e.message)
+  } finally {
+    if (!silent) loading.value = false
+  }
 }
 
 async function retryTask(id) {
@@ -795,11 +891,14 @@ onMounted(() => {
   loadTasks()
   loadBatches()
   refreshTimer = setInterval(() => {
-    if (tasks.value.some(t => t.status === 'PROCESSING' || t.status === 'PENDING')) loadTasks()
+    if (tasks.value.some(t => t.status === 'PROCESSING' || t.status === 'PENDING' || t.status === 'FINALIZING')) loadTasks({ silent: true })
   }, 5000)
 })
 
-onUnmounted(() => { if (refreshTimer) clearInterval(refreshTimer) })
+onUnmounted(() => {
+  if (refreshTimer) clearInterval(refreshTimer)
+  closeAllProgressStreams()
+})
 </script>
 
 <style scoped>
