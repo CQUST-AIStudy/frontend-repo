@@ -302,7 +302,6 @@ import axios from 'axios'
 import api from '@/api'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
-import ErrorAnalysisPanel from './components/ErrorAnalysisPanel.vue'
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 
 const API_BASE = API_BASE_URL

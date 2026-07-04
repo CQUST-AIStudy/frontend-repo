@@ -225,7 +225,7 @@ function statusLabel(status) {
   return map[s] || status || '未知'
 }
 
-function severityIcon(severity) {
+function severityIcon() {
   return ''
 }
 

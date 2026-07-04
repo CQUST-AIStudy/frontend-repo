@@ -145,7 +145,7 @@
             <span class="text-[#c44b3f]">*</span> 上传作业文件
           </label>
           <ui-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :on-change="onFileChange"
-                     accept=".pdf,.docx,.doc" multiple drag :on-remove="onFileRemove"
+                     accept=".pdf,.docx,.doc,.zip" multiple drag :on-remove="onFileRemove"
                      class="upload-flow-wrapper w-full"
                      :class="formErrors.files ? 'upload-error' : ''">
             <div class="flex items-center justify-center gap-7 px-8 py-6 w-full">
@@ -156,11 +156,12 @@
                 <div class="text-[15px] font-semibold text-[#101828] mb-2">
                   拖拽作业文件到此处，或 <span class="text-[var(--app-primary)]">点击选择</span>
                 </div>
-                <div class="text-[13px] text-[#667085] mb-3">支持批量上传，AI 将自动识别并批改</div>
+                <div class="text-[13px] text-[#667085] mb-3">支持批量上传，AI 将自动识别并批改。ZIP 压缩包将自动解压其中的 PDF 文件</div>
                 <div class="flex flex-wrap items-center gap-2 text-[12px] text-[#667085]">
                   <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">PDF</span>
                   <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">DOC</span>
                   <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">DOCX</span>
+                  <span class="inline-flex h-7 items-center rounded-[7px] bg-[#eef2f6] px-3 font-medium">ZIP</span>
                 </div>
               </div>
             </div>
@@ -439,13 +440,17 @@ function openProgressStream(taskId) {
       }
       if (d.status === 'COMPLETED' || d.status === 'FAILED') {
         if (progressStreams[taskId]) { progressStreams[taskId].close?.(); delete progressStreams[taskId] }
+        // 清除 liveProgress 缓存，避免已完成的任务残留过时数据
+        delete liveProgress.value[taskId]
         loadTasks({ silent: true })
         loadBatches()
       }
     },
     onError() {
-      // SSE 不可用时标记为已失败，回退到 5s 轮询，避免反复重连。
-      progressStreams[taskId] = { close: () => {}, errored: true }
+      // SSE 不可用时清除 stream 引用，让 syncProgressStreams 可以重新连接。
+      // 同时清除可能过期的 liveProgress，避免 rowDisplayPercent 使用陈旧数据。
+      delete progressStreams[taskId]
+      delete liveProgress.value[taskId]
     }
   })
 }
@@ -458,6 +463,8 @@ function syncProgressStreams() {
     if (!activeIds.has(id)) {
       progressStreams[id].close?.()
       delete progressStreams[id]
+      // 任务已不在进行中，清除对应的 liveProgress 缓存
+      delete liveProgress.value[id]
     }
   })
 }
@@ -468,11 +475,13 @@ function closeAllProgressStreams() {
 }
 
 function rowDisplayPercent(row) {
+  // 优先使用轮询获取的 row 数据（更可靠），SSE 的 liveProgress 仅用于补充子进度
   const lp = liveProgress.value[row.taskId]
-  const total = (lp?.totalCount ?? row.totalCount) || 0
-  const completed = (lp?.completedCount ?? row.completedCount) || 0
-  const failed = (lp?.failedCount ?? row.failedCount) || 0
+  const total = row.totalCount || lp?.totalCount || 0
+  const completed = row.completedCount ?? lp?.completedCount ?? 0
+  const failed = row.failedCount ?? lp?.failedCount ?? 0
   let base = total ? ((completed + failed) / total) * 100 : 0
+  // 仅当 SSE 提供子进度且任务确实仍在进行中时，才叠加细粒度进度
   if (lp && typeof lp.subPercent === 'number' && total && (completed + failed) < total) {
     base += (lp.subPercent / 100) * (1 / total) * 100
   }
@@ -742,6 +751,7 @@ function fileTypeLabel(file) {
   if (ext === 'pdf') return 'PDF'
   if (ext === 'doc') return 'DOC'
   if (ext === 'docx') return 'DOCX'
+  if (ext === 'zip') return 'ZIP'
   return ext ? ext.toUpperCase().slice(0, 5) : 'FILE'
 }
 
@@ -749,6 +759,7 @@ function fileTypeBadgeClass(file) {
   const type = fileTypeLabel(file)
   if (type === 'PDF') return 'bg-[#c44b3f]'
   if (type === 'DOC' || type === 'DOCX') return 'bg-[#2563eb]'
+  if (type === 'ZIP') return 'bg-[#f59e0b]'
   return 'bg-[#667085]'
 }
 
@@ -817,7 +828,8 @@ async function submitTask() {
     clearSelectedFiles()
     createForm.value.teacherSignature = ''
     createForm.value.batchName = ''
-    loadTasks()
+    // 静默刷新，避免整个列表被 spinner 替换
+    loadTasks({ silent: true })
     loadBatches()
   } catch (e) { uiMessage.error('创建失败: ' + e.message) }
   submitting.value = false
