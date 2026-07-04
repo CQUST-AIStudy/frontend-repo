@@ -81,14 +81,14 @@
           <div class="flex gap-2 flex-wrap">
             <UiButton
               @click="isReportFailed ? preGenerateResources() : downloadReport()"
-              :disabled="downloadingReport || isReportGenerating || (!detail?.hasDownloadableReport && !isReportFailed)"
+              :disabled="downloadingReport || isReportGenerating || preGeneratingResources"
               class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
               :class="isReportFailed
                 ? 'text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)]'
                 : 'text-[#6b8f6b] bg-[rgba(107,143,107,0.08)] hover:bg-[rgba(107,143,107,0.15)]'"
             >
               <span v-if="downloadingReport || preGeneratingResources" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
-              {{ isReportFailed ? '重新生成批注报告' : (isReportGenerating ? '批注报告生成中...' : '下载批注报告') }}
+              {{ isReportFailed ? '重新生成批注报告' : (isReportGenerating ? '批注报告生成中...' : (preGeneratingResources ? '正在生成报告...' : (detail?.hasDownloadableReport ? '下载批注报告' : '生成并下载报告'))) }}
             </UiButton>
             <UiButton
               @click="generateReview"
@@ -761,8 +761,24 @@ async function confirmMatch() {
 
 async function downloadReport() {
   if (!detail.value?.hasDownloadableReport) {
-    uiMessage.warning('当前还没有可下载的批注报告')
-    return
+    // No report exists yet — auto-generate it first, then download
+    preGeneratingResources.value = true
+    try {
+      const res = await preGenerateSubmissionResources(subId)
+      const data = res?.data || res
+      detail.value = { ...detail.value, ...data }
+      // Refresh detail to get updated hasDownloadableReport
+      await loadDetail()
+      if (!detail.value?.hasDownloadableReport) {
+        uiMessage.warning('报告生成中，请稍后再试')
+        return
+      }
+    } catch (error) {
+      uiMessage.error(`生成报告失败: ${error.message}`)
+      return
+    } finally {
+      preGeneratingResources.value = false
+    }
   }
   downloadingReport.value = true
   try {

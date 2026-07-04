@@ -275,6 +275,10 @@
                   <UiButton v-if="row.hasDownloadableReport" @click="downloadReport(row)" class="text-[13px] font-medium text-[#6b8f6b] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3">
                     下载报告
                   </UiButton>
+                  <UiButton v-else-if="row.totalScore != null && row.status !== 'FAILED'" @click="downloadReport(row)" :disabled="generatingReportId === row.submissionId" class="text-[13px] font-medium text-[#6b8f6b] cursor-pointer hover:text-[#2da44e] transition-colors bg-transparent border-none mr-3 disabled:opacity-50">
+                    <span v-if="generatingReportId === row.submissionId" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1"></span>
+                    {{ generatingReportId === row.submissionId ? '生成中...' : '生成报告' }}
+                  </UiButton>
                   <UiButton
                     v-if="row.status === 'FAILED'"
                     :disabled="retryingSubmissionId === row.submissionId"
@@ -359,6 +363,7 @@ import {
   exportGradingTask,
   getBatchReview,
   getGradingTaskDetail,
+  preGenerateSubmissionResources,
   publishConfirmedTask,
   publishSubmission,
   revokeSubmissionPublication,
@@ -652,7 +657,33 @@ async function doBatchExportAnnotated() {
   }
 }
 
+const generatingReportId = ref(null)
+
 async function downloadReport(row) {
+  if (!row.hasDownloadableReport) {
+    // Auto-generate the report first, then download
+    generatingReportId.value = row.submissionId
+    try {
+      await preGenerateSubmissionResources(row.submissionId)
+      // Refresh task detail to update hasDownloadableReport
+      const res = await getGradingTaskDetail(route.params.id)
+      const data = res?.data || res
+      if (data?.submissions) {
+        submissions.value = data.submissions
+      }
+      const updated = submissions.value.find(s => s.submissionId === row.submissionId)
+      if (!updated?.hasDownloadableReport) {
+        uiMessage.warning('报告生成中，请稍后再试')
+        return
+      }
+      row = updated
+    } catch (error) {
+      uiMessage.error(`生成报告失败: ${error.message}`)
+      return
+    } finally {
+      generatingReportId.value = null
+    }
+  }
   try {
     const res = await downloadSubmissionReport(row.submissionId)
     const blob = new Blob([res])
