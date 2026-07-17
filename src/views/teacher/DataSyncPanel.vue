@@ -128,7 +128,7 @@
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
                 <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">增量同步</div>
-                <div class="text-[12px] text-[#6e6e73]">检测新题目集，爬取内容+提交+导出（仅新增）</div>
+                <div class="text-[12px] text-[#6e6e73]">新实验全量爬取；未截止实验更新提交+导出；已截止跳过</div>
               </div>
               <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
                 <span v-if="syncLoading === 'incremental'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
