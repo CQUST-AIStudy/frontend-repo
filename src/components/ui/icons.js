@@ -5,6 +5,7 @@ const paths = {
   ArrowLeft: 'M14 6l-6 6 6 6',
   ArrowRight: 'M8 6l6 6-6 6',
   Back: 'M14 6l-6 6 6 6',
+  Bell: 'M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
   Calendar: 'M7 4v4M17 4v4M5 8h14M6 6h12a2 2 0 0 1 2 2v12H4V8a2 2 0 0 1 2-2z',
   ChatDotRound: 'M5 18l-1 4 4-2h8a6 6 0 1 0 0-12H8a6 6 0 0 0-3 11z',
   ChatLineRound: 'M5 18l-1 4 4-2h8a6 6 0 1 0 0-12H8a6 6 0 0 0-3 11zM8 12h8',
@@ -83,6 +84,7 @@ export const ArrowDown = icon('ArrowDown')
 export const ArrowLeft = icon('ArrowLeft')
 export const ArrowRight = icon('ArrowRight')
 export const Back = icon('Back')
+export const Bell = icon('Bell')
 export const Briefcase = icon('Briefcase')
 export const Calendar = icon('Calendar')
 export const ChatDotRound = icon('ChatDotRound')
@@ -141,6 +143,7 @@ export const icons = {
   ArrowLeft,
   ArrowRight,
   Back,
+  Bell,
   Briefcase,
   Calendar,
   ChatDotRound,

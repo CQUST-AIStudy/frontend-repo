@@ -138,9 +138,18 @@
             <h2 class="m-0 text-lg font-semibold text-[#1d1d1f]">错误演示</h2>
             <p class="mb-0 mt-1 text-xs leading-5 text-[#6e6e73]">根据评分批注中的真实代码锚点还原执行状态，发布成绩后学生可查看同一演示。</p>
           </div>
-          <span v-if="detail.errorDemonstrations?.length" class="rounded-lg bg-[#eef6ff] px-3 py-1.5 text-xs font-medium text-[#1677ff]">
-            已生成 {{ detail.errorDemonstrations.length }} 个可视化
-          </span>
+          <div class="flex items-center gap-2">
+            <span v-if="detail.errorDemonstrations?.length" class="rounded-lg bg-[#eef6ff] px-3 py-1.5 text-xs font-medium text-[#1677ff]">
+              已生成 {{ detail.errorDemonstrations.length }} 个可视化
+            </span>
+            <UiButton
+              v-if="detail.errorDemonstrations?.length"
+              @click="openDemoPage"
+              class="h-8 px-3 rounded-lg text-xs font-medium border border-[#d7dfeb] bg-white text-[#1677ff] hover:bg-[#f0f7ff]"
+            >
+              新窗口打开
+            </UiButton>
+          </div>
         </div>
         <div v-if="demonstrationsLoading || isDemoGenerating" class="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 text-center">
           <LucideIcon name="loader" :size="24" class="animate-spin text-[var(--app-primary)] mb-2" />
@@ -167,6 +176,74 @@
           <LucideIcon name="circle-check" :size="24" class="mb-2 text-[#16a34a]" />
           <div class="text-sm font-medium text-[#334155]">没有可演示的代码错误</div>
           <div class="mt-1 text-xs text-[#8b96a8]">仅当评分证据包含可定位的越界、指针或运行时错误时生成，避免用随机动画误导学生。</div>
+        </div>
+      </div>
+
+      <!-- 代码问题定位（AI 阅读代码证据判断逻辑/边界问题） -->
+      <div v-if="detail.codeAnalysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-6">
+        <div class="mb-4">
+          <h2 class="m-0 text-lg font-semibold text-[#1d1d1f]">代码问题定位</h2>
+          <p class="mb-0 mt-1 text-xs leading-5 text-[#6e6e73]">
+            由 AI 阅读报告中的代码/运行日志判断逻辑与边界问题（非硬编码规则匹配）。
+          </p>
+        </div>
+        <div v-if="detail.codeAnalysis.code_summary" class="mb-4 rounded-xl bg-[#f5f5f7] px-4 py-3 text-sm leading-6 text-[#334155]">
+          <span class="mr-2 rounded-md bg-white px-2 py-0.5 text-xs font-medium text-[#6e6e73]">{{ detail.codeAnalysis.language || 'unknown' }}</span>
+          {{ detail.codeAnalysis.code_summary }}
+        </div>
+        <div v-if="detail.codeAnalysis.findings?.length" class="space-y-3">
+          <div
+            v-for="(f, idx) in detail.codeAnalysis.findings"
+            :key="idx"
+            class="rounded-xl border border-black/[0.06] p-4"
+            :class="severityBorderClass(f.severity)"
+          >
+            <div class="mb-1.5 flex flex-wrap items-center gap-2">
+              <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold" :class="severityBadgeClass(f.severity)">
+                {{ severityLabel(f.severity) }}
+              </span>
+              <span class="text-sm font-semibold text-[#1d1d1f]">{{ f.issue_type || '问题' }}</span>
+              <span v-if="f.evidence_id" class="text-[11px] text-[#aeaeb2]">位置 {{ f.evidence_id }}</span>
+            </div>
+            <pre v-if="f.anchor_text" class="mb-2 overflow-x-auto rounded-lg bg-[#1d1d1f] px-3 py-2 text-xs leading-5 text-[#e6e6e6] whitespace-pre-wrap">{{ f.anchor_text }}</pre>
+            <p v-if="f.explanation" class="m-0 text-sm leading-6 text-[#334155]"><span class="font-medium text-[#6e6e73]">问题：</span>{{ f.explanation }}</p>
+            <p v-if="f.suggestion" class="m-0 mt-1 text-sm leading-6 text-[#16794c]"><span class="font-medium">建议：</span>{{ f.suggestion }}</p>
+          </div>
+        </div>
+        <div v-else class="rounded-xl border border-dashed border-[#d7dfeb] bg-[#fbfcfe] px-5 py-4 text-center text-sm text-[#8b96a8]">
+          未发现明显的逻辑/边界问题。
+        </div>
+      </div>
+
+      <!-- 分层改进建议（按薄弱程度聚合） -->
+      <div v-if="detail.improvementPlan" class="rounded-[20px] border border-black/[0.06] bg-white/95 p-6 shadow-[0_4px_16px_rgba(0,0,0,0.06)] mb-6">
+        <div class="mb-4">
+          <h2 class="m-0 text-lg font-semibold text-[#1d1d1f]">分层改进建议</h2>
+          <p class="mb-0 mt-1 text-xs leading-5 text-[#6e6e73]">按各维度得分率分档，给出优先级明确的下一步动作。</p>
+        </div>
+        <p v-if="detail.improvementPlan.overall_summary" class="mb-4 whitespace-pre-line text-sm leading-6 text-[#334155]">
+          {{ detail.improvementPlan.overall_summary }}
+        </p>
+        <div class="space-y-4">
+          <div v-for="tier in (detail.improvementPlan.tiers || [])" :key="tier.tier">
+            <div class="mb-2 flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full" :class="tierDotClass(tier.tier)"></span>
+              <span class="text-sm font-semibold text-[#1d1d1f]">{{ tier.label || tier.tier }}</span>
+              <span class="text-[11px] text-[#aeaeb2]">{{ (tier.items || []).length }} 项</span>
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="(item, i) in (tier.items || [])"
+                :key="i"
+                class="rounded-xl border border-black/[0.06] px-4 py-3"
+                :class="tierCardClass(tier.tier)"
+              >
+                <div class="text-sm font-medium text-[#1d1d1f]">{{ item.dimension }}</div>
+                <p v-if="item.problem" class="m-0 mt-1 text-sm leading-6 text-[#6e6e73]"><span class="font-medium">问题：</span>{{ item.problem }}</p>
+                <p v-if="item.action" class="m-0 mt-1 text-sm leading-6 text-[#334155]"><span class="font-medium text-[var(--app-primary)]">下一步：</span>{{ item.action }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -455,7 +532,7 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import hljs from 'highlight.js/lib/common'
 import { message as uiMessage } from '@/services/feedback'
@@ -487,8 +564,17 @@ import {
 } from '@/api/tap'
 
 const route = useRoute()
+const router = useRouter()
 const subId = route.params.id
 const detail = ref(null)
+
+function openDemoPage() {
+  router.push({
+    name: 'TeacherErrorDemonstrationPage',
+    params: { id: subId }
+  })
+}
+
 const loading = ref(false)
 const loadError = ref('')
 const dimensions = ref({})
@@ -534,6 +620,29 @@ const scoreLevel = computed(() => {
   if (score >= 60) return 'level-ok'
   return 'level-low'
 })
+
+// 代码问题定位 / 分层改进建议 展示辅助
+const severityLabel = (s) => ({ HIGH: '高', MEDIUM: '中', LOW: '低' }[String(s || '').toUpperCase()] || '中')
+const severityBadgeClass = (s) => ({
+  HIGH: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
+  MEDIUM: 'bg-[rgba(196,154,60,0.12)] text-[#b8860b]',
+  LOW: 'bg-[rgba(22,121,76,0.1)] text-[#16794c]'
+}[String(s || '').toUpperCase()] || 'bg-[rgba(196,154,60,0.12)] text-[#b8860b]')
+const severityBorderClass = (s) => ({
+  HIGH: 'border-l-[3px] border-l-[#c44b3f]',
+  MEDIUM: 'border-l-[3px] border-l-[#c49a3c]',
+  LOW: 'border-l-[3px] border-l-[#16794c]'
+}[String(s || '').toUpperCase()] || '')
+const tierDotClass = (t) => ({
+  CRITICAL: 'bg-[#c44b3f]',
+  IMPROVE: 'bg-[#c49a3c]',
+  SOLID: 'bg-[#16794c]'
+}[String(t || '').toUpperCase()] || 'bg-[#aeaeb2]')
+const tierCardClass = (t) => ({
+  CRITICAL: 'bg-[rgba(196,75,63,0.04)]',
+  IMPROVE: 'bg-[rgba(196,154,60,0.05)]',
+  SOLID: 'bg-[rgba(22,121,76,0.04)]'
+}[String(t || '').toUpperCase()] || 'bg-white')
 
 const preferredReportLabel = computed(() => {
   const type = detail.value?.preferredReportFileType

@@ -42,8 +42,16 @@
             </UiButton>
           </div>
           <div v-if="publishedGrading.errorDemonstrations?.length" class="mt-5 border-t border-[#d8ebde] pt-5">
-            <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-[#1f5130]">
-              <LucideIcon name="play" :size="16" />老师发布的错误演示
+            <div class="mb-3 flex items-center justify-between">
+              <div class="flex items-center gap-2 text-sm font-semibold text-[#1f5130]">
+                <LucideIcon name="play" :size="16" />老师发布的错误演示
+              </div>
+              <UiButton
+                @click="openDemoPage"
+                class="h-8 px-3 rounded-lg text-xs font-medium border border-[#d8ebde] bg-white text-[#15803d] hover:bg-[#f0fdf4]"
+              >
+                新窗口打开
+              </UiButton>
             </div>
             <ErrorDemonstrationPlayer
               :demonstrations="publishedGrading.errorDemonstrations"
@@ -308,6 +316,13 @@ const API_BASE = API_BASE_URL
 const route = useRoute()
 const router = useRouter()
 const experimentStore = useExperimentStore()
+
+function openDemoPage() {
+  router.push({
+    name: 'StudentErrorDemonstrationPage',
+    params: { id: experimentId.value }
+  })
+}
 const loading = ref(true)
 const activeTab = ref('code')
 const aiGenerating = ref(false)

@@ -34,6 +34,12 @@ const routes = [
         component: () => import('../views/student/ExperimentDetail.vue')
       },
       {
+        path: 'experiment-detail/:id/demos',
+        name: 'StudentErrorDemonstrationPage',
+        component: () => import('../views/grading/ErrorDemonstrationPage.vue'),
+        props: { mode: 'student' }
+      },
+      {
         // 兼容旧链接：/student/experiment/2 → /student/experiment-detail/2
         path: 'experiment/:id',
         redirect: to => ({ path: `/student/experiment-detail/${to.params.id}` })
@@ -252,6 +258,12 @@ const routes = [
         path: 'grading/submission/:id',
         name: 'SubmissionReview',
         component: () => import('../views/teacher/SubmissionReview.vue')
+      },
+      {
+        path: 'grading/submission/:id/demos',
+        name: 'TeacherErrorDemonstrationPage',
+        component: () => import('../views/grading/ErrorDemonstrationPage.vue'),
+        props: { mode: 'teacher' }
       },
       {
         path: 'grading/rubrics',

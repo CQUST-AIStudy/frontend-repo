@@ -72,6 +72,34 @@
       </UiButton>
     </div>
 
+    <!-- 任务↔实验 正式绑定：决定学生端能否在对应实验里看到已发布成绩 -->
+    <div v-if="task" class="flex items-center flex-wrap gap-3 rounded-[16px] border border-black/[0.06] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.05)] px-6 py-4 mb-4">
+      <div class="flex items-center gap-2">
+        <span class="text-[14px] font-semibold text-[#1d1d1f]">关联实验</span>
+        <span
+          class="inline-flex items-center h-[22px] px-2.5 rounded-full text-[11px] font-bold"
+          :class="task.assignmentOfferingId ? 'bg-[rgba(22,163,74,0.1)] text-[#16a34a]' : 'bg-[rgba(255,149,0,0.12)] text-[#c26a00]'"
+        >{{ task.assignmentOfferingId ? '已关联学生实验' : (task.experimentId ? '已选实验(未匹配到学生开课)' : '未关联') }}</span>
+      </div>
+      <select
+        v-model="selectedExperimentId"
+        :disabled="experimentsLoading || bindingSaving"
+        class="h-[38px] min-w-[240px] px-3 rounded-[10px] border border-black/[0.1] bg-white text-sm text-[#1d1d1f] focus:outline-none focus:border-[var(--app-primary)] disabled:opacity-50"
+      >
+        <option :value="''">未关联（解绑）</option>
+        <option v-for="exp in experimentOptions" :key="exp.id" :value="exp.id">{{ exp.label }}</option>
+      </select>
+      <UiButton
+        :disabled="bindingSaving || !bindingDirty"
+        @click="saveExperimentBinding"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] active:scale-[0.96] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span v-if="bindingSaving" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
+        保存绑定
+      </UiButton>
+      <span class="text-[12px] text-[#6e6e73]">绑定后，学生在该实验详情页即可看到已发布的成绩与批注报告。</span>
+    </div>
+
     <!-- Distribution and batch review -->
     <div v-if="task" class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,1fr)] gap-4 mb-4">
       <section class="rounded-[16px] border border-black/[0.06] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.05)] px-6 py-5 min-h-[300px]">
@@ -358,10 +386,12 @@ import logger from '@/utils/logger'
 import AppModal from '../../components/AppModal.vue'
 import {
   batchGenerateAnnotatedReports,
+  bindGradingTaskExperiment,
   downloadSubmissionReport,
   exportGradingExcel,
   exportGradingTask,
   getBatchReview,
+  getBindableExperiments,
   getGradingTaskDetail,
   preGenerateSubmissionResources,
   publishConfirmedTask,
@@ -391,6 +421,16 @@ const exportingAnnotated = ref(false)
 const retryingSubmissionId = ref(null)
 const publishingTask = ref(false)
 const publishingSubmissionId = ref(null)
+
+// ---- 任务↔实验 绑定 ----
+const experimentOptions = ref([])
+const experimentsLoading = ref(false)
+const selectedExperimentId = ref('')
+const bindingSaving = ref(false)
+const bindingDirty = computed(() => {
+  const current = task.value?.experimentId != null ? String(task.value.experimentId) : ''
+  return String(selectedExperimentId.value ?? '') !== current
+})
 
 // ---- 批次总评 ----
 const batchReview = ref({
@@ -804,6 +844,7 @@ async function loadDetail() {
     const data = res?.data || res
     task.value = data
     submissions.value = data.submissions || []
+    selectedExperimentId.value = data?.experimentId != null ? String(data.experimentId) : ''
     await loadBatchReview()
     await ensureBatchReviewAutoGeneration()
   } catch (error) {
@@ -813,8 +854,53 @@ async function loadDetail() {
   }
 }
 
+async function loadBindableExperiments() {
+  experimentsLoading.value = true
+  try {
+    const res = await getBindableExperiments()
+    const list = res?.data?.data || res?.data || res || []
+    experimentOptions.value = (Array.isArray(list) ? list : [])
+      .map((exp) => {
+        const id = exp?.experimentId ?? exp?.id
+        if (id == null) return null
+        const name = exp?.name || exp?.title || `实验 #${id}`
+        return { id: String(id), label: name }
+      })
+      .filter(Boolean)
+  } catch (error) {
+    logger.error('加载可绑定实验列表失败:', error)
+    experimentOptions.value = []
+  } finally {
+    experimentsLoading.value = false
+  }
+}
+
+async function saveExperimentBinding() {
+  bindingSaving.value = true
+  try {
+    const raw = selectedExperimentId.value
+    const experimentId = raw === '' || raw == null ? null : Number(raw)
+    const res = await bindGradingTaskExperiment(taskId, experimentId)
+    const data = res?.data || res
+    if (task.value) {
+      task.value.experimentId = data?.experimentId ?? null
+      task.value.assignmentOfferingId = data?.assignmentOfferingId ?? null
+    }
+    if (experimentId != null && (data?.assignmentOfferingId == null)) {
+      uiMessage.warning('已保存实验绑定，但未匹配到对应的学生开课，学生可能仍无法看到。请确认该实验已向本任务班级开课。')
+    } else {
+      uiMessage.success(experimentId == null ? '已解绑实验' : '实验绑定已保存')
+    }
+  } catch (error) {
+    uiMessage.error(error.message || '保存绑定失败')
+  } finally {
+    bindingSaving.value = false
+  }
+}
+
 onMounted(() => {
   loadDetail()
+  loadBindableExperiments()
   startBatchReviewPolling()
 })
 

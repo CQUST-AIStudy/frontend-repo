@@ -138,6 +138,16 @@ export function updateGradingTaskSignature(id, teacherSignature) {
   return tapClient.post(`/api/grading/tasks/${id}/signature`, { teacherSignature })
 }
 
+// 教师端：把批改任务正式绑定到某个实验（experimentId=null 表示解绑）。
+export function bindGradingTaskExperiment(id, experimentId) {
+  return tapClient.put(`/api/grading/tasks/${id}/experiment`, { experimentId })
+}
+
+// 教师端：可绑定的实验列表（legacy 实验，用于绑定下拉）。
+export function getBindableExperiments(params = {}) {
+  return tapClient.get('/api/teacher/experiments', { params })
+}
+
 export function getSubmissionDetail(id) {
   return tapClient.get(`/api/grading/submissions/${id}`)
 }

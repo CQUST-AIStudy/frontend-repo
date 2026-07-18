@@ -224,7 +224,7 @@ const passwordForm = reactive({
 })
 
 const currentUser = computed(() => userStore.userInfo || {})
-const displayName = computed(() => currentUser.value.name || currentUser.value.username || '学生')
+const displayName = computed(() => currentUser.value.realName || currentUser.value.name || currentUser.value.username || '学生')
 const studentId = computed(() => currentUser.value.usernum || currentUser.value.id || '')
 const className = computed(() => currentUser.value.class || currentUser.value.classname || '')
 const gradeText = computed(() => {

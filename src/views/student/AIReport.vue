@@ -351,7 +351,7 @@ const generateReport = async () => {
 
   // 准备用户数据
   const userData = {
-    studentName: userStore.userInfo?.name || userStore.userInfo?.username || '',
+    studentName: userStore.userInfo?.realName || userStore.userInfo?.name || userStore.userInfo?.username || '',
     studentId: userStore.userInfo?.usernum || userStore.userInfo?.username || userStore.userInfo?.id || '',
     className: userStore.userInfo?.class || userStore.userInfo?.classname || '',
     experimentContent: selectedExperiment.value.description || selectedExperiment.value.content || '',
@@ -493,7 +493,7 @@ const prepareReportData = () => {
   const reportMeta = selectedExperiment.value.reportData || {}
   reportData.value = {
     experimentName: selectedExperiment.value.name,
-    studentName: reportMeta.studentName || profile.name || profile.username || '',
+    studentName: reportMeta.studentName || profile.realName || profile.name || profile.username || '',
     studentId: reportMeta.studentId || profile.usernum || profile.username || profile.id || '',
     className: profile.class || profile.classname || '',
     courseName: '数据结构',
