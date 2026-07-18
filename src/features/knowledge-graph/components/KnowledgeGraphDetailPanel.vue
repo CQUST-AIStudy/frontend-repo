@@ -188,7 +188,7 @@ const relationGroups = computed(() => {
     { title: '后续知识', icon: 'trend', items: context.value.nextNodes },
     { title: '关联知识', icon: 'link', items: context.value.relatedNodes },
     { title: '关联练习', icon: 'target', items: context.value.exercises }
-  ]
+  ].filter(group => Array.isArray(group.items) && group.items.length > 0)
 })
 </script>
 
