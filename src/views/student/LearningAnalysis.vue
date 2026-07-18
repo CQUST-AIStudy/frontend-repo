@@ -507,7 +507,7 @@ async function fetchAiLearningSuggestions() {
 function resolveStudentName() {
   try {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-    return userInfo.name || userInfo.username || ''
+    return userInfo.realName || userInfo.name || userInfo.username || ''
   } catch {
     return ''
   }

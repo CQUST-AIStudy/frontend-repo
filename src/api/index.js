@@ -561,6 +561,18 @@ export default {
     })
   },
 
+  async getNotifications(limit = 50) {
+    return apiClient.get('/api/student/notifications', { params: { limit } })
+  },
+
+  async getNotificationUnreadCount() {
+    return apiClient.get('/api/student/notifications/unread-count')
+  },
+
+  async markNotificationsRead(payload = { all: true }) {
+    return apiClient.post('/api/student/notifications/read', payload)
+  },
+
   async getLearningTracking(submissionId) {
     const response = await apiClient.get(`/api/submissions/${submissionId}/learning-tracking`)
     if (response?.success === false) {

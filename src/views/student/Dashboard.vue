@@ -591,7 +591,8 @@ async function loadData() {
     if (profileRes.status === 'fulfilled' && profileRes.value) {
       const d = profileRes.value?.data || profileRes.value || {}
       profileData.value = d
-      studentName.value = d?.username || d?.name ||
+      studentName.value = d?.realName || d?.studentName || d?.username || d?.name ||
+        JSON.parse(localStorage.getItem('userInfo') || '{}')?.realName ||
         JSON.parse(localStorage.getItem('userInfo') || '{}')?.username || ''
       className.value = d?.class || d?.className ||
         JSON.parse(localStorage.getItem('userInfo') || '{}')?.class || ''

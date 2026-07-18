@@ -183,6 +183,54 @@
           <div class="header-right [display:flex] [align-items:center] [justify-content:flex-end] [gap:12px] [min-width:0] [gap:14px]">
             <ui-dropdown
               trigger="click"
+              class="notification-bell [z-index:95] [&>div:nth-child(2)]:![z-index:3000] [&>div:nth-child(2)]:![min-width:320px] [&>div:nth-child(2)]:![max-width:360px] [&>div:nth-child(2)]:![border-radius:14px] [&>div:nth-child(2)]:![border-color:var(--app-border)] [&>div:nth-child(2)]:![background:var(--app-surface)] [&>div:nth-child(2)]:![box-shadow:var(--app-shadow)] [&>div:nth-child(2)]:![padding:0]"
+              @command="handleNotificationCommand"
+            >
+              <div
+                class="bell-trigger [position:relative] [display:flex] [align-items:center] [justify-content:center] [width:42px] [height:42px] [border-radius:14px] [cursor:pointer] [background:var(--app-glass)] [border:1px_solid_var(--app-border-soft)] [transition:all_0.2s] hover:[border-color:var(--app-primary-tint-50)] hover:[box-shadow:var(--app-shadow-soft)]"
+                @click="onBellClick"
+              >
+                <ui-icon class="[font-size:18px] [color:var(--app-text-secondary)]"><Bell /></ui-icon>
+                <span
+                  v-if="notificationStore.unreadCount > 0"
+                  class="[position:absolute] [top:3px] [right:3px] [min-width:16px] [height:16px] [padding:0_4px] [border-radius:8px] [background:#ef4444] [color:#fff] [font-size:10px] [font-weight:700] [line-height:16px] [text-align:center] [box-shadow:0_0_0_2px_var(--app-surface)]"
+                >{{ notificationStore.unreadCount > 99 ? '99+' : notificationStore.unreadCount }}</span>
+              </div>
+              <template #dropdown>
+                <div class="[display:flex] [flex-direction:column] [max-height:440px]">
+                  <div class="[display:flex] [align-items:center] [justify-content:space-between] [padding:12px_16px] [border-bottom:1px_solid_var(--app-border-soft)]">
+                    <span class="[font-size:14px] [font-weight:700] [color:var(--app-text)]">通知</span>
+                    <button
+                      v-if="notificationStore.unreadCount > 0"
+                      type="button"
+                      class="[font-size:12px] [font-weight:600] [color:var(--app-primary)] [cursor:pointer] [background:none] [border:none] [padding:0]"
+                      @click="handleMarkAllRead"
+                    >全部已读</button>
+                  </div>
+                  <div class="[flex:1_1_auto] [overflow-y:auto] [min-height:0]">
+                    <div
+                      v-if="!notificationStore.items.length"
+                      class="[padding:30px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-soft)]"
+                    >暂无通知</div>
+                    <ui-dropdown-item
+                      v-for="item in notificationStore.items"
+                      :key="item.id"
+                      :command="item.id"
+                      class="![display:flex] ![flex-direction:column] ![align-items:flex-start] ![gap:4px] ![padding:11px_16px] ![border-bottom:1px_solid_var(--app-border-soft)]"
+                    >
+                      <div class="[display:flex] [align-items:center] [gap:8px] [width:100%]">
+                        <span v-if="!item.read" class="[width:7px] [height:7px] [border-radius:50%] [background:#ef4444] [flex-shrink:0]"></span>
+                        <span class="[font-size:13px] [font-weight:700] [color:var(--app-text)] [flex:1_1_auto] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]">{{ item.title }}</span>
+                      </div>
+                      <span class="[font-size:12px] [color:var(--app-text-secondary)] [line-height:1.5] [white-space:normal]">{{ item.content }}</span>
+                      <span class="[font-size:11px] [color:var(--app-text-soft)]">{{ item.createdAt }}</span>
+                    </ui-dropdown-item>
+                  </div>
+                </div>
+              </template>
+            </ui-dropdown>
+            <ui-dropdown
+              trigger="click"
               class="[z-index:90] [&>div:nth-child(2)]:![z-index:3000] [&>div:nth-child(2)]:![min-width:184px] [&>div:nth-child(2)]:![border-radius:14px] [&>div:nth-child(2)]:![border-color:var(--app-border)] [&>div:nth-child(2)]:![background:var(--app-surface)] [&>div:nth-child(2)]:![box-shadow:var(--app-shadow)]"
               @command="handleCommand"
             >
@@ -190,7 +238,7 @@
                 <ui-avatar :size="34">
                   <img src="../../assets/User/Cat.jpg" alt="avatar" class="[width:100%] [height:100%] [object-fit:cover]" />
                 </ui-avatar>
-                <span class="username [min-width:0] [flex:1_1_auto] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-size:13px] [font-weight:700] [color:var(--app-text)]">{{ userInfo.name || '学生' }}</span>
+                <span class="username [min-width:0] [flex:1_1_auto] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] [font-size:13px] [font-weight:700] [color:var(--app-text)]">{{ userInfo.realName || userInfo.name || '学生' }}</span>
                 <ui-icon class="arrow-icon [font-size:12px] [color:var(--app-text-soft)]"><ArrowDown /></ui-icon>
               </div>
               <template #dropdown>
@@ -227,7 +275,7 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, reactive, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import {
   HomeFilled,
@@ -238,15 +286,18 @@ import {
   Setting,
   Fold,
   ArrowDown,
+  Bell,
   Menu as MenuIcon,
   SwitchButton
 } from '@/components/ui/icons'
 import { useUserStore } from '../../store'
+import { useNotificationStore } from '../../store/notification'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 const {
   isMobile,
   collapsed,
@@ -418,10 +469,37 @@ function handleCommand(command) {
 }
 
 onMounted(() => {
-  if (userStore.isLoggedIn) return
-  router.push('/login')
-  uiMessage.warning('请先登录')
+  if (!userStore.isLoggedIn) {
+    router.push('/login')
+    uiMessage.warning('请先登录')
+    return
+  }
+  notificationStore.startPolling()
 })
+
+onUnmounted(() => {
+  notificationStore.stopPolling()
+})
+
+// ── Notifications ──────────────────────────────────────────
+function onBellClick() {
+  notificationStore.fetchNotifications()
+}
+
+function handleNotificationCommand(id) {
+  const item = notificationStore.items.find((n) => n.id === id)
+  if (!item) return
+  if (!item.read) {
+    notificationStore.markRead([id])
+  }
+  if (item.linkExperimentId != null) {
+    router.push(`/student/experiment-detail/${item.linkExperimentId}`)
+  }
+}
+
+function handleMarkAllRead() {
+  notificationStore.markAllRead()
+}
 </script>
 
 <style scoped>
