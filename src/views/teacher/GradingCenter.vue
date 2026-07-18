@@ -1,9 +1,14 @@
 <template>
   <div class="grading-center min-h-full">
     <!-- 页面标题 -->
-    <div class="mb-6">
-      <h1 class="m-0 text-[20px] font-semibold text-[#1d1d1f] mb-1">AI 批改中心</h1>
-      <p class="m-0 text-[14px] text-[#6e6e73]">上传学生作业，AI 自动评分并生成详细评语</p>
+    <div class="mb-6 flex items-start justify-between">
+      <div>
+        <h1 class="m-0 text-[20px] font-semibold text-[#1d1d1f] mb-1">AI 批改中心</h1>
+        <p class="m-0 text-[14px] text-[#6e6e73]">上传学生作业，AI 自动评分并生成详细评语</p>
+      </div>
+      <UiButton @click="resetCreateForm" class="h-9 px-4 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] transition-all cursor-pointer border-none">
+        重置表单
+      </UiButton>
     </div>
 
     <!-- 流程引导卡片 -->
@@ -398,6 +403,58 @@ const fileList = ref([])
 const uploadRef = ref(null)
 const createForm = ref({ rubricId: null, experimentId: '', classId: '', teacherSignature: '', scoreRange: [75, 99], batchName: '' })
 const userStore = useUserStore()
+
+const FORM_STORAGE_KEY = 'grading:createForm'
+
+function restoreCreateForm() {
+  try {
+    const saved = localStorage.getItem(FORM_STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      createForm.value = {
+        ...createForm.value,
+        rubricId: parsed.rubricId ?? null,
+        teacherSignature: parsed.teacherSignature ?? '',
+        batchName: parsed.batchName ?? '',
+        scoreRange: Array.isArray(parsed.scoreRange) && parsed.scoreRange.length === 2
+          ? parsed.scoreRange
+          : [75, 99]
+      }
+    }
+  } catch (e) {
+    logger.warn('恢复批改表单失败:', e)
+  }
+}
+
+function resetCreateForm() {
+  createForm.value = {
+    rubricId: null,
+    experimentId: '',
+    classId: userStore.selectedClass?.id || '',
+    teacherSignature: '',
+    scoreRange: [75, 99],
+    batchName: ''
+  }
+  localStorage.removeItem(FORM_STORAGE_KEY)
+  uiMessage.info('已重置为默认表单')
+}
+
+let saveFormTimer = null
+watch(createForm, (val) => {
+  clearTimeout(saveFormTimer)
+  saveFormTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify({
+        rubricId: val.rubricId,
+        teacherSignature: val.teacherSignature,
+        batchName: val.batchName,
+        scoreRange: val.scoreRange
+      }))
+    } catch (e) {
+      logger.warn('保存批改表单失败:', e)
+    }
+  }, 300)
+}, { deep: true })
 const formErrors = ref({ rubricId: '', teacherSignature: '', files: '' })
 let refreshTimer = null
 
@@ -826,8 +883,7 @@ async function submitTask() {
     })
     uiMessage.success('批改任务已创建，AI 正在处理中...')
     clearSelectedFiles()
-    createForm.value.teacherSignature = ''
-    createForm.value.batchName = ''
+    // 保留表单选择，方便教师继续下一批
     // 静默刷新，避免整个列表被 spinner 替换
     loadTasks({ silent: true })
     loadBatches()
@@ -898,6 +954,7 @@ async function loadRubrics() {
 
 onMounted(() => {
   createForm.value.classId = userStore.selectedClass?.id || ''
+  restoreCreateForm()
   loadRubrics()
   loadSignatures()
   loadTasks()
