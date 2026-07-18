@@ -245,6 +245,7 @@ import {
 import { DocxGenerator } from '../../utils/docxGenerator'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import CodeViewer from '@/components/CodeViewer.vue'
+import ReportGenerator from '@/components/ReportGenerator.vue'
 
 const experimentStore = useExperimentStore()
 const userStore = useUserStore()
