@@ -298,8 +298,9 @@
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-14">#</th>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-40">学号</th>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-36">姓名</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-24">密码</th>
                 <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs">加入时间</th>
-                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-20">操作</th>
+                <th class="text-left px-4 py-3 font-medium text-[#86868b] text-xs w-32">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -307,13 +308,20 @@
                 <td class="px-4 py-3 text-[#86868b]">{{ idx + 1 }}</td>
                 <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentNum }}</td>
                 <td class="px-4 py-3 text-[#1d1d1f]">{{ row.studentName }}</td>
+                <td class="px-4 py-3">
+                  <span v-if="row.hasPassword" class="inline-flex items-center px-2 py-0.5 rounded-full bg-[#e6f4ea] text-[#34a853] text-xs font-medium">已设置</span>
+                  <span v-else class="inline-flex items-center px-2 py-0.5 rounded-full bg-[#fef7e0] text-[#b26a00] text-xs font-medium">未设置</span>
+                </td>
                 <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
                 <td class="px-4 py-3">
-                  <UiButton class="text-[#c44b3f] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
+                  <div class="flex items-center gap-3">
+                    <UiButton class="text-[#1677ff] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="openResetPasswordDialog(row)">重置密码</UiButton>
+                    <UiButton class="text-[#c44b3f] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
+                  </div>
                 </td>
               </tr>
               <tr v-if="filteredStudents.length === 0 && !studentsLoading">
-                <td colspan="5" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
+                <td colspan="6" class="px-4 py-8 text-center text-[#86868b]">暂无学生数据</td>
               </tr>
             </tbody>
           </table>
@@ -355,7 +363,39 @@
       </template>
     </AppModal>
 
-    <!-- Dialog 4: PTA Sync -->
+    <!-- Dialog 4: Reset Student Password -->
+    <AppModal v-model="resetPasswordVisible" title="重置学生密码" width="420px">
+      <div class="space-y-4">
+        <div class="rounded-[12px] bg-[#f5f5f7] p-3.5 text-sm text-[#6e6e73]">
+          <div>学生：<span class="font-medium text-[#1d1d1f]">{{ resetPasswordTarget?.studentName }}</span></div>
+          <div class="mt-1">学号：<span class="font-medium text-[#1d1d1f]">{{ resetPasswordTarget?.studentNum }}</span></div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">新密码</label>
+          <UiInput
+            v-model="resetPasswordForm.newPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="请输入新密码（至少6位）"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
+          />
+          <p v-if="resetPasswordError" class="mt-1 text-xs text-[#c44b3f]">{{ resetPasswordError }}</p>
+        </div>
+      </div>
+      <template #footer>
+        <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="resetPasswordVisible = false">取消</UiButton>
+        <UiButton
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50"
+          :disabled="resettingPassword"
+          @click="doResetPassword"
+        >
+          <span v-if="resettingPassword" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>重置中</span>
+          <span v-else>确认重置</span>
+        </UiButton>
+      </template>
+    </AppModal>
+
+    <!-- Dialog 5: PTA Sync -->
     <AppModal v-model="syncDialogVisible" title="PTA 同步账号" width="480px">
       <div class="space-y-4">
         <!-- Info alert -->
@@ -513,6 +553,7 @@ import {
   getTeachingClasses,
   importPtaStudents,
   removeClassStudent,
+  resetStudentPassword,
   submitPtaCookie,
   triggerPtaSync,
   updateTeachingClass
@@ -567,6 +608,12 @@ const studentSearch = ref('')
 const addStudentVisible = ref(false)
 const addStudentForm = reactive({ studentName: '', studentNum: '' })
 const addingStudent = ref(false)
+
+const resetPasswordVisible = ref(false)
+const resetPasswordTarget = ref(null)
+const resetPasswordForm = reactive({ newPassword: '' })
+const resetPasswordError = ref('')
+const resettingPassword = ref(false)
 
 const cookieStatus = ref('UNKNOWN')
 const cookieDialogVisible = ref(false)
@@ -1123,6 +1170,39 @@ const confirmRemoveStudent = (row) => {
       uiMessage.error(error.message || '移除失败')
     }
   }).catch(() => {})
+}
+
+const openResetPasswordDialog = (row) => {
+  resetPasswordTarget.value = row
+  resetPasswordForm.newPassword = ''
+  resetPasswordError.value = ''
+  resetPasswordVisible.value = true
+}
+
+const doResetPassword = async () => {
+  if (!resetPasswordForm.newPassword.trim()) {
+    resetPasswordError.value = '请输入新密码'
+    return
+  }
+  if (resetPasswordForm.newPassword.trim().length < 6) {
+    resetPasswordError.value = '新密码长度不能少于6位'
+    return
+  }
+  resettingPassword.value = true
+  resetPasswordError.value = ''
+  try {
+    await resetStudentPassword(currentClass.value.id, resetPasswordTarget.value.id, {
+      newPassword: resetPasswordForm.newPassword.trim()
+    })
+    uiMessage.success('密码重置成功')
+    resetPasswordVisible.value = false
+    const res = await getClassStudents(currentClass.value.id)
+    students.value = extract(res) || []
+  } catch (error) {
+    resetPasswordError.value = error.message || '重置密码失败'
+  } finally {
+    resettingPassword.value = false
+  }
 }
 
 const formatTime = (value) => {

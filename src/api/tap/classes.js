@@ -30,6 +30,10 @@ export function removeClassStudent(classId, studentId) {
   return tapClient.delete(`/api/classes/${classId}/students/${studentId}`)
 }
 
+export function resetStudentPassword(classId, studentId, data) {
+  return tapClient.post(`/api/classes/${classId}/students/${studentId}/reset-password`, data)
+}
+
 export function joinClass(data) {
   return tapClient.post('/api/classes/join', data)
 }
