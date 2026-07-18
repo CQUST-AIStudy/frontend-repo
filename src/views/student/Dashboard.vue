@@ -125,14 +125,15 @@
           <span>推荐原因：{{ recReason || '根据你的学习数据，为你推荐以下针对性练习' }}</span>
         </div>
         <div class="rec-grid [display:grid] [grid-template-columns:repeat(3,_1fr)] [gap:12px]">
-          <div v-for="(rec, i) in practiceRecommendations" :key="i"
+          <div v-for="(rec, i) in practiceRecommendations" :key="rec.problemId || rec.title || i"
                class="rec-item [padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#c8ddf5] hover:[background:#fff] hover:[box-shadow:0_6px_16px_rgba(59,130,246,0.1)]" @click="goToPractice(rec)">
             <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
               <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#eff6ff] [color:#3b82f6]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source }}</span>
-              <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : rec.tag }}</span>
+              <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : (rec.tag || '推荐拓展') }}</span>
             </div>
             <div class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [display:inline-block] [margin-bottom:12px] [font-weight:500]" :class="rec._diffClass">{{ rec._diffLabel }}</div>
             <div class="[font-size:14px] [font-weight:700] [color:#1a1a2e] [margin-bottom:14px] [line-height:1.4]">{{ rec.title }}</div>
+            <div v-if="rec.reason" class="[font-size:12px] [color:#6b7280] [line-height:1.5] [margin-bottom:12px]">{{ rec.reason }}</div>
             <UiButton
                 class="w-full text-white border-none rounded-full py-[7px] text-[12px] cursor-pointer font-semibold bg-[linear-gradient(135deg,_#3b82f6,_#2563eb)] hover:bg-[linear-gradient(135deg,_#2563eb,_#1d4ed8)]"
                 @click.stop="goToPractice(rec)"
@@ -493,8 +494,27 @@ function countdownText(t) {
 }
 
 function goToPractice(rec) {
-  if (rec.source === 'LeetCode') nav('/student/leetcode-search')
-  else nav('/student/practice')
+  if (rec.source !== 'LeetCode') {
+    nav('/student/practice')
+    return
+  }
+
+  const problemId = toPositiveId(rec.problemId)
+  if (!problemId) {
+    nav('/student/leetcode-search')
+    return
+  }
+
+  const query = {}
+  if (rec.requestId) {
+    query.recommendationRequestId = rec.requestId
+    query.recommendationSessionId = ensureRecommendationSessionId()
+  }
+
+  router.push({
+    path: `/student/leetcode-practice/${problemId}`,
+    query: Object.keys(query).length ? query : undefined
+  })
 }
 
 async function refreshRecommendations() {
@@ -514,13 +534,74 @@ async function loadRecommendations() {
     }
     if (lcRes.status === 'fulfilled' && lcRes.value) {
       const list = Array.isArray(lcRes.value) ? lcRes.value : (lcRes.value?.items || lcRes.value?.data || [])
-      list.slice(0, 3 - items.length).forEach(item => {
-        const diff = item.difficulty || 'Medium'
-        items.push({ title: item.title || item.name || 'LeetCode 题目', source: 'LeetCode', tag: diff, _diffLabel: '推荐拓展', _diffClass: '[color:#059669] [background:#ecfdf5]', path: '/student/leetcode-search' })
-      })
+      const leetcodeItems = list
+        .map(item => {
+          const problem = item?.problem || {}
+          const title = getRecommendationTitle(item)
+          if (!title) return null
+
+          const difficulty = getRecommendationDifficulty(problem.difficulty || item.difficulty)
+          const tags = getRecommendationTags(item)
+          return {
+            title,
+            source: 'LeetCode',
+            tag: tags[0] || '推荐拓展',
+            _diffLabel: difficulty.label,
+            _diffClass: difficulty.className,
+            problemId: toPositiveId(problem.problemId || item.problemId || problem.id),
+            requestId: item.requestId || null,
+            reason: item.reasonText || item.reason || '',
+            sourceUrl: problem.sourceUrl || item.sourceUrl || '',
+            path: '/student/leetcode-search'
+          }
+        })
+        .filter(Boolean)
+        .slice(0, Math.max(0, 3 - items.length))
+      items.push(...leetcodeItems)
     }
     if (items.length) practiceRecommendations.value = items.slice(0, 3)
   } catch (e) { logger.warn('加载推荐练习失败:', e) }
+}
+
+function getRecommendationTitle(item) {
+  const problem = item?.problem || {}
+  const title = String(problem.title || problem.titleMain || problem.titleAlt || item?.title || item?.name || '').trim()
+  return title && title !== 'LeetCode 题目' ? title : ''
+}
+
+function getRecommendationTags(item) {
+  const tags = item?.problem?.tags || item?.tags
+  if (!Array.isArray(tags)) return []
+  return tags
+    .map(tag => typeof tag === 'string' ? tag.trim() : String(tag?.tagName || tag?.name || '').trim())
+    .filter(Boolean)
+}
+
+function getRecommendationDifficulty(value) {
+  const difficulty = String(value || '').trim().toLowerCase()
+  if (difficulty === 'easy') {
+    return { label: '简单', className: '[color:#059669] [background:#ecfdf5]' }
+  }
+  if (difficulty === 'hard') {
+    return { label: '困难', className: '[color:#dc2626] [background:#fef2f2]' }
+  }
+  return { label: '中等', className: '[color:#b45309] [background:#fff7ed]' }
+}
+
+function toPositiveId(value) {
+  const id = Number(value)
+  return Number.isInteger(id) && id > 0 ? id : null
+}
+
+function ensureRecommendationSessionId() {
+  if (typeof window === 'undefined') return ''
+  const storageKey = 'leetcode_recommendation_session_id'
+  const existing = window.sessionStorage.getItem(storageKey)
+  if (existing) return existing
+
+  const sessionId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+  window.sessionStorage.setItem(storageKey, sessionId)
+  return sessionId
 }
 
 // ── 图表 ──
