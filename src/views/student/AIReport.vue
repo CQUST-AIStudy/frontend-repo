@@ -85,8 +85,8 @@
                     </ui-icon>
                     查看报告
                   </ui-button>
-                  <ui-button type="primary" :loading="experimentStore.generatingReport"
-                             :disabled="experimentStore.generatingReport" @click="generateReport">
+                   <ui-button type="primary" :loading="experimentStore.generatingReport"
+                              :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
                     <ui-icon>
                       <MagicStick />
                     </ui-icon>
@@ -124,6 +124,9 @@
               </div>
 
               <div v-else-if="!selectedExperiment.report && !isReportViewVisible" class="no-report [text-align:center] [padding:30px_20px]">
+                <div v-if="!canGenerateReport" class="mb-5 rounded-xl border border-[#f3d19e] bg-[#fdf6ec] px-4 py-3 text-left text-sm text-[#b88230]">
+                  {{ reportIneligibleReason }}
+                </div>
                 <div class="ai-feature [margin-bottom:30px]">
                   <ui-icon class="ai-feature-icon [font-size:60px] [color:#1a73e8] [margin-bottom:20px]">
                     <MagicStick />
@@ -158,7 +161,7 @@
 
                 <div class="generate-action [margin-top:30px]">
                   <ui-button type="primary" size="large" :loading="experimentStore.generatingReport"
-                             :disabled="experimentStore.generatingReport" @click="generateReport">
+                              :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
                     <ui-icon>
                       <MagicStick />
                     </ui-icon>
@@ -260,6 +263,15 @@ const selectedExperiment = ref(null)
 const isReportViewVisible = ref(false)
 const reportData = ref({})
 
+const canGenerateReport = computed(() => {
+  if (!selectedExperiment.value || selectedExperiment.value.status !== 'completed') return false
+  if (selectedExperiment.value.aiReportEligible === false) return false
+  return Boolean(String(selectedExperiment.value.code || '').trim())
+})
+
+const reportIneligibleReason = computed(() => selectedExperiment.value?.aiReportIneligibleReason
+  || '该实验尚无本平台 OJ 代码提交。请先在实验页面完成并提交代码，再生成 AI 报告。')
+
 
 // 过滤后的实验列表
 const filteredExperiments = computed(() => {
@@ -349,6 +361,10 @@ const generateReport = async () => {
     uiMessage.warning('请先完成实验')
     return
   }
+  if (!canGenerateReport.value) {
+    uiMessage.warning(reportIneligibleReason.value)
+    return
+  }
 
   // 准备用户数据
   const userData = {
@@ -405,7 +421,7 @@ const generateReport = async () => {
       logger.error('生成报告失败:', result)
     }
   } catch (error) {
-    uiMessage.error('生成报告失败，请稍后再试')
+      uiMessage.error(error?.friendlyMessage || error?.response?.data?.message || '生成报告失败，请稍后再试')
     logger.error('生成报告异常:', error)
   } finally {
     loading.value = false

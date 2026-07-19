@@ -58,8 +58,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../../store'
 import LucideIcon from '../../components/LucideIcon.vue'
 import ErrorDemonstrationPlayer from '../../components/grading/ErrorDemonstrationPlayer.vue'
-import * as api from '../../api'
-import * as gradingApi from '../../api/tap/grading'
+import api from '../../api'
+import { getSubmissionErrorDemonstrations } from '../../api/tap/grading'
 
 const props = defineProps({
   mode: {
@@ -89,7 +89,7 @@ async function loadDemonstrations() {
   try {
     let demos = []
     if (mode.value === 'teacher') {
-      const res = await gradingApi.getErrorDemonstrations(Number(resourceId.value))
+      const res = await getSubmissionErrorDemonstrations(Number(resourceId.value))
       demos = res?.data || res || []
     } else {
       const res = await api.getPublishedGradingResult(Number(resourceId.value))

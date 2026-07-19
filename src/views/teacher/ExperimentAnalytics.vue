@@ -100,6 +100,9 @@
     </template>
 
     <template v-else-if="data && data.overview && selectedExp">
+      <div class="mb-3 rounded-[14px] border border-black/[0.06] bg-white px-4 py-3 text-sm text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+        当前实验：<span class="font-semibold text-[var(--app-primary)]">{{ selectedExperimentName }}</span>
+      </div>
       <div class="grid grid-cols-10 gap-2 max-[768px]:grid-cols-5 max-[480px]:grid-cols-2">
         <div v-for="item in kpiItems" :key="item.label" class="bg-white rounded-[12px] p-[10px_8px] text-center border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
           <div class="text-[20px] font-bold leading-tight" :class="kpiValueClass(item)">{{ item.value }}</div>
@@ -331,6 +334,16 @@ const problemAccuracy = computed(() => {
   const items = data.value?.problemAccuracy
   return Array.isArray(items) ? items : []
 })
+const selectedExperimentName = computed(() => experiments.value.find(
+  item => String(item.experimentId) === String(selectedExp.value)
+)?.name || `实验 ${selectedExp.value}`)
+
+function problemDisplayName(item = {}) {
+  const title = String(item.type || item.title || '').trim()
+  const label = String(item.label || '').trim()
+  if (title && title !== label) return title.length > 12 ? `${title.slice(0, 12)}...` : title
+  return label || '未命名题目'
+}
 
 const activeClassLabel = computed(() => {
   if (selectedClass.value) return selectedClass.value
@@ -788,15 +801,19 @@ function renderAccChart() {
   accChart.setOption({
     tooltip: {
       trigger: 'axis',
-      formatter: params => `${params[0].name}<br/>得分率：${params[0].value}%`,
+      formatter: params => {
+        const item = problemAccuracy.value[params[0].dataIndex] || {}
+        return `${item.type || item.title || item.label || '未命名题目'}<br/>题号：${item.label || '-'}<br/>得分率：${params[0].value}%`
+      },
     },
     grid: { left: 40, right: 16, top: 20, bottom: 36 },
     xAxis: {
       type: 'category',
-      data: problemAccuracy.value.map(item => item.label),
+      data: problemAccuracy.value.map(problemDisplayName),
       axisLabel: {
         fontSize: 10,
-        rotate: problemAccuracy.value.length > 12 ? 30 : 0,
+        rotate: problemAccuracy.value.length > 8 ? 30 : 0,
+        interval: 0,
       },
     },
     yAxis: { type: 'value', max: 100, name: '%' },

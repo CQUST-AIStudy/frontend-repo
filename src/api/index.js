@@ -544,7 +544,7 @@ export default {
   },
 
   async generateExperimentReport(id, data) {
-    return apiClient.post(`/api/experiments/${id}/report/generate`, data)
+    return apiClient.post(`/api/experiments/${id}/report/generate`, data, { timeout: 180000 })
   },
 
   async getExperimentReport(id) {

@@ -576,9 +576,20 @@ async function loadPageData() {
     completedProblemIds.value = readCompletedProblemIds()
     trainingState.value = readWeaknessTrainingState(getCurrentStudentId())
     if (!learningStore.recommendedPractices || !normalizedPractices.value.length) {
-      await learningStore.fetchRecommendedPractices()
+      try {
+        await learningStore.fetchRecommendedPractices()
+      } catch (error) {
+        logger.warn('推荐练习暂不可用，继续加载学生画像:', error)
+        uiMessage.warning('推荐题服务暂不可用，已继续加载薄弱点数据')
+      }
     }
-    profile.value = await fetchProfile()
+    try {
+      profile.value = await fetchProfile()
+    } catch (error) {
+      logger.error('加载学生薄弱点画像失败:', error)
+      profile.value = {}
+      uiMessage.error('薄弱点画像加载失败，请检查画像数据是否已同步')
+    }
     const queryExperimentId = getNormalizedProblemId(route.query.experimentId)
     if (queryExperimentId) {
       selectedWeaknessId.value = queryExperimentId

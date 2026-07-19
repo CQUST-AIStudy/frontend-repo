@@ -131,7 +131,8 @@
     </template>
 
     <!-- Student profile modal -->
-    <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="80%">
+    <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="960px">
+      <div class="max-h-[75vh] overflow-y-auto pr-1">
       <div v-if="dialogLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-3">
           <div class="w-8 h-8 border-[3px] border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></div>
@@ -142,22 +143,26 @@
         <div v-if="dialogProfile.error" class="rounded-[12px] bg-[#fff3cd] border border-[#ffecb5] p-4 text-[13px] text-[#86650a]">
           {{ dialogProfile.error }}
         </div>
-        <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div ref="dialogRadarRef" class="h-[300px]"></div>
-          <div ref="dialogTrendRef" class="h-[300px]"></div>
+        <div v-else-if="hasDialogChartData" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div v-if="dialogProfile.radar" ref="dialogRadarRef" class="h-[300px]"></div>
+          <div v-if="dialogProfile.trend?.series?.length" ref="dialogTrendRef" class="h-[300px]"></div>
         </div>
         <div v-if="!dialogProfile.error && dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#6b8f6b]">{{ dialogProfile.feedback }}</div>
         <div v-if="!dialogProfile.error && dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
           <span v-for="p in dialogProfile.patterns" :key="p.tag" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[var(--app-primary)]/10 text-[var(--app-primary)]">{{ p.tag }}: {{ p.description }}</span>
         </div>
+        <div v-if="!dialogProfile.error && !hasDialogContent" class="rounded-[12px] border border-dashed border-black/10 bg-[#f5f5f7] px-4 py-10 text-center text-sm text-[#6e6e73]">
+          该学生暂无可展示的画像数据，请先同步提交与成绩数据。
+        </div>
       </template>
+      </div>
     </AppModal>
   </div>
 </template>
 
 <script setup>
 import logger from '@/utils/logger'
-import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import { getClassProfile, getStudentProfile } from '../../api/tap'
@@ -248,6 +253,10 @@ const dialogStudentName = ref('')
 const dialogProfile = ref({})
 const dialogRadarRef = ref(null)
 const dialogTrendRef = ref(null)
+const hasDialogChartData = computed(() => Boolean(dialogProfile.value?.radar || dialogProfile.value?.trend?.series?.length))
+const hasDialogContent = computed(() => Boolean(
+  hasDialogChartData.value || dialogProfile.value?.feedback || dialogProfile.value?.patterns?.length
+))
 
 function tierCount(key) {
   return data.value.tiers?.[key]?.count || 0
