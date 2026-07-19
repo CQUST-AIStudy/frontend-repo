@@ -393,6 +393,7 @@ import {
   getBatchReview,
   getBindableExperiments,
   getGradingTaskDetail,
+  getPublishProgress,
   preGenerateSubmissionResources,
   publishConfirmedTask,
   publishSubmission,
@@ -472,13 +473,43 @@ async function doPublishTask() {
   try {
     const res = await publishConfirmedTask(taskId)
     const data = res?.data || res
-    uiMessage.success(`已发布 ${data.publishedCount || 0} 份成绩`)
-    await loadDetail()
+    uiMessage.info(data.message || '批量发布已开始，请稍候...')
+    await pollPublishProgress()
   } catch (error) {
     uiMessage.error(error.message || '批量发布失败')
-  } finally {
     publishingTask.value = false
   }
+}
+
+async function pollPublishProgress() {
+  const maxAttempts = 120
+  let attempts = 0
+  const interval = 2000
+
+  while (attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, interval))
+    attempts++
+    try {
+      const res = await getPublishProgress(taskId)
+      const progress = res?.data || res
+      if (progress.status === 'COMPLETED') {
+        uiMessage.success(`已发布 ${progress.publishedCount || 0} 份成绩，跳过 ${progress.skippedCount || 0} 份`)
+        await loadDetail()
+        publishingTask.value = false
+        return
+      }
+      if (progress.status === 'FAILED') {
+        uiMessage.error('批量发布失败')
+        publishingTask.value = false
+        return
+      }
+    } catch (e) {
+      // 轮询失败继续重试
+    }
+  }
+  uiMessage.warning('发布进度查询超时，请手动刷新查看')
+  await loadDetail()
+  publishingTask.value = false
 }
 
 async function doRevokeTask() {
