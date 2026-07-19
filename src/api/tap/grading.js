@@ -237,6 +237,10 @@ export function publishConfirmedTask(taskId) {
   return tapClient.post(`/api/grading/tasks/${taskId}/publish-confirmed`)
 }
 
+export function getPublishProgress(taskId) {
+  return tapClient.get(`/api/grading/tasks/${taskId}/publish-progress`)
+}
+
 export function revokeTaskPublications(taskId) {
   return tapClient.delete(`/api/grading/tasks/${taskId}/publish`)
 }
