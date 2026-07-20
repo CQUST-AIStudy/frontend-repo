@@ -10,6 +10,72 @@ function cls(...items) {
   return items.flat(Infinity).filter(Boolean).join(' ')
 }
 
+const focusableSelector = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',')
+
+let overlayId = 0
+
+function nextOverlayId(prefix) {
+  overlayId += 1
+  return `${prefix}-${overlayId}`
+}
+
+function useModalFocus(isOpen, close) {
+  const panelRef = ref(null)
+  let previousFocus = null
+
+  const getFocusableElements = () => Array.from(panelRef.value?.querySelectorAll(focusableSelector) || [])
+  const focusPanel = () => {
+    const firstFocusable = getFocusableElements()[0]
+    ;(firstFocusable || panelRef.value)?.focus()
+  }
+  const handleKeydown = (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      close()
+      return
+    }
+    if (event.key !== 'Tab') return
+
+    const focusableElements = getFocusableElements()
+    if (!focusableElements.length) {
+      event.preventDefault()
+      panelRef.value?.focus()
+      return
+    }
+
+    const first = focusableElements[0]
+    const last = focusableElements[focusableElements.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
+  watch(isOpen, async (visible) => {
+    if (typeof document === 'undefined') return
+    if (visible) {
+      previousFocus = document.activeElement
+      await nextTick()
+      focusPanel()
+      return
+    }
+    if (previousFocus?.isConnected) previousFocus.focus()
+    previousFocus = null
+  }, { immediate: true })
+
+  return { panelRef, handleKeydown }
+}
+
 function normalizeType(type) {
   if (!type || type === 'button' || type === 'submit' || type === 'reset') return 'default'
   if (type === 'success') return 'success'
@@ -144,14 +210,14 @@ async function validateRule(rule, value, model) {
   await runCustomValidator(rule, value, model)
 }
 
-const buttonBase = 'ui-button inline-flex items-center justify-center gap-2 min-h-9 px-3.5 py-2 rounded-lg border text-[14px] font-medium leading-none transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]'
+const buttonBase = 'ui-button inline-flex items-center justify-center gap-2 min-h-9 px-3.5 py-2 rounded-[var(--app-radius-md)] border text-[14px] font-medium leading-none transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]'
 const buttonTypes = {
-  default: 'border-[#d9e2ec] bg-white text-[#334155] hover:enabled:border-[#b8c7d6] hover:enabled:bg-[#f8fafc]',
-  primary: 'border-[#007aff] bg-[#007aff] text-white shadow-[0_2px_8px_rgba(0,122,255,0.25)] hover:enabled:border-[#0056b3] hover:enabled:bg-[#0056b3]',
-  success: 'border-[#16a34a] bg-[#16a34a] text-white hover:enabled:bg-[#15803d]',
-  warning: 'border-[#d97706] bg-[#d97706] text-white hover:enabled:bg-[#b45309]',
-  danger: 'border-[#dc2626] bg-[#dc2626] text-white hover:enabled:bg-[#b91c1c]',
-  info: 'border-[#d9e2ec] bg-[#f8fafc] text-[#475569] hover:enabled:bg-white'
+  default: 'border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)] hover:enabled:border-[var(--app-border-strong)] hover:enabled:bg-[var(--app-surface-muted)]',
+  primary: 'border-[var(--app-primary)] bg-[var(--app-primary)] text-white shadow-[0_2px_8px_rgba(var(--app-primary-rgb),0.2)] hover:enabled:border-[var(--app-primary-strong)] hover:enabled:bg-[var(--app-primary-strong)]',
+  success: 'border-[var(--app-success)] bg-[var(--app-success)] text-white hover:enabled:bg-[var(--app-success-strong)]',
+  warning: 'border-[var(--app-warning)] bg-[var(--app-warning)] text-white hover:enabled:bg-[var(--app-warning-strong)]',
+  danger: 'border-[var(--app-danger)] bg-[var(--app-danger)] text-white hover:enabled:bg-[var(--app-danger-strong)]',
+  info: 'border-[var(--app-border)] bg-[var(--app-surface-muted)] text-[var(--app-text-secondary)] hover:enabled:bg-[var(--app-surface)]'
 }
 
 export const UiButton = defineComponent({
@@ -178,9 +244,9 @@ export const UiButton = defineComponent({
       class: cls(
         buttonBase,
         props.link || props.text
-          ? 'min-h-0 border-transparent bg-transparent px-1 py-1 text-[#007aff] shadow-none hover:enabled:text-[#0056b3]'
+          ? 'min-h-0 border-transparent bg-transparent px-1 py-1 text-[var(--app-primary)] shadow-none hover:enabled:text-[var(--app-primary-strong)]'
           : props.plain
-            ? 'border-[#d9e2ec] bg-white text-[#334155] hover:enabled:bg-[#f8fafc]'
+            ? 'border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)] hover:enabled:bg-[var(--app-surface-muted)]'
             : buttonTypes[normalizeType(props.type)],
         props.round && 'rounded-full',
         props.circle && 'h-9 w-9 px-0 rounded-full',
@@ -220,9 +286,9 @@ export const UiCard = defineComponent({
   setup(_, { attrs, slots }) {
     return () => h('section', {
       ...attrs,
-      class: cls('ui-card overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors duration-150 hover:border-[#cbd5e1]', attrs.class)
+      class: cls('ui-card overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border-soft)] bg-[var(--app-surface)] shadow-[var(--app-shadow-soft)] transition-colors duration-150 hover:border-[var(--app-border)]', attrs.class)
     }, [
-      slots.header && h('div', { class: 'ui-card__header border-b border-[#edf2f7] px-5 py-4 text-[15px] font-semibold text-[#0f172a]' }, slots.header()),
+      slots.header && h('div', { class: 'ui-card__header border-b border-[var(--app-border-soft)] px-5 py-4 text-[15px] font-semibold text-[var(--app-text)]' }, slots.header()),
       h('div', { class: 'ui-card__body min-w-0 px-5 py-4' }, slots.default?.())
     ])
   }
@@ -239,22 +305,22 @@ export const UiAlert = defineComponent({
   setup(props, { attrs, slots }) {
     const visible = ref(true)
     const tone = computed(() => ({
-      success: 'border-[#34c759]/20 bg-[#34c759]/10 text-[#248a3d]',
-      warning: 'border-[#ff9500]/20 bg-[#ff9500]/10 text-[#b86a00]',
-      danger: 'border-[#ff3b30]/20 bg-[#ff3b30]/10 text-[#b42318]',
-      error: 'border-[#ff3b30]/20 bg-[#ff3b30]/10 text-[#b42318]',
-      info: 'border-black/[0.06] bg-white/80 text-[#1d1d1f]'
-    }[props.type] || 'border-black/[0.06] bg-white/80 text-[#1d1d1f]'))
+      success: 'border-[var(--app-success)]/25 bg-[var(--app-success)]/10 text-[var(--app-success)]',
+      warning: 'border-[var(--app-warning)]/25 bg-[var(--app-warning)]/10 text-[var(--app-warning)]',
+      danger: 'border-[var(--app-danger)]/25 bg-[var(--app-danger)]/10 text-[var(--app-danger)]',
+      error: 'border-[var(--app-danger)]/25 bg-[var(--app-danger)]/10 text-[var(--app-danger)]',
+      info: 'border-[var(--app-border-soft)] bg-[var(--app-surface)] text-[var(--app-text-secondary)]'
+    }[props.type] || 'border-[var(--app-border-soft)] bg-[var(--app-surface)] text-[var(--app-text-secondary)]'))
     return () => visible.value && h('div', {
       ...attrs,
-      class: cls('ui-alert flex gap-3 rounded-[14px] border px-5 py-4 text-sm leading-relaxed', tone.value, attrs.class)
+      class: cls('ui-alert flex gap-3 rounded-[var(--app-radius-md)] border px-5 py-4 text-sm leading-relaxed', tone.value, attrs.class)
     }, [
       h('div', { class: 'min-w-0 flex-1' }, [
         props.title && h('div', { class: 'font-semibold' }, props.title),
         props.description && h('div', { class: 'mt-1 opacity-80' }, props.description),
         slots.default?.()
       ]),
-      props.closable && h('button', { class: 'shrink-0 text-lg leading-none opacity-60 hover:opacity-100', onClick: () => { visible.value = false } }, 'x')
+      props.closable && h('button', { type: 'button', 'aria-label': '关闭提示', class: 'shrink-0 text-lg leading-none opacity-60 hover:opacity-100', onClick: () => { visible.value = false } }, '×')
     ])
   }
 })
@@ -267,31 +333,31 @@ export const UiTag = defineComponent({
       const type = normalizeType(props.type)
       if (props.effect === 'dark') {
         return ({
-          primary: 'bg-[#007aff] text-white',
-          success: 'bg-[#16a34a] text-white',
-          warning: 'bg-[#d97706] text-white',
-          danger: 'bg-[#dc2626] text-white',
-          info: 'bg-[#64748b] text-white'
-        }[type] || 'bg-[#64748b] text-white')
+          primary: 'bg-[var(--app-primary)] text-white',
+          success: 'bg-[var(--app-success)] text-white',
+          warning: 'bg-[var(--app-warning)] text-white',
+          danger: 'bg-[var(--app-danger)] text-white',
+          info: 'bg-[var(--app-info)] text-white'
+        }[type] || 'bg-[var(--app-info)] text-white')
       }
 
       if (props.effect === 'plain') {
         return ({
-          primary: 'border border-[#007aff]/30 bg-white text-[#007aff]',
-          success: 'border border-[#16a34a]/30 bg-white text-[#16a34a]',
-          warning: 'border border-[#d97706]/30 bg-white text-[#d97706]',
-          danger: 'border border-[#dc2626]/30 bg-white text-[#dc2626]',
-          info: 'border border-[#cbd5e1] bg-white text-[#64748b]'
-        }[type] || 'border border-[#cbd5e1] bg-white text-[#64748b]')
+          primary: 'border border-[var(--app-primary)]/30 bg-[var(--app-surface)] text-[var(--app-primary)]',
+          success: 'border border-[var(--app-success)]/30 bg-[var(--app-surface)] text-[var(--app-success)]',
+          warning: 'border border-[var(--app-warning)]/30 bg-[var(--app-surface)] text-[var(--app-warning)]',
+          danger: 'border border-[var(--app-danger)]/30 bg-[var(--app-surface)] text-[var(--app-danger)]',
+          info: 'border border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-info)]'
+        }[type] || 'border border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-info)]')
       }
 
       return ({
-        primary: 'bg-[#007aff]/10 text-[#007aff]',
-        success: 'bg-[#16a34a]/10 text-[#16a34a]',
-        warning: 'bg-[#d97706]/10 text-[#d97706]',
-        danger: 'bg-[#dc2626]/10 text-[#dc2626]',
-        info: 'bg-black/5 text-[#64748b]'
-      }[type] || 'bg-black/5 text-[#64748b]')
+        primary: 'bg-[var(--app-primary)]/10 text-[var(--app-primary)]',
+        success: 'bg-[var(--app-success)]/10 text-[var(--app-success)]',
+        warning: 'bg-[var(--app-warning)]/10 text-[var(--app-warning)]',
+        danger: 'bg-[var(--app-danger)]/10 text-[var(--app-danger)]',
+        info: 'bg-[var(--app-text)]/5 text-[var(--app-info)]'
+      }[type] || 'bg-[var(--app-text)]/5 text-[var(--app-info)]')
     })
     return () => h('span', {
       ...attrs,
@@ -313,8 +379,8 @@ export const UiBadge = defineComponent({
     return () => h('span', { ...attrs, class: cls('ui-badge relative inline-flex', attrs.class) }, [
       slots.default?.(),
       props.isDot
-        ? h('span', { class: 'absolute right-0 top-0 h-2 w-2 rounded-full bg-[#ff3b30] ring-2 ring-white' })
-        : props.value !== undefined && h('span', { class: 'absolute -right-2 -top-2 rounded-full bg-[#ff3b30] px-1.5 text-[10px] font-bold text-white' }, String(props.value))
+        ? h('span', { class: 'absolute right-0 top-0 h-2 w-2 rounded-full bg-[var(--app-danger)] ring-2 ring-[var(--app-surface)]' })
+        : props.value !== undefined && h('span', { class: 'absolute -right-2 -top-2 rounded-full bg-[var(--app-danger)] px-1.5 text-[10px] font-bold text-white' }, String(props.value))
     ])
   }
 })
@@ -330,7 +396,7 @@ export const UiAvatar = defineComponent({
     return () => h('span', {
       ...attrs,
       style: [sizeStyle.value, attrs.style],
-      class: cls('ui-avatar inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#007aff] to-[#5856d6] text-sm font-semibold text-white', attrs.class)
+      class: cls('ui-avatar inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--app-primary)] text-sm font-semibold text-white', attrs.class)
     }, props.src ? h('img', { src: props.src, class: 'h-full w-full object-cover', alt: '' }) : slots.default?.())
   }
 })
@@ -405,7 +471,7 @@ export const UiMenuItem = defineComponent({
       ]
       const itemProps = {
         ...attrs,
-        class: cls('ui-menu-item relative flex h-10 items-center gap-2.5 rounded-lg px-3 text-[13.5px] text-[#6e6e73] transition-colors hover:bg-black/[0.04] hover:text-[#1d1d1f]', active && '!bg-[#007aff]/10 !font-semibold !text-[#007aff]', attrs.class),
+        class: cls('ui-menu-item relative flex h-10 items-center gap-2.5 rounded-[var(--app-radius-sm)] px-3 text-[13.5px] text-[var(--app-text-secondary)] transition-colors hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]', active && '!bg-[var(--app-primary-tint-12)] !font-semibold !text-[var(--app-primary)]', attrs.class),
         onClick: (event) => {
           attrs.onClick?.(event)
           menu?.select(props.index)
@@ -424,7 +490,7 @@ export const UiSubMenu = defineComponent({
   setup(_, { attrs, slots }) {
     const open = ref(true)
     return () => h('div', { ...attrs, class: cls('ui-sub-menu', attrs.class) }, [
-      h('button', { type: 'button', class: 'flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-[13.5px] text-[#6e6e73] hover:bg-black/[0.04]', onClick: () => { open.value = !open.value } }, slots.title?.()),
+      h('button', { type: 'button', class: 'flex h-10 w-full items-center gap-2.5 rounded-[var(--app-radius-sm)] px-3 text-[13.5px] text-[var(--app-text-secondary)] hover:bg-[var(--app-primary-tint-8)]', onClick: () => { open.value = !open.value } }, slots.title?.()),
       open.value && h('div', { class: 'ml-6 mt-1 space-y-0.5' }, slots.default?.())
     ])
   }
@@ -434,10 +500,10 @@ export const UiBreadcrumb = defineComponent({
   name: 'UiBreadcrumb',
   props: { separator: { type: String, default: '/' } },
   setup(props, { attrs, slots }) {
-    return () => h('nav', { ...attrs, class: cls('ui-breadcrumb flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-[13px] text-[#6e6e73]', attrs.class) },
+    return () => h('nav', { ...attrs, class: cls('ui-breadcrumb flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-[13px] text-[var(--app-text-secondary)]', attrs.class) },
       flattenVNodes(slots.default?.()).map((node, index, nodes) => [
         node,
-        index < nodes.length - 1 && h('span', { class: 'text-[#aeaeb2]' }, props.separator)
+        index < nodes.length - 1 && h('span', { class: 'text-[var(--app-text-soft)]' }, props.separator)
       ]))
   }
 })
@@ -447,8 +513,8 @@ export const UiBreadcrumbItem = defineComponent({
   props: { to: [String, Object] },
   setup(props, { attrs, slots }) {
     return () => props.to
-      ? h(RouterLink, { ...attrs, to: props.to, class: cls('hover:text-[#007aff]', attrs.class) }, slots.default)
-      : h('span', { ...attrs, class: cls('truncate text-[#1d1d1f] font-medium', attrs.class) }, slots.default?.())
+      ? h(RouterLink, { ...attrs, to: props.to, class: cls('hover:text-[var(--app-primary)]', attrs.class) }, slots.default)
+      : h('span', { ...attrs, class: cls('truncate text-[var(--app-text)] font-medium', attrs.class) }, slots.default?.())
   }
 })
 
@@ -585,15 +651,15 @@ export const UiFormItem = defineComponent({
     })
     const errorMessage = computed(() => props.prop ? form?.errors[props.prop] : '')
 
-    return () => h('label', { ...attrs, class: cls('ui-form-item flex min-w-0 flex-col gap-1.5 text-[13px] text-[#6e6e73]', errorMessage.value && 'text-[#dc2626]', attrs.class) }, [
+    return () => h('label', { ...attrs, class: cls('ui-form-item flex min-w-0 flex-col gap-1.5 text-[13px] text-[var(--app-text-secondary)]', errorMessage.value && 'text-[var(--app-danger)]', attrs.class) }, [
       props.label && h('span', { class: 'font-medium' }, props.label),
       h('span', { class: 'min-w-0' }, slots.default?.()),
-      errorMessage.value && h('span', { class: 'text-[12px] leading-relaxed text-[#dc2626]' }, errorMessage.value)
+      errorMessage.value && h('span', { class: 'text-[12px] leading-relaxed text-[var(--app-danger)]' }, errorMessage.value)
     ])
   }
 })
 
-const inputBase = 'ui-input min-h-10 w-full rounded-lg border border-[#d9e2ec] bg-white px-3 py-2 text-[14px] text-[#0f172a] outline-none transition-colors placeholder:text-[#94a3b8] hover:border-[#b8c7d6] focus:border-[#007aff] focus:ring-3 focus:ring-[#007aff]/10 disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:opacity-70'
+const inputBase = 'ui-input min-h-10 w-full rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-[14px] text-[var(--app-text)] outline-none transition-colors placeholder:text-[var(--app-text-soft)] hover:border-[var(--app-border-strong)] focus:border-[var(--app-primary)] focus:ring-3 focus:ring-[var(--app-primary-tint-12)] disabled:cursor-not-allowed disabled:bg-[var(--app-surface-muted)] disabled:opacity-70'
 
 export const UiInput = defineComponent({
   name: 'UiInput',
@@ -656,7 +722,7 @@ export const UiInput = defineComponent({
           value: optionValue,
           checked,
           disabled: props.disabled,
-          class: cls('ui-input ui-input--checkbox shrink-0 accent-[#007aff]', attrs.class),
+          class: cls('ui-input ui-input--checkbox shrink-0 accent-[var(--app-primary)]', attrs.class),
           onChange: onCheckboxChange
         })
       }
@@ -686,12 +752,12 @@ export const UiInput = defineComponent({
         onChange: (event) => emit('change', event.target.value)
       }
       return h('span', { class: 'ui-input-wrap relative inline-flex w-full items-center' }, [
-        hasPrefix && h('span', { class: 'absolute left-3 inline-flex text-[#94a3b8]' }, slots.prefix?.() || renderIcon(props.prefixIcon)),
+        hasPrefix && h('span', { class: 'absolute left-3 inline-flex text-[var(--app-text-soft)]' }, slots.prefix?.() || renderIcon(props.prefixIcon)),
         props.type === 'textarea'
           ? h('textarea', { ...common, ref: inputRef, rows: props.rows || 3, class: cls(inputBase, 'min-h-[88px] resize-y leading-relaxed', attrs.class) })
           : h('input', { ...common, ref: inputRef, type: props.showPassword ? 'password' : props.type }),
-        canClear && h('button', { type: 'button', class: 'absolute right-3 inline-flex h-5 w-5 items-center justify-center rounded-full text-[#94a3b8] hover:bg-[#e2e8f0] hover:text-[#334155]', onClick: clearInput }, 'x'),
-        hasSuffix && !canClear && h('span', { class: 'absolute right-3 inline-flex text-[#94a3b8]' }, slots.suffix?.() || renderIcon(props.suffixIcon))
+        canClear && h('button', { type: 'button', 'aria-label': '清空输入', class: 'absolute right-3 inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--app-text-soft)] hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]', onClick: clearInput }, '×'),
+        hasSuffix && !canClear && h('span', { class: 'absolute right-3 inline-flex text-[var(--app-text-soft)]' }, slots.suffix?.() || renderIcon(props.suffixIcon))
       ])
     }
   }
@@ -950,7 +1016,7 @@ export const UiSelect = defineComponent({
           'aria-controls': triggerId ? `${triggerId}-listbox` : undefined,
           style: triggerStyle,
           class: cls(
-            'ui-select inline-flex !h-10 !min-h-10 max-w-full min-w-[160px] items-center justify-between gap-2 rounded-[10px] border border-[#d9e2ec] !bg-white !px-3.5 !py-0 text-left text-[14px] leading-none text-[#1d1d1f] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors duration-150 focus:outline-none focus-visible:border-[#007aff] focus-visible:ring-4 focus-visible:ring-[#007aff]/15 disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#94a3b8]',
+            'ui-select inline-flex !h-10 !min-h-10 max-w-full min-w-[160px] items-center justify-between gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] !bg-[var(--app-surface)] !px-3.5 !py-0 text-left text-[14px] leading-none text-[var(--app-text)] shadow-[var(--app-shadow-soft)] transition-colors duration-150 focus:outline-none focus-visible:border-[var(--app-primary)] focus-visible:ring-4 focus-visible:ring-[var(--app-primary-tint-15)] disabled:cursor-not-allowed disabled:bg-[var(--app-surface-muted)] disabled:text-[var(--app-text-soft)]',
             triggerClass
           ),
           onClick: handleTriggerClick,
@@ -959,12 +1025,12 @@ export const UiSelect = defineComponent({
           h('span', {
             class: cls(
               'min-w-0 flex-1 truncate whitespace-nowrap',
-              !hasSelection.value && 'text-[#94a3b8]'
+              !hasSelection.value && 'text-[var(--app-text-soft)]'
             )
           }, selectedLabel.value || props.placeholder || ''),
           h('span', {
             class: cls(
-              'pointer-events-none relative h-4 w-4 shrink-0 text-[#64748b] transition-transform',
+              'pointer-events-none relative h-4 w-4 shrink-0 text-[var(--app-text-secondary)] transition-transform',
               open.value && 'rotate-180'
             ),
             'aria-hidden': 'true'
@@ -980,7 +1046,7 @@ export const UiSelect = defineComponent({
             id: triggerId ? `${triggerId}-listbox` : undefined,
             role: 'listbox',
             'aria-multiselectable': isMultiple.value ? 'true' : undefined,
-            class: 'ui-select__panel fixed z-[4000] overflow-y-auto rounded-lg border border-[#d9e2ec] bg-white py-1 shadow-[0_14px_32px_rgba(15,23,42,0.16)]',
+            class: 'ui-select__panel fixed z-[4000] overflow-y-auto rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] py-1 shadow-[var(--app-shadow)]',
             style: panelStyle.value,
             onKeydown: handleKeydown
           }, options.value.length
@@ -998,10 +1064,10 @@ export const UiSelect = defineComponent({
                 class: cls(
                   'flex h-9 w-full items-center gap-2 px-3 text-left text-[13px] leading-none transition-colors',
                   option.disabled
-                    ? 'cursor-not-allowed text-[#cbd5e1]'
-                    : 'cursor-pointer text-[#334155] hover:bg-[#f8fafc] hover:text-[#0f172a]',
-                  highlightedIndex.value === index && !option.disabled && 'bg-[#f8fafc] text-[#0f172a]',
-                  selected && 'bg-[#e8f2ff] font-medium text-[#0056b3]'
+                    ? 'cursor-not-allowed text-[var(--app-disabled)]'
+                    : 'cursor-pointer text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-muted)] hover:text-[var(--app-text)]',
+                  highlightedIndex.value === index && !option.disabled && 'bg-[var(--app-surface-muted)] text-[var(--app-text)]',
+                  selected && 'bg-[var(--app-primary-tint-12)] font-medium text-[var(--app-primary-strong)]'
                 ),
                 onMousedown: (event) => event.preventDefault(),
                 onMouseenter: () => {
@@ -1010,10 +1076,10 @@ export const UiSelect = defineComponent({
                 onClick: () => selectOption(option)
               }, [
                 h('span', { class: 'min-w-0 flex-1 truncate whitespace-nowrap' }, String(option.label ?? '')),
-                selected && h('span', { class: 'h-1.5 w-1.5 shrink-0 rounded-full bg-[#007aff]', 'aria-hidden': 'true' })
+                selected && h('span', { class: 'h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--app-primary)]', 'aria-hidden': 'true' })
               ])
             })
-            : h('div', { class: 'px-3 py-2 text-[13px] text-[#94a3b8]' }, '暂无选项'))
+            : h('div', { class: 'px-3 py-2 text-[13px] text-[var(--app-text-soft)]' }, '暂无选项'))
         ])
       ]
     }
@@ -1072,7 +1138,7 @@ export const UiSwitch = defineComponent({
     }
     return () => h('label', { ...attrs, class: cls('ui-switch inline-flex cursor-pointer items-center', props.disabled && 'cursor-not-allowed opacity-60', attrs.class) }, [
       h('input', { type: 'checkbox', class: 'peer sr-only', checked: checked.value, disabled: props.disabled, onChange: toggle }),
-      h('span', { class: 'h-7 w-12 rounded-full bg-black/10 p-0.5 transition-colors peer-checked:bg-[#34c759]' }, [
+      h('span', { class: 'h-7 w-12 rounded-full bg-[var(--app-border)] p-0.5 transition-colors peer-checked:bg-[var(--app-success)]' }, [
         h('span', { class: cls('block h-6 w-6 rounded-full bg-white shadow transition-transform', checked.value && 'translate-x-5') })
       ])
     ])
@@ -1111,8 +1177,8 @@ export const UiCheckbox = defineComponent({
         emit('change', event.target.checked)
       }
     }
-    return () => h('label', { ...attrs, class: cls('ui-checkbox inline-flex cursor-pointer items-center gap-2 text-[14px] text-[#1d1d1f]', attrs.class) }, [
-      h('input', { type: 'checkbox', checked: checked.value, class: 'h-4 w-4 accent-[#007aff]', onChange: update }),
+    return () => h('label', { ...attrs, class: cls('ui-checkbox inline-flex cursor-pointer items-center gap-2 text-[14px] text-[var(--app-text)]', attrs.class) }, [
+      h('input', { type: 'checkbox', checked: checked.value, class: 'h-4 w-4 accent-[var(--app-primary)]', onChange: update }),
       h('span', slots.default?.() || props.label)
     ])
   }
@@ -1140,7 +1206,7 @@ export const UiRadio = defineComponent({
   setup(props, { attrs, slots }) {
     const group = inject(radioGroupKey)
     return () => h('label', { ...attrs, class: cls('ui-radio inline-flex cursor-pointer items-center gap-2 text-[14px]', attrs.class) }, [
-      h('input', { type: 'radio', checked: group?.value.value === props.label, class: 'h-4 w-4 accent-[#007aff]', onChange: () => group?.update(props.label) }),
+      h('input', { type: 'radio', checked: group?.value.value === props.label, class: 'h-4 w-4 accent-[var(--app-primary)]', onChange: () => group?.update(props.label) }),
       h('span', slots.default?.() || props.label)
     ])
   }
@@ -1155,7 +1221,7 @@ export const UiRadioButton = defineComponent({
     return () => h('button', {
       ...attrs,
       type: 'button',
-      class: cls('ui-radio-button h-9 rounded-[10px] px-4 text-[13px] font-medium transition-colors', active.value ? 'bg-white text-[#007aff] shadow-sm' : 'bg-black/[0.04] text-[#6e6e73] hover:text-[#1d1d1f]', attrs.class),
+      class: cls('ui-radio-button h-9 rounded-[var(--app-radius-md)] px-4 text-[13px] font-medium transition-colors', active.value ? 'bg-[var(--app-surface)] text-[var(--app-primary)] shadow-sm' : 'bg-[var(--app-surface-muted)] text-[var(--app-text-secondary)] hover:text-[var(--app-text)]', attrs.class),
       onClick: () => group?.update(props.label)
     }, slots.default?.() || props.label)
   }
@@ -1180,8 +1246,8 @@ export const UiSlider = defineComponent({
     }
     return () => h('div', { ...attrs, class: cls('ui-slider flex items-center gap-3', attrs.class) },
       props.range
-        ? [0, 1].map((index) => h('input', { key: index, type: 'range', min: props.min, max: props.max, step: props.step, value: props.modelValue?.[index] ?? (index ? props.max : props.min), class: 'w-full accent-[#007aff]', onInput: (event) => update(index, event.target.value) }))
-        : h('input', { type: 'range', min: props.min, max: props.max, step: props.step, value: props.modelValue ?? props.min, class: 'w-full accent-[#007aff]', onInput: (event) => update(0, event.target.value) }))
+        ? [0, 1].map((index) => h('input', { key: index, type: 'range', min: props.min, max: props.max, step: props.step, value: props.modelValue?.[index] ?? (index ? props.max : props.min), class: 'w-full accent-[var(--app-primary)]', onInput: (event) => update(index, event.target.value) }))
+        : h('input', { type: 'range', min: props.min, max: props.max, step: props.step, value: props.modelValue ?? props.min, class: 'w-full accent-[var(--app-primary)]', onInput: (event) => update(0, event.target.value) }))
   }
 })
 
@@ -1190,12 +1256,12 @@ export const UiRate = defineComponent({
   props: { modelValue: { type: Number, default: 0 }, max: { type: Number, default: 5 }, disabled: Boolean, showScore: Boolean },
   emits: ['update:modelValue', 'change'],
   setup(props, { attrs, emit }) {
-    return () => h('div', { ...attrs, class: cls('ui-rate inline-flex items-center gap-1 text-[#ff9500]', attrs.class) }, [
+    return () => h('div', { ...attrs, class: cls('ui-rate inline-flex items-center gap-1 text-[var(--app-warning)]', attrs.class) }, [
       ...Array.from({ length: props.max }, (_, index) => {
         const value = index + 1
         return h('button', { type: 'button', disabled: props.disabled, class: cls('text-lg leading-none', value <= props.modelValue ? 'opacity-100' : 'opacity-30'), onClick: () => { emit('update:modelValue', value); emit('change', value) } }, '★')
       }),
-      props.showScore && h('span', { class: 'ml-1 text-[13px] text-[#6e6e73]' }, props.modelValue)
+      props.showScore && h('span', { class: 'ml-1 text-[13px] text-[var(--app-text-secondary)]' }, props.modelValue)
     ])
   }
 })
@@ -1206,13 +1272,13 @@ export const UiProgress = defineComponent({
   setup(props, { attrs }) {
     const barColor = computed(() => typeof props.color === 'string'
       ? props.color
-      : props.status === 'success' ? '#34c759' : props.status === 'warning' ? '#ff9500' : '#007aff')
+      : props.status === 'success' ? 'var(--app-success)' : props.status === 'warning' ? 'var(--app-warning)' : 'var(--app-primary)')
     return () => h('div', { ...attrs, class: cls('ui-progress flex items-center gap-2', attrs.class) }, [
       h('div', { class: 'min-w-0 flex-1 overflow-hidden rounded-full bg-black/[0.06]', style: { height: `${props.strokeWidth}px` } }, [
         h('div', { class: 'h-full rounded-full transition-[width]', style: { width: `${Math.max(0, Math.min(100, props.percentage))}%`, background: barColor.value } },
           props.textInside ? h('span', { class: 'block px-2 text-right text-[10px] leading-none text-white' }, `${props.percentage}%`) : null)
       ]),
-      props.showText && !props.textInside && h('span', { class: 'w-10 text-right text-[12px] text-[#6e6e73]' }, `${props.percentage}%`)
+      props.showText && !props.textInside && h('span', { class: 'w-10 text-right text-[12px] text-[var(--app-text-secondary)]' }, `${props.percentage}%`)
     ])
   }
 })
@@ -1221,7 +1287,7 @@ export const UiDivider = defineComponent({
   name: 'UiDivider',
   props: { contentPosition: String },
   setup(_, { attrs, slots }) {
-    return () => h('div', { ...attrs, class: cls('ui-divider my-5 flex items-center gap-3 text-[13px] font-medium text-[#6e6e73]', attrs.class) }, [
+    return () => h('div', { ...attrs, class: cls('ui-divider my-5 flex items-center gap-3 text-[13px] font-medium text-[var(--app-text-secondary)]', attrs.class) }, [
       h('span', { class: 'h-px flex-1 bg-black/[0.06]' }),
       slots.default && h('span', {}, slots.default()),
       h('span', { class: 'h-px flex-1 bg-black/[0.06]' })
@@ -1287,23 +1353,23 @@ export const UiTable = defineComponent({
     }
     return () => h('div', {
       ...attrs,
-      class: cls('ui-table-wrap relative w-full overflow-auto rounded-xl border border-[#e2e8f0] bg-white', attrs.class),
+      class: cls('ui-table-wrap relative w-full overflow-auto rounded-[var(--app-radius-lg)] border border-[var(--app-border-soft)] bg-[var(--app-surface)]', attrs.class),
       style: [props.maxHeight ? { maxHeight: typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight } : null, attrs.style]
     }, [
-      props.loading && h('div', { class: 'absolute inset-0 z-10 flex items-center justify-center bg-white/80 text-[#007aff]' }, '加载中...'),
-      h('table', { class: 'ui-table min-w-full border-separate border-spacing-0 bg-white text-left text-[13px] text-[#0f172a]' }, [
-        h('thead', { class: 'bg-[#f8fafc] text-[12px] font-semibold text-[#64748b]' }, [
-          h('tr', columns.value.map((column) => h('th', { class: 'whitespace-nowrap border-b border-[#e2e8f0] px-4 py-3', style: { width: column.props.width ? `${column.props.width}px` : undefined, minWidth: column.props['min-width'] ? `${column.props['min-width']}px` : undefined } }, column.props.label || '')))
+      props.loading && h('div', { class: 'absolute inset-0 z-10 flex items-center justify-center bg-[var(--app-surface)]/80 text-[var(--app-primary)]' }, '加载中...'),
+      h('table', { class: 'ui-table min-w-full border-separate border-spacing-0 bg-[var(--app-surface)] text-left text-[13px] text-[var(--app-text)]' }, [
+        h('thead', { class: 'bg-[var(--app-table-header-bg)] text-[12px] font-semibold text-[var(--app-text-secondary)]' }, [
+          h('tr', columns.value.map((column) => h('th', { class: 'whitespace-nowrap border-b border-[var(--app-border-soft)] px-4 py-3', style: { width: column.props.width ? `${column.props.width}px` : undefined, minWidth: column.props['min-width'] ? `${column.props['min-width']}px` : undefined } }, column.props.label || '')))
         ]),
         h('tbody', props.data.length
-          ? props.data.map((row, rowIndex) => h('tr', { key: typeof props.rowKey === 'function' ? props.rowKey(row) : props.rowKey ? row[props.rowKey] : rowIndex, class: cls('transition-colors hover:bg-[#f8fafc]', props.stripe && rowIndex % 2 === 1 && 'bg-[#fbfdff]') },
-            columns.value.map((column) => h('td', { class: 'border-b border-[#edf2f7] px-4 py-3 align-middle' },
+          ? props.data.map((row, rowIndex) => h('tr', { key: typeof props.rowKey === 'function' ? props.rowKey(row) : props.rowKey ? row[props.rowKey] : rowIndex, class: cls('transition-colors hover:bg-[var(--app-primary-tint-8)]', props.stripe && rowIndex % 2 === 1 && 'bg-[var(--app-table-header-bg)]') },
+            columns.value.map((column) => h('td', { class: 'border-b border-[var(--app-border-soft)] px-4 py-3 align-middle' },
               column.slots.default
                 ? callSlot(column.slots.default, { row, column, $index: rowIndex })
                 : valueFor(row, column, rowIndex)
             ))))
           : h('tr', [
-              h('td', { class: 'px-4 py-10 text-center text-[#aeaeb2]', colspan: Math.max(columns.value.length, 1) }, props.emptyText)
+              h('td', { class: 'px-4 py-10 text-center text-[var(--app-text-soft)]', colspan: Math.max(columns.value.length, 1) }, props.emptyText)
             ]))
       ])
     ])
@@ -1316,16 +1382,27 @@ export const UiDialog = defineComponent({
   emits: ['update:modelValue', 'close'],
   setup(props, { emit, slots }) {
     const close = () => { emit('update:modelValue', false); emit('close') }
+    const titleId = nextOverlayId('ui-dialog-title')
+    const { panelRef, handleKeydown } = useModalFocus(computed(() => props.modelValue), close)
     return () => h(Teleport, { to: 'body' }, [
       h(Transition, { name: 'ui-fade' }, () => props.modelValue && h('div', { class: 'fixed inset-0 z-[2000] flex items-center justify-center p-4' }, [
-        h('div', { class: 'fixed inset-0 bg-[#0f172a]/45', onMousedown: () => props.closeOnClickModal && close() }),
-        h('section', { class: 'relative max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-[0_20px_48px_rgba(15,23,42,0.18)]', style: { maxWidth: props.width } }, [
-          h('header', { class: 'flex items-center justify-between border-b border-[#edf2f7] px-5 py-4' }, [
-            h('h2', { class: 'text-[16px] font-semibold text-[#0f172a]' }, slots.header?.() || props.title),
-            h('button', { type: 'button', class: 'flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a]', onClick: close }, '×')
+        h('div', { class: 'fixed inset-0 bg-[var(--app-text)]/45', 'aria-hidden': 'true', onMousedown: () => props.closeOnClickModal && close() }),
+        h('section', {
+          ref: panelRef,
+          role: 'dialog',
+          'aria-modal': 'true',
+          'aria-labelledby': titleId,
+          tabindex: -1,
+          class: 'relative max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border-soft)] bg-[var(--app-surface)] shadow-[var(--app-shadow)] outline-none',
+          style: { maxWidth: props.width },
+          onKeydown: handleKeydown
+        }, [
+          h('header', { class: 'flex items-center justify-between border-b border-[var(--app-border-soft)] px-5 py-4' }, [
+            h('h2', { id: titleId, class: 'text-[16px] font-semibold text-[var(--app-text)]' }, slots.header?.() || props.title),
+            h('button', { type: 'button', 'aria-label': '关闭对话框', class: 'flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-sm)] text-[var(--app-text-secondary)] hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]', onClick: close }, '×')
           ]),
           h('div', { class: 'max-h-[calc(100vh-180px)] overflow-y-auto px-5 py-4' }, slots.default?.()),
-          slots.footer && h('footer', { class: 'flex justify-end gap-3 border-t border-[#edf2f7] px-5 py-4' }, slots.footer())
+          slots.footer && h('footer', { class: 'flex justify-end gap-3 border-t border-[var(--app-border-soft)] px-5 py-4' }, slots.footer())
         ])
       ]))
     ])
@@ -1339,6 +1416,8 @@ export const UiDrawer = defineComponent({
   emits: ['update:modelValue', 'close'],
   setup(props, { attrs, emit, slots }) {
     const close = () => { emit('update:modelValue', false); emit('close') }
+    const titleId = nextOverlayId('ui-drawer-title')
+    const { panelRef, handleKeydown } = useModalFocus(computed(() => props.modelValue), close)
     return () => {
       const { class: drawerClass, style: drawerStyle, ...drawerAttrs } = attrs
       return h(Teleport, { to: 'body' }, [
@@ -1346,17 +1425,24 @@ export const UiDrawer = defineComponent({
           ...drawerAttrs,
           class: cls('ui-drawer fixed inset-0 z-[2000]', drawerClass)
         }, [
-        h('div', { class: 'fixed inset-0 bg-[#0f172a]/40', onClick: close }),
+        h('div', { class: 'fixed inset-0 bg-[var(--app-text)]/40', 'aria-hidden': 'true', onClick: close }),
         h('aside', {
-          class: cls('fixed inset-y-0 flex flex-col border-[#e2e8f0] bg-white shadow-[0_20px_48px_rgba(15,23,42,0.16)]', props.direction === 'ltr' || props.direction === 'left' ? 'left-0 border-r' : 'right-0 border-l'),
-          style: [{ width: props.size }, drawerStyle]
+          ref: panelRef,
+          role: 'dialog',
+          'aria-modal': 'true',
+          'aria-labelledby': props.withHeader ? titleId : undefined,
+          'aria-label': props.withHeader ? undefined : (props.title || '侧边面板'),
+          tabindex: -1,
+          class: cls('fixed inset-y-0 flex flex-col border-[var(--app-border-soft)] bg-[var(--app-surface)] shadow-[var(--app-shadow)] outline-none', props.direction === 'ltr' || props.direction === 'left' ? 'left-0 border-r' : 'right-0 border-l'),
+          style: [{ width: props.size }, drawerStyle],
+          onKeydown: handleKeydown
         }, [
-          props.withHeader && h('header', { class: 'flex h-14 items-center justify-between border-b border-[#edf2f7] px-5' }, [
-            h('h2', { class: 'text-[16px] font-semibold text-[#0f172a]' }, slots.header?.() || props.title),
-            h('button', { type: 'button', class: 'flex h-8 w-8 items-center justify-center rounded-lg text-[#64748b] hover:bg-[#f1f5f9]', onClick: close }, '×')
+          props.withHeader && h('header', { class: 'flex h-14 items-center justify-between border-b border-[var(--app-border-soft)] px-5' }, [
+            h('h2', { id: titleId, class: 'text-[16px] font-semibold text-[var(--app-text)]' }, slots.header?.() || props.title),
+            h('button', { type: 'button', 'aria-label': '关闭抽屉', class: 'flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-sm)] text-[var(--app-text-secondary)] hover:bg-[var(--app-primary-tint-8)]', onClick: close }, '×')
           ]),
           h('div', { class: 'flex-1 overflow-y-auto p-5' }, slots.default?.()),
-          slots.footer && h('footer', { class: 'flex justify-end gap-3 border-t border-[#edf2f7] px-5 py-4' }, slots.footer())
+          slots.footer && h('footer', { class: 'flex justify-end gap-3 border-t border-[var(--app-border-soft)] px-5 py-4' }, slots.footer())
         ])
         ])
       ])
@@ -1368,6 +1454,7 @@ export const UiTooltip = defineComponent({
   name: 'UiTooltip',
   props: { content: String, placement: { type: String, default: 'top' } },
   setup(props, { attrs, slots }) {
+    const tooltipId = nextOverlayId('ui-tooltip')
     const visible = ref(false)
     const triggerRef = ref(null)
     const coords = reactive({ left: 0, top: 0 })
@@ -1404,20 +1491,24 @@ export const UiTooltip = defineComponent({
       ...attrs,
       ref: triggerRef,
       class: cls('ui-tooltip inline-flex', attrs.class),
+      'aria-describedby': visible.value && props.content ? tooltipId : undefined,
       onMouseenter: show,
       onMouseleave: hide,
-      onFocus: show,
-      onBlur: hide
+      onFocusin: show,
+      onFocusout: hide,
+      onKeydown: (event) => { if (event.key === 'Escape') hide() }
     }, [
       slots.default?.(),
       h(Teleport, { to: 'body' }, [
         h(Transition, { name: 'ui-fade' }, () => visible.value && props.content && h('div', {
+          id: tooltipId,
+          role: 'tooltip',
           class: 'ui-tooltip__pop fixed z-[3000] max-w-[280px] rounded-md px-2.5 py-1.5 text-[12px] font-medium leading-snug shadow-[0_4px_16px_rgba(15,23,42,0.18)] pointer-events-none',
           style: {
             left: `${coords.left}px`,
             top: `${coords.top}px`,
-            background: 'var(--app-text, #0f172a)',
-            color: 'var(--app-surface, #fffcf7)',
+            background: 'var(--app-text)',
+            color: 'var(--app-surface)',
             transform: props.placement === 'top' || props.placement === 'bottom'
               ? 'translateY(0)'
               : 'translateY(-50%)'
@@ -1440,12 +1531,12 @@ export const UiStatusDot = defineComponent({
   },
   setup(props, { attrs }) {
     const color = computed(() => ({
-      success: '#16a34a',
-      warning: '#d97706',
-      danger: '#dc2626',
-      info: '#64748b',
-      primary: '#007aff'
-    }[normalizeType(props.type)] || '#64748b'))
+      success: 'var(--app-success)',
+      warning: 'var(--app-warning)',
+      danger: 'var(--app-danger)',
+      info: 'var(--app-info)',
+      primary: 'var(--app-primary)'
+    }[normalizeType(props.type)] || 'var(--app-info)'))
     const px = computed(() => `${props.size}px`)
     return () => h(UiTooltip, {
       content: props.content,
@@ -1472,7 +1563,7 @@ export const UiDropdown = defineComponent({
     provide(dropdownKey, { command: (value) => { emit('command', value); open.value = false } })
     return () => h('div', { ...attrs, class: cls('ui-dropdown relative inline-flex', attrs.class) }, [
       h('div', { onClick: () => { open.value = !open.value } }, slots.default?.()),
-      open.value && h('div', { class: 'absolute right-0 top-full z-[3000] mt-2 min-w-[160px] rounded-lg border border-[#e2e8f0] bg-white py-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.12)]' }, slots.dropdown?.())
+      open.value && h('div', { class: 'absolute right-0 top-full z-[3000] mt-2 min-w-[160px] rounded-[var(--app-radius-md)] border border-[var(--app-border-soft)] bg-[var(--app-surface)] py-1.5 shadow-[var(--app-shadow)]' }, slots.dropdown?.())
     ])
   }
 })
@@ -1489,7 +1580,7 @@ export const UiDropdownItem = defineComponent({
   props: { command: [String, Number], divided: Boolean },
   setup(props, { attrs, slots }) {
     const dropdown = inject(dropdownKey, null)
-    return () => h('button', { ...attrs, type: 'button', class: cls('ui-dropdown-item flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] text-[#334155] hover:bg-[#f8fafc] hover:text-[#0f172a]', props.divided && 'mt-1 border-t border-[#edf2f7] pt-3', attrs.class), onClick: () => dropdown?.command(props.command) }, slots.default?.())
+    return () => h('button', { ...attrs, type: 'button', class: cls('ui-dropdown-item flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] text-[var(--app-text)] hover:bg-[var(--app-primary-tint-8)]', props.divided && 'mt-1 border-t border-[var(--app-border-soft)] pt-3', attrs.class), onClick: () => dropdown?.command(props.command) }, slots.default?.())
   }
 })
 
@@ -1502,7 +1593,7 @@ export const UiTabs = defineComponent({
     const active = computed(() => props.modelValue ?? panes.value[0]?.props.name)
     const setActive = (name) => { emit('update:modelValue', name); emit('change', name) }
     return () => h('div', { ...attrs, class: cls('ui-tabs', attrs.class) }, [
-      h('div', { class: 'flex border-b border-[#e2e8f0]' }, panes.value.map((pane) => h('button', { type: 'button', class: cls('h-10 px-4 text-[14px] transition-colors', active.value === pane.props.name ? 'border-b-2 border-[#007aff] font-semibold text-[#007aff]' : 'text-[#64748b] hover:text-[#007aff]'), onClick: () => setActive(pane.props.name) }, pane.props.label))),
+      h('div', { class: 'flex border-b border-[var(--app-border-soft)]' }, panes.value.map((pane) => h('button', { type: 'button', class: cls('h-10 px-4 text-[14px] transition-colors', active.value === pane.props.name ? 'border-b-2 border-[var(--app-primary)] font-semibold text-[var(--app-primary)]' : 'text-[var(--app-text-secondary)] hover:text-[var(--app-primary)]'), onClick: () => setActive(pane.props.name) }, pane.props.label))),
       h('div', { class: 'ui-tabs__content pt-4' }, panes.value.find((pane) => pane.props.name === active.value)?.slots.default?.())
     ])
   }
@@ -1528,8 +1619,8 @@ export const UiCollapseItem = defineComponent({
   props: { title: String },
   setup(props, { attrs, slots }) {
     return () => h('details', { ...attrs, class: cls('ui-collapse-item rounded-xl border border-black/[0.06] bg-white/80 px-4 py-3', attrs.class) }, [
-      h('summary', { class: 'cursor-pointer font-medium text-[#1d1d1f]' }, slots.title?.() || props.title),
-      h('div', { class: 'mt-3 text-[14px] text-[#1d1d1f]' }, slots.default?.())
+      h('summary', { class: 'cursor-pointer font-medium text-[var(--app-text)]' }, slots.title?.() || props.title),
+      h('div', { class: 'mt-3 text-[14px] text-[var(--app-text)]' }, slots.default?.())
     ])
   }
 })
@@ -1548,11 +1639,11 @@ export const UiDescriptions = defineComponent({
   setup(props, { attrs, slots }) {
     const items = computed(() => flattenVNodes(slots.default?.()).filter((node) => node?.type?.name === 'UiDescriptionsItem').map((node) => ({ props: toKebabProps(node.props || {}), slots: node.children || {} })))
     return () => h('section', { ...attrs, class: cls('ui-descriptions', attrs.class) }, [
-      props.title && h('h3', { class: 'mb-3 text-[16px] font-semibold text-[#1d1d1f]' }, props.title),
+      props.title && h('h3', { class: 'mb-3 text-[16px] font-semibold text-[var(--app-text)]' }, props.title),
       h('div', { class: 'grid overflow-hidden rounded-xl border border-black/[0.06]', style: { gridTemplateColumns: `repeat(${props.column}, minmax(0, 1fr))` } },
         items.value.map((item) => h('div', { class: 'min-w-0 border-b border-r border-black/[0.04] bg-white p-3' }, [
-          h('div', { class: 'mb-1 text-[12px] font-medium text-[#6e6e73]' }, item.props.label),
-          h('div', { class: 'text-[14px] text-[#1d1d1f]' }, item.slots.default?.())
+          h('div', { class: 'mb-1 text-[12px] font-medium text-[var(--app-text-secondary)]' }, item.props.label),
+          h('div', { class: 'text-[14px] text-[var(--app-text)]' }, item.slots.default?.())
         ])))
     ])
   }
@@ -1569,8 +1660,8 @@ export const UiTimelineItem = defineComponent({
   name: 'UiTimelineItem',
   props: { timestamp: String, type: String },
   setup(props, { attrs, slots }) {
-    return () => h('li', { ...attrs, class: cls('ui-timeline-item relative pl-5 before:absolute before:left-0 before:top-1.5 before:h-2.5 before:w-2.5 before:rounded-full before:bg-[#007aff]', attrs.class) }, [
-      props.timestamp && h('div', { class: 'mb-1 text-[12px] text-[#aeaeb2]' }, props.timestamp),
+    return () => h('li', { ...attrs, class: cls('ui-timeline-item relative pl-5 before:absolute before:left-0 before:top-1.5 before:h-2.5 before:w-2.5 before:rounded-full before:bg-[var(--app-primary)]', attrs.class) }, [
+      props.timestamp && h('div', { class: 'mb-1 text-[12px] text-[var(--app-text-soft)]' }, props.timestamp),
       slots.default?.()
     ])
   }
@@ -1581,7 +1672,7 @@ export const UiEmpty = defineComponent({
   props: { description: { type: String, default: '暂无数据' }, imageSize: [Number, String] },
   setup(props, { attrs, slots }) {
     const sizeStyle = computed(() => props.imageSize ? { minHeight: typeof props.imageSize === 'number' ? `${props.imageSize}px` : props.imageSize } : null)
-    return () => h('div', { ...attrs, style: [sizeStyle.value, attrs.style], class: cls('ui-empty flex flex-col items-center justify-center rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] px-4 py-10 text-center text-[14px] text-[#64748b]', attrs.class) }, slots.default?.() || props.description)
+    return () => h('div', { ...attrs, style: [sizeStyle.value, attrs.style], class: cls('ui-empty flex flex-col items-center justify-center rounded-[var(--app-radius-lg)] border border-dashed border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-10 text-center text-[14px] text-[var(--app-text-secondary)]', attrs.class) }, slots.default?.() || props.description)
   }
 })
 
@@ -1589,7 +1680,7 @@ export const UiSkeleton = defineComponent({
   name: 'UiSkeleton',
   props: { rows: { type: Number, default: 4 } },
   setup(props, { attrs }) {
-    return () => h('div', { ...attrs, class: cls('ui-skeleton space-y-3 p-4', attrs.class) }, Array.from({ length: props.rows }, (_, index) => h('div', { class: 'h-4 animate-g-shimmer rounded bg-[linear-gradient(90deg,#f0f0f0_25%,#e8e8e8_50%,#f0f0f0_75%)] bg-[length:200%_100%]', style: { width: `${80 - index * 10}%` } })))
+    return () => h('div', { ...attrs, class: cls('ui-skeleton space-y-3 p-4', attrs.class) }, Array.from({ length: props.rows }, (_, index) => h('div', { class: 'h-4 animate-g-shimmer rounded bg-[linear-gradient(90deg,var(--app-surface-muted)_25%,var(--app-border)_50%,var(--app-surface-muted)_75%)] bg-[length:200%_100%]', style: { width: `${80 - index * 10}%` } })))
   }
 })
 
@@ -1621,7 +1712,7 @@ export const UiLink = defineComponent({
   name: 'UiLink',
   props: { href: String, type: String },
   setup(props, { attrs, slots }) {
-    return () => h('a', { ...attrs, href: props.href || attrs.href || '#', class: cls('ui-link text-[#007aff] hover:text-[#0056b3]', attrs.class) }, slots.default?.())
+    return () => h('a', { ...attrs, href: props.href || attrs.href || '#', class: cls('ui-link text-[var(--app-primary)] hover:text-[var(--app-primary-strong)]', attrs.class) }, slots.default?.())
   }
 })
 
@@ -1633,7 +1724,7 @@ export const UiPageHeader = defineComponent({
     if (!props.showBack) {
       return () => h('div', { ...attrs, class: cls('ui-page-header flex items-center gap-3', attrs.class) }, [
         h('div', { class: 'min-w-0' }, [
-          h('div', { class: 'text-[18px] font-semibold text-[#0f172a]' }, slots.content?.() || props.content || props.title),
+          h('div', { class: 'text-[18px] font-semibold text-[var(--app-text)]' }, slots.content?.() || props.content || props.title),
           slots.default?.()
         ])
       ])
@@ -1642,7 +1733,7 @@ export const UiPageHeader = defineComponent({
     return () => h('div', { ...attrs, class: cls('ui-page-header flex items-center gap-3', attrs.class) }, [
       h('button', {
         type: 'button',
-        class: 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#007aff] transition-colors hover:bg-[#e8f2ff]',
+        class: 'flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] text-[var(--app-primary)] transition-colors hover:bg-[var(--app-primary-tint-8)]',
         'aria-label': 'Back',
         onClick: () => emit('back')
       }, [
@@ -1660,7 +1751,7 @@ export const UiPageHeader = defineComponent({
         ])
       ]),
       h('div', { class: 'min-w-0' }, [
-        h('div', { class: 'text-[18px] font-semibold text-[#0f172a]' }, slots.content?.() || props.content || props.title),
+        h('div', { class: 'text-[18px] font-semibold text-[var(--app-text)]' }, slots.content?.() || props.content || props.title),
         slots.default?.()
       ])
     ])
@@ -1685,7 +1776,7 @@ export const UiPagination = defineComponent({
     }
     return () => h('div', { ...attrs, class: cls('ui-pagination flex items-center justify-center gap-1.5', attrs.class) }, [
       h(UiButton, { plain: true, disabled: current.value <= 1, onClick: () => go(current.value - 1) }, () => '<'),
-      h('span', { class: 'px-3 text-[13px] text-[#6e6e73]' }, `${current.value} / ${totalPages.value}`),
+      h('span', { class: 'px-3 text-[13px] text-[var(--app-text-secondary)]' }, `${current.value} / ${totalPages.value}`),
       h(UiButton, { plain: true, disabled: current.value >= totalPages.value, onClick: () => go(current.value + 1) }, () => '>')
     ])
   }
@@ -1802,7 +1893,7 @@ export const UiUpload = defineComponent({
     return () => h('div', { ...attrs, class: cls('ui-upload inline-block', attrs.class) }, [
       h('input', { ref: inputRef, type: 'file', accept: props.accept, multiple: props.multiple, disabled: props.disabled, class: 'sr-only', onChange: onFileChange }),
       h('div', {
-        class: cls(props.drag && 'rounded-2xl border border-dashed bg-white/60 p-6 text-center cursor-pointer transition-colors', isDragging.value ? 'border-[#007aff] bg-[rgba(0,122,255,0.04)]' : 'border-black/10'),
+        class: cls(props.drag && 'rounded-[var(--app-radius-lg)] border border-dashed bg-[var(--app-glass)] p-6 text-center cursor-pointer transition-colors', isDragging.value ? 'border-[var(--app-primary)] bg-[var(--app-primary-tint-8)]' : 'border-[var(--app-border)]'),
         onClick: open,
         onDragover: props.drag ? onDragOver : undefined,
         onDragleave: props.drag ? onDragLeave : undefined,
@@ -1810,25 +1901,25 @@ export const UiUpload = defineComponent({
       }, slots.default?.()),
       !slots.default && files.value.length > 0 && h('div', { class: 'mt-3 flex flex-col gap-2' }, files.value.map((file) => h('div', {
         key: file.uid,
-        class: 'flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-white px-3 py-2 text-[13px] text-[#334155]'
+        class: 'flex items-center justify-between gap-3 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-2 text-[13px] text-[var(--app-text)]'
       }, [
         h('span', { class: 'min-w-0 truncate' }, file.name),
         h('button', {
           type: 'button',
-          class: 'shrink-0 text-[#6e6e73] hover:text-[#ff3b30]',
+          class: 'shrink-0 text-[var(--app-text-secondary)] hover:text-[var(--app-danger)]',
           onClick: (event) => {
             event.stopPropagation()
             removeFile(file)
           }
         }, 'x')
       ]))),
-      slots.tip && h('div', { class: 'mt-2 text-[12px] text-[#aeaeb2]' }, slots.tip())
+      slots.tip && h('div', { class: 'mt-2 text-[12px] text-[var(--app-text-soft)]' }, slots.tip())
     ])
   }
 })
 
 export const UiSteps = defineComponent({ name: 'UiSteps', setup: (_, { attrs, slots }) => () => h('div', { ...attrs, class: cls('ui-steps flex items-center gap-3', attrs.class) }, slots.default?.()) })
-export const UiStep = defineComponent({ name: 'UiStep', props: { title: String }, setup: (props, { attrs, slots }) => () => h('div', { ...attrs, class: cls('ui-step flex items-center gap-2 text-[13px] text-[#6e6e73]', attrs.class) }, [h('span', { class: 'h-2 w-2 rounded-full bg-[#007aff]' }), slots.default?.() || props.title]) })
+export const UiStep = defineComponent({ name: 'UiStep', props: { title: String }, setup: (props, { attrs, slots }) => () => h('div', { ...attrs, class: cls('ui-step flex items-center gap-2 text-[13px] text-[var(--app-text-secondary)]', attrs.class) }, [h('span', { class: 'h-2 w-2 rounded-full bg-[var(--app-primary)]' }), slots.default?.() || props.title]) })
 export const UiCalendar = defineComponent({ name: 'UiCalendar', props: { modelValue: [String, Date] }, emits: ['update:modelValue'], setup: (props, { attrs, emit, slots }) => () => h('div', { ...attrs, class: cls('ui-calendar rounded-2xl bg-white p-4', attrs.class) }, [h('input', { type: 'date', class: inputBase, value: props.modelValue ? String(props.modelValue).slice(0, 10) : '', onInput: (e) => emit('update:modelValue', e.target.value) }), slots.default?.({ date: props.modelValue })]) })
 
 export const uiComponents = {

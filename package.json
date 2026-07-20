@@ -6,7 +6,7 @@
     "preinstall": "node scripts/ensure-npm.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
+    "lint": "vue-cli-service lint src",
     "api:local": "node scripts/switch-api.js local",
     "api:server": "node scripts/switch-api.js server",
     "api:status": "node scripts/switch-api.js status"

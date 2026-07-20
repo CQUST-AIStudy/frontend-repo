@@ -211,8 +211,52 @@
                 </ui-descriptions>
 
                 <div class="experiment-code [margin-top:20px]" v-if="selectedExperiment.code">
-                  <h3>实验代码</h3>
-                  <CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
+                  <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [margin-bottom:12px]">
+                    <h3 class="[margin:0]">实验代码</h3>
+                    <span v-if="parsedQuestions.length > 1" class="[font-size:12px] [color:var(--app-text-secondary)]">
+                      共 {{ parsedQuestions.length }} 题
+                    </span>
+                  </div>
+
+                  <div v-if="parsedQuestions.length > 0" class="[display:flex] [flex-direction:column] [gap:12px]">
+                    <div
+                      v-if="parsedQuestions.length > 1"
+                      class="[display:flex] [flex-wrap:wrap] [gap:8px] [padding:4px] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [background:var(--app-surface-muted)]"
+                      role="tablist"
+                      aria-label="实验题目"
+                    >
+                      <UiButton
+                        v-for="(question, index) in parsedQuestions"
+                        :key="`question-tab-${question.number}-${index}`"
+                        :type="activeQuestionTab === String(index) ? 'primary' : 'default'"
+                        size="small"
+                        :aria-selected="activeQuestionTab === String(index)"
+                        role="tab"
+                        @click="activeQuestionTab = String(index)"
+                      >
+                        第{{ question.number }}题
+                      </UiButton>
+                    </div>
+
+                    <div
+                      v-for="(question, index) in parsedQuestions"
+                      v-show="activeQuestionTab === String(index)"
+                      :key="`question-panel-${question.number}-${index}`"
+                      class="app-panel [overflow:hidden]"
+                      role="tabpanel"
+                    >
+                      <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [padding:12px_16px] [border-bottom:1px_solid_var(--app-border-soft)]">
+                        <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题</span>
+                        <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
+                      </div>
+                      <div class="[padding:16px]">
+                        <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
+                        <pre v-if="question.testResults" class="[margin:16px_0_0] [padding:12px] [overflow:auto] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)] [color:var(--app-text-secondary)] [font-size:12px] [line-height:1.6] [white-space:pre-wrap]"><code>{{ question.testResults }}</code></pre>
+                      </div>
+                    </div>
+                  </div>
+
+                  <CodeViewer v-else :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
                 </div>
 
                 <div class="ai-comment [margin-top:20px]" v-if="selectedExperiment.aiComment">
@@ -247,6 +291,7 @@ import {
 } from '@/components/ui/icons'
 import { DocxGenerator } from '../../utils/docxGenerator'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
+import { parseSubmissionQuestions } from '@/utils/submissionQuestionParser.mjs'
 import CodeViewer from '@/components/CodeViewer.vue'
 import ReportGenerator from '@/components/ReportGenerator.vue'
 
@@ -262,6 +307,7 @@ const searchQuery = ref('')
 const selectedExperiment = ref(null)
 const isReportViewVisible = ref(false)
 const reportData = ref({})
+const activeQuestionTab = ref('0')
 
 const canGenerateReport = computed(() => {
   if (!selectedExperiment.value || selectedExperiment.value.status !== 'completed') return false
@@ -324,6 +370,9 @@ const selectExperiment = async (experiment) => {
   selectedExperiment.value = { ...experiment }
   reportData.value = {}
   isReportViewVisible.value = false
+  activeQuestionTab.value = '0'
+  parsedQuestions.value = []
+  parseQuestionCode()
 
   if (experiment.status !== 'completed') {
     return
@@ -446,36 +495,11 @@ const parsedQuestions = ref([])
 
 // 解析实验代码为题目数组
 const parseQuestionCode = () => {
-  if (!selectedExperiment.value || !selectedExperiment.value.code) return
-  const regex = /第\s*(\d+)\s*题如下([\s\S]*?)(?=第\s*\d+\s*题如下|$)/g
-  const code = selectedExperiment.value.code
-  const questions = []
-  let match
-  while ((match = regex.exec(code)) !== null) {
-    const questionNumber = match[1]
-    let questionCode = match[2].trim()
-    // 提取测试结果表格（如果有）
-    const testResultsRegex = /([\s\S]*?)((?:\|\s*测试点[\s\S]*?)+$)/
-    const resultMatch = questionCode.match(testResultsRegex)
-    let testResults = null
-    if (resultMatch) {
-      questionCode = resultMatch[1].trim()
-      testResults = resultMatch[2].trim()
-    }
-    questions.push({
-      number: parseInt(questionNumber),
-      code: questionCode,
-      testResults
-    })
-  }
-  parsedQuestions.value = questions
-  if (questions.length === 0 && code) {
-    parsedQuestions.value = [{
-      number: 1,
-      code: code,
-      testResults: null
-    }]
-  }
+  parsedQuestions.value = parseSubmissionQuestions({
+    code: selectedExperiment.value?.code,
+    problems: selectedExperiment.value?.problems
+  })
+  activeQuestionTab.value = '0'
 }
 
 // 生成steps内容（只包含代码，不包含测试结果）

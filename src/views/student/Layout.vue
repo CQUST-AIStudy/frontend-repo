@@ -1,11 +1,11 @@
 <template>
-  <div class="student-layout [width:100%] [height:100vh] [height:100dvh] [min-height:0] [overflow:hidden] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto] max-[960px]:[overflow-x:hidden]">
-    <ui-container class="layout-container [height:100vh] [height:100dvh] [min-height:0] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto]">
-      <ui-aside v-if="!isMobile" :width="asideWidth" class="layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--app-sidebar-bg)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:0.5px_solid_var(--app-border-soft)] [backdrop-filter:blur(20px)_saturate(180%)]">
+  <div class="app-layout app-layout--student student-layout [width:100%] [height:100vh] [height:100dvh] [min-height:0] [overflow:hidden] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto] max-[960px]:[overflow-x:hidden]">
+    <ui-container class="app-layout-container layout-container [height:100vh] [height:100dvh] [min-height:0] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto]">
+      <ui-aside v-if="!isMobile" :width="asideWidth" class="app-layout-aside layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--app-sidebar-bg)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:1px_solid_var(--app-border-soft)] [backdrop-filter:blur(16px)_saturate(140%)]">
         <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_var(--app-border-soft)]">
           <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_var(--app-border-soft)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
           <transition name="fade-text">
-            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:var(--app-text)] [white-space:nowrap] [letter-spacing:-0.01em]">智能学习平台</span>
+            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:var(--app-text)] [white-space:nowrap] [letter-spacing:0]">智能学习平台</span>
           </transition>
         </div>
 
@@ -93,7 +93,7 @@
         :with-header="false"
         class="layout-drawer"
       >
-        <div class="layout-aside mobile-aside [width:100%] [border-right:none]">
+        <div class="app-layout-aside layout-aside mobile-aside [width:100%] [border-right:none]">
           <div class="logo-container">
             <img src="../../assets/logo.png" alt="Logo" class="logo" />
             <span class="logo-title">智能学习平台</span>
@@ -161,7 +161,7 @@
       </ui-drawer>
 
       <ui-container class="layout-main student-layout-main [display:flex] [flex-direction:column] [flex:1_1_auto] [width:100%] [height:100%] [min-width:0] [min-height:0] [overflow:hidden] [background:var(--app-layout-main)]">
-        <ui-header class="layout-header student-layout-header [position:relative] [z-index:80] [overflow:visible] [background:var(--app-glass-header)] [display:flex] [align-items:center] [justify-content:space-between] [height:58px] [min-height:58px] [padding:8px_24px] [border-bottom:1px_solid_var(--app-border-soft)] [gap:16px] [backdrop-filter:blur(14px)] [flex-shrink:0]">
+        <ui-header class="app-layout-header layout-header student-layout-header [position:relative] [z-index:80] [overflow:visible] [background:var(--app-glass-header)] [display:flex] [align-items:center] [justify-content:space-between] [height:64px] [min-height:64px] [padding:8px_24px] [border-bottom:1px_solid_var(--app-border-soft)] [gap:16px] [backdrop-filter:blur(14px)] [flex-shrink:0]">
           <div class="header-left [display:flex] [align-items:center] [gap:12px] [min-width:0] [gap:14px]">
             <ui-icon class="fold-icon [display:inline-flex] [align-items:center] [justify-content:center] [width:40px] [height:40px] [flex:0_0_40px] [cursor:pointer] [font-size:20px] [color:var(--app-text-secondary)] [border-radius:14px] [transition:all_0.2s_ease] hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-primary)]" @click="toggleNavigation">
               <MenuIcon v-if="isMobile" />
@@ -257,7 +257,7 @@
           </div>
         </ui-header>
 
-        <ui-main class="layout-content student-layout-content [background:var(--app-layout-main)] [padding:18px_24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow-y:auto] [overflow-x:hidden] [position:relative]">
+        <ui-main class="app-layout-content layout-content student-layout-content [background:var(--app-layout-main)] [padding:24px] [min-width:0] [min-height:0] [flex:1_1_auto] [overflow-y:auto] [overflow-x:hidden] [position:relative]">
           <router-view v-slot="{ Component }">
             <transition name="page-slide" mode="out-in">
               <component :is="Component" />
@@ -265,7 +265,7 @@
           </router-view>
         </ui-main>
 
-        <ui-footer class="layout-footer student-layout-footer [text-align:center] [color:var(--app-text-soft)] [padding:7px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_var(--app-border-soft)] [flex-shrink:0]">
+        <ui-footer class="app-layout-footer layout-footer student-layout-footer [text-align:center] [color:var(--app-text-soft)] [padding:12px_16px] [font-size:12px] [line-height:18px] [background:transparent] [border-top:1px_solid_var(--app-border-soft)] [flex-shrink:0]">
           智能个性画像与个性化实验能力提升平台 © 2025
         </ui-footer>
       </ui-container>
@@ -509,14 +509,14 @@ function handleMarkAllRead() {
 }
 
 .student-layout-header {
-  min-height: 58px !important;
+  min-height: 64px !important;
   padding: 8px 24px !important;
 }
 
 .student-layout-content {
   flex: 1 1 auto !important;
   min-height: 0 !important;
-  padding: 18px 24px !important;
+  padding: 24px !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   position: relative !important;
@@ -539,19 +539,19 @@ function handleMarkAllRead() {
 }
 
 .student-layout-footer {
-  padding: 7px 16px !important;
+  padding: 12px 16px !important;
 }
 
 @media (max-width: 960px) {
   .student-layout-header {
     height: auto !important;
-    min-height: 56px !important;
+    min-height: 58px !important;
     padding: 10px 16px !important;
   }
 
   .student-layout-content {
     min-height: 0 !important;
-    padding: 14px !important;
+    padding: 16px !important;
     overflow-y: auto !important;
   }
 }

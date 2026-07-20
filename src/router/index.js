@@ -348,6 +348,26 @@ const routes = [
         component: () => import('../views/admin/Profile.vue')
       }
     ]
+  },
+  {
+    path: '/403',
+    name: 'Forbidden',
+    component: () => import('../views/common/HttpStatusPage.vue'),
+    props: {
+      statusCode: 403,
+      title: '无权访问此页面',
+      description: '当前账号没有执行此操作所需的权限。请返回上一页，或联系管理员确认账号权限。'
+    }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/common/HttpStatusPage.vue'),
+    props: {
+      statusCode: 404,
+      title: '页面不存在',
+      description: '该地址可能已失效、被移动或输入有误。请返回上一页，或回到当前角色首页。'
+    }
   }
 ]
 
@@ -416,7 +436,7 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.meta.requiredRole && userRole !== to.meta.requiredRole) {
-    next(getRoleHomePath(userRole))
+    next({ path: '/403', query: { from: to.fullPath } })
     return
   }
 
@@ -431,7 +451,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiredPermissions) {
     const userPermissions = userInfo?.permissions || []
     if (!hasAllPermissions(to.meta.requiredPermissions, userPermissions)) {
-      next('/teacher/dashboard')
+      next({ path: '/403', query: { from: to.fullPath } })
       return
     }
   }

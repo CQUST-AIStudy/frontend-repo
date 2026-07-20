@@ -1,9 +1,9 @@
 <template>
-  <div class="flex h-screen h-dvh overflow-hidden bg-[var(--app-layout-main)]">
+  <div class="app-layout app-layout--teacher flex h-screen h-dvh overflow-hidden bg-[var(--app-layout-main)]">
     <!-- Sidebar (Desktop) -->
     <UiAside
       v-if="!isMobile"
-      class="fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-[var(--app-border-soft)] bg-[var(--app-sidebar-bg)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+      class="app-layout-aside fixed inset-y-0 left-0 z-30 flex w-[var(--teacher-aside-width)] flex-col h-screen h-dvh overflow-hidden border-r border-[var(--app-border-soft)] bg-[var(--app-sidebar-bg)] backdrop-blur-[20px] backdrop-saturate-[180%] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
       :style="asideStyle"
     >
       <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--app-border-soft)] shrink-0">
@@ -18,7 +18,7 @@
         >
           <div v-if="!collapsed" class="flex flex-col gap-0.5 overflow-hidden">
             <span class="text-[11px] font-medium text-[var(--app-text-soft)] uppercase tracking-wide">教师工作台</span>
-            <span class="text-base font-bold text-[var(--app-text)] tracking-tight whitespace-nowrap">智能教学平台</span>
+            <span class="text-base font-bold text-[var(--app-text)] tracking-normal whitespace-nowrap">智能教学平台</span>
           </div>
         </transition>
       </div>
@@ -100,12 +100,12 @@
         leave-from-class="translate-x-0"
         leave-to-class="-translate-x-full"
       >
-        <UiAside v-if="mobileMenuVisible" class="fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[var(--app-sidebar-bg)] backdrop-blur-[24px] shadow-2xl">
+        <UiAside v-if="mobileMenuVisible" class="app-layout-aside fixed inset-y-0 left-0 z-50 w-[300px] flex flex-col bg-[var(--app-sidebar-bg)] backdrop-blur-[24px] shadow-2xl">
           <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--app-border-soft)] shrink-0">
             <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-[var(--app-border-soft)] shadow-sm" />
             <div class="flex flex-col gap-0.5">
               <span class="text-[11px] font-medium text-[var(--app-text-soft)] uppercase tracking-wide">教师工作台</span>
-              <span class="text-base font-bold text-[var(--app-text)] tracking-tight">智能教学平台</span>
+              <span class="text-base font-bold text-[var(--app-text)] tracking-normal">智能教学平台</span>
             </div>
           </div>
           <nav class="flex-1 overflow-y-auto px-2 py-3">
@@ -153,9 +153,9 @@
     </Teleport>
 
     <!-- Main Area -->
-    <div class="ml-[var(--teacher-main-margin)] flex h-screen h-dvh flex-col flex-1 min-w-0 overflow-hidden transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
+    <div class="app-layout-main ml-[var(--teacher-main-margin)] flex h-screen h-dvh flex-col flex-1 min-w-0 overflow-hidden transition-[margin-left] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" :style="mainStyle">
       <!-- Header -->
-      <UiHeader class="sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-[var(--app-border-soft)] bg-[var(--app-glass-header)] backdrop-blur-[20px] backdrop-saturate-[180%]">
+      <UiHeader class="app-layout-header sticky top-0 z-20 flex shrink-0 items-center justify-between gap-4 min-h-[64px] px-6 border-b border-[var(--app-border-soft)] bg-[var(--app-glass-header)] backdrop-blur-[20px] backdrop-saturate-[180%]">
         <div class="flex items-center gap-3.5 min-w-0">
           <UiButton @click="toggleNavigation" class="inline-flex items-center justify-center w-10 h-10 rounded-[10px] text-[var(--app-text-secondary)] text-xl cursor-pointer transition-all duration-200 hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-primary)] shrink-0" title="切换导航">
             <MenuIcon v-if="isMobile" />
@@ -222,7 +222,7 @@
 
       <!-- Content -->
       <UiMain
-        class="flex-1 min-w-0 min-h-0 p-6 overflow-y-auto overflow-x-hidden bg-[var(--app-layout-main)]"
+        class="app-layout-content flex-1 min-w-0 min-h-0 p-6 overflow-y-auto overflow-x-hidden bg-[var(--app-layout-main)]"
         :class="{
           '!box-border !h-[calc(100vh-64px)] !h-[calc(100dvh-64px)] !min-h-0 !overflow-hidden !p-4': isAiChatPage
         }"
@@ -243,7 +243,7 @@
       </UiMain>
 
       <!-- Footer -->
-      <UiFooter v-if="!isAiChatPage" class="shrink-0 text-center text-[var(--app-text-soft)] text-[12px] py-3 px-4 border-t border-[var(--app-border-soft)]">
+      <UiFooter v-if="!isAiChatPage" class="app-layout-footer shrink-0 text-center text-[var(--app-text-soft)] text-[12px] py-3 px-4 border-t border-[var(--app-border-soft)]">
         智能个性画像与个性化实验能力提升平台 · 教师工作空间
       </UiFooter>
     </div>
