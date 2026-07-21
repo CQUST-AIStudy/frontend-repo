@@ -342,7 +342,8 @@ function problemDisplayName(item = {}) {
   const title = String(item.type || item.title || '').trim()
   const label = String(item.label || '').trim()
   if (title && title !== label) return title.length > 12 ? `${title.slice(0, 12)}...` : title
-  return label || '未命名题目'
+  if (label) return label.length > 12 ? `${label.slice(0, 12)}...` : label
+  return '未命名题目'
 }
 
 const activeClassLabel = computed(() => {
@@ -765,8 +766,12 @@ function renderDistChart() {
         return `${label}<br/>人数：${current.value}<br/>比例：${Math.round((current.value / total) * 100)}%`
       },
     },
-    grid: { left: 40, right: 16, top: 20, bottom: 36 },
-    xAxis: { type: 'category', data: SCORE_SHORT_LABELS, axisLabel: { fontSize: 10, rotate: 30 } },
+    grid: { left: 16, right: 16, top: 20, bottom: 12, containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: SCORE_SHORT_LABELS,
+      axisLabel: { fontSize: 10, rotate: 30, margin: 10, interval: 0 },
+    },
     yAxis: { type: 'value', name: '人数', minInterval: 1 },
     series: [{
       type: 'bar',
@@ -806,7 +811,13 @@ function renderAccChart() {
         return `${item.type || item.title || item.label || '未命名题目'}<br/>题号：${item.label || '-'}<br/>得分率：${params[0].value}%`
       },
     },
-    grid: { left: 40, right: 16, top: 20, bottom: 36 },
+    grid: {
+      left: 16,
+      right: 16,
+      top: 20,
+      bottom: problemAccuracy.value.length > 12 ? 48 : 12,
+      containLabel: true,
+    },
     xAxis: {
       type: 'category',
       data: problemAccuracy.value.map(problemDisplayName),
@@ -814,9 +825,27 @@ function renderAccChart() {
         fontSize: 10,
         rotate: problemAccuracy.value.length > 8 ? 30 : 0,
         interval: 0,
+        margin: 10,
       },
     },
     yAxis: { type: 'value', max: 100, name: '%' },
+    dataZoom: problemAccuracy.value.length > 12 ? [
+      {
+        type: 'inside',
+        startValue: 0,
+        endValue: 11,
+        zoomLock: false,
+      },
+      {
+        type: 'slider',
+        startValue: 0,
+        endValue: 11,
+        height: 14,
+        bottom: 2,
+        showDetail: false,
+        brushSelect: false,
+      },
+    ] : [],
     series: [{
       type: 'bar',
       barWidth: '60%',

@@ -1,7 +1,7 @@
 <template>
   <div class="page [display:flex] [flex-direction:column] [gap:20px]">
     <UiPageHeader title="错题本">
-      <div class="[color:#7c6a55] [font-size:13px] [margin-top:2px]">
+      <div class="[color:var(--app-text-secondary)] [font-size:13px] [margin-top:2px]">
         自动收集每次错误；连续两次 AC 标记为已掌握
       </div>
 
@@ -30,10 +30,10 @@
               >
                 {{ item.value }}
               </div>
-              <div class="summary-label [color:#5f5142] [font-size:13px]">
+              <div class="summary-label [color:var(--app-text)] [font-size:13px]">
                 {{ item.label }}
               </div>
-              <div class="summary-tip [color:#a08b73] [font-size:12px]">
+              <div class="summary-tip [color:var(--app-text-secondary)] [font-size:12px]">
                 {{ item.tip }}
               </div>
             </div>
@@ -162,12 +162,12 @@
             <div
                 v-for="row in rows"
                 :key="row.id"
-                class="row-card [background:#fffdf8] [border:1px_solid_#ead7b8] [border-radius:16px] [padding:16px] [transition:.2s] hover:[border-color:#d6b57d] hover:[box-shadow:0_8px_20px_rgba(120,_83,_43,_0.08)]"
+                class="row-card [background:var(--app-surface)] [border:1px_solid_var(--app-border)] [border-radius:16px] [padding:16px] [transition:.2s] hover:[border-color:rgba(var(--app-primary-rgb),0.35)] hover:[box-shadow:0_8px_20px_rgba(var(--app-primary-rgb),0.08)]"
             >
               <div class="[display:flex] [justify-content:space-between] [align-items:flex-start] [gap:12px] [flex-wrap:wrap]">
                 <div class="[min-width:0] [flex:1]">
                   <div class="[display:flex] [align-items:center] [gap:8px] [flex-wrap:wrap] [margin-bottom:6px]">
-                    <span class="title [color:#2f2a22] [font-size:16px] [font-weight:700]">
+                    <span class="title [color:var(--app-text)] [font-size:16px] [font-weight:700]">
                       {{ row.problemTitle }}
                     </span>
 
@@ -201,7 +201,7 @@
                     </ui-tag>
                   </div>
 
-                  <div class="muted [color:#7c6a55] [font-size:12px] [display:flex] [gap:10px] [flex-wrap:wrap]">
+                  <div class="muted [color:var(--app-text-secondary)] [font-size:12px] [display:flex] [gap:10px] [flex-wrap:wrap]">
                     <span>错误 {{ row.totalWrongCount }} 次</span>
                     <span>·</span>
                     <span>连续 AC {{ row.consecutiveAcCount }}/2</span>
@@ -216,7 +216,7 @@
 
                   <div
                       v-if="row.notes"
-                      class="notes [margin-top:8px] [padding:8px_10px] [background:#fff7e8] [border-radius:8px] [color:#4b3b2a] [font-size:13px] [white-space:pre-wrap]"
+                      class="notes [margin-top:8px] [padding:8px_10px] [background:var(--app-primary-soft)] [border-radius:8px] [color:var(--app-text)] [font-size:13px] [white-space:pre-wrap]"
                   >
                     {{ row.notes }}
                   </div>
@@ -350,25 +350,25 @@ const summaryCards = computed(() => [
     label: '错题总数',
     value: stats.total || 0,
     tip: '所有进入错题本的题目',
-    color: '#2f2a22'
+    color: 'var(--app-text)'
   },
   {
     label: '待攻克',
     value: stats.unresolved || 0,
     tip: '尚未连续 AC 两次',
-    color: '#c2410c'
+    color: 'var(--app-danger)'
   },
   {
     label: '已掌握',
     value: stats.resolved || 0,
     tip: '连续 AC 两次后自动标记',
-    color: '#15803d'
+    color: 'var(--app-success)'
   },
   {
     label: '错误类型数',
     value: Object.keys(stats.byErrorCategory || {}).length,
     tip: '覆盖的错误分类',
-    color: '#b45309'
+    color: 'var(--app-warning)'
   }
 ])
 
@@ -623,21 +623,20 @@ onMounted(() => {
   min-height: 100%;
 }
 
-/* 统计卡片暖色化 */
 .summary-card {
   border-radius: 18px;
-  border: 1px solid rgba(232, 213, 184, 0.9);
-  background: rgba(255, 252, 247, 0.96);
-  box-shadow: 0 10px 26px rgba(120, 83, 43, 0.06);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  box-shadow: 0 10px 26px rgba(61, 53, 41, 0.06);
 }
 
 /* 外层错题卡片 */
 .wrong-card {
   overflow: hidden;
   border-radius: 20px;
-  border: 1px solid rgba(230, 211, 181, 0.95);
-  background: rgba(255, 253, 248, 0.96);
-  box-shadow: 0 16px 36px rgba(120, 83, 43, 0.08);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  box-shadow: 0 16px 36px rgba(61, 53, 41, 0.08);
 }
 
 /* 去掉卡片 header 默认分割线 */
@@ -654,12 +653,10 @@ onMounted(() => {
 /* 筛选区域整体 */
 .filter-box {
   padding: 16px;
-  border: 1px solid #ead8bb;
+  border: 1px solid var(--app-border);
   border-radius: 20px;
-  background:
-      radial-gradient(circle at 0% 0%, rgba(255, 237, 213, 0.95), transparent 34%),
-      linear-gradient(180deg, #fffaf1 0%, #fff7e8 100%);
-  box-shadow: 0 10px 24px rgba(120, 83, 43, 0.08);
+  background: var(--app-surface-muted);
+  box-shadow: 0 10px 24px rgba(61, 53, 41, 0.08);
 }
 
 /* 筛选标题行 */
@@ -672,14 +669,14 @@ onMounted(() => {
 }
 
 .filter-title {
-  color: #3f3021;
+  color: var(--app-text);
   font-size: 15px;
   font-weight: 800;
 }
 
 .filter-desc {
   margin-top: 3px;
-  color: #9a8060;
+  color: var(--app-text-secondary);
   font-size: 12px;
 }
 
@@ -694,9 +691,9 @@ onMounted(() => {
 /* 左侧查看范围 */
 .filter-scope {
   padding: 14px;
-  border: 1px solid rgba(232, 205, 164, 0.9);
+  border: 1px solid var(--app-border);
   border-radius: 16px;
-  background: rgba(255, 253, 248, 0.78);
+  background: var(--app-surface);
 }
 
 /* 右侧筛选项 */
@@ -713,13 +710,13 @@ onMounted(() => {
   align-items: center;
   min-height: 46px;
   padding: 10px 12px;
-  border: 1px solid rgba(232, 205, 164, 0.86);
+  border: 1px solid var(--app-border);
   border-radius: 16px;
-  background: rgba(255, 253, 248, 0.82);
+  background: var(--app-surface);
 }
 
 .filter-label {
-  color: #8a6b44;
+  color: var(--app-text-secondary);
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -750,30 +747,29 @@ onMounted(() => {
 /* 重置按钮 */
 .filter-reset-button {
   min-width: 92px;
-  border-color: #e2c59a;
-  color: #a16207;
-  background: #fffdf6;
+  border-color: var(--app-border);
+  color: var(--app-primary);
+  background: var(--app-surface);
   font-weight: 700;
 }
 
 .filter-reset-button:hover {
-  border-color: #d97706;
-  color: #92400e;
-  background: #fffbeb;
+  border-color: var(--app-primary);
+  color: var(--app-primary-strong);
+  background: var(--app-primary-soft);
 }
 
-/* 普通按钮暖色 */
 .warm-normal-button {
-  border-color: #e2c59a;
-  color: #8a5a18;
-  background: #fffdf6;
+  border-color: var(--app-border);
+  color: var(--app-primary);
+  background: var(--app-surface);
   font-weight: 700;
 }
 
 .warm-normal-button:hover {
-  border-color: #d97706;
-  color: #92400e;
-  background: #fffbeb;
+  border-color: var(--app-primary);
+  color: var(--app-primary-strong);
+  background: var(--app-primary-soft);
 }
 
 /* 查看范围按钮 */
@@ -790,10 +786,10 @@ onMounted(() => {
 .status-tabs :deep(.ui-radio-button__inner) {
   min-width: 82px;
   padding: 9px 14px;
-  border: 1px solid #e7cfaa;
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: #fffaf1;
-  color: #8a6b44;
+  background: var(--app-surface);
+  color: var(--app-text-secondary);
   box-shadow: none;
   font-size: 13px;
   font-weight: 700;
@@ -801,16 +797,16 @@ onMounted(() => {
 }
 
 .status-tabs :deep(.ui-radio-button__inner:hover) {
-  border-color: #d97706;
-  color: #b45309;
-  background: #fffbeb;
+  border-color: var(--app-primary);
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
 }
 
 .status-tabs :deep(.ui-radio-button__orig-radio:checked + .ui-radio-button__inner) {
-  border-color: #d97706;
-  background: #f59e0b;
+  border-color: var(--app-primary);
+  background: var(--app-primary);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(217, 119, 6, 0.22);
+  box-shadow: 0 8px 18px rgba(var(--app-primary-rgb), 0.22);
 }
 
 .status-tabs :deep(.ui-radio-button:first-child .ui-radio-button__inner),
@@ -818,31 +814,30 @@ onMounted(() => {
   border-radius: 999px;
 }
 
-/* 输入框和下拉框暖色化 */
 .filter-box :deep(.ui-input__wrapper),
 .filter-box :deep(.ui-select__wrapper) {
   min-height: 34px;
   border-radius: 12px;
-  background: #fffdf8;
-  box-shadow: 0 0 0 1px #ead8bb inset;
+  background: var(--app-surface);
+  box-shadow: 0 0 0 1px var(--app-border) inset;
 }
 
 .filter-box :deep(.ui-input__wrapper:hover),
 .filter-box :deep(.ui-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px #d97706 inset;
+  box-shadow: 0 0 0 1px var(--app-primary) inset;
 }
 
 .filter-box :deep(.ui-input__wrapper.is-focus),
 .filter-box :deep(.ui-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px #d97706 inset;
+  box-shadow: 0 0 0 1px var(--app-primary) inset;
 }
 
 /* 空状态 */
 .empty-box {
   padding: 24px 0 6px;
-  border: 1px dashed #ead8bb;
+  border: 1px dashed var(--app-border);
   border-radius: 18px;
-  background: #fffdf8;
+  background: var(--app-surface-muted);
 }
 
 /* 响应式 */

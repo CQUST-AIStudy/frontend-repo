@@ -12,7 +12,7 @@
       <div class="practice-content [flex:1_1_auto] [min-height:0] [display:flex] [flex-direction:column]">
         <div class="practice-main-grid">
           <section class="practice-list-column">
-            <div class="practice-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_#dadce0] [flex-shrink:0]">
+            <div class="practice-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:16px] [padding-bottom:12px] [border-bottom:1px_solid_var(--app-border)] [flex-shrink:0]">
               <div class="header-tabs">
                 <ui-radio-group v-model="activeTab" size="large">
                   <ui-radio-button label="recommended">为我推荐</ui-radio-button>
@@ -33,18 +33,18 @@
             <!-- 复习计划 Tab -->
             <div v-if="activeTab === 'review'" class="review-plan-content [flex:1_1_auto] [min-height:0] [overflow-y:auto] [display:flex] [flex-direction:column] [gap:16px] [padding-right:4px]">
               <div class="review-curve-section" v-if="reviewSkills.length > 0">
-                <div class="section-label [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:12px]">遗忘曲线概览</div>
+                <div class="section-label [font-size:14px] [font-weight:600] [color:var(--app-text)] [margin-bottom:12px]">遗忘曲线概览</div>
                 <div ref="curveChartRef" style="width:100%;height:280px;"></div>
               </div>
 
-              <div class="section-label [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:8px]">待复习知识点</div>
+              <div class="section-label [font-size:14px] [font-weight:600] [color:var(--app-text)] [margin-bottom:8px]">待复习知识点</div>
 
               <ui-empty v-if="reviewSkills.length === 0" description="暂无需要复习的知识点，继续保持练习吧" />
 
-              <ui-card v-for="skill in reviewSkills" :key="skill.dimension || skill.skillId" class="review-card [border:1px_solid_#e8eef6] [border-radius:16px] [flex-shrink:0]">
+              <ui-card v-for="skill in reviewSkills" :key="skill.dimension || skill.skillId" class="review-card [border:1px_solid_var(--app-border)] [border-radius:16px] [flex-shrink:0]">
                 <div class="[display:flex] [justify-content:space-between] [align-items:center]">
                   <div>
-                    <div class="[font-size:15px] [font-weight:600] [color:#202124]">{{ skill.dimension || skill.skillName || '知识点' }}</div>
+                    <div class="[font-size:15px] [font-weight:600] [color:var(--app-text)]">{{ skill.dimension || skill.skillName || '知识点' }}</div>
                     <div class="[font-size:12px] [color:#64748b] [margin-top:4px]">
                       上次练习：{{ formatLastPractice(skill.lastPracticeAt) }}
                     </div>
@@ -74,27 +74,27 @@
             <!-- 为我推荐 / PTA推荐 Tab -->
             <div v-else class="practice-list [flex:1_1_auto] [min-height:0] [overflow-y:auto] [display:flex] [flex-direction:column] [gap:12px] [padding-right:4px]">
               <ui-empty v-if="filteredPractices.length === 0" description="没有找到符合条件的练习题目" />
-              <ui-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card [cursor:pointer] [transition:all_0.3s] [border-left:3px_solid_transparent] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] hover:[transform:translateY(-2px)] [&.selected]:[border-left-color:#1a73e8] [&.selected]:[background-color:#e8f0fe] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [background:#fff] [text-align:left] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0] [flex-shrink:0]"
+              <ui-card v-for="practice in currentPagePractices" :key="practice.id || practice.number" class="practice-card [cursor:pointer] [transition:all_0.3s] [border-left:3px_solid_transparent] hover:[box-shadow:0_4px_12px_rgba(0,_0,_0,_0.1)] hover:[transform:translateY(-2px)] [&.selected]:[border-left-color:var(--app-primary)] [&.selected]:[background-color:var(--app-primary-soft)] [width:100%] [border:1px_solid_var(--app-border)] [border-radius:16px] [padding:14px] [background:var(--app-surface)] [text-align:left] [transition:.2s] [&.completed]:[background:#f6fff7] [&.completed]:[border-color:#bbf7d0] [flex-shrink:0]"
                 :class="{ 'selected': selectedPractice?.id === practice.id || selectedPractice?.number === practice.number }"
                 @click="selectPractice(practice)">
                 <div v-if="practice.type === 'introduction'" class="introduction-card [padding:10px]">
-                  <div class="introduction-title [font-size:16px] [font-weight:500] [color:#1a73e8] [margin-bottom:10px] [border-bottom:1px_solid_#dadce0] [padding-bottom:5px]">AI推荐说明</div>
-                  <div class="introduction-content [color:#5f6368] [line-height:1.6]" v-html="getFormattedDescription(practice)"></div>
+                  <div class="introduction-title [font-size:16px] [font-weight:500] [color:var(--app-primary)] [margin-bottom:10px] [border-bottom:1px_solid_var(--app-border)] [padding-bottom:5px]">AI推荐说明</div>
+                  <div class="introduction-content [color:var(--app-text-secondary)] [line-height:1.6]" v-html="getFormattedDescription(practice)"></div>
                 </div>
                 <div v-else class="practice-card-content [display:flex] [flex-direction:column] [gap:10px]">
-                  <div class="practice-title [display:flex] [justify-content:space-between] [align-items:center] [font-size:16px] [font-weight:500] [color:#202124]">
+                  <div class="practice-title [display:flex] [justify-content:space-between] [align-items:center] [font-size:16px] [font-weight:500] [color:var(--app-text)]">
                     <span>{{ practice.title || practice.name }}</span>
-                    <div class="match-rate [font-size:14px] [color:#5f6368] [&_.rate]:[color:#f56c6c] [&_.rate]:[font-weight:600]" v-if="practice.matchRate">
+                    <div class="match-rate [font-size:14px] [color:var(--app-text-secondary)] [&_.rate]:[color:var(--app-danger)] [&_.rate]:[font-weight:600]" v-if="practice.matchRate">
                       匹配度<span class="rate">{{ practice.matchRate }}%</span>
                     </div>
                   </div>
 
                   <!-- 知识点标签 -->
                   <div v-if="practice.tags && practice.tags.length" class="tags-row [display:flex] [flex-wrap:wrap] [gap:6px]">
-                    <span v-for="tag in practice.tags.slice(0, 4)" :key="tag" class="knowledge-tag [display:inline-block] [padding:2px_8px] [border-radius:4px] [font-size:11px] [background:#eef2ff] [color:#4338ca]">{{ tag }}</span>
+                    <span v-for="tag in practice.tags.slice(0, 4)" :key="tag" class="knowledge-tag [display:inline-block] [padding:2px_8px] [border-radius:4px] [font-size:11px] [background:var(--app-primary-soft)] [color:var(--app-primary-strong)]">{{ tag }}</span>
                   </div>
 
-                  <div v-if="practice.reason" class="practice-reason [color:#5f6368] [font-size:13px] [line-height:1.5]">
+                  <div v-if="practice.reason" class="practice-reason [color:var(--app-text-secondary)] [font-size:13px] [line-height:1.5]">
                     {{ practice.reason }}
                   </div>
 
@@ -112,7 +112,7 @@
                     </ui-tag>
                     <!-- 外链跳转按钮 -->
                     <a v-if="getSourceUrl(practice)" :href="getSourceUrl(practice)" target="_blank" rel="noopener noreferrer"
-                      class="source-link [display:inline-flex] [align-items:center] [gap:3px] [font-size:12px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]"
+                      class="source-link [display:inline-flex] [align-items:center] [gap:3px] [font-size:12px] [color:var(--app-primary)] [text-decoration:none] hover:[text-decoration:underline]"
                       @click.stop>
                       <span>前往题目</span>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
@@ -143,7 +143,7 @@
             <div class="practice-detail [display:flex] [flex-direction:column] [gap:16px] [flex:1_1_auto] [min-height:0]">
               <ui-card v-if="selectedPractice" class="detail-card [flex:1_1_auto] [min-height:0] [display:flex] [flex-direction:column] [overflow:hidden]">
                 <template #header>
-                  <div class="detail-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[font-size:16px] [&_h3]:[font-weight:600] [&_h3]:[color:#202124] [gap:12px] [flex-shrink:0]">
+                  <div class="detail-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[font-size:16px] [&_h3]:[font-weight:600] [&_h3]:[color:var(--app-text)] [gap:12px] [flex-shrink:0]">
                     <h3 class="[flex:1_1_auto] [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]">{{ selectedPractice.title || selectedPractice.name }}</h3>
                     <div class="practice-number [font-size:13px] [color:#909399] [flex-shrink:0]" v-if="selectedPractice.number">
                       #{{ selectedPractice.number }}
@@ -155,7 +155,7 @@
                 </template>
 
                 <div class="detail-content [flex:1_1_auto] [min-height:0] [overflow-y:auto] [display:flex] [flex-direction:column] [gap:12px]">
-                  <div v-if="selectedPractice.type === 'introduction'" class="introduction-detail [color:#5f6368] [line-height:1.8] [padding:10px] [background-color:#f8f9fa] [border-radius:4px]">
+                  <div v-if="selectedPractice.type === 'introduction'" class="introduction-detail [color:var(--app-text-secondary)] [line-height:1.8] [padding:10px] [background-color:var(--app-surface-muted)] [border-radius:4px]">
                     <div v-html="getFormattedDescription(selectedPractice)"></div>
                   </div>
                   <div v-else>
@@ -163,7 +163,7 @@
                     <div v-if="getSourceUrl(selectedPractice)" class="source-info [margin-bottom:12px] [padding:10px_14px] [border-radius:8px] [background:#f0fdf4] [border:1px_solid_#bbf7d0] [display:flex] [align-items:center] [justify-content:space-between]">
                       <div>
                         <span class="[font-size:12px] [color:#166534] [font-weight:500]">{{ getSourceLabel(selectedPractice) }}</span>
-                        <a :href="getSourceUrl(selectedPractice)" target="_blank" rel="noopener noreferrer" class="[display:block] [font-size:12px] [color:#1a73e8] [margin-top:2px] [word-break:break-all]">
+                        <a :href="getSourceUrl(selectedPractice)" target="_blank" rel="noopener noreferrer" class="[display:block] [font-size:12px] [color:var(--app-primary)] [margin-top:2px] [word-break:break-all]">
                           {{ getSourceUrl(selectedPractice) }}
                         </a>
                       </div>
@@ -174,15 +174,15 @@
                     <div v-if="selectedPractice.tags && selectedPractice.tags.length" class="tags-section [margin-bottom:12px]">
                       <div class="[font-size:13px] [font-weight:500] [color:#374151] [margin-bottom:6px]">相关知识点</div>
                       <div class="[display:flex] [flex-wrap:wrap] [gap:6px]">
-                        <span v-for="tag in selectedPractice.tags" :key="tag" class="knowledge-tag [display:inline-block] [padding:4px_10px] [border-radius:6px] [font-size:12px] [background:#eef2ff] [color:#4338ca]">{{ tag }}</span>
+                        <span v-for="tag in selectedPractice.tags" :key="tag" class="knowledge-tag [display:inline-block] [padding:4px_10px] [border-radius:6px] [font-size:12px] [background:var(--app-primary-soft)] [color:var(--app-primary-strong)]">{{ tag }}</span>
                       </div>
                     </div>
 
-                    <div v-if="selectedPractice.reason" class="recommendation-reason [margin-bottom:12px] [padding:12px] [border-radius:8px] [background:#f7faff] [border-left:4px_solid_#1a73e8]">
+                    <div v-if="selectedPractice.reason" class="recommendation-reason [margin-bottom:12px] [padding:12px] [border-radius:8px] [background:var(--app-primary-soft)] [border-left:4px_solid_var(--app-primary)]">
                       <h4>推荐理由</h4>
                       <p>{{ selectedPractice.reason }}</p>
                     </div>
-                    <div v-if="selectedPractice.estimatedMinutes" class="recommendation-meta [margin-bottom:12px] [color:#5f6368] [font-size:13px]">
+                    <div v-if="selectedPractice.estimatedMinutes" class="recommendation-meta [margin-bottom:12px] [color:var(--app-text-secondary)] [font-size:13px]">
                       预计用时 {{ selectedPractice.estimatedMinutes }} 分钟
                     </div>
 
@@ -228,22 +228,22 @@
 
                 <div class="stats-content [padding:4px_0]">
                   <div class="stats-item [display:flex] [justify-content:space-between] [margin-bottom:12px]">
-                    <div class="stats-label [color:#5f6368]">已完成题目</div>
-                    <div class="stats-value [font-weight:600] [color:#202124]">{{ completedCount }}</div>
+                    <div class="stats-label [color:var(--app-text-secondary)]">已完成题目</div>
+                    <div class="stats-value [font-weight:600] [color:var(--app-text)]">{{ completedCount }}</div>
                   </div>
 
                   <div class="stats-item [display:flex] [justify-content:space-between] [margin-bottom:12px]">
-                    <div class="stats-label [color:#5f6368]">待完成题目</div>
-                    <div class="stats-value [font-weight:600] [color:#202124]">{{ pendingCount }}</div>
+                    <div class="stats-label [color:var(--app-text-secondary)]">待完成题目</div>
+                    <div class="stats-value [font-weight:600] [color:var(--app-text)]">{{ pendingCount }}</div>
                   </div>
 
                   <div class="stats-item [display:flex] [justify-content:space-between] [margin-bottom:12px]" v-if="reviewSkills.length > 0">
-                    <div class="stats-label [color:#5f6368]">待复习知识点</div>
+                    <div class="stats-label [color:var(--app-text-secondary)]">待复习知识点</div>
                     <div class="stats-value [font-weight:600] [color:#ea580c]">{{ reviewSkills.length }}</div>
                   </div>
 
                   <div class="stats-progress [margin-top:14px]">
-                    <div class="progress-header [display:flex] [justify-content:space-between] [margin-bottom:8px] [color:#5f6368]">
+                    <div class="progress-header [display:flex] [justify-content:space-between] [margin-bottom:8px] [color:var(--app-text-secondary)]">
                       <span>整体进度</span>
                       <span>{{ completionRate }}%</span>
                     </div>
@@ -259,7 +259,7 @@
     <!-- 题目详情对话框-->
     <ui-dialog v-model="detailDialogVisible" title="题目详情" width="60%" :destroy-on-close="true">
       <div class="practice-detail-dialog [padding:0_20px]" v-if="selectedPractice">
-        <div class="detail-header-dialog [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_#dadce0]">
+        <div class="detail-header-dialog [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:20px] [padding-bottom:15px] [border-bottom:1px_solid_var(--app-border)]">
           <h2>{{ selectedPractice.title || selectedPractice.name }}</h2>
           <div class="practice-number" v-if="selectedPractice.number">
             题目 #{{ selectedPractice.number }}
@@ -270,19 +270,19 @@
         </div>
 
         <div class="detail-section [margin-bottom:25px]" v-if="selectedPractice.type === 'introduction'">
-          <div class="section-content [font-size:15px] [line-height:1.8] [color:#111827] [color:#5f6368]" v-html="getFormattedDescription(selectedPractice)"></div>
+          <div class="section-content [font-size:15px] [line-height:1.8] [color:var(--app-text-secondary)]" v-html="getFormattedDescription(selectedPractice)"></div>
         </div>
 
         <div v-else>
           <div v-if="getSourceUrl(selectedPractice)" class="[margin-bottom:16px]">
-            <a :href="getSourceUrl(selectedPractice)" target="_blank" rel="noopener noreferrer" class="[color:#1a73e8] [font-size:14px]">
+            <a :href="getSourceUrl(selectedPractice)" target="_blank" rel="noopener noreferrer" class="[color:var(--app-primary)] [font-size:14px]">
               {{ getSourceLabel(selectedPractice) }} - {{ getSourceUrl(selectedPractice) }}
             </a>
           </div>
           <div v-if="selectedPractice.tags && selectedPractice.tags.length" class="[margin-bottom:16px]">
-            <div class="[font-size:13px] [color:#5f6368] [margin-bottom:6px]">知识点：</div>
+            <div class="[font-size:13px] [color:var(--app-text-secondary)] [margin-bottom:6px]">知识点：</div>
             <div class="[display:flex] [flex-wrap:wrap] [gap:6px]">
-              <span v-for="tag in selectedPractice.tags" :key="tag" class="knowledge-tag [display:inline-block] [padding:4px_10px] [border-radius:6px] [font-size:12px] [background:#eef2ff] [color:#4338ca]">{{ tag }}</span>
+              <span v-for="tag in selectedPractice.tags" :key="tag" class="knowledge-tag [display:inline-block] [padding:4px_10px] [border-radius:6px] [font-size:12px] [background:var(--app-primary-soft)] [color:var(--app-primary-strong)]">{{ tag }}</span>
             </div>
           </div>
         </div>
@@ -877,6 +877,8 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  color: var(--app-text);
+  background: var(--app-bg);
 }
 
 .practice-container > .my-page-header {
@@ -923,6 +925,7 @@ onBeforeUnmount(() => {
   gap: 12px;
   margin-bottom: 10px !important;
   padding-bottom: 10px !important;
+  border-bottom-color: var(--app-border) !important;
 }
 
 .practice-list {
@@ -934,11 +937,14 @@ onBeforeUnmount(() => {
 
 .practice-card {
   border-radius: 14px !important;
+  border-color: var(--app-border) !important;
+  background: var(--app-surface) !important;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
 }
 
 .practice-card:hover {
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.09) !important;
+  border-color: rgba(var(--app-primary-rgb), 0.35) !important;
+  box-shadow: 0 8px 18px rgba(var(--app-primary-rgb), 0.09) !important;
 }
 
 .practice-card :deep(.ui-card__body) {
@@ -992,7 +998,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 3px;
   font-size: 12px;
-  color: #1a73e8;
+  color: var(--app-primary);
   text-decoration: none;
 }
 
@@ -1005,8 +1011,8 @@ onBeforeUnmount(() => {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  background: #eef2ff;
-  color: #4338ca;
+  background: var(--app-primary-soft);
+  color: var(--app-primary-strong);
 }
 
 .tags-row {
@@ -1037,6 +1043,8 @@ onBeforeUnmount(() => {
 .detail-card,
 .empty-detail {
   min-height: 0;
+  border-color: var(--app-border) !important;
+  background: var(--app-surface) !important;
 }
 
 .detail-card :deep(.ui-card__header) {
@@ -1061,6 +1069,8 @@ onBeforeUnmount(() => {
 .recommendation-reason {
   margin-bottom: 10px !important;
   padding: 10px 12px !important;
+  border-left-color: var(--app-primary) !important;
+  background: var(--app-primary-soft) !important;
 }
 
 .recommendation-reason h4,
@@ -1079,6 +1089,12 @@ onBeforeUnmount(() => {
 
 .stats-card :deep(.ui-card__body) {
   padding: 14px 18px 16px !important;
+}
+
+.stats-card,
+.review-card {
+  border-color: var(--app-border) !important;
+  background: var(--app-surface) !important;
 }
 
 .stats-card .card-header {

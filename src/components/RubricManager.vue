@@ -44,7 +44,9 @@
           <UiTableColumn label="维度数" width="80">
             <template #default="{ row }">{{ row.dimensions?.length || 0 }}</template>
           </UiTableColumn>
-          <UiTableColumn prop="createdAt" label="创建时间" width="180" />
+          <UiTableColumn label="创建时间" width="180">
+            <template #default="{ row }">{{ formatRubricTime(row.createdAt) }}</template>
+          </UiTableColumn>
           <UiTableColumn label="操作" width="120">
             <template #default="{ row }">
               <UiButton @click="editRubric(row)" class="text-sm font-medium text-[#c2703e] hover:text-[#a85c30] bg-transparent border-none cursor-pointer transition-colors">编辑</UiButton>
@@ -122,6 +124,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
 import { getRubrics, normalizeRubricList, createRubric, updateRubric, getRubricDetail, draftRubricFromTemplate } from '@/api/tap'
+import { formatDate } from '@/utils/dateUtils'
 import logger from '@/utils/logger'
 import AppModal from './AppModal.vue'
 
@@ -142,6 +145,8 @@ const templateInput = ref(null)
 const form = ref({ name: '', subject: '', description: '', customPrompt: '', dimensions: [] })
 
 const weightSum = computed(() => form.value.dimensions.reduce((s, d) => s + (d.weight || 0), 0))
+
+const formatRubricTime = value => formatDate(value, 'YYYY-MM-DD HH:mm:ss') || '-'
 
 const cardClass = computed(() =>
   props.embedded

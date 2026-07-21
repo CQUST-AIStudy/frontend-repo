@@ -1,13 +1,13 @@
 <template>
-  <div class="learning-analysis-container">
+  <div ref="analysisContainerRef" class="learning-analysis-container">
     <UiPageHeader class="my-page-header [padding:20px]" title="个性画像" description="基于您的PTA平台提交数据的AI深度分析" />
 
     <loading-state :loading="loading">
-      <div class="analysis-content [display:flex] [flex-direction:column] [gap:20px] [padding:10px] [background-color:#f5f7fa] [border-radius:4px] [line-height:1.6]">
+      <div class="analysis-content [display:flex] [flex-direction:column] [gap:16px] [padding:0] [background-color:var(--app-bg)] [border-radius:12px] [line-height:1.6]">
         <!-- 总体概览 -->
-        <ui-row :gutter="20">
+        <ui-row :gutter="20" class="overview-row">
           <ui-col :span="6" v-for="item in overviewCards" :key="item.label">
-            <ui-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
+            <ui-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none] hover:[box-shadow:0_4px_12px_rgba(61,_53,_41,_0.08)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[padding:18px] [background:var(--app-surface)] [flex:1] [min-width:180px]">
               <div class="stat-icon [width:44px] [height:44px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
                 <ui-icon :size="22" color="#fff"><component :is="item.icon" /></ui-icon>
               </div>
@@ -42,41 +42,41 @@
         </div>
 
         <!-- 雷达图+ 趋势 -->
-        <ui-row :gutter="20" class="chart-row [margin-top:0] [margin-bottom:0] [margin-bottom:20px]">
+        <ui-row :gutter="20" class="chart-row [margin:0]">
           <ui-col :span="12">
-            <ui-card class="chart-card [min-height:420px] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] [margin-bottom:20px] [height:400px]">
-              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [font-size:15px] [font-weight:500] [color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>知识掌握雷达图</span></div></template>
-              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="radarChartRef" class="chart [width:100%] [height:100%]"></div></div>
+            <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>知识掌握雷达图</span></div></template>
+              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="radarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
           <ui-col :span="12">
-            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
-              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各实验掌握度趋势</span></div></template>
-              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="trendChartRef" class="chart [width:100%] [height:100%]"></div></div>
+            <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>各实验掌握度趋势</span></div></template>
+              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="trendChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
         </ui-row>
 
         <!-- 实验得分对比 + 能力维度柱状图-->
-        <ui-row :gutter="20" class="chart-row [margin-bottom:0] [margin-bottom:20px]">
+        <ui-row :gutter="20" class="chart-row [margin:0]">
           <ui-col :span="12">
-            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
-              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>各维度能力对比</span></div></template>
-              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
+            <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>各维度能力对比</span></div></template>
+              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
           <ui-col :span="12">
-            <ui-card class="chart-card [margin-bottom:20px] [height:400px]">
-              <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span>提交效率分析</span></div></template>
-              <div class="chart-container [height:340px] [width:100%] [position:relative] [height:300px] [height:400px] [height:350px] [height:240px] [width:30vw] [height:320px]"><div ref="efficiencyChartRef" class="chart [width:100%] [height:100%]"></div></div>
+            <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>提交效率分析</span></div></template>
+              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="efficiencyChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
         </ui-row>
 
         <!-- 班级对比分析 -->
-        <ui-card class="chart-card [margin-top:20px] [margin-bottom:20px] [height:400px]" v-if="classData && classData.experiments?.length">
+        <ui-card class="chart-card [min-height:400px] [border:1px_solid_var(--app-border)]" v-if="classData && classData.experiments?.length">
           <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <span><LucideIcon name="bar-chart" :size="18" class="mr-2" /> 班级对比分析</span>
               <div class="class-summary-chips [display:flex] [gap:8px]" v-if="classData.summary">
                 <span class="summary-chip [font-size:12px] [padding:3px_10px] [border-radius:100px] [font-weight:500] [&.positive]:[background:#e6f4ea] [&.positive]:[color:#1e8e3e] [&.negative]:[background:#fce8e6] [&.negative]:[color:#d93025] [&.neutral]:[background:#f1f3f4] [&.neutral]:[color:#5f6368] [min-width:min(280px,_100%)] [display:inline-flex] [align-items:center] [gap:8px] [padding:12px_14px] [border-radius:16px] [background:rgba(244,_248,_253,_0.92)] [border:1px_solid_#e3ebf5] [color:#34475d] [line-height:1.6] [word-break:break-word]" :class="avgDiffClass">
@@ -105,16 +105,16 @@
         <!-- AI智能个性画像 -->
         <ui-alert
           v-else-if="classCompareUnavailableReason"
-          class="class-compare-alert [margin-top:20px]"
+          class="class-compare-alert"
           type="warning"
           :closable="false"
           :title="classCompareUnavailableReason"
           show-icon
         />
 
-        <ui-card class="ai-analysis-card [margin-top:20px]">
+        <ui-card class="ai-analysis-card">
           <template #header>
-            <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [align-items:flex-start] [gap:16px] [gap:10px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px]">
               <div class="ai-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
                 <ui-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></ui-icon>
                 <span>AI智能个性画像</span>
@@ -124,7 +124,7 @@
           </template>
           <div class="ai-analysis-content">
             <!-- 学习特征标签 -->
-            <div class="section-block [margin-bottom:24px]">
+            <div class="section-block [margin-bottom:16px]">
               <h4><LucideIcon name="tags" :size="18" class="mr-2" />学习特征</h4>
               <div class="patterns-row [display:flex] [gap:12px] [flex-wrap:wrap]">
                 <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card [display:flex] [gap:10px] [padding:12px_16px] [border-radius:12px] [border:1px_solid_#e8eaed] [flex:1] [min-width:200px] [&.pat-good]:[background:#e6f4ea] [&.pat-good]:[border-color:#ceead6] [&.pat-warn]:[background:#fef7e0] [&.pat-warn]:[border-color:#feefc3] [&.pat-bad]:[background:#fce8e6] [&.pat-bad]:[border-color:#f5c6c2]" :class="patternClass(p.tag)">
@@ -138,7 +138,7 @@
             </div>
 
             <!-- 能力趋势 -->
-            <div class="section-block [margin-bottom:24px]">
+            <div class="section-block [margin-bottom:16px]">
               <h4><LucideIcon name="bar-chart" :size="18" class="mr-2" /> 各维度能力水平</h4>
               <div class="ability-list [display:flex] [flex-direction:column] [gap:16px]">
                 <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item [padding:12px_16px] [border:1px_solid_#e8eaed] [border-radius:12px]">
@@ -158,7 +158,7 @@
             </div>
 
             <!-- 薄弱点-->
-            <div class="section-block [margin-bottom:24px]" v-if="profileData.weaknesses?.length">
+            <div class="section-block" v-if="profileData.weaknesses?.length">
               <h4><LucideIcon name="alert-triangle" :size="18" class="mr-2" /> 重点提升方向</h4>
               <div class="improvement-items [display:flex] [flex-direction:column] [gap:10px]">
                 <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item [display:flex] [align-items:center] [gap:8px] [font-size:14px] [color:#5f6368]">
@@ -171,9 +171,9 @@
         </ui-card>
 
         <!-- 🤖 AI 个性化学习建议 -->
-        <ui-card v-if="aiSuggestions" class="ai-suggestions-card [margin-top:20px]">
+        <ui-card v-if="aiSuggestions" class="ai-suggestions-card">
           <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
+            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
               <div class="ai-suggestions-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
                 <ui-icon class="[font-size:20px] [color:#1a73e8]"><MagicStick /></ui-icon>
                 <span>🤖 AI 个性化学习建议</span>
@@ -259,7 +259,7 @@
 
         <ui-alert
           v-else-if="aiSuggestionsError"
-          class="ai-suggestions-alert [margin-top:20px]"
+          class="ai-suggestions-alert"
           type="info"
           :closable="false"
           :title="aiSuggestionsError"
@@ -267,8 +267,8 @@
         />
 
         <!-- 学习方法推荐 -->
-        <ui-card class="[margin-top:20px]">
-          <template #header><div class="card-header [display:flex] [justify-content:space-between] [align-items:flex-start] [gap:16px] [align-items:center] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]"><span><LucideIcon name="book-open" :size="18" class="mr-2" /> 学习方法推荐</span></div></template>
+        <ui-card>
+          <template #header><div class="card-header [display:flex] [align-items:center] [gap:12px]"><span><LucideIcon name="book-open" :size="18" class="mr-2" /> 学习方法推荐</span></div></template>
           <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
             <ui-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
               <div class="method-header [display:flex] [flex-direction:column] [align-items:center] [gap:8px] [margin-bottom:8px]">
@@ -300,6 +300,7 @@ import { API_BASE_URL } from '../../config/runtime'
 const API_BASE = API_BASE_URL
 const loading = ref(true)
 const profileData = ref({})
+const analysisContainerRef = ref(null)
 
 const classData = ref(null)
 const classCompareUnavailableReason = ref('')
@@ -311,6 +312,7 @@ const trendChartRef = ref(null)
 const dimBarChartRef = ref(null)
 const efficiencyChartRef = ref(null)
 let radarChart = null, trendChart = null, dimBarChart = null, efficiencyChart = null
+let analysisResizeObserver = null
 
 // AI 学习建议
 const aiSuggestions = ref(null)
@@ -596,7 +598,7 @@ function initTrend() {
   }
   trendChart.setOption({
     tooltip: { trigger: 'axis' },
-    grid: { left: 50, right: 20, bottom: 60, top: 20 },
+    grid: { left: 16, right: 16, bottom: 16, top: 24, containLabel: true },
     xAxis: { type: 'category', data: s.map(x => x.name), axisLabel: { rotate: 35, fontSize: 10 } },
     yAxis: { type: 'value', min: 0, max: 100, name: '掌握度' },
     series: [{ type: 'line', data: s.map(x => x.mastery), smooth: true,
@@ -618,7 +620,7 @@ function initDimBar() {
   }
   dimBarChart.setOption({
     tooltip: { trigger: 'axis' },
-    grid: { left: 80, right: 20, bottom: 20, top: 20 },
+    grid: { left: 16, right: 24, bottom: 16, top: 16, containLabel: true },
     xAxis: { type: 'value', max: 100 },
     yAxis: { type: 'category', data: [...r.dimensions].reverse() },
     series: [{ type: 'bar', data: [...r.scores].reverse().map((v) => ({
@@ -645,7 +647,7 @@ function initEfficiency() {
   efficiencyChart.setOption({
     tooltip: { trigger: 'axis' },
     legend: { data: ['总提交', 'AC次数'], bottom: 0 },
-    grid: { left: 50, right: 20, bottom: 40, top: 20 },
+    grid: { left: 16, right: 16, bottom: 32, top: 16, containLabel: true },
     xAxis: { type: 'category', data: items.map(x => x.name), axisLabel: { rotate: 40, fontSize: 10 } },
     yAxis: { type: 'value' },
     series: [
@@ -699,7 +701,7 @@ function initClassCompareChart() {
   classCompareChart.setOption({
     tooltip: { trigger: 'axis' },
     legend: { data: ['我的得分', '班级均分', '班级中位数'], top: 0 },
-    grid: { left: 50, right: 20, bottom: 55, top: 36 },
+    grid: { left: 16, right: 16, bottom: 20, top: 36, containLabel: true },
     xAxis: { type: 'category', data: names, axisLabel: { rotate: 30, fontSize: 10 } },
     yAxis: { type: 'value', name: '分数' },
     series: [
@@ -717,11 +719,45 @@ function initClassCompareChart() {
 }
 
 function handleResize() { radarChart?.resize(); trendChart?.resize(); dimBarChart?.resize(); efficiencyChart?.resize(); classCompareChart?.resize() }
-onMounted(() => { loadData(); window.addEventListener('resize', handleResize) })
+onMounted(() => {
+  loadData()
+  window.addEventListener('resize', handleResize)
+  if (typeof ResizeObserver !== 'undefined' && analysisContainerRef.value) {
+    analysisResizeObserver = new ResizeObserver(handleResize)
+    analysisResizeObserver.observe(analysisContainerRef.value)
+  }
+})
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  analysisResizeObserver?.disconnect()
   radarChart?.dispose(); trendChart?.dispose(); dimBarChart?.dispose(); efficiencyChart?.dispose(); classCompareChart?.dispose()
 })
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .overview-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .overview-row :deep(.ui-col) {
+    grid-column: span 1 / span 1 !important;
+  }
+
+  .overview-row .stat-card {
+    min-width: 0 !important;
+  }
+
+  .chart-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .chart-row :deep(.ui-col) {
+    grid-column: span 1 / span 1 !important;
+  }
+}
+</style>
 
 

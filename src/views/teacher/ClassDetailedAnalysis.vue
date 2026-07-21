@@ -11,7 +11,7 @@
       </UiButton>
     </UiPageHeader>
 
-    <div class="px-5 pb-5 bg-[#f5f7fa] rounded-[4px] leading-relaxed">
+    <div class="px-5 pb-5 bg-[var(--app-bg)] rounded-[4px] leading-relaxed">
       <!-- 欢迎页面 - 未选择班级时显示-->
       <div v-if="!showDetailedAnalysis && !loading" class="mb-8">
         <div class="rounded-xl border border-black/[0.06] bg-white/95 px-4 py-3 shadow-[0_1px_4px_rgba(15,23,42,0.05)]">
@@ -49,7 +49,7 @@
           <template v-if="filteredClasses.length">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               <div v-for="classItem in filteredClasses" :key="classItem.id"
-                   class="rounded-[20px] border border-black/[0.06] bg-[radial-gradient(circle_at_top_right,rgba(26,115,232,0.08),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_36px_rgba(38,61,89,0.07)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(194,112,62,0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                   class="rounded-[20px] border border-[var(--app-border-soft)] bg-[var(--app-surface)] shadow-[0_8px_24px_rgba(61,53,41,0.06)] p-6 min-h-[380px] flex flex-col cursor-pointer transition-all hover:-translate-y-[5px] hover:border-[rgba(var(--app-primary-rgb),0.3)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
                    @click="viewDetailedAnalysis(classItem)">
                 <div class="flex flex-col h-full">
                   <h3 class="text-base font-semibold text-[#1d1d1f] mb-3">{{ classItem.name }}</h3>

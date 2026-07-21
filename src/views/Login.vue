@@ -4,7 +4,7 @@
     :style="pageBackgroundStyle"
   >
     <div class="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(3,14,28,0.02),rgba(3,14,28,0.24))]"></div>
-    <div class="absolute right-[clamp(32px,6vw,86px)] top-[clamp(28px,5vh,52px)] z-[2] text-[14px] font-semibold tracking-[0.12em] text-[var(--app-primary)] max-[720px]:hidden" aria-hidden="true">
+    <div class="absolute right-[clamp(32px,6vw,86px)] top-[clamp(28px,5vh,52px)] z-[2] text-[14px] font-semibold tracking-[0.12em] text-[rgba(91,190,255,0.78)] max-[720px]:hidden" aria-hidden="true">
       AI TEACHING ASSISTANT
     </div>
 
@@ -27,8 +27,8 @@
       </div>
     </Transition>
 
-    <main class="relative z-[1] mx-auto grid min-h-screen min-h-[100dvh] w-[min(100%,1500px)] min-w-0 grid-cols-[minmax(420px,0.95fr)_minmax(460px,554px)] items-center gap-[142px] px-[108px] py-[46px] max-[1400px]:gap-16 max-[1400px]:px-16 max-[1180px]:grid-cols-[minmax(0,1fr)] max-[1180px]:content-center max-[1180px]:gap-7 max-[720px]:flex max-[720px]:min-h-[100dvh] max-[720px]:w-full max-[720px]:flex-col max-[720px]:items-center max-[720px]:justify-center max-[720px]:gap-4 max-[720px]:px-3 max-[720px]:py-5 max-[360px]:py-4">
-      <section class="relative flex min-h-[600px] min-w-0 max-w-[720px] translate-x-[2px] flex-col justify-center max-[1180px]:mx-auto max-[720px]:min-h-0 max-[720px]:w-full max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:items-center max-[720px]:text-center" aria-label="平台简介">
+    <main class="relative z-[1] mx-auto grid min-h-screen min-h-[100dvh] w-[min(100%,1500px)] grid-cols-[minmax(420px,0.95fr)_minmax(460px,554px)] items-center gap-[142px] px-[108px] py-[46px] max-[1180px]:grid-cols-[minmax(0,1fr)] max-[1180px]:content-center max-[1180px]:gap-7 max-[720px]:flex max-[720px]:min-h-[100dvh] max-[720px]:flex-col max-[720px]:items-center max-[720px]:justify-center max-[720px]:gap-4 max-[720px]:px-3 max-[720px]:py-5 max-[360px]:py-4">
+      <section class="relative flex min-h-[600px] max-w-[720px] translate-x-[2px] flex-col justify-center max-[720px]:min-h-0 max-[720px]:w-full max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:items-center max-[720px]:text-center" aria-label="平台简介">
         <div class="absolute -top-2 right-2 text-[58px] font-bold tracking-normal text-[rgba(80,153,255,0.16)] max-[720px]:hidden" aria-hidden="true">
           &lt;/&gt;
         </div>
@@ -38,13 +38,13 @@
         <p class="mt-[18px] text-[24px] font-normal leading-[1.35] tracking-normal text-[rgba(226,238,251,0.82)] max-[720px]:mt-2 max-[720px]:max-w-[300px] max-[720px]:text-[13px] max-[720px]:leading-[1.45] max-[360px]:text-[12px]">
           面向程序设计实验教学的智能支持系统
         </p>
-        <div class="mb-6 mt-6 h-[5px] w-[54px] rounded-full bg-[var(--app-primary)] shadow-[0_0_22px_rgba(var(--app-primary-rgb),0.36)] max-[720px]:mb-0 max-[720px]:mt-3 max-[720px]:h-1 max-[720px]:w-12" aria-hidden="true"></div>
+        <div class="mb-6 mt-6 h-[5px] w-[54px] rounded-full bg-[linear-gradient(90deg,#13d6ff,#3185ff)] shadow-[0_0_22px_rgba(30,178,255,0.45)] max-[720px]:mb-0 max-[720px]:mt-3 max-[720px]:h-1 max-[720px]:w-12" aria-hidden="true"></div>
 
-        <div class="grid w-[min(100%,680px)] min-w-0 grid-cols-3 gap-[46px] max-[1400px]:gap-5 max-[720px]:hidden">
+        <div class="grid w-[min(100%,680px)] grid-cols-[repeat(3,max-content)] gap-[46px] max-[720px]:hidden max-[720px]:grid-cols-1 max-[720px]:gap-3.5">
           <article
             v-for="feature in features"
             :key="feature.title"
-            class="grid min-w-0 grid-cols-[58px_minmax(0,1fr)] items-center gap-3.5"
+            class="grid grid-cols-[58px_max-content] items-center gap-3.5 max-[720px]:grid-cols-[52px_minmax(0,1fr)]"
           >
             <div
               class="grid h-[58px] w-[58px] place-items-center rounded-xl border-2 bg-[rgba(var(--feature-rgb),0.1)] text-[var(--feature-color)] shadow-[0_0_28px_rgba(var(--feature-rgb),0.18),inset_0_0_18px_rgba(var(--feature-rgb),0.1)] max-[720px]:h-[52px] max-[720px]:w-[52px]"
@@ -97,11 +97,11 @@
                 <path d="M19 9v5" />
               </svg>
             </div>
-            <div class="min-w-0">
+            <div>
               <h2 class="mb-[7px] mt-0 whitespace-nowrap text-[18px] font-[560] tracking-normal text-[#f8fbff]">
                 {{ feature.title }}
               </h2>
-              <p class="m-0 text-[12px] leading-[1.6] text-[rgba(202,219,238,0.72)]">
+              <p class="m-0 whitespace-nowrap text-[12px] leading-[1.6] text-[rgba(202,219,238,0.72)]">
                 {{ feature.description }}
               </p>
             </div>
@@ -109,16 +109,16 @@
         </div>
       </section>
 
-      <section class="relative w-full min-w-0 max-w-[554px] translate-x-1.5 translate-y-[18px] overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] px-[60px] pb-[30px] pt-10 text-[var(--app-text)] shadow-[var(--app-shadow)] max-[1180px]:mx-auto max-[1180px]:max-w-[560px] max-[720px]:w-full max-[720px]:max-w-full max-[720px]:translate-x-0 max-[720px]:translate-y-0 max-[720px]:px-4 max-[720px]:pb-4 max-[720px]:pt-5 max-[360px]:px-3.5" aria-label="账号登录">
+      <section class="relative w-full max-w-[554px] translate-x-1.5 translate-y-[18px] overflow-hidden rounded-[18px] border border-[rgba(221,231,242,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,251,255,0.97))] px-[60px] pb-[30px] pt-10 text-slate-900 shadow-[0_28px_80px_rgba(0,10,28,0.32),inset_0_1px_0_rgba(255,255,255,0.92)] max-[1180px]:max-w-[560px] max-[720px]:mx-auto max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:translate-y-0 max-[720px]:rounded-[24px] max-[720px]:px-4 max-[720px]:pb-4 max-[720px]:pt-5 max-[360px]:px-3.5" aria-label="账号登录">
         <div class="pointer-events-none absolute inset-x-0 top-0 h-[130px] bg-[radial-gradient(circle_at_50%_0%,rgba(26,119,255,0.09),transparent_70%)]"></div>
-        <div class="relative min-w-0">
-          <div class="relative mb-[34px] flex min-w-0 border-b-2 border-[var(--app-border)] max-[720px]:mb-4" role="tablist" aria-label="账号操作">
+        <div class="relative">
+          <div class="relative mb-[34px] flex border-b-2 border-[#e7edf5] max-[720px]:mb-4" role="tablist" aria-label="账号操作">
             <button
               v-for="tab in tabs"
               :key="tab.value"
               type="button"
               class="h-[52px] flex-1 text-[24px] font-[650] tracking-normal transition-colors max-[720px]:h-10 max-[720px]:text-[18px]"
-              :class="activeTab === tab.value ? 'text-[var(--app-primary)]' : 'text-[var(--app-text)] hover:text-[var(--app-primary)]'"
+              :class="activeTab === tab.value ? 'text-[#0074ff]' : 'text-[#1e293b] hover:text-[#0074ff]'"
               role="tab"
               :aria-selected="activeTab === tab.value"
               @click="setActiveTab(tab.value)"
@@ -126,13 +126,13 @@
               {{ tab.label }}
             </button>
             <span
-              class="absolute -bottom-0.5 left-0 h-1 w-1/2 rounded-full bg-[var(--app-primary)] transition-transform duration-300 ease-out motion-reduce:transition-none"
+              class="absolute -bottom-0.5 left-0 h-1 w-1/2 rounded-full bg-[linear-gradient(90deg,#006cff,#1594ff)] transition-transform duration-300 ease-out motion-reduce:transition-none"
               :class="activeTab === 'register' ? 'translate-x-full' : 'translate-x-0'"
               aria-hidden="true"
             ></span>
           </div>
 
-          <div class="min-w-0 overflow-hidden">
+          <div class="overflow-hidden">
             <Transition
               mode="out-in"
               :enter-active-class="formTransitionEnterActiveClass"
@@ -142,16 +142,16 @@
               leave-from-class="translate-x-0 opacity-100"
               :leave-to-class="formTransitionLeaveToClass"
             >
-              <form v-if="activeTab === 'login'" key="login" class="min-w-0 space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleLogin">
+              <form v-if="activeTab === 'login'" key="login" class="space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleLogin">
                 <div>
-                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[var(--app-text)] max-[720px]:mb-2 max-[720px]:text-[15px]">角色</label>
-                  <div class="flex w-full min-w-0 overflow-hidden rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)]">
+                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#17233a] max-[720px]:mb-2 max-[720px]:text-[15px]">角色</label>
+                  <div class="flex w-full overflow-hidden rounded-lg border border-[#dce4ee] bg-white">
                     <button
                       v-for="role in roleOptions"
                       :key="role.value"
                       type="button"
-                      class="min-h-[52px] min-w-0 flex-1 border-l border-[var(--app-border)] px-2 text-[18px] font-[560] tracking-normal transition first:border-l-0 max-[720px]:min-h-[42px] max-[720px]:text-[14px]"
-                      :class="selectedRole === role.value ? 'bg-[var(--app-primary)] text-white shadow-[0_8px_18px_rgba(var(--app-primary-rgb),0.22)]' : 'bg-[var(--app-surface)] text-[var(--app-text-secondary)] hover:bg-[var(--app-surface-muted)]'"
+                      class="min-h-[52px] flex-1 border-l border-[#dce4ee] text-[18px] font-[560] tracking-normal transition first:border-l-0 max-[720px]:min-h-[42px] max-[720px]:px-2 max-[720px]:text-[15px]"
+                      :class="selectedRole === role.value ? 'bg-[linear-gradient(180deg,#0076ff,#0063df)] text-white shadow-[0_12px_22px_rgba(0,105,240,0.22)]' : 'bg-white text-[#344154] hover:bg-slate-50'"
                       :aria-pressed="selectedRole === role.value"
                       @click="selectRole(role.value)"
                     >
@@ -161,15 +161,15 @@
                 </div>
 
                 <div>
-                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[var(--app-text)] max-[720px]:mb-2 max-[720px]:text-[15px]" for="login-username">用户名</label>
+                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#17233a] max-[720px]:mb-2 max-[720px]:text-[15px]" for="login-username">用户名</label>
                   <div :class="inputShellClass(loginErrors.username)">
-                    <span class="grid h-5 w-5 shrink-0 place-items-center text-[var(--app-text-soft)]" aria-hidden="true">
+                    <span class="grid h-5 w-5 shrink-0 place-items-center text-[#8a97aa]" aria-hidden="true">
                       <UserIcon />
                     </span>
                     <input
                       id="login-username"
                       v-model.trim="loginForm.username"
-                      class="h-full min-h-[49px] min-w-0 flex-1 bg-transparent text-[17px] text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] max-[720px]:min-h-[44px] max-[720px]:text-[16px]"
+                      class="h-full min-h-[49px] flex-1 bg-transparent text-[17px] text-[#17233a] outline-none placeholder:text-[#9aa7b8] max-[720px]:min-h-[44px] max-[720px]:text-[16px]"
                       type="text"
                       autocomplete="username"
                       placeholder="请输入用户名"
@@ -181,15 +181,15 @@
                 </div>
 
                 <div>
-                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[var(--app-text)] max-[720px]:mb-2 max-[720px]:text-[15px]" for="login-password">密码</label>
+                  <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#17233a] max-[720px]:mb-2 max-[720px]:text-[15px]" for="login-password">密码</label>
                   <div :class="inputShellClass(loginErrors.password)">
-                    <span class="grid h-5 w-5 shrink-0 place-items-center text-[var(--app-text-soft)]" aria-hidden="true">
+                    <span class="grid h-5 w-5 shrink-0 place-items-center text-[#8a97aa]" aria-hidden="true">
                       <LockIcon />
                     </span>
                     <input
                       id="login-password"
                       v-model="loginForm.password"
-                      class="h-full min-h-[49px] min-w-0 flex-1 bg-transparent text-[17px] text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] max-[720px]:min-h-[44px] max-[720px]:text-[16px]"
+                      class="h-full min-h-[49px] flex-1 bg-transparent text-[17px] text-[#17233a] outline-none placeholder:text-[#9aa7b8] max-[720px]:min-h-[44px] max-[720px]:text-[16px]"
                       :type="showLoginPassword ? 'text' : 'password'"
                       autocomplete="current-password"
                       placeholder="请输入密码"
@@ -198,7 +198,7 @@
                     />
                     <button
                       type="button"
-                      class="grid h-8 w-8 shrink-0 place-items-center rounded-md text-[var(--app-text-soft)] transition hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)] max-[720px]:h-7 max-[720px]:w-7"
+                      class="grid h-8 w-8 shrink-0 place-items-center rounded-md text-[#8a97aa] transition hover:bg-slate-100 hover:text-[#344154] max-[720px]:h-7 max-[720px]:w-7"
                       :aria-label="showLoginPassword ? '隐藏密码' : '显示密码'"
                       @click="showLoginPassword = !showLoginPassword"
                     >
@@ -211,34 +211,34 @@
 
                 <button
                   type="submit"
-                  class="mt-2.5 flex min-h-[60px] w-full min-w-0 items-center justify-center gap-2 rounded-[var(--app-radius-md)] border-0 bg-[var(--app-primary)] text-[21px] font-[650] tracking-normal text-white shadow-[0_12px_24px_rgba(var(--app-primary-rgb),0.24)] transition hover:bg-[var(--app-primary-strong)] focus:outline-none focus:ring-4 focus:ring-[var(--app-primary-tint-15)] disabled:cursor-not-allowed disabled:opacity-70 max-[720px]:mt-1 max-[720px]:min-h-[50px] max-[720px]:text-[17px]"
+                  class="mt-2.5 flex min-h-[60px] w-full items-center justify-center gap-2 rounded-lg border-0 bg-[linear-gradient(180deg,#087cff_0%,#0062dd_100%)] text-[21px] font-[650] tracking-normal text-white shadow-[0_16px_30px_rgba(0,101,232,0.26)] transition hover:bg-[linear-gradient(180deg,#1688ff_0%,#0069eb_100%)] focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-70 max-[720px]:mt-1 max-[720px]:min-h-[50px] max-[720px]:text-[17px]"
                   :disabled="loading"
                 >
                   <span v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true"></span>
                   登录
                 </button>
 
-                <div class="mt-[16px] flex items-center gap-2 text-[14px] leading-[1.7] text-[var(--app-text-secondary)] max-[720px]:mt-2.5 max-[720px]:text-[12px]">
+                <div class="mt-[16px] flex items-center gap-2 text-[14px] leading-[1.7] text-[#5f6f83] max-[720px]:mt-2.5 max-[720px]:text-[12px]">
                   <input
                     id="remember-password"
                     v-model="rememberPassword"
                     type="checkbox"
-                    class="h-[18px] w-[18px] rounded border-[var(--app-border)] text-[var(--app-primary)] accent-[var(--app-primary)] max-[720px]:h-4 max-[720px]:w-4"
+                    class="h-[18px] w-[18px] rounded border-[#dce4ee] text-[#087cff] accent-[#087cff] max-[720px]:h-4 max-[720px]:w-4"
                   />
                   <label for="remember-password">记住密码</label>
                 </div>
 
-                <div class="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[var(--app-text-secondary)] max-[720px]:mt-2.5 max-[720px]:items-start max-[720px]:text-[12px] max-[720px]:leading-[1.55]">
+                <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] leading-[1.7] text-[#5f6f83] max-[720px]:mt-2.5 max-[720px]:items-start max-[720px]:text-[12px] max-[720px]:leading-[1.55]">
                   <input
                     id="login-agreement"
                     v-model="agreementAccepted"
                     type="checkbox"
-                    class="h-[18px] w-[18px] rounded border-[var(--app-border)] text-[var(--app-primary)] accent-[var(--app-primary)] max-[720px]:mt-0.5 max-[720px]:h-4 max-[720px]:w-4"
+                    class="h-[18px] w-[18px] rounded border-[#dce4ee] text-[#087cff] accent-[#087cff] max-[720px]:mt-0.5 max-[720px]:h-4 max-[720px]:w-4"
                   />
                   <label for="login-agreement">登录即表示您已阅读并同意</label>
-                  <a href="javascript:void(0)" class="font-semibold text-[var(--app-primary)]">《用户协议》</a>
+                  <a href="javascript:void(0)" class="font-semibold text-[#087cff]">《用户协议》</a>
                   <span>和</span>
-                  <a href="javascript:void(0)" class="font-semibold text-[var(--app-primary)]">《隐私政策》</a>
+                  <a href="javascript:void(0)" class="font-semibold text-[#087cff]">《隐私政策》</a>
                 </div>
               </form>
 
@@ -305,7 +305,7 @@
 
                 <button
                   type="submit"
-                  class="flex min-h-[60px] w-full min-w-0 items-center justify-center gap-2 rounded-[var(--app-radius-md)] border-0 bg-[var(--app-primary)] text-[21px] font-[650] tracking-normal text-white shadow-[0_12px_24px_rgba(var(--app-primary-rgb),0.24)] transition hover:bg-[var(--app-primary-strong)] focus:outline-none focus:ring-4 focus:ring-[var(--app-primary-tint-15)] disabled:cursor-not-allowed disabled:opacity-70 max-[720px]:min-h-[50px] max-[720px]:text-[17px]"
+                  class="flex min-h-[60px] w-full items-center justify-center gap-2 rounded-lg border-0 bg-[linear-gradient(180deg,#087cff_0%,#0062dd_100%)] text-[21px] font-[650] tracking-normal text-white shadow-[0_16px_30px_rgba(0,101,232,0.26)] transition hover:bg-[linear-gradient(180deg,#1688ff_0%,#0069eb_100%)] focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-70 max-[720px]:min-h-[50px] max-[720px]:text-[17px]"
                   :disabled="loading"
                 >
                   <span v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true"></span>
@@ -464,14 +464,14 @@ const features = [
   }
 ]
 
-const inputShellBaseClass = 'flex min-h-[49px] min-w-0 items-center gap-2 rounded-[var(--app-radius-md)] bg-[var(--app-surface)] px-[18px] transition focus-within:ring-4 max-[720px]:min-h-[44px] max-[720px]:px-3'
+const inputShellBaseClass = 'flex min-h-[49px] items-center gap-2 rounded-lg bg-white px-[18px] transition focus-within:ring-4 max-[720px]:min-h-[44px] max-[720px]:px-3'
 
 function inputShellClass(errorMessage) {
   return [
     inputShellBaseClass,
     errorMessage
-      ? 'shadow-[inset_0_0_0_1px_var(--app-danger)] focus-within:ring-[var(--app-primary-tint-12)]'
-      : 'shadow-[inset_0_0_0_1px_var(--app-border)] focus-within:shadow-[inset_0_0_0_1px_var(--app-primary)] focus-within:ring-[var(--app-primary-tint-12)]'
+      ? 'shadow-[0_0_0_1px_#fb7185_inset] focus-within:ring-rose-100'
+      : 'shadow-[0_0_0_1px_#dce4ee_inset] focus-within:shadow-[0_0_0_1px_#117eff_inset] focus-within:ring-[rgba(17,126,255,0.12)]'
   ]
 }
 
@@ -708,15 +708,15 @@ const TextField = defineComponent({
   setup(props, { emit, slots }) {
     return () =>
       h('div', [
-        h('label', { class: 'mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[var(--app-text)] max-[720px]:mb-2 max-[720px]:text-[15px]', for: props.id }, props.label),
+        h('label', { class: 'mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#17233a] max-[720px]:mb-2 max-[720px]:text-[15px]', for: props.id }, props.label),
         h('div', { class: inputShellClass(props.error) }, [
           slots.default
-            ? h('span', { class: 'grid h-5 w-5 shrink-0 place-items-center text-[var(--app-text-soft)]', 'aria-hidden': 'true' }, slots.default())
+            ? h('span', { class: 'grid h-5 w-5 shrink-0 place-items-center text-[#8a97aa]', 'aria-hidden': 'true' }, slots.default())
             : null,
           h('input', {
             id: props.id,
             value: props.modelValue,
-            class: 'h-full min-h-[49px] min-w-0 flex-1 bg-transparent text-[17px] text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] max-[720px]:min-h-[44px] max-[720px]:text-[16px]',
+            class: 'h-full min-h-[49px] flex-1 bg-transparent text-[17px] text-[#17233a] outline-none placeholder:text-[#9aa7b8] max-[720px]:min-h-[44px] max-[720px]:text-[16px]',
             type: 'text',
             autocomplete: props.autocomplete,
             inputmode: props.inputmode,
@@ -747,13 +747,13 @@ const PasswordField = defineComponent({
   setup(props, { emit }) {
     return () =>
       h('div', [
-        h('label', { class: 'mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[var(--app-text)] max-[720px]:mb-2 max-[720px]:text-[15px]', for: props.id }, props.label),
+        h('label', { class: 'mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#17233a] max-[720px]:mb-2 max-[720px]:text-[15px]', for: props.id }, props.label),
         h('div', { class: inputShellClass(props.error) }, [
-          h('span', { class: 'grid h-5 w-5 shrink-0 place-items-center text-[var(--app-text-soft)]', 'aria-hidden': 'true' }, [h(LockIcon)]),
+          h('span', { class: 'grid h-5 w-5 shrink-0 place-items-center text-[#8a97aa]', 'aria-hidden': 'true' }, [h(LockIcon)]),
           h('input', {
             id: props.id,
             value: props.modelValue,
-            class: 'h-full min-h-[49px] min-w-0 flex-1 bg-transparent text-[17px] text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] max-[720px]:min-h-[44px] max-[720px]:text-[16px]',
+            class: 'h-full min-h-[49px] flex-1 bg-transparent text-[17px] text-[#17233a] outline-none placeholder:text-[#9aa7b8] max-[720px]:min-h-[44px] max-[720px]:text-[16px]',
             type: props.visible ? 'text' : 'password',
             autocomplete: props.autocomplete,
             placeholder: props.placeholder,
@@ -767,7 +767,7 @@ const PasswordField = defineComponent({
             'button',
             {
               type: 'button',
-              class: 'grid h-8 w-8 shrink-0 place-items-center rounded-md text-[var(--app-text-soft)] transition hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)] max-[720px]:h-7 max-[720px]:w-7',
+              class: 'grid h-8 w-8 shrink-0 place-items-center rounded-md text-[#8a97aa] transition hover:bg-slate-100 hover:text-[#344154] max-[720px]:h-7 max-[720px]:w-7',
               'aria-label': props.visible ? '隐藏密码' : '显示密码',
               onClick: () => emit('toggleVisible')
             },

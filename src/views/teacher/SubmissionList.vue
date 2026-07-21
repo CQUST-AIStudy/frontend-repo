@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-full px-4 pb-5 bg-[#f5f7fa] max-md:px-2 max-md:pb-4">
+  <div class="min-h-full px-4 pb-5 bg-[var(--app-bg)] max-md:px-2 max-md:pb-4">
     <UiPageHeader
       class="py-6 max-md:py-4"
       title="学生提交"

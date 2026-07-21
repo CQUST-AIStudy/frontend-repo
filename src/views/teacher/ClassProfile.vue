@@ -131,7 +131,7 @@
     </template>
 
     <!-- Student profile modal -->
-    <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="960px">
+    <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="960px" @close="disposeDialogCharts">
       <div class="max-h-[75vh] overflow-y-auto pr-1">
       <div v-if="dialogLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-3">
@@ -143,9 +143,9 @@
         <div v-if="dialogProfile.error" class="rounded-[12px] bg-[#fff3cd] border border-[#ffecb5] p-4 text-[13px] text-[#86650a]">
           {{ dialogProfile.error }}
         </div>
-        <div v-else-if="hasDialogChartData" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div v-if="dialogProfile.radar" ref="dialogRadarRef" class="h-[300px]"></div>
-          <div v-if="dialogProfile.trend?.series?.length" ref="dialogTrendRef" class="h-[300px]"></div>
+        <div v-else-if="hasDialogChartData" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div v-if="hasDialogRadarData" ref="dialogRadarRef" class="h-[240px] rounded-[12px] border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)]"></div>
+          <div v-if="hasDialogTrendData" ref="dialogTrendRef" class="h-[240px] rounded-[12px] border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)]"></div>
         </div>
         <div v-if="!dialogProfile.error && dialogProfile.feedback" class="mt-3 text-[14px] leading-[1.8] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] p-[14px_16px] rounded-[10px] border-l-4 border-l-[#6b8f6b]">{{ dialogProfile.feedback }}</div>
         <div v-if="!dialogProfile.error && dialogProfile.patterns?.length" class="mt-3 flex flex-wrap gap-2">
@@ -253,10 +253,28 @@ const dialogStudentName = ref('')
 const dialogProfile = ref({})
 const dialogRadarRef = ref(null)
 const dialogTrendRef = ref(null)
-const hasDialogChartData = computed(() => Boolean(dialogProfile.value?.radar || dialogProfile.value?.trend?.series?.length))
+const hasDialogRadarData = computed(() => {
+  const radar = dialogProfile.value?.radar
+  return Array.isArray(radar?.dimensions) && radar.dimensions.length > 0
+    && Array.isArray(radar?.scores) && radar.scores.length > 0
+})
+const hasDialogTrendData = computed(() => {
+  const series = dialogProfile.value?.trend?.series
+  return Array.isArray(series) && series.length > 0
+})
+const hasDialogChartData = computed(() => hasDialogRadarData.value || hasDialogTrendData.value)
 const hasDialogContent = computed(() => Boolean(
   hasDialogChartData.value || dialogProfile.value?.feedback || dialogProfile.value?.patterns?.length
 ))
+let dialogRadarChart = null
+let dialogTrendChart = null
+
+function disposeDialogCharts() {
+  dialogRadarChart?.dispose()
+  dialogTrendChart?.dispose()
+  dialogRadarChart = null
+  dialogTrendChart = null
+}
 
 function tierCount(key) {
   return data.value.tiers?.[key]?.count || 0
@@ -353,9 +371,14 @@ function renderBar() {
   })
 }
 
-const handleProfileResize = () => { barChartInst?.resize() }
+const handleProfileResize = () => {
+  barChartInst?.resize()
+  dialogRadarChart?.resize()
+  dialogTrendChart?.resize()
+}
 
 async function viewStudent(studentId) {
+  disposeDialogCharts()
   dialogVisible.value = true
   dialogLoading.value = true
   dialogStudentName.value = studentId
@@ -370,26 +393,31 @@ async function viewStudent(studentId) {
     }
     dialogProfile.value = d
     dialogStudentName.value = d.studentName || studentId
+    dialogLoading.value = false
     await nextTick()
-    if (dialogRadarRef.value && d.radar) {
-      const c = echarts.init(dialogRadarRef.value)
-      c.setOption({
+    await new Promise(resolve => setTimeout(resolve, 280))
+    if (!dialogVisible.value) return
+    if (dialogRadarRef.value && hasDialogRadarData.value) {
+      dialogRadarChart = echarts.init(dialogRadarRef.value)
+      dialogRadarChart.setOption({
         radar: {
           indicator: d.radar.dimensions.map((dim) => ({ name: dim, max: 100 })),
           shape: 'polygon'
         },
         series: [{ type: 'radar', data: [{ value: d.radar.scores, areaStyle: { color: 'rgba(64,158,255,0.3)' } }] }]
       })
+      dialogRadarChart.resize()
     }
-    if (dialogTrendRef.value && d.trend?.series) {
-      const c = echarts.init(dialogTrendRef.value)
-      c.setOption({
+    if (dialogTrendRef.value && hasDialogTrendData.value) {
+      dialogTrendChart = echarts.init(dialogTrendRef.value)
+      dialogTrendChart.setOption({
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: d.trend.series.map(s => s.name), axisLabel: { rotate: 30, fontSize: 9 } },
         yAxis: { type: 'value', min: 0, max: 100 },
         series: [{ type: 'line', data: d.trend.series.map(s => s.mastery), smooth: true, areaStyle: {} }],
         grid: { left: 40, right: 10, bottom: 50, top: 20 }
       })
+      dialogTrendChart.resize()
     }
   } catch (e) {
     dialogProfile.value = { error: getFriendlyErrorMessage(e, '学生画像加载失败，请稍后重试') }
@@ -406,5 +434,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleProfileResize)
   barChartInst?.dispose()
+  disposeDialogCharts()
 })
 </script>
