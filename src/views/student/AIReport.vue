@@ -210,21 +210,26 @@
                   </ui-descriptions-item>
                 </ui-descriptions>
 
-                <div class="experiment-code [margin-top:20px]" v-if="selectedExperiment.code">
+                <div class="experiment-code [margin-top:20px]" v-if="selectedExperiment.code || selectedExperiment.problems?.length">
                   <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [margin-bottom:12px]">
                     <h3 class="[margin:0]">实验代码</h3>
-                    <span v-if="parsedQuestions.length > 1" class="[font-size:12px] [color:var(--app-text-secondary)]">
+                    <span v-if="parsedQuestions.length > 0" class="[font-size:12px] [color:var(--app-text-secondary)]">
                       共 {{ parsedQuestions.length }} 题
                     </span>
                   </div>
 
-                  <div v-if="parsedQuestions.length > 0" class="[display:flex] [flex-direction:column] [gap:12px]">
-                    <div
-                      v-if="parsedQuestions.length > 1"
-                      class="[display:flex] [flex-wrap:wrap] [gap:8px] [padding:4px] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [background:var(--app-surface-muted)]"
-                      role="tablist"
-                      aria-label="实验题目"
-                    >
+                  <div v-if="parsedQuestions.length > 0" class="[display:grid] [grid-template-columns:140px_minmax(0,1fr)] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [overflow:hidden] max-[640px]:[display:flex] max-[640px]:[flex-direction:column]">
+                    <div class="[display:flex] [flex-direction:column] [gap:2px] [padding:6px] [background:var(--app-surface-muted)] [border-right:1px_solid_var(--app-border-soft)] max-[640px]:[flex-direction:row] max-[640px]:[overflow-x:auto] max-[640px]:[border-right:none] max-[640px]:[border-bottom:1px_solid_var(--app-border-soft)]" role="tablist" aria-label="实验题目">
+                      <UiButton
+                        :type="activeQuestionTab === 'full' ? 'primary' : 'default'"
+                        size="small"
+                        :aria-selected="activeQuestionTab === 'full'"
+                        role="tab"
+                        class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
+                        @click="activeQuestionTab = 'full'"
+                      >
+                        完整源码
+                      </UiButton>
                       <UiButton
                         v-for="(question, index) in parsedQuestions"
                         :key="`question-tab-${question.number}-${index}`"
@@ -232,31 +237,50 @@
                         size="small"
                         :aria-selected="activeQuestionTab === String(index)"
                         role="tab"
+                        class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
                         @click="activeQuestionTab = String(index)"
                       >
                         第{{ question.number }}题
                       </UiButton>
                     </div>
 
-                    <div
-                      v-for="(question, index) in parsedQuestions"
-                      v-show="activeQuestionTab === String(index)"
-                      :key="`question-panel-${question.number}-${index}`"
-                      class="app-panel [overflow:hidden]"
-                      role="tabpanel"
-                    >
-                      <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [padding:12px_16px] [border-bottom:1px_solid_var(--app-border-soft)]">
-                        <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题</span>
-                        <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
+                    <div class="[min-width:0] [padding:16px]">
+                      <div v-if="activeQuestionTab === 'full'" role="tabpanel">
+                        <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [margin-bottom:12px]">
+                          <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">完整源码</span>
+                          <span class="[font-size:12px] [color:var(--app-text-secondary)]">学生原始提交</span>
+                        </div>
+                        <CodeViewer v-if="selectedExperiment.code" :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
+                        <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无完整源码</div>
                       </div>
-                      <div class="[padding:16px]">
-                        <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
-                        <pre v-if="question.testResults" class="[margin:16px_0_0] [padding:12px] [overflow:auto] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)] [color:var(--app-text-secondary)] [font-size:12px] [line-height:1.6] [white-space:pre-wrap]"><code>{{ question.testResults }}</code></pre>
+
+                      <div v-for="(question, index) in parsedQuestions" v-show="activeQuestionTab === String(index)" :key="`question-panel-${question.number}-${index}`" role="tabpanel">
+                        <div v-if="question.problemTitle || question.statementMd || question.problemNo" class="[margin-bottom:16px] [padding:14px_16px] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
+                          <div class="[display:flex] [align-items:baseline] [flex-wrap:wrap] [gap:8px] [margin-bottom:8px]">
+                            <span class="[font-size:14px] [font-weight:600] [color:var(--app-primary)]">第{{ question.number }}题</span>
+                            <span v-if="question.problemNo" class="[font-size:12px] [color:var(--app-text-secondary)]">题号：{{ question.problemNo }}</span>
+                            <span v-if="question.problemTitle" class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">{{ question.problemTitle }}</span>
+                          </div>
+                          <div v-if="question.statementMd" class="markdown-body [font-size:13px] [line-height:1.7] [color:var(--app-text)] [&_p]:[margin:8px_0] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre]:[padding:12px] [&_pre]:[border-radius:8px] [&_pre]:[background:var(--app-surface)] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px]" v-html="renderMarkdown(question.statementMd)"></div>
+                        </div>
+                        <div v-if="question.code" class="[margin-bottom:16px]">
+                          <div class="[display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:8px]">
+                            <span class="[font-size:13px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题代码</span>
+                            <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
+                          </div>
+                          <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
+                        </div>
+                        <div v-else class="[margin-bottom:16px] [padding:28px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)] [border:1px_dashed_var(--app-border-soft)] [border-radius:var(--app-radius-sm)]">本题暂无代码提交</div>
+                        <div v-if="question.testResults" class="[padding:12px] [overflow:auto] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
+                          <h4 class="[margin:0_0_8px] [font-size:13px] [font-weight:600] [color:var(--app-text)]">测试结果</h4>
+                          <pre class="[margin:0] [white-space:pre-wrap] [font-size:12px] [line-height:1.6] [color:var(--app-text-secondary)]"><code>{{ question.testResults }}</code></pre>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <CodeViewer v-else :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
+                  <div v-else-if="selectedExperiment.code" class="[margin-top:8px]"><CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="500px" /></div>
+                  <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无代码提交</div>
                 </div>
 
                 <div class="ai-comment [margin-top:20px]" v-if="selectedExperiment.aiComment">

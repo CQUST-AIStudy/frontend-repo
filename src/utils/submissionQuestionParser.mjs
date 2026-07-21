@@ -43,12 +43,6 @@ export function parseSubmissionQuestions({ code, problems } = {}) {
   const hasStructured = structuredMap.size > 0
   const source = typeof code === 'string' ? code : ''
 
-  if (hasStructured) {
-    return Array.from(structuredMap.entries()).map(([number, problem]) =>
-      buildStructuredQuestion(problem, number)
-    )
-  }
-
   if (!source.trim() && hasStructured) {
     return Array.from(structuredMap.entries()).map(([number, problem]) =>
       buildStructuredQuestion(problem, number)
@@ -97,6 +91,16 @@ export function parseSubmissionQuestions({ code, problems } = {}) {
 
   if (questions.length > 0) {
     return questions
+  }
+
+  if (hasStructured) {
+    const structuredQuestions = Array.from(structuredMap.entries()).map(([number, problem]) =>
+      buildStructuredQuestion(problem, number)
+    )
+    const hasPerQuestionCode = structuredQuestions.some(question => String(question.code || '').trim())
+    if (structuredQuestions.length > 1 && hasPerQuestionCode) {
+      return structuredQuestions
+    }
   }
 
   if (source.trim()) {
