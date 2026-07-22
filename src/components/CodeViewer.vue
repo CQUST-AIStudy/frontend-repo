@@ -2,11 +2,14 @@
   <div class="code-viewer">
     <div class="code-viewer__toolbar">
       <span class="code-viewer__lang">{{ langLabel }}</span>
-      <button class="code-viewer__copy" @click="copyCode" :title="copied ? '已复制' : '复制代码'">
-        <svg v-if="!copied" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>{{ copied ? '已复制' : '复制' }}</span>
-      </button>
+      <div class="code-viewer__toolbar-right">
+        <slot name="toolbar-extra"></slot>
+        <button v-if="!hideCopy" class="code-viewer__copy" @click="copyCode" :title="copied ? '已复制' : '复制代码'">
+          <svg v-if="!copied" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>{{ copied ? '已复制' : '复制' }}</span>
+        </button>
+      </div>
     </div>
     <div class="code-viewer__body">
       <table class="code-viewer__table">
@@ -30,6 +33,7 @@ const props = defineProps({
   code: { type: String, default: '' },
   language: { type: String, default: 'cpp' },
   maxHeight: { type: String, default: '400px' },
+  hideCopy: { type: Boolean, default: false },
 })
 
 const copied = ref(false)
@@ -139,6 +143,12 @@ async function copyCode() {
   padding: 8px 16px;
   background: #f6f8fa;
   border-bottom: 1px solid #d0d7de;
+}
+
+.code-viewer__toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .code-viewer__lang {

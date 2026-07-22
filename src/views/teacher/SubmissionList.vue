@@ -67,6 +67,7 @@
           <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">已评分：{{ getStatusCount('graded') }}</span>
           <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">已提交：{{ getStatusCount('submitted') }}</span>
           <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,75,63,0.1)] text-[#c44b3f]">未开始：{{ getStatusCount('not_started') }}</span>
+          <span v-if="selectedRows.length" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[var(--app-primary-soft)] text-[var(--app-primary)]">已选：{{ selectedRows.length }}</span>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -74,9 +75,13 @@
             <Refresh class="w-4 h-4" />
             刷新
           </UiButton>
-          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#30d158] to-[#28a745] shadow-[0_2px_8px_rgba(40,167,69,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedRows.length" @click="batchGrade">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#4cd964] to-[#34c759] shadow-[0_2px_8px_rgba(52,199,89,0.2)] hover:from-[#30d158] hover:to-[#28a745] hover:shadow-[0_2px_8px_rgba(40,167,69,0.3)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedRows.length" @click="batchGrade">
             <Edit class="w-4 h-4" />
             批量评分
+          </UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed" :disabled="!selectedRows.length" @click="clearSelection">
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            清空勾选
           </UiButton>
           <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5" @click="exportData">
             <Download class="w-4 h-4" />
@@ -90,7 +95,7 @@
           <thead>
             <tr class="border-b border-black/[0.06]">
               <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[55px]">
-                <UiInput type="checkbox" class="cursor-pointer" @change="toggleSelectAll($event)" />
+                <input type="checkbox" :checked="isAllSelected" class="w-4 h-4 cursor-pointer accent-[var(--app-primary)]" @change="toggleSelectAll($event)" />
               </th>
               <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验 ID</th>
               <th v-if="!experimentId" class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
@@ -106,7 +111,7 @@
           <tbody>
             <tr v-for="row in pagedSubmissions" :key="row.id" class="border-b border-black/[0.04] hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3">
-                <UiInput type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="cursor-pointer" @change="toggleRowSelection(row, $event)" />
+                <input type="checkbox" :checked="selectedRows.some(r => r.id === row.id)" class="w-4 h-4 cursor-pointer accent-[var(--app-primary)]" @change="toggleRowSelection(row, $event)" />
               </td>
               <td v-if="!experimentId" class="py-3 px-3">{{ row.experimentId }}</td>
               <td v-if="!experimentId" class="py-3 px-3 max-w-[180px] truncate">{{ row.experimentName }}</td>
@@ -206,6 +211,65 @@
         </div>
       </div>
     </div>
+    <!-- Batch Grade Dialog -->
+    <div v-if="batchGradeDialogVisible" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="batchGradeDialogVisible = false"></div>
+      <div class="relative w-[520px] max-w-[90vw] rounded-[20px] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-6">
+        <h3 class="text-lg font-semibold text-[#1d1d1f] mb-2">批量评分</h3>
+        <p class="text-[13px] text-[#6e6e73] mb-5">已选择 <span class="font-semibold text-[var(--app-primary)]">{{ selectedRows.length }}</span> 条提交记录，将统一设置以下评分信息</p>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">选择数量</label>
+            <span class="text-sm text-[#1d1d1f] font-medium">{{ selectedRows.length }} 条记录</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">成绩</label>
+            <UiInput
+              v-model.number="batchGradeForm.score"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm w-[120px]"
+            />
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0">查重率</label>
+            <div class="flex items-center gap-1.5">
+              <UiInput
+                v-model.number="batchGradeForm.plagiarismRate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm w-[120px]"
+              />
+              <span class="text-sm text-[#6e6e73]">%</span>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <label class="w-[100px] text-sm text-[#6e6e73] text-right shrink-0 pt-2.5">AI 评语</label>
+            <textarea
+              v-model="batchGradeForm.aiComment"
+              rows="6"
+              placeholder="请输入AI 评语（将应用于所有选中记录）"
+              class="flex-1 px-3 py-2.5 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2.5 mt-6">
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none" @click="batchGradeDialogVisible = false">取消</UiButton>
+          <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none" :disabled="batchGrading" @click="submitBatchGrade">
+            {{ batchGrading ? '提交中...' : '确定批量评分' }}
+          </UiButton>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -268,6 +332,14 @@ const gradeForm = reactive({
   aiComment: ''
 })
 
+const batchGradeDialogVisible = ref(false)
+const batchGrading = ref(false)
+const batchGradeForm = reactive({
+  score: 0,
+  plagiarismRate: 0,
+  aiComment: ''
+})
+
 const normalizeSubmitTime = (value) => {
   if (!value) return null
   const raw = String(value).trim()
@@ -311,6 +383,8 @@ const pagedSubmissions = computed(() => {
 watch(filteredSubmissions, () => {
   const maxPage = Math.max(1, Math.ceil(filteredSubmissions.value.length / pageSize.value))
   if (currentPage.value > maxPage) currentPage.value = maxPage
+  // 筛选变化后清除跨页残留勾选
+  selectedRows.value = selectedRows.value.filter(r => filteredSubmissions.value.some(f => f.id === r.id))
 })
 
 watch(experimentId, (id) => {
@@ -322,12 +396,20 @@ const handleCurrentChange = (page) => {
   currentPage.value = page
 }
 
+const isAllSelected = computed(() => {
+  return filteredSubmissions.value.length > 0 && selectedRows.value.length === filteredSubmissions.value.length
+})
+
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
     selectedRows.value = [...pagedSubmissions.value]
   } else {
     selectedRows.value = []
   }
+}
+
+const clearSelection = () => {
+  selectedRows.value = []
 }
 
 const toggleRowSelection = (row, event) => {
@@ -339,7 +421,14 @@ const toggleRowSelection = (row, event) => {
 }
 
 const batchGrade = () => {
-  uiMessage.info('批量评分功能暂未实现。')
+  if (!selectedRows.value.length) {
+    uiMessage.warning('请先选择要评分的提交记录')
+    return
+  }
+  batchGradeForm.score = 0
+  batchGradeForm.plagiarismRate = 0
+  batchGradeForm.aiComment = ''
+  batchGradeDialogVisible.value = true
 }
 
 const formatDate = (dateString) => {
@@ -581,6 +670,30 @@ const submitGrade = async () => {
   } catch (error) {
     logger.error('提交评分失败:', error)
     uiMessage.error('提交评分失败，请重试。')
+  }
+}
+
+const submitBatchGrade = async () => {
+  if (!selectedRows.value.length) return
+
+  batchGrading.value = true
+  try {
+    const submissionIds = selectedRows.value.map(row => row.id)
+    await api.batchGradeSubmissions({
+      submissionIds,
+      score: Number(batchGradeForm.score),
+      plagiarismRate: Number(batchGradeForm.plagiarismRate),
+      aiComment: batchGradeForm.aiComment
+    })
+    uiMessage.success(`批量评分成功，共处理 ${submissionIds.length} 条记录。`)
+    batchGradeDialogVisible.value = false
+    selectedRows.value = []
+    await loadSubmissions()
+  } catch (error) {
+    logger.error('批量评分失败:', error)
+    uiMessage.error('批量评分失败，请重试。')
+  } finally {
+    batchGrading.value = false
   }
 }
 

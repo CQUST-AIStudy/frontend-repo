@@ -592,6 +592,10 @@ export default {
     return apiClient.post(`/api/submissions/${id}/grade`, data)
   },
 
+  async batchGradeSubmissions(data) {
+    return apiClient.post('/api/submissions/batch-grade', data)
+  },
+
   async saveQuestionComment(submissionId, questionIndex, comment) {
     return apiClient.post(`/api/submissions/${submissionId}/comments`, { questionIndex, comment })
   },

@@ -2,86 +2,98 @@
   <div class="app-layout app-layout--student student-layout [width:100%] [height:100vh] [height:100dvh] [min-height:0] [overflow:hidden] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto] max-[960px]:[overflow-x:hidden]">
     <ui-container class="app-layout-container layout-container [height:100vh] [height:100dvh] [min-height:0] max-[960px]:[min-height:100vh] max-[960px]:[min-height:100dvh] max-[960px]:[height:auto]">
       <ui-aside v-if="!isMobile" :width="asideWidth" class="app-layout-aside layout-aside [display:flex] [flex-direction:column] [height:100vh] [height:100dvh] [background:var(--app-sidebar-bg)] [transition:width_0.3s_cubic-bezier(0.25,_0.46,_0.45,_0.94)] [overflow:hidden] [border-right:1px_solid_var(--app-border-soft)] [backdrop-filter:blur(16px)_saturate(140%)]">
-        <div class="logo-container [height:64px] [display:flex] [align-items:center] [padding:0_16px] [gap:12px] [border-bottom:0.5px_solid_var(--app-border-soft)]">
-          <img src="../../assets/logo.png" alt="Logo" class="logo [border-radius:10px] [border:1px_solid_var(--app-border-soft)] [height:36px] [width:36px] [flex-shrink:0] [transition:all_0.3s]" />
-          <transition name="fade-text">
-            <span v-if="!collapsed" class="logo-title [font-size:15px] [font-weight:700] [color:var(--app-text)] [white-space:nowrap] [letter-spacing:0]">智能学习平台</span>
+        <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--app-border-soft)] shrink-0">
+          <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-[var(--app-border-soft)] shadow-sm shrink-0" />
+          <transition
+            enter-active-class="transition-opacity duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+          >
+            <div v-if="!collapsed" class="flex flex-col gap-0.5 overflow-hidden">
+              <span class="text-[11px] font-medium text-[var(--app-text-soft)] uppercase tracking-wide">学生工作台</span>
+              <span class="text-base font-bold text-[var(--app-text)] tracking-normal whitespace-nowrap">智能学习平台</span>
+            </div>
           </transition>
         </div>
 
         <ui-scrollbar class="menu-scrollbar [flex:1] [min-height:0] [height:calc(100vh_-_64px)] [height:calc(100dvh_-_64px)] [&_.ui-scrollbar__bar.is-vertical]:[width:4px] [&_.ui-scrollbar__bar.is-vertical]:[right:2px] [&_.ui-scrollbar__thumb]:[background:var(--app-border-strong)] [&_.ui-scrollbar__thumb]:[border-radius:4px]">
-          <nav class="[padding:8px] [display:flex] [flex-direction:column] [gap:2px]" :class="{ '[items:center]': collapsed }">
-            <template v-for="item in menuItems" :key="item.path || item.group">
-              <!-- Single item -->
+          <nav class="px-2 py-3" :class="{ '[&>*]:[justify-content:center]': collapsed }">
+            <div class="space-y-0.5" :class="{ 'items-center': collapsed }">
+              <template v-for="item in menuItems" :key="item.path || item.group">
+                <!-- Single item -->
+                <router-link
+                  v-if="!item.children"
+                  :to="item.path"
+                  class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
+                  :class="{
+                    'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive(item.path),
+                    'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isItemActive(item.path)
+                  }"
+                >
+                  <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+                  <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
+                </router-link>
+
+                <!-- Group with children -->
+                <div v-else>
+                  <UiButton
+                    class="nav-item group relative flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
+                    :class="getGroupButtonClass(item)"
+                    @click="toggleGroup(item.group)"
+                  >
+                    <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[var(--app-primary)]': isGroupActive(item) }"></span>
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--app-border-soft)] bg-[var(--app-glass)] text-[var(--app-text-secondary)] transition-colors duration-150 group-hover:border-[var(--app-border-soft)] group-hover:text-[var(--app-text)]" :class="{ '!border-[var(--app-primary)]/20 !bg-[var(--app-primary)]/10 !text-[var(--app-primary)]': isGroupActive(item) || openGroups[item.group] }">
+                      <component :is="item.icon" class="w-[17px] h-[17px]" />
+                    </span>
+                    <span v-if="!collapsed" class="truncate flex-1 text-left">{{ item.label }}</span>
+                    <span v-if="!collapsed" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--app-primary-tint-8)] text-[var(--app-text-soft)] transition-colors duration-150 group-hover:bg-[var(--app-primary-tint-12)]" :class="{ '!bg-[var(--app-primary)]/10 !text-[var(--app-primary)]': openGroups[item.group] || isGroupActive(item) }">
+                      <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </UiButton>
+                  <transition
+                    enter-active-class="max-h-[300px] overflow-hidden transition-all duration-200 ease-out"
+                    enter-from-class="max-h-0 opacity-0"
+                    enter-to-class="max-h-[300px] opacity-100"
+                    leave-active-class="max-h-[300px] overflow-hidden transition-all duration-150 ease-in"
+                    leave-from-class="max-h-[300px] opacity-100"
+                    leave-to-class="max-h-0 opacity-0"
+                  >
+                    <div v-if="openGroups[item.group] && !collapsed" class="relative mt-1 ml-[20px] pl-3 py-0.5 space-y-0.5 overflow-hidden before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-[var(--app-border-soft)]">
+                      <router-link
+                        v-for="child in item.children"
+                        :key="child.path"
+                        :to="child.path"
+                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
+                        :class="{
+                          'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path),
+                          'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path)
+                        }"
+                      >
+                        <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)] transition-colors" :class="{ '!border-[var(--app-primary)] !bg-[var(--app-primary)]': isChildActive(child.path), 'group-hover/child:border-[var(--app-text-soft)]': !isChildActive(child.path) }"></span>
+                        <span class="truncate">{{ child.label }}</span>
+                      </router-link>
+                    </div>
+                  </transition>
+                </div>
+              </template>
+
+              <div class="h-px bg-[var(--app-border-soft)] mx-3 my-2.5"></div>
+
               <router-link
-                v-if="!item.children"
-                :to="item.path"
-                class="nav-item [display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:var(--app-text-secondary)] [transition:all_0.2s] [position:relative]"
+                to="/student/profile"
+                class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
                 :class="{
-                  '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600] [&::before]:[content:\'\'] [&::before]:[position:absolute] [&::before]:[left:0] [&::before]:[top:50%] [&::before]:[transform:translateY(-50%)] [&::before]:[width:3px] [&::before]:[height:18px] [&::before]:[background:var(--app-primary)] [&::before]:[border-radius:0_3px_3px_0]': isItemActive(item.path),
-                  'hover:[background:var(--app-primary-tint-12)] hover:[color:var(--app-text)]': !isItemActive(item.path)
+                  'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive('/student/profile'),
+                  'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isItemActive('/student/profile')
                 }"
               >
-                <component :is="item.icon" class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]" />
-                <span v-if="!collapsed" class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.label }}</span>
+                <ui-icon class="w-[18px] h-[18px] shrink-0"><Setting /></ui-icon>
+                <span v-if="!collapsed" class="truncate">个人设置</span>
               </router-link>
-
-              <!-- Group with children -->
-              <div v-else class="[width:100%]">
-                <UiButton
-                  class="nav-group-btn [display:flex] [align-items:center] [overflow:hidden] [font-size:13.5px] [font-weight:500] [transition:all_0.2s] [cursor:pointer] ![min-height:0] ![height:40px] ![width:100%] ![justify-content:flex-start] ![gap:10px] ![padding:0_12px] ![border-radius:8px] ![border:none] ![shadow:none]"
-                  :class="getGroupButtonClass(item)"
-                  @click="toggleGroup(item.group)"
-                >
-                  <component :is="item.icon" class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]" />
-                  <span v-if="!collapsed" class="[flex:1] [text-align:left] [white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ item.label }}</span>
-                  <svg v-if="!collapsed" class="[width:12px] [height:12px] [flex-shrink:0] [transition:transform_0.2s]" :class="{ '[transform:rotate(90deg)]': openGroups[item.group] }" viewBox="0 0 12 12" fill="none">
-                    <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </UiButton>
-                <transition
-                  enter-active-class="[transition:all_0.2s_ease-out] [overflow:hidden]"
-                  enter-from-class="[max-height:0] [opacity:0]"
-                  enter-to-class="[max-height:300px] [opacity:1]"
-                  leave-active-class="[transition:all_0.15s_ease-in] [overflow:hidden]"
-                  leave-from-class="[max-height:300px] [opacity:1]"
-                  leave-to-class="[max-height:0] [opacity:0]"
-                >
-                  <div
-                    v-if="openGroups[item.group] && !collapsed"
-                    class="[position:relative] [margin-top:2px] [margin-left:28px] [padding-left:12px] [padding-top:2px] [padding-bottom:2px] [display:flex] [flex-direction:column] [gap:1px] before:[content:''] before:[position:absolute] before:[left:0] before:[top:4px] before:[bottom:4px] before:[width:1px] before:[background:var(--app-border-soft)]"
-                  >
-                    <router-link
-                      v-for="child in item.children"
-                      :key="child.path"
-                      :to="child.path"
-                      class="nav-child-item [display:flex] [align-items:center] [position:relative] [height:30px] [padding:0_10px] [border-radius:6px] [text-decoration:none] [font-size:12.5px] [color:var(--app-text-secondary)] [transition:all_0.15s]"
-                      :class="{
-                        '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isChildActive(child.path),
-                        'hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-text)]': !isChildActive(child.path)
-                      }"
-                    >
-                      <span class="[position:absolute] [left:-15px] [top:50%] [transform:translateY(-50%)] [width:6px] [height:6px] [border-radius:50%] [border:1px_solid_var(--app-border-soft)] [background:var(--app-surface-muted)] [transition:all_0.15s]" :class="{ '![border-color:var(--app-primary)] ![background:var(--app-primary)]': isChildActive(child.path) }"></span>
-                      <span class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">{{ child.label }}</span>
-                    </router-link>
-                  </div>
-                </transition>
-              </div>
-            </template>
-
-            <div class="[height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>
-
-            <router-link
-              to="/student/profile"
-              class="nav-item [display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:var(--app-text-secondary)] [transition:all_0.2s] [position:relative]"
-              :class="{
-                '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600] [&::before]:[content:\'\'] [&::before]:[position:absolute] [&::before]:[left:0] [&::before]:[top:50%] [&::before]:[transform:translateY(-50%)] [&::before]:[width:3px] [&::before]:[height:18px] [&::before]:[background:var(--app-primary)] [&::before]:[border-radius:0_3px_3px_0]': isItemActive('/student/profile'),
-                'hover:[background:var(--app-primary-tint-12)] hover:[color:var(--app-text)]': !isItemActive('/student/profile')
-              }"
-            >
-              <ui-icon class="[font-size:18px] [flex-shrink:0] [display:inline-flex] [align-items:center] [justify-content:center] [width:18px] [height:18px]"><Setting /></ui-icon>
-              <span v-if="!collapsed" class="[white-space:nowrap] [overflow:hidden] [text-overflow:ellipsis]">个人设置</span>
-            </router-link>
+            </div>
           </nav>
         </ui-scrollbar>
       </ui-aside>
@@ -93,68 +105,73 @@
         :with-header="false"
         class="layout-drawer"
       >
-        <div class="app-layout-aside layout-aside mobile-aside [width:100%] [border-right:none]">
-          <div class="logo-container">
-            <img src="../../assets/logo.png" alt="Logo" class="logo" />
-            <span class="logo-title">智能学习平台</span>
+        <div class="app-layout-aside layout-aside mobile-aside [width:100%] [border-right:none] flex flex-col h-full bg-[var(--app-sidebar-bg)] backdrop-blur-[24px]">
+          <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--app-border-soft)] shrink-0">
+            <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-[var(--app-border-soft)] shadow-sm shrink-0" />
+            <div class="flex flex-col gap-0.5">
+              <span class="text-[11px] font-medium text-[var(--app-text-soft)] uppercase tracking-wide">学生工作台</span>
+              <span class="text-base font-bold text-[var(--app-text)] tracking-normal whitespace-nowrap">智能学习平台</span>
+            </div>
           </div>
 
-          <ui-scrollbar class="menu-scrollbar">
-            <nav class="[padding:8px] [display:flex] [flex-direction:column] [gap:2px]">
-              <template v-for="item in menuItems" :key="item.path || item.group">
+          <ui-scrollbar class="flex-1 min-h-0">
+            <nav class="px-2 py-3">
+              <div class="space-y-0.5">
+                <template v-for="item in menuItems" :key="item.path || item.group">
+                  <router-link
+                    v-if="!item.children"
+                    :to="item.path"
+                    class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)] transition-all duration-150"
+                    :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive(item.path), 'hover:bg-[var(--app-primary-tint-8)]': !isItemActive(item.path) }"
+                    @click="closeMobileMenu"
+                  >
+                    <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
+                    <span>{{ item.label }}</span>
+                  </router-link>
+
+                  <div v-else>
+                    <UiButton
+                      class="group relative flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
+                      :class="getGroupButtonClass(item)"
+                      @click="toggleGroup(item.group)"
+                    >
+                      <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-transparent transition-colors duration-150" :class="{ '!bg-[var(--app-primary)]': isGroupActive(item) }"></span>
+                      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--app-border-soft)] bg-[var(--app-glass)] text-[var(--app-text-secondary)] transition-colors duration-150" :class="{ '!border-[var(--app-primary)]/20 !bg-[var(--app-primary)]/10 !text-[var(--app-primary)]': isGroupActive(item) || openGroups[item.group] }">
+                        <component :is="item.icon" class="w-[17px] h-[17px]" />
+                      </span>
+                      <span class="flex-1 text-left">{{ item.label }}</span>
+                      <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--app-primary-tint-8)] text-[var(--app-text-soft)] transition-colors duration-150" :class="{ '!bg-[var(--app-primary)]/10 !text-[var(--app-primary)]': openGroups[item.group] || isGroupActive(item) }">
+                        <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': openGroups[item.group] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </span>
+                    </UiButton>
+                    <div v-if="openGroups[item.group]" class="relative ml-[20px] mt-1 pl-3 py-0.5 space-y-0.5 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-[var(--app-border-soft)]">
+                      <router-link
+                        v-for="child in item.children"
+                        :key="child.path"
+                        :to="child.path"
+                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150"
+                        :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }"
+                        @click="closeMobileMenu"
+                      >
+                        <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)] transition-colors" :class="{ '!border-[var(--app-primary)] !bg-[var(--app-primary)]': isChildActive(child.path) }"></span>
+                        <span>{{ child.label }}</span>
+                      </router-link>
+                    </div>
+                  </div>
+                </template>
+
+                <div class="h-px bg-[var(--app-border-soft)] mx-3 my-2.5"></div>
+
                 <router-link
-                  v-if="!item.children"
-                  :to="item.path"
-                  class="[display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:var(--app-text-secondary)] [transition:all_0.2s]"
-                  :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isItemActive(item.path), 'hover:[background:var(--app-primary-tint-12)]': !isItemActive(item.path) }"
+                  to="/student/profile"
+                  class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)]"
+                  :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive('/student/profile') }"
                   @click="closeMobileMenu"
                 >
-                  <component :is="item.icon" class="[font-size:18px] [flex-shrink:0]" />
-                  <span>{{ item.label }}</span>
+                  <ui-icon class="w-[18px] h-[18px] shrink-0"><Setting /></ui-icon>
+                  <span>个人设置</span>
                 </router-link>
-
-                <div v-else>
-                  <UiButton
-                    class="[display:flex] [align-items:center] [overflow:hidden] [font-size:13.5px] [font-weight:500] [transition:all_0.2s] [cursor:pointer] ![min-height:0] ![height:40px] ![width:100%] ![justify-content:flex-start] ![gap:10px] ![padding:0_12px] ![border-radius:8px] ![border:none] ![shadow:none]"
-                    :class="getGroupButtonClass(item)"
-                    @click="toggleGroup(item.group)"
-                  >
-                    <component :is="item.icon" class="[font-size:18px] [flex-shrink:0]" />
-                    <span class="[flex:1] [text-align:left]">{{ item.label }}</span>
-                    <svg class="[width:12px] [height:12px] [flex-shrink:0] [transition:transform_0.2s]" :class="{ '[transform:rotate(90deg)]': openGroups[item.group] }" viewBox="0 0 12 12" fill="none">
-                      <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </UiButton>
-                  <div
-                    v-if="openGroups[item.group]"
-                    class="[position:relative] [margin-top:2px] [margin-left:28px] [padding-left:12px] [padding-top:2px] [padding-bottom:2px] [display:flex] [flex-direction:column] [gap:1px] before:[content:''] before:[position:absolute] before:[left:0] before:[top:4px] before:[bottom:4px] before:[width:1px] before:[background:var(--app-border-soft)]"
-                  >
-                    <router-link
-                      v-for="child in item.children"
-                      :key="child.path"
-                      :to="child.path"
-                      class="[display:flex] [align-items:center] [position:relative] [height:30px] [padding:0_10px] [border-radius:6px] [text-decoration:none] [font-size:12.5px] [color:var(--app-text-secondary)] [transition:all_0.15s]"
-                      :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isChildActive(child.path), 'hover:[background:var(--app-primary-tint-8)] hover:[color:var(--app-text)]': !isChildActive(child.path) }"
-                      @click="closeMobileMenu"
-                    >
-                      <span class="[position:absolute] [left:-15px] [top:50%] [transform:translateY(-50%)] [width:6px] [height:6px] [border-radius:50%] [border:1px_solid_var(--app-border-soft)] [background:var(--app-surface-muted)]" :class="{ '![border-color:var(--app-primary)] ![background:var(--app-primary)]': isChildActive(child.path) }"></span>
-                      <span>{{ child.label }}</span>
-                    </router-link>
-                  </div>
-                </div>
-              </template>
-
-              <div class="[height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>
-
-              <router-link
-                to="/student/profile"
-                class="[display:flex] [align-items:center] [gap:10px] [height:40px] [padding:0_12px] [border-radius:8px] [text-decoration:none] [font-size:13.5px] [font-weight:400] [color:var(--app-text-secondary)] [transition:all_0.2s]"
-                :class="{ '[background:var(--app-primary-soft)] ![color:var(--app-primary)] ![font-weight:600]': isItemActive('/student/profile') }"
-                @click="closeMobileMenu"
-              >
-                <ui-icon class="[font-size:18px] [flex-shrink:0]"><Setting /></ui-icon>
-                <span>个人设置</span>
-              </router-link>
+              </div>
             </nav>
           </ui-scrollbar>
         </div>
@@ -403,12 +420,12 @@ function getGroupButtonClass(item) {
   const active = isGroupActive(item)
   const open = openGroups[item.group]
   if (active) {
-    return '![border-color:rgba(var(--app-primary-rgb),_0.25)] ![background:rgba(var(--app-primary-rgb),_0.09)] ![color:var(--app-primary)]'
+    return '!border-[var(--app-primary)]/25 !bg-[var(--app-primary-tint-12)] !text-[var(--app-primary)]'
   }
   if (open) {
-    return '![border-color:var(--app-border-soft)] ![background:var(--app-glass)] ![color:var(--app-text)]'
+    return '!border-[var(--app-border-soft)] !bg-[var(--app-glass)] !text-[var(--app-text)]'
   }
-  return '![border-color:var(--app-border-soft)] ![background:var(--app-glass-strong)] ![color:var(--app-text-secondary)] hover:![border-color:var(--app-border)] hover:![background:var(--app-glass)] hover:![color:var(--app-text)]'
+  return '!border-[var(--app-border-soft)] !bg-[var(--app-glass-strong)] !text-[var(--app-text-secondary)] hover:!border-[var(--app-border)] hover:!bg-[var(--app-glass)] hover:!text-[var(--app-text)]'
 }
 
 // Auto-open the active group

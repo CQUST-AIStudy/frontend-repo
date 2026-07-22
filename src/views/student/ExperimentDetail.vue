@@ -61,7 +61,7 @@
         </section>
 
         <!-- 标签页-->
-        <div class="g-card [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
+        <div class="g-card flex flex-col flex-1 min-h-0 [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
           <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px]">
             <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'"><LucideIcon name="code" :size="16" class="mr-1.5" /> 代码</UiButton>
             <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'" v-if="false"><LucideIcon name="bot" :size="16" class="mr-1.5" /> AI助教点评</UiButton>
@@ -70,37 +70,96 @@
           </div>
 
           <!-- 代码 -->
-          <div v-if="activeTab === 'code'" class="g-tab-body [padding:20px]">
-            <div v-if="(!currentExp.problems || !currentExp.problems.length) && (!currentExp.code || !isCompleted)" class="g-empty [text-align:center] [padding:48px_20px]">
+          <div v-if="activeTab === 'code'" class="flex flex-col flex-1 min-h-0" style="padding:20px">
+            <!-- 空状态 -->
+            <div v-if="!hasAnyCode && !hasStudentQuestions" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="file-code" :size="48" /></div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无代码提交</div>
               <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" @click="goToPTA">前往PTA平台完成实验</UiButton>
             </div>
-            <div v-else>
-              <div class="g-toolbar [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
-                <span class="g-toolbar-title [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
-                <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:12px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" @click="copyCode">复制</UiButton>
+            <!-- 有代码 -->
+            <template v-else>
+              <div class="flex items-center justify-between mb-3 shrink-0">
+                <span></span>
+                <UiButton class="h-[30px] px-4 rounded-full text-[12px] text-[#5f6368] bg-white border border-[#dadce0] hover:bg-[#f8f9fa] cursor-pointer transition-colors" @click="copyCode">复制</UiButton>
               </div>
-              <!-- 按题分割展示：题目(题号+标题+题面) + 代码 -->
-              <div v-if="currentExp.problems && currentExp.problems.length" class="flex flex-col gap-4">
-                <div v-for="(problem, index) in currentExp.problems" :key="index" class="rounded-xl border border-[#e8eaed] overflow-hidden">
-                  <div class="p-4 bg-[#f8f9fa] border-b border-[#e8eaed]">
-                    <div class="flex items-baseline gap-2 mb-2">
-                      <span class="text-sm font-semibold text-[#1a73e8]">第{{ problem.number || (index + 1) }}题</span>
-                      <span v-if="problem.problemNo" class="text-xs text-[#5f6368]">题号：{{ problem.problemNo }}</span>
-                      <span v-if="problem.problemTitle" class="text-sm font-medium text-[#202124]">{{ problem.problemTitle }}</span>
+
+              <!-- 双栏布局 -->
+              <div v-if="displayQuestions.length" class="flex border border-[#e8eaed] rounded-xl overflow-hidden" style="max-height:610px;min-height:330px">
+                <!-- 左侧题目导航 -->
+                <div class="flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto">
+                  <UiButton @click="activeCodeQuestion = 'full'" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none shrink-0" :class="activeCodeQuestion === 'full' ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">完整源码</UiButton>
+                  <UiButton v-for="(q, i) in displayQuestions" :key="'qn'+i" @click="activeCodeQuestion = String(i)" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none truncate shrink-0" :class="activeCodeQuestion === String(i) ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">第{{ q.number || (i+1) }}题</UiButton>
+                </div>
+                <!-- 右侧：代码 + 测试点 -->
+                <div class="flex-1 flex flex-col min-h-0">
+                  <div class="flex-1 overflow-auto">
+                    <!-- 完整源码 -->
+                    <div v-show="activeCodeQuestion === 'full'">
+                      <CodeViewer v-if="cleanFullCode" :code="cleanFullCode" language="cpp" maxHeight="none" hideCopy />
+                      <div v-else class="text-center py-20 text-[13px] text-[#9aa0a6]">暂无完整源码</div>
                     </div>
-                    <div v-if="problem.statementMd" class="markdown-body text-[13px] leading-[1.7] text-[#202124] [&_p]:[margin:8px_0] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:12px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px] [&_li]:[margin:4px_0]" v-html="renderSafeMarkdown(problem.statementMd)"></div>
-                  </div>
-                  <div class="p-3">
-                    <CodeViewer v-if="problem.code" :code="problem.code" language="cpp" maxHeight="500px" />
-                    <div v-else class="text-center py-6 text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
+                    <!-- 逐题 -->
+                    <div v-for="(q, i) in displayQuestions" :key="'qp'+i" v-show="activeCodeQuestion === String(i)" class="flex flex-col flex-1 min-h-0 relative">
+                      <div v-if="q.problemTitle || q.statementMd" class="p-3 bg-[#f9f9fb] border-b border-[#e8eaed] shrink-0">
+                        <div class="flex items-baseline gap-2 mb-1">
+                          <span class="text-sm font-semibold text-[#1a73e8]">第{{ q.number || (i+1) }}题</span>
+                          <span v-if="q.problemNo" class="text-xs text-[#5f6368]">题号：{{ q.problemNo }}</span>
+                          <span v-if="q.problemTitle" class="text-sm font-medium text-[#202124]">{{ q.problemTitle }}</span>
+                        </div>
+                        <div v-if="q.statementMd" class="markdown-body text-[12px] leading-[1.6] text-[#202124]" v-html="renderSafeMarkdown(q.statementMd)"></div>
+                      </div>
+                      <CodeViewer v-if="q.code" :code="q.code" language="cpp" maxHeight="none" hideCopy style="height:100%">
+                        <template #toolbar-extra>
+                          <button v-if="q.testResults && q.testResults.length"
+                            @click="toggleTestResults(i)"
+                            class="inline-flex items-center gap-1 text-[12px] font-medium transition-colors bg-transparent border-none cursor-pointer"
+                            :class="expandedTestResults[i] ? 'text-[var(--app-primary)]' : 'text-[#57606a] hover:text-[#24292f]'"
+                          >
+                            <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': expandedTestResults[i] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            测试点
+                          </button>
+                        </template>
+                      </CodeViewer>
+                      <div v-else class="flex items-center justify-center h-full text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
+                      <!-- 本题测试点浮层 -->
+                      <div v-if="expandedTestResults[i] && q.testResults" class="absolute right-0 top-0 w-[36%] min-w-[260px] bg-white/97 backdrop-blur-sm border-l border-b border-[#d0d7de] shadow-[-8px_0_24px_rgba(0,0,0,0.1)] flex flex-col rounded-l-xl rounded-br-xl z-10 max-h-[220px]">
+                        <div class="flex items-center justify-between px-3 py-2 bg-[#f6f8fa] border-b border-[#e0e0e0] shrink-0 rounded-tl-xl">
+                          <span class="text-[12px] font-semibold text-[#24292f]">测试点</span>
+                          <button @click="toggleTestResults(i)" class="text-[11px] text-[#57606a] bg-transparent border-none cursor-pointer hover:text-[#24292f]">收起</button>
+                        </div>
+                        <div class="flex-1 overflow-hidden flex flex-col">
+                          <div class="flex-1 overflow-auto">
+                            <table class="w-full text-[11px] border-collapse">
+                              <thead><tr class="bg-[#f0f1f3] sticky top-0"><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">测试点</th><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">结果</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">得分</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">耗时</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">内存</th></tr></thead>
+                              <tbody>
+                                <tr v-for="(row, ri) in pagedTP(i)" :key="ri" class="hover:bg-[#f8f9fa]">
+                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-[#202124]">{{ row.point }}</td>
+                                  <td class="px-2.5 py-1 border border-[#e8eaed]"><span class="inline-flex items-center h-[18px] px-1.5 rounded-full text-[10px] font-bold" :class="row.result === '答案正确' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'">{{ row.result }}</span></td>
+                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#202124] font-medium">{{ row.score }}</td>
+                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.time }}</td>
+                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.memory }}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <div v-if="tpTotalPages(i) > 1" class="flex items-center justify-center gap-1.5 px-3 py-1.5 border-t border-[#e0e0e0] bg-[#f6f8fa] shrink-0">
+                            <button :disabled="(testPointPage[i]||1) <= 1" @click="testPointPage[i] = (testPointPage[i]||1) - 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">‹</button>
+                            <span class="text-[11px] text-[#57606a]">{{ testPointPage[i] || 1 }} / {{ tpTotalPages(i) }}</span>
+                            <button :disabled="(testPointPage[i]||1) >= tpTotalPages(i)" @click="testPointPage[i] = (testPointPage[i]||1) + 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">›</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <!-- 兜底：无结构化题目时退回单块代码展示 -->
-              <CodeViewer v-else-if="currentExp.code" :code="currentExp.code" language="cpp" maxHeight="500px" />
-            </div>
+              <!-- 兜底 -->
+              <div v-else-if="cleanFullCode" class="flex-1 min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden">
+                <CodeViewer :code="cleanFullCode" language="cpp" maxHeight="none" hideCopy />
+              </div>
+
+            </template>
           </div>
 
           <!-- AI点评 -->
@@ -325,6 +384,11 @@ function openDemoPage() {
 }
 const loading = ref(true)
 const activeTab = ref('code')
+const activeCodeQuestion = ref('full')
+const showTestResults = ref(false)
+const expandedTestResults = ref({})
+const testPointPage = ref({})
+const TP_PER_PAGE = 5
 const aiGenerating = ref(false)
 const aiSource = ref('')
 const localAiComment = ref('')
@@ -350,6 +414,145 @@ const plagiarismClass = computed(() => {
   return r > 20 ? 'danger-text' : r > 10 ? 'warning-text' : ''
 })
 
+// 解析合并代码字符串（"第N题如下:" 格式）为逐题对象
+const parsedStudentQuestions = computed(() => {
+  const code = currentExp.value?.code
+  if (!code || typeof code !== 'string') return []
+  const text = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  // 找所有 "第N题如下" 的位置
+  const markers = []
+  const markerRe = /第(\d+)题如下[：:]/g
+  let m
+  while ((m = markerRe.exec(text)) !== null) {
+    markers.push({ index: m.index, number: parseInt(m[1]), len: m[0].length })
+  }
+  if (markers.length === 0) return []
+
+  // 每道题从自己的段落提取代码 + 测试点
+  const questions = []
+  for (let i = 0; i < markers.length; i++) {
+    const start = markers[i].index + markers[i].len
+    const end = i + 1 < markers.length ? markers[i + 1].index : text.length
+    const body = text.substring(start, end).trim()
+    // 分离：找第一个 |...测试点...| 表头行
+    const lines = body.split(/\n/)
+    let codeLines = []
+    let tpLines = []
+    let foundTP = false
+    for (const line of lines) {
+      if (!foundTP && /\|.*测试点.*\|/.test(line)) {
+        foundTP = true
+        continue // 跳过表头行
+      }
+      if (foundTP) {
+        tpLines.push(line)
+      } else {
+        codeLines.push(line)
+      }
+    }
+    const codePart = codeLines.join('\n').trim()
+    const testResults = parseTestPointLines(tpLines)
+    questions.push({
+      number: markers[i].number,
+      code: codePart || null,
+      testResults: testResults && testResults.length > 0 ? testResults : null,
+      problemTitle: null,
+      statementMd: null,
+      problemNo: null
+    })
+  }
+
+  return questions
+})
+
+// 解析测试点数据行：跳过表头和分隔行，提取数据
+function parseTestPointLines(lines) {
+  const rows = []
+  for (const line of lines) {
+    if (!/^\s*\|/.test(line)) continue           // 非表格行
+    if (line.includes('测试点')) continue         // 表头
+    if (line.includes('---')) continue            // 分隔行
+    const cells = line.split('|').map(c => c.trim()).filter(c => c !== '')
+    if (cells.length >= 5) {
+      rows.push({
+        point: cells[0],
+        result: cells[1],
+        score: cells[2],
+        time: cells[3],
+        memory: cells[4]
+      })
+    }
+  }
+  return rows.length > 0 ? rows : null
+}
+
+// 用题目数多的那个来源（后端 problems 或前端解析），合并两份数据
+const displayQuestions = computed(() => {
+  const problems = currentExp.value?.problems || []
+  const parsed = parsedStudentQuestions.value
+  // 哪边题多信哪边
+  const useProblems = problems.length >= parsed.length
+  const base = useProblems ? problems : parsed
+  const other = useProblems ? parsed : problems
+  return base.map((q, i) => {
+    // 从另一边找匹配的题来补元数据
+    const match = other.find(o => o.number === q.number) || other[i] || {}
+    return {
+      number: q.number || (i + 1),
+      code: q.code || match.code || '',
+      testResults: q.testResults || match.testResults || null,
+      problemTitle: q.problemTitle || match.problemTitle || null,
+      statementMd: q.statementMd || match.statementMd || null,
+      problemNo: q.problemNo || match.problemNo || null
+    }
+  })
+})
+
+// 完整源码去除测试点表格，只保留纯代码（去掉所有 | 开头的表格行）
+const cleanFullCode = computed(() => {
+  const code = currentExp.value?.code
+  if (!code || typeof code !== 'string') return ''
+  return code
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .filter(line => !/^\s*\|/.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+})
+
+function toggleTestResults(index) {
+  const wasOpen = expandedTestResults.value[index]
+  expandedTestResults.value = { ...expandedTestResults.value, [index]: !wasOpen }
+  if (!wasOpen) testPointPage.value = { ...testPointPage.value, [index]: 1 }
+}
+
+function tpTotalPages(i) {
+  const q = displayQuestions.value[i]
+  return Math.max(1, Math.ceil((q?.testResults?.length || 0) / TP_PER_PAGE))
+}
+
+function pagedTP(i) {
+  const q = displayQuestions.value[i]
+  if (!q?.testResults) return []
+  const page = testPointPage.value[i] || 1
+  const start = (page - 1) * TP_PER_PAGE
+  return q.testResults.slice(start, start + TP_PER_PAGE)
+}
+
+const allTestResults = computed(() => {
+  return currentExp.value?.allTestResults || []
+})
+
+const hasAnyCode = computed(() => {
+  return cleanFullCode.value.length > 0
+})
+
+const hasStudentQuestions = computed(() => {
+  return displayQuestions.value.length > 0
+})
+
 const aiCommentRaw = computed(() => localAiComment.value || currentExp.value?.aiComment || '')
 const hasAiComment = computed(() => {
   const c = aiCommentRaw.value; return c && c.trim() && !c.includes('暂时还没有生成AI点评')
@@ -357,7 +560,16 @@ const hasAiComment = computed(() => {
 const renderedAiComment = computed(() => hasAiComment.value ? renderSafeMarkdown(aiCommentRaw.value) : '')
 
 function copyCode() {
-  if (currentExp.value?.code) { navigator.clipboard.writeText(currentExp.value.code); uiMessage.success('代码已复制') }
+  let code = ''
+  if (activeCodeQuestion.value === 'full') {
+    code = cleanFullCode.value
+  } else {
+    const idx = parseInt(activeCodeQuestion.value)
+    if (!isNaN(idx) && displayQuestions.value[idx]) {
+      code = displayQuestions.value[idx].code || ''
+    }
+  }
+  if (code) { navigator.clipboard.writeText(code); uiMessage.success('代码已复制') }
 }
 function goToPTA() { uiMessage.info('请前往PTA平台完成实验') }
 
