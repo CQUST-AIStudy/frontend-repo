@@ -362,6 +362,13 @@ export default {
     return apiClient.get('/recommend/health', { timeout: 5000 }).catch(() => null)
   },
 
+  async getPtaHighFrequencyErrors(studentNo, minErrors = 5) {
+    return apiClient.get('/recommend/ai/recommendation/pta-errors', {
+      params: { student_no: studentNo, min_errors: minErrors },
+      timeout: 8000
+    })
+  },
+
   async getErrorAnalysisHealth() {
     return apiClient.get('/api/analysis/health')
   },

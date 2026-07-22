@@ -40,6 +40,41 @@
           </ui-card>
         </div>
 
+        <section v-if="ptaErrorState !== 'idle'" class="pta-error-section">
+          <div class="pta-error-heading">
+            <div>
+              <h3>高频 PTA 错题</h3>
+              <p v-if="ptaErrorState === 'loaded' && ptaErrors.length">在 PTA 平台上累计错误 5 次以上的题目，建议优先回炉训练。</p>
+              <p v-else-if="ptaErrorState === 'loading'">正在加载 PTA 高频错题数据…</p>
+              <p v-else-if="ptaErrorState === 'error'">PTA 高频错题加载失败</p>
+              <p v-else>暂未发现累计错误 5 次以上的 PTA 题目。</p>
+            </div>
+            <ui-tag v-if="ptaErrors.length" type="danger" effect="dark">{{ ptaErrors.length }} 题</ui-tag>
+            <ui-button v-if="ptaErrorState === 'error'" size="small" plain @click="loadPtaErrors">重试</ui-button>
+          </div>
+
+          <div v-if="ptaErrorState === 'loading'" class="[text-align:center] [padding:20px] [color:var(--app-text-secondary)]">
+            正在查询 PTA 提交数据…
+          </div>
+
+          <div v-else-if="ptaErrors.length" class="pta-error-list">
+            <div
+              v-for="item in ptaErrors"
+              :key="item.problem_id"
+              class="pta-error-card"
+            >
+              <div class="pta-error-card__copy">
+                <span class="pta-error-card__title">{{ item.problem_title || `PTA 题目 #${item.source_problem_id || item.problem_id}` }}</span>
+                <span class="pta-error-card__meta">
+                  错误 <strong class="danger-text">{{ item.error_count }}</strong> 次
+                  <template v-if="item.offering_title"> · {{ item.offering_title }}</template>
+                </span>
+              </div>
+              <ui-button type="primary" size="small" @click="ptaPractice(item)">去 PTA 练习</ui-button>
+            </div>
+          </div>
+        </section>
+
         <ui-card shadow="hover" class="wrong-card">
           <template #header>
             <div class="filter-box">
@@ -297,10 +332,14 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import { wrongNotebookApi } from '@/api/wrongNotebook'
+import { getUserInfo } from '@/constants/auth'
+import api from '@/api'
 
 const router = useRouter()
 const loading = ref(false)
 const rows = ref([])
+const ptaErrors = ref([])
+const ptaErrorState = ref('idle') // idle | loading | error | loaded
 
 const stats = reactive({
   total: 0,
@@ -365,9 +404,9 @@ const summaryCards = computed(() => [
     color: 'var(--app-success)'
   },
   {
-    label: '错误类型数',
-    value: Object.keys(stats.byErrorCategory || {}).length,
-    tip: '覆盖的错误分类',
+    label: 'PTA 高频错题',
+    value: ptaErrors.value.length,
+    tip: '累计错误 ≥5 次',
     color: 'var(--app-warning)'
   }
 ])
@@ -486,7 +525,7 @@ async function loadStats() {
 
 async function loadAll() {
   loading.value = true
-  await Promise.all([reloadList(), loadStats()])
+  await Promise.all([reloadList(), loadStats(), loadPtaErrors()])
   loading.value = false
 }
 
@@ -608,6 +647,34 @@ async function saveNote() {
     uiMessage.error(err?.friendlyMessage || err?.message || '保存失败')
   } finally {
     noteDialog.saving = false
+  }
+}
+
+async function loadPtaErrors() {
+  const userInfo = getUserInfo()
+  const studentNo = userInfo?.usernum
+  if (!studentNo) {
+    ptaErrorState.value = 'error'
+    return
+  }
+  ptaErrorState.value = 'loading'
+  try {
+    const res = await api.getPtaHighFrequencyErrors(String(studentNo))
+    const data = res?.data || res || {}
+    ptaErrors.value = Array.isArray(data.items) ? data.items : []
+    ptaErrorState.value = 'loaded'
+  } catch (err) {
+    ptaErrors.value = []
+    ptaErrorState.value = 'error'
+  }
+}
+
+function ptaPractice(item) {
+  const offeringId = item.offering_id
+  if (offeringId) {
+    router.push(`/student/experiment-detail/${offeringId}`)
+  } else {
+    router.push('/student/experiments')
   }
 }
 
@@ -838,6 +905,77 @@ onMounted(() => {
   border: 1px dashed var(--app-border);
   border-radius: 18px;
   background: var(--app-surface-muted);
+}
+
+.pta-error-section {
+  padding: 18px 20px;
+  border: 1px solid var(--app-border);
+  border-left: 4px solid var(--app-danger);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--app-danger) 4%, var(--app-surface));
+}
+
+.pta-error-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pta-error-heading h3 {
+  margin: 0 0 4px;
+  color: var(--app-text);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pta-error-heading p {
+  margin: 0;
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.pta-error-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 10px;
+}
+
+.pta-error-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 11px;
+  background: var(--app-surface);
+}
+
+.pta-error-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pta-error-card__title {
+  overflow: hidden;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pta-error-card__meta {
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.danger-text {
+  color: var(--app-danger);
 }
 
 /* 响应式 */
