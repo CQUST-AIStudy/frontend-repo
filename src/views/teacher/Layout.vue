@@ -323,7 +323,6 @@ const menuItems = [
     group: 'teaching', icon: Notebook, label: '实验教学',
     children: [
       { path: '/teacher/experiments', label: '实验列表' },
-      { path: '/teacher/experiment-create', label: '创建实验' },
       { path: '/teacher/submissions', label: '学生提交' },
       { path: '/teacher/experiment-analytics', label: '实验数据分析' },
       { path: '/teacher/data-sync', label: 'PTA 数据同步' }

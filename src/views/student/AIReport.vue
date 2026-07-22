@@ -250,7 +250,7 @@
                           <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">完整源码</span>
                           <span class="[font-size:12px] [color:var(--app-text-secondary)]">学生原始提交</span>
                         </div>
-                        <CodeViewer v-if="selectedExperiment.code" :code="selectedExperiment.code" language="cpp" maxHeight="500px" />
+                        <CodeViewer v-if="selectedExperiment.code" :code="selectedExperiment.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" />
                         <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无完整源码</div>
                       </div>
 
@@ -268,7 +268,7 @@
                             <span class="[font-size:13px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题代码</span>
                             <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
                           </div>
-                          <CodeViewer :code="question.code" language="cpp" maxHeight="500px" />
+                          <CodeViewer :code="question.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" />
                         </div>
                         <div v-else class="[margin-bottom:16px] [padding:28px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)] [border:1px_dashed_var(--app-border-soft)] [border-radius:var(--app-radius-sm)]">本题暂无代码提交</div>
                         <div v-if="question.testResults" class="[padding:12px] [overflow:auto] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
@@ -279,7 +279,7 @@
                     </div>
                   </div>
 
-                  <div v-else-if="selectedExperiment.code" class="[margin-top:8px]"><CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="500px" /></div>
+                  <div v-else-if="selectedExperiment.code" class="[margin-top:8px]"><CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" /></div>
                   <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无代码提交</div>
                 </div>
 

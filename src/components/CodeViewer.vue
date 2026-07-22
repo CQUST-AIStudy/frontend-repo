@@ -1,5 +1,5 @@
 <template>
-  <div class="code-viewer" :style="{ maxHeight: maxHeight || 'none' }">
+  <div class="code-viewer">
     <div class="code-viewer__toolbar">
       <span class="code-viewer__lang">{{ langLabel }}</span>
       <button class="code-viewer__copy" @click="copyCode" :title="copied ? '已复制' : '复制代码'">
@@ -172,6 +172,9 @@ async function copyCode() {
 .code-viewer__body {
   overflow: auto;
   max-height: v-bind(maxHeight);
+  min-height: 0;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding: 0;
 }
 
