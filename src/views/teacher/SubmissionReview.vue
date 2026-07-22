@@ -63,15 +63,23 @@
                 {{ matchConfirmed ? `已匹配：${detail.studentName || detail.studentNo || '学生'}` : matchStatusText }}
               </div>
             </div>
-            <div v-if="!matchConfirmed" class="flex items-center gap-2">
+            <div v-if="!matchConfirmed || rematching" class="flex items-center gap-2">
               <select v-model="selectedStudentId" class="h-9 min-w-[220px] rounded-lg border border-[#d9e2ec] bg-white px-3 text-sm outline-none">
                 <option value="">请选择班级学生</option>
                 <option v-for="student in matchCandidates" :key="student.studentId" :value="student.studentId">
                   {{ student.studentNo || '无学号' }} · {{ student.studentName }}
                 </option>
               </select>
-              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-lg border-none bg-[var(--app-primary)] text-white text-sm disabled:opacity-50">
-                确认匹配
+              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-[10px] border-none bg-[var(--app-primary)] hover:bg-[var(--app-primary-dark)] shadow-[0_2px_6px_rgba(var(--app-primary-rgb),0.3)] text-white text-sm disabled:opacity-50">
+                {{ rematching ? '确认重新匹配' : '确认匹配' }}
+              </UiButton>
+              <UiButton v-if="rematching" @click="rematching = false" class="h-9 px-4 rounded-[10px] border border-[#d9e2ec] bg-white hover:bg-[#f5f5f7] text-sm text-[#6e6e73]">
+                取消
+              </UiButton>
+            </div>
+            <div v-else>
+              <UiButton @click="startRematch" class="h-9 px-4 rounded-[10px] border border-[#d9e2ec] bg-white hover:bg-[#f5f5f7] hover:border-[var(--app-primary)] text-sm text-[var(--app-primary)] transition-all">
+                重新选择
               </UiButton>
             </div>
           </div>
@@ -82,10 +90,10 @@
             <UiButton
               @click="isReportFailed ? preGenerateResources() : downloadReport()"
               :disabled="downloadingReport || isReportGenerating || preGeneratingResources"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium shadow-sm transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
               :class="isReportFailed
-                ? 'text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)]'
-                : 'text-[#6b8f6b] bg-[rgba(107,143,107,0.08)] hover:bg-[rgba(107,143,107,0.15)]'"
+                ? 'text-white bg-[#c44b3f] hover:bg-[#a63d33] shadow-[0_2px_6px_rgba(196,75,63,0.3)]'
+                : 'text-white bg-[#6b8f6b] hover:bg-[#5a7a5a] shadow-[0_2px_6px_rgba(107,143,107,0.3)]'"
             >
               <span v-if="downloadingReport || preGeneratingResources" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               {{ isReportFailed ? '重新生成批注报告' : (isReportGenerating ? '批注报告生成中...' : (preGeneratingResources ? '正在生成报告...' : (detail?.hasDownloadableReport ? '下载批注报告' : '生成并下载报告'))) }}
@@ -93,7 +101,7 @@
             <UiButton
               @click="generateReview"
               :disabled="generatingReview"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[var(--app-primary)] bg-[rgba(194,112,62,0.08)] hover:bg-[rgba(194,112,62,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] hover:bg-[var(--app-primary-dark)] shadow-[0_2px_6px_rgba(var(--app-primary-rgb),0.3)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="generatingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               AI 生成总评
@@ -101,7 +109,7 @@
             <UiButton
               @click="saveReview"
               :disabled="!reviewEdited || savingReview"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-white border border-[#d9e2ec] hover:bg-[#f5f5f7] hover:border-[#b8c7d6] shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.96] transition-all cursor-pointer border-solid disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="savingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               保存总评
@@ -110,7 +118,7 @@
               @click="togglePublication"
               :disabled="publishingReport || (!detail.published && !matchConfirmed)"
               :title="!matchConfirmed && !detail.published ? '请先确认学生匹配' : ''"
-              class="h-[32px] px-3.5 rounded-[8px] text-xs font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.15)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[#c44b3f] hover:bg-[#a63d33] shadow-[0_2px_6px_rgba(196,75,63,0.3)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               {{ detail.published ? '撤回发布' : (matchConfirmed ? '发布给学生' : '请先确认学生匹配') }}
@@ -589,6 +597,12 @@ const demonstrationsLoading = ref(false)
 const preGeneratingResources = ref(false)
 const matchCandidates = ref([])
 const selectedStudentId = ref('')
+const rematching = ref(false)
+
+function startRematch() {
+  rematching.value = true
+  selectedStudentId.value = ''
+}
 let detailPollTimer = null
 const confirmingMatch = ref(false)
 
@@ -860,6 +874,7 @@ async function confirmMatch() {
   try {
     await confirmSubmissionStudent(subId, Number(selectedStudentId.value))
     await loadDetail()
+    rematching.value = false
     uiMessage.success('学生匹配已确认')
   } catch (error) {
     uiMessage.error(`确认失败: ${error.message}`)
