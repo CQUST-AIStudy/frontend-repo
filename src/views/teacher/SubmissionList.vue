@@ -510,7 +510,10 @@ const parseSubmissionCompositeId = (submissionId) => {
 
 const normalizeStatus = (item) => {
   if (item.status === 'completed') {
-    return Number(item.score) > 0 ? 'graded' : 'submitted'
+    // 改用 score != null 判断，而非 score > 0，避免 score=0 时误判为 submitted
+    if (item.submissionStatus === 'GRADED') return 'graded'
+    if (item.score != null && !isNaN(Number(item.score))) return 'graded'
+    return 'submitted'
   }
   if (['submitted', 'graded', 'rejected', 'not_started'].includes(item.status)) {
     return item.status
@@ -654,7 +657,11 @@ const submitGrade = async () => {
       experimentId: expId
     }
 
-    await api.gradeSubmission(submissionId, gradeData)
+    const res = await api.gradeSubmission(submissionId, gradeData)
+    if (res && res.success === false) {
+      uiMessage.error(res.message || '评分提交失败')
+      return
+    }
     uiMessage.success('评分提交成功。')
     gradeDialogVisible.value = false
 
@@ -679,13 +686,28 @@ const submitBatchGrade = async () => {
   batchGrading.value = true
   try {
     const submissionIds = selectedRows.value.map(row => row.id)
-    await api.batchGradeSubmissions({
+    const res = await api.batchGradeSubmissions({
       submissionIds,
       score: Number(batchGradeForm.score),
       plagiarismRate: Number(batchGradeForm.plagiarismRate),
       aiComment: batchGradeForm.aiComment
     })
-    uiMessage.success(`批量评分成功，共处理 ${submissionIds.length} 条记录。`)
+    // 检查后端返回结果
+    if (res && res.success === false) {
+      uiMessage.error(res.message || '批量评分失败')
+      if (res.errors && res.errors.length) {
+        logger.error('批量评分错误详情:', res.errors)
+      }
+      return
+    }
+    const processed = res?.processed ?? submissionIds.length
+    const failed = res?.failed ?? 0
+    if (failed > 0) {
+      uiMessage.warning(`批量评分部分成功：${processed} 条成功，${failed} 条失败`)
+      logger.warn('批量评分部分失败:', res?.errors)
+    } else {
+      uiMessage.success(`批量评分成功，共处理 ${processed} 条记录。`)
+    }
     batchGradeDialogVisible.value = false
     selectedRows.value = []
     await loadSubmissions()
