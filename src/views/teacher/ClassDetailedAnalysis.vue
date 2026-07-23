@@ -298,44 +298,11 @@
             </div>
           </div>
 
-          <!-- AI教学建议 -->
-          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
-            <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
-              <span class="font-semibold text-[#1d1d1f]">AI教学建议</span>
-              <UiButton @click="generateClassTeachingAdvice" :disabled="aiAdviceLoading"
-                        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-                {{ aiAdviceLoading ? '生成中...' : '生成建议' }}
-              </UiButton>
-            </div>
-
-            <div class="px-1 py-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--app-primary)] to-[#5856d6] flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                </div>
-                <div>
-                  <h3 class="text-sm font-semibold text-[#1d1d1f]">教学建议</h3>
-                  <p class="text-xs text-[#6e6e73]">针对{{ currentClassName }}的个性化教学建议</p>
-                </div>
-              </div>
-
-              <div class="h-px bg-black/[0.06] my-4"></div>
-
-              <div v-if="aiAdviceError" class="flex items-start gap-3 p-4 rounded-[12px] bg-[#fff8e1] border border-[#ffcc02]/20 mb-4">
-                <svg class="w-5 h-5 text-[#b45309] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                <p class="text-sm text-[#b45309]">{{ aiAdviceError }}</p>
-              </div>
-
-              <div v-if="aiAdviceLoading" class="space-y-3">
-                <div v-for="i in 8" :key="i" class="h-4 w-[var(--progress-width)] bg-[#f5f5f7] rounded-[8px] animate-pulse" :style="progressWidthStyle(90 - i * 5)"></div>
-              </div>
-              <div v-else-if="aiAdviceContent" class="prose prose-sm max-w-none text-[#303133] leading-[1.7]" v-html="renderedAiAdvice"></div>
-              <div v-else class="flex flex-col items-center justify-center py-10 text-[#6e6e73]">
-                <svg class="w-16 h-16 mb-4 text-[#d1d1d6]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                <p class="text-sm">点击生成建议，基于当前班级真实数据生成教学建议</p>
-              </div>
-            </div>
-          </div>
+          <TeachingAdvicePanel
+            :class-id="filterForm.classId"
+            :experiments="experimentList"
+            class="mb-5"
+          />
         </template>
 
         <!-- 未加载班级数据时提示 -->
@@ -402,10 +369,9 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import {DataAnalysis} from '@/components/ui/icons'
-import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '../../api'
-import {buildStructuredPrompt, chatSend, CHAT_MESSAGE_MAX_LENGTH} from '../../api/tap'
 import AppModal from '../../components/AppModal.vue'
+import TeachingAdvicePanel from './components/TeachingAdvicePanel.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -511,296 +477,6 @@ const currentClassName = computed(() => {
   if (!classData.value) return '当前班级'
   return classData.value.name
 })
-
-// AI教学建议 - 基于真实数据动态生成
-const aiAdvice = reactive({
-  classOverview: '',
-  studentsAtRisk: [],
-  teachingAdvice: []
-})
-const aiAdviceLoading = ref(false)
-const aiAdviceContent = ref('')
-const aiAdviceError = ref('')
-const renderedAiAdvice = computed(() => aiAdviceContent.value ? renderSafeMarkdown(aiAdviceContent.value) : '')
-const CLASS_ADVICE_PROMPT_MAX_LENGTH = CHAT_MESSAGE_MAX_LENGTH - 200
-
-// 根据学生数据更新AI建议
-const updateAiAdvice = () => {
-  if (!studentList.value.length) {
-    aiAdvice.classOverview = '暂无学生数据，无法生成教学建议。'
-    aiAdvice.studentsAtRisk = []
-    aiAdvice.teachingAdvice = []
-    return
-  }
-
-  const students = studentList.value
-  const avgCompletion = Math.round(students.reduce((s, st) => s + st.completionRate, 0) / students.length)
-  const avgScore = Math.round(students.reduce((s, st) => s + (st.averageScore || 0), 0) / students.length)
-  const downTrend = students.filter(s => s.trend === 'down').length
-  const lowCompletion = students.filter(s => s.completionRate < 60)
-
-  aiAdvice.classOverview = `该班级共${students.length}名学生，实验平均完成率${avgCompletion}%，平均分${avgScore}分。` +
-      (downTrend > 0 ? `有${downTrend}名学生成绩呈下降趋势。` : '整体趋势稳定。') +
-      (lowCompletion.length > 0 ? `${lowCompletion.length}名学生完成率低于60%，需要重点关注。` : '')
-
-  const riskStudents = students
-      .filter(s => s.completionRate < 60 || s.averageScore < 60 || s.trend === 'down')
-      .sort((a, b) => a.completionRate - b.completionRate)
-      .slice(0, 5)
-
-  aiAdvice.studentsAtRisk = riskStudents.map(s => {
-    const reasons = []
-    if (s.completionRate < 60) reasons.push(`实验完成率仅${s.completionRate}%`)
-    if (s.averageScore < 60) reasons.push(`平均分${s.averageScore}分，低于及格线`)
-    if (s.trend === 'down') reasons.push('近期成绩呈下降趋势')
-    return { name: s.name, reason: reasons.join('，') || '综合表现需关注' }
-  })
-
-  const advice = []
-  if (avgCompletion < 80) advice.push('实验完成率偏低，建议加强实验提交的督促，可设置阶段性检查点')
-  if (avgScore < 75) advice.push('班级平均分有提升空间，建议增加课堂练习和知识点回顾')
-  if (lowCompletion.length > 3) advice.push(`有${lowCompletion.length}名学生完成率较低，建议安排课后辅导或一对一答疑`)
-  if (downTrend > 2) advice.push('多名学生成绩下降，建议及时与学生沟通了解原因')
-  if (avgScore >= 80) advice.push('班级整体成绩良好，可以适当增加拓展性实验内容')
-  if (advice.length === 0) advice.push('班级整体表现良好，继续保持当前教学节奏')
-
-  aiAdvice.teachingAdvice = advice
-}
-
-const summarizeStudentForPrompt = (student) => {
-  const unfinished = student.experiments.filter(e => e.status !== 'completed').length
-  const recentScores = student.experiments
-      .filter(e => e.score > 0)
-      .slice(-3)
-      .map(e => `${e.name}:${e.score}`)
-      .join('，') || '暂无有效成绩'
-  const evidenceSummary = summarizeStudentEvidence(student)
-  return `${student.name}(${student.id})：完成率${student.completionRate}%，均分${student.averageScore}，趋势${student.trend}，未完成${unfinished}项，近期成绩：${recentScores}，完成证据：${evidenceSummary}`
-}
-
-const summarizeStudentBriefForPrompt = (student) => {
-  const unfinished = student.experiments.filter(e => e.status !== 'completed').length
-  return `${student.name}(${student.id})：完成率${student.completionRate}%，均分${student.averageScore}，趋势${student.trend}，未完成${unfinished}项`
-}
-
-const completedEvidenceTypes = new Set(['TRANSCRIPT_SCORE', 'ANSWER_SHEET', 'SCORED_CODE'])
-
-const evidenceLabel = (evidence) => {
-  const labels = {
-    TRANSCRIPT_SCORE: '成绩单有效总分',
-    ANSWER_SHEET: '答题卡',
-    SCORED_CODE: '得分代码',
-    SUBMISSION_ATTEMPT: '提交记录尝试',
-    NONE: '无完成证据'
-  }
-  return labels[evidence] || evidence || '无完成证据'
-}
-
-const summarizeStudentEvidence = (student) => {
-  const counts = student.experiments.reduce((acc, item) => {
-    const key = item.completionEvidence || 'NONE'
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-  return Object.entries(counts)
-      .filter(([, count]) => count > 0)
-      .map(([key, count]) => `${evidenceLabel(key)}${count}项`)
-      .join('，') || '无完成证据'
-}
-
-const buildExperimentEvidenceStats = (experiment, students) => {
-  const rows = students
-      .map(student => student.experiments.find(item => String(item.id) === String(experiment.id)))
-      .filter(Boolean)
-  const completed = rows.filter(item => item.status === 'completed').length
-  const scored = rows.filter(item => Number(item.score || 0) > 0)
-  const score = scored.length
-      ? Math.round(scored.reduce((sum, item) => sum + Number(item.score || 0), 0) / scored.length)
-      : 0
-  const evidenceCounts = rows.reduce((acc, item) => {
-    const key = item.completionEvidence || 'NONE'
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-  const transcriptRows = rows.filter(item => item.transcriptRowPresent).length
-  const answerSheetStudents = rows.filter(item => Number(item.answerSheetCount || 0) > 0).length
-  const scoredCodeStudents = rows.filter(item => Number(item.scoredCodeCount || 0) > 0).length
-  const attemptStudents = rows.filter(item => Number(item.submissionAttemptCount || 0) > 0).length
-  const completionRate = students.length ? Math.round(completed / students.length * 100) : 0
-  const evidenceText = Object.entries(evidenceCounts)
-      .filter(([key, count]) => count > 0 && completedEvidenceTypes.has(key))
-      .map(([key, count]) => `${evidenceLabel(key)}${count}人`)
-      .join('，') || '无完成证据'
-  return {
-    rows,
-    completed,
-    score,
-    completionRate,
-    transcriptRows,
-    answerSheetStudents,
-    scoredCodeStudents,
-    attemptStudents,
-    evidenceText
-  }
-}
-
-const buildClassTeachingAdvicePrompt = () => {
-  const students = studentList.value || []
-  const experiments = experimentList.value || []
-  const avgCompletion = students.length
-      ? Math.round(students.reduce((sum, student) => sum + Number(student.completionRate || 0), 0) / students.length)
-      : 0
-  const scoredStudents = students.filter(student => Number(student.averageScore || 0) > 0)
-  const avgScore = scoredStudents.length
-      ? Math.round(scoredStudents.reduce((sum, student) => sum + Number(student.averageScore || 0), 0) / scoredStudents.length)
-      : Number(classData.value?.averageScore || 0)
-  const riskStudents = students
-      .filter(student => student.completionRate < 70 || student.averageScore < 60 || student.trend === 'down')
-      .sort((a, b) => (a.completionRate - b.completionRate) || (a.averageScore - b.averageScore))
-      .slice(0, 5)
-  const experimentStats = experiments.map(experiment => {
-    const stats = buildExperimentEvidenceStats(experiment, students)
-    return `${experiment.name}：完成率${stats.completionRate}%，均分${stats.score}，完成${stats.completed}/${students.length}，证据${stats.evidenceText}；源数据覆盖：成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人，提交记录尝试${stats.attemptStudents}人`
-  }).slice(0, 8)
-  const lowExperimentStats = experiments
-      .map(experiment => ({ experiment, stats: buildExperimentEvidenceStats(experiment, students) }))
-      .filter(item => item.stats.completionRate < 60)
-      .sort((a, b) => a.stats.completionRate - b.stats.completionRate)
-      .slice(0, 5)
-      .map(({ experiment, stats }) => `${experiment.name}：完成率${stats.completionRate}%，完成${stats.completed}/${students.length}，证据${stats.evidenceText}，成绩单行${stats.transcriptRows}人，答题卡${stats.answerSheetStudents}人，得分代码${stats.scoredCodeStudents}人`)
-  const evidenceTotals = students.flatMap(student => student.experiments).reduce((acc, item) => {
-    const key = item.completionEvidence || 'NONE'
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-  const evidenceTotalItems = Object.entries(evidenceTotals)
-      .filter(([, count]) => count > 0)
-      .map(([key, count]) => `${evidenceLabel(key)}：${count}条`)
-
-  const prompt = buildStructuredPrompt({
-    role: '你是一位资深数据结构课程教学顾问，擅长根据班级真实提交和成绩数据给教师提供可执行建议。',
-    task: `请为${currentClassName.value || '当前班级'}生成班级教学诊断与改进建议。`,
-    contextSections: [
-      {
-        title: '班级概况',
-        items: [
-          `学生数：${students.length || classData.value?.studentCount || 0}`,
-          `实验数：${experiments.length}`,
-          `班级平均完成率：${avgCompletion}%`,
-          `班级平均分：${avgScore}`,
-          `需关注学生数：${riskStudents.length}`,
-          '完成口径：GRADED 或SUBMITTED 才算完成；IN_PROGRESS 只代表存在提交记录尝试，不单独算完成。',
-          '数据来源说明：提交记录csv 受PTA 翻页/API 限制，可能只有约200条；完成判断优先使用 PAPER_TRANSCRIPT 成绩单有效总分，其次ANSWER_SHEET 答题卡、SCORED_CODE 得分代码，提交记录只作过程证据。',
-        ],
-      },
-      {
-        title: '完成证据分布',
-        items: evidenceTotalItems.length ? evidenceTotalItems : ['暂无完成证据统计'],
-      },
-      {
-        title: '低完成率实验明细',
-        items: lowExperimentStats.length ? lowExperimentStats : ['暂无明显低完成率实验'],
-      },
-      {
-        title: '实验表现',
-        items: experimentStats.length ? experimentStats : ['暂无实验统计'],
-      },
-      {
-        title: '优先关注学生',
-        items: riskStudents.length ? riskStudents.map(summarizeStudentForPrompt) : ['暂无明显高风险学生'],
-      },
-    ],
-    instructions: [
-      '先给出班级当前最主要的教学风险判断，并说明判断依据。',
-      '指出最需要补救的实验或知识点方向，不要泛泛而谈。',
-      '给出3到5条教师可以直接执行的课堂、课后和实验安排建议。',
-      '按学生分层提出策略：高风险学生、一般学生、优秀学生分别怎么安排。',
-      '如果数据不足，请明确指出缺失哪些数据以及会影响什么判断。',
-    ],
-    outputRequirements: [
-      '使用 Markdown 输出。',
-      '建议必须引用上方真实指标。',
-      '不要声称看到了未提供的数据。',
-    ],
-  })
-
-  if (prompt.length <= CLASS_ADVICE_PROMPT_MAX_LENGTH) {
-    return prompt
-  }
-
-  const compactExperimentStats = experiments
-      .map(experiment => {
-        const stats = buildExperimentEvidenceStats(experiment, students)
-        return `${experiment.name}：完成率${stats.completionRate}%，均分${stats.score}，完成${stats.completed}/${students.length}`
-      })
-      .sort((a, b) => {
-        const rateA = Number((a.match(/完成率(\d+)%/) || [])[1] || 100)
-        const rateB = Number((b.match(/完成率(\d+)%/) || [])[1] || 100)
-        return rateA - rateB
-      })
-      .slice(0, 6)
-
-  return buildStructuredPrompt({
-    role: '你是一位数据结构课程教学顾问。',
-    task: `请为${currentClassName.value || '当前班级'}生成简洁、可执行的班级教学诊断建议。`,
-    contextSections: [
-      {
-        title: '班级概况',
-        items: [
-          `学生数：${students.length || classData.value?.studentCount || 0}`,
-          `实验数：${experiments.length}`,
-          `班级平均完成率：${avgCompletion}%`,
-          `班级平均分：${avgScore}`,
-          `需关注学生数：${riskStudents.length}`,
-          '完成口径：GRADED 或 SUBMITTED 才算完成；提交记录只作过程证据。',
-        ],
-      },
-      {
-        title: '低完成率或重点实验',
-        items: compactExperimentStats.length ? compactExperimentStats : ['暂无实验统计'],
-      },
-      {
-        title: '优先关注学生',
-        items: riskStudents.length ? riskStudents.slice(0, 5).map(summarizeStudentBriefForPrompt) : ['暂无明显高风险学生'],
-      },
-    ],
-    instructions: [
-      '判断班级最主要教学风险，并引用上述指标。',
-      '指出优先补救的实验或能力方向。',
-      '给出3到5条教师可直接执行的课堂、课后和分层辅导建议。',
-    ],
-    outputRequirements: [
-      '使用 Markdown 输出。',
-      '不要声称看到了未提供的数据。',
-    ],
-  }).slice(0, CLASS_ADVICE_PROMPT_MAX_LENGTH)
-}
-
-const generateClassTeachingAdvice = async () => {
-  if (aiAdviceLoading.value) return
-  if (!studentList.value.length) {
-    aiAdviceError.value = '当前班级暂无学生实验数据，无法生成班级教学建议。'
-    aiAdviceContent.value = ''
-    return
-  }
-
-  aiAdviceLoading.value = true
-  aiAdviceError.value = ''
-  aiAdviceContent.value = ''
-  try {
-    const res = await chatSend(buildClassTeachingAdvicePrompt(), [])
-    const data = res?.data ?? res
-    const reply = String(data?.reply || '').trim()
-    if (!reply) throw new Error('AI 服务未返回有效内容')
-    aiAdviceContent.value = reply
-  } catch (error) {
-    logger.error('生成班级教学建议失败:', error)
-    aiAdviceError.value = `AI 教学建议生成失败：${error?.message || '请检查后端AI 服务配置'}`
-    uiMessage.warning(aiAdviceError.value)
-  } finally {
-    aiAdviceLoading.value = false
-  }
-}
 
 // 加载班级列表
 const loadClassList = async () => {
@@ -1021,8 +697,6 @@ const loadClassData = async () => {
   classData.value = null;
   studentList.value = [];
   filteredStudents.value = [];
-  aiAdviceContent.value = '';
-  aiAdviceError.value = '';
 
   try {
     try {
@@ -1047,8 +721,6 @@ const loadClassData = async () => {
 
     await loadStudentData()
     filterStudents()
-    updateAiAdvice()
-    generateClassTeachingAdvice()
 
     nextTick(() => {
       initCharts()

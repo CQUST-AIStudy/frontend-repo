@@ -204,14 +204,41 @@
             <UiOption v-for="y in gradeOptions" :key="y" :value="y">{{ y }} 级</UiOption>
           </UiSelect>
         </div>
-        <!-- Course name -->
+        <!-- Course and term metadata -->
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名称</label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程绑定</label>
+          <UiSelect
+            v-model="classForm.courseId"
+            placeholder="选择课程"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+            @change="handleCourseChange"
+          >
+            <UiOption v-for="course in courseOptions" :key="course.id" :value="course.id">
+              {{ course.code ? `${course.code} · ` : '' }}{{ course.name }}
+            </UiOption>
+          </UiSelect>
+          <p class="mt-1.5 text-xs text-[#7b8ba0]">绑定后可按同课程教学班和历史学期进行可信对比。</p>
+        </div>
+        <div v-if="!classForm.courseId">
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">课程名称（未绑定时）</label>
           <UiInput
             v-model="classForm.courseName"
             placeholder="例如：数据结构"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">学期绑定</label>
+          <UiSelect
+            v-model="classForm.termId"
+            placeholder="选择学期"
+            class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm appearance-none cursor-pointer"
+          >
+            <UiOption v-for="term in termOptions" :key="term.id" :value="term.id">
+              {{ term.name }}{{ term.code ? ` · ${term.code}` : '' }}
+            </UiOption>
+          </UiSelect>
+          <p class="mt-1.5 text-xs text-[#7b8ba0]">学期用于限制本学期数据，并支持课程历史对比。</p>
         </div>
         <!-- Description -->
         <div>
@@ -538,6 +565,7 @@
 import { useRouter } from 'vue-router'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
+import logger from '@/utils/logger'
 import AppModal from '../../components/AppModal.vue'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { useUserStore } from '../../store'
@@ -550,6 +578,7 @@ import {
   getClassStudents,
   getPtaCookieStatus,
   getTeacherPtaCredentials,
+  getTeachingAdviceOptions,
   getTeachingClasses,
   importPtaStudents,
   removeClassStudent,
@@ -566,6 +595,8 @@ const userStore = useUserStore()
 const loading = ref(false)
 const classes = ref([])
 const gradeOptions = ['2022', '2023', '2024', '2025', '2026', '2027']
+const courseOptions = ref([])
+const termOptions = ref([])
 
 const classDialogVisible = ref(false)
 const editingClass = ref(null)
@@ -576,6 +607,8 @@ const classForm = reactive({
   joinPassword: '',
   grade: '',
   courseName: '',
+  courseId: '',
+  termId: '',
   description: '',
   ptaGroupName: '',
   syncEnabled: false
@@ -825,6 +858,24 @@ const loadClasses = async () => {
   }
 }
 
+const loadTeachingMetadata = async () => {
+  try {
+    const res = await getTeachingAdviceOptions()
+    const data = extract(res) || {}
+    courseOptions.value = Array.isArray(data.courses) ? data.courses : []
+    termOptions.value = Array.isArray(data.terms) ? data.terms : []
+  } catch (error) {
+    logger.error('加载课程和学期选项失败:', error)
+    courseOptions.value = []
+    termOptions.value = []
+  }
+}
+
+const handleCourseChange = (courseId) => {
+  const selected = courseOptions.value.find(item => String(item.id) === String(courseId))
+  if (selected) classForm.courseName = selected.name || ''
+}
+
 const openCreateDialog = () => {
   editingClass.value = null
   Object.assign(classForm, {
@@ -833,6 +884,8 @@ const openCreateDialog = () => {
     joinPassword: '',
     grade: '',
     courseName: '',
+    courseId: '',
+    termId: '',
     description: '',
     ptaGroupName: '',
     syncEnabled: false
@@ -849,6 +902,8 @@ const editClass = (cls) => {
     joinPassword: cleanText(cls.joinPassword, ''),
     grade: cleanText(cls.grade, ''),
     courseName: cleanText(cls.courseName, ''),
+    courseId: cls.courseId || '',
+    termId: cls.termId || '',
     description: cleanText(cls.description, ''),
     ptaGroupName: cleanText(getPtaGroupName(cls), ''),
     syncEnabled: !!cls.syncEnabled
@@ -873,6 +928,8 @@ const submitClassForm = async () => {
         joinPassword: classForm.joinPassword,
         grade: classForm.grade,
         courseName: classForm.courseName,
+        courseId: classForm.courseId || null,
+        termId: classForm.termId || null,
         description: classForm.description,
         ptaGroupName,
         syncEnabled: classForm.syncEnabled
@@ -1271,6 +1328,7 @@ const submitCookieForm = async () => {
 
 onMounted(() => {
   loadClasses()
+  loadTeachingMetadata()
   checkCookieStatus()
   loadBoundCredentials()
 })
