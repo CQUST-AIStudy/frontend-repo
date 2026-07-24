@@ -1013,9 +1013,9 @@ onMounted(() => {
 }
 
 .web-button--active {
-  border-color: #93c5fd;
-  background: #eff6ff;
-  color: #2563eb;
+  border-color: #e8c4b0;
+  background: #fbf1eb;
+  color: #ac6843;
 }
 
 .web-button:disabled {
@@ -1370,8 +1370,8 @@ onMounted(() => {
 }
 
 .assistant-input:focus {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  border-color: #e8c4b0;
+  box-shadow: 0 0 0 3px rgba(209, 138, 97, 0.12);
 }
 
 .composer-actions {
@@ -1460,7 +1460,7 @@ onMounted(() => {
 .assistant-markdown :deep(blockquote) {
   margin: 10px 0;
   padding: 9px 12px;
-  border-left: 3px solid #60a5fa;
+  border-left: 3px solid #dda784;
   border-radius: 8px;
   background: rgba(96, 165, 250, 0.1);
   color: #475569;
@@ -1499,7 +1499,7 @@ onMounted(() => {
   padding: 2px 6px;
   border-radius: 5px;
   background: rgba(15, 23, 42, 0.08);
-  color: #1d4ed8;
+  color: #8f4f31;
   font-family: Consolas, "Courier New", monospace;
   font-size: 0.92em;
   word-break: break-word;

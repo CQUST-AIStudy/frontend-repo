@@ -213,7 +213,7 @@ function selectNode(node) {
 
 .chain-node.current {
   border-color: #1270d8;
-  background: #eff6ff;
+  background: #fbf1eb;
   color: #0f172a;
   font-weight: 850;
 }
@@ -258,8 +258,8 @@ function selectNode(node) {
 }
 
 .dim-tag {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #fbf1eb;
+  color: #8f4f31;
 }
 
 .path-tip {

@@ -1304,7 +1304,7 @@ const initAbilityDistributionChart = () => {
             problemSolvingScores.filter(s => s >= 75 && s < 90).length,
             teamworkScores.filter(s => s >= 75 && s < 90).length
           ],
-          itemStyle: {color: '#409EFF'}
+          itemStyle: {color: '#d18a61'}
         },
         {
           name: '及格', type: 'bar', stack: 'total',
@@ -1414,7 +1414,7 @@ const initStudentRadarCharts = () => {
                   student.abilities.teamwork
                 ],
                 name: '能力值',
-                areaStyle: { color: 'rgba(64, 158, 255, 0.6)' }
+                areaStyle: { color: 'rgba(209, 138, 97, 0.6)' }
               }
             ]
           }]
@@ -1449,7 +1449,7 @@ const initStudentRadarCharts = () => {
 // 获取进度条颜色
 const getProgressColor = (percentage) => {
   if (percentage >= 80) return '#67C23A'
-  if (percentage >= 60) return '#409EFF'
+  if (percentage >= 60) return '#d18a61'
   if (percentage >= 40) return '#E6A23C'
   return '#F56C6C'
 }

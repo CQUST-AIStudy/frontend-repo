@@ -30,9 +30,9 @@
   --color-app-text: #3d3529;
   --color-app-text-secondary: #7a6f5f;
   --color-app-text-soft: #a89b87;
-  --color-app-primary: #c2703e;
-  --color-app-primary-strong: #a85c30;
-  --color-app-primary-soft: #faf0e8;
+  --color-app-primary: #d18a61;
+  --color-app-primary-strong: #ac6843;
+  --color-app-primary-soft: #fbf1eb;
   --color-app-success: #6b8f6b;
   --color-app-success-strong: #5e805e;
   --color-app-warning: #c49a3c;
@@ -70,10 +70,10 @@
     --app-text: #3d3529;
     --app-text-secondary: #7a6f5f;
     --app-text-soft: #a89b87;
-    --app-primary: #c2703e;
-    --app-primary-rgb: 194, 112, 62;
-    --app-primary-strong: #a85c30;
-    --app-primary-soft: #faf0e8;
+    --app-primary: #d18a61;
+    --app-primary-rgb: 209, 138, 97;
+    --app-primary-strong: #ac6843;
+    --app-primary-soft: #fbf1eb;
     --app-success: #6b8f6b;
     --app-success-strong: #5e805e;
     --app-warning: #c49a3c;
@@ -91,10 +91,10 @@
     --app-radius-sm: 8px;
     --font-page: "NotoSerifSC", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
     --ui-color-primary: var(--app-primary);
-    --ui-color-primary-light-3: #d49068;
-    --ui-color-primary-light-5: #e1b098;
-    --ui-color-primary-light-7: #edcfc0;
-    --ui-color-primary-light-9: #f9efe8;
+    --ui-color-primary-light-3: #dda784;
+    --ui-color-primary-light-5: #e8c4b0;
+    --ui-color-primary-light-7: #f1ddd2;
+    --ui-color-primary-light-9: #fbf3ee;
     --ui-color-primary-dark-2: var(--app-primary-strong);
     --ui-color-success: var(--app-success);
     --ui-color-warning: var(--app-warning);
@@ -114,7 +114,7 @@
     --ui-card-border-color: var(--app-border);
     --ui-card-bg-color: var(--app-surface);
 
-    /* —— 跟随主题的半透明玻璃表面（color-mix，浅色白底玻璃）—— */
+    /* 鈥斺€?璺熼殢涓婚鐨勫崐閫忔槑鐜荤拑琛ㄩ潰锛坈olor-mix锛屾祬鑹茬櫧搴曠幓鐠冿級鈥斺€?*/
     --app-glass:           rgba(255, 255, 255, 0.95);
     --app-glass:           color-mix(in srgb, var(--app-surface) 95%, transparent);
     --app-glass-strong:    rgba(255, 255, 255, 0.92);
@@ -123,7 +123,7 @@
     --app-glass-header:    color-mix(in srgb, var(--app-surface) 85%, transparent);
     --app-glass-aside:     var(--app-sidebar-bg);
 
-    /* —— 输入框 / 表格底 —— */
+    /* 鈥斺€?杈撳叆妗?/ 琛ㄦ牸搴?鈥斺€?*/
     --app-input-bg:        rgba(250, 246, 239, 0.8);
     --app-input-bg:        color-mix(in srgb, var(--app-surface-muted) 80%, transparent);
     --app-input-bg-focus:  var(--app-surface);
@@ -131,13 +131,13 @@
     --app-table-header-bg: color-mix(in srgb, var(--app-surface-muted) 60%, transparent);
     --app-table-row-bg:    var(--app-surface);
 
-    /* —— 软边框 / 分隔线（深色文字叠透明）—— */
+    /* 鈥斺€?杞竟妗?/ 鍒嗛殧绾匡紙娣辫壊鏂囧瓧鍙犻€忔槑锛夆€斺€?*/
     --app-border-soft:     rgba(0, 0, 0, 0.06);
     --app-border-soft:     color-mix(in srgb, var(--app-text) 6%, transparent);
     --app-border-softer:   rgba(0, 0, 0, 0.04);
     --app-border-softer:   color-mix(in srgb, var(--app-text) 4%, transparent);
 
-    /* —— 主题色派生（复用 store 注入的 --app-primary-rgb，主题色一改自动跟随）—— */
+    /* 鈥斺€?涓婚鑹叉淳鐢燂紙澶嶇敤 store 娉ㄥ叆鐨?--app-primary-rgb锛屼富棰樿壊涓€鏀硅嚜鍔ㄨ窡闅忥級鈥斺€?*/
     --app-primary-tint-8:  rgba(var(--app-primary-rgb), 0.08);
     --app-primary-tint-12: rgba(var(--app-primary-rgb), 0.12);
     --app-primary-tint-15: rgba(var(--app-primary-rgb), 0.15);
@@ -1327,11 +1327,11 @@
   }
   
   .code-editor .CodeMirror-cursor {
-    border-left: 2px solid #409eff;
+    border-left: 2px solid var(--app-primary);
   }
   
   .code-editor .CodeMirror-selected {
-    background: #409eff33;
+    background: var(--app-primary-tint-12);
   }
   
   .code-editor .CodeMirror-line {
@@ -1349,16 +1349,16 @@
   }
   
   .code-editor .cm-focused {
-    outline: 2px solid #409eff;
+    outline: 2px solid var(--app-primary);
     outline-offset: -2px;
   }
   
   .code-editor .cm-editor.cm-focused .cm-cursor {
-    border-left-color: #409eff;
+    border-left-color: var(--app-primary);
   }
   
   .code-editor .cm-selectionBackground {
-    background: #409eff33 !important;
+    background: var(--app-primary-tint-12) !important;
   }
   
   .result-content pre {
@@ -2227,12 +2227,12 @@
   }
   
   .chart-card {
-    height: 400px; /* 增加图表卡片高度 */
+    height: 400px; /* 澧炲姞鍥捐〃鍗＄墖楂樺害 */
     margin-bottom: 20px;
   }
   
   .chart-container {
-    height: 320px; /* 明确设置图表容器高度 */
+    height: 320px; /* 鏄庣‘璁剧疆鍥捐〃瀹瑰櫒楂樺害 */
     width: 100%;
   }
   
@@ -2246,7 +2246,7 @@
   /* src/views/teacher/GeneratePPT.vue */
   
   .slide-card--title {
-    background: linear-gradient(160deg, #eef5ff 0%, #f8fbff 100%);
+    background: linear-gradient(160deg, #fbf1eb 0%, #f8fbff 100%);
   }
   
   .slide-card__body h3 {
@@ -2765,7 +2765,7 @@
   .main-tabs .ui-tabs__content {
     height: calc(100% - 55px);
     position: relative;
-    /* 添加相对定位 */
+    /* 娣诲姞鐩稿瀹氫綅 */
   }
   
   .main-tabs .ui-tab-pane {
@@ -2779,16 +2779,16 @@
     margin: 0 auto;
     font-size: 0.95em;
     overflow-y: auto;
-    /* 添加垂直滚动条 */
+    /* 娣诲姞鍨傜洿婊氬姩鏉?*/
     max-height: 70vh;
-    /* 限制最大高度，确保需要滚动 */
+    /* 闄愬埗鏈€澶ч珮搴︼紝纭繚闇€瑕佹粴鍔?*/
   }
   
   .report-container .report-generator {
     width: 100%;
     max-width: 100%;
     overflow-y: auto;
-    /* 改为visible，让滚动由父容器处理 */
+    /* 鏀逛负visible锛岃婊氬姩鐢辩埗瀹瑰櫒澶勭悊 */
   }
   
   .ui-button.is-round {
@@ -2815,7 +2815,7 @@
     margin: 0 auto;
     font-size: 0.95em;
     overflow-y: auto;
-    /* 添加垂直滚动条 */
+    /* 娣诲姞鍨傜洿婊氬姩鏉?*/
     max-height: 70vh;
     overflow: hidden;
   }
@@ -3866,7 +3866,7 @@
   }
 }
 
-/* 浮动 tooltip 淡入过渡（UiTooltip / UiDialog / UiDrawer 共用） */
+/* 娴姩 tooltip 娣″叆杩囨浮锛圲iTooltip / UiDialog / UiDrawer 鍏辩敤锛?*/
 .ui-fade-enter-active,
 .ui-fade-leave-active {
   transition: opacity 0.15s ease, transform 0.15s ease;

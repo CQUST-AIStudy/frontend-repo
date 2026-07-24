@@ -342,7 +342,7 @@
                 <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
-                    <UiButton class="text-[#1677ff] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="openResetPasswordDialog(row)">重置密码</UiButton>
+                    <UiButton class="text-[#d18a61] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="openResetPasswordDialog(row)">重置密码</UiButton>
                     <UiButton class="text-[#c44b3f] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
                   </div>
                 </td>

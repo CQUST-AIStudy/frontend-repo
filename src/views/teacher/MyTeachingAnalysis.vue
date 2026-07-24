@@ -376,7 +376,7 @@ const initExperimentCompletionChart = () => {
           value: item.completion,
         itemStyle: {
             color: item.completion >= 80 ? '#67C23A' :
-                  item.completion >= 60 ? '#409EFF' : '#F56C6C'
+                  item.completion >= 60 ? '#d18a61' : '#F56C6C'
         }
         })),
         label: {
@@ -468,7 +468,7 @@ const initStudentAbilityChart = () => {
             value: abilities.map(ability => ability.value),
             name: '能力分布',
             areaStyle: {
-              color: 'rgba(64, 158, 255, 0.6)'
+              color: 'rgba(209, 138, 97, 0.6)'
             }
           }
         ]

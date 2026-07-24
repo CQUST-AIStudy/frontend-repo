@@ -11,7 +11,7 @@
     <div v-else class="dashboard-body [display:flex] [flex-direction:column] [gap:24px] [min-width:0] max-[640px]:[gap:14px]">
       <section class="hero-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1280px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[768px]:[grid-template-columns:1fr]">
         <ui-card class="hero-card hero-card-ai [border:none] [overflow:hidden] ![background:linear-gradient(135deg,_#16324f,_#2b6f91)] ![color:#f8fafc] ![box-shadow:0_16px_36px_rgba(22,_50,_79,_0.18)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[flex-direction:column] [&_.ui-card__body]:[gap:12px] [&_.ui-card__body]:[min-height:150px] max-[640px]:[&_.ui-card__body]:[min-height:auto] max-[640px]:[&_.ui-card__body]:[padding:18px]" shadow="hover">
-          <div class="hero-label [font-size:14px] [font-weight:600] [color:#dbeafe]">今日 AI 请求</div>
+          <div class="hero-label [font-size:14px] [font-weight:600] [color:#f1d5c2]">今日 AI 请求</div>
           <div class="hero-value [font-size:34px] [font-weight:800] [line-height:1] [color:#ffffff] max-[640px]:[font-size:30px]">{{ formatNumber(stats.aiRequestsUsedToday) }}</div>
           <div class="hero-meta [font-size:13px] [font-weight:500] [color:#c7d2fe] [word-break:break-all]">上限 {{ formatNumber(stats.aiRequestsLimit) }}</div>
           <ui-progress :percentage="quotaPercent('ai')" :stroke-width="8" :show-text="false" />

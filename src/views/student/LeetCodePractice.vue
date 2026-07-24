@@ -18,18 +18,18 @@
       <!-- 题目内容 -->
       <div v-if="!showSolution" class="problem-content [line-height:1.7] [flex:1] [min-height:0]">
         <div class="problem-description [height:100%] [font-size:14px] [color:#555] [&_pre]:[background:#f5f5f5] [&_pre]:[padding:12px] [&_pre]:[border-radius:4px] [&_pre]:[overflow-x:auto] [&_code]:[background:#f0f0f0] [&_code]:[padding:2px_4px] [&_code]:[border-radius:2px] [&_code]:[font-family:'Courier_New',_monospace]">
-          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
+          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#d18a61] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
             <h3>题目描述</h3>
-            <div class="formatted-content [font-size:15px] [line-height:1.85] [color:#374151] [background:#f8fafc] [padding:18px_20px] [border-radius:8px] [border-left:4px_solid_#409eff] [overflow:visible]" v-html="renderedProblemText"></div>
+            <div class="formatted-content [font-size:15px] [line-height:1.85] [color:#374151] [background:#f8fafc] [padding:18px_20px] [border-radius:8px] [border-left:4px_solid_#d18a61] [overflow:visible]" v-html="renderedProblemText"></div>
           </div>
           
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="showSeparateExamples">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#d18a61] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="showSeparateExamples">
             <h3>示例</h3>
             <div class="examples-container [background:#f8f9fa] [padding:16px] [border-radius:8px]">
               <div 
                 v-for="(example, index) in parsedExamples" 
                 :key="index" 
-                class="example-item [margin-bottom:16px] [padding:12px] [background:white] [border-radius:6px] [border:1px_solid_#e0e0e0] [&:last-child]:[margin-bottom:0] [&_h4]:[margin:0_0_8px_0] [&_h4]:[color:#409eff] [&_h4]:[font-size:14px] [background-color:#f5f7fa] [padding:10px] [border-radius:4px]"
+                class="example-item [margin-bottom:16px] [padding:12px] [background:white] [border-radius:6px] [border:1px_solid_#e0e0e0] [&:last-child]:[margin-bottom:0] [&_h4]:[margin:0_0_8px_0] [&_h4]:[color:#d18a61] [&_h4]:[font-size:14px] [background-color:#f5f7fa] [padding:10px] [border-radius:4px]"
               >
                 <h4>示例 {{ index + 1 }}:</h4>
                 <div class="example-content [font-family:'Courier_New',_monospace] [font-size:13px] [background-color:#f2f6fc] [padding:12px] [border-radius:4px] [font-family:'Courier_New',_Courier,_monospace] [overflow-x:auto] [margin:0] [white-space:pre-wrap] [word-wrap:break-word] [color:#5a5a5a]">
@@ -47,7 +47,7 @@
             </div>
           </div>
 
-          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#409eff] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="problem.constraints">
+          <div class="content-section [margin-bottom:24px] [&_h3]:[color:#333] [&_h3]:[font-size:18px] [&_h3]:[margin-bottom:12px] [&_h3]:[padding-bottom:8px] [&_h3]:[border-bottom:2px_solid_#d18a61] [border-left:2px_solid_#d0d7de] [border-right:2px_solid_#d0d7de] [border-bottom:1px_solid_#d0d7de] [padding:18px_24px] last:[border-bottom:2px_solid_#d0d7de]" v-if="problem.constraints">
             <h3>提示</h3>
             <div class="constraints-content [background:#fff3cd] [padding:12px] [border-radius:6px] [border-left:4px_solid_#ffc107] [font-size:13px]" v-html="renderedConstraints"></div>
           </div>
@@ -56,11 +56,11 @@
 
       <!-- 官方题解 -->
         <div v-if="showSolution" class="solution-view [flex:1] [min-height:0] [font-size:14px] [color:#374151] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_code]:[font-family:'Courier_New',_monospace]">
-          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#409eff] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
+          <div class="content-section [margin-bottom:0] [&_h3]:[color:#1f2937] [&_h3]:[font-size:18px] [&_h3]:[margin:0_0_16px_0] [&_h3]:[padding-bottom:10px] [&_h3]:[border-bottom:2px_solid_#d18a61] [border:1px_solid_#e5e7eb] [border-radius:8px] [padding:20px_24px] [min-height:100%] [background:#fff]">
             <h3>&#23448;&#26041;&#39064;&#35299;</h3>
             <ui-empty v-if="!hasSolutionContent" description="&#26242;&#26080;&#39064;&#35299;&#20869;&#23481;" :image-size="96" />
             <div v-else class="solution-blocks [display:flex] [flex-direction:column] [gap:16px]">
-              <section v-if="renderedSolutionApproach" class="solution-card [background:#f8fafc] [border-left:4px_solid_#409eff] [border-radius:8px] [padding:18px_20px]">
+              <section v-if="renderedSolutionApproach" class="solution-card [background:#f8fafc] [border-left:4px_solid_#d18a61] [border-radius:8px] [padding:18px_20px]">
                 <h4 class="[margin:0_0_12px_0] [font-size:16px] [color:#111827]">&#35299;&#39064;&#24605;&#36335;</h4>
                 <div class="solution-markdown [line-height:1.85]" v-html="renderedSolutionApproach"></div>
               </section>
@@ -175,7 +175,7 @@
             <ui-icon><Check v-if="submitResult.accepted" /><Close v-else /></ui-icon>
             {{ submitResult.status === 'unavailable' ? '评测暂不可用' : (submitResult.accepted ? '通过' : '未通过') }}
           </div>
-          <div class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]" v-if="submitResult.score !== null && submitResult.score !== undefined">
+          <div class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#d18a61] [font-weight:700]" v-if="submitResult.score !== null && submitResult.score !== undefined">
             得分: {{ submitResult.score }}/100
           </div>
         </div>
@@ -183,7 +183,7 @@
         <!-- AI评测结果 -->
         <div class="ai-feedback [margin:20px_0]" v-if="submitResult.aiFeedback">
           <h3>AI 评测反馈</h3>
-          <div class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff]" v-html="renderedAiFeedback"></div>
+          <div class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#d18a61]" v-html="renderedAiFeedback"></div>
         </div>
 
         <!-- 执行详情 -->
@@ -369,7 +369,7 @@ const codeEditorTheme = EditorView.theme({
   '.cm-content': {
     minHeight: '100%',
     padding: '14px 0',
-    caretColor: '#1d4ed8'
+    caretColor: '#8f4f31'
   },
   '.cm-line': {
     padding: '0 18px 0 12px'
@@ -383,20 +383,20 @@ const codeEditorTheme = EditorView.theme({
     padding: '0 12px 0 14px'
   },
   '.cm-activeLine': {
-    backgroundColor: 'rgba(59, 130, 246, 0.06)'
+    backgroundColor: 'rgba(209, 138, 97, 0.06)'
   },
   '.cm-activeLineGutter': {
-    backgroundColor: 'rgba(59, 130, 246, 0.10)',
+    backgroundColor: 'rgba(209, 138, 97, 0.10)',
     color: '#24292f'
   },
   '&.cm-focused': {
     outline: 'none'
   },
   '&.cm-focused .cm-cursor': {
-    borderLeftColor: '#1d4ed8'
+    borderLeftColor: '#8f4f31'
   },
   '&.cm-focused .cm-selectionBackground, & .cm-selectionBackground, & .cm-content ::selection': {
-    backgroundColor: 'rgba(59, 130, 246, 0.18)'
+    backgroundColor: 'rgba(209, 138, 97, 0.18)'
   },
   '.cm-matchingBracket': {
     backgroundColor: 'rgba(250, 204, 21, 0.20)',
@@ -1660,8 +1660,8 @@ watch(() => route.params.id, () => {
   margin: 12px 0;
   padding: 12px 16px;
   border-radius: 8px;
-  background: #eef6ff;
-  color: #1d4ed8;
+  background: #fbf1eb;
+  color: #8f4f31;
   font-family: var(--font-page);
   font-style: italic;
   line-height: 1.6;
@@ -1857,7 +1857,7 @@ watch(() => route.params.id, () => {
 
 :deep(.md-code-block.language-cpp .md-code-header span::before),
 :deep(.md-code-block.language-c .md-code-header span::before) {
-  background: #60a5fa;
+  background: #dda784;
 }
 
 :deep(.md-code-block.language-javascript .md-code-header span::before),
@@ -1879,7 +1879,7 @@ watch(() => route.params.id, () => {
   width: 12px;
   height: 12px;
   border: 2px solid rgba(226, 232, 240, 0.35);
-  border-top-color: #60a5fa;
+  border-top-color: #dda784;
   border-radius: 999px;
   animation: starter-template-spin 0.8s linear infinite;
 }

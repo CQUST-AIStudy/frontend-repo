@@ -50,7 +50,7 @@
           drag multiple :auto-upload="false"
           :on-change="handleFileChange" :file-list="fileList"
           :on-remove="handleFileRemove" accept=".pdf,.docx,.doc,.txt"
-          class="mt-4 w-full [&_.ui-upload]:!w-full [&_.ui-upload-dragger]:!border-2 [&_.ui-upload-dragger]:!border-dashed [&_.ui-upload-dragger]:!border-[var(--app-primary)]/30 [&_.ui-upload-dragger]:!rounded-[14px] [&_.ui-upload-dragger]:!bg-[#f5f5f7] [&_.ui-upload-dragger]:hover:!border-[var(--app-primary)]/60 [&_.ui-upload-dragger]:hover:!bg-[#eef6ff]"
+          class="mt-4 w-full [&_.ui-upload]:!w-full [&_.ui-upload-dragger]:!border-2 [&_.ui-upload-dragger]:!border-dashed [&_.ui-upload-dragger]:!border-[var(--app-primary)]/30 [&_.ui-upload-dragger]:!rounded-[14px] [&_.ui-upload-dragger]:!bg-[#f5f5f7] [&_.ui-upload-dragger]:hover:!border-[var(--app-primary)]/60 [&_.ui-upload-dragger]:hover:!bg-[#fbf1eb]"
         >
           <div class="text-center py-7">
             <UploadFilled class="w-10 h-10 text-[var(--app-primary)] mx-auto" />

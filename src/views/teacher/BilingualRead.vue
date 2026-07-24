@@ -2,7 +2,7 @@
   <div class="min-h-full">
     <!-- Hero -->
     <div class="flex items-center gap-4 p-7 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-      <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
+      <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#fbf1eb] text-[#d18a61]">
         <LucideIcon name="globe" :size="26" />
       </div>
       <div>

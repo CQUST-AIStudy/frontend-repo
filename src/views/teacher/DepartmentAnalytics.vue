@@ -189,7 +189,7 @@ const initCompletionChart = () => {
       type: 'bar',
       data: sorted.map(e => ({
         value: e.rate,
-        itemStyle: { color: e.rate >= 80 ? '#67C23A' : e.rate >= 60 ? '#409EFF' : e.rate >= 40 ? '#E6A23C' : '#F56C6C' }
+        itemStyle: { color: e.rate >= 80 ? '#67C23A' : e.rate >= 60 ? '#d18a61' : e.rate >= 40 ? '#E6A23C' : '#F56C6C' }
       })),
       label: { show: true, position: 'top', formatter: '{c}%' }
     }]
@@ -221,7 +221,7 @@ const initGradeChart = () => {
         { value: ranges['<60'], name: '不及格', itemStyle: { color: '#F56C6C' } },
         { value: ranges['60-69'], name: '60-69分', itemStyle: { color: '#E6A23C' } },
         { value: ranges['70-79'], name: '70-79分', itemStyle: { color: '#67C23A' } },
-        { value: ranges['80-89'], name: '80-89分', itemStyle: { color: '#409EFF' } },
+        { value: ranges['80-89'], name: '80-89分', itemStyle: { color: '#d18a61' } },
         { value: ranges['90-100'], name: '90-100分', itemStyle: { color: '#8E44AD' } }
       ]
     }]
@@ -247,7 +247,7 @@ const initTrendChart = () => {
       type: 'line', data: avgScores, smooth: true,
       markPoint: { data: [{ type: 'max', name: '最高' }, { type: 'min', name: '最低' }] },
       markLine: { data: [{ type: 'average', name: '平均值' }] },
-      areaStyle: { color: 'rgba(64,158,255,0.15)' }
+      areaStyle: { color: 'rgba(209, 138, 97,0.15)' }
     }]
   })
 }

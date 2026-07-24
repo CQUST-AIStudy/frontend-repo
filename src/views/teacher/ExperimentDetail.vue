@@ -732,7 +732,7 @@ const initScoreChart = () => {
           { value: scoreCounts['<60'], itemStyle: {color: '#F56C6C'} },
           { value: scoreCounts['60-69'], itemStyle: {color: '#E6A23C'} },
           { value: scoreCounts['70-79'], itemStyle: {color: '#67C23A'} },
-          { value: scoreCounts['80-89'], itemStyle: {color: '#409EFF'} },
+          { value: scoreCounts['80-89'], itemStyle: {color: '#d18a61'} },
           { value: scoreCounts['90-100'], itemStyle: {color: '#8E44AD'} }
         ]
       }]
@@ -895,7 +895,7 @@ const formatDate = (dateString) => {
 const getScoreClass = (score) => {
   if (score === undefined || score === null) return ''
   if (score >= 90) return 'font-semibold text-[#8E44AD]'
-  if (score >= 80) return 'font-semibold text-[#409EFF]'
+  if (score >= 80) return 'font-semibold text-[#d18a61]'
   if (score >= 60) return 'font-semibold text-[#67C23A]'
   return 'font-semibold text-[#F56C6C]'
 }

@@ -3,7 +3,7 @@ import logger from '@/utils/logger'
 
 // 默认外观配置（与 tailwind.css :root 中的浅色基调一致）
 export const DEFAULT_THEME = Object.freeze({
-  primaryColor: '#c2703e',
+  primaryColor: '#d18a61',
   bgColor: '#faf6ef',
   textColor: '#3d3529'
 })

@@ -1,5 +1,6 @@
 import logger from '@/utils/logger'
 import { nextTick } from 'vue'
+import { getThemePrimaryColor } from '@/utils/themeColors'
 
 function resolveChartElement(chartRef) {
   const value = chartRef?.value ?? chartRef
@@ -103,7 +104,7 @@ export function safeInitCharts(chartRefs, initFunction, delay = 300) {
  * @param {String} color - 图表颜色
  * @returns {Object} 图表配置
  */
-export function createBarChartOptions(title, categories, data, color = '#409EFF') {
+export function createBarChartOptions(title, categories, data, color = getThemePrimaryColor()) {
   return {
     title: {
       text: title,

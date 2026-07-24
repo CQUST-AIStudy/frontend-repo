@@ -12,7 +12,7 @@
                 <ui-icon :size="22" color="#fff"><component :is="item.icon" /></ui-icon>
               </div>
               <div class="stat-info [flex:1]">
-                <div class="stat-value [font-size:22px] [font-weight:600] [color:#202124] [font-size:24px] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
+                <div class="stat-value [font-size:22px] [font-weight:600] [color:#202124] [font-size:24px] [font-weight:bold] [color:#d18a61] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
                 <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
               </div>
             </ui-card>
@@ -349,7 +349,7 @@ function progressWidthStyle(value) {
 const overviewCards = computed(() => {
   const o = profileData.value.overview || {}
   return [
-    { label: '总提交次数', value: o.totalSubmissions || 0, icon: TrendCharts, color: '#409EFF', bg: 'linear-gradient(135deg,#409EFF,#79bbff)' },
+    { label: '总提交次数', value: o.totalSubmissions || 0, icon: TrendCharts, color: '#d18a61', bg: 'linear-gradient(135deg,#d18a61,#e8c4b0)' },
     { label: '通过次数', value: o.totalAc || 0, icon: Finished, color: '#67C23A', bg: 'linear-gradient(135deg,#67C23A,#95d475)' },
     { label: '总体AC率', value: (o.overallAcRate || 0) + '%', icon: DataAnalysis, color: '#E6A23C', bg: 'linear-gradient(135deg,#E6A23C,#eebe77)' },
     { label: '已参与实验', value: (o.experimentsCovered || 0) + '/' + (o.totalExperiments || 19), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
@@ -357,14 +357,14 @@ const overviewCards = computed(() => {
 })
 
 function overviewIconClass(item) {
-  if (item.color === '#409EFF') return '[background:linear-gradient(135deg,#409EFF,#79bbff)]'
+  if (item.color === '#d18a61') return '[background:linear-gradient(135deg,#d18a61,#e8c4b0)]'
   if (item.color === '#67C23A') return '[background:linear-gradient(135deg,#67C23A,#95d475)]'
   if (item.color === '#E6A23C') return '[background:linear-gradient(135deg,#E6A23C,#eebe77)]'
   return '[background:linear-gradient(135deg,#909399,#b1b3b8)]'
 }
 
 function overviewValueClass(item) {
-  if (item.color === '#409EFF') return '[color:#409EFF]'
+  if (item.color === '#d18a61') return '[color:#d18a61]'
   if (item.color === '#67C23A') return '[color:#67C23A]'
   if (item.color === '#E6A23C') return '[color:#E6A23C]'
   return '[color:#909399]'
@@ -575,14 +575,14 @@ function initRadar() {
       indicator: r.dimensions.map(d => ({ name: d, max: 100 })),
       shape: 'circle', radius: '65%',
       axisName: { color: '#606266', fontSize: 13 },
-      splitArea: { areaStyle: { color: ['rgba(64,158,255,0.05)', 'rgba(64,158,255,0.1)'] } }
+      splitArea: { areaStyle: { color: ['rgba(209, 138, 97,0.05)', 'rgba(209, 138, 97,0.1)'] } }
     },
     series: [{ type: 'radar', symbol: 'circle', symbolSize: 8, data: [{
       value: r.scores, name: '掌握度',
-      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(64,158,255,0.5)' }, { offset: 1, color: 'rgba(64,158,255,0.1)' }]) },
-      lineStyle: { color: '#409EFF', width: 2 },
-      itemStyle: { color: '#409EFF', borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: p => p.value, color: '#409EFF', fontSize: 11 }
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(209, 138, 97,0.5)' }, { offset: 1, color: 'rgba(209, 138, 97,0.1)' }]) },
+      lineStyle: { color: '#d18a61', width: 2 },
+      itemStyle: { color: '#d18a61', borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: p => p.value, color: '#d18a61', fontSize: 11 }
     }] }]
   })
 }
@@ -602,8 +602,8 @@ function initTrend() {
     xAxis: { type: 'category', data: s.map(x => x.name), axisLabel: { rotate: 35, fontSize: 10 } },
     yAxis: { type: 'value', min: 0, max: 100, name: '掌握度' },
     series: [{ type: 'line', data: s.map(x => x.mastery), smooth: true,
-      lineStyle: { color: '#409EFF', width: 2.5 }, symbolSize: 7,
-      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(64,158,255,0.3)' }, { offset: 1, color: 'rgba(64,158,255,0.02)' }]) },
+      lineStyle: { color: '#d18a61', width: 2.5 }, symbolSize: 7,
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(209, 138, 97,0.3)' }, { offset: 1, color: 'rgba(209, 138, 97,0.02)' }]) },
       markLine: { data: [{ type: 'average', name: '均值' }], lineStyle: { color: '#E6A23C', type: 'dashed' } }
     }]
   })
@@ -651,7 +651,7 @@ function initEfficiency() {
     xAxis: { type: 'category', data: items.map(x => x.name), axisLabel: { rotate: 40, fontSize: 10 } },
     yAxis: { type: 'value' },
     series: [
-      { name: '总提交', type: 'bar', data: items.map(x => x.total), itemStyle: { color: '#409EFF' }, barWidth: 12 },
+      { name: '总提交', type: 'bar', data: items.map(x => x.total), itemStyle: { color: '#d18a61' }, barWidth: 12 },
       { name: 'AC次数', type: 'bar', data: items.map(x => x.ac), itemStyle: { color: '#67C23A' }, barWidth: 12 }
     ]
   })

@@ -10,7 +10,7 @@ export const NODE_TYPES = {
   course: {
     label: '课程',
     color: '#1270d8',
-    softColor: '#dbeafe',
+    softColor: '#f1d5c2',
     textColor: '#fff',
     icon: 'library'
   },

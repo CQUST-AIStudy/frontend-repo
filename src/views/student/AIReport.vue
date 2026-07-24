@@ -193,7 +193,7 @@
                   </ui-descriptions-item>
 
                   <ui-descriptions-item label="实验得分">
-                    <span class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#409eff] [font-weight:700]">{{ selectedExperiment.score || '暂无' }}</span>
+                    <span class="score [font-size:16px] [font-weight:bold] [color:#f56c6c] [color:#d18a61] [font-weight:700]">{{ selectedExperiment.score || '暂无' }}</span>
                   </ui-descriptions-item>
 
                   <ui-descriptions-item label="截止日期">

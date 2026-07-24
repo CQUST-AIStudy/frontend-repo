@@ -262,7 +262,7 @@
                 </div>
 
                 <!-- 总体评估 -->
-                <div v-if="errorAnalysisData.overallAssessment" class="g-assessment [background:#f0f7ff] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
+                <div v-if="errorAnalysisData.overallAssessment" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
                   {{ errorAnalysisData.overallAssessment }}
                 </div>
 

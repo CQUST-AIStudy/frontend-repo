@@ -191,7 +191,7 @@
                       <span>该知识点遗忘度 {{ Math.round(selectedPractice.forgettingScore) }}%</span>
                       <span v-if="selectedPractice.forgettingScore > 50"> — 建议尽快复习</span>
                     </div>
-                    <div v-else-if="selectedPractice.forgettingScore != null && selectedPractice.forgettingScore < 0" class="forgetting-hint [margin-bottom:12px] [padding:10px_14px] [border-radius:8px] [background:#eff6ff] [border:1px_solid_#bfdbfe] [font-size:13px] [color:#1e40af]">
+                    <div v-else-if="selectedPractice.forgettingScore != null && selectedPractice.forgettingScore < 0" class="forgetting-hint [margin-bottom:12px] [padding:10px_14px] [border-radius:8px] [background:#fbf1eb] [border:1px_solid_#edd0bc] [font-size:13px] [color:#8f4f31]">
                       <span>新知识点 — 尚未学习，推荐开始练习</span>
                     </div>
 
@@ -461,7 +461,7 @@ const initForgettingCurveChart = () => {
       }
     ]
     const topSkills = reviewSkills.value.slice(0, 5)
-    const palette = ['#2563eb', '#dc2626', '#ea580c', '#7c3aed', '#0891b2']
+    const palette = ['#ac6843', '#dc2626', '#ea580c', '#7c3aed', '#0891b2']
     topSkills.forEach((skill, idx) => {
       const mastery = skill.masteryScore || 50
       const forgettingRate = (skill.forgettingScore || 0) / 100

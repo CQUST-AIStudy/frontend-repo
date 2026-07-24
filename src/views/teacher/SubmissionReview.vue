@@ -21,7 +21,7 @@
         class="flex items-center justify-between gap-6 p-6 px-8 rounded-[18px] mb-6 border"
         :class="{
           'bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] border-[#bbf7d0]': scoreLevel === 'level-good' || scoreLevel === '',
-          'bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border-[#bfdbfe]': scoreLevel === 'level-ok',
+          'bg-gradient-to-br from-[#fbf1eb] to-[#f1d5c2] border-[#edd0bc]': scoreLevel === 'level-ok',
           'bg-gradient-to-br from-[#fef2f2] to-[#fecaca] border-[#fca5a5]': scoreLevel === 'level-low'
         }"
       >
@@ -30,7 +30,7 @@
             class="text-4xl font-bold"
             :class="{
               'text-[#15803d]': scoreLevel === 'level-good' || scoreLevel === '',
-              'text-[#1d4ed8]': scoreLevel === 'level-ok',
+              'text-[#8f4f31]': scoreLevel === 'level-ok',
               'text-[#dc2626]': scoreLevel === 'level-low'
             }"
           >{{ formatScore(detail.totalScore, '暂无') }}</span>
@@ -147,13 +147,13 @@
             <p class="mb-0 mt-1 text-xs leading-5 text-[#6e6e73]">根据评分批注中的真实代码锚点还原执行状态，发布成绩后学生可查看同一演示。</p>
           </div>
           <div class="flex items-center gap-2">
-            <span v-if="detail.errorDemonstrations?.length" class="rounded-lg bg-[#eef6ff] px-3 py-1.5 text-xs font-medium text-[#1677ff]">
+            <span v-if="detail.errorDemonstrations?.length" class="rounded-lg bg-[#fbf1eb] px-3 py-1.5 text-xs font-medium text-[#d18a61]">
               已生成 {{ detail.errorDemonstrations.length }} 个可视化
             </span>
             <UiButton
               v-if="detail.errorDemonstrations?.length"
               @click="openDemoPage"
-              class="h-8 px-3 rounded-lg text-xs font-medium border border-[#d7dfeb] bg-white text-[#1677ff] hover:bg-[#f0f7ff]"
+              class="h-8 px-3 rounded-lg text-xs font-medium border border-[#d7dfeb] bg-white text-[#d18a61] hover:bg-[#fbf1eb]"
             >
               新窗口打开
             </UiButton>

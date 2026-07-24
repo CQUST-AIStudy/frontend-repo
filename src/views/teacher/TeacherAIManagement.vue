@@ -331,7 +331,7 @@ const renderCompletionChart = (experiments) => {
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: names, axisLabel: { rotate: 30, fontSize: 10 } },
     yAxis: { type: 'value', max: 100, name: '完成率' },
-    series: [{ type: 'bar', data: rates, itemStyle: { color: '#409EFF' }, barWidth: '50%' }],
+    series: [{ type: 'bar', data: rates, itemStyle: { color: '#d18a61' }, barWidth: '50%' }],
     grid: { left: 50, right: 20, bottom: 60, top: 30 }
   })
   window.addEventListener('resize', handleResize)
@@ -358,7 +358,7 @@ const renderScoreDistChart = (scored) => {
       label: { show: true, formatter: '{b}: {c}' },
       data: [
         { value: dist['90-100'], name: '90-100', itemStyle: { color: '#67C23A' } },
-        { value: dist['80-89'], name: '80-89', itemStyle: { color: '#409EFF' } },
+        { value: dist['80-89'], name: '80-89', itemStyle: { color: '#d18a61' } },
         { value: dist['70-79'], name: '70-79', itemStyle: { color: '#E6A23C' } },
         { value: dist['60-69'], name: '60-69', itemStyle: { color: '#F56C6C' } },
         { value: dist['<60'], name: '<60', itemStyle: { color: '#909399' } }

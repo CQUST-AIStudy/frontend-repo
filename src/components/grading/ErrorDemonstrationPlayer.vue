@@ -65,7 +65,7 @@
       </div>
 
       <footer class="col-span-full border-t border-[#e8edf4] bg-[#fbfcfe] px-5 py-4">
-        <div class="rounded-lg border border-[#bfdbfe] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
+        <div class="rounded-lg border border-[#edd0bc] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
           <span class="font-semibold">提示：</span>点击代码中红色波浪线标注处，即可弹出动态 D3 动画，查看错误发生时的执行路径。
         </div>
       </footer>
@@ -128,7 +128,7 @@
           </div>
         </div>
 
-        <div class="rounded-lg border px-4 py-3 text-sm leading-6" :class="activeStep.error ? 'border-[#fecaca] bg-[#fff7f7] text-[#b91c1c]' : 'border-[#bfdbfe] bg-[#f5f9ff] text-[#1e3a8a]'">
+        <div class="rounded-lg border px-4 py-3 text-sm leading-6" :class="activeStep.error ? 'border-[#fecaca] bg-[#fff7f7] text-[#b91c1c]' : 'border-[#edd0bc] bg-[#f5f9ff] text-[#1e3a8a]'">
           <div class="mb-1 flex items-center gap-2 font-semibold">
             <LucideIcon :name="activeStep.error ? 'triangle-alert' : 'circle-check'" :size="16" />
             {{ activeStep.error ? `第 ${activeStep.order} 步发生错误` : `第 ${activeStep.order} 步执行正常` }}
@@ -180,7 +180,7 @@
             title="概念动画"
           ></iframe>
         </div>
-        <div v-if="htmlFrame.narration" class="rounded-lg border border-[#bfdbfe] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
+        <div v-if="htmlFrame.narration" class="rounded-lg border border-[#edd0bc] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
           <span class="font-semibold">讲解：</span>{{ htmlFrame.narration }}
         </div>
       </div>
@@ -306,7 +306,7 @@ function frameClass(type) {
   switch (type) {
     case 'expected': return 'border-[#bbdfc5] bg-[#f3fbf5]'
     case 'actual': return 'border-[#fecaca] bg-[#fff7f7]'
-    case 'analysis': return 'border-[#bfdbfe] bg-[#f5f9ff]'
+    case 'analysis': return 'border-[#edd0bc] bg-[#f5f9ff]'
     default: return 'border-[#dce3ec] bg-[#fbfcfe]'
   }
 }

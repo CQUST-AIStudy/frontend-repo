@@ -55,7 +55,7 @@
               <div
                 v-for="item in weaknessCards"
                 :key="item.experimentId"
-                class="weakness-card [background:#fff] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [position:relative] [width:100%] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]"
+                class="weakness-card [background:#fff] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [position:relative] [width:100%] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#e8c4b0] hover:[box-shadow:0_10px_24px_rgba(143,_79,_49,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#e8c4b0] [&.active]:[box-shadow:0_10px_24px_rgba(143,_79,_49,_0.08)] [&.active]:[transform:translateY(-1px)]"
                 :class="{ active: item.experimentId === selectedWeaknessId }"
                 @click="selectWeakness(item.experimentId)"
               >
@@ -214,7 +214,7 @@
                     <div class="title small [color:#0f172a] [font-size:15px] [font-weight:700] [&.small]:[font-size:14px]">{{ record.problemTitle }}</div>
                     <div class="muted [color:#98a2b3] [font-size:12px] [color:#64748b]">{{ formatTime(record.createdAt) }} · {{ record.accepted ? '通过后计入回升' : '尝试中' }}</div>
                   </div>
-                  <strong class="recovery-score [color:#1d4ed8] [white-space:nowrap]">{{ record.estimatedMastery }} 分</strong>
+                  <strong class="recovery-score [color:#8f4f31] [white-space:nowrap]">{{ record.estimatedMastery }} 分</strong>
                 </div>
               </div>
               <ui-empty v-else description="完成专项题提交后，这里会开始累计。" :image-size="68" />

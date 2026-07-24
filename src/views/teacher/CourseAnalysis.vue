@@ -251,7 +251,7 @@ const initExperimentScoreChart = () => {
       type: 'bar',
       data: Object.entries(ranges).map(([, v], i) => ({
         value: v,
-        itemStyle: { color: ['#F56C6C', '#E6A23C', '#67C23A', '#409EFF', '#8E44AD'][i] }
+        itemStyle: { color: ['#F56C6C', '#E6A23C', '#67C23A', '#d18a61', '#8E44AD'][i] }
       })),
       label: { show: true, position: 'top' }
     }]

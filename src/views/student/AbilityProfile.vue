@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="ability-profile [padding:0] [font-family:var(--font-page)]">
     <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
       <ui-skeleton :rows="10" animated />
@@ -13,7 +13,7 @@
               <ui-icon :size="24" color="#fff"><component :is="item.icon" /></ui-icon>
             </div>
             <div class="stat-info [flex:1]">
-              <div class="stat-value [font-size:24px] [font-weight:600] [color:#202124] [font-weight:bold] [color:#409EFF] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
+              <div class="stat-value [font-size:24px] [font-weight:600] [color:#202124] [font-weight:bold] [color:#d18a61] [font-size:28px] [font-weight:700] [margin-bottom:5px]" :class="overviewValueClass(item)">{{ item.value }}</div>
               <div class="stat-label [font-size:13px] [color:#5f6368] [margin-top:2px] [font-size:12px] [margin-top:10px] [color:#606266] [margin-top:4px]">{{ item.label }}</div>
             </div>
           </ui-card>
@@ -53,7 +53,7 @@
           <ui-skeleton :rows="4" animated />
           <div class="feedback-loading-tip [text-align:center] [color:#5f6368] [font-size:13px] [margin-top:12px]">正在调用 DeepSeek 分析学习数据，请稍候...</div>
         </div>
-        <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#409eff]" v-html="renderedFeedback"></div>
+        <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#d18a61]" v-html="renderedFeedback"></div>
         <div v-else class="feedback-empty [padding:20px_0]">
           <ui-empty description="暂无AI分析，点击上方按钮生成" :image-size="80" />
         </div>
@@ -81,7 +81,7 @@
         <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="alert-triangle" :size="18" class="mr-2" /> Top 薄弱点</span></template>
         <ui-row :gutter="16">
           <ui-col :span="8" v-for="(w, idx) in profile.weaknesses" :key="w.experimentId">
-            <div class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#93c5fd] hover:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#93c5fd] [&.active]:[box-shadow:0_10px_24px_rgba(30,_64,_175,_0.08)] [&.active]:[transform:translateY(-1px)]">
+            <div class="weakness-card [background:#fff] [border:1px_solid_#fde2e2] [border-radius:12px] [padding:16px] [position:relative] [transition:box-shadow_.2s] [height:100%] hover:[box-shadow:0_4px_12px_rgba(245,108,108,0.15)] [width:100%] [border:1px_solid_#e8eef6] [border-radius:16px] [padding:14px] [text-align:left] [cursor:pointer] [transition:.2s] hover:[border-color:#e8c4b0] hover:[box-shadow:0_10px_24px_rgba(143,_79,_49,_0.08)] hover:[transform:translateY(-1px)] [&.active]:[border-color:#e8c4b0] [&.active]:[box-shadow:0_10px_24px_rgba(143,_79,_49,_0.08)] [&.active]:[transform:translateY(-1px)]">
               <div class="weakness-rank [position:absolute] [top:-8px] [left:-8px] [width:28px] [height:28px] [background:#F56C6C] [color:#fff] [border-radius:50%] [display:flex] [align-items:center] [justify-content:center] [font-weight:700] [font-size:13px]">#{{ idx + 1 }}</div>
               <div class="weakness-header [display:flex] [align-items:center] [justify-content:space-between]">
                 <span class="weakness-name [font-weight:600] [font-size:14px]">{{ w.experimentName }}</span>
@@ -172,21 +172,21 @@ function profileRequestConfig() {
 }
 
 const overviewCards = computed(() => [
-  { label: '总提交次数', value: profile.value.overview?.totalSubmissions || 0, icon: TrendCharts, color: '#409EFF', bg: 'linear-gradient(135deg,#409EFF,#79bbff)' },
+  { label: '总提交次数', value: profile.value.overview?.totalSubmissions || 0, icon: TrendCharts, color: '#d18a61', bg: 'linear-gradient(135deg,#d18a61,#e8c4b0)' },
   { label: '通过次数', value: profile.value.overview?.totalAc || 0, icon: Finished, color: '#67C23A', bg: 'linear-gradient(135deg,#67C23A,#95d475)' },
   { label: '总体AC率', value: (profile.value.overview?.overallAcRate || 0) + '%', icon: DataAnalysis, color: '#E6A23C', bg: 'linear-gradient(135deg,#E6A23C,#eebe77)' },
   { label: '已参与实验', value: (profile.value.overview?.experimentsCovered || 0) + '/' + (profile.value.overview?.totalExperiments || 19), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
 ])
 
 function overviewIconClass(item) {
-  if (item.color === '#409EFF') return '[background:linear-gradient(135deg,#409EFF,#79bbff)]'
+  if (item.color === '#d18a61') return '[background:linear-gradient(135deg,#d18a61,#e8c4b0)]'
   if (item.color === '#67C23A') return '[background:linear-gradient(135deg,#67C23A,#95d475)]'
   if (item.color === '#E6A23C') return '[background:linear-gradient(135deg,#E6A23C,#eebe77)]'
   return '[background:linear-gradient(135deg,#909399,#b1b3b8)]'
 }
 
 function overviewValueClass(item) {
-  if (item.color === '#409EFF') return '[color:#409EFF]'
+  if (item.color === '#d18a61') return '[color:#d18a61]'
   if (item.color === '#67C23A') return '[color:#67C23A]'
   if (item.color === '#E6A23C') return '[color:#E6A23C]'
   return '[color:#909399]'
@@ -286,14 +286,14 @@ function initRadar() {
       indicator: r.dimensions.map(d => ({ name: d, max: 100 })),
       shape: 'polygon', radius: '65%',
       axisName: { color: '#333', fontSize: 13, fontWeight: 'bold' },
-      splitArea: { areaStyle: { color: ['rgba(64,158,255,0.05)', 'rgba(64,158,255,0.1)'] } },
+      splitArea: { areaStyle: { color: ['rgba(209, 138, 97,0.05)', 'rgba(209, 138, 97,0.1)'] } },
       splitLine: { lineStyle: { color: '#ddd' } }, axisLine: { lineStyle: { color: '#ccc' } }
     },
     series: [{ type: 'radar', symbol: 'circle', symbolSize: 6, data: [{
       value: r.scores, name: '能力值',
-      areaStyle: { color: 'rgba(64,158,255,0.25)' }, lineStyle: { color: '#409EFF', width: 2 },
-      itemStyle: { color: '#409EFF', borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: p => p.value + '', color: '#409EFF', fontSize: 11 }
+      areaStyle: { color: 'rgba(209, 138, 97,0.25)' }, lineStyle: { color: '#d18a61', width: 2 },
+      itemStyle: { color: '#d18a61', borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: p => p.value + '', color: '#d18a61', fontSize: 11 }
     }] }]
   })
 }
@@ -308,8 +308,8 @@ function initTrend() {
     xAxis: { type: 'category', data: s.map(x => x.name), axisLabel: { rotate: 35, fontSize: 10, color: '#666' }, axisLine: { lineStyle: { color: '#ddd' } } },
     yAxis: { type: 'value', min: 0, max: 100, name: '掌握度', nameTextStyle: { color: '#999' }, splitLine: { lineStyle: { type: 'dashed', color: '#eee' } } },
     series: [{ type: 'line', data: s.map(x => x.mastery), smooth: true,
-      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(64,158,255,0.3)' }, { offset: 1, color: 'rgba(64,158,255,0.02)' }]) },
-      lineStyle: { color: '#409EFF', width: 2.5 }, itemStyle: { color: '#409EFF', borderColor: '#fff', borderWidth: 2 }, symbolSize: 7,
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(209, 138, 97,0.3)' }, { offset: 1, color: 'rgba(209, 138, 97,0.02)' }]) },
+      lineStyle: { color: '#d18a61', width: 2.5 }, itemStyle: { color: '#d18a61', borderColor: '#fff', borderWidth: 2 }, symbolSize: 7,
       markLine: { data: [{ type: 'average', name: '平均', label: { formatter: '均值 {c}' } }], lineStyle: { color: '#E6A23C', type: 'dashed' } }
     }],
     grid: { left: 50, right: 20, bottom: 55, top: 35 }

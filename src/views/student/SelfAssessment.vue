@@ -121,7 +121,7 @@
                       :step="5"
                     ></ui-slider>
                   </div>
-                  <div class="knowledge-level [width:60px] [text-align:right] [font-weight:500] [color:#409EFF]">{{ getKnowledgeLevel(knowledgeAssessment[item.key]) }}</div>
+                  <div class="knowledge-level [width:60px] [text-align:right] [font-weight:500] [color:#d18a61]">{{ getKnowledgeLevel(knowledgeAssessment[item.key]) }}</div>
                 </div>
 
                 <div class="save-button knowledge-save [margin-top:10px] [text-align:right] [margin-top:30px]">

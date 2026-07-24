@@ -404,7 +404,7 @@ async function viewStudent(studentId) {
           indicator: d.radar.dimensions.map((dim) => ({ name: dim, max: 100 })),
           shape: 'polygon'
         },
-        series: [{ type: 'radar', data: [{ value: d.radar.scores, areaStyle: { color: 'rgba(64,158,255,0.3)' } }] }]
+        series: [{ type: 'radar', data: [{ value: d.radar.scores, areaStyle: { color: 'rgba(209, 138, 97,0.3)' } }] }]
       })
       dialogRadarChart.resize()
     }

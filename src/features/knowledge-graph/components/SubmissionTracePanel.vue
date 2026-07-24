@@ -316,8 +316,8 @@ watch(() => props.selectedSubmission, (sub) => {
   margin: 0;
   padding: 8px 10px;
   border-radius: 6px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #fbf1eb;
+  color: #8f4f31;
   font-size: 12px;
   line-height: 1.6;
 }

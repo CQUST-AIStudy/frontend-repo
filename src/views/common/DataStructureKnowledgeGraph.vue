@@ -146,7 +146,7 @@ const statCards = computed(() => [
     value: stats.value.totalNodes,
     icon: 'network',
     color: '#1270d8',
-    bg: '#dbeafe'
+    bg: '#f1d5c2'
   },
   {
     label: '关系总数',

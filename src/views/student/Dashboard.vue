@@ -9,15 +9,15 @@
         <div>
           <div class="[font-size:24px] [font-weight:700] [color:#1a1a2e] [display:flex] [align-items:center] [gap:8px]">
             <span>你好，{{ studentName }}</span>
-            <span class="[width:30px] [height:30px] [border-radius:10px] [display:inline-flex] [align-items:center] [justify-content:center] [background:#eff6ff] [color:#3b82f6]">
+            <span class="[width:30px] [height:30px] [border-radius:10px] [display:inline-flex] [align-items:center] [justify-content:center] [background:#fbf1eb] [color:#d18a61]">
               <LucideIcon name="sparkles" :size="16" :stroke-width="2.2" />
             </span>
           </div>
           <div class="[font-size:14px] [color:#8c959f] [margin-top:6px]">今天也要加油学习哦！</div>
         </div>
-        <div class="[position:relative] [width:120px] [height:80px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#eef6ff,_#e3effb)] [border-radius:12px] [border:1px_solid_#d6e6f5] [color:#3b82f6]">
+        <div class="[position:relative] [width:120px] [height:80px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#fbf1eb,_#f6e4d8)] [border-radius:12px] [border:1px_solid_#ead6c5] [color:#d18a61]">
           <LucideIcon name="book-open" :size="34" :stroke-width="2" />
-          <span class="[position:absolute] [top:14px] [right:18px] [width:24px] [height:24px] [border-radius:8px] [display:flex] [align-items:center] [justify-content:center] [background:#3b82f6] [color:#fff] [box-shadow:0_4px_10px_rgba(59,130,246,0.2)]">
+          <span class="[position:absolute] [top:14px] [right:18px] [width:24px] [height:24px] [border-radius:8px] [display:flex] [align-items:center] [justify-content:center] [background:#d18a61] [color:#fff] [box-shadow:0_4px_10px_rgba(209, 138, 97,0.2)]">
             <LucideIcon name="sparkles" :size="13" :stroke-width="2.2" />
           </span>
         </div>
@@ -83,7 +83,7 @@
       <div v-if="recentErrors.length" class="dash-card [padding:20px_24px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:14px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">最近未解决的错误（{{ recentErrors.length }}）</span>
-          <a class="[font-size:13px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/wrong-notebook')">查看全部 →</a>
+          <a class="[font-size:13px] [color:#d18a61] [cursor:pointer] [font-weight:600] hover:[color:#ac6843]" @click="nav('/student/wrong-notebook')">查看全部 →</a>
         </div>
         <div class="[display:flex] [flex-direction:column]">
           <div v-for="(err, i) in recentErrors" :key="err.id || i"
@@ -100,7 +100,7 @@
               <div class="[font-size:11px] [color:#9ca3af] [margin-top:2px]">提交时间 {{ formatTime(err.lastWrongAt) }}</div>
             </div>
             <span :class="errTagClass(err)" class="[font-size:11px] [padding:3px_10px] [border-radius:100px] [font-weight:600] [flex-shrink:0] [letter-spacing:0.01em]">{{ errTagText(err) }}</span>
-            <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:500] hover:[background:#eff6ff] hover:[border-color:#3b82f6]" @click="nav('/student/wrong-notebook')">查看详情</UiButton>
+            <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#d18a61] [cursor:pointer] [font-weight:500] hover:[background:#fbf1eb] hover:[border-color:#d18a61]" @click="nav('/student/wrong-notebook')">查看详情</UiButton>
           </div>
         </div>
       </div>
@@ -126,16 +126,16 @@
         </div>
         <div class="rec-grid [display:grid] [grid-template-columns:repeat(3,_1fr)] [gap:12px]">
           <div v-for="(rec, i) in practiceRecommendations" :key="rec.problemId || rec.title || i"
-               class="rec-item [padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#c8ddf5] hover:[background:#fff] hover:[box-shadow:0_6px_16px_rgba(59,130,246,0.1)]" @click="goToPractice(rec)">
+               class="rec-item [padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#e3bea8] hover:[background:#fff] hover:[box-shadow:0_6px_16px_rgba(209, 138, 97,0.1)]" @click="goToPractice(rec)">
             <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
-              <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#eff6ff] [color:#3b82f6]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source }}</span>
+              <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#fbf1eb] [color:#d18a61]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source }}</span>
               <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : (rec.tag || '推荐拓展') }}</span>
             </div>
             <div class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [display:inline-block] [margin-bottom:12px] [font-weight:500]" :class="rec._diffClass">{{ rec._diffLabel }}</div>
             <div class="[font-size:14px] [font-weight:700] [color:#1a1a2e] [margin-bottom:14px] [line-height:1.4]">{{ rec.title }}</div>
             <div v-if="rec.reason" class="[font-size:12px] [color:#6b7280] [line-height:1.5] [margin-bottom:12px]">{{ rec.reason }}</div>
             <UiButton
-                class="w-full text-white border-none rounded-full py-[7px] text-[12px] cursor-pointer font-semibold bg-[linear-gradient(135deg,_#3b82f6,_#2563eb)] hover:bg-[linear-gradient(135deg,_#2563eb,_#1d4ed8)]"
+                class="w-full text-white border-none rounded-full py-[7px] text-[12px] cursor-pointer font-semibold bg-[linear-gradient(135deg,_#d18a61,_#ac6843)] hover:bg-[linear-gradient(135deg,_#ac6843,_#8f4f31)]"
                 @click.stop="goToPractice(rec)"
             >
               开始练习
@@ -174,7 +174,7 @@
           <div class="[font-size:15px] [font-weight:700] [color:#1a1a2e] [margin-bottom:8px]">本周实验日历</div>
           <div class="[display:flex] [gap:6px] [align-items:center] [font-size:10px] [color:#8c959f] [flex-wrap:wrap]">
             <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#10b981]"></span>已完成</span>
-            <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#3b82f6]"></span>进行中</span>
+            <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#d18a61]"></span>进行中</span>
             <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#f59e0b]"></span>即将截止</span>
             <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#d1d5db]"></span>未开始</span>
             <span class="[display:inline-flex] [align-items:center] [gap:3px]"><span class="[width:7px] [height:7px] [border-radius:50%] [display:inline-block] [background:#ef4444]"></span>逾期</span>
@@ -205,7 +205,7 @@
             </div>
           </div>
           <div class="[text-align:right]">
-            <a class="[font-size:11px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/experiments')">查看全部日程 →</a>
+            <a class="[font-size:11px] [color:#d18a61] [cursor:pointer] [font-weight:600] hover:[color:#ac6843]" @click="nav('/student/experiments')">查看全部日程 →</a>
           </div>
         </template>
       </div>
@@ -214,7 +214,7 @@
       <div v-if="hasWeeklyStats" class="dash-card [padding:18px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">学习数据概览（本周）</span>
-          <a class="[font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/learning-analysis')">查看详情</a>
+          <a class="[font-size:12px] [color:#d18a61] [cursor:pointer] [font-weight:600] hover:[color:#ac6843]" @click="nav('/student/learning-analysis')">查看详情</a>
         </div>
         <div class="stats-grid [display:grid] [grid-template-columns:repeat(4,_1fr)] [gap:8px] [margin-bottom:14px]">
           <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4f8)] [border-radius:10px] [border:1px_solid_#eef1f5]">
@@ -223,8 +223,8 @@
           <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#ecfdf5,_#d1fae5)] [border-radius:10px] [border:1px_solid_#a7f3d0]">
             <div class="[font-size:19px] [font-weight:800] [color:#059669]">{{ weeklyStats?.accuracy ?? '--' }}%</div><div class="[font-size:10px] [color:#6b7280] [margin-top:2px] [font-weight:500]">正确率</div>
           </div>
-          <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#eff6ff,_#dbeafe)] [border-radius:10px] [border:1px_solid_#bfdbfe]">
-            <div class="[font-size:19px] [font-weight:800] [color:#2563eb]">{{ weeklyStats?.submissions ?? '--' }}</div><div class="[font-size:10px] [color:#6b7280] [margin-top:2px] [font-weight:500]">提交次数</div>
+          <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#fbf1eb,_#f1d5c2)] [border-radius:10px] [border:1px_solid_#edd0bc]">
+            <div class="[font-size:19px] [font-weight:800] [color:#ac6843]">{{ weeklyStats?.submissions ?? '--' }}</div><div class="[font-size:10px] [color:#6b7280] [margin-top:2px] [font-weight:500]">提交次数</div>
           </div>
           <div class="[text-align:center] [padding:10px_4px] [background:linear-gradient(135deg,_#faf5ff,_#ede9fe)] [border-radius:10px] [border:1px_solid_#c4b5fd]">
             <div class="[font-size:19px] [font-weight:800] [color:#7c3aed]">{{ weeklyStats?.studyHours ?? '--' }}h</div><div class="[font-size:10px] [color:#6b7280] [margin-top:2px] [font-weight:500]">学习时长</div>
@@ -238,7 +238,7 @@
       <div v-if="feedbackList.length" class="dash-card [padding:18px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:10px]">
           <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">最新反馈</span>
-          <a class="[font-size:12px] [color:#3b82f6] [cursor:pointer] [font-weight:600] hover:[color:#2563eb]" @click="nav('/student/ai-report')">查看全部</a>
+          <a class="[font-size:12px] [color:#d18a61] [cursor:pointer] [font-weight:600] hover:[color:#ac6843]" @click="nav('/student/ai-report')">查看全部</a>
         </div>
         <div class="[display:flex] [flex-direction:column] [gap:0]">
           <div v-for="(fb, i) in feedbackList" :key="i"
@@ -341,7 +341,7 @@ function feedbackIconName(fb) {
   return 'message-square'
 }
 function feedbackIconStyle(fb) {
-  if (feedbackTone(fb) === 'insight') return { background: '#eff6ff', color: '#2563eb' }
+  if (feedbackTone(fb) === 'insight') return { background: '#fbf1eb', color: '#ac6843' }
   if (feedbackTone(fb) === 'success') return { background: '#ecfdf5', color: '#059669' }
   if (feedbackTone(fb) === 'warning') return { background: '#fff7ed', color: '#ea580c' }
   return { background: '#f3f4f6', color: '#6b7280' }
@@ -349,18 +349,18 @@ function feedbackIconStyle(fb) {
 
 // ── 快捷入口（静态配置） ──
 const quickEntries = [
-  { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#eff6ff,#dbeafe)', color: '#2563eb' },
+  { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#fbf1eb,#f1d5c2)', color: '#ac6843' },
   { iconName: 'circle-x', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
   { iconName: 'check', label: '推荐练习', path: '/student/practice', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
   { iconName: 'target', label: '专项训练', path: '/student/weakness-training', bg: 'linear-gradient(135deg,#faf5ff,#ede9fe)', color: '#7c3aed' },
   { iconName: 'brain', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
-  { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#eff6ff,#bfdbfe)', color: '#3b82f6' }
+  { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#fbf1eb,#edd0bc)', color: '#d18a61' }
 ]
 
 // ── 日历 ──
 function calColor(type) {
   if (type === 'done') return { background: '#d1fae5', color: '#065f46' }
-  if (type === 'progress') return { background: '#dbeafe', color: '#1e40af' }
+  if (type === 'progress') return { background: '#f1d5c2', color: '#8f4f31' }
   if (type === 'soon') return { background: '#fef3c7', color: '#92400e' }
   if (type === 'overdue') return { background: '#fce4e4', color: '#b91c1c' }
   return { background: '#fff', color: '#1f2937' }
@@ -644,9 +644,9 @@ function initWeeklyChart() {
     yAxis: { type: 'value', min: 0, name: 'h', splitLine: { lineStyle: { type: 'dashed', color: '#f3f4f6' } }, axisLabel: { fontSize: 9, color: '#9ca3af' } },
     series: [{
       type: 'line', data: data, smooth: true, symbolSize: 4,
-      lineStyle: { color: '#3b82f6', width: 2 },
-      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0)'}]) },
-      itemStyle: { color: '#3b82f6' }
+      lineStyle: { color: '#d18a61', width: 2 },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(209, 138, 97,0.15)'},{offset:1,color:'rgba(209, 138, 97,0)'}]) },
+      itemStyle: { color: '#d18a61' }
     }]
   })
 }

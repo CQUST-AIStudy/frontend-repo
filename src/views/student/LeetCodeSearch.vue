@@ -34,11 +34,11 @@
         <div class="search-progress-card [width:min(520px,_100%)] [background:white] [border:1px_solid_#e5edf7] [border-radius:16px] [padding:28px_32px] [box-shadow:0_12px_32px_rgba(15,_23,_42,_0.08)]">
           <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [margin-bottom:14px]">
             <span class="[font-size:16px] [font-weight:700] [color:#0f172a]">正在加载个性化推荐</span>
-            <strong class="[font-size:24px] [color:#409eff]">{{ searchProgress }}%</strong>
+            <strong class="[font-size:24px] [color:#d18a61]">{{ searchProgress }}%</strong>
           </div>
           <div class="[height:10px] [border-radius:999px] [background:#e8f1ff] [overflow:hidden]">
             <div
-              class="[height:100%] [border-radius:999px] [background:linear-gradient(90deg,_#60a5fa,_#2563eb)] [transition:width_0.28s_ease]"
+              class="[height:100%] [border-radius:999px] [background:linear-gradient(90deg,_#dda784,_#ac6843)] [transition:width_0.28s_ease]"
               :style="{ width: `${searchProgress}%` }"
             ></div>
           </div>

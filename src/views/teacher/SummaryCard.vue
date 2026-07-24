@@ -3,7 +3,7 @@
     <!-- 顶部 -->
     <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6 flex items-center">
       <div class="flex items-center gap-4">
-        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef5ff] text-[#1677ff]">
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#fbf1eb] text-[#d18a61]">
           <LucideIcon name="book-open" :size="26" />
         </div>
         <div>

@@ -829,8 +829,8 @@ const relationGroups = computed(() => {
 }
 
 .usecase-list span {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #fbf1eb;
+  color: #8f4f31;
 }
 
 .exercise-section {
