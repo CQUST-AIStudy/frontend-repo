@@ -164,6 +164,82 @@
       </footer>
     </div>
 
+    <!-- CONCEPT_STEPS 工作流：概念/原理分步可视化（大模型产出步骤数据，固定引擎渲染） -->
+    <div v-else-if="current.workflow === 'CONCEPT_STEPS'" class="grid gap-0" :class="conceptHasCode ? 'lg:grid-cols-[minmax(0,0.85fr)_minmax(440px,1.15fr)]' : 'grid-cols-1'">
+      <!-- 左：示意代码（可选），随当前步高亮 -->
+      <div v-if="conceptHasCode" class="border-b border-[#e8edf4] p-5 lg:border-b-0 lg:border-r">
+        <div class="mb-3 flex items-center gap-2">
+          <span class="text-sm font-semibold text-[#172033]">示意代码</span>
+          <span class="rounded bg-[#eef2f7] px-2 py-0.5 text-[11px] text-[#64748b]">仅用于讲解</span>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-[#dce3ec] bg-[#fbfcfe] font-mono text-[13px] leading-7">
+          <div
+            v-for="(line, index) in sourceLines"
+            :key="`concept-${index}`"
+            class="grid grid-cols-[36px_1fr] gap-2 border-l-[3px] px-2 transition-colors"
+            :class="index + 1 === activeStep.line ? 'border-l-[var(--app-primary)] bg-[var(--app-primary-soft)]' : 'border-l-transparent'"
+          >
+            <span class="select-none text-right text-[#9aa5b5]">{{ index + 1 }}</span>
+            <code class="whitespace-pre-wrap text-[#1f2937]">{{ line || ' ' }}</code>
+          </div>
+        </div>
+        <div v-if="current.correctedCode" class="mt-4 rounded-lg border border-[#bbdfc5] bg-[#f3fbf5] p-3">
+          <div class="mb-1 text-xs font-semibold text-[#15803d]">要点 / 正确写法</div>
+          <pre class="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-sm leading-6 text-[#166534]"><code>{{ current.correctedCode }}</code></pre>
+        </div>
+      </div>
+
+      <!-- 右：画布 + 旁白字幕 + 变量 + 步骤控件 -->
+      <div class="p-5">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <span class="text-sm font-semibold text-[#172033]">{{ current.title }} <span v-if="readonly" class="font-normal text-[#8b96a8]">（只读）</span></span>
+          <span class="text-xs text-[#64748b]">第 {{ activeStep.order }} 步 / 共 {{ steps.length }} 步</span>
+        </div>
+
+        <!-- 画布：主角 -->
+        <div class="mb-3">
+          <PythonTutorRenderer :state="activeStep.state" :height="300" />
+        </div>
+
+        <!-- 旁白字幕：totuma 式，居中醒目 -->
+        <div class="mb-4 rounded-lg border px-4 py-3 text-center text-[15px] font-medium leading-7"
+          :class="activeStep.error ? 'border-[#fecaca] bg-[#fff7f7] text-[#b91c1c]' : 'border-[#bfdbfe] bg-[#f5f9ff] text-[#1e3a8a]'">
+          <LucideIcon v-if="activeStep.error" name="triangle-alert" :size="16" class="mr-1 inline align-[-3px]" />
+          {{ activeStep.explanation || '—' }}
+        </div>
+
+        <!-- 变量芯片 -->
+        <div v-if="hasVariables(activeStep)" class="mb-4 flex flex-wrap gap-2">
+          <span v-for="(value, key) in activeStep.variables" :key="key"
+            class="inline-flex items-center gap-1 rounded-lg border border-[#dce3ec] bg-white px-2.5 py-1 font-mono text-xs">
+            <span class="text-[#64748b]">{{ key }}</span>
+            <span class="text-[#94a3b8]">=</span>
+            <span class="font-semibold text-[#172033]">{{ value }}</span>
+          </span>
+        </div>
+
+        <!-- 步骤控件 -->
+        <div class="mt-1 flex items-center gap-2">
+          <UiButton :disabled="stepIndex === 0" @click="previous" class="h-9 rounded-lg border border-[#d7dfeb] bg-white px-4 text-sm text-[#334155] disabled:opacity-40">上一步</UiButton>
+          <UiButton @click="togglePlay" class="inline-flex h-9 min-w-24 items-center justify-center gap-2 rounded-lg border-none bg-[var(--app-primary)] px-4 text-sm text-white">
+            <LucideIcon :name="playing ? 'pause' : 'play'" :size="16" />{{ playing ? '暂停' : '播放' }}
+          </UiButton>
+          <UiButton :disabled="stepIndex >= steps.length - 1" @click="next" class="h-9 rounded-lg border border-[#d7dfeb] bg-white px-4 text-sm text-[#334155] disabled:opacity-40">下一步</UiButton>
+          <UiButton @click="reset" class="ml-auto h-9 rounded-lg border-none bg-[#f1f5f9] px-3 text-sm text-[#475569]" title="重置演示"><LucideIcon name="rotate-ccw" :size="16" /></UiButton>
+        </div>
+
+        <div class="mt-4 flex items-center gap-1.5">
+          <button v-for="(step, index) in steps" :key="step.order" type="button" @click="goTo(index)" class="h-2 flex-1 cursor-pointer rounded border-none p-0 transition-colors" :class="index <= stepIndex ? (step.error ? 'bg-[#ef4444]' : 'bg-[var(--app-primary)]') : 'bg-[#e2e8f0]'" :aria-label="`第 ${step.order} 步`"></button>
+        </div>
+      </div>
+
+      <footer v-if="current.explanation" class="col-span-full border-t border-[#e8edf4] bg-[#fbfcfe] px-5 py-4">
+        <div class="rounded-lg border border-[#bfdbfe] bg-[#f5f9ff] px-4 py-3 text-sm leading-6 text-[#1e3a8a]">
+          <span class="font-semibold">小结：</span>{{ current.explanation }}
+        </div>
+      </footer>
+    </div>
+
     <!-- HTML_ANIMATION 工作流：AI 生成 HTML 动画 -->
     <div v-else-if="current.workflow === 'HTML_ANIMATION'" class="p-5">
       <div v-if="htmlFrame" class="space-y-4">
@@ -292,6 +368,14 @@ const compareFrames = computed(() => {
   if (current.value.workflow !== 'RESULT_COMPARE') return []
   return current.value.frames || []
 })
+const conceptHasCode = computed(() =>
+  current.value.workflow === 'CONCEPT_STEPS' && String(current.value.sourceCode || '').trim().length > 0
+)
+
+function hasVariables(step) {
+  const vars = step?.variables
+  return vars && typeof vars === 'object' && Object.keys(vars).length > 0
+}
 
 function lineClass(lineNumber) {
   const isErrorLine = lineNumber === current.value.errorLine
@@ -356,10 +440,12 @@ function togglePlay() {
   if (playing.value) return stop()
   if (stepIndex.value >= steps.value.length - 1) stepIndex.value = 0
   playing.value = true
+  // 概念动画每步含旁白字幕，播放节奏放慢以便阅读
+  const interval = current.value.workflow === 'CONCEPT_STEPS' ? 1600 : 900
   timer = window.setInterval(() => {
     if (stepIndex.value >= steps.value.length - 1) return stop()
     stepIndex.value += 1
-  }, 900)
+  }, interval)
 }
 
 onBeforeUnmount(stop)
