@@ -85,9 +85,9 @@
               </div>
 
               <!-- 双栏布局 -->
-              <div v-if="displayQuestions.length" class="flex border border-[#e8eaed] rounded-xl overflow-hidden" style="max-height:610px;min-height:330px">
+              <div v-if="displayQuestions.length" class="flex border border-[#e8eaed] rounded-xl overflow-hidden" style="height:min(65vh,620px);min-height:330px">
                 <!-- 左侧题目导航 -->
-                <div class="flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto">
+                <div class="flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto min-h-0" style="padding:0 0 16px 0;scrollbar-gutter:stable">
                   <UiButton @click="activeCodeQuestion = 'full'" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none shrink-0" :class="activeCodeQuestion === 'full' ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">完整源码</UiButton>
                   <UiButton v-for="(q, i) in displayQuestions" :key="'qn'+i" @click="activeCodeQuestion = String(i)" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none truncate shrink-0" :class="activeCodeQuestion === String(i) ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">第{{ q.number || (i+1) }}题</UiButton>
                 </div>
@@ -100,53 +100,56 @@
                       <div v-else class="text-center py-20 text-[13px] text-[#9aa0a6]">暂无完整源码</div>
                     </div>
                     <!-- 逐题 -->
-                    <div v-for="(q, i) in displayQuestions" :key="'qp'+i" v-show="activeCodeQuestion === String(i)" class="flex flex-col flex-1 min-h-0 relative">
-                      <div v-if="q.problemTitle || q.statementMd" class="p-3 bg-[#f9f9fb] border-b border-[#e8eaed] shrink-0">
-                        <div class="flex items-baseline gap-2 mb-1">
-                          <span class="text-sm font-semibold text-[#1a73e8]">第{{ q.number || (i+1) }}题</span>
-                          <span v-if="q.problemNo" class="text-xs text-[#5f6368]">题号：{{ q.problemNo }}</span>
-                          <span v-if="q.problemTitle" class="text-sm font-medium text-[#202124]">{{ q.problemTitle }}</span>
+                    <div v-for="(q, i) in displayQuestions" :key="'qp'+i" v-show="activeCodeQuestion === String(i)" class="flex flex-col flex-1 min-h-0">
+                      <!-- 题目信息卡片（数据来自后端 problems，风格参考教师端提交详情） -->
+                      <div v-if="q.problemTitle || q.statementMd" class="mb-4 p-4 bg-[#f9f9fb] rounded-lg shrink-0">
+                        <div class="flex items-baseline gap-2 mb-2">
+                          <span class="text-sm font-semibold text-[var(--app-primary)]">第{{ q.number || (i+1) }}题</span>
+                          <span v-if="q.problemTitle" class="text-sm font-medium text-[#1d1d1f]">{{ q.problemTitle }}</span>
                         </div>
-                        <div v-if="q.statementMd" class="markdown-body text-[12px] leading-[1.6] text-[#202124]" v-html="renderSafeMarkdown(q.statementMd)"></div>
+                        <div v-if="q.statementMd" class="markdown-body text-[13px] leading-[1.7] text-[#1d1d1f] [&_p]:[margin:8px_0] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px] [&_li]:[margin:4px_0]" v-html="renderSafeMarkdown(q.statementMd)"></div>
                       </div>
-                      <CodeViewer v-if="q.code" :code="q.code" language="cpp" maxHeight="none" hideCopy style="height:100%">
-                        <template #toolbar-extra>
-                          <button v-if="q.testResults && q.testResults.length"
-                            @click="toggleTestResults(i)"
-                            class="inline-flex items-center gap-1 text-[12px] font-medium transition-colors bg-transparent border-none cursor-pointer"
-                            :class="expandedTestResults[i] ? 'text-[var(--app-primary)]' : 'text-[#57606a] hover:text-[#24292f]'"
-                          >
-                            <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': expandedTestResults[i] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            测试点
-                          </button>
-                        </template>
-                      </CodeViewer>
-                      <div v-else class="flex items-center justify-center h-full text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
-                      <!-- 本题测试点浮层 -->
-                      <div v-if="expandedTestResults[i] && q.testResults" class="absolute right-0 top-0 w-[36%] min-w-[260px] bg-white/97 backdrop-blur-sm border-l border-b border-[#d0d7de] shadow-[-8px_0_24px_rgba(0,0,0,0.1)] flex flex-col rounded-l-xl rounded-br-xl z-10 max-h-[220px]">
-                        <div class="flex items-center justify-between px-3 py-2 bg-[#f6f8fa] border-b border-[#e0e0e0] shrink-0 rounded-tl-xl">
-                          <span class="text-[12px] font-semibold text-[#24292f]">测试点</span>
-                          <button @click="toggleTestResults(i)" class="text-[11px] text-[#57606a] bg-transparent border-none cursor-pointer hover:text-[#24292f]">收起</button>
-                        </div>
-                        <div class="flex-1 overflow-hidden flex flex-col">
-                          <div class="flex-1 overflow-auto">
-                            <table class="w-full text-[11px] border-collapse">
-                              <thead><tr class="bg-[#f0f1f3] sticky top-0"><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">测试点</th><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">结果</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">得分</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">耗时</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">内存</th></tr></thead>
-                              <tbody>
-                                <tr v-for="(row, ri) in pagedTP(i)" :key="ri" class="hover:bg-[#f8f9fa]">
-                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-[#202124]">{{ row.point }}</td>
-                                  <td class="px-2.5 py-1 border border-[#e8eaed]"><span class="inline-flex items-center h-[18px] px-1.5 rounded-full text-[10px] font-bold" :class="row.result === '答案正确' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'">{{ row.result }}</span></td>
-                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#202124] font-medium">{{ row.score }}</td>
-                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.time }}</td>
-                                  <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.memory }}</td>
-                                </tr>
-                              </tbody>
-                            </table>
+                      <!-- 代码区 -->
+                      <div class="relative flex-1 min-h-0">
+                        <CodeViewer v-if="q.code" :code="q.code" language="cpp" maxHeight="none" hideCopy style="height:100%">
+                          <template #toolbar-extra>
+                            <button v-if="q.testResults && q.testResults.length"
+                              @click="toggleTestResults(i)"
+                              class="inline-flex items-center gap-1 text-[12px] font-medium transition-colors bg-transparent border-none cursor-pointer"
+                              :class="expandedTestResults[i] ? 'text-[var(--app-primary)]' : 'text-[#57606a] hover:text-[#24292f]'"
+                            >
+                              <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-90': expandedTestResults[i] }" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                              测试点 {{ expandedTestResults[i] ? '▼' : '▶' }}
+                            </button>
+                          </template>
+                        </CodeViewer>
+                        <div v-else class="flex items-center justify-center h-full text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
+                        <!-- 测试点浮层（覆盖在代码右上角） -->
+                        <div v-if="expandedTestResults[i] && q.testResults" class="absolute right-0 top-0 w-[36%] min-w-[260px] bg-white/97 backdrop-blur-sm border-l border-b border-[#d0d7de] shadow-[-8px_0_24px_rgba(0,0,0,0.1)] flex flex-col rounded-l-xl rounded-br-xl z-10 max-h-[220px]">
+                          <div class="flex items-center justify-between px-3 py-2 bg-[#f6f8fa] border-b border-[#e0e0e0] shrink-0 rounded-tl-xl">
+                            <span class="text-[12px] font-semibold text-[#24292f]">测试点</span>
+                            <button @click="toggleTestResults(i)" class="text-[11px] text-[#57606a] bg-transparent border-none cursor-pointer hover:text-[#24292f]">收起</button>
                           </div>
-                          <div v-if="tpTotalPages(i) > 1" class="flex items-center justify-center gap-1.5 px-3 py-1.5 border-t border-[#e0e0e0] bg-[#f6f8fa] shrink-0">
-                            <button :disabled="(testPointPage[i]||1) <= 1" @click="testPointPage[i] = (testPointPage[i]||1) - 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">‹</button>
-                            <span class="text-[11px] text-[#57606a]">{{ testPointPage[i] || 1 }} / {{ tpTotalPages(i) }}</span>
-                            <button :disabled="(testPointPage[i]||1) >= tpTotalPages(i)" @click="testPointPage[i] = (testPointPage[i]||1) + 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">›</button>
+                          <div class="flex-1 overflow-hidden flex flex-col">
+                            <div class="flex-1 overflow-auto">
+                              <table class="w-full text-[11px] border-collapse">
+                                <thead><tr class="bg-[#f0f1f3] sticky top-0"><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">测试点</th><th class="px-2.5 py-1.5 text-left font-medium text-[#5f6368] border border-[#e0e0e0]">结果</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">得分</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">耗时</th><th class="px-2.5 py-1.5 text-right font-medium text-[#5f6368] border border-[#e0e0e0]">内存</th></tr></thead>
+                                <tbody>
+                                  <tr v-for="(row, ri) in pagedTP(i)" :key="ri" class="hover:bg-[#f8f9fa]">
+                                    <td class="px-2.5 py-1 border border-[#e8eaed] text-[#202124]">{{ row.point }}</td>
+                                    <td class="px-2.5 py-1 border border-[#e8eaed]"><span class="inline-flex items-center h-[18px] px-1.5 rounded-full text-[10px] font-bold" :class="row.result === '答案正确' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'">{{ row.result }}</span></td>
+                                    <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#202124] font-medium">{{ row.score }}</td>
+                                    <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.time }}</td>
+                                    <td class="px-2.5 py-1 border border-[#e8eaed] text-right text-[#5f6368]">{{ row.memory }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <div v-if="tpTotalPages(i) > 1" class="flex items-center justify-center gap-1.5 px-3 py-1.5 border-t border-[#e0e0e0] bg-[#f6f8fa] shrink-0">
+                              <button :disabled="(testPointPage[i]||1) <= 1" @click="testPointPage[i] = (testPointPage[i]||1) - 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">‹</button>
+                              <span class="text-[11px] text-[#57606a]">{{ testPointPage[i] || 1 }} / {{ tpTotalPages(i) }}</span>
+                              <button :disabled="(testPointPage[i]||1) >= tpTotalPages(i)" @click="testPointPage[i] = (testPointPage[i]||1) + 1" class="w-6 h-6 flex items-center justify-center rounded text-[11px] bg-transparent border border-[#d0d7de] cursor-pointer disabled:opacity-30">›</button>
+                            </div>
                           </div>
                         </div>
                       </div>

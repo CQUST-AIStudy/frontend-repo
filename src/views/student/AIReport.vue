@@ -4,9 +4,10 @@
 
     <div class="report-content [margin-top:20px] [padding-bottom:60px]">
       <ui-row :gutter="20">
-        <!-- 左侧实验列表 -->
+        <!-- 左侧实验列表【已修复滚动截断】 -->
         <ui-col :span="8">
-          <ui-card class="experiments-card [height:80vh] [display:flex] [flex-direction:column]">
+          <!-- 父级flex容器增加 [min-height:0] 打破flex高度限制链 -->
+          <ui-card class="experiments-card [height:80vh] [display:flex] [flex-direction:column] [min-height:0]">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <h3>我的实验列表</h3>
@@ -14,7 +15,14 @@
               </div>
             </template>
 
-            <div class="experiment-list [height:65vh] [flex:1] [overflow-y:auto] [margin-top:10px]">
+            <!-- 滚动容器核心修复：删除冲突height:65vh + min-height:0 + 底部padding留白 -->
+            <div class="experiment-list
+              [flex:1]
+              [min-height:0]
+              [overflow-y:auto]
+              [margin-top:10px]
+              [padding-bottom:48px]
+              [box-sizing:border-box]">
               <loading-state :loading="experimentStore.loading">
                 <ui-empty v-if="filteredExperiments.length === 0" description="没有找到实验"></ui-empty>
 
@@ -66,7 +74,7 @@
           </ui-card>
         </ui-col>
 
-        <!-- 右侧报告生成与预览-->
+        <!-- 右侧报告生成与预览 完全未改动 -->
         <ui-col :span="16">
           <ui-card class="report-card ![height:auto] ![overflow:visible]" v-if="selectedExperiment">
             <template #header>
@@ -85,28 +93,19 @@
                     </ui-icon>
                     查看报告
                   </ui-button>
-                   <ui-button type="primary" :loading="experimentStore.generatingReport"
-                              :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
+                  <ui-button type="primary" :loading="experimentStore.generatingReport"
+                             :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
                     <ui-icon>
                       <MagicStick />
                     </ui-icon>
                     {{ selectedExperiment.report ? '重新生成报告' : '生成AI报告' }}
                   </ui-button>
 
-                  <!-- <ui-button v-if="selectedExperiment.report" type="warning" @click="downloadReport">
-                    <ui-icon>
-                      <Download />
-                    </ui-icon>
-                    下载报告
-                  </ui-button> -->
-
                   <ui-button v-if="selectedExperiment.report" type="primary" @click="generateWordDoc">
                     <ui-icon>
                       <Download />
                     </ui-icon>下载Word文档
                   </ui-button>
-
-
                 </div>
               </div>
             </template>
@@ -161,7 +160,7 @@
 
                 <div class="generate-action [margin-top:30px]">
                   <ui-button type="primary" size="large" :loading="experimentStore.generatingReport"
-                              :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
+                             :disabled="experimentStore.generatingReport || !canGenerateReport" @click="generateReport">
                     <ui-icon>
                       <MagicStick />
                     </ui-icon>
@@ -218,47 +217,46 @@
                     </span>
                   </div>
 
-                  <div v-if="parsedQuestions.length > 0" class="[display:grid] [grid-template-columns:140px_minmax(0,1fr)] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [overflow:hidden] max-[640px]:[display:flex] max-[640px]:[flex-direction:column]">
-                    <div class="[display:flex] [flex-direction:column] [gap:2px] [max-height:clamp(260px,_46vh,_500px)] [overflow-y:auto] [padding:6px] [background:var(--app-surface-muted)] [border-right:1px_solid_var(--app-border-soft)] max-[640px]:[flex-direction:row] max-[640px]:[max-height:none] max-[640px]:[overflow-x:auto] max-[640px]:[overflow-y:visible] max-[640px]:[border-right:none] max-[640px]:[border-bottom:1px_solid_var(--app-border-soft)]" role="tablist" aria-label="实验题目">
+                  <div v-if="parsedQuestions.length > 0" class="[display:flex] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [overflow:hidden]" style="height:min(calc(100vh - 380px), 700px);min-height:330px">
+                    <div class="[display:flex] [flex-direction:column] [gap:2px] [background:var(--app-surface-muted)] [border-right:1px_solid_var(--app-border-soft)] [flex-shrink:0] [min-height:0]" style="width:140px;overflow-y:auto;padding:6px 6px 16px 6px;scrollbar-gutter:stable" role="tablist" aria-label="实验题目">
                       <UiButton
-                        :type="activeQuestionTab === 'full' ? 'primary' : 'default'"
-                        size="small"
-                        :aria-selected="activeQuestionTab === 'full'"
-                        role="tab"
-                        class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
-                        @click="activeQuestionTab = 'full'"
+                          :type="activeQuestionTab === 'full' ? 'primary' : 'default'"
+                          size="small"
+                          :aria-selected="activeQuestionTab === 'full'"
+                          role="tab"
+                          class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
+                          @click="activeQuestionTab = 'full'"
                       >
                         完整源码
                       </UiButton>
                       <UiButton
-                        v-for="(question, index) in parsedQuestions"
-                        :key="`question-tab-${question.number}-${index}`"
-                        :type="activeQuestionTab === String(index) ? 'primary' : 'default'"
-                        size="small"
-                        :aria-selected="activeQuestionTab === String(index)"
-                        role="tab"
-                        class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
-                        @click="activeQuestionTab = String(index)"
+                          v-for="(question, index) in parsedQuestions"
+                          :key="`question-tab-${question.number}-${index}`"
+                          :type="activeQuestionTab === String(index) ? 'primary' : 'default'"
+                          size="small"
+                          :aria-selected="activeQuestionTab === String(index)"
+                          role="tab"
+                          class="[justify-content:flex-start] [white-space:nowrap] max-[640px]:[flex:0_0_auto]"
+                          @click="activeQuestionTab = String(index)"
                       >
                         第{{ question.number }}题
                       </UiButton>
                     </div>
 
-                    <div class="[min-width:0] [padding:16px]">
+                    <div class="[min-width:0] [flex:1] [min-height:0]" style="overflow-y:auto;padding:16px 16px 24px 16px">
                       <div v-if="activeQuestionTab === 'full'" role="tabpanel">
                         <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [margin-bottom:12px]">
                           <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">完整源码</span>
                           <span class="[font-size:12px] [color:var(--app-text-secondary)]">学生原始提交</span>
                         </div>
-                        <CodeViewer v-if="selectedExperiment.code" :code="selectedExperiment.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" />
+                        <CodeViewer v-if="selectedExperiment.code" :code="selectedExperiment.code" language="cpp" maxHeight="none" hideCopy />
                         <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无完整源码</div>
                       </div>
 
                       <div v-for="(question, index) in parsedQuestions" v-show="activeQuestionTab === String(index)" :key="`question-panel-${question.number}-${index}`" role="tabpanel">
-                        <div v-if="question.problemTitle || question.statementMd || question.problemNo" class="[margin-bottom:16px] [padding:14px_16px] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
+                        <div v-if="question.problemTitle || question.statementMd" class="[margin-bottom:16px] [padding:14px_16px] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
                           <div class="[display:flex] [align-items:baseline] [flex-wrap:wrap] [gap:8px] [margin-bottom:8px]">
                             <span class="[font-size:14px] [font-weight:600] [color:var(--app-primary)]">第{{ question.number }}题</span>
-                            <span v-if="question.problemNo" class="[font-size:12px] [color:var(--app-text-secondary)]">题号：{{ question.problemNo }}</span>
                             <span v-if="question.problemTitle" class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">{{ question.problemTitle }}</span>
                           </div>
                           <div v-if="question.statementMd" class="markdown-body [font-size:13px] [line-height:1.7] [color:var(--app-text)] [&_p]:[margin:8px_0] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre]:[padding:12px] [&_pre]:[border-radius:8px] [&_pre]:[background:var(--app-surface)] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px]" v-html="renderMarkdown(question.statementMd)"></div>
@@ -268,7 +266,7 @@
                             <span class="[font-size:13px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题代码</span>
                             <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
                           </div>
-                          <CodeViewer :code="question.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" />
+                          <CodeViewer :code="question.code" language="cpp" maxHeight="none" hideCopy />
                         </div>
                         <div v-else class="[margin-bottom:16px] [padding:28px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)] [border:1px_dashed_var(--app-border-soft)] [border-radius:var(--app-radius-sm)]">本题暂无代码提交</div>
                         <div v-if="question.testResults" class="[padding:12px] [overflow:auto] [border-radius:var(--app-radius-sm)] [background:var(--app-surface-muted)]">
@@ -279,7 +277,7 @@
                     </div>
                   </div>
 
-                  <div v-else-if="selectedExperiment.code" class="[margin-top:8px]"><CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="clamp(260px, 46vh, 500px)" /></div>
+                  <div v-else-if="selectedExperiment.code" class="[margin-top:8px]"><CodeViewer :code="selectedExperiment.code" language="cpp" maxHeight="none" hideCopy /></div>
                   <div v-else class="[padding:32px_16px] [text-align:center] [font-size:13px] [color:var(--app-text-secondary)]">暂无代码提交</div>
                 </div>
 
@@ -340,7 +338,7 @@ const canGenerateReport = computed(() => {
 })
 
 const reportIneligibleReason = computed(() => selectedExperiment.value?.aiReportIneligibleReason
-  || '该实验尚无本平台 OJ 代码提交。请先在实验页面完成并提交代码，再生成 AI 报告。')
+    || '该实验尚无本平台 OJ 代码提交。请先在实验页面完成并提交代码，再生成 AI 报告。')
 
 
 // 过滤后的实验列表
@@ -445,7 +443,6 @@ const generateReport = async () => {
     studentId: userStore.userInfo?.usernum || userStore.userInfo?.username || userStore.userInfo?.id || '',
     className: userStore.userInfo?.class || userStore.userInfo?.classname || '',
     experimentContent: selectedExperiment.value.description || selectedExperiment.value.content || '',
-    // 传递完整的实验详情
     experimentName: selectedExperiment.value.name,
     experimentId: selectedExperiment.value.id,
     code: selectedExperiment.value.code,
@@ -457,7 +454,6 @@ const generateReport = async () => {
     aiComment: selectedExperiment.value.aiComment
   }
 
-  // 直接生成报告，无需填写额外信息
   userData.courseName = "数据结构"
   userData.teacherName = selectedExperiment.value.teacherName || ''
   userData.summary = ''
@@ -466,15 +462,12 @@ const generateReport = async () => {
     loading.value = true
     logger.debug('生成实验报告，用户数据', userData)
 
-    // 调用AI生成报告
     const result = await experimentStore.generateAIReport(selectedExperiment.value.id, userData)
 
     if (result.success && result.report) {
-      // 更新当前选中的实验报告
       selectedExperiment.value.report = result.report
       selectedExperiment.value.reportData = result.data
 
-      // 更新experimentList中的报告
       const experimentIndex = experimentStore.experimentList.findIndex(exp => exp.id === selectedExperiment.value.id)
       if (experimentIndex !== -1) {
         experimentStore.experimentList[experimentIndex] = {
@@ -484,7 +477,6 @@ const generateReport = async () => {
         }
       }
 
-      // 准备报告数据
       prepareReportData()
 
       uiMessage.success('AI报告生成成功！')
@@ -494,7 +486,7 @@ const generateReport = async () => {
       logger.error('生成报告失败:', result)
     }
   } catch (error) {
-      uiMessage.error(error?.friendlyMessage || error?.response?.data?.message || '生成报告失败，请稍后再试')
+    uiMessage.error(error?.friendlyMessage || error?.response?.data?.message || '生成报告失败，请稍后再试')
     logger.error('生成报告异常:', error)
   } finally {
     loading.value = false
@@ -507,10 +499,7 @@ const viewReport = () => {
     uiMessage.warning('没有找到报告内容')
     return
   }
-
-  // 准备报告数据
   prepareReportData()
-
   isReportViewVisible.value = true
 }
 
@@ -533,7 +522,6 @@ const updateReportWithCode = () => {
   parsedQuestions.value.forEach((question) => {
     stepsContent += `### 第${question.number}题\n\n`
     stepsContent += '```c\n' + question.code + '\n```\n\n'
-    // 不再在这里插入测试结果
   })
   reportData.value.steps = stepsContent
 }
@@ -562,16 +550,15 @@ const prepareReportData = () => {
     studentId: reportMeta.studentId || profile.usernum || profile.username || profile.id || '',
     className: profile.class || profile.classname || '',
     courseName: '数据结构',
-    steps: '', // 由updateReportWithCode生成
-    results: '', // 由updateReportWithResults生成
+    steps: '',
+    results: '',
     submitTime: selectedExperiment.value.submitTime,
     deadline: selectedExperiment.value.deadline,
     plagiarismRate: selectedExperiment.value.plagiarismRate,
     labName: reportMeta.labName || reportMeta.labRoomName || selectedExperiment.value.labName || selectedExperiment.value.labRoomName || '',
-	labTime: reportMeta.labTime || selectedExperiment.value.labTime || '',
+    labTime: reportMeta.labTime || selectedExperiment.value.labTime || '',
     teacherName: selectedExperiment.value.teacherName || '',
   }
-  // 提取其他章节
   if (selectedExperiment.value.report) {
     try {
       const report = selectedExperiment.value.report
@@ -580,16 +567,15 @@ const prepareReportData = () => {
       const requirementsMatch = report.match(/##?\s*实验环境[^\n]*\n+([\s\S]+?)(?=##)/i)
       if (requirementsMatch) reportData.value.requirements = requirementsMatch[1].trim()
       const tasksMatch = report.match(/##?\s*实验内容[^\n]*\n+([\s\S]+?)(?=##)/i) ||
-        report.match(/##?\s*实验任务[^\n]*\n+([\s\S]+?)(?=##)/i)
+          report.match(/##?\s*实验任务[^\n]*\n+([\s\S]+?)(?=##)/i)
       if (tasksMatch) reportData.value.tasks = tasksMatch[1].trim()
       const summaryMatch = report.match(/##?\s*实验总结[^\n]*\n+([\s\S]+?)(?=$)/i) ||
-        report.match(/##?\s*心得体会[^\n]*\n+([\s\S]+?)(?=$)/i)
+          report.match(/##?\s*心得体会[^\n]*\n+([\s\S]+?)(?=$)/i)
       if (summaryMatch) reportData.value.summary = summaryMatch[1].trim()
     } catch (e) {
       logger.error('解析报告内容失败:', e)
     }
   }
-  // 生成steps和results
   if (parsedQuestions.value.length > 0) {
     updateReportWithCode()
     updateReportWithResults()
@@ -613,7 +599,6 @@ const handleReportDataUpdate = (newData) => {
 onMounted(async () => {
   loading.value = true
   try {
-    // 加载实验列表
     if (experimentStore.experimentList.length === 0) {
       await experimentStore.fetchExperimentList()
     }
@@ -647,5 +632,3 @@ const generateWordDoc = async () => {
   }
 }
 </script>
-
-
