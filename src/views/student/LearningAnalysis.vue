@@ -57,11 +57,11 @@
           </ui-col>
         </ui-row>
 
-        <!-- 实验得分对比 + 能力维度柱状图-->
+        <!-- 各实验掌握度排行 + 提交效率分析 -->
         <ui-row :gutter="20" class="chart-row [margin:0]">
           <ui-col :span="12">
             <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
-              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>各维度能力对比</span></div></template>
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>各实验掌握度排行</span></div></template>
               <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
@@ -723,19 +723,52 @@ function initDimBar() {
   if (!dimBarChartRef.value) return
   if (dimBarChart) dimBarChart.dispose()
   dimBarChart = echarts.init(dimBarChartRef.value)
-  const r = profileData.value.radar
-  if (!r?.dimensions?.length || !r?.scores?.length) {
-    setEmptyChart(dimBarChart, '暂无维度能力数据')
+  const series = profileData.value.trend?.series
+  if (!series?.length) {
+    setEmptyChart(dimBarChart, '暂无实验掌握度数据')
     return
   }
+  const items = series
+    .map(item => {
+      const value = Number(item.mastery)
+      return {
+        name: item.name || '未命名实验',
+        mastery: Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0
+      }
+    })
+    .sort((a, b) => a.mastery - b.mastery)
   dimBarChart.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter(params) {
+        if (!params?.length) return ''
+        const index = params[0].dataIndex
+        const item = items[index]
+        if (!item) return ''
+        return `${item.name}<br/>掌握度：${item.mastery}分`
+      }
+    },
     grid: { left: 16, right: 24, bottom: 16, top: 16, containLabel: true },
-    xAxis: { type: 'value', max: 100 },
-    yAxis: { type: 'category', data: [...r.dimensions].reverse() },
-    series: [{ type: 'bar', data: [...r.scores].reverse().map((v) => ({
-      value: v, itemStyle: { color: v >= 70 ? '#67C23A' : v >= 40 ? '#E6A23C' : '#F56C6C', borderRadius: [0, 4, 4, 0] }
-    })), barWidth: 20, label: { show: true, position: 'right', formatter: '{c}分' } }]
+    xAxis: { type: 'value', min: 0, max: 100, name: '掌握度' },
+    yAxis: {
+      type: 'category',
+      data: items.map(item => item.name),
+      axisLabel: { width: 120, overflow: 'truncate' }
+    },
+    series: [{
+      name: '掌握度',
+      type: 'bar',
+      data: items.map(item => ({
+        value: item.mastery,
+        itemStyle: {
+          color: item.mastery >= 70 ? '#67C23A' : item.mastery >= 40 ? '#E6A23C' : '#F56C6C',
+          borderRadius: [0, 4, 4, 0]
+        }
+      })),
+      barWidth: 18,
+      label: { show: true, position: 'right', formatter: '{c}分' }
+    }]
   })
 }
 
