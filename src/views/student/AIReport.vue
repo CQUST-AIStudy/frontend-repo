@@ -219,7 +219,7 @@
                   </div>
 
                   <div v-if="parsedQuestions.length > 0" class="[display:grid] [grid-template-columns:140px_minmax(0,1fr)] [border:1px_solid_var(--app-border-soft)] [border-radius:var(--app-radius-md)] [overflow:hidden] max-[640px]:[display:flex] max-[640px]:[flex-direction:column]">
-                    <div class="[display:flex] [flex-direction:column] [gap:2px] [padding:6px] [background:var(--app-surface-muted)] [border-right:1px_solid_var(--app-border-soft)] max-[640px]:[flex-direction:row] max-[640px]:[overflow-x:auto] max-[640px]:[border-right:none] max-[640px]:[border-bottom:1px_solid_var(--app-border-soft)]" role="tablist" aria-label="实验题目">
+                    <div class="[display:flex] [flex-direction:column] [gap:2px] [max-height:clamp(260px,_46vh,_500px)] [overflow-y:auto] [padding:6px] [background:var(--app-surface-muted)] [border-right:1px_solid_var(--app-border-soft)] max-[640px]:[flex-direction:row] max-[640px]:[max-height:none] max-[640px]:[overflow-x:auto] max-[640px]:[overflow-y:visible] max-[640px]:[border-right:none] max-[640px]:[border-bottom:1px_solid_var(--app-border-soft)]" role="tablist" aria-label="实验题目">
                       <UiButton
                         :type="activeQuestionTab === 'full' ? 'primary' : 'default'"
                         size="small"
