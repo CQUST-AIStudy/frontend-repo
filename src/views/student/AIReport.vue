@@ -68,7 +68,7 @@
 
         <!-- 右侧报告生成与预览-->
         <ui-col :span="16">
-          <ui-card class="report-card" v-if="selectedExperiment">
+          <ui-card class="report-card ![height:auto] ![overflow:visible]" v-if="selectedExperiment">
             <template #header>
               <div class="report-card-header [display:flex] [justify-content:space-between] [align-items:center]">
                 <div class="title-info [display:flex] [align-items:center]">
