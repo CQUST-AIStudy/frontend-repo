@@ -310,6 +310,7 @@ import {
 import { useUserStore } from '../../store'
 import { useNotificationStore } from '../../store/notification'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
+import { resolveBreadcrumbs } from '../../utils/breadcrumbLabels.mjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -443,26 +444,7 @@ watch(activeGroupKey, syncActiveGroup, { immediate: true })
 
 // ── Breadcrumbs ────────────────────────────────────────────
 const breadcrumbs = computed(() => {
-  const pathMap = {
-    dashboard: '首页',
-    experiments: '实验列表',
-    'experiment-detail': '实验详情',
-    'learning-analysis': '个性画像',
-    'ai-report': 'AI 报告生成',
-    'ai-assistant': 'AI 学习助手',
-    'class-join': '教学班级',
-    practice: '推荐练习',
-    'wrong-notebook': '错题本',
-    'weakness-training': '专项训练',
-    'ability-profile': '能力画像',
-    'knowledge-learning': '我的学习图谱',
-    'knowledge-graph': '我的学习图谱',
-    'leetcode-search': 'LeetCode 拓展',
-    'leetcode-practice': 'LeetCode 练习',
-    profile: '个人设置'
-  }
-  const paths = route.path.split('/').filter(Boolean)
-  return paths[0] === 'student' ? paths.slice(1).map((part) => pathMap[part] || part) : []
+  return resolveBreadcrumbs('student', route.path)
 })
 
 // ── User dropdown ──────────────────────────────────────────

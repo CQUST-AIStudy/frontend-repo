@@ -273,6 +273,7 @@ import {
 } from '@/components/ui/icons'
 import { useUserStore } from '../../store'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
+import { resolveBreadcrumbs } from '../../utils/breadcrumbLabels.mjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -440,20 +441,7 @@ function toggleGroup(group) {
 watch(activeGroupKey, syncActiveGroup, { immediate: true })
 
 const breadcrumbs = computed(() => {
-  const pathMap = {
-    dashboard: '首页总览', experiments: '实验列表', 'experiment-detail': '实验详情',
-    'experiment-create': '创建实验', submissions: '学生提交', 'submission-detail': '提交详情',
-    'class-list': '教学班列表', 'class-analysis': '教学班分析', 'class-profile': '能力画像',
-    profile: '个人设置', 'document-center': '文档中心', 'bilingual-read': '双语阅读',
-    'summary-card': 'AI 精读', 'ai-chat': 'AI 对话', 'ai-organize': '智能整理',
-    'knowledge-graph': '知识图谱',
-    grading: 'AI 批改', 'knowledge-base': '课程知识库', 'rag-analytics': 'RAG 分析',
-    'course-analysis': '课程分析', 'department-teachers': '教师管理',
-    'department-analytics': '院系统计', 'teacher-ai-management': 'AI 管理',
-    'ai-recommendation': '教学建议', 'experiment-analytics': '实验数据分析', 'data-sync': 'PTA 数据同步'
-  }
-  const paths = route.path.split('/').filter(Boolean)
-  return paths[0] === 'teacher' ? paths.slice(1).map((part) => pathMap[part] || part) : []
+  return resolveBreadcrumbs('teacher', route.path)
 })
 
 const dropdownOpen = ref(false)

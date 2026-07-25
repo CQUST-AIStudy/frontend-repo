@@ -97,7 +97,7 @@
               <tr v-for="row in recentSubmissions" :key="row.id || row.submitTime" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
                 <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.studentName }}</td>
                 <td class="py-3 px-3 text-[#6e6e73]">{{ row.experimentId }}</td>
-                <td class="py-3 px-3 text-[#6e6e73]">{{ row.submitTime }}</td>
+                <td class="py-3 px-3 text-[#6e6e73]">{{ formatSubmissionTime(row.submitTime) }}</td>
                 <td class="py-3 px-3"><span class="inline-flex items-center h-7 px-2.5 rounded-full text-[12px] font-bold" :class="statusClass(row.status)">{{ getSubStatusText(row.status) }}</span></td>
               </tr>
               <tr v-if="!recentSubmissions.length">
@@ -131,6 +131,7 @@ import * as echarts from 'echarts'
 import { Document, DocumentChecked, Timer, UserFilled } from '@/components/ui/icons'
 import api from '../../api'
 import { getTeachingClasses } from '../../api/tap'
+import { formatCompletionTooltip, formatSubmissionTime } from './teacherDashboardFormatters.mjs'
 
 const router = useRouter()
 const classChartRef = ref(null)
@@ -388,7 +389,7 @@ function initClassChart() {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      formatter: (params) => `${params[0].name}<br/>完成率：${params[0].value}%`
+      formatter: formatCompletionTooltip
     },
     grid: { left: '3%', right: '4%', bottom: '14%', containLabel: true },
     xAxis: {
@@ -410,6 +411,7 @@ function initClassChart() {
       itemStyle: { borderRadius: [10, 10, 0, 0] },
       data: chartData.map((item) => ({
         value: item.rate,
+        fullName: item.name,
         itemStyle: { color: getCompletionColor(item.rate) }
       })),
       label: {

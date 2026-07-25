@@ -43,11 +43,11 @@
       <!-- 模块2: 当前最紧急的实验 -->
       <div v-if="urgentExperiment" class="dash-card-urgent [padding:20px_24px]">
         <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:16px]">
-          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#fef3c7] [display:flex] [align-items:center] [justify-content:center] [color:#d97706]">
+          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#ffe4e6] [display:flex] [align-items:center] [justify-content:center] [color:#be123c]">
             <LucideIcon name="flame" :size="14" :stroke-width="2.1" />
           </span>
-          <span class="[font-size:13px] [font-weight:700] [color:#92400e]">当前最紧急的实验</span>
-          <span v-if="urgentCountdown" class="[font-size:12px] [color:#b45309] [font-weight:600] [margin-left:auto] [background:#fef3c7] [padding:3px_10px] [border-radius:100px] [display:inline-flex] [align-items:center] [gap:4px]">
+          <span class="[font-size:13px] [font-weight:700] [color:#9f1239]">当前最紧急的实验</span>
+          <span v-if="urgentCountdown" class="[font-size:12px] [color:#be123c] [font-weight:600] [margin-left:auto] [background:#ffe4e6] [padding:3px_10px] [border-radius:100px] [display:inline-flex] [align-items:center] [gap:4px]">
             <LucideIcon name="clock" :size="12" :stroke-width="2.2" />
             {{ urgentCountdown }}
           </span>
@@ -724,10 +724,10 @@ onBeforeUnmount(() => { window.removeEventListener('scroll', handleScroll); wind
   border: 1px solid #eef1f5;
 }
 .dash-card-urgent {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef7ed 50%, #fff8f0 100%);
+  background: linear-gradient(135deg, #fff7f7 0%, #fff1f2 100%);
   border-radius: 16px;
-  border: 1px solid #fde4c2;
-  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.06);
+  border: 1px solid #fecdd3;
+  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.06);
 }
 
 .dash-right {
