@@ -49,16 +49,6 @@ const breadcrumbLabels = {
     'experiment-analytics': '实验数据分析',
     'data-sync': 'PTA 数据同步',
     'leetcode-bank': 'LeetCode 题库'
-  },
-  admin: {
-    dashboard: '首页',
-    'user-management': '用户管理',
-    'class-management': '班级管理',
-    'experiment-management': '实验管理',
-    'experiment-screen': '实验大屏',
-    'system-log': '系统日志',
-    'leetcode-claw': 'LeetCode 采集',
-    profile: '个人设置'
   }
 }
 
