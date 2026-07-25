@@ -43,11 +43,11 @@
       <!-- 模块2: 当前最紧急的实验 -->
       <div v-if="urgentExperiment" class="dash-card-urgent [padding:20px_24px]">
         <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:16px]">
-          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#ffe4e6] [display:flex] [align-items:center] [justify-content:center] [color:#be123c]">
+          <span class="[width:26px] [height:26px] [border-radius:50%] [background:#fbf1eb] [display:flex] [align-items:center] [justify-content:center] [color:#ac6843]">
             <LucideIcon name="flame" :size="14" :stroke-width="2.1" />
           </span>
-          <span class="[font-size:13px] [font-weight:700] [color:#9f1239]">当前最紧急的实验</span>
-          <span v-if="urgentCountdown" class="[font-size:12px] [color:#be123c] [font-weight:600] [margin-left:auto] [background:#ffe4e6] [padding:3px_10px] [border-radius:100px] [display:inline-flex] [align-items:center] [gap:4px]">
+          <span class="[font-size:13px] [font-weight:700] [color:#ac6843]">当前最紧急的实验</span>
+          <span v-if="urgentCountdown" class="[font-size:12px] [color:#ac6843] [font-weight:600] [margin-left:auto] [background:#fbf1eb] [padding:3px_10px] [border-radius:100px] [display:inline-flex] [align-items:center] [gap:4px]">
             <LucideIcon name="clock" :size="12" :stroke-width="2.2" />
             {{ urgentCountdown }}
           </span>
@@ -56,23 +56,23 @@
           <div class="[flex:1]">
             <div class="[font-size:17px] [font-weight:700] [color:#1a1a2e] [margin-bottom:6px]">
               {{ urgentExperiment.name }}
-              <span v-if="urgentFailCount > 0" class="[font-size:11px] [padding:2px_10px] [border-radius:100px] [background:linear-gradient(135deg,_#fef3c7,_#fde4c2)] [color:#b45309] [font-weight:600] [margin-left:8px] [border:1px_solid_#fde4c2]">部分测试未通过</span>
+              <span v-if="urgentFailCount > 0" class="[font-size:11px] [padding:2px_10px] [border-radius:100px] [background:#fbf1eb] [color:#ac6843] [font-weight:600] [margin-left:8px] [border:1px_solid_#ead6c5]">部分测试未通过</span>
             </div>
             <div class="[font-size:12px] [color:#6b7280] [margin-bottom:8px] [line-height:1.7]">
               所属实验：{{ urgentExperiment.name }} · 题目数：{{ urgentExperiment.problemCount || 0 }} · 最近提交：{{ formatTime(urgentExperiment.submitTime) || '暂无' }}
             </div>
             <div class="[display:flex] [align-items:center] [gap:16px] [margin-bottom:14px]">
-              <span class="[font-size:13px] [color:#1a1a2e]">通过率：<strong class="[color:#b45309]">{{ urgentPassRate }}%</strong> ({{ urgentExperiment.acceptedProblemCount || 0 }}/{{ urgentExperiment.problemCount || 0 }})</span>
-              <span v-if="urgentFailCount > 0" class="[font-size:13px] [color:#ef4444] [font-weight:600]">未通过 {{ urgentFailCount }} 个测试点</span>
+              <span class="[font-size:13px] [color:#1a1a2e]">通过率：<strong class="[color:#ac6843]">{{ urgentPassRate }}%</strong> ({{ urgentExperiment.acceptedProblemCount || 0 }}/{{ urgentExperiment.problemCount || 0 }})</span>
+              <span v-if="urgentFailCount > 0" class="[font-size:13px] [color:#ac6843] [font-weight:600]">未通过 {{ urgentFailCount }} 个测试点</span>
             </div>
             <div class="[display:flex] [gap:10px]">
-              <UiButton class="[background:linear-gradient(135deg,_#f59e0b,_#d97706)] text-white [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(245,158,11,0.25)] hover:[background:linear-gradient(135deg,_#d97706,_#b45309)] hover:[box-shadow:0_4px_12px_rgba(245,158,11,0.35)]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">继续修改</UiButton>
-              <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:8px_22px] [font-size:13px] [color:#6b7280] [font-weight:500] [cursor:pointer] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">查看错误详情</UiButton>
+              <UiButton class="[background:linear-gradient(135deg,_#d18a61,_#ac6843)] text-white [border:none] [border-radius:100px] [padding:8px_22px] [font-size:13px] [font-weight:600] [cursor:pointer] [box-shadow:0_2px_6px_rgba(209,138,97,0.22)] hover:[background:linear-gradient(135deg,_#ac6843,_#8f4f31)] hover:[box-shadow:0_4px_12px_rgba(209,138,97,0.3)]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">继续修改</UiButton>
+              <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:8px_22px] [font-size:13px] [color:#6b7280] [font-weight:500] [cursor:pointer] hover:[background:#fffaf7] hover:[border-color:#ead6c5] hover:[color:#ac6843]" @click="nav('/student/experiment-detail/' + urgentExperiment.id)">查看错误详情</UiButton>
             </div>
           </div>
           <div class="[display:flex] [align-items:center] [gap:14px] [flex-shrink:0]">
             <div ref="urgentRingRef" class="[width:90px] [height:90px]"></div>
-            <div class="[width:56px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [background:linear-gradient(135deg,_#fff8eb,_#fef3c7)] [border:1px_solid_#fde4c2] [color:#d97706]">
+            <div class="[width:56px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [background:#fbf1eb] [border:1px_solid_#ead6c5] [color:#d18a61]">
               <LucideIcon name="clipboard-check" :size="26" :stroke-width="2" />
             </div>
           </div>
@@ -118,8 +118,8 @@
             </span>
           </UiButton>
         </div>
-        <div class="[font-size:12px] [color:#6b7280] [margin-bottom:14px] [padding:8px_12px] [background:linear-gradient(135deg,_#f8fafd,_#f0f4ff)] [border-radius:8px] [border:1px_solid_#e8edf5] [display:flex] [align-items:center] [gap:8px]">
-          <span class="[display:inline-flex] [color:#eab308]">
+        <div class="[font-size:12px] [color:#6b7280] [margin-bottom:14px] [padding:8px_12px] [background:#fbf1eb] [border-radius:8px] [border:1px_solid_#ead6c5] [display:flex] [align-items:center] [gap:8px]">
+          <span class="[display:inline-flex] [color:#d18a61]">
             <LucideIcon name="lightbulb" :size="14" :stroke-width="2.2" />
           </span>
           <span>推荐原因：{{ recReason || '根据你的学习数据，为你推荐以下针对性练习' }}</span>
@@ -621,10 +621,10 @@ function initUrgentRing() {
   urgentRingChart.setOption({
     series: [{
       type: 'pie', radius: ['68%', '82%'], center: ['50%', '50%'], silent: true, labelLine: { show: false },
-      label: { show: true, position: 'center', formatter: `${rate}%`, fontSize: 18, fontWeight: 'bold', color: '#f59e0b' },
+      label: { show: true, position: 'center', formatter: `${rate}%`, fontSize: 18, fontWeight: 'bold', color: '#d18a61' },
       data: [
-        { value: rate, name: '通过', itemStyle: { color: '#f59e0b', borderRadius: 6 } },
-        { value: 100 - rate, name: '未通过', itemStyle: { color: '#fef3c7' } }
+        { value: rate, name: '通过', itemStyle: { color: '#d18a61', borderRadius: 6 } },
+        { value: 100 - rate, name: '未通过', itemStyle: { color: '#fbf1eb' } }
       ]
     }]
   })
@@ -724,10 +724,10 @@ onBeforeUnmount(() => { window.removeEventListener('scroll', handleScroll); wind
   border: 1px solid #eef1f5;
 }
 .dash-card-urgent {
-  background: linear-gradient(135deg, #fff7f7 0%, #fff1f2 100%);
+  background: linear-gradient(135deg, #fffaf7 0%, #fbf1eb 100%);
   border-radius: 16px;
-  border: 1px solid #fecdd3;
-  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.06);
+  border: 1px solid #ead6c5;
+  box-shadow: 0 1px 4px rgba(209, 138, 97, 0.08);
 }
 
 .dash-right {
