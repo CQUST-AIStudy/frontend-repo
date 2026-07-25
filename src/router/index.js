@@ -12,6 +12,12 @@ const routes = [
     component: () => import('../views/Login.vue')
   },
   {
+    path: '/ds-preview',
+    name: 'DataStructurePreview',
+    component: () => import('../views/dev/DataStructurePreview.vue'),
+    meta: { public: true }
+  },
+  {
     path: '/student',
     name: 'StudentLayout',
     component: () => import('../views/student/Layout.vue'),
@@ -404,6 +410,11 @@ function hasAllPermissions(requiredPermissions, userPermissions) {
 
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
+  // 免登录页（如开发自测预览）直接放行
+  if (to.meta.public) {
+    next()
+    return
+  }
   const isLoginPage = to.path === '/login'
   const token = getSessionToken()
   const userInfo = getUserInfo()

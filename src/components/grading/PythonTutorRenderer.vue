@@ -79,7 +79,8 @@ function render() {
     .style('display', 'block')
 
   const raw = props.state?.dataStructure || 'code'
-  const structure = STRUCTURE_ALIASES[String(raw).toLowerCase()] || 'code'
+  // 先查别名表；规范名（array/linked-list 等）不在别名表里，回落到原值本身，交给 switch 匹配。
+  const structure = STRUCTURE_ALIASES[String(raw).toLowerCase()] || String(raw).toLowerCase()
   const nodes = normalizeNodes(props.state?.nodes)
   const edges = normalizeEdges(props.state?.edges)
   const pointers = normalizePointers(props.state?.pointers)
@@ -492,8 +493,10 @@ function renderBinaryTree(svg, nodes, edges, width, height) {
   const left = new Map(), right = new Map()
   const childSet = new Set()
   edges.forEach(e => {
-    const isLeft = /left|l|左/i.test(e.kind) || /^l$|left|左/i.test(e.label)
-    const isRight = /right|r|右/i.test(e.kind) || /^r$|right|右/i.test(e.label)
+    const k = (e.kind || '').toLowerCase()
+    const lb = (e.label || '').toLowerCase()
+    const isLeft = k.includes('left') || lb === 'l' || lb === '左' || lb.includes('left')
+    const isRight = k.includes('right') || lb === 'r' || lb === '右' || lb.includes('right')
     if (isLeft) left.set(e.source, e.target)
     else if (isRight) right.set(e.source, e.target)
     else { (left.has(e.source) ? right : left).set(e.source, e.target) }
