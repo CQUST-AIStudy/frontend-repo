@@ -796,9 +796,9 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid #d7e6ff;
+  border: 1px solid #ead6c5;
   border-radius: 8px;
-  background: #f5f9ff;
+  background: #fbf1eb;
   color: var(--app-primary);
   font-size: 13px;
   font-weight: 700;
@@ -828,12 +828,12 @@ onMounted(() => {
 }
 
 .history-item:hover {
-  background: #f7f9fc;
+  background: #fffaf7;
 }
 
 .history-item--active {
-  border-color: #cfe3ff;
-  background: #eaf4ff;
+  border-color: #ead6c5;
+  background: #fbf1eb;
 }
 
 .history-title,
