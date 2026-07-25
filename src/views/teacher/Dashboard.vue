@@ -1,8 +1,33 @@
 <template>
   <div class="flex flex-col gap-[18px] max-[640px]:gap-3.5">
-    <UiPageHeader title="教师工作台" :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`">
-      <UiButton @click="goToClasses" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f] bg-white/80 border border-black/[0.1] backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-px active:scale-[0.96] cursor-pointer">教学班管理</UiButton>
-      <UiButton @click="goToExperiments" class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25),0_1px_3px_rgba(194,112,62,0.15)] transition-all duration-200 hover:from-[#c2703e] hover:to-[#a85c30] hover:shadow-[0_4px_16px_rgba(194,112,62,0.35)] hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none">进入实验中心</UiButton>
+    <UiPageHeader
+        title="教师工作台"
+        :description="`欢迎回来，${displayName}。这里汇总了实验教学、学生提交与班级执行情况。`"
+    >
+      <div class="flex items-center gap-3 max-[640px]:gap-2">
+        <UiButton
+            @click="goToClasses"
+            class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-[#1d1d1f]
+             bg-white/80 border border-black/[0.1] backdrop-blur-sm
+             shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200
+             hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]
+             hover:-translate-y-px active:scale-[0.96] cursor-pointer"
+        >
+          教学班管理
+        </UiButton>
+
+        <UiButton
+            @click="goToExperiments"
+            class="h-[38px] px-5 rounded-[10px] text-[14px] font-medium text-white
+             bg-gradient-to-b from-[#d49068] to-[var(--app-primary)]
+             shadow-[0_2px_8px_rgba(194,112,62,0.25),0_1px_3px_rgba(194,112,62,0.15)]
+             transition-all duration-200 hover:from-[#c2703e] hover:to-[#a85c30]
+             hover:shadow-[0_4px_16px_rgba(194,112,62,0.35)]
+             hover:-translate-y-px active:scale-[0.96] cursor-pointer border-none"
+        >
+          进入实验中心
+        </UiButton>
+      </div>
     </UiPageHeader>
 
     <!-- Hero Strip -->

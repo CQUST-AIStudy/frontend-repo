@@ -1,5 +1,5 @@
 <template>
-  <div class="page training-page [display:flex] [flex-direction:column] [gap:20px]">
+  <div class="page training-page [display:flex] [flex-direction:column] [gap:40px]">
     <UiPageHeader title="专项训练" description="沿着今日训练路线，集中攻克一个薄弱点。">
       <ui-button plain @click="goPractice">拓展题库</ui-button>
       <ui-button type="primary" :loading="loading" @click="loadPageData">刷新数据</ui-button>
