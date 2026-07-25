@@ -351,7 +351,7 @@ function feedbackIconStyle(fb) {
 const quickEntries = [
   { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#fbf1eb,#f1d5c2)', color: '#ac6843' },
   { iconName: 'circle-x', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
-  { iconName: 'check', label: '推荐练习', path: '/student/practice', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
+  { iconName: 'check', label: '推荐练习', path: '/student/leetcode-search', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
   { iconName: 'target', label: '专项训练', path: '/student/weakness-training', bg: 'linear-gradient(135deg,#faf5ff,#ede9fe)', color: '#7c3aed' },
   { iconName: 'brain', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
   { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#fbf1eb,#edd0bc)', color: '#d18a61' }
@@ -495,7 +495,7 @@ function countdownText(t) {
 
 function goToPractice(rec) {
   if (rec.source !== 'LeetCode') {
-    nav('/student/practice')
+    nav('/student/leetcode-search')
     return
   }
 
@@ -529,7 +529,7 @@ async function loadRecommendations() {
     if (ptaRes.status === 'fulfilled' && ptaRes.value) {
       const list = Array.isArray(ptaRes.value) ? ptaRes.value : (ptaRes.value?.data || ptaRes.value?.items || [])
       list.slice(0, 2).forEach(item => {
-        items.push({ title: item.name || 'PTA 练习', source: 'PTA', tag: item.offeringId ? `7-${item.id || '?'}` : '推荐', _diffLabel: '简单', _diffClass: '[color:#059669] [background:#ecfdf5]', path: '/student/practice' })
+        items.push({ title: item.name || 'PTA 练习', source: 'PTA', tag: item.offeringId ? `7-${item.id || '?'}` : '推荐', _diffLabel: '简单', _diffClass: '[color:#059669] [background:#ecfdf5]', path: '/student/leetcode-search' })
       })
     }
     if (lcRes.status === 'fulfilled' && lcRes.value) {

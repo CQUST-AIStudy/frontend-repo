@@ -616,7 +616,7 @@ function tagTypeForSource(sourceKind) {
 }
 
 function goPractice() {
-  router.push('/student/practice')
+  router.push('/student/leetcode-search')
 }
 
 async function fetchProfile() {

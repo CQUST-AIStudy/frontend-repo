@@ -302,7 +302,7 @@ function updateNodeSubmissionStats(nodeId, submissions) {
 function openPractice(item) {
   const knowledge = item?.knowledgeLabel || item?.exerciseNode?.label || ''
   router.push({
-    path: '/student/practice',
+    path: '/student/leetcode-search',
     query: knowledge ? { knowledge } : {}
   })
 }

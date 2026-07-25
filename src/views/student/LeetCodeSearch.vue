@@ -4,7 +4,6 @@
       title="LeetCode 拓展练习"
       description="基于个性化推荐结果筛选 LeetCode 题目，支持关键词与难度过滤。"
     >
-      <ui-button plain @click="router.push('/student/practice')">返回推荐练习</ui-button>
     </UiPageHeader>
 
     <ui-card shadow="never" class="[border-radius:16px] [border:1px_solid_#e8eef6]">

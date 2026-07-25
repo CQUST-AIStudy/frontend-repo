@@ -1323,7 +1323,7 @@ async function submitCode() {
 
 function continuePractice() {
   showSubmitResult.value = false
-  router.push('/student/practice')
+  router.push('/student/leetcode-search')
 }
 
 async function loadProblem() {
@@ -1353,7 +1353,7 @@ async function loadProblem() {
   const problemId = route.params.id
   if (!problemId) {
     uiMessage.error('题目ID不存在')
-    router.push('/student/practice')
+    router.push('/student/leetcode-search')
     return
   }
 
@@ -1380,7 +1380,7 @@ async function loadProblem() {
   } catch (error) {
     logger.error('加载题目失败:', error)
     uiMessage.error('加载题目失败')
-    router.push('/student/practice')
+    router.push('/student/leetcode-search')
   }
 }
 
