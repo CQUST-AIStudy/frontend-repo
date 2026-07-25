@@ -112,60 +112,112 @@
           show-icon
         />
 
-        <ui-card class="ai-analysis-card">
+        <ui-card class="ai-profile-card">
           <template #header>
-            <div class="card-header ai-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px]">
-              <div class="ai-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
-                <ui-icon class="ai-icon-title [font-size:20px] [color:#1a73e8]"><Connection /></ui-icon>
-                <span>AI智能个性画像</span>
+            <div class="[display:flex] [align-items:center] [justify-content:space-between] [gap:12px]">
+              <div class="[display:flex] [align-items:center] [gap:12px]">
+                <div class="[width:40px] [height:40px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" style="background: var(--app-primary-soft)">
+                  <LucideIcon name="sparkles" :size="20" style="color: var(--app-primary)" />
+                </div>
+                <div>
+                  <div class="[font-size:17px] [font-weight:600] [color:var(--app-text)]">AI 智能个性画像</div>
+                  <div class="[font-size:11px] [color:var(--app-text-soft)] [margin-top:2px]">把分散的学习数据，整理成一眼能看懂的判断</div>
+                </div>
               </div>
               <ui-tag type="success" effect="dark">基于真实数据</ui-tag>
             </div>
           </template>
-          <div class="ai-analysis-content">
-            <!-- 学习特征标签 -->
-            <div class="section-block [margin-bottom:16px]">
-              <h4><LucideIcon name="tags" :size="18" class="mr-2" />学习特征</h4>
-              <div class="patterns-row [display:flex] [gap:12px] [flex-wrap:wrap]">
-                <div v-for="p in profileData.patterns" :key="p.tag" class="pattern-tag-card [display:flex] [gap:10px] [padding:12px_16px] [border-radius:12px] [border:1px_solid_#e8eaed] [flex:1] [min-width:200px] [&.pat-good]:[background:#e6f4ea] [&.pat-good]:[border-color:#ceead6] [&.pat-warn]:[background:#fef7e0] [&.pat-warn]:[border-color:#feefc3] [&.pat-bad]:[background:#fce8e6] [&.pat-bad]:[border-color:#f5c6c2]" :class="patternClass(p.tag)">
-                  <span class="pattern-emoji"><LucideIcon :name="patternEmoji(p.tag)" :size="24" /></span>
-                  <div>
-                    <div class="pattern-name [font-weight:500] [font-size:14px] [color:#202124]">{{ p.tag }}</div>
-                    <div class="pattern-desc [font-size:13px] [color:#5f6368] [margin-top:3px] [font-size:12px] [margin-top:2px]">{{ p.description }}</div>
-                  </div>
-                </div>
+
+          <div class="[display:flex] [flex-direction:column] [gap:16px]">
+            <!-- 一句话画像 -->
+            <div class="[display:flex] [align-items:center] [gap:16px] [padding:16px_20px] [border-radius:14px]" style="background: var(--app-primary-soft); border-left: 4px solid var(--app-primary)">
+              <div class="[flex:1] [min-width:0]">
+                <div class="[font-size:11px] [font-weight:600] [margin-bottom:6px]" style="color: var(--app-primary-strong)">一句话画像</div>
+                <div class="[font-size:18px] [font-weight:700] [color:var(--app-text)] [line-height:1.4]">{{ portraitHeadline }}</div>
+                <div v-if="portraitSubline" class="[font-size:12px] [color:var(--app-text-secondary)] [margin-top:4px]">{{ portraitSubline }}</div>
               </div>
             </div>
 
-            <!-- 能力趋势 -->
-            <div class="section-block [margin-bottom:16px]">
-              <h4><LucideIcon name="bar-chart" :size="18" class="mr-2" /> 各维度能力水平</h4>
-              <div class="ability-list [display:flex] [flex-direction:column] [gap:16px]">
-                <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="ability-item [padding:12px_16px] [border:1px_solid_#e8eaed] [border-radius:12px]">
-                  <div class="ability-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
-                    <span class="ability-name [font-weight:500] [font-size:14px] [color:#202124]"><LucideIcon :name="dimEmoji(dim.dimension)" :size="18" class="mr-2" /> {{ dim.dimension }}</span>
-                    <div class="ability-score [display:flex] [align-items:center] [gap:8px] [font-weight:500]">
-                      <span>{{ dim.avgMastery }}分</span>
-                      <ui-tag size="small" :type="dim.level === 'good' ? 'success' : dim.level === 'medium' ? 'warning' : 'danger'">
-                        {{ dim.level === 'good' ? '掌握良好' : dim.level === 'medium' ? '需要巩固' : '薄弱' }}
-                      </ui-tag>
+            <!-- 三列：学习特征 / 能力水平 / 提升方向 -->
+            <div class="ai-profile-grid [display:grid] [grid-template-columns:1fr_1.3fr_1.1fr] [gap:16px]">
+
+              <!-- 左：学习特征 -->
+              <div class="[padding:16px] [border-radius:14px] [border:1px_solid_var(--app-border)]" style="background: var(--app-surface-muted)" v-if="profileData.patterns?.length">
+                <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:14px]">
+                  <LucideIcon name="tags" :size="16" style="color: var(--app-primary)" />
+                  <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">学习特征</span>
+                </div>
+                <div class="[display:flex] [flex-direction:column] [gap:10px]">
+                  <div v-for="p in profileData.patterns" :key="p.tag"
+                    class="[display:flex] [align-items:flex-start] [gap:10px] [padding:10px_12px] [border-radius:10px] [border:1px_solid_var(--app-border)]"
+                    :style="traitBgStyle(p.tag)">
+                    <div class="[width:28px] [height:28px] [border-radius:50%] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]"
+                         :style="{ background: traitColor(p.tag) }">
+                      <LucideIcon :name="patternEmoji(p.tag)" :size="14" style="color: #fff" />
+                    </div>
+                    <div class="[flex:1] [min-width:0]">
+                      <div class="[font-size:13px] [font-weight:600] [color:var(--app-text)]">{{ p.tag }}</div>
+                      <div class="[font-size:11px] [color:var(--app-text-secondary)] [margin-top:2px]">{{ p.description }}</div>
                     </div>
                   </div>
-                  <ui-progress :percentage="Math.min(100, Math.round(dim.avgMastery))" :color="masteryColor(dim.avgMastery)" :stroke-width="12" />
-                  <div class="ability-desc [font-size:12px] [color:#5f6368] [margin-top:6px]">{{ dim.description }}</div>
                 </div>
               </div>
-            </div>
 
-            <!-- 薄弱点-->
-            <div class="section-block" v-if="profileData.weaknesses?.length">
-              <h4><LucideIcon name="alert-triangle" :size="18" class="mr-2" /> 重点提升方向</h4>
-              <div class="improvement-items [display:flex] [flex-direction:column] [gap:10px]">
-                <div v-for="(w, i) in profileData.weaknesses" :key="i" class="improvement-item [display:flex] [align-items:center] [gap:8px] [font-size:14px] [color:#5f6368]">
-                  <ui-icon class="improvement-icon [color:#e37400] [font-size:18px] [&.high-priority]:[color:#d93025]" :class="i === 0 ? 'high-priority' : ''"><Warning /></ui-icon>
-                  <span>{{ w.experimentName }}（{{ w.dimension }}）掌握度仅{{ Math.round(w.mastery) }}分，建议重点练习</span>
+              <!-- 中：各维度能力水平 -->
+              <div class="[padding:16px] [border-radius:14px] [border:1px_solid_var(--app-border)]" v-if="profileData.skillTree?.length">
+                <div class="[display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:14px]">
+                  <div class="[display:flex] [align-items:center] [gap:8px]">
+                    <LucideIcon name="bar-chart" :size="16" style="color: var(--app-success)" />
+                    <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">各维度能力水平</span>
+                  </div>
+                  <span class="[font-size:11px] [color:var(--app-text-soft)]">平均 {{ avgMastery }} 分</span>
+                </div>
+                <div class="[display:flex] [flex-direction:column] [gap:12px]">
+                  <div v-for="dim in profileData.skillTree" :key="dim.dimension" class="[display:flex] [align-items:center] [gap:10px]">
+                    <span class="[font-size:12px] [font-weight:500] [color:var(--app-text)] [width:68px] [flex-shrink:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]" :title="dim.dimension">{{ dim.dimension }}</span>
+                    <div class="[flex:1] [min-width:0] [height:8px] [border-radius:4px] [overflow:hidden]" style="background: #ece4d8">
+                      <div class="[height:100%] [border-radius:4px] [transition:width_.6s_ease]"
+                           :style="{ width: Math.min(100, Math.round(dim.avgMastery)) + '%', background: masteryColor(dim.avgMastery) }"></div>
+                    </div>
+                    <span class="[font-size:13px] [font-weight:700] [width:30px] [text-align:right] [flex-shrink:0]" :style="{ color: masteryColor(dim.avgMastery) }">{{ Math.round(dim.avgMastery) }}</span>
+                    <span class="[font-size:10px] [font-weight:600] [width:56px] [text-align:right] [flex-shrink:0]" :style="{ color: masteryColor(dim.avgMastery) }">{{ abilityStateLabel(dim.level) }}</span>
+                  </div>
                 </div>
               </div>
+
+              <!-- 右：重点提升方向 -->
+              <div class="[padding:16px] [border-radius:14px] [border:1px_solid_var(--app-border)]" v-if="sortedWeaknesses.length">
+                <div class="[display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:14px]">
+                  <div class="[display:flex] [align-items:center] [gap:8px]">
+                    <LucideIcon name="flag" :size="16" style="color: var(--app-danger)" />
+                    <span class="[font-size:14px] [font-weight:600] [color:var(--app-text)]">重点提升方向</span>
+                  </div>
+                </div>
+                <div class="[display:flex] [flex-direction:column] [gap:10px]">
+                  <div v-for="(w, i) in sortedWeaknesses.slice(0, 3)" :key="i"
+                    class="[padding:12px] [border-radius:10px] [border:1px_solid_var(--app-border)]"
+                    :style="weaknessBgStyle(i)">
+                    <div class="[display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:6px]">
+                      <div class="[display:flex] [align-items:center] [gap:8px] [min-width:0]">
+                        <span class="[width:22px] [height:22px] [border-radius:50%] [display:inline-flex] [align-items:center] [justify-content:center] [font-size:11px] [font-weight:700] [color:#fff] [flex-shrink:0]"
+                              :style="{ background: i === 0 ? 'var(--app-danger)' : i === 1 ? 'var(--app-warning)' : 'var(--app-text-soft)' }">{{ i + 1 }}</span>
+                        <span class="[font-size:13px] [font-weight:600] [color:var(--app-text)] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]">{{ w.experimentName || w.dimension }}</span>
+                      </div>
+                      <span class="[font-size:12px] [font-weight:700] [flex-shrink:0] [margin-left:8px]" :style="{ color: masteryColor(w.mastery) }">{{ Math.round(w.mastery) }}分</span>
+                    </div>
+                    <div class="[font-size:11px] [color:var(--app-text-secondary)]">
+                      {{ w.dimension }}<template v-if="w.evidence"> · 提交{{ w.evidence.totalSubmissions }}次 · AC{{ w.evidence.acCount }}次</template>
+                    </div>
+                    <router-link v-if="i === 0" to="/student/wrong-notebook"
+                      class="[display:inline-flex] [align-items:center] [gap:4px] [margin-top:8px] [font-size:11px] [font-weight:600] [text-decoration:none] hover:[opacity:0.8]"
+                      style="color: var(--app-primary)">
+                      去错题本回炉
+                      <LucideIcon name="chevron-right" :size="14" />
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </ui-card>
@@ -287,7 +339,7 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, Warning, MagicStick } from '@/components/ui/icons'
+import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, MagicStick } from '@/components/ui/icons'
 import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import LoadingState from '../../components/LoadingState.vue'
@@ -370,6 +422,73 @@ function overviewValueClass(item) {
   return '[color:#909399]'
 }
 
+const portraitHeadline = computed(() => {
+  const patterns = profileData.value.patterns || []
+  const weaknesses = profileData.value.weaknesses || []
+  const steady = patterns.find(p => p.tag === '稳定进步' || p.tag === '表现均衡')
+  const lead = steady ? steady.tag : (patterns[0]?.tag || '持续学习')
+  if (weaknesses.length) {
+    const top = [...weaknesses].sort((a, b) => a.mastery - b.mastery)[0]
+    return `${lead}，但在${top.dimension || top.experimentName}上仍需加强`
+  }
+  return `${lead}，整体表现均衡`
+})
+
+const portraitSubline = computed(() => {
+  const skillTree = profileData.value.skillTree || []
+  const weaknesses = profileData.value.weaknesses || []
+  const strongest = [...skillTree].sort((a, b) => b.avgMastery - a.avgMastery)[0]
+  const topWeak = weaknesses.length ? [...weaknesses].sort((a, b) => a.mastery - b.mastery)[0] : null
+  const parts = []
+  if (strongest) parts.push(`优势是${strongest.dimension}`)
+  if (topWeak) parts.push(`当前突破口是${topWeak.dimension || topWeak.experimentName}`)
+  return parts.length ? parts.join('，') + '。' : ''
+})
+
+const sortedWeaknesses = computed(() => {
+  const ws = profileData.value.weaknesses || []
+  return [...ws].sort((a, b) => a.mastery - b.mastery)
+})
+
+const avgMastery = computed(() => {
+  const tree = profileData.value.skillTree || []
+  if (!tree.length) return 0
+  const sum = tree.reduce((s, d) => s + (d.avgMastery || 0), 0)
+  return Math.round(sum / tree.length)
+})
+
+function abilityStateLabel(level) {
+  if (level === 'good') return '掌握良好'
+  if (level === 'medium') return '需要巩固'
+  return '薄弱'
+}
+
+function traitTone(tag) {
+  if (tag === '稳定进步' || tag === '表现均衡') return 'success'
+  if (tag === '高波动型') return 'warning'
+  return 'danger'
+}
+
+function traitColor(tag) {
+  const tone = traitTone(tag)
+  if (tone === 'success') return 'var(--app-success)'
+  if (tone === 'warning') return 'var(--app-warning)'
+  return 'var(--app-danger)'
+}
+
+function traitBgStyle(tag) {
+  const tone = traitTone(tag)
+  if (tone === 'success') return { background: 'rgba(107,143,107,0.08)' }
+  if (tone === 'warning') return { background: 'rgba(196,154,60,0.08)' }
+  return { background: 'rgba(196,75,63,0.06)' }
+}
+
+function weaknessBgStyle(index) {
+  if (index === 0) return { background: 'rgba(196,75,63,0.06)', borderColor: 'rgba(196,75,63,0.2)' }
+  if (index === 1) return { background: 'rgba(196,154,60,0.06)', borderColor: 'rgba(196,154,60,0.2)' }
+  return {}
+}
+
 const learningMethods = [
   { icon: Reading, title: '系统学习', description: '通过教材和参考书籍系统地学习理论知识，掌握数据结构的基本概念和算法原理。' },
   { icon: Notebook, title: '动手实践', description: '多做实验和编程练习，将理论知识应用到实际问题中，加深对算法的理解。' },
@@ -379,18 +498,9 @@ const learningMethods = [
 ]
 
 function masteryColor(v) { return v >= 70 ? '#67C23A' : v >= 40 ? '#E6A23C' : '#F56C6C' }
-function patternClass(tag) {
-  if (tag === '稳定进步' || tag === '表现均衡') return 'pat-good'
-  if (tag === '高波动型') return 'pat-warn'
-  return 'pat-bad'
-}
 function patternEmoji(tag) {
   const map = { '稳定进步': 'trend', '表现均衡': 'scale', '高波动型': 'trend-down', '高重做型': 'refresh', '编码基础薄弱': 'wrench' }
   return map[tag] || 'clipboard-text'
-}
-function dimEmoji(dim) {
-  const map = { '线性表': 'ruler', '栈与队列': 'library', '树': 'tree', '图': 'network', '哈希': 'hash', '综合': 'target' }
-  return map[dim] || 'package'
 }
 
 function resolveCurrentStudentId() {
@@ -756,6 +866,12 @@ onBeforeUnmount(() => {
 
   .chart-row :deep(.ui-col) {
     grid-column: span 1 / span 1 !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .ai-profile-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 </style>

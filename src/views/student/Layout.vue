@@ -350,8 +350,7 @@ const menuItems = [
     group: 'personalized', icon: Collection, label: '个性化学习',
     children: [
       { path: '/student/leetcode-search', label: 'LeetCode 拓展' },
-      { path: '/student/wrong-notebook', label: '错题本' },
-      { path: '/student/weakness-training', label: '专项训练' }
+      { path: '/student/wrong-notebook', label: '错题本' }
     ]
   },
   {

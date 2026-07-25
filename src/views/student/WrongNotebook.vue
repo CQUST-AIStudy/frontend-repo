@@ -1,334 +1,186 @@
 <template>
-  <div class="page [display:flex] [flex-direction:column] [gap:20px]">
-    <UiPageHeader title="错题本">
-      <div class="[color:var(--app-text-secondary)] [font-size:13px] [margin-top:2px]">
-        自动收集每次错误；连续两次 AC 标记为已掌握
-      </div>
-
-      <div class="[display:flex] [gap:10px] [margin-top:10px] [flex-wrap:wrap]">
-        <ui-button :loading="loading" class="warm-normal-button" @click="loadAll">
-          刷新
-        </ui-button>
-      </div>
+  <div class="wrong-notebook-page">
+    <UiPageHeader title="错题本" description="按知识点归档 PTA 与 LeetCode 错题，并在同一处完成针对性回炉。">
+      <ui-button :loading="loading" class="warm-normal-button" @click="loadAll">刷新数据</ui-button>
     </UiPageHeader>
 
     <loading-state :loading="loading">
-      <div class="content [display:flex] [flex-direction:column] [gap:20px]">
-        <div
-            class="summary-grid [display:grid] [grid-template-columns:repeat(4,_minmax(0,_1fr))] [gap:16px] max-[1200px]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] max-[760px]:[grid-template-columns:1fr]"
-        >
-          <ui-card
-              v-for="item in summaryCards"
-              :key="item.label"
-              class="summary-card [&_.ui-card__body]:[padding:18px]"
-              shadow="hover"
-          >
-            <div class="[display:flex] [flex-direction:column] [gap:6px]">
-              <div
-                  class="summary-value [font-size:26px] [font-weight:700]"
-                  :style="{ color: item.color }"
-              >
-                {{ item.value }}
-              </div>
-              <div class="summary-label [color:var(--app-text)] [font-size:13px]">
-                {{ item.label }}
-              </div>
-              <div class="summary-tip [color:var(--app-text-secondary)] [font-size:12px]">
-                {{ item.tip }}
-              </div>
-            </div>
+      <div class="notebook-content">
+        <div class="summary-grid">
+          <ui-card v-for="item in summaryCards" :key="item.label" class="summary-card" shadow="hover">
+            <div class="summary-value" :style="{ color: item.color }">{{ item.value }}</div>
+            <div class="summary-label">{{ item.label }}</div>
+            <div class="summary-tip">{{ item.tip }}</div>
           </ui-card>
         </div>
 
-        <section v-if="ptaErrorState !== 'idle'" class="pta-error-section">
-          <div class="pta-error-heading">
+        <ui-card class="filter-card" shadow="never">
+          <div class="filter-head">
             <div>
-              <h3>高频 PTA 错题</h3>
-              <p v-if="ptaErrorState === 'loaded' && ptaErrors.length">在 PTA 平台上累计错误 5 次以上的题目，建议优先回炉训练。</p>
-              <p v-else-if="ptaErrorState === 'loading'">正在加载 PTA 高频错题数据…</p>
-              <p v-else-if="ptaErrorState === 'error'">PTA 高频错题加载失败</p>
-              <p v-else>暂未发现累计错误 5 次以上的 PTA 题目。</p>
+              <div class="filter-title">只看当前需要的错题</div>
+              <div class="filter-desc">筛选结果会实时重组知识点，没有错题的知识点不会显示。</div>
             </div>
-            <ui-tag v-if="ptaErrors.length" type="danger" effect="dark">{{ ptaErrors.length }} 题</ui-tag>
-            <ui-button v-if="ptaErrorState === 'error'" size="small" plain @click="loadPtaErrors">重试</ui-button>
+            <ui-button plain size="small" class="filter-reset-button" @click="resetFilters">重置筛选</ui-button>
           </div>
 
-          <div v-if="ptaErrorState === 'loading'" class="[text-align:center] [padding:20px] [color:var(--app-text-secondary)]">
-            正在查询 PTA 提交数据…
-          </div>
+          <div class="filter-content">
+            <ui-radio-group v-model="activeTab" class="status-tabs" @change="onTabChange">
+              <ui-radio-button label="all">全部 {{ stats.total || 0 }}</ui-radio-button>
+              <ui-radio-button label="unresolved">待攻克 {{ stats.unresolved || 0 }}</ui-radio-button>
+              <ui-radio-button label="resolved">已掌握 {{ stats.resolved || 0 }}</ui-radio-button>
+            </ui-radio-group>
 
-          <div v-else-if="ptaErrors.length" class="pta-error-list">
-            <div
-              v-for="item in ptaErrors"
-              :key="item.problem_id"
-              class="pta-error-card"
-            >
-              <div class="pta-error-card__copy">
-                <span class="pta-error-card__title">{{ item.problem_title || `PTA 题目 #${item.source_problem_id || item.problem_id}` }}</span>
-                <span class="pta-error-card__meta">
-                  错误 <strong class="danger-text">{{ item.error_count }}</strong> 次
-                  <template v-if="item.offering_title"> · {{ item.offering_title }}</template>
-                </span>
-              </div>
-              <ui-button type="primary" size="small" @click="ptaPractice(item)">去 PTA 练习</ui-button>
+            <div class="filter-controls">
+              <ui-select v-model="filters.sourceType" class="toolbar-control" placeholder="来源" clearable size="small" @change="reloadList">
+                <ui-option label="LeetCode" value="LEETCODE_PRACTICE" />
+                <ui-option label="PTA" value="PTA_SYNCED" />
+              </ui-select>
+              <ui-select v-model="filters.difficulty" class="toolbar-control" placeholder="难度" clearable size="small" @change="reloadList">
+                <ui-option label="简单" value="Easy" />
+                <ui-option label="中等" value="Medium" />
+                <ui-option label="困难" value="Hard" />
+              </ui-select>
+              <ui-select v-model="filters.errorCategory" class="toolbar-control" placeholder="错误类型" clearable size="small" @change="reloadList">
+                <ui-option v-for="opt in errorCategoryOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+              </ui-select>
+              <ui-input v-model="filters.q" class="toolbar-search" placeholder="搜索题目或知识点" clearable size="small" @change="reloadList" />
             </div>
-          </div>
-        </section>
-
-        <ui-card shadow="hover" class="wrong-card">
-          <template #header>
-            <div class="filter-box">
-              <div class="filter-top">
-                <div>
-                  <div class="filter-title">错题筛选</div>
-                  <div class="filter-desc">
-                    按掌握状态、难度、错误类型快速定位薄弱题目
-                  </div>
-                </div>
-
-                <ui-button
-                    plain
-                    size="small"
-                    class="filter-reset-button"
-                    @click="resetFilters"
-                >
-                  重置筛选
-                </ui-button>
-              </div>
-
-              <div class="filter-body">
-                <div class="filter-scope">
-                  <div class="filter-label filter-label-block">查看范围</div>
-
-                  <ui-radio-group
-                      v-model="activeTab"
-                      class="status-tabs"
-                      @change="onTabChange"
-                  >
-                    <ui-radio-button label="all">
-                      全部 {{ stats.total || 0 }}
-                    </ui-radio-button>
-                    <ui-radio-button label="unresolved">
-                      待攻克 {{ stats.unresolved || 0 }}
-                    </ui-radio-button>
-                    <ui-radio-button label="resolved">
-                      已掌握 {{ stats.resolved || 0 }}
-                    </ui-radio-button>
-                  </ui-radio-group>
-                </div>
-
-                <div class="filter-fields">
-                  <div class="filter-row">
-                    <span class="filter-label">基础筛选</span>
-
-                    <div class="filter-controls">
-                      <ui-select
-                          v-model="filters.difficulty"
-                          class="toolbar-control"
-                          placeholder="难度"
-                          clearable
-                          size="small"
-                          @change="reloadList"
-                      >
-                        <ui-option label="简单" value="Easy" />
-                        <ui-option label="中等" value="Medium" />
-                        <ui-option label="困难" value="Hard" />
-                      </ui-select>
-
-                      <ui-select
-                          v-model="filters.errorCategory"
-                          class="toolbar-control toolbar-control-md"
-                          placeholder="错误类型"
-                          clearable
-                          size="small"
-                          @change="reloadList"
-                      >
-                        <ui-option
-                            v-for="opt in errorCategoryOptions"
-                            :key="opt.value"
-                            :label="opt.label"
-                            :value="opt.value"
-                        />
-                      </ui-select>
-
-                      <ui-select
-                          v-model="filters.sourceType"
-                          class="toolbar-control"
-                          placeholder="来源"
-                          clearable
-                          size="small"
-                          @change="reloadList"
-                      >
-                        <ui-option label="LeetCode" value="LEETCODE_PRACTICE" />
-                        <ui-option label="PTA" value="PTA_SYNCED" />
-                      </ui-select>
-                    </div>
-                  </div>
-
-                  <div class="filter-row">
-                    <span class="filter-label">快速检索</span>
-
-                    <div class="filter-controls">
-                      <ui-input
-                          v-model="filters.tag"
-                          class="toolbar-control"
-                          placeholder="标签筛选"
-                          clearable
-                          size="small"
-                          @change="reloadList"
-                      />
-
-                      <ui-input
-                          v-model="filters.q"
-                          class="toolbar-control toolbar-control-lg"
-                          placeholder="题目关键词"
-                          clearable
-                          size="small"
-                          @change="reloadList"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <div v-if="rows.length" class="list [display:flex] [flex-direction:column] [gap:14px]">
-            <div
-                v-for="row in rows"
-                :key="row.id"
-                class="row-card [background:var(--app-surface)] [border:1px_solid_var(--app-border)] [border-radius:16px] [padding:16px] [transition:.2s] hover:[border-color:rgba(var(--app-primary-rgb),0.35)] hover:[box-shadow:0_8px_20px_rgba(var(--app-primary-rgb),0.08)]"
-            >
-              <div class="[display:flex] [justify-content:space-between] [align-items:flex-start] [gap:12px] [flex-wrap:wrap]">
-                <div class="[min-width:0] [flex:1]">
-                  <div class="[display:flex] [align-items:center] [gap:8px] [flex-wrap:wrap] [margin-bottom:6px]">
-                    <span class="title [color:var(--app-text)] [font-size:16px] [font-weight:700]">
-                      {{ row.problemTitle }}
-                    </span>
-
-                    <ui-tag
-                        v-if="row.difficulty"
-                        :type="difficultyTagType(row.difficulty)"
-                        size="small"
-                        effect="plain"
-                    >
-                      {{ difficultyLabel(row.difficulty) }}
-                    </ui-tag>
-
-                    <ui-tag
-                        v-if="row.errorCategory"
-                        :type="errorCategoryTagType(row.errorCategory)"
-                        size="small"
-                    >
-                      {{ errorCategoryLabel(row.errorCategory) }}
-                    </ui-tag>
-
-                    <ui-tag
-                        size="small"
-                        effect="plain"
-                        :type="row.sourceType === 'PTA_SYNCED' ? 'info' : 'success'"
-                    >
-                      {{ row.sourceType === 'PTA_SYNCED' ? 'PTA' : 'LeetCode' }}
-                    </ui-tag>
-
-                    <ui-tag v-if="row.resolved" type="success" size="small">
-                      已掌握
-                    </ui-tag>
-                  </div>
-
-                  <div class="muted [color:var(--app-text-secondary)] [font-size:12px] [display:flex] [gap:10px] [flex-wrap:wrap]">
-                    <span>错误 {{ row.totalWrongCount }} 次</span>
-                    <span>·</span>
-                    <span>连续 AC {{ row.consecutiveAcCount }}/2</span>
-                    <span>·</span>
-                    <span>最后错误 {{ formatTime(row.lastWrongAt) }}</span>
-
-                    <template v-if="row.tagsCached">
-                      <span>·</span>
-                      <span class="tags">标签：{{ row.tagsCached }}</span>
-                    </template>
-                  </div>
-
-                  <div
-                      v-if="row.notes"
-                      class="notes [margin-top:8px] [padding:8px_10px] [background:var(--app-primary-soft)] [border-radius:8px] [color:var(--app-text)] [font-size:13px] [white-space:pre-wrap]"
-                  >
-                    {{ row.notes }}
-                  </div>
-                </div>
-
-                <div class="actions [display:flex] [flex-direction:column] [gap:6px] [align-items:stretch] [min-width:140px]">
-                  <ui-button type="primary" size="small" @click="practice(row)">
-                    去练习
-                  </ui-button>
-
-                  <ui-button size="small" @click="openNoteEditor(row)">
-                    笔记
-                  </ui-button>
-
-                  <ui-button
-                      v-if="!row.resolved"
-                      size="small"
-                      plain
-                      @click="markResolved(row)"
-                  >
-                    标记已掌握
-                  </ui-button>
-
-                  <ui-button size="small" plain @click="removeRow(row)">
-                    移除
-                  </ui-button>
-                </div>
-              </div>
-
-              <div
-                  v-if="row.lastWrongCode && expandedRowId === row.id"
-                  class="code-block [margin-top:10px] [background:#2f2a22] [color:#fef3c7] [border-radius:8px] [padding:10px_12px] [max-height:240px] [overflow:auto] [font-size:12px] [font-family:ui-monospace,SFMono-Regular,Menlo,monospace] [white-space:pre]"
-              >
-                {{ row.lastWrongCode }}
-              </div>
-            </div>
-
-            <div class="pager [display:flex] [justify-content:center] [padding-top:10px]">
-              <ui-pagination
-                  v-model:current-page="page.current"
-                  v-model:page-size="page.size"
-                  :total="page.total"
-                  :page-sizes="[10, 20, 50]"
-                  layout="prev, pager, next, sizes, total"
-                  @current-change="reloadList"
-                  @size-change="onSizeChange"
-              />
-            </div>
-          </div>
-
-          <div v-else class="empty-box">
-            <ui-empty description="还没有错题记录，继续练习吧" :image-size="120" />
           </div>
         </ui-card>
+
+        <ui-alert
+          v-if="ptaErrorState === 'error'"
+          type="warning"
+          :closable="false"
+          title="PTA 错题知识点暂时加载失败，当前仍可查看已同步到错题本的记录。"
+          show-icon
+        />
+
+        <div v-if="knowledgeGroups.length && selectedGroup" class="knowledge-layout">
+          <ui-card class="knowledge-sidebar" shadow="never">
+            <template #header>
+              <div class="panel-head">
+                <div>
+                  <strong>错题知识点</strong>
+                  <span>仅显示有错题的知识点</span>
+                </div>
+                <ui-tag type="danger" effect="plain">{{ knowledgeGroups.length }} 个</ui-tag>
+              </div>
+            </template>
+
+            <div class="knowledge-list">
+              <button
+                v-for="group in knowledgeGroups"
+                :key="group.key"
+                type="button"
+                class="knowledge-item"
+                :class="{ active: group.key === selectedGroup.key }"
+                @click="selectKnowledge(group.key)"
+              >
+                <div class="knowledge-item__top">
+                  <span class="knowledge-name">{{ group.name }}</span>
+                  <span class="knowledge-count">{{ group.items.length }} 题</span>
+                </div>
+                <div class="knowledge-meta">
+                  <span>错误 {{ group.wrongCount }} 次</span>
+                  <span v-if="group.unresolvedCount">待攻克 {{ group.unresolvedCount }}</span>
+                  <span v-else>本组已掌握</span>
+                </div>
+                <div class="knowledge-progress">
+                  <i :style="{ width: `${group.progress}%` }"></i>
+                </div>
+              </button>
+            </div>
+          </ui-card>
+
+          <div class="knowledge-detail">
+            <section class="focus-banner">
+              <div class="focus-copy">
+                <span class="focus-eyebrow">当前知识点</span>
+                <h2>{{ selectedGroup.name }}</h2>
+                <p>共 {{ selectedGroup.items.length }} 道错题，累计错误 {{ selectedGroup.wrongCount }} 次。按错误频次从高到低回炉。</p>
+              </div>
+              <div class="focus-stats">
+                <div><span>待攻克</span><strong>{{ selectedGroup.unresolvedCount }}</strong></div>
+                <div><span>已掌握</span><strong>{{ selectedGroup.resolvedCount }}</strong></div>
+              </div>
+              <ui-button type="primary" size="large" @click="startGroupTraining(selectedGroup)">
+                {{ selectedGroup.unresolvedCount ? '开始本组训练' : '再次巩固' }}
+              </ui-button>
+            </section>
+
+            <ui-card class="question-panel" shadow="never">
+              <template #header>
+                <div class="panel-head">
+                  <div>
+                    <strong>{{ selectedGroup.name }}错题</strong>
+                    <span>PTA 知识点与 LeetCode 标签已合并归档</span>
+                  </div>
+                  <div class="source-tags">
+                    <ui-tag v-if="selectedGroup.ptaCount" type="info" effect="plain">PTA {{ selectedGroup.ptaCount }}</ui-tag>
+                    <ui-tag v-if="selectedGroup.leetcodeCount" type="success" effect="plain">LeetCode {{ selectedGroup.leetcodeCount }}</ui-tag>
+                  </div>
+                </div>
+              </template>
+
+              <div class="question-list">
+                <article v-for="item in selectedGroup.items" :key="item.key" class="question-card">
+                  <div class="question-main">
+                    <div class="question-title-row">
+                      <span class="question-title">{{ item.title }}</span>
+                      <ui-tag :type="item.sourceType === 'PTA_SYNCED' ? 'info' : 'success'" size="small" effect="plain">
+                        {{ item.sourceType === 'PTA_SYNCED' ? 'PTA' : 'LeetCode' }}
+                      </ui-tag>
+                      <ui-tag v-if="item.resolved" type="success" size="small">已掌握</ui-tag>
+                      <ui-tag v-if="item.difficulty" :type="difficultyTagType(item.difficulty)" size="small" effect="plain">
+                        {{ difficultyLabel(item.difficulty) }}
+                      </ui-tag>
+                    </div>
+
+                    <div class="question-meta">
+                      <span>错误 {{ item.wrongCount }} 次</span>
+                      <span v-if="item.errorCategory">{{ errorCategoryLabel(item.errorCategory) }}</span>
+                      <span v-if="item.offeringTitle">{{ item.offeringTitle }}</span>
+                      <span v-if="item.lastWrongAt">最后错误 {{ formatTime(item.lastWrongAt) }}</span>
+                    </div>
+
+                    <div v-if="item.notes" class="question-note">{{ item.notes }}</div>
+                  </div>
+
+                  <div class="question-actions">
+                    <ui-button type="primary" size="small" @click="practiceItem(item)">开始回炉</ui-button>
+                    <template v-if="item.kind === 'notebook'">
+                      <ui-button size="small" @click="openNoteEditor(item.row)">笔记</ui-button>
+                      <ui-button v-if="!item.resolved" size="small" plain @click="markResolved(item.row)">标记掌握</ui-button>
+                      <ui-button size="small" plain @click="removeRow(item.row)">移除</ui-button>
+                    </template>
+                  </div>
+                </article>
+              </div>
+            </ui-card>
+          </div>
+        </div>
+
+        <div v-else class="empty-box">
+          <ui-empty description="当前筛选范围内没有错题知识点" :image-size="110">
+            <ui-button type="primary" @click="resetFilters">查看全部错题</ui-button>
+          </ui-empty>
+        </div>
       </div>
     </loading-state>
 
-    <ui-dialog v-model="noteDialog.visible" title="笔记" width="520px">
-      <ui-input
-          v-model="noteDialog.value"
-          type="textarea"
-          :rows="6"
-          placeholder="记下你对这道题的反思、坑点、解题思路..."
-      />
-
+    <ui-dialog v-model="noteDialog.visible" title="错题笔记" width="520px">
+      <ui-input v-model="noteDialog.value" type="textarea" :rows="6" placeholder="记录坑点、错误原因和正确思路……" />
       <template #footer>
         <ui-button @click="noteDialog.visible = false">取消</ui-button>
-        <ui-button type="primary" :loading="noteDialog.saving" @click="saveNote">
-          保存
-        </ui-button>
+        <ui-button type="primary" :loading="noteDialog.saving" @click="saveNote">保存</ui-button>
       </template>
     </ui-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import { wrongNotebookApi } from '@/api/wrongNotebook'
@@ -339,7 +191,9 @@ const router = useRouter()
 const loading = ref(false)
 const rows = ref([])
 const ptaErrors = ref([])
-const ptaErrorState = ref('idle') // idle | loading | error | loaded
+const ptaErrorState = ref('idle')
+const selectedKnowledgeKey = ref('')
+const activeTab = ref('unresolved')
 
 const stats = reactive({
   total: 0,
@@ -349,24 +203,12 @@ const stats = reactive({
   byErrorCategory: {}
 })
 
-const activeTab = ref('unresolved')
-
 const filters = reactive({
-  resolved: false,
   sourceType: '',
   errorCategory: '',
   difficulty: '',
-  tag: '',
   q: ''
 })
-
-const page = reactive({
-  current: 1,
-  size: 20,
-  total: 0
-})
-
-const expandedRowId = ref(null)
 
 const noteDialog = reactive({
   visible: false,
@@ -384,127 +226,194 @@ const errorCategoryOptions = [
   { label: '其他', value: 'UNKNOWN' }
 ]
 
-const summaryCards = computed(() => [
-  {
-    label: '错题总数',
-    value: stats.total || 0,
-    tip: '所有进入错题本的题目',
-    color: 'var(--app-text)'
-  },
-  {
-    label: '待攻克',
-    value: stats.unresolved || 0,
-    tip: '尚未连续 AC 两次',
-    color: 'var(--app-danger)'
-  },
-  {
-    label: '已掌握',
-    value: stats.resolved || 0,
-    tip: '连续 AC 两次后自动标记',
-    color: 'var(--app-success)'
-  },
-  {
-    label: 'PTA 高频错题',
-    value: ptaErrors.value.length,
-    tip: '累计错误 ≥5 次',
-    color: 'var(--app-warning)'
+function normalizedText(value) {
+  return String(value || '').trim().toLocaleLowerCase()
+}
+
+function splitKnowledgePoints(value) {
+  const raw = Array.isArray(value) ? value : [value]
+  return [...new Set(raw.flatMap(item => String(item || '').split(/[;,，、|>]+/))
+    .map(item => item.trim())
+    .filter(Boolean))]
+}
+
+function notebookKnowledgePoints(row) {
+  const tags = splitKnowledgePoints(row.tagsCached)
+  return tags.length ? tags : ['其他错题']
+}
+
+function ptaKnowledgePoints(item) {
+  const points = splitKnowledgePoints(item.knowledge_point || item.knowledge_leaf)
+  if (points.length) return points
+  const path = splitKnowledgePoints(item.knowledge_path)
+  if (path.length) return [path[path.length - 1]]
+  return [item.offering_title || '其他错题']
+}
+
+function findMatchingPtaError(row) {
+  if (row?.sourceType !== 'PTA_SYNCED') return null
+  const candidates = [normalizedText(row.problemTitle), normalizedText(row.problemSlug)].filter(Boolean)
+  return ptaErrors.value.find(item => {
+    const itemKeys = [normalizedText(item.problem_title), normalizedText(item.source_problem_id)].filter(Boolean)
+    return candidates.some(candidate => itemKeys.includes(candidate))
+  }) || null
+}
+
+const filteredNotebookRows = computed(() => {
+  const query = normalizedText(filters.q)
+  if (!query) return rows.value
+  return rows.value.filter(row => {
+    const ptaMatch = findMatchingPtaError(row)
+    return [
+      row.problemTitle,
+      row.tagsCached,
+      ptaMatch?.knowledge_point,
+      ptaMatch?.knowledge_path,
+      ptaMatch?.offering_title
+    ].some(value => normalizedText(value).includes(query))
+  })
+})
+
+const filteredPtaErrors = computed(() => {
+  if (activeTab.value === 'resolved' || filters.sourceType === 'LEETCODE_PRACTICE') return []
+  if (filters.errorCategory && filters.errorCategory !== 'WRONG_ANSWER' && filters.errorCategory !== 'UNKNOWN') return []
+  const query = normalizedText(filters.q)
+  return ptaErrors.value.filter(item => {
+    if (filters.difficulty && normalizedText(difficultyLabel(item.difficulty_label)) !== normalizedText(difficultyLabel(filters.difficulty))) return false
+    if (!query) return true
+    return [item.problem_title, item.offering_title, item.knowledge_point, item.knowledge_path]
+      .some(value => normalizedText(value).includes(query))
+  })
+})
+
+const knowledgeGroups = computed(() => {
+  const groups = new Map()
+  const addItem = (knowledgeName, item) => {
+    const name = String(knowledgeName || '').trim()
+    if (!name) return
+    const key = normalizedText(name)
+    if (!groups.has(key)) {
+      groups.set(key, { key, name, items: [] })
+    }
+    const group = groups.get(key)
+    if (!group.items.some(existing => existing.key === item.key)) group.items.push(item)
   }
+
+  for (const row of filteredNotebookRows.value) {
+    const matchedPtaError = findMatchingPtaError(row)
+    const item = {
+      key: `notebook-${row.id}`,
+      kind: 'notebook',
+      row,
+      title: row.problemTitle || `题目 ${row.problemId}`,
+      sourceType: row.sourceType || 'LEETCODE_PRACTICE',
+      wrongCount: Number(row.totalWrongCount || 0),
+      resolved: !!row.resolved,
+      difficulty: row.difficulty,
+      errorCategory: row.errorCategory,
+      lastWrongAt: row.lastWrongAt,
+      notes: row.notes,
+      problemId: row.problemId,
+      offeringTitle: matchedPtaError?.offering_title
+    }
+    const points = matchedPtaError ? ptaKnowledgePoints(matchedPtaError) : notebookKnowledgePoints(row)
+    points.forEach(point => addItem(point, item))
+  }
+
+  const notebookPtaKeys = new Set(filteredNotebookRows.value
+    .filter(row => row.sourceType === 'PTA_SYNCED')
+    .flatMap(row => [normalizedText(row.problemTitle), normalizedText(row.problemSlug)].filter(Boolean)))
+
+  for (const raw of filteredPtaErrors.value) {
+    const rawKeys = [normalizedText(raw.problem_title), normalizedText(raw.source_problem_id)].filter(Boolean)
+    if (rawKeys.some(key => notebookPtaKeys.has(key))) continue
+    const item = {
+      key: `pta-${raw.offering_id || 'x'}-${raw.problem_id}`,
+      kind: 'pta',
+      raw,
+      title: raw.problem_title || `PTA 题目 #${raw.source_problem_id || raw.problem_id}`,
+      sourceType: 'PTA_SYNCED',
+      wrongCount: Number(raw.error_count || 0),
+      resolved: false,
+      difficulty: raw.difficulty_label,
+      offeringTitle: raw.offering_title,
+      problemId: raw.problem_id
+    }
+    ptaKnowledgePoints(raw).forEach(point => addItem(point, item))
+  }
+
+  return [...groups.values()].map(group => {
+    const items = group.items.slice().sort((a, b) => Number(a.resolved) - Number(b.resolved) || b.wrongCount - a.wrongCount)
+    const resolvedCount = items.filter(item => item.resolved).length
+    const unresolvedCount = items.length - resolvedCount
+    return {
+      ...group,
+      items,
+      wrongCount: items.reduce((sum, item) => sum + item.wrongCount, 0),
+      resolvedCount,
+      unresolvedCount,
+      progress: items.length ? Math.round((resolvedCount / items.length) * 100) : 0,
+      ptaCount: items.filter(item => item.sourceType === 'PTA_SYNCED').length,
+      leetcodeCount: items.filter(item => item.sourceType !== 'PTA_SYNCED').length
+    }
+  }).filter(group => group.items.length > 0)
+    .sort((a, b) => b.unresolvedCount - a.unresolvedCount || b.wrongCount - a.wrongCount || a.name.localeCompare(b.name, 'zh-CN'))
+})
+
+const selectedGroup = computed(() => {
+  return knowledgeGroups.value.find(group => group.key === selectedKnowledgeKey.value) || knowledgeGroups.value[0] || null
+})
+
+const visibleItems = computed(() => {
+  const items = new Map()
+  knowledgeGroups.value.forEach(group => group.items.forEach(item => items.set(item.key, item)))
+  return [...items.values()]
+})
+
+const summaryCards = computed(() => [
+  { label: '当前错题', value: visibleItems.value.length, tip: '当前筛选范围内', color: 'var(--app-text)' },
+  { label: '待攻克', value: visibleItems.value.filter(item => !item.resolved).length, tip: '可直接开始回炉', color: 'var(--app-danger)' },
+  { label: '错题知识点', value: knowledgeGroups.value.length, tip: '零错题知识点已隐藏', color: 'var(--app-primary)' },
+  { label: 'PTA 错题', value: visibleItems.value.filter(item => item.sourceType === 'PTA_SYNCED').length, tip: '已关联 PTA 知识点', color: 'var(--app-warning)' }
 ])
 
-function difficultyLabel(d) {
-  if (!d) return ''
-  if (/easy/i.test(d)) return '简单'
-  if (/medium/i.test(d)) return '中等'
-  if (/hard/i.test(d)) return '困难'
-  return d
-}
-
-function difficultyTagType(d) {
-  if (/easy/i.test(d)) return 'success'
-  if (/medium/i.test(d)) return 'warning'
-  if (/hard/i.test(d)) return 'danger'
-  return 'info'
-}
-
-function errorCategoryLabel(code) {
-  const map = {
-    WRONG_ANSWER: '答案错误',
-    COMPILE_ERROR: '编译错误',
-    RUNTIME_ERROR: '运行错误',
-    TIME_LIMIT_EXCEEDED: '超时',
-    MEMORY_LIMIT_EXCEEDED: '内存超限',
-    UNKNOWN: '其他'
+watch(knowledgeGroups, (groups) => {
+  if (!groups.some(group => group.key === selectedKnowledgeKey.value)) {
+    selectedKnowledgeKey.value = groups[0]?.key || ''
   }
+}, { immediate: true })
 
-  return map[code] || code || ''
-}
-
-function errorCategoryTagType(code) {
-  if (code === 'WRONG_ANSWER') return 'danger'
-  if (code === 'COMPILE_ERROR') return 'warning'
-  if (code === 'RUNTIME_ERROR') return 'info'
-  if (code === 'TIME_LIMIT_EXCEEDED') return 'warning'
-  if (code === 'MEMORY_LIMIT_EXCEEDED') return 'warning'
-  return 'info'
-}
-
-function formatTime(value) {
-  if (!value) return '未知'
-
-  const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return value
-
-  const now = Date.now()
-  const diff = now - d.getTime()
-
-  if (diff < 60_000) return '刚刚'
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} 分钟前`
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} 小时前`
-  if (diff < 7 * 86_400_000) return `${Math.floor(diff / 86_400_000)} 天前`
-
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-      d.getDate()
-  ).padStart(2, '0')}`
-}
-
-function buildQueryParams() {
-  const params = {
-    page: Math.max(0, page.current - 1),
-    size: page.size,
-    sort: 'lastWrongAt',
-    direction: 'desc'
-  }
-
-  if (activeTab.value === 'unresolved') {
-    params.resolved = false
-  } else if (activeTab.value === 'resolved') {
-    params.resolved = true
-  }
-
+function buildQueryParams(pageIndex = 0) {
+  const params = { page: pageIndex, size: 100, sort: 'lastWrongAt', direction: 'desc' }
+  if (activeTab.value === 'unresolved') params.resolved = false
+  if (activeTab.value === 'resolved') params.resolved = true
   if (filters.sourceType) params.sourceType = filters.sourceType
   if (filters.errorCategory) params.errorCategory = filters.errorCategory
   if (filters.difficulty) params.difficulty = filters.difficulty
-  if (filters.tag) params.tag = filters.tag
-  if (filters.q) params.q = filters.q
-
   return params
 }
 
-async function reloadList() {
-  loading.value = true
-
+async function reloadList(manageLoading = true) {
+  if (manageLoading) loading.value = true
   try {
-    const payload = await wrongNotebookApi.list(buildQueryParams())
-    const data = payload?.data ?? payload
-
-    rows.value = Array.isArray(data?.content) ? data.content : []
-    page.total = Number(data?.totalElements ?? rows.value.length)
-  } catch (err) {
-    uiMessage.error(err?.friendlyMessage || err?.message || '加载错题列表失败')
+    const collected = []
+    let pageIndex = 0
+    let total = 0
+    do {
+      const payload = await wrongNotebookApi.list(buildQueryParams(pageIndex))
+      const data = payload?.data ?? payload
+      const content = Array.isArray(data?.content) ? data.content : []
+      collected.push(...content)
+      total = Number(data?.totalElements ?? collected.length)
+      pageIndex += 1
+      if (!content.length) break
+    } while (collected.length < total && pageIndex < 10)
+    rows.value = collected
+  } catch (error) {
     rows.value = []
-    page.total = 0
+    uiMessage.error(error?.friendlyMessage || error?.message || '加载错题列表失败')
   } finally {
-    loading.value = false
+    if (manageLoading) loading.value = false
   }
 }
 
@@ -512,43 +421,73 @@ async function loadStats() {
   try {
     const payload = await wrongNotebookApi.stats()
     const data = payload?.data ?? payload
-
     stats.total = Number(data?.total ?? 0)
     stats.unresolved = Number(data?.unresolved ?? 0)
     stats.resolved = Number(data?.resolved ?? 0)
     stats.byDifficulty = data?.byDifficulty || {}
     stats.byErrorCategory = data?.byErrorCategory || {}
-  } catch (err) {
-    // 统计加载失败不影响列表
+  } catch {
+    // 统计失败不阻断错题列表。
+  }
+}
+
+async function loadPtaErrors() {
+  const studentNo = getUserInfo()?.usernum
+  if (!studentNo) {
+    ptaErrors.value = []
+    ptaErrorState.value = 'error'
+    return
+  }
+  ptaErrorState.value = 'loading'
+  try {
+    const response = await api.getPtaHighFrequencyErrors(String(studentNo), 1)
+    const data = response?.data || response || {}
+    ptaErrors.value = Array.isArray(data.items) ? data.items : []
+    ptaErrorState.value = 'loaded'
+  } catch {
+    ptaErrors.value = []
+    ptaErrorState.value = 'error'
   }
 }
 
 async function loadAll() {
   loading.value = true
-  await Promise.all([reloadList(), loadStats(), loadPtaErrors()])
-  loading.value = false
+  try {
+    await Promise.all([reloadList(false), loadStats(), loadPtaErrors()])
+  } finally {
+    loading.value = false
+  }
+}
+
+function selectKnowledge(key) {
+  selectedKnowledgeKey.value = key
 }
 
 function onTabChange() {
-  page.current = 1
   reloadList()
 }
 
 function resetFilters() {
+  activeTab.value = 'unresolved'
   filters.sourceType = ''
   filters.errorCategory = ''
   filters.difficulty = ''
-  filters.tag = ''
   filters.q = ''
-
-  page.current = 1
   reloadList()
 }
 
-function onSizeChange(size) {
-  page.size = size
-  page.current = 1
-  reloadList()
+function startGroupTraining(group) {
+  const item = group.items.find(candidate => !candidate.resolved) || group.items[0]
+  if (!item) return
+  practiceItem(item)
+}
+
+function practiceItem(item) {
+  if (item.kind === 'pta') {
+    ptaPractice(item.raw)
+    return
+  }
+  practice(item.row)
 }
 
 function practice(row) {
@@ -556,71 +495,49 @@ function practice(row) {
     uiMessage.warning('该题目缺少 problemId，无法跳转')
     return
   }
-
   router.push({
     path: `/student/leetcode-practice/${row.problemId}`,
-    query: {
-      from: 'notebook',
-      notebookId: row.id
-    }
+    query: { from: 'notebook', notebookId: row.id }
   })
+}
+
+function ptaPractice(item) {
+  if (item?.offering_id) router.push(`/student/experiment-detail/${item.offering_id}`)
+  else router.push('/student/experiments')
 }
 
 async function markResolved(row) {
   try {
     await messageBox.confirm('确定要把这道题标记为已掌握吗？', '提示', {
-      confirmButtonText: '标记',
-      cancelButtonText: '取消',
-      type: 'warning'
+      confirmButtonText: '标记', cancelButtonText: '取消', type: 'warning'
     })
   } catch {
     return
   }
-
   try {
-    await wrongQuestionRetryAsResolve(row)
+    await wrongNotebookApi.retry(row.id, { judgeStatus: 'ACCEPTED', code: null, runtimeMs: null, memoryKb: null })
+    await wrongNotebookApi.retry(row.id, { judgeStatus: 'ACCEPTED', code: null, runtimeMs: null, memoryKb: null })
     uiMessage.success('已标记为已掌握')
     await loadAll()
-  } catch (err) {
-    uiMessage.error(err?.friendlyMessage || err?.message || '标记失败')
+  } catch (error) {
+    uiMessage.error(error?.friendlyMessage || error?.message || '标记失败')
   }
-}
-
-async function wrongQuestionRetryAsResolve(row) {
-  await wrongNotebookApi.retry(row.id, {
-    judgeStatus: 'ACCEPTED',
-    code: null,
-    runtimeMs: null,
-    memoryKb: null
-  })
-
-  const fresh = await wrongNotebookApi.retry(row.id, {
-    judgeStatus: 'ACCEPTED',
-    code: null,
-    runtimeMs: null,
-    memoryKb: null
-  })
-
-  return fresh
 }
 
 async function removeRow(row) {
   try {
-    await messageBox.confirm('确定要从错题本中移除这道题吗？已掌握状态会保留，可再次添加。', '提示', {
-      confirmButtonText: '移除',
-      cancelButtonText: '取消',
-      type: 'warning'
+    await messageBox.confirm('确定要从错题本中移除这道题吗？', '提示', {
+      confirmButtonText: '移除', cancelButtonText: '取消', type: 'warning'
     })
   } catch {
     return
   }
-
   try {
     await wrongNotebookApi.remove(row.id)
     uiMessage.success('已移除')
     await loadAll()
-  } catch (err) {
-    uiMessage.error(err?.friendlyMessage || err?.message || '移除失败')
+  } catch (error) {
+    uiMessage.error(error?.friendlyMessage || error?.message || '移除失败')
   }
 }
 
@@ -631,249 +548,178 @@ function openNoteEditor(row) {
 }
 
 async function saveNote() {
-  if (!noteDialog.id) {
-    noteDialog.visible = false
-    return
-  }
-
+  if (!noteDialog.id) return
   noteDialog.saving = true
-
   try {
     await wrongNotebookApi.updateNote(noteDialog.id, noteDialog.value || '')
     uiMessage.success('笔记已保存')
     noteDialog.visible = false
     await reloadList()
-  } catch (err) {
-    uiMessage.error(err?.friendlyMessage || err?.message || '保存失败')
+  } catch (error) {
+    uiMessage.error(error?.friendlyMessage || error?.message || '保存失败')
   } finally {
     noteDialog.saving = false
   }
 }
 
-async function loadPtaErrors() {
-  const userInfo = getUserInfo()
-  const studentNo = userInfo?.usernum
-  if (!studentNo) {
-    ptaErrorState.value = 'error'
-    return
-  }
-  ptaErrorState.value = 'loading'
-  try {
-    const res = await api.getPtaHighFrequencyErrors(String(studentNo))
-    const data = res?.data || res || {}
-    ptaErrors.value = Array.isArray(data.items) ? data.items : []
-    ptaErrorState.value = 'loaded'
-  } catch (err) {
-    ptaErrors.value = []
-    ptaErrorState.value = 'error'
-  }
+function difficultyLabel(value) {
+  if (!value) return ''
+  if (/easy|简单/i.test(value)) return '简单'
+  if (/medium|中等/i.test(value)) return '中等'
+  if (/hard|困难/i.test(value)) return '困难'
+  return value
 }
 
-function ptaPractice(item) {
-  const offeringId = item.offering_id
-  if (offeringId) {
-    router.push(`/student/experiment-detail/${offeringId}`)
-  } else {
-    router.push('/student/experiments')
-  }
+function difficultyTagType(value) {
+  const label = difficultyLabel(value)
+  if (label === '简单') return 'success'
+  if (label === '中等') return 'warning'
+  if (label === '困难') return 'danger'
+  return 'info'
 }
 
-onMounted(() => {
-  activeTab.value = 'unresolved'
-  filters.resolved = false
-  loadAll()
-})
+function errorCategoryLabel(code) {
+  return {
+    WRONG_ANSWER: '答案错误',
+    COMPILE_ERROR: '编译错误',
+    RUNTIME_ERROR: '运行错误',
+    TIME_LIMIT_EXCEEDED: '超时',
+    MEMORY_LIMIT_EXCEEDED: '内存超限',
+    UNKNOWN: '其他'
+  }[code] || code || ''
+}
+
+function formatTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const diff = Date.now() - date.getTime()
+  if (diff < 60_000) return '刚刚'
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} 分钟前`
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} 小时前`
+  if (diff < 7 * 86_400_000) return `${Math.floor(diff / 86_400_000)} 天前`
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+onMounted(loadAll)
 </script>
 
 <style scoped>
-.page {
-  min-height: 100%;
+.wrong-notebook-page,
+.notebook-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .summary-card {
-  border-radius: 18px;
   border: 1px solid var(--app-border);
+  border-radius: 16px;
   background: var(--app-surface);
-  box-shadow: 0 10px 26px rgba(61, 53, 41, 0.06);
 }
 
-/* 外层错题卡片 */
-.wrong-card {
-  overflow: hidden;
-  border-radius: 20px;
-  border: 1px solid var(--app-border);
-  background: var(--app-surface);
-  box-shadow: 0 16px 36px rgba(61, 53, 41, 0.08);
-}
-
-/* 去掉卡片 header 默认分割线 */
-.wrong-card :deep(.ui-card__header) {
-  padding: 18px 18px 0;
-  border-bottom: none;
-}
-
-/* 错题卡片 body */
-.wrong-card :deep(.ui-card__body) {
+.summary-card :deep(.ui-card__body) {
   padding: 18px;
 }
 
-/* 筛选区域整体 */
-.filter-box {
-  padding: 16px;
-  border: 1px solid var(--app-border);
-  border-radius: 20px;
-  background: var(--app-surface-muted);
-  box-shadow: 0 10px 24px rgba(61, 53, 41, 0.08);
+.summary-value {
+  font-size: 26px;
+  font-weight: 700;
 }
 
-/* 筛选标题行 */
-.filter-top {
+.summary-label {
+  margin-top: 5px;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summary-tip {
+  margin-top: 4px;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+}
+
+.filter-card,
+.knowledge-sidebar,
+.question-panel {
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  background: var(--app-surface);
+}
+
+.filter-card :deep(.ui-card__body) {
+  padding: 18px;
+}
+
+.filter-head,
+.filter-content,
+.panel-head,
+.knowledge-item__top,
+.question-title-row,
+.question-actions,
+.source-tags {
   display: flex;
   align-items: center;
+}
+
+.filter-head,
+.panel-head,
+.knowledge-item__top {
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
 }
 
 .filter-title {
   color: var(--app-text);
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
-.filter-desc {
+.filter-desc,
+.panel-head span {
   margin-top: 3px;
   color: var(--app-text-secondary);
-  font-size: 12px;
+  font-size: 11px;
 }
 
-/* 筛选主体 */
-.filter-body {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 14px;
-  align-items: stretch;
+.filter-content {
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--app-border);
 }
 
-/* 左侧查看范围 */
-.filter-scope {
-  padding: 14px;
-  border: 1px solid var(--app-border);
-  border-radius: 16px;
-  background: var(--app-surface);
-}
-
-/* 右侧筛选项 */
-.filter-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.filter-row {
-  display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-  min-height: 46px;
-  padding: 10px 12px;
-  border: 1px solid var(--app-border);
-  border-radius: 16px;
-  background: var(--app-surface);
-}
-
-.filter-label {
-  color: var(--app-text-secondary);
-  font-size: 12px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.filter-label-block {
-  margin-bottom: 10px;
-}
-
+.status-tabs,
 .filter-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.toolbar-control {
-  width: 150px;
-}
-
-.toolbar-control-md {
-  width: 168px;
-}
-
-.toolbar-control-lg {
-  width: 260px;
-}
-
-/* 重置按钮 */
-.filter-reset-button {
-  min-width: 92px;
-  border-color: var(--app-border);
-  color: var(--app-primary);
-  background: var(--app-surface);
-  font-weight: 700;
-}
-
-.filter-reset-button:hover {
-  border-color: var(--app-primary);
-  color: var(--app-primary-strong);
-  background: var(--app-primary-soft);
-}
-
-.warm-normal-button {
-  border-color: var(--app-border);
-  color: var(--app-primary);
-  background: var(--app-surface);
-  font-weight: 700;
-}
-
-.warm-normal-button:hover {
-  border-color: var(--app-primary);
-  color: var(--app-primary-strong);
-  background: var(--app-primary-soft);
-}
-
-/* 查看范围按钮 */
-.status-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.status-tabs :deep(.ui-radio-button) {
-  margin-right: 0;
-}
-
 .status-tabs :deep(.ui-radio-button__inner) {
   min-width: 82px;
-  padding: 9px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--app-border);
   border-radius: 999px;
   background: var(--app-surface);
   color: var(--app-text-secondary);
   box-shadow: none;
-  font-size: 13px;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-
-.status-tabs :deep(.ui-radio-button__inner:hover) {
-  border-color: var(--app-primary);
-  color: var(--app-primary);
-  background: var(--app-primary-soft);
 }
 
 .status-tabs :deep(.ui-radio-button__orig-radio:checked + .ui-radio-button__inner) {
   border-color: var(--app-primary);
   background: var(--app-primary);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(var(--app-primary-rgb), 0.22);
+  color: #fff;
+  box-shadow: none;
 }
 
 .status-tabs :deep(.ui-radio-button:first-child .ui-radio-button__inner),
@@ -881,86 +727,68 @@ onMounted(() => {
   border-radius: 999px;
 }
 
-.filter-box :deep(.ui-input__wrapper),
-.filter-box :deep(.ui-select__wrapper) {
-  min-height: 34px;
-  border-radius: 12px;
-  background: var(--app-surface);
-  box-shadow: 0 0 0 1px var(--app-border) inset;
+.toolbar-control {
+  width: 140px;
 }
 
-.filter-box :deep(.ui-input__wrapper:hover),
-.filter-box :deep(.ui-select__wrapper:hover) {
-  box-shadow: 0 0 0 1px var(--app-primary) inset;
+.toolbar-search {
+  width: 230px;
 }
 
-.filter-box :deep(.ui-input__wrapper.is-focus),
-.filter-box :deep(.ui-select__wrapper.is-focused) {
-  box-shadow: 0 0 0 1px var(--app-primary) inset;
-}
-
-/* 空状态 */
-.empty-box {
-  padding: 24px 0 6px;
-  border: 1px dashed var(--app-border);
-  border-radius: 18px;
-  background: var(--app-surface-muted);
-}
-
-.pta-error-section {
-  padding: 18px 20px;
-  border: 1px solid var(--app-border);
-  border-left: 4px solid var(--app-danger);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--app-danger) 4%, var(--app-surface));
-}
-
-.pta-error-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.pta-error-heading h3 {
-  margin: 0 0 4px;
-  color: var(--app-text);
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.pta-error-heading p {
-  margin: 0;
-  color: var(--app-text-secondary);
-  font-size: 12px;
-}
-
-.pta-error-list {
+.knowledge-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
 }
 
-.pta-error-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--app-border);
-  border-radius: 11px;
-  background: var(--app-surface);
+.knowledge-sidebar :deep(.ui-card__header),
+.question-panel :deep(.ui-card__header) {
+  padding: 16px 18px;
 }
 
-.pta-error-card__copy {
+.panel-head > div:first-child {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   min-width: 0;
 }
 
-.pta-error-card__title {
+.panel-head strong {
+  color: var(--app-text);
+  font-size: 15px;
+}
+
+.knowledge-list,
+.question-list,
+.knowledge-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.knowledge-item {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.knowledge-item:hover,
+.knowledge-item.active {
+  border-color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.knowledge-item.active {
+  box-shadow: inset 3px 0 0 var(--app-primary);
+}
+
+.knowledge-name {
   overflow: hidden;
   color: var(--app-text);
   font-size: 14px;
@@ -969,50 +797,209 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.pta-error-card__meta {
+.knowledge-count,
+.knowledge-meta {
+  color: var(--app-text-secondary);
+  font-size: 11px;
+}
+
+.knowledge-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.knowledge-progress {
+  height: 5px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--app-border);
+}
+
+.knowledge-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--app-success);
+}
+
+.focus-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 22px;
+  align-items: center;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 30%, var(--app-border));
+  border-left: 5px solid var(--app-primary);
+  border-radius: 16px;
+  background: var(--app-primary-soft);
+}
+
+.focus-copy h2 {
+  margin: 5px 0;
+  color: var(--app-text);
+  font-size: 22px;
+}
+
+.focus-copy p {
+  margin: 0;
   color: var(--app-text-secondary);
   font-size: 12px;
 }
 
-.danger-text {
-  color: var(--app-danger);
+.focus-eyebrow {
+  color: var(--app-primary-strong);
+  font-size: 11px;
+  font-weight: 700;
 }
 
-/* 响应式 */
+.focus-stats {
+  display: flex;
+  gap: 18px;
+}
+
+.focus-stats div {
+  display: flex;
+  min-width: 64px;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.focus-stats span {
+  color: var(--app-text-secondary);
+  font-size: 10px;
+}
+
+.focus-stats strong {
+  color: var(--app-text);
+  font-size: 22px;
+}
+
+.source-tags,
+.question-title-row,
+.question-actions {
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.question-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 16px;
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  background: var(--app-surface);
+}
+
+.question-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.question-title {
+  overflow: hidden;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+  color: var(--app-text-secondary);
+  font-size: 11px;
+}
+
+.question-note {
+  margin-top: 9px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--app-surface-muted);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.question-actions {
+  align-content: flex-start;
+  justify-content: flex-end;
+  min-width: 110px;
+}
+
+.empty-box {
+  padding: 30px;
+  border: 1px dashed var(--app-border);
+  border-radius: 16px;
+  background: var(--app-surface-muted);
+}
+
+.warm-normal-button,
+.filter-reset-button {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-primary);
+  font-weight: 600;
+}
+
 @media (max-width: 1200px) {
-  .filter-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 760px) {
-  .wrong-card :deep(.ui-card__header) {
-    padding: 12px 12px 0;
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .wrong-card :deep(.ui-card__body) {
-    padding: 12px;
-  }
-
-  .filter-box {
-    padding: 12px;
-  }
-
-  .filter-top {
+  .filter-content,
+  .focus-banner {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .filter-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .filter-content {
+    display: flex;
+  }
+
+  .focus-banner {
+    display: flex;
+  }
+}
+
+@media (max-width: 900px) {
+  .knowledge-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .knowledge-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .summary-grid,
+  .knowledge-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filter-head,
+  .question-card {
+    flex-direction: column;
   }
 
   .toolbar-control,
-  .toolbar-control-md,
-  .toolbar-control-lg,
+  .toolbar-search,
   .filter-reset-button {
     width: 100%;
+  }
+
+  .question-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>

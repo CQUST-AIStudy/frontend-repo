@@ -10,7 +10,7 @@ const breadcrumbLabels = {
     'class-join': '教学班级',
     practice: '推荐练习',
     'wrong-notebook': '错题本',
-    'weakness-training': '专项训练',
+    'weakness-training': '错题本',
     'knowledge-graph': '我的学习图谱',
     'leetcode-search': 'LeetCode 拓展',
     'leetcode-practice': 'LeetCode 练习',

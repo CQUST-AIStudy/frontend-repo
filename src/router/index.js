@@ -77,8 +77,7 @@ const routes = [
       },
       {
         path: 'weakness-training',
-        name: 'WeaknessTraining',
-        component: () => import('../views/student/WeaknessTraining.vue')
+        redirect: to => ({ path: '/student/wrong-notebook', query: to.query })
       },
       {
         path: 'wrong-notebook',

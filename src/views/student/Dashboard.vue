@@ -352,7 +352,6 @@ const quickEntries = [
   { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#fbf1eb,#f1d5c2)', color: '#ac6843' },
   { iconName: 'circle-x', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
   { iconName: 'check', label: '推荐练习', path: '/student/leetcode-search', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
-  { iconName: 'target', label: '专项训练', path: '/student/weakness-training', bg: 'linear-gradient(135deg,#faf5ff,#ede9fe)', color: '#7c3aed' },
   { iconName: 'brain', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
   { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#fbf1eb,#edd0bc)', color: '#d18a61' }
 ]
