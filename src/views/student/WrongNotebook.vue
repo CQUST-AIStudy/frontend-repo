@@ -148,7 +148,7 @@
                   </div>
 
                   <div class="question-actions">
-                    <ui-button type="primary" size="small" @click="practiceItem(item)">开始回炉</ui-button>
+                    <ui-button type="primary" size="small" @click="practiceItem(item)">{{ practiceActionLabel(item) }}</ui-button>
                     <template v-if="item.kind === 'notebook'">
                       <ui-button size="small" @click="openNoteEditor(item.row)">笔记</ui-button>
                       <ui-button v-if="!item.resolved" size="small" plain @click="markResolved(item.row)">标记掌握</ui-button>
@@ -490,6 +490,16 @@ function practiceItem(item) {
   practice(item.row)
 }
 
+function practiceActionLabel(item) {
+  if (item?.kind !== 'pta') return '开始回炉'
+  return hasPtaDirectUrl(item.raw) ? '前往 PTA 作答' : '查看原实验'
+}
+
+function hasPtaDirectUrl(item) {
+  return /^\d+$/.test(String(item?.pta_problem_set_id || '').trim())
+    && /^\d+$/.test(String(item?.source_problem_id || '').trim())
+}
+
 function practice(row) {
   if (!row?.problemId) {
     uiMessage.warning('该题目缺少 problemId，无法跳转')
@@ -502,8 +512,21 @@ function practice(row) {
 }
 
 function ptaPractice(item) {
-  if (item?.offering_id) router.push(`/student/experiment-detail/${item.offering_id}`)
-  else router.push('/student/experiments')
+  const problemSetId = String(item?.pta_problem_set_id || '').trim()
+  const sourceProblemId = String(item?.source_problem_id || '').trim()
+  if (hasPtaDirectUrl(item)) {
+    const url = `https://pintia.cn/problem-sets/${encodeURIComponent(problemSetId)}/exam/problems/${encodeURIComponent(sourceProblemId)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+    return
+  }
+  if (item?.offering_id) {
+    router.push({
+      path: `/student/experiment-detail/${item.offering_id}`,
+      query: { problemNo: item.problem_no || sourceProblemId || undefined }
+    })
+    return
+  }
+  router.push('/student/experiments')
 }
 
 async function markResolved(row) {

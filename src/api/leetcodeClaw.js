@@ -48,6 +48,13 @@ function createPracticeCard(fields = {}, overrides = {}) {
   }
 }
 
+function toMatchRatePercent(value) {
+  if (value === null || value === undefined || value === '') return null
+  const score = Number(value)
+  if (!Number.isFinite(score)) return null
+  return Math.round(Math.max(0, Math.min(1, score)) * 100)
+}
+
 export function mapProblemToPractice(problem = {}) {
   const slug = problem.sourceKey ? problem.sourceKey.replace(/^slug:/, '') : ''
   return createPracticeCard({
@@ -76,7 +83,7 @@ export function mapRecommendationItemToPractice(item = {}) {
     ...mapped,
     id: problem.id || item.problemId || mapped.id,
     problemId: problem.id || item.problemId || mapped.problemId,
-    matchRate: item.scoreNeedMatch ? Math.round(Number(item.scoreNeedMatch) * 100) : null,
+    matchRate: toMatchRatePercent(item.scoreNeedMatch),
     reason: item.reasonText || '来自个性化推荐',
     source: 'leetcode_recommendation',
     type: 'leetcode_problem',
@@ -144,7 +151,7 @@ export function mapClawItemToPractice(item = {}) {
     title: getProblemTitle(problem),
     difficulty,
     estimatedMinutes: difficulty === 'hard' ? 50 : difficulty === 'easy' ? 20 : 35,
-    matchRate: item.score ? Math.round(Number(item.score) * 100) : null,
+    matchRate: toMatchRatePercent(item.score),
     reason: item.reason || '来自 LeetCodeClaw 关键词推荐',
     source: 'leetcode_claw',
     type: 'leetcode_claw_problem',

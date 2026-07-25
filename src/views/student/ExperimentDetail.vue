@@ -512,6 +512,13 @@ const displayQuestions = computed(() => {
   })
 })
 
+function focusRequestedProblem() {
+  const problemNo = String(route.query.problemNo || '').trim()
+  if (!problemNo) return
+  const index = displayQuestions.value.findIndex(question => String(question.problemNo || '').trim() === problemNo)
+  if (index >= 0) activeCodeQuestion.value = String(index)
+}
+
 // 完整源码去除测试点表格，只保留纯代码（去掉所有 | 开头的表格行）
 const cleanFullCode = computed(() => {
   const code = currentExp.value?.code
@@ -741,6 +748,7 @@ onMounted(async () => {
   loading.value = true
   try {
     await experimentStore.fetchExperimentDetail(experimentId.value)
+    focusRequestedProblem()
     await fetchPublishedGrading()
     if (isCompleted.value && !hasAiComment.value) generateAiComment(false)
     // 不再自动加载错误分析，改为用户点击 tab 时触发

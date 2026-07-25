@@ -284,30 +284,8 @@ export const useExperimentStore = defineStore('experiment', {
 })
 
 export const useLearningStore = defineStore('learning', {
-  state: () => ({
-    analysisData: null,
-    recommendedPractices: [],
-    loading: false
-  }),
+  state: () => ({}),
   actions: {
-    async fetchLearningAnalysis() {
-      this.loading = true
-      try {
-        this.analysisData = await api.getLearningAnalysis()
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async fetchRecommendedPractices() {
-      this.loading = true
-      try {
-        this.recommendedPractices = await api.getRecommendedPractices()
-      } finally {
-        this.loading = false
-      }
-    },
-
     async submitSelfAssessment(data) {
       return api.submitSelfAssessment(data)
     }

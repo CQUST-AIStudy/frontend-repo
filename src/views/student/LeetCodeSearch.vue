@@ -61,7 +61,7 @@
               <div class="[margin-top:6px] [display:flex] [gap:8px] [flex-wrap:wrap]">
                 <ui-tag size="small" :type="getDifficultyType(item.difficulty)">{{ getDifficultyText(item.difficulty) }}</ui-tag>
                 <ui-tag v-if="item.number" size="small" effect="plain">#{{ item.number }}</ui-tag>
-                <ui-tag v-if="item.matchRate" size="small" effect="plain">匹配 {{ item.matchRate }}%</ui-tag>
+                <ui-tag v-if="item.matchRate !== null" size="small" effect="plain">匹配 {{ item.matchRate }}%</ui-tag>
               </div>
             </div>
             <ui-button type="primary" size="small" @click="startPractice(item)">

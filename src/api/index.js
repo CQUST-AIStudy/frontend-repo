@@ -316,10 +316,6 @@ export default {
     return apiClient.get(`/api/experiments/${id}`)
   },
 
-  async getLearningAnalysis() {
-    return apiClient.get('/api/student/learning-analysis')
-  },
-
   async getLeetCodeProblem(problemId) {
     return apiClient.get(`/api/leetcode/problem/${problemId}`)
   },
