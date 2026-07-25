@@ -186,6 +186,9 @@
             <div v-if="currentTask.skipped_cooldown && currentTask.skipped_cooldown.length" class="text-[12px] text-[#e37400] mt-1">
               跳过（冷却中）: {{ currentTask.skipped_cooldown.join('、') }}
             </div>
+            <div v-if="currentTask.warnings && currentTask.warnings.length" class="text-[13px] text-[#b26a00] mt-1.5">
+              部分数据警告：{{ currentTask.warnings.join('；') }}
+            </div>
             <div v-if="currentTask.error" class="text-[13px] text-[#d93025] mt-1.5">{{ currentTask.error }}</div>
           </div>
         </div>
@@ -211,7 +214,10 @@
                   <td class="px-3 py-2 text-[#1d1d1f]">{{ row.task_id }}</td>
                   <td class="px-3 py-2 text-[#1d1d1f]">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</td>
                   <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></td>
-                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="row.status==='SUCCESS' ? 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]' : row.status==='FAILED' ? 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]' : 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]'">{{ row.status }}</span></td>
+                  <td class="px-3 py-2">
+                    <span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="taskStatusClass(row)">{{ taskStatusTextFor(row) }}</span>
+                    <div v-if="row.warnings && row.warnings.length" class="mt-1 text-[11px] text-[#b26a00]" :title="row.warnings.join('；')">答题卡数据缺失</div>
+                  </td>
                   <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></td>
                   <td class="px-3 py-2 text-[#1d1d1f]">{{ row.force ? '是' : '' }}</td>
                   <td class="px-3 py-2 text-[#6e6e73]">{{ row.created_at }}</td>
@@ -427,17 +433,24 @@ let pollTimer = null
 const cookieStatusText = computed(() => {
   return { OK: '正常', EXPIRED: '已过期', UNKNOWN: '未知' }[cookieStatus.value] || cookieStatus.value
 })
-const taskBadgeClass = computed(() => {
-  if (!currentTask.value) return 'bg-[#f0f0f5] text-[#6e6e73]'
-  const s = currentTask.value.status
+const taskStatusClass = (task) => {
+  const s = task?.status
+  if (s === 'SUCCESS' && task?.warnings?.length) return 'bg-[rgba(196,154,60,0.12)] text-[#b26a00]'
   if (s === 'SUCCESS') return 'bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]'
   if (s === 'FAILED') return 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]'
   if (s === 'RUNNING') return 'bg-[rgba(196,154,60,0.1)] text-[#c49a3c]'
   return 'bg-[#f0f0f5] text-[#6e6e73]'
+}
+const taskStatusTextFor = (task) => {
+  if (task?.status === 'SUCCESS' && task?.warnings?.length) return '完成（部分数据缺失）'
+  return { QUEUED:'排队中', RUNNING:'运行中', SUCCESS:'完成', FAILED:'失败' }[task?.status] || task?.status || ''
+}
+const taskBadgeClass = computed(() => {
+  if (!currentTask.value) return 'bg-[#f0f0f5] text-[#6e6e73]'
+  return taskStatusClass(currentTask.value)
 })
 const taskStatusText = computed(() => {
-  if (!currentTask.value) return ''
-  return { QUEUED:'排队中', RUNNING:'运行中', SUCCESS:'完成', FAILED:'失败' }[currentTask.value.status] || currentTask.value.status
+  return taskStatusTextFor(currentTask.value)
 })
 
 const modeCn = (m) => ({ incremental:'增量', submissions:'提交', refresh:'刷新', full:'全量' }[m] || m)
@@ -618,7 +631,7 @@ async function triggerSync(mode) {
     const taskId = r?.taskId || r?.task_id
     if (taskId) {
       currentTask.value = { task_id: taskId, status: 'QUEUED', new_sets_count: 0,
-        refreshed_count: 0, submissions_count: 0, error: null, skipped_cooldown: [], force: forceMode.value,
+        refreshed_count: 0, submissions_count: 0, error: null, warnings: [], skipped_cooldown: [], force: forceMode.value,
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value }
       pollTaskStatus(taskId)
     } else {
@@ -629,6 +642,7 @@ async function triggerSync(mode) {
         refreshed_count: 0,
         submissions_count: 0,
         error: r?.error || null,
+        warnings: Array.isArray(r?.warnings) ? r.warnings : [],
         skipped_cooldown: [],
         force: forceMode.value,
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value
@@ -654,7 +668,9 @@ function pollTaskStatus(taskId) {
         pollTimer = null
         loadTaskHistory()
         loadCooldown()
-        if (r.data.status === 'SUCCESS') uiMessage.success('数据同步完成')
+        if (r.data.status === 'SUCCESS' && r.data.warnings?.length) {
+          uiMessage.warning('数据同步完成，但部分答题卡数据缺失，请查看任务警告')
+        } else if (r.data.status === 'SUCCESS') uiMessage.success('数据同步完成')
         else uiMessage.error(getFriendlyResponseMessage({ error: r.data.error }, '同步失败，请稍后重试'))
       }
     } catch { /* ignore */ }
