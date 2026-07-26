@@ -342,7 +342,7 @@
                 <td class="px-4 py-3 text-[#6e6e73]">{{ formatTime(row.joinedAt) }}</td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
-                    <UiButton class="text-[#d18a61] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="openResetPasswordDialog(row)">重置密码</UiButton>
+                    <UiButton class="text-[#d18a61] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="openResetPasswordDialog(row)">{{ row.username ? '重置密码' : '创建账号' }}</UiButton>
                     <UiButton class="text-[#c44b3f] text-sm hover:underline cursor-pointer border-none bg-transparent p-0" @click="confirmRemoveStudent(row)">移除</UiButton>
                   </div>
                 </td>
@@ -390,20 +390,23 @@
       </template>
     </AppModal>
 
-    <!-- Dialog 4: Reset Student Password -->
-    <AppModal v-model="resetPasswordVisible" title="重置学生密码" width="420px">
+    <!-- Dialog 4: Reset Student Password / Create Account -->
+    <AppModal v-model="resetPasswordVisible" :title="resetTargetHasAccount ? '重置学生密码' : '创建学生账号'" width="420px">
       <div class="space-y-4">
         <div class="rounded-[12px] bg-[#f5f5f7] p-3.5 text-sm text-[#6e6e73]">
           <div>学生：<span class="font-medium text-[#1d1d1f]">{{ resetPasswordTarget?.studentName }}</span></div>
           <div class="mt-1">学号：<span class="font-medium text-[#1d1d1f]">{{ resetPasswordTarget?.studentNum }}</span></div>
         </div>
+        <div v-if="!resetTargetHasAccount" class="rounded-[12px] bg-[#fef7e0] p-3 text-[13px] text-[#b26a00] leading-relaxed">
+          该学生尚未创建登录账号，确认后将自动创建账号（用户名为学号 {{ resetPasswordTarget?.studentNum || '—' }}）并设置下方密码。
+        </div>
         <div>
-          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">新密码</label>
+          <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">{{ resetTargetHasAccount ? '新密码' : '初始密码' }}</label>
           <UiInput
             v-model="resetPasswordForm.newPassword"
             type="password"
             autocomplete="new-password"
-            placeholder="请输入新密码（至少6位）"
+            :placeholder="resetTargetHasAccount ? '请输入新密码（至少6位）' : '请输入初始密码（至少6位）'"
             class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
           />
           <p v-if="resetPasswordError" class="mt-1 text-xs text-[#c44b3f]">{{ resetPasswordError }}</p>
@@ -416,8 +419,8 @@
           :disabled="resettingPassword"
           @click="doResetPassword"
         >
-          <span v-if="resettingPassword" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>重置中</span>
-          <span v-else>确认重置</span>
+          <span v-if="resettingPassword" class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>{{ resetTargetHasAccount ? '重置中' : '创建中' }}</span>
+          <span v-else>{{ resetTargetHasAccount ? '确认重置' : '创建账号' }}</span>
         </UiButton>
       </template>
     </AppModal>
@@ -647,6 +650,7 @@ const resetPasswordTarget = ref(null)
 const resetPasswordForm = reactive({ newPassword: '' })
 const resetPasswordError = ref('')
 const resettingPassword = ref(false)
+const resetTargetHasAccount = computed(() => !!resetPasswordTarget.value?.username)
 
 const cookieStatus = ref('UNKNOWN')
 const cookieDialogVisible = ref(false)
@@ -1240,25 +1244,27 @@ const openResetPasswordDialog = (row) => {
 
 const doResetPassword = async () => {
   if (!resetPasswordForm.newPassword.trim()) {
-    resetPasswordError.value = '请输入新密码'
+    resetPasswordError.value = '请输入密码'
     return
   }
   if (resetPasswordForm.newPassword.trim().length < 6) {
-    resetPasswordError.value = '新密码长度不能少于6位'
+    resetPasswordError.value = '密码长度不能少于6位'
     return
   }
+  const creatingAccount = !resetTargetHasAccount.value
   resettingPassword.value = true
   resetPasswordError.value = ''
   try {
     await resetStudentPassword(currentClass.value.id, resetPasswordTarget.value.id, {
-      newPassword: resetPasswordForm.newPassword.trim()
+      newPassword: resetPasswordForm.newPassword.trim(),
+      createIfMissing: creatingAccount
     })
-    uiMessage.success('密码重置成功')
+    uiMessage.success(creatingAccount ? '账号创建成功，用户名为学号' : '密码重置成功')
     resetPasswordVisible.value = false
     const res = await getClassStudents(currentClass.value.id)
     students.value = extract(res) || []
   } catch (error) {
-    resetPasswordError.value = error.message || '重置密码失败'
+    resetPasswordError.value = error.message || (creatingAccount ? '创建账号失败' : '重置密码失败')
   } finally {
     resettingPassword.value = false
   }
