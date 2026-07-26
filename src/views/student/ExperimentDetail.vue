@@ -85,7 +85,7 @@
               </div>
 
               <!-- 双栏布局 -->
-              <div v-if="displayQuestions.length" class="flex border border-[#e8eaed] rounded-xl overflow-hidden" style="height:min(65vh,620px);min-height:330px">
+              <div v-if="displayQuestions.length" class="flex min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden" style="height:min(610px,calc(100vh - 260px));min-height:330px">
                 <!-- 左侧题目导航 -->
                 <div class="flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto min-h-0" style="padding:0 0 16px 0;scrollbar-gutter:stable">
                   <UiButton @click="activeCodeQuestion = 'full'" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none shrink-0" :class="activeCodeQuestion === 'full' ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">完整源码</UiButton>
@@ -158,8 +158,8 @@
                 </div>
               </div>
               <!-- 兜底 -->
-              <div v-else-if="cleanFullCode" class="flex-1 min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden">
-                <CodeViewer :code="cleanFullCode" language="cpp" maxHeight="none" hideCopy />
+              <div v-else-if="cleanFullCode" class="flex-1 min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden" style="height:min(610px,calc(100vh - 260px));min-height:330px">
+                <CodeViewer :code="cleanFullCode" language="cpp" maxHeight="none" hideCopy style="height:100%" />
               </div>
 
             </template>

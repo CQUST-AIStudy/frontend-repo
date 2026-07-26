@@ -11,7 +11,7 @@
         </button>
       </div>
     </div>
-    <div class="code-viewer__body">
+    <div ref="bodyRef" class="code-viewer__body" @wheel="handleWheel">
       <table class="code-viewer__table">
         <tbody>
           <tr v-for="(line, idx) in lines" :key="idx" class="code-viewer__line">
@@ -37,6 +37,7 @@ const props = defineProps({
 })
 
 const copied = ref(false)
+const bodyRef = ref(null)
 
 const langLabel = computed(() => {
   const labels = { c: 'C', cpp: 'C++', java: 'Java', python: 'Python', javascript: 'JavaScript', sql: 'SQL', json: 'JSON', xml: 'XML', css: 'CSS', bash: 'Bash' }
@@ -122,10 +123,51 @@ async function copyCode() {
     setTimeout(() => { copied.value = false }, 2000)
   }
 }
+
+function normalizeWheelDelta(event) {
+  const DOM_DELTA_LINE = 1
+  const DOM_DELTA_PAGE = 2
+  if (event.deltaMode === DOM_DELTA_LINE) return { x: event.deltaX * 16, y: event.deltaY * 16 }
+  if (event.deltaMode === DOM_DELTA_PAGE) return { x: event.deltaX * window.innerWidth, y: event.deltaY * window.innerHeight }
+  return { x: event.deltaX, y: event.deltaY }
+}
+
+function canScrollInDirection(el, delta, axis) {
+  if (!el || delta === 0) return false
+  if (axis === 'y') {
+    const maxTop = el.scrollHeight - el.clientHeight
+    if (maxTop <= 1) return false
+    if (delta < 0) return el.scrollTop > 0
+    return el.scrollTop < maxTop - 1
+  }
+  const maxLeft = el.scrollWidth - el.clientWidth
+  if (maxLeft <= 1) return false
+  if (delta < 0) return el.scrollLeft > 0
+  return el.scrollLeft < maxLeft - 1
+}
+
+function handleWheel(event) {
+  const el = bodyRef.value
+  if (!el) return
+
+  const { x, y } = normalizeWheelDelta(event)
+  const shouldScrollY = canScrollInDirection(el, y, 'y')
+  const shouldScrollX = canScrollInDirection(el, x, 'x')
+
+  if (!shouldScrollY && !shouldScrollX) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  if (shouldScrollY) el.scrollTop += y
+  if (shouldScrollX) el.scrollLeft += x
+}
 </script>
 
 <style scoped>
 .code-viewer {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
@@ -180,12 +222,14 @@ async function copyCode() {
 }
 
 .code-viewer__body {
+  flex: 1 1 auto;
   overflow: auto;
   max-height: v-bind(maxHeight);
   min-height: 0;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   scrollbar-gutter: stable;
   padding: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .code-viewer__table {

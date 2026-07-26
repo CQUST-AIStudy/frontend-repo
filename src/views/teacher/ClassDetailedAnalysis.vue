@@ -193,7 +193,7 @@
           </div>
 
           <!-- 学生能力分布 -->
-          <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
+          <div id="student-layer-analysis" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-5">
             <div class="flex justify-between items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
               <span class="font-semibold text-[#1d1d1f]">班级能力分布</span>
             </div>
