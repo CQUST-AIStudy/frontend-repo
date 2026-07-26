@@ -246,15 +246,34 @@
                   <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:14px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">重新分析</UiButton>
                 </div>
 
-                <!-- 最新提交概况 -->
-                <div v-if="errorAnalysisData.latestCode || errorAnalysisData.latestJudgeStatus" class="g-latest-submission [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:14px]">
+                <!-- 提交代码（多题目 tab 切换） -->
+                <div v-if="displayQuestions.length || errorAnalysisData.latestCode || errorAnalysisData.latestJudgeStatus" class="g-latest-submission [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:14px]">
                   <div class="g-latest-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px]">
-                    <span class="g-latest-label [font-size:14px] [font-weight:500] [color:#202124]">最新提交</span>
+                    <span class="g-latest-label [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
                     <span v-if="errorAnalysisData.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(errorAnalysisData.latestJudgeStatus)">
                       判题结果：{{ judgeStatusLabel(errorAnalysisData.latestJudgeStatus) }}
                     </span>
                   </div>
-                  <CodeViewer v-if="errorAnalysisData.latestCode" :code="errorAnalysisData.latestCode" language="cpp" maxHeight="400px" />
+                  <!-- 题目标签栏 -->
+                  <div v-if="displayQuestions.length > 1" class="flex items-center gap-1 mb-0 border-b border-[#e8eaed] overflow-x-auto" style="margin:0 -16px 12px -16px;padding:0 16px">
+                    <button v-for="(q, i) in displayQuestions" :key="i"
+                      @click="analysisActiveProblemIndex = i"
+                      style="border:none;cursor:pointer;white-space:nowrap;background:none;padding:8px 14px 10px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:all 0.2s"
+                      :style="analysisActiveProblemIndex === i
+                        ? 'color:#1a73e8;border-bottom-color:#1a73e8'
+                        : 'color:#5f6368'">
+                      第{{ q.number || (i+1) }}题 {{ q.problemTitle || '' }}
+                    </button>
+                  </div>
+                  <!-- 当前题代码 -->
+                  <CodeViewer
+                    v-if="displayQuestions[analysisActiveProblemIndex]?.code"
+                    :code="displayQuestions[analysisActiveProblemIndex].code"
+                    language="cpp" maxHeight="400px"
+                  />
+                  <div v-else-if="displayQuestions.length" class="text-center py-12 text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
+                  <!-- Fallback: 单题 -->
+                  <CodeViewer v-else-if="errorAnalysisData.latestCode" :code="errorAnalysisData.latestCode" language="cpp" maxHeight="400px" />
                 </div>
 
                 <!-- 全 AC / 无错误 正面反馈 -->
@@ -399,6 +418,7 @@ const errorAnalysisData = ref(null)
 const errorLoading = ref(false)
 const errorChecked = ref(false)
 const warningData = ref(null)
+const analysisActiveProblemIndex = ref(0)
 const publishedGrading = ref(null)
 const downloadingPublishedReport = ref(false)
 
