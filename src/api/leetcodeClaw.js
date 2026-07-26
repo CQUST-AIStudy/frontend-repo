@@ -13,9 +13,9 @@ const leetCodeClawClient = axios.create({
 
 /** 搜索 LeetCode 题库（学生端，请求 Java 后端，不直连爬虫服务） */
 export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 20, offset = 0 } = {}) {
-  return apiClient.get('/api/leetcode/problems/search', {
+  return axios.get('/api/leetcode/problems/search', {
     params: { keyword, difficulty, limit, offset }
-  })
+  }).then(res => res.data)
 }
 
 export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
