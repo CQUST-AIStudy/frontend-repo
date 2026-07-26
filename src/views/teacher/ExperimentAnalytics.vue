@@ -682,13 +682,13 @@ async function loadExperiments({ autoSelect = true } = {}) {
   }
 }
 
-async function loadAnalytics(parentSeq = 0) {
+async function loadAnalytics(parentSeq) {
   if (!selectedExp.value) {
     clearDetailData()
     return
   }
 
-  const seq = parentSeq ?? ++requestSeq
+  const seq = parentSeq != null ? parentSeq : ++requestSeq
   loading.value = true
   errorMessage.value = ''
   // Clear stale data before fetching new
@@ -713,8 +713,8 @@ async function loadAnalytics(parentSeq = 0) {
   }
 }
 
-async function loadComparison(parentSeq = 0) {
-  const seq = parentSeq ?? ++requestSeq
+async function loadComparison(parentSeq) {
+  const seq = parentSeq != null ? parentSeq : ++requestSeq
   compLoading.value = true
   errorMessage.value = ''
 
@@ -932,7 +932,6 @@ function onClassChange(value) {
 
 function onExperimentChange(value) {
   selectedExp.value = value ?? null
-  // Clear stale data before loading new experiment
   clearDetailData()
   loadAnalytics()
 }
