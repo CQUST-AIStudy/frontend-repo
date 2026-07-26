@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { apiClient } from './index'
 import { createFriendlyError } from '../utils/errorMessage'
 
 const leetCodeClawClient = axios.create({
@@ -12,15 +13,15 @@ const leetCodeClawClient = axios.create({
 
 /** 搜索 LeetCode 题库（学生端，请求 Java 后端，不直连爬虫服务） */
 export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 20, offset = 0 } = {}) {
-  return axios.get('/api/leetcode/problems/search', {
+  return apiClient.get('/api/leetcode/problems/search', {
     params: { keyword, difficulty, limit, offset }
-  }).then(res => res.data)
+  })
 }
 
 export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
-  return axios.get('/api/recommendations/leetcode/sync', {
+  return apiClient.get('/api/recommendations/leetcode/sync', {
     params: { limit }
-  }).then(res => res.data)
+  })
 }
 
 /** 将后端 LeetCodeProblem 实体映射为前端练习卡片格式 */

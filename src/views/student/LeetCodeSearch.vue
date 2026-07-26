@@ -95,7 +95,9 @@ import {
   getDifficultyText,
   getDifficultyType,
   getPersonalizedLeetCodeRecommendations,
-  mapRecommendationItemToPractice
+  mapProblemToPractice,
+  mapRecommendationItemToPractice,
+  searchLeetCodeProblems
 } from '../../api/leetcodeClaw'
 
 const route = useRoute()
@@ -134,18 +136,47 @@ async function searchProblems() {
       .filter(item => matchesPersonalizedFilters(item, value, difficulty.value))
 
     if (!items.value.length) {
-      uiMessage.warning(
-        value || difficulty.value
-          ? '当前个性化推荐中没有符合筛选条件的题目。'
-          : '暂未获取到个性化推荐题目。'
-      )
+      const fallbackItems = await loadProblemBankFallback(value, requestLimit)
+      items.value = fallbackItems
+      uiMessage.warning(fallbackItems.length
+        ? '当前个性化推荐中没有匹配题目，已展示题库筛选结果。'
+        : '暂未获取到符合条件的 LeetCode 题目。')
     }
   } catch (error) {
-    uiMessage.error(error.friendlyMessage || error.message || '加载个性化推荐失败')
+    try {
+      const fallbackItems = await loadProblemBankFallback(value, requestLimit)
+      items.value = fallbackItems
+      if (fallbackItems.length) {
+        finishSearchProgress()
+        uiMessage.warning('个性化推荐服务暂不可用，已展示题库筛选结果。')
+      } else {
+        uiMessage.error(error.friendlyMessage || error.message || '加载个性化推荐失败')
+      }
+    } catch {
+      items.value = []
+      uiMessage.error(error.friendlyMessage || error.message || '加载个性化推荐失败')
+    }
   } finally {
     stopSearchProgress()
     loading.value = false
   }
+}
+
+async function loadProblemBankFallback(keywordValue, requestLimit) {
+  const response = await searchLeetCodeProblems({
+    keyword: keywordValue,
+    difficulty: difficulty.value,
+    limit: requestLimit,
+    offset: 0
+  })
+  const rows = Array.isArray(response?.data)
+    ? response.data
+    : Array.isArray(response?.items)
+      ? response.items
+      : Array.isArray(response)
+        ? response
+        : []
+  return rows.map(mapProblemToPractice)
 }
 
 function matchesPersonalizedFilters(item, keywordValue, difficultyValue) {
