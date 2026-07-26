@@ -1,22 +1,34 @@
 import { tapClient } from './client'
 
-export function getAnalyticsExperiments(classPrefix) {
+function normalizeScopeParams(scope = {}) {
+  if (typeof scope === 'string') return scope ? { classPrefix: scope } : {}
+  return Object.fromEntries(Object.entries(scope || {}).filter(([, value]) => (
+    value !== null && value !== undefined && String(value).trim() !== ''
+  )))
+}
+
+export function getAnalyticsExperiments(scope) {
   return tapClient.get('/api/analytics/experiments', {
-    params: classPrefix ? { classPrefix } : {}
+    params: normalizeScopeParams(scope)
   })
 }
 
-export function getClassPrefixes() {
-  return tapClient.get('/api/analytics/class-prefixes')
+export function getClassPrefixes(scope) {
+  return tapClient.get('/api/analytics/class-prefixes', {
+    params: normalizeScopeParams(scope)
+  })
 }
 
-export function getExperimentAnalytics(experimentId) {
-  return tapClient.get(`/api/analytics/experiments/${experimentId}`)
+export function getExperimentAnalytics(experimentId, scope) {
+  return tapClient.get(`/api/analytics/experiments/${experimentId}`, {
+    params: normalizeScopeParams(scope)
+  })
 }
 
-export function getExperimentComparison(classPrefix) {
-  const params = classPrefix ? { classPrefix } : {}
-  return tapClient.get('/api/analytics/comparison', { params })
+export function getExperimentComparison(scope) {
+  return tapClient.get('/api/analytics/comparison', {
+    params: normalizeScopeParams(scope)
+  })
 }
 
 export function getStudentAnalyticsOverview(studentId) {

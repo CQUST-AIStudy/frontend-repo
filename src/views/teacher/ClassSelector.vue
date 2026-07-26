@@ -192,7 +192,9 @@ function confirmSelect() {
     name: found.name,
     ptaGroupId,
     ptaGroupName,
-    ptaKeyword: ptaGroupName || found.ptaKeyword || found.pta_keyword || ''
+    ptaKeyword: ptaGroupName || found.ptaKeyword || found.pta_keyword || '',
+    courseId: found.courseId || found.course_id || null,
+    courseName: found.courseName || found.course_name || ''
   })
   router.replace('/teacher/dashboard')
 }

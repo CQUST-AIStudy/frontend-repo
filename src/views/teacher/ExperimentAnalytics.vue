@@ -67,7 +67,7 @@
       class="flex items-start gap-3 p-4 rounded-[14px] border border-[rgba(196,154,60,0.2)] bg-[rgba(196,154,60,0.06)] mb-3"
     >
       <svg class="w-5 h-5 text-[#c49a3c] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-      <span class="text-sm text-[#c49a3c]">当前教学班没有匹配到实验前缀，已自动切换为全部实验。</span>
+      <span class="text-sm text-[#c49a3c]">当前教学班没有匹配到实验前缀，已切换为当前课程内的全部实验。</span>
     </div>
 
     <!-- Info alert (scope) -->
@@ -319,8 +319,27 @@ const filterFallback = ref(false)
 const comparisonItems = ref([])
 const errorMessage = ref('')
 
-// Request sequence counter to prevent race conditions
-let requestSeq = 0
+const currentCourseScope = computed(() => {
+  const currentClass = userStore.selectedClass || {}
+  return {
+    classId: currentClass.id || currentClass.classId || null,
+    courseId: currentClass.courseId || currentClass.course_id || null,
+    courseName: currentClass.courseName || currentClass.course_name || '',
+  }
+})
+
+function analyticsScope(classPrefix = '') {
+  return {
+    ...currentCourseScope.value,
+    classPrefix: classPrefix || undefined,
+  }
+}
+
+// Independent request counters prevent one panel from cancelling another.
+let scopeRequestSeq = 0
+let detailRequestSeq = 0
+let comparisonRequestSeq = 0
+let prefixRequestSeq = 0
 
 const distChartRef = ref(null)
 const accChartRef = ref(null)
@@ -352,7 +371,12 @@ const activeClassLabel = computed(() => {
   const clsName = userStore.selectedClass?.name
   return clsName ? `${clsName}（全部实验）` : '全部实验'
 })
-const comparisonScopeLabel = computed(() => selectedClass.value ? `${selectedClass.value} 范围` : '全部实验范围')
+const currentCourseName = computed(() => (
+  currentCourseScope.value.courseName || userStore.selectedClass?.name || '当前课程'
+))
+const comparisonScopeLabel = computed(() => selectedClass.value
+  ? `${currentCourseName.value} / ${selectedClass.value}`
+  : `${currentCourseName.value}全部实验`)
 const comparisonSummary = computed(() => (
   `${comparisonScopeLabel.value}内共有 ${experiments.value.length} 个可分析实验，当前展示 ${comparisonItems.value.length} 个有对比指标的实验。`
 ))
@@ -375,7 +399,7 @@ const scopeDescription = computed(() => {
   }
   if (scope.className) parts.push(`数据班级：${scope.className}`)
   if (scope.courseName) parts.push(`课程：${scope.courseName}`)
-  parts.push('范围：仅数据结构实验，已排除 C 语言数据')
+  parts.push(`范围：仅${scope.courseName || currentCourseName.value}实验，已排除其他课程数据`)
   if (scope.rosterCount != null) parts.push(`名单人数：${safeNumber(scope.rosterCount)}`)
   if (scope.submittedCount != null) parts.push(`已提交：${safeNumber(scope.submittedCount)}`)
   if (scope.scoredCount != null) parts.push(`有成绩：${safeNumber(scope.scoredCount)}`)
@@ -616,34 +640,45 @@ function clearDetailData() {
 }
 
 async function loadClassPrefixes() {
+  const seq = ++prefixRequestSeq
+  const scope = { ...currentCourseScope.value }
   try {
-    const res = await getClassPrefixes()
+    const res = await getClassPrefixes(scope)
+    if (seq !== prefixRequestSeq) return false
     classPrefixes.value = normalizeArray(res)
     selectedClass.value = resolveInitialClassPrefix(classPrefixes.value)
   } catch (error) {
+    if (seq !== prefixRequestSeq) return false
     classPrefixes.value = []
     selectedClass.value = ''
     logger.warn('加载实验班级前缀失败:', error)
   }
+  return true
 }
 
 async function loadExperiments({ autoSelect = true } = {}) {
-  const seq = ++requestSeq
+  const seq = ++scopeRequestSeq
+  ++detailRequestSeq
+  ++comparisonRequestSeq
   loading.value = true
+  compLoading.value = false
   filterFallback.value = false
   errorMessage.value = ''
   // Clear stale data immediately so old scope info isn't shown during loading
+  experiments.value = []
+  selectedExp.value = null
+  comparisonItems.value = []
   clearDetailData()
 
   try {
-    let list = normalizeExperimentList(await getAnalyticsExperiments(selectedClass.value || undefined))
-    if (seq !== requestSeq) return // stale request, discard
+    let list = normalizeExperimentList(await getAnalyticsExperiments(analyticsScope(selectedClass.value)))
+    if (seq !== scopeRequestSeq) return // stale request, discard
 
     if (!list.length && selectedClass.value) {
       filterFallback.value = true
       selectedClass.value = ''
-      list = normalizeExperimentList(await getAnalyticsExperiments())
-      if (seq !== requestSeq) return
+      list = normalizeExperimentList(await getAnalyticsExperiments(analyticsScope()))
+      if (seq !== scopeRequestSeq) return
     }
 
     experiments.value = list
@@ -669,77 +704,75 @@ async function loadExperiments({ autoSelect = true } = {}) {
       await loadComparison(seq)
     }
   } catch (error) {
-    if (seq !== requestSeq) return
+    if (seq !== scopeRequestSeq) return
     experiments.value = []
     selectedExp.value = null
     data.value = null
     errorMessage.value = getErrorText(error, EXPERIMENT_LIST_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
-    if (seq === requestSeq) {
+    if (seq === scopeRequestSeq) {
       loading.value = false
     }
   }
 }
 
-async function loadAnalytics(parentSeq) {
+async function loadAnalytics(parentSeq = null) {
   if (!selectedExp.value) {
     clearDetailData()
     return
   }
 
-  const seq = parentSeq != null ? parentSeq : ++requestSeq
+  const expectedScopeSeq = parentSeq ?? scopeRequestSeq
+  const seq = ++detailRequestSeq
   loading.value = true
   errorMessage.value = ''
   // Clear stale data before fetching new
   clearDetailData()
   try {
-    const res = await getExperimentAnalytics(selectedExp.value)
-    if (seq !== requestSeq) return // stale request, discard
+    const res = await getExperimentAnalytics(selectedExp.value, currentCourseScope.value)
+    if (seq !== detailRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     data.value = normalizePayload(res)
     await nextTick()
-    if (seq !== requestSeq) return // stale after nextTick
+    if (seq !== detailRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     renderDistChart()
     renderAccChart()
   } catch (error) {
-    if (seq !== requestSeq) return
+    if (seq !== detailRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     data.value = null
     errorMessage.value = getErrorText(error, EXPERIMENT_ANALYTICS_ERROR_TEXT)
     disposeDetailCharts()
   } finally {
-    if (seq === requestSeq) {
+    if (seq === detailRequestSeq && expectedScopeSeq === scopeRequestSeq) {
       loading.value = false
     }
   }
 }
 
-async function loadComparison(parentSeq) {
-  const seq = parentSeq != null ? parentSeq : ++requestSeq
+async function loadComparison(parentSeq = null) {
+  const expectedScopeSeq = parentSeq ?? scopeRequestSeq
+  const seq = ++comparisonRequestSeq
   compLoading.value = true
   errorMessage.value = ''
 
   try {
-    if (seq !== requestSeq) {
-      compLoading.value = false
-      return
-    }
-    const res = await getExperimentComparison(selectedClass.value || undefined)
-    if (seq !== requestSeq) return
+    const res = await getExperimentComparison(analyticsScope(selectedClass.value))
+    if (seq !== comparisonRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     comparisonItems.value = alignComparisonItems(res)
   } catch (error) {
-    if (seq !== requestSeq) return
+    if (seq !== comparisonRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     comparisonItems.value = []
     errorMessage.value = getErrorText(error, EXPERIMENT_COMPARISON_ERROR_TEXT)
     compChart?.dispose()
     compChart = null
   } finally {
-    if (seq === requestSeq) {
+    if (seq === comparisonRequestSeq && expectedScopeSeq === scopeRequestSeq) {
       compLoading.value = false
     }
   }
 
   await nextTick()
-  if (seq !== requestSeq) return
+  if (seq !== comparisonRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
   renderComparisonChart()
 }
 
@@ -947,25 +980,29 @@ function handleResize() {
 }
 
 watch(showComparison, async value => {
-  // Cancel any inflight requests and reset both loading flags
-  ++requestSeq
-  loading.value = false
-  compLoading.value = false
   if (value) {
+    ++detailRequestSeq
     await loadComparison()
   } else if (selectedExp.value) {
+    ++comparisonRequestSeq
+    compLoading.value = false
     await loadAnalytics()
   }
 })
 
-// React to global teaching class changes (e.g. store updated without full navigation)
-watch(() => userStore.selectedClass?.id, async (newId, oldId) => {
-  // Only refresh if the class actually changed and prefixes are already loaded
-  if (newId !== oldId && classPrefixes.value.length > 0) {
-    const newPrefix = resolveInitialClassPrefix(classPrefixes.value)
-    if (newPrefix !== selectedClass.value) {
-      selectedClass.value = newPrefix
-      clearDetailData()
+// React to global teaching class changes even when the route is not remounted.
+watch(currentCourseScope, async (newScope, oldScope) => {
+  if (JSON.stringify(newScope) !== JSON.stringify(oldScope)) {
+    ++scopeRequestSeq
+    ++detailRequestSeq
+    ++comparisonRequestSeq
+    loading.value = false
+    compLoading.value = false
+    experiments.value = []
+    comparisonItems.value = []
+    selectedExp.value = null
+    clearDetailData()
+    if (await loadClassPrefixes()) {
       await loadExperiments()
     }
   }
@@ -978,6 +1015,10 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  ++scopeRequestSeq
+  ++detailRequestSeq
+  ++comparisonRequestSeq
+  ++prefixRequestSeq
   window.removeEventListener('resize', handleResize)
   disposeCharts()
 })

@@ -822,7 +822,9 @@ const toSelectedClass = (cls) => ({
   name: displayClassName(cls),
   ptaGroupId: getPtaGroupId(cls),
   ptaGroupName: getPtaGroupName(cls),
-  ptaKeyword: getPtaGroupName(cls) || cls.ptaKeyword || cls.pta_keyword || ''
+  ptaKeyword: getPtaGroupName(cls) || cls.ptaKeyword || cls.pta_keyword || '',
+  courseId: cls.courseId || cls.course_id || null,
+  courseName: cls.courseName || cls.course_name || ''
 })
 
 // Sync tag styling
