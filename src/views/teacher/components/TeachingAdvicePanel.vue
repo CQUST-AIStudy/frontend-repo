@@ -369,13 +369,13 @@
                   <button
                     v-if="advice"
                     type="button"
-                    :disabled="!focusStudentRows.length"
+                    :disabled="!focusStudentTotal"
                     :aria-expanded="focusPanelOpen"
                     class="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 py-1 text-xs font-semibold text-[#2563eb] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#dbeafe] hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                     @click.stop="toggleFocusPanel"
                   >
                     <span class="h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#2563eb]' : 'bg-[#93c5fd]'"></span>
-                    {{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentRows.length} 人` }}
+                    {{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentTotal} 人` }}
                     <span class="text-[11px]">{{ focusPanelOpen ? '▲' : '▼' }}</span>
                   </button>
                   <button
@@ -469,23 +469,39 @@
                     </div>
 
                     <div v-if="isStudentFollowSection(activeMarkdownSection) && focusStudentRows.length" class="space-y-3">
-                      <div class="grid grid-cols-1 gap-2 md:grid-cols-3">
-                        <div
-                          v-for="stat in focusStudentStats"
+                      <div class="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border border-[#bfdbfe] bg-[#eff6ff] px-4 py-2.5 text-xs font-medium text-[#1d4ed8]">
+                        <span v-if="focusStudentRosterComplete">已展示全部 {{ focusStudentTotal }} 名重点学生，并按问题严重程度分为 P1/P2/P3。</span>
+                        <span v-else>当前历史报告只保存了 {{ focusStudentRows.length }} / {{ focusStudentTotal }} 人，重新生成后可查看完整名单。</span>
+                        <span class="rounded-full bg-white px-2.5 py-1 font-semibold">AI 深度分析 {{ focusStudentAiAnalyzedCount }} 人</span>
+                      </div>
+                      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                        <button
+                          v-for="stat in focusStudentFilterStats"
                           :key="stat.key"
-                          class="rounded-[16px] border px-3 py-3"
-                          :class="stat.tone"
+                          type="button"
+                          :aria-pressed="selectedFocusPriority === stat.key"
+                          aria-controls="focus-student-group-list"
+                          :disabled="stat.count === 0"
+                          class="rounded-[16px] border px-3 py-3 text-left transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          :class="[
+                            stat.tone,
+                            selectedFocusPriority === stat.key
+                              ? stat.activeClass
+                              : 'hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(15,23,42,0.08)] active:translate-y-0 active:scale-[0.99]'
+                          ]"
+                          @click="selectFocusPriority(stat.key)"
                         >
                           <div class="flex items-center justify-between gap-2">
                             <span class="text-xs font-semibold" :class="stat.textClass">{{ stat.title }}</span>
                             <span class="text-lg font-bold" :class="stat.textClass">{{ stat.count }}</span>
                           </div>
-                        <p class="mt-1 text-xs font-medium leading-5 text-[#4b5563]">{{ stat.hint }}</p>
-                        </div>
+                          <p class="mt-1 text-xs font-medium leading-5 text-[#4b5563]">{{ stat.hint }}</p>
+                        </button>
                       </div>
 
+                      <TransitionGroup id="focus-student-group-list" name="focus-filter" tag="div" class="space-y-3">
                       <section
-                        v-for="group in focusStudentGroups"
+                        v-for="group in visibleFocusStudentGroups"
                         :key="group.key"
                         class="overflow-hidden rounded-[18px] border bg-white shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
                         :class="group.borderClass"
@@ -499,11 +515,11 @@
                             </div>
                           </div>
                           <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold" :class="group.textClass">
-                            {{ group.students.length }} 人
+                            {{ group.totalCount > group.students.length ? `展示 ${group.students.length} / 共 ${group.totalCount}` : `${group.totalCount} 人` }}
                           </span>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-3 p-3 xl:grid-cols-2">
+                        <div class="grid max-h-[560px] grid-cols-1 gap-3 overflow-y-auto overscroll-contain p-3 pr-2 xl:grid-cols-2">
                           <article
                             v-for="student in group.students"
                             :key="student.key"
@@ -515,6 +531,7 @@
                                   <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :class="student.dotClass">
                                     {{ student.priority }}
                                   </span>
+                                  <span v-if="student.aiAnalyzed" class="rounded-full bg-[#eff6ff] px-2 py-0.5 text-[10px] font-semibold text-[#2563eb]">AI 详析</span>
                                   <h6 class="text-sm font-semibold text-[#1d1d1f]">
                                     {{ student.studentName || '未命名学生' }}
                                     <span class="font-normal text-[#6e6e73]">{{ student.studentNo ? `· ${student.studentNo}` : '' }}</span>
@@ -553,6 +570,7 @@
                           </article>
                         </div>
                       </section>
+                      </TransitionGroup>
                     </div>
 
                     <div v-else-if="activeMarkdownSection.children?.length" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -595,19 +613,68 @@
             v-if="advice && focusPanelOpen"
             class="min-w-0 min-h-0 space-y-5 overflow-y-auto xl:sticky xl:top-4 xl:max-h-[calc(100vh-120px)] xl:pr-1"
           >
-            <section class="rounded-[20px] border border-black/[0.07] bg-white p-5">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <h3 class="text-base font-semibold text-[#1d1d1f]">课后重点找谁</h3>
-                  <p class="mt-1 text-xs leading-5 text-[#6e6e73]">按问题严重程度排序，先处理最需要介入的学生。</p>
-                </div>
-                <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-semibold text-[#2563eb]">
-                  {{ focusStudentRows.length }} 人
+            <section class="overflow-hidden rounded-[20px] border border-black/[0.07] bg-white">
+              <button
+                type="button"
+                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#f8fafc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2563eb]"
+                :aria-expanded="focusFollowExpanded"
+                aria-controls="focus-follow-content"
+                @click="toggleFocusFollow"
+              >
+                <span class="min-w-0">
+                  <span class="block text-sm font-semibold text-[#1d1d1f]">课后重点找谁</span>
+                  <span class="mt-1 block text-xs leading-5 text-[#6e6e73]">按严重程度分类，优先处理最需要介入的学生</span>
                 </span>
-              </div>
-              <div v-if="focusStudentRows.length" class="mt-4 space-y-3">
+                <span class="flex shrink-0 items-center gap-2">
+                  <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-semibold text-[#2563eb]">
+                    {{ selectedFocusPriority === 'ALL' ? `${focusStudentTotal} 人` : `${selectedFocusPriority} · ${visibleFocusStudentRows.length} 人` }}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-200 group-hover:bg-[#e8eef7]"
+                    :class="focusFollowExpanded ? 'rotate-180' : ''"
+                  >⌄</span>
+                </span>
+              </button>
+
+              <Transition name="sidebar-accordion">
+              <div v-if="focusFollowExpanded" id="focus-follow-content" class="border-t border-black/[0.06] px-4 pb-4 pt-3">
+                <div class="grid grid-cols-2 gap-2" aria-label="重点学生分类">
+                  <button
+                    v-for="stat in focusStudentFilterStats"
+                    :key="`sidebar-${stat.key}`"
+                    type="button"
+                    :aria-pressed="selectedFocusPriority === stat.key"
+                    aria-controls="sidebar-focus-student-list"
+                    :disabled="stat.count === 0"
+                    class="flex min-h-[58px] items-center justify-between gap-2 rounded-[12px] border px-3 py-2 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-45"
+                    :class="[
+                      stat.tone,
+                      selectedFocusPriority === stat.key
+                        ? stat.activeClass
+                        : 'hover:-translate-y-0.5 hover:shadow-[0_6px_14px_rgba(15,23,42,0.07)] active:translate-y-0 active:scale-[0.98]'
+                    ]"
+                    @click="selectFocusPriority(stat.key)"
+                  >
+                    <span class="text-[11px] font-semibold leading-4 sm:text-xs" :class="stat.textClass">{{ stat.title }}</span>
+                    <span class="text-base font-bold" :class="stat.textClass">{{ stat.count }}</span>
+                  </button>
+                </div>
+
+                <p class="mt-3 rounded-[12px] border border-[#bfdbfe] bg-[#eff6ff] px-3 py-2 text-xs font-medium leading-5 text-[#1d4ed8]">
+                  {{ focusStudentRosterComplete
+                    ? `已加载全部 ${focusStudentTotal} 人，其中 ${focusStudentAiAnalyzedCount} 人含 AI 深度建议，其余人员依据数据库做题结果生成跟进动作。`
+                    : `当前历史报告仅包含 ${focusStudentRows.length} / ${focusStudentTotal} 人，重新生成后可查看完整名单。` }}
+                </p>
+                <TransitionGroup
+                  v-if="visibleFocusStudentRows.length"
+                  id="sidebar-focus-student-list"
+                  name="focus-filter"
+                  tag="div"
+                  class="mt-3 max-h-[520px] space-y-3 overflow-y-auto overscroll-contain pr-1"
+                >
                 <article
-                  v-for="student in focusStudentRows"
+                  v-for="student in visibleFocusStudentRows"
                   :key="student.key"
                   class="rounded-[16px] border px-3.5 py-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(15,23,42,0.08)]"
                   :class="student.tone"
@@ -658,24 +725,51 @@
                   </div>
                   </Transition>
                 </article>
+                </TransitionGroup>
+                <p v-else class="mt-3 rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
+                  当前分类暂无重点学生。
+                </p>
               </div>
+              </Transition>
             </section>
 
-            <section class="rounded-[20px] border border-black/[0.07] bg-white p-5">
-              <h3 class="text-base font-semibold text-[#1d1d1f]">备课提醒</h3>
-              <p class="mt-1 text-xs leading-5 text-[#6e6e73]">把建议转成备课动作：讲什么、补什么、课后怎么追。</p>
-              <div v-if="teacherFocusRows.length" class="mt-4 space-y-3">
-                <div v-for="item in teacherFocusRows" :key="item.key" class="rounded-[16px] border border-black/[0.06] bg-[#f8fafc] px-4 py-3">
-                  <div class="text-xs font-semibold text-[#1d1d1f]">{{ item.title }}</div>
-                  <p class="mt-2 compact-line-clamp-2 text-xs leading-5 text-[#4b5563]">{{ item.instruction }}</p>
-                  <p class="mt-2 text-[11px] leading-5 text-[#6e6e73]">
-                    {{ item.when }} · {{ item.target }}
-                  </p>
+            <section class="overflow-hidden rounded-[20px] border border-black/[0.07] bg-white">
+              <button
+                type="button"
+                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#fffaf5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f97316]"
+                :aria-expanded="prepReminderExpanded"
+                aria-controls="prep-reminder-content"
+                @click="prepReminderExpanded = !prepReminderExpanded"
+              >
+                <span class="min-w-0">
+                  <span class="block text-sm font-semibold text-[#1d1d1f]">备课提醒</span>
+                  <span class="mt-1 block text-xs leading-5 text-[#6e6e73]">讲什么、补什么、课后怎么追</span>
+                </span>
+                <span class="flex shrink-0 items-center gap-2">
+                  <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[11px] font-semibold text-[#c2410c]">{{ teacherFocusRows.length }} 项</span>
+                  <span
+                    aria-hidden="true"
+                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#fff7ed] text-sm font-semibold text-[#c2410c] transition-transform duration-200 group-hover:bg-[#ffedd5]"
+                    :class="prepReminderExpanded ? 'rotate-180' : ''"
+                  >⌄</span>
+                </span>
+              </button>
+              <Transition name="sidebar-accordion">
+              <div v-if="prepReminderExpanded" id="prep-reminder-content" class="border-t border-black/[0.06] px-4 pb-4 pt-3">
+                <div v-if="teacherFocusRows.length" class="max-h-[420px] space-y-3 overflow-y-auto overscroll-contain pr-1">
+                  <div v-for="item in teacherFocusRows" :key="item.key" class="rounded-[14px] border border-[#fed7aa] bg-[#fffaf5] px-4 py-3">
+                    <div class="text-xs font-semibold text-[#9a3412]">{{ item.title }}</div>
+                    <p class="mt-2 compact-line-clamp-2 text-xs leading-5 text-[#374151]">{{ item.instruction }}</p>
+                    <p class="mt-2 text-[11px] font-medium leading-5 text-[#6e6e73]">
+                      {{ item.when }} · {{ item.target }}
+                    </p>
+                  </div>
                 </div>
+                <p v-else class="rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
+                  生成后会从 AI 报告里提炼“讲什么、补什么、怎么跟进”。
+                </p>
               </div>
-              <p v-else class="mt-4 rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
-                生成后会从 AI 报告里提炼“讲什么、补什么、怎么跟进”。
-              </p>
+              </Transition>
             </section>
 
             <section class="rounded-[20px] border border-black/[0.07] bg-white">
@@ -756,7 +850,10 @@ const reportExpanded = ref(true)
 const rawAdviceCopied = ref(false)
 const expandedMarkdownSectionKey = ref('')
 const focusPanelOpen = ref(false)
+const focusFollowExpanded = ref(false)
+const prepReminderExpanded = ref(false)
 const expandedFocusStudentKey = ref('')
+const selectedFocusPriority = ref('ALL')
 const historyExpanded = ref(false)
 let contextRequestId = 0
 
@@ -779,7 +876,9 @@ const scopeDescription = computed(() => {
 })
 const scopePreviewRows = computed(() => {
   const distribution = metrics.value.scoreDistribution || {}
-  const focusCount = Array.isArray(metrics.value.focusStudents) ? metrics.value.focusStudents.length : 0
+  const displayedFocusCount = Array.isArray(metrics.value.focusStudents) ? metrics.value.focusStudents.length : 0
+  const focusCountValue = Number(metrics.value.focusStudentTotal)
+  const focusCount = Number.isFinite(focusCountValue) ? Math.max(focusCountValue, displayedFocusCount) : displayedFocusCount
   const problemRows = Array.isArray(metrics.value.problemErrorPoints) ? metrics.value.problemErrorPoints : []
   const studentCount = Number(distribution.total || 0)
   if (scopeLevel.value === 'EXPERIMENT') {
@@ -1022,6 +1121,7 @@ const focusStudentRows = computed(() => {
   const aiStudents = Array.isArray(advice.value?.focusStudents) ? advice.value.focusStudents : []
   const metricStudents = contextFocusStudents.value
   const source = [...aiStudents, ...metricStudents]
+  const aiStudentKeys = new Set(aiStudents.map(item => String(item?.studentNo || item?.studentName || '').trim()).filter(Boolean))
   const rowsByKey = new Map()
 
   for (const item of source) {
@@ -1073,7 +1173,8 @@ const focusStudentRows = computed(() => {
       riskSummary: merged.riskSummary || (Array.isArray(merged.riskReasons) ? merged.riskReasons.join('；') : ''),
       suggestion: isGenericStudentSuggestion(suggestion) ? specificStudentSuggestion(merged, reason) : suggestion,
       validation: isGenericStudentSuggestion(validation) ? specificStudentValidation(merged, reason) : (validation || specificStudentValidation(merged, reason)),
-      evidenceRefs: Array.isArray(merged.evidenceRefs) ? merged.evidenceRefs : []
+      evidenceRefs: Array.isArray(merged.evidenceRefs) ? merged.evidenceRefs : [],
+      aiAnalyzed: aiStudentKeys.has(String(merged.studentNo || merged.studentName || '').trim())
     }
     const rowKey = row.studentNo || row.studentName || row.key
     const existing = rowsByKey.get(rowKey)
@@ -1081,8 +1182,8 @@ const focusStudentRows = computed(() => {
       rowsByKey.set(rowKey, row)
     } else {
       rowsByKey.set(rowKey, {
-        ...existing,
         ...row,
+        ...existing,
         evidenceRefs: Array.from(new Set([...(existing.evidenceRefs || []), ...(row.evidenceRefs || [])]))
       })
     }
@@ -1102,6 +1203,7 @@ const focusStudentRows = computed(() => {
 
 const contextFocusStudents = computed(() => {
   const source = [
+    ...(Array.isArray(metrics.value.focusStudentRoster) ? metrics.value.focusStudentRoster : []),
     ...(Array.isArray(metrics.value.focusStudents) ? metrics.value.focusStudents : []),
     ...(Array.isArray(teachingContext.value.studentFollowUpCandidates) ? teachingContext.value.studentFollowUpCandidates : [])
   ]
@@ -1116,35 +1218,83 @@ const contextFocusStudents = computed(() => {
   return Array.from(rowsByKey.values())
 })
 
+const focusStudentTotal = computed(() => {
+  const value = Number(metrics.value.focusStudentTotal)
+  return Number.isFinite(value) ? Math.max(value, focusStudentRows.value.length) : focusStudentRows.value.length
+})
+
+const focusStudentAiLimit = computed(() => {
+  const value = Number(metrics.value.focusStudentAiLimit ?? metrics.value.focusStudentDisplayLimit)
+  return Number.isFinite(value) && value > 0 ? value : 12
+})
+
+const focusStudentHasMore = computed(() => focusStudentTotal.value > focusStudentRows.value.length)
+const focusStudentRosterComplete = computed(() => focusStudentTotal.value > 0 && !focusStudentHasMore.value)
+const focusStudentAiAnalyzedCount = computed(() => {
+  if (advice.value && Array.isArray(advice.value.focusStudents)) {
+    return Math.min(advice.value.focusStudents.length, focusStudentRows.value.length)
+  }
+  const value = Number(metrics.value.focusStudentAiAnalyzed)
+  if (Number.isFinite(value) && value >= 0) return Math.min(value, focusStudentTotal.value)
+  return Math.min(focusStudentAiLimit.value, focusStudentRows.value.length)
+})
+
+const focusStudentPriorityCounts = computed(() => {
+  const counts = metrics.value.focusStudentPriorityCounts
+  if (!counts || typeof counts !== 'object') return null
+  return {
+    P1: Math.max(0, Number(counts.P1) || 0),
+    P2: Math.max(0, Number(counts.P2) || 0),
+    P3: Math.max(0, Number(counts.P3) || 0)
+  }
+})
+
 const focusStudentStats = computed(() => {
   const rows = focusStudentRows.value
+  const counts = focusStudentPriorityCounts.value
   return [
     {
       key: 'P1',
       title: 'P1 立即找',
-      count: rows.filter(item => item.priority === 'P1').length,
+      count: counts?.P1 ?? rows.filter(item => item.priority === 'P1').length,
       hint: '高风险，建议下次课前先处理',
       tone: 'border-[#fecaca] bg-[#fff7f7]',
-      textClass: 'text-[#b42318]'
+      textClass: 'text-[#b42318]',
+      activeClass: 'ring-2 ring-[#ef4444] ring-offset-1 shadow-[0_8px_18px_rgba(239,68,68,0.15)]'
     },
     {
       key: 'P2',
       title: 'P2 本周跟',
-      count: rows.filter(item => item.priority === 'P2').length,
+      count: counts?.P2 ?? rows.filter(item => item.priority === 'P2').length,
       hint: '中风险，安排短周期纠偏',
       tone: 'border-[#fed7aa] bg-[#fffaf5]',
-      textClass: 'text-[#c2410c]'
+      textClass: 'text-[#c2410c]',
+      activeClass: 'ring-2 ring-[#f97316] ring-offset-1 shadow-[0_8px_18px_rgba(249,115,22,0.14)]'
     },
     {
       key: 'P3',
       title: 'P3 观察复测',
-      count: rows.filter(item => item.priority === 'P3').length,
+      count: counts?.P3 ?? rows.filter(item => item.priority === 'P3').length,
       hint: '低风险，用小题或补交结果复核',
       tone: 'border-[#bfdbfe] bg-[#f8fbff]',
-      textClass: 'text-[#1d4ed8]'
+      textClass: 'text-[#1d4ed8]',
+      activeClass: 'ring-2 ring-[#3b82f6] ring-offset-1 shadow-[0_8px_18px_rgba(59,130,246,0.14)]'
     }
   ]
 })
+
+const focusStudentFilterStats = computed(() => [
+  {
+    key: 'ALL',
+    title: '全部重点学生',
+    count: focusStudentTotal.value,
+    hint: '查看完整风险名单',
+    tone: 'border-[#dbe3ee] bg-white',
+    textClass: 'text-[#1d1d1f]',
+    activeClass: 'ring-2 ring-[#64748b] ring-offset-1 shadow-[0_8px_18px_rgba(15,23,42,0.12)]'
+  },
+  ...focusStudentStats.value
+])
 
 const focusStudentGroups = computed(() => {
   const priorities = ['P1', 'P2', 'P3']
@@ -1154,11 +1304,21 @@ const focusStudentGroups = computed(() => {
       return {
         key: priority,
         students: focusStudentRows.value.filter(item => item.priority === priority),
+        totalCount: focusStudentPriorityCounts.value?.[priority]
+          ?? focusStudentRows.value.filter(item => item.priority === priority).length,
         ...meta
       }
     })
     .filter(group => group.students.length)
 })
+
+const visibleFocusStudentGroups = computed(() => selectedFocusPriority.value === 'ALL'
+  ? focusStudentGroups.value
+  : focusStudentGroups.value.filter(group => group.key === selectedFocusPriority.value))
+
+const visibleFocusStudentRows = computed(() => selectedFocusPriority.value === 'ALL'
+  ? focusStudentRows.value
+  : focusStudentRows.value.filter(student => student.priority === selectedFocusPriority.value))
 
 const adviceMarkdown = computed(() => {
   if (advice.value?.markdown) return advice.value.markdown
@@ -1456,9 +1616,23 @@ function toggleFocusStudentDetail(key) {
   expandedFocusStudentKey.value = expandedFocusStudentKey.value === key ? '' : key
 }
 
+function toggleFocusFollow() {
+  focusFollowExpanded.value = !focusFollowExpanded.value
+  if (!focusFollowExpanded.value) expandedFocusStudentKey.value = ''
+}
+
 function toggleFocusPanel() {
   focusPanelOpen.value = !focusPanelOpen.value
-  if (!focusPanelOpen.value) expandedFocusStudentKey.value = ''
+  if (!focusPanelOpen.value) {
+    focusFollowExpanded.value = false
+    prepReminderExpanded.value = false
+    expandedFocusStudentKey.value = ''
+  }
+}
+
+function selectFocusPriority(priority) {
+  selectedFocusPriority.value = priority
+  expandedFocusStudentKey.value = ''
 }
 
 function mergeFocusStudent(item) {
@@ -1889,7 +2063,10 @@ function changeScope(nextLevel) {
   activeReport.value = null
   contextData.value = null
   focusPanelOpen.value = false
+  focusFollowExpanded.value = false
+  prepReminderExpanded.value = false
   expandedFocusStudentKey.value = ''
+  selectedFocusPriority.value = 'ALL'
   errorMessage.value = ''
 }
 
@@ -1912,7 +2089,10 @@ async function loadContext() {
   activeReport.value = null
   contextData.value = null
   focusPanelOpen.value = false
+  focusFollowExpanded.value = false
+  prepReminderExpanded.value = false
   expandedFocusStudentKey.value = ''
+  selectedFocusPriority.value = 'ALL'
   errorMessage.value = ''
   if (!canGenerate.value) {
     contextData.value = null
@@ -1946,7 +2126,10 @@ async function generateReport() {
   if (!canGenerate.value || generating.value) return
   generating.value = true
   focusPanelOpen.value = false
+  focusFollowExpanded.value = false
+  prepReminderExpanded.value = false
   expandedFocusStudentKey.value = ''
+  selectedFocusPriority.value = 'ALL'
   errorMessage.value = ''
   try {
     const generatedReport = unwrap(await generateTeachingAdvice(requestPayload()))
@@ -1969,7 +2152,10 @@ async function generateReport() {
 function selectReport(report) {
   activeReport.value = report
   focusPanelOpen.value = false
+  focusFollowExpanded.value = false
+  prepReminderExpanded.value = false
   expandedFocusStudentKey.value = ''
+  selectedFocusPriority.value = 'ALL'
 }
 
 watch(() => props.experiments, rows => {
@@ -2082,6 +2268,20 @@ watch(renderedAdviceSections, sections => {
   transform: translateX(16px) scale(0.98);
 }
 
+.sidebar-accordion-enter-active,
+.sidebar-accordion-leave-active {
+  transform-origin: top center;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.sidebar-accordion-enter-from,
+.sidebar-accordion-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scaleY(0.98);
+}
+
 .detail-fade-enter-active,
 .detail-fade-leave-active {
   overflow: hidden;
@@ -2105,13 +2305,34 @@ watch(renderedAdviceSections, sections => {
   transform: translateY(0);
 }
 
+.focus-filter-enter-active,
+.focus-filter-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.focus-filter-enter-from,
+.focus-filter-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .report-section-enter-active,
   .report-section-leave-active,
   .focus-panel-enter-active,
   .focus-panel-leave-active,
+  .sidebar-accordion-enter-active,
+  .sidebar-accordion-leave-active,
   .detail-fade-enter-active,
-  .detail-fade-leave-active {
+  .detail-fade-leave-active,
+  .focus-filter-enter-active,
+  .focus-filter-leave-active {
+    transition: none;
+  }
+
+  .sidebar-chevron {
     transition: none;
   }
 }
