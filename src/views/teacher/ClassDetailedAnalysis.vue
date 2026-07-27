@@ -22,7 +22,7 @@
               </div>
               <div class="min-w-0">
                 <h2 class="text-[16px] font-semibold leading-6 text-[#1d1d1f]">班级教学分析平台</h2>
-                <p class="truncate text-[13px] leading-5 text-[#6e6e73]">选择教学班级后查看学习情况、能力趋势和AI教学建议</p>
+                <p class="truncate text-[13px] leading-5 text-[#6e6e73]">选择教学班级后查看学习情况、能力趋势和学生分层表现</p>
               </div>
             </div>
           </div>
@@ -297,12 +297,6 @@
               </table>
             </div>
           </div>
-
-          <TeachingAdvicePanel
-            :class-id="filterForm.classId"
-            :experiments="experimentList"
-            class="mb-5"
-          />
         </template>
 
         <!-- 未加载班级数据时提示 -->
@@ -371,7 +365,6 @@ import { message as uiMessage } from '@/services/feedback'
 import {DataAnalysis} from '@/components/ui/icons'
 import api from '../../api'
 import AppModal from '../../components/AppModal.vue'
-import TeachingAdvicePanel from './components/TeachingAdvicePanel.vue'
 
 const router = useRouter()
 const route = useRoute()

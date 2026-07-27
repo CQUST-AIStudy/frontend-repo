@@ -325,6 +325,6 @@ const copyResult = async () => {
 }
 
 onMounted(() => {
-  router.replace('/teacher/class-detailed-analysis')
+  router.replace('/teacher/teaching-advice')
 })
 </script>

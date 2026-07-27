@@ -316,8 +316,7 @@ const menuItems = [
     group: 'class', icon: UserFilled, label: '教学班管理',
     children: [
       { path: '/teacher/class-list', label: '教学班列表' },
-      { path: '/teacher/class-analysis', label: '教学班分析' },
-      { path: '/teacher/class-profile', label: '能力画像' }
+      { path: '/teacher/class-profile', label: '教学班级分析' }
     ]
   },
   {
@@ -347,7 +346,7 @@ const menuItems = [
     group: 'ai', icon: ChatDotRound, label: 'AI 助教',
     children: [
       { path: '/teacher/ai-chat', label: 'AI 对话' },
-      { path: '/teacher/class-detailed-analysis', label: '教学建议' }
+      { path: '/teacher/teaching-advice', label: '教学建议' }
     ]
   },
   {

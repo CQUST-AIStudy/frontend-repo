@@ -1,6 +1,6 @@
 <template>
-  <section class="rounded-[24px] border border-black/[0.06] bg-white/95 p-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] lg:p-6">
-    <div class="flex flex-col gap-4 border-b border-black/[0.06] pb-5 xl:flex-row xl:items-center xl:justify-between">
+  <section class="teaching-advice-shell rounded-[24px] border border-black/[0.06] bg-white/95 p-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] lg:p-6">
+    <div class="shrink-0 flex flex-col gap-4 border-b border-black/[0.06] pb-5 xl:flex-row xl:items-center xl:justify-between">
       <div class="min-w-0">
         <div class="flex items-center gap-3">
           <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--app-primary)] text-sm font-bold text-white">AI</span>
@@ -19,7 +19,7 @@
             type="button"
             class="h-8 min-w-[82px] rounded-[7px] border-none px-3 text-sm font-medium transition-colors"
             :class="scopeLevel === item.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_4px_rgba(0,0,0,0.12)]' : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
-            @click="scopeLevel = item.value"
+            @click="changeScope(item.value)"
           >
             {{ item.label }}
           </button>
@@ -39,13 +39,13 @@
           type="button"
           role="switch"
           :aria-checked="includeHistory"
-          class="inline-flex h-10 items-center gap-2 rounded-[10px] border border-black/[0.08] bg-white px-3 text-sm text-[#374151]"
+          class="inline-flex h-10 items-center gap-3 rounded-[10px] border border-black/[0.08] bg-white px-3.5 text-sm text-[#374151]"
           @click="includeHistory = !includeHistory"
         >
-          <span class="relative h-5 w-9 rounded-full transition-colors" :class="includeHistory ? 'bg-[var(--app-primary)]' : 'bg-[#d1d5db]'">
-            <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform" :class="includeHistory ? 'translate-x-[18px]' : 'translate-x-0.5'"></span>
+          <span class="relative h-5 w-10 shrink-0 rounded-full transition-colors" :class="includeHistory ? 'bg-[var(--app-primary)]' : 'bg-[#d1d5db]'">
+            <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all" :class="includeHistory ? 'right-0.5' : 'left-0.5'"></span>
           </span>
-          同课程历史学期
+          <span class="shrink-0 leading-none">同课程历史学期</span>
         </button>
 
         <div class="flex flex-col items-stretch gap-1 sm:items-end">
@@ -63,7 +63,7 @@
       </div>
     </div>
 
-    <div class="mt-5 flex flex-col gap-4">
+    <div class="teaching-advice-body mt-5 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
       <div v-if="errorMessage" class="rounded-[12px] border border-[#f0c4bd] bg-[#fff7f5] px-4 py-3 text-sm text-[#a63d32]">
         {{ errorMessage }}
       </div>
@@ -73,8 +73,31 @@
       </div>
 
       <template v-else-if="activeData">
-        <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div class="min-w-0 space-y-4">
+        <div
+          class="grid h-full min-h-0 grid-cols-1 gap-5"
+          :class="{ 'xl:grid-cols-[minmax(0,1fr)_360px]': advice && focusPanelOpen }"
+        >
+          <div class="min-w-0 min-h-0 flex flex-col space-y-4">
+            <section v-if="!advice && scopePreviewRows.length" class="rounded-[18px] border border-[#dbeafe] bg-[#f8fbff] px-4 py-3.5">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="text-sm font-bold text-[#111827]">{{ currentScopeTitle }}数据预览</h3>
+                    <span class="rounded-full bg-[#dbeafe] px-2.5 py-1 text-[11px] font-semibold text-[#1d4ed8]">{{ scopeDescription }}</span>
+                  </div>
+                  <p class="mt-1 text-xs leading-5 text-[#64748b]">生成按钮会基于这组范围数据生成对应层级的教学建议。</p>
+                </div>
+                <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#64748b]">{{ activeScopeLevelLabel }}</span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+                <div v-for="item in scopePreviewRows" :key="item.key" class="rounded-[12px] border border-white bg-white px-3 py-2">
+                  <div class="text-[11px] font-medium text-[#64748b]">{{ item.label }}</div>
+                  <div class="mt-1 text-base font-bold text-[#111827]">{{ item.value }}</div>
+                  <div class="mt-0.5 truncate text-[10px] text-[#94a3b8]" :title="item.hint">{{ item.hint }}</div>
+                </div>
+              </div>
+            </section>
+
             <div v-if="false && advice" class="rounded-[22px] border border-[#d6e7ff] bg-gradient-to-br from-[#eef7ff] to-[#ecfbf4] p-4 shadow-[0_10px_28px_rgba(47,111,237,0.08)] lg:p-5">
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="min-w-0">
@@ -280,91 +303,6 @@
               </div>
             </div>
 
-            <div v-if="!advice && diagnosisVisible" class="rounded-[20px] border border-[#dbeafe] bg-white p-5">
-              <div class="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 class="text-base font-semibold text-[#1d1d1f]">生成前可用的真实学情信号</h3>
-                  <p class="mt-1 text-xs leading-5 text-[#6e6e73]">
-                    这些不是最终建议，只用于提醒老师：AI 会基于哪些做题结果、错误状态和数据质量生成判断。
-                  </p>
-                </div>
-                <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="diagnosisReliability.className">
-                  {{ diagnosisReliability.label }}
-                </span>
-              </div>
-
-              <div v-if="learningDiagnosis.conclusion" class="mt-4 rounded-[16px] bg-[#f8fafc] px-4 py-3">
-                <div class="text-xs font-semibold text-[#1d1d1f]">诊断结论</div>
-                <p class="mt-2 text-sm leading-6 text-[#374151]">{{ learningDiagnosis.conclusion }}</p>
-                <p v-if="learningDiagnosis.nextTeachingAction" class="mt-2 text-xs leading-5 text-[#2563eb]">
-                  下一步：{{ learningDiagnosis.nextTeachingAction }}
-                </p>
-              </div>
-
-              <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
-                <article v-if="problemErrorPointRows.length" class="rounded-[16px] border border-[#fecaca] bg-[#fffafa] px-4 py-3 lg:col-span-3">
-                  <div class="text-xs font-semibold text-[#991b1b]">学生做题错误点</div>
-                  <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    <div v-for="item in problemErrorPointRows" :key="`${item.problemNo}-${item.title}-${item.errorPoint}`" class="rounded-[12px] bg-white px-3 py-3 text-xs leading-5 text-[#4b5563]">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <span class="rounded bg-[#fef2f2] px-2 py-0.5 font-mono text-[#b42318]">第 {{ item.problemNo || '-' }} 题</span>
-                        <span class="font-semibold text-[#1d1d1f]">{{ item.title }}</span>
-                        <span v-if="item.inferredKnowledge" class="rounded bg-white px-2 py-0.5 text-[#6b7280]">
-                          {{ knowledgeSourceLabel(item) }}：{{ item.inferredKnowledge }}
-                        </span>
-                        <span v-if="item.difficultyLabel" class="rounded bg-[#fff7ed] px-2 py-0.5 text-[#c2410c]">
-                          {{ item.difficultyLabel }}
-                        </span>
-                      </div>
-                      <p class="mt-2">
-                        <span class="font-semibold text-[#991b1b]">错误点：</span>{{ item.errorPoint }}
-                      </p>
-                      <p class="mt-1">
-                        <span class="font-semibold text-[#1d1d1f]">主要状态：</span>{{ item.dominantStatus || 'UNKNOWN' }}
-                        <span class="ml-2 text-[#8a8a8f]">影响 {{ item.affectedStudentCount || 0 }} 人，平均尝试 {{ item.averageAttempts || 0 }} 次</span>
-                      </p>
-                      <p class="mt-1">
-                        <span class="font-semibold text-[#1d1d1f]">建议：</span>{{ item.teachingAdvice }}
-                      </p>
-                      <p v-if="item.validation" class="mt-1 text-[#2563eb]">复测：{{ item.validation }}</p>
-                    </div>
-                  </div>
-                </article>
-
-                <article v-if="knowledgeSignalRows.length" class="rounded-[16px] border border-black/[0.06] bg-[#fbfdff] px-4 py-3">
-                  <div class="text-xs font-semibold text-[#1d1d1f]">推断薄弱知识点</div>
-                  <div class="mt-3 space-y-2">
-                    <div v-for="item in knowledgeSignalRows" :key="item.knowledge" class="text-xs leading-5 text-[#4b5563]">
-                      <span class="font-medium text-[#1d1d1f]">{{ item.knowledge }}</span>
-                      <span class="ml-1 text-[#8a8a8f]">· {{ item.confidence || 'MEDIUM' }}</span>
-                      <p class="mt-0.5">{{ item.teachingAdvice }}</p>
-                    </div>
-                  </div>
-                </article>
-
-                <article v-if="errorSignalRows.length" class="rounded-[16px] border border-black/[0.06] bg-[#fbfffc] px-4 py-3">
-                  <div class="text-xs font-semibold text-[#1d1d1f]">高频错误类型</div>
-                  <div class="mt-3 space-y-2">
-                    <div v-for="item in errorSignalRows" :key="item.status" class="text-xs leading-5 text-[#4b5563]">
-                      <span class="font-mono font-semibold text-[#1d1d1f]">{{ item.status }}</span>
-                      <span class="ml-1 text-[#8a8a8f]">{{ item.studentCount || 0 }} 人 / {{ item.problemCount || 0 }} 题</span>
-                      <p class="mt-0.5">{{ item.teachingAdvice }}</p>
-                    </div>
-                  </div>
-                </article>
-
-                <article v-if="dataQualityRows.length" class="rounded-[16px] border border-[#fde68a] bg-[#fffdf5] px-4 py-3">
-                  <div class="text-xs font-semibold text-[#92400e]">数据可靠性提醒</div>
-                  <div class="mt-3 space-y-2">
-                    <div v-for="item in dataQualityRows" :key="item.type" class="text-xs leading-5 text-[#78350f]">
-                      <span class="font-medium">{{ item.message }}</span>
-                      <p class="mt-0.5 text-[#8a5a00]">{{ item.action }}</p>
-                    </div>
-                  </div>
-                </article>
-              </div>
-            </div>
-
             <div v-if="false && advice && hasStudentLayerSummary" class="rounded-[20px] border border-black/[0.07] bg-white p-5">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -405,7 +343,7 @@
               </div>
             </div>
 
-            <article v-if="advice" id="teaching-advice-markdown-root" class="overflow-hidden rounded-[24px] border border-[#bfdbfe] bg-gradient-to-br from-[#f8fbff] via-white to-[#fffaf5] p-4 shadow-[0_14px_36px_rgba(47,111,237,0.10)]">
+            <article v-if="advice" id="teaching-advice-markdown-root" class="teaching-advice-report min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[#bfdbfe] bg-gradient-to-br from-[#f8fbff] via-white to-[#fffaf5] p-4 shadow-[0_14px_36px_rgba(47,111,237,0.10)]">
               <button
                 v-if="false"
                 type="button"
@@ -426,30 +364,42 @@
                   {{ reportExpanded ? '收起原文' : '展开原文' }}
                 </span>
               </button>
-              <div v-if="reportExpanded">
+              <div v-if="reportExpanded" class="teaching-advice-report-body min-h-0 flex-1">
                 <div class="mb-3 flex flex-wrap items-center justify-end gap-2">
                   <button
+                    v-if="advice"
                     type="button"
-                    class="rounded-full border border-[#dbeafe] bg-white/90 px-3 py-1 text-xs font-medium text-[#2f6fed] shadow-sm"
+                    :disabled="!focusStudentRows.length"
+                    :aria-expanded="focusPanelOpen"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 py-1 text-xs font-semibold text-[#2563eb] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#dbeafe] hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                    @click.stop="toggleFocusPanel"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#2563eb]' : 'bg-[#93c5fd]'"></span>
+                    {{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentRows.length} 人` }}
+                    <span class="text-[11px]">{{ focusPanelOpen ? '▲' : '▼' }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-full border border-[#dbeafe] bg-white/90 px-3 py-1 text-xs font-medium text-[#2f6fed] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#eff6ff] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
                     @click.stop="copyRawAdvice"
                   >
                     {{ rawAdviceCopied ? '已复制' : '复制 Markdown' }}
                   </button>
                 </div>
-                <div v-if="renderedAdviceSections.length" class="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-                  <aside class="sticky top-4 self-start space-y-3 xl:max-h-[calc(100vh-120px)] xl:overflow-y-auto xl:pr-1">
-                    <div class="rounded-[20px] border border-[#bfdbfe] bg-gradient-to-br from-[#eef5ff] via-white to-[#fff7ed] px-4 py-4 shadow-[0_10px_24px_rgba(47,111,237,0.12)]">
+                <div v-if="renderedAdviceSections.length" class="teaching-advice-report-grid grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+                  <aside class="teaching-advice-outline sticky top-4 self-start min-h-0 space-y-3 xl:pr-1">
+                    <div class="rounded-[20px] border border-[#bfdbfe] bg-gradient-to-br from-[#f7fbff] via-white to-[#fff7ed] px-4 py-4 shadow-[0_10px_24px_rgba(47,111,237,0.10)]">
                       <div class="flex items-start justify-between gap-3">
                         <div>
-                          <div class="text-sm font-semibold text-[#1d1d1f]">报告目录</div>
-                          <p class="mt-1 text-xs leading-5 text-[#2563eb]">先看结论，再看怎么教，最后核对依据。</p>
+                          <div class="text-base font-bold text-[#111827]">报告目录</div>
+                          <p class="mt-1 text-sm font-semibold leading-5 text-[#1d4ed8]">先看结论，再看怎么教，最后核对依据。</p>
                         </div>
-                        <span class="rounded-full bg-[#2f6fed] px-2.5 py-1 text-[11px] font-semibold text-white">
+                        <span class="rounded-full bg-[#2f6fed] px-3 py-1.5 text-[11px] font-bold text-white shadow-sm">
                           当前 {{ activeMarkdownSectionIndex + 1 }}
                         </span>
                       </div>
-                      <div class="mt-3 rounded-[14px] border border-[#bfdbfe] bg-white/85 px-3 py-2 text-xs leading-5 text-[#2563eb]">
-                        <span class="font-semibold">推荐阅读：</span>结论 → 怎么教 → 找谁跟进 → 分层/课程调整 → 依据核对
+                      <div class="mt-3 rounded-[14px] border border-[#bfdbfe] bg-white px-3 py-2 text-sm font-semibold leading-6 text-[#1d4ed8]">
+                        <span class="text-[#111827]">推荐阅读：</span>结论 → 怎么教 → 找谁跟进 → 分层/课程调整 → 依据核对
                       </div>
                     </div>
 
@@ -458,8 +408,8 @@
                         v-for="section in renderedAdviceSections"
                         :key="section.key"
                         type="button"
-                        class="relative w-full rounded-[18px] border px-3 py-3 text-left transition-all"
-                        :class="expandedMarkdownSectionKey === section.key ? `${section.tone} shadow-[0_10px_22px_rgba(47,111,237,0.14)] ring-2 ring-inset ring-[rgba(47,111,237,0.22)]` : 'border-black/[0.06] bg-white/90 hover:border-[#bfdbfe] hover:bg-[#fbfdff]'"
+                        class="relative w-full rounded-[18px] border px-3.5 py-3.5 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985]"
+                        :class="expandedMarkdownSectionKey === section.key ? `${section.tone} shadow-[0_10px_22px_rgba(47,111,237,0.14)] ring-2 ring-inset ring-[rgba(47,111,237,0.24)]` : 'border-[#e5e7eb] bg-white hover:border-[#bfdbfe] hover:bg-[#fbfdff]'"
                         @click="toggleMarkdownSection(section.key)"
                       >
                         <div class="flex items-start gap-3">
@@ -469,62 +419,50 @@
                           <div class="min-w-0 flex-1">
                             <div class="flex items-start justify-between gap-2">
                               <div class="min-w-0">
-                                <div class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#2f6fed]">
+                                <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2563eb]">
                                   Level 1 · {{ section.badge }}
                                 </div>
-                                <h4 class="mt-0.5 truncate text-sm font-semibold text-[#1d1d1f]">{{ section.title }}</h4>
+                                <h4 class="mt-1 truncate text-[15px] font-bold text-[#111827]">{{ section.title }}</h4>
                               </div>
                             </div>
-                            <p class="mt-1 compact-line-clamp-2 text-[11px] leading-4 text-[#4b5563]">{{ section.hint }}</p>
-
-                            <div v-if="section.children?.length" class="mt-3 space-y-1.5 border-l border-dashed border-[#c7d7fe] pl-3">
-                              <div
-                                v-for="child in visibleMarkdownChildren(section)"
-                                :key="child.key"
-                                class="flex min-w-0 items-center gap-2 rounded-[10px] px-2 py-1 text-[11px]"
-                                :class="expandedMarkdownSectionKey === section.key ? 'bg-white/80 text-[#374151]' : 'bg-[#f8fafc] text-[#6e6e73]'"
-                              >
-                                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#93c5fd]"></span>
-                                <span class="shrink-0 text-[10px] text-[#8a8a8f]">L2</span>
-                                <span class="truncate">{{ child.title }}</span>
-                              </div>
-                            </div>
+                            <p class="mt-1 compact-line-clamp-2 text-xs font-medium leading-5 text-[#4b5563]">{{ section.hint }}</p>
                           </div>
                         </div>
                       </button>
                     </div>
                   </aside>
 
-                  <section v-if="activeMarkdownSection" class="space-y-3">
-                    <div class="rounded-[22px] border border-[#bfdbfe] bg-gradient-to-br from-white via-[#fbfdff] to-[#fff7ed] p-4 shadow-[0_10px_24px_rgba(47,111,237,0.08)]">
-                      <div class="flex flex-wrap items-center gap-2 text-[11px] text-[#6e6e73]">
-                        <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[#2f6fed]">原文</span>
+                  <Transition name="report-section" mode="out-in">
+                  <section v-if="activeMarkdownSection" :key="activeMarkdownSection.key" class="teaching-advice-content min-h-0 space-y-3">
+                    <div class="rounded-[22px] border border-[#bfdbfe] bg-gradient-to-br from-white via-[#fbfdff] to-[#fff7ed] p-5 shadow-[0_10px_24px_rgba(47,111,237,0.08)]">
+                      <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#4b5563]">
+                        <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 font-semibold text-[#2f6fed]">原文</span>
                         <span>›</span>
-                        <span class="rounded-full bg-[#f8fafc] px-2.5 py-1">{{ activeMarkdownSection.title }}</span>
+                        <span class="rounded-full bg-[#f3f6fb] px-2.5 py-1 text-[#374151]">{{ activeMarkdownSection.title }}</span>
                       </div>
                       <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="min-w-0">
-                          <div class="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#2f6fed]">
+                          <div class="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
                             Level 1 · {{ activeMarkdownSection.badge }}
                           </div>
-                          <h4 class="mt-1 text-lg font-semibold text-[#1d1d1f]">{{ activeMarkdownSection.title }}</h4>
-                          <p class="mt-1 text-xs leading-5 text-[#6e6e73]">{{ activeMarkdownSection.hint }}</p>
+                          <h4 class="mt-1 text-xl font-bold text-[#111827]">{{ activeMarkdownSection.title }}</h4>
+                          <p class="mt-1 text-sm font-medium leading-6 text-[#4b5563]">{{ activeMarkdownSection.hint }}</p>
                         </div>
                         <div class="flex shrink-0 items-center gap-2">
                           <button
                             type="button"
-                            class="rounded-full border border-[#dbeafe] bg-white px-3 py-1 text-[11px] text-[#2f6fed]"
+                            class="rounded-full border border-[#bfdbfe] bg-white px-3 py-1.5 text-xs font-semibold text-[#2563eb] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#eff6ff] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
                             @click="scrollMarkdownToTop"
                           >
                             回到目录顶部
                           </button>
                         </div>
                       </div>
-                      <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_160px]">
-                        <p class="rounded-[14px] bg-[#f8fafc] px-3 py-2 text-xs leading-5 text-[#4b5563]">
+                      <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_190px]">
+                        <p class="rounded-[14px] bg-[#f3f6fb] px-4 py-3 text-sm font-medium leading-6 text-[#374151]">
                           <span class="font-semibold text-[#1d1d1f]">本节摘要：</span>{{ activeMarkdownSection.preview }}
                         </p>
-                        <div class="rounded-[14px] bg-[#eef5ff] px-3 py-2 text-xs leading-5 text-[#2563eb]">
+                        <div class="rounded-[14px] bg-[#eef5ff] px-4 py-3 text-sm font-semibold leading-6 text-[#2563eb]">
                           <span class="font-semibold">阅读目标：</span>{{ activeMarkdownSection.readingGoal }}
                         </div>
                       </div>
@@ -542,7 +480,7 @@
                             <span class="text-xs font-semibold" :class="stat.textClass">{{ stat.title }}</span>
                             <span class="text-lg font-bold" :class="stat.textClass">{{ stat.count }}</span>
                           </div>
-                          <p class="mt-1 text-[11px] leading-4 text-[#6e6e73]">{{ stat.hint }}</p>
+                        <p class="mt-1 text-xs font-medium leading-5 text-[#4b5563]">{{ stat.hint }}</p>
                         </div>
                       </div>
 
@@ -557,7 +495,7 @@
                             <span class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white" :class="group.dotClass">{{ group.short }}</span>
                             <div>
                               <h5 class="text-sm font-semibold text-[#1d1d1f]">{{ group.title }}</h5>
-                              <p class="mt-0.5 text-xs leading-5 text-[#6e6e73]">{{ group.hint }}</p>
+                              <p class="mt-0.5 text-xs font-medium leading-5 text-[#4b5563]">{{ group.hint }}</p>
                             </div>
                           </div>
                           <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold" :class="group.textClass">
@@ -582,35 +520,35 @@
                                     <span class="font-normal text-[#6e6e73]">{{ student.studentNo ? `· ${student.studentNo}` : '' }}</span>
                                   </h6>
                                 </div>
-                                <p class="mt-2 text-xs leading-5 text-[#374151]">
+                                <p class="mt-2 text-sm font-medium leading-6 text-[#374151]">
                                   <span class="font-semibold text-[#1d1d1f]">问题判断：</span>{{ student.reason }}
                                 </p>
                               </div>
                               <div class="shrink-0 rounded-[12px] bg-[#f8fafc] px-3 py-2 text-right">
-                                <div class="text-[10px] text-[#8a8a8f]">风险分</div>
+                                <div class="text-[11px] font-semibold text-[#64748b]">风险分</div>
                                 <div class="text-base font-bold" :class="student.levelClass">{{ student.riskScore || '-' }}</div>
                               </div>
                             </div>
 
                             <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                               <div class="rounded-[12px] bg-[#f8fafc] px-3 py-2">
-                                <div class="text-[11px] font-semibold text-[#6e6e73]">类型</div>
+                                <div class="text-[11px] font-semibold text-[#64748b]">类型</div>
                                 <p class="mt-1 text-xs font-semibold text-[#1d1d1f]">{{ student.typeLabel }}</p>
                               </div>
                               <div class="rounded-[12px] bg-[#f8fafc] px-3 py-2">
-                                <div class="text-[11px] font-semibold text-[#6e6e73]">数据证据</div>
+                                <div class="text-[11px] font-semibold text-[#64748b]">数据证据</div>
                                 <p class="mt-1 text-xs leading-5 text-[#1d1d1f]">{{ student.evidenceSummary }}</p>
                               </div>
                             </div>
 
                             <div class="mt-3 rounded-[14px] border border-[#dbeafe] bg-[#fbfdff] px-3 py-2">
                               <div class="text-[11px] font-semibold text-[#2563eb]">老师下一步直接做</div>
-                              <p class="mt-1 text-xs leading-6 text-[#1d1d1f]">{{ student.suggestion }}</p>
+                              <p class="mt-1 text-sm font-medium leading-6 text-[#1d1d1f]">{{ student.suggestion }}</p>
                             </div>
 
                             <div class="mt-2 rounded-[14px] bg-[#f8fafc] px-3 py-2">
-                              <div class="text-[11px] font-semibold text-[#6e6e73]">验收方式</div>
-                              <p class="mt-1 text-xs leading-5 text-[#374151]">{{ student.validation }}</p>
+                              <div class="text-[11px] font-semibold text-[#64748b]">验收方式</div>
+                              <p class="mt-1 text-xs font-medium leading-5 text-[#374151]">{{ student.validation }}</p>
                             </div>
                           </article>
                         </div>
@@ -627,7 +565,7 @@
                           <div class="min-w-0">
                             <div class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#2f6fed]">Level 2 · {{ child.badge }}</div>
                             <div class="mt-0.5 text-xs font-semibold text-[#1d1d1f]">{{ child.title }}</div>
-                            <div class="mt-0.5 text-[11px] leading-4 text-[#8a8a8f]">{{ child.hint }}</div>
+                            <div class="mt-0.5 text-xs font-medium leading-5 text-[#4b5563]">{{ child.hint }}</div>
                           </div>
                         </div>
                         <div class="teaching-advice-markdown markdown-body max-h-[300px] overflow-y-auto px-3 py-3 pr-2 text-sm leading-7 text-[#1d1d1f]" v-html="child.html"></div>
@@ -640,6 +578,7 @@
                       v-html="activeMarkdownSection.html"
                     ></div>
                   </section>
+                  </Transition>
                 </div>
                 <div
                   v-else
@@ -649,68 +588,35 @@
               </div>
             </article>
 
-            <div v-if="advice" class="rounded-[18px] border border-black/[0.07] bg-[#f8fafc]">
-              <button
-                type="button"
-                class="flex w-full items-center justify-between gap-3 border-none bg-transparent px-4 py-4 text-left"
-                @click="evidenceExpanded = !evidenceExpanded"
-              >
-                <span class="text-sm font-semibold text-[#1d1d1f]">
-                  {{ evidenceExpanded ? '▾' : '▸' }} 查看 AI 判断依据：数据覆盖、证据编号、原始指标
-                </span>
-                <span class="shrink-0 text-xs text-[#8a8a8f]">默认折叠，避免堆数据</span>
-              </button>
-              <div v-if="evidenceExpanded" class="border-t border-black/[0.06] bg-white px-4 py-4">
-                <div class="flex flex-wrap items-center gap-3 text-xs text-[#6e6e73]">
-                  <span class="font-medium text-[#1d1d1f]">数据覆盖</span>
-                  <span>主要数据 {{ dataCoverage.primaryRows || 0 }} 组</span>
-                  <span>辅助数据 {{ dataCoverage.secondaryRows || 0 }} 组</span>
-                  <span class="rounded-full px-2 py-1 font-medium" :class="dataCoverage.status === 'AVAILABLE' ? 'bg-[#e9f7ef] text-[#18794e]' : 'bg-[#fff1e8] text-[#a14b12]'">
-                    {{ dataCoverage.status === 'AVAILABLE' ? '可分析' : '数据不足' }}
-                  </span>
-                </div>
-                <div v-if="scopeWarnings.length" class="mt-4 space-y-2">
-                  <div v-for="warning in scopeWarnings" :key="warning" class="rounded-[8px] bg-[#fff8e1] px-3 py-2 text-xs leading-5 text-[#8a5a00]">
-                    {{ warning }}
-                  </div>
-                </div>
-                <div v-if="evidenceRows.length" class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                  <div v-for="item in evidenceRows" :key="item.evidenceId" class="rounded-[12px] border border-black/[0.07] p-4">
-                    <div class="flex items-start justify-between gap-3">
-                      <span class="text-sm font-medium text-[#1d1d1f]">{{ item.label }}</span>
-                      <span class="shrink-0 rounded bg-[#f1f3f5] px-2 py-1 font-mono text-[11px] text-[#5f6368]">{{ item.evidenceId }}</span>
-                    </div>
-                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
-                      <template v-for="field in displayEvidenceFields(item.value)" :key="field.key">
-                        <div class="min-w-0">
-                          <dt class="truncate text-[11px] text-[#8a8a8f]">{{ field.label }}</dt>
-                          <dd class="mt-0.5 truncate text-xs font-medium text-[#374151]" :title="String(field.value)">{{ field.value }}</dd>
-                        </div>
-                      </template>
-                    </dl>
-                  </div>
-                </div>
-                <p v-else class="mt-4 text-sm text-[#8a8a8f]">当前范围暂无可引用指标。</p>
-              </div>
-            </div>
           </div>
 
-          <aside class="min-w-0 space-y-5">
+          <Transition name="focus-panel">
+          <aside
+            v-if="advice && focusPanelOpen"
+            class="min-w-0 min-h-0 space-y-5 overflow-y-auto xl:sticky xl:top-4 xl:max-h-[calc(100vh-120px)] xl:pr-1"
+          >
             <section class="rounded-[20px] border border-black/[0.07] bg-white p-5">
-              <h3 class="text-base font-semibold text-[#1d1d1f]">课后重点找谁</h3>
-              <p class="mt-1 text-xs leading-5 text-[#6e6e73]">只列需要老师介入的学生，并说明为什么、怎么跟进。</p>
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-semibold text-[#1d1d1f]">课后重点找谁</h3>
+                  <p class="mt-1 text-xs leading-5 text-[#6e6e73]">按问题严重程度排序，先处理最需要介入的学生。</p>
+                </div>
+                <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-semibold text-[#2563eb]">
+                  {{ focusStudentRows.length }} 人
+                </span>
+              </div>
               <div v-if="focusStudentRows.length" class="mt-4 space-y-3">
                 <article
                   v-for="student in focusStudentRows"
                   :key="student.key"
-                  class="rounded-[16px] border px-4 py-3"
+                  class="rounded-[16px] border px-3.5 py-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(15,23,42,0.08)]"
                   :class="student.tone"
                 >
                   <div class="flex items-start gap-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" :class="student.dotClass">{{ student.tag }}</span>
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" :class="student.dotClass">{{ student.tag }}</span>
                     <div class="min-w-0">
                       <div class="flex flex-wrap items-center gap-2">
-                        <div class="truncate text-sm font-semibold text-[#1d1d1f]">
+                        <div class="min-w-0 truncate text-sm font-semibold text-[#1d1d1f]">
                           {{ student.studentNo || '未知学号' }}
                           <span v-if="student.studentName" class="font-normal text-[#6e6e73]">· {{ student.studentName }}</span>
                         </div>
@@ -718,25 +624,41 @@
                           {{ student.priority }} · {{ student.riskLevel }}
                         </span>
                       </div>
-                      <p class="mt-1 compact-line-clamp-2 text-xs leading-5 text-[#6e6e73]">{{ student.reason }}</p>
+                        <p class="mt-1 compact-line-clamp-2 text-xs leading-5 text-[#6e6e73]">
+                          <span class="font-semibold text-[#1d1d1f]">卡点：</span>{{ student.stuckPoint || student.reason }}
+                        </p>
                     </div>
                   </div>
-                  <div v-if="student.riskSummary" class="mt-2 rounded-[10px] bg-white/70 px-3 py-1.5 text-[11px] leading-5 text-[#6e6e73]">
-                    <span class="font-semibold text-[#1d1d1f]">分级依据：</span>{{ student.riskSummary }}
-                  </div>
-                  <div class="mt-3 rounded-[12px] bg-white/80 px-3 py-2 text-xs leading-5 text-[#374151]">
+                  <div class="mt-2 rounded-[12px] border border-white/80 bg-white/80 px-3 py-2 text-xs leading-5 text-[#374151]">
                     <span class="font-semibold text-[#1d1d1f]">下一步：</span>{{ student.suggestion }}
                   </div>
-                  <details v-if="student.validation" class="mt-2 text-xs leading-5 text-[#374151]">
-                    <summary class="cursor-pointer select-none text-[#2f6fed]">查看验收方式</summary>
-                    <p class="mt-1">{{ student.validation }}</p>
-                  </details>
-                  <p v-if="student.evidenceRefs?.length" class="mt-2 font-mono text-[11px] text-[#8a8a8f]">证据：{{ joinRefs(student.evidenceRefs) }}</p>
+                  <button
+                    type="button"
+                    class="mt-2 inline-flex items-center gap-1 rounded-full border border-transparent px-2 py-1 text-[11px] font-medium text-[#2563eb] transition-all duration-200 ease-out hover:border-[#bfdbfe] hover:bg-white/80 active:scale-[0.97]"
+                    :aria-expanded="expandedFocusStudentKey === student.key"
+                    @click="toggleFocusStudentDetail(student.key)"
+                  >
+                    {{ expandedFocusStudentKey === student.key ? '收起详情' : '查看详情' }}
+                    <span>{{ expandedFocusStudentKey === student.key ? '▲' : '▼' }}</span>
+                  </button>
+                  <Transition name="detail-fade">
+                  <div v-if="expandedFocusStudentKey === student.key" class="mt-2 space-y-2 rounded-[12px] border border-white/80 bg-white/70 px-3 py-2 text-[11px] leading-5 text-[#4b5563]">
+                    <p v-if="student.problemTitle"><span class="font-semibold text-[#1d1d1f]">定位题目：</span>第 {{ student.problemNo || '-' }} 题“{{ student.problemTitle }}”</p>
+                    <p v-if="student.hasSpecificKnowledge"><span class="font-semibold text-[#1d1d1f]">薄弱知识点：</span>{{ student.knowledgeSourceText }}“{{ student.inferredKnowledge }}”<span v-if="student.knowledgeConfidence">（置信度 {{ student.knowledgeConfidence }}）</span></p>
+                    <p v-if="student.errorPoint"><span class="font-semibold text-[#1d1d1f]">具体错误点：</span>{{ student.errorPoint }}<span v-if="student.problemStatus">（{{ student.problemStatus }}）</span></p>
+                    <p v-if="student.problem"><span class="font-semibold text-[#1d1d1f]">具体问题：</span>{{ student.problem }}</p>
+                    <p v-if="student.cause"><span class="font-semibold text-[#1d1d1f]">卡住原因：</span>{{ student.cause }}</p>
+                    <p v-if="student.followUpType"><span class="font-semibold text-[#1d1d1f]">问题类型：</span>{{ student.followUpType }}</p>
+                    <p v-if="student.studentPortraitSummary"><span class="font-semibold text-[#1d1d1f]">画像摘要：</span>{{ student.studentPortraitSummary }}</p>
+                    <p v-if="student.abilityTrendLabel"><span class="font-semibold text-[#1d1d1f]">趋势判断：</span>{{ student.abilityTrendLabel }}</p>
+                    <p v-if="student.riskSummary"><span class="font-semibold text-[#1d1d1f]">分级依据：</span>{{ student.riskSummary }}</p>
+                    <p v-if="student.evidenceSummary"><span class="font-semibold text-[#1d1d1f]">数据证据：</span>{{ student.evidenceSummary }}</p>
+                    <p v-if="student.validation"><span class="font-semibold text-[#1d1d1f]">验收方式：</span>{{ student.validation }}</p>
+                    <p v-if="student.evidenceRefs?.length" class="font-mono text-[10px] text-[#8a8a8f]">证据：{{ joinRefs(student.evidenceRefs) }}</p>
+                  </div>
+                  </Transition>
                 </article>
               </div>
-              <p v-else class="mt-4 rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
-                生成报告后，这里会展示 AI 判断出的重点跟进学生和具体辅导建议。
-              </p>
             </section>
 
             <section class="rounded-[20px] border border-black/[0.07] bg-white p-5">
@@ -787,6 +709,7 @@
               </div>
             </section>
           </aside>
+          </Transition>
         </div>
       </template>
 
@@ -832,7 +755,8 @@ const diagnosisExpanded = ref(false)
 const reportExpanded = ref(true)
 const rawAdviceCopied = ref(false)
 const expandedMarkdownSectionKey = ref('')
-const evidenceExpanded = ref(false)
+const focusPanelOpen = ref(false)
+const expandedFocusStudentKey = ref('')
 const historyExpanded = ref(false)
 let contextRequestId = 0
 
@@ -841,10 +765,54 @@ const activeData = computed(() => activeReport.value || contextData.value)
 const scope = computed(() => activeData.value?.scope || {})
 const metrics = computed(() => activeData.value?.metrics || {})
 const advice = computed(() => activeReport.value?.advice || null)
+const activeScopeLevel = computed(() => String(activeReport.value?.scopeLevel || scope.value.level || '').toUpperCase())
+const activeScopeLevelLabel = computed(() => scopeLabel(activeScopeLevel.value || scopeLevel.value))
+const currentScopeTitle = computed(() => {
+  if (scopeLevel.value === 'EXPERIMENT') return scope.value.experimentName || '当前实验'
+  if (scopeLevel.value === 'COURSE') return scope.value.courseName || '当前课程'
+  return scope.value.className || '当前教学班'
+})
+const scopeDescription = computed(() => {
+  if (scopeLevel.value === 'EXPERIMENT') return '只统计当前实验的提交、题目和错误点'
+  if (scopeLevel.value === 'COURSE') return '汇总同课程同学期下的多个教学班'
+  return '只统计当前教学班的实验和学生表现'
+})
+const scopePreviewRows = computed(() => {
+  const distribution = metrics.value.scoreDistribution || {}
+  const focusCount = Array.isArray(metrics.value.focusStudents) ? metrics.value.focusStudents.length : 0
+  const problemRows = Array.isArray(metrics.value.problemErrorPoints) ? metrics.value.problemErrorPoints : []
+  const studentCount = Number(distribution.total || 0)
+  if (scopeLevel.value === 'EXPERIMENT') {
+    const problemCount = Array.isArray(metrics.value.problemPerformance) ? metrics.value.problemPerformance.length : 0
+    const peerCount = Array.isArray(metrics.value.classComparison) ? metrics.value.classComparison.length : 0
+    return [
+      { key: 'students', label: '涉及学生', value: studentCount || '-', hint: '当前实验有提交记录的学生' },
+      { key: 'problems', label: '实验题目', value: problemCount || '-', hint: '当前实验题目数量' },
+      { key: 'errorPoints', label: '已定位错误点', value: problemRows.length || '-', hint: '基于提交状态和错误证据' },
+      { key: 'classes', label: '对比班级', value: peerCount || '-', hint: '同实验的班级表现对比' }
+    ]
+  }
+  if (scopeLevel.value === 'COURSE') {
+    const classCount = Array.isArray(metrics.value.classComparison) ? metrics.value.classComparison.length : 0
+    const experimentCount = Array.isArray(metrics.value.experimentSummary) ? metrics.value.experimentSummary.length : 0
+    return [
+      { key: 'classes', label: '覆盖班级', value: classCount || '-', hint: '同课程同学期的教学班' },
+      { key: 'experiments', label: '课程实验', value: experimentCount || '-', hint: '按实验模板汇总' },
+      { key: 'focus', label: '重点学生', value: focusCount || '-', hint: '跨班级风险分层后的学生' },
+      { key: 'errorPoints', label: '高频错误点', value: problemRows.length || '-', hint: '跨班级合并后的错误证据' }
+    ]
+  }
+  const experimentCount = Array.isArray(metrics.value.experiments) ? metrics.value.experiments.length : 0
+  return [
+    { key: 'experiments', label: '班级实验', value: experimentCount || '-', hint: '当前教学班已布置实验' },
+    { key: 'students', label: '参与学生', value: studentCount || '-', hint: '当前班级有成绩或提交记录的学生' },
+    { key: 'focus', label: '重点学生', value: focusCount || '-', hint: '按风险等级筛选' },
+    { key: 'errorPoints', label: '错误点', value: problemRows.length || '-', hint: '当前班级提交中的具体错误证据' }
+  ]
+})
 const teachingConclusion = computed(() => advice.value?.teachingConclusion || {})
 const teachingContext = computed(() => metrics.value.teachingContext || {})
 const nextTeachingPlan = computed(() => advice.value?.nextTeachingPlan || {})
-const evidenceRows = computed(() => Array.isArray(metrics.value.evidence) ? metrics.value.evidence : [])
 const dataCoverage = computed(() => metrics.value.dataCoverage || {})
 const learningDiagnosis = computed(() => metrics.value.learningDiagnosis || {})
 const problemErrorPointRows = computed(() => Array.isArray(learningDiagnosis.value.problemErrorPoints)
@@ -853,20 +821,6 @@ const problemErrorPointRows = computed(() => Array.isArray(learningDiagnosis.val
 const knowledgeSignalRows = computed(() => Array.isArray(learningDiagnosis.value.inferredKnowledgeSignals)
   ? learningDiagnosis.value.inferredKnowledgeSignals.slice(0, 3)
   : [])
-const errorSignalRows = computed(() => Array.isArray(learningDiagnosis.value.errorTypeSignals)
-  ? learningDiagnosis.value.errorTypeSignals.filter(item => item.status !== 'ACCEPTED').slice(0, 3)
-  : [])
-const dataQualityRows = computed(() => Array.isArray(learningDiagnosis.value.dataQualityIssues)
-  ? learningDiagnosis.value.dataQualityIssues.slice(0, 2)
-  : [])
-const diagnosisVisible = computed(() => !!learningDiagnosis.value.conclusion || problemErrorPointRows.value.length || knowledgeSignalRows.value.length || errorSignalRows.value.length || dataQualityRows.value.length)
-const diagnosisReliability = computed(() => {
-  const value = String(learningDiagnosis.value.reliability || 'LOW').toUpperCase()
-  if (value === 'HIGH') return { label: '数据可信度：高', className: 'bg-[#e9f7ef] text-[#18794e]' }
-  if (value === 'MEDIUM') return { label: '数据可信度：中', className: 'bg-[#fff7ed] text-[#c2410c]' }
-  return { label: '数据可信度：低', className: 'bg-[#f1f3f5] text-[#6b7280]' }
-})
-const scopeWarnings = computed(() => Array.isArray(scope.value.warnings) ? scope.value.warnings : [])
 const canGenerate = computed(() => !!props.classId && (scopeLevel.value !== 'EXPERIMENT' || !!experimentId.value))
 const disabledReason = computed(() => {
   if (!props.classId) return '当前班级信息缺失，无法生成'
@@ -1067,22 +1021,51 @@ const adjustmentRows = computed(() => [
 const focusStudentRows = computed(() => {
   const aiStudents = Array.isArray(advice.value?.focusStudents) ? advice.value.focusStudents : []
   const metricStudents = contextFocusStudents.value
-  const source = aiStudents.length ? aiStudents : metricStudents
-  return source.slice(0, 6).map((item, index) => {
+  const source = [...aiStudents, ...metricStudents]
+  const rowsByKey = new Map()
+
+  for (const item of source) {
     const merged = mergeFocusStudent(item)
     const reason = merged.reason || merged.suggestionHint || '需要结合实验表现进一步观察'
     const risk = riskTone(reason, merged)
     const suggestion = merged.teacherAction || merged.suggestion || merged.suggestionHint || ''
     const validation = merged.validation || ''
     const priority = merged.followUpPriority || risk.priority || 'P3'
-    return {
-      key: `${index}-${merged.studentNo || merged.studentName || 'student'}`,
+    const row = {
+      key: `${merged.studentNo || merged.studentName || 'student'}-${priority}`,
       ...risk,
       studentNo: merged.studentNo || '',
       studentName: merged.studentName || '',
-      reason: merged.problem || reason,
+      reason: buildStudentProblemJudgment(merged, reason),
+      stuckPoint: buildStudentStuckPoint(merged, reason),
       riskLevel: merged.riskLevel || risk.riskLevel || 'LOW',
       riskScore: merged.riskScore ?? '',
+      score: merged.score ?? '',
+      averageScore: merged.averageScore ?? '',
+      completionRate: merged.completionRate ?? '',
+      lowestScore: merged.lowestScore ?? '',
+      failedProblemCount: merged.failedProblemCount ?? '',
+      averageAttempts: merged.averageAttempts ?? '',
+      incompleteExperimentCount: merged.incompleteExperimentCount ?? '',
+      acceptedProblemCount: merged.acceptedProblemCount ?? '',
+      problemCount: merged.problemCount ?? '',
+      followUpType: merged.followUpType || '',
+      problemNo: merged.problemNo || '',
+      problemTitle: merged.problemTitle || '',
+      inferredKnowledge: merged.inferredKnowledge || '',
+      hasSpecificKnowledge: !!merged.inferredKnowledge && merged.inferredKnowledge !== '待人工确认',
+      knowledgePath: merged.knowledgePath || '',
+      knowledgeSource: merged.knowledgeSource || '',
+      knowledgeSourceText: String(merged.knowledgeSource || '').toUpperCase() === 'PTA_KNOWLEDGE_LEAF' ? '题目知识点' : '推断知识点',
+      knowledgeConfidence: merged.knowledgeConfidence || '',
+      problemStatus: merged.problemStatus || '',
+      problemAttempts: merged.problemAttempts ?? '',
+      errorPoint: merged.errorPoint || '',
+      problem: merged.problem || '',
+      cause: merged.cause || '',
+      studentPortraitSummary: merged.studentPortraitSummary || '',
+      abilityTrendLabel: merged.abilityTrendLabel || '',
+      riskReasons: Array.isArray(merged.riskReasons) ? merged.riskReasons : [],
       priority,
       tag: priority,
       typeLabel: focusTypeLabel(merged, reason),
@@ -1092,15 +1075,45 @@ const focusStudentRows = computed(() => {
       validation: isGenericStudentSuggestion(validation) ? specificStudentValidation(merged, reason) : (validation || specificStudentValidation(merged, reason)),
       evidenceRefs: Array.isArray(merged.evidenceRefs) ? merged.evidenceRefs : []
     }
+    const rowKey = row.studentNo || row.studentName || row.key
+    const existing = rowsByKey.get(rowKey)
+    if (!existing) {
+      rowsByKey.set(rowKey, row)
+    } else {
+      rowsByKey.set(rowKey, {
+        ...existing,
+        ...row,
+        evidenceRefs: Array.from(new Set([...(existing.evidenceRefs || []), ...(row.evidenceRefs || [])]))
+      })
+    }
+  }
+
+  return Array.from(rowsByKey.values()).sort((left, right) => {
+    const priorityOrder = { P1: 0, P2: 1, P3: 2 }
+    const priorityDiff = (priorityOrder[left.priority] ?? 3) - (priorityOrder[right.priority] ?? 3)
+    if (priorityDiff !== 0) return priorityDiff
+    const riskDiff = toNumber(right.riskScore) - toNumber(left.riskScore)
+    if (riskDiff !== 0) return riskDiff
+    const scoreDiff = toNumber(left.averageScore) - toNumber(right.averageScore)
+    if (scoreDiff !== 0) return scoreDiff
+    return String(left.studentNo || left.studentName || '').localeCompare(String(right.studentNo || right.studentName || ''))
   })
 })
 
 const contextFocusStudents = computed(() => {
-  if (Array.isArray(metrics.value.focusStudents) && metrics.value.focusStudents.length) return metrics.value.focusStudents
-  if (Array.isArray(teachingContext.value.studentFollowUpCandidates) && teachingContext.value.studentFollowUpCandidates.length) {
-    return teachingContext.value.studentFollowUpCandidates
+  const source = [
+    ...(Array.isArray(metrics.value.focusStudents) ? metrics.value.focusStudents : []),
+    ...(Array.isArray(teachingContext.value.studentFollowUpCandidates) ? teachingContext.value.studentFollowUpCandidates : [])
+  ]
+  const rowsByKey = new Map()
+  for (const item of source) {
+    const studentNo = String(item?.studentNo || '').trim()
+    const studentName = String(item?.studentName || '').trim()
+    const key = studentNo || studentName || `${rowsByKey.size}`
+    const existing = rowsByKey.get(key) || {}
+    rowsByKey.set(key, { ...existing, ...item })
   }
-  return []
+  return Array.from(rowsByKey.values())
 })
 
 const focusStudentStats = computed(() => {
@@ -1167,16 +1180,6 @@ const markdownOutlineSummary = computed(() => {
   const childCount = renderedAdviceSections.value.reduce((sum, item) => sum + (item.children?.length || 0), 0)
   return { childCount }
 })
-
-const fieldLabels = {
-  className: '班级', experimentCount: '实验数', studentCount: '学生数', completedCount: '完成人数',
-  completionRate: '完成率(%)', averageScore: '平均分', problemNo: '题号', title: '题目',
-  acceptedCount: '通过人数', acceptanceRate: '通过率(%)', averageAttempts: '平均尝试次数',
-  name: '实验', termName: '学期', classCount: '班级数', total: '学生总数', highRisk: '重点帮扶层',
-  strong: '优秀层', regular: '常规层', excellent: '优秀层', middle: '中等层', risk: '风险层',
-  incomplete: '未完成', studentNo: '学号', studentName: '姓名', reason: '原因'
-}
-const hiddenEvidenceFields = new Set(['evidenceId', 'classId', 'experimentId', 'templateId', 'termId'])
 
 function normalizeActions(rows) {
   return Array.isArray(rows)
@@ -1445,14 +1448,17 @@ function markdownSectionMeta(title, index) {
   }
 }
 
-function visibleMarkdownChildren(section) {
-  const children = Array.isArray(section?.children) ? section.children : []
-  if (expandedMarkdownSectionKey.value === section?.key) return children.slice(0, 5)
-  return children.slice(0, 3)
-}
-
 function toggleMarkdownSection(key) {
   expandedMarkdownSectionKey.value = key
+}
+
+function toggleFocusStudentDetail(key) {
+  expandedFocusStudentKey.value = expandedFocusStudentKey.value === key ? '' : key
+}
+
+function toggleFocusPanel() {
+  focusPanelOpen.value = !focusPanelOpen.value
+  if (!focusPanelOpen.value) expandedFocusStudentKey.value = ''
 }
 
 function mergeFocusStudent(item) {
@@ -1487,7 +1493,18 @@ function mergeFocusStudent(item) {
     'problemCount',
     'failedProblemCount',
     'averageAttempts',
-    'problemStateCount'
+    'problemStateCount',
+    'problemNo',
+    'problemTitle',
+    'problemStatementSummary',
+    'inferredKnowledge',
+    'knowledgePath',
+    'knowledgeSource',
+    'knowledgeConfidence',
+    'problemStatus',
+    'problemAttempts',
+    'problemBestScore',
+    'errorPoint'
   ]) {
     if (!hasValue(aiStudent[key]) && hasValue(metricStudent[key])) {
       merged[key] = metricStudent[key]
@@ -1501,7 +1518,23 @@ function mergeFocusStudent(item) {
   if ((!Array.isArray(aiStudent.evidenceRefs) || !aiStudent.evidenceRefs.length) && Array.isArray(metricStudent.evidenceRefs)) {
     merged.evidenceRefs = metricStudent.evidenceRefs
   }
+  if (hasValue(metricStudent.problem) && hasValue(metricStudent.problemTitle) && isGenericKnowledgeProblem(aiStudent.problem)) {
+    merged.problem = metricStudent.problem
+  }
+  if (hasValue(metricStudent.cause) && hasValue(metricStudent.problemTitle) && isGenericKnowledgeProblem(aiStudent.cause)) {
+    merged.cause = metricStudent.cause
+  }
   return merged
+}
+
+function isGenericKnowledgeProblem(value) {
+  const text = String(value || '').trim()
+  if (!text) return true
+  return text.includes('关键题/知识点') ||
+    text.includes('关键知识点没有打通') ||
+    text.includes('某个核心知识点') ||
+    text.includes('需要定位') ||
+    text.includes('进一步观察')
 }
 
 function isStudentFollowSection(section) {
@@ -1581,6 +1614,152 @@ function formatStudentEvidence(item) {
   return '暂无明确数值，需结合提交记录核对'
 }
 
+function studentWeakPointDetails(item) {
+  const problemNo = String(item?.problemNo || '').trim()
+  const problemTitle = String(item?.problemTitle || '').trim()
+  const knowledge = String(item?.inferredKnowledge || '').trim()
+  const errorPoint = String(item?.errorPoint || '').trim()
+  const source = String(item?.knowledgeSource || '').trim().toUpperCase()
+  const status = String(item?.problemStatus || '').trim().toUpperCase()
+  const attempts = toNumber(item?.problemAttempts)
+  const hasProblem = !!problemTitle && problemTitle !== '未知题目'
+  const hasKnowledge = !!knowledge && knowledge !== '待人工确认'
+  const problemLabel = hasProblem ? `第 ${problemNo || '-'} 题“${problemTitle}”` : ''
+  const knowledgeLabel = hasKnowledge
+    ? `${source === 'PTA_KNOWLEDGE_LEAF' ? '题目知识点' : '推断知识点'}“${knowledge}”`
+    : ''
+  const location = [problemLabel, knowledgeLabel, errorPoint ? `错误点“${errorPoint}”` : ''].filter(Boolean).join('，')
+  const evidence = [status ? `状态 ${status}` : '', attempts > 0 ? `该题尝试 ${formatMetric(attempts)} 次` : ''].filter(Boolean).join('，')
+  return { hasProblem, hasKnowledge, problemLabel, knowledgeLabel, knowledge, errorPoint, status, attempts, location, evidence }
+}
+
+function buildStudentProblemJudgment(item, fallbackReason = '') {
+  const reason = String(fallbackReason || '').trim()
+  const group = String(item?.followUpGroup || '').toUpperCase()
+  const type = String(item?.followUpType || '').toUpperCase()
+  const trendLabel = String(item?.abilityTrendLabel || '').trim()
+  const portraitLabel = String(item?.studentPortraitRiskLabel || '').trim()
+  const completionRate = toNumber(item?.completionRate)
+  const averageScore = toNumber(item?.averageScore)
+  const lowestScore = toNumber(item?.lowestScore)
+  const score = toNumber(item?.score)
+  const accepted = toNumber(item?.acceptedProblemCount)
+  const total = toNumber(item?.problemCount)
+  const failed = toNumber(item?.failedProblemCount)
+  const attempts = toNumber(item?.averageAttempts)
+  const incomplete = toNumber(item?.incompleteExperimentCount)
+  const acceptedRate = accepted > 0 && total > 0 ? Math.round((accepted / total) * 100) : 0
+  const weakPoint = studentWeakPointDetails(item)
+  const evidenceParts = []
+
+  if (hasValue(item?.score)) evidenceParts.push(`本次 ${formatMetric(score)} 分`)
+  if (hasValue(item?.averageScore)) evidenceParts.push(`均分 ${formatMetric(averageScore)}`)
+  if (hasValue(item?.completionRate)) evidenceParts.push(`完成率 ${formatMetric(completionRate)}%`)
+  if (accepted > 0 && total > 0) evidenceParts.push(`通过 ${formatMetric(accepted)}/${formatMetric(total)} 题（${acceptedRate}%）`)
+  if (failed > 0) evidenceParts.push(`未过题 ${formatMetric(failed)} 个`)
+  if (attempts > 0) evidenceParts.push(`均尝试 ${formatMetric(attempts)} 次`)
+  if (incomplete > 0) evidenceParts.push(`未完成 ${formatMetric(incomplete)} 次`)
+  if (lowestScore > 0) evidenceParts.push(`最低 ${formatMetric(lowestScore)} 分`)
+  if (trendLabel) evidenceParts.push(`趋势${trendLabel}`)
+  if (portraitLabel) evidenceParts.push(`画像${portraitLabel}`)
+  const evidence = evidenceParts.slice(0, 4).join('，')
+  const evidenceText = evidence ? `，依据是：${evidence}` : ''
+
+  const hasLowScore = (hasValue(item?.score) && score < 70) || (hasValue(item?.averageScore) && averageScore < 70)
+  const hasVeryLowScore = (hasValue(item?.score) && score < 60) || (hasValue(item?.averageScore) && averageScore < 60)
+  const hasWeakCompletion = hasValue(item?.completionRate) && completionRate > 0 && completionRate < 80
+  const hasProblemGap = total > 0 && accepted < total
+
+  if (group === 'SUBMISSION_BLOCKED' || type === 'INCOMPLETE' || reason.includes('未完成') || reason.includes('未提交')) {
+    return `判断为“提交链路/未完成”优先${evidenceText}。先核对是否缺交、账号同步或提交路径卡住，再决定是否补讲知识点。`
+  } else if (group === 'REPEATED_FAILED_ATTEMPTS' || attempts >= 3 || reason.includes('反复') || reason.includes('尝试')) {
+    if (weakPoint.hasProblem) {
+      return `具体卡在${weakPoint.location}${evidenceText}。${weakPoint.evidence || '该题反复提交仍未通过'}，应直接核对最后一次失败代码。`
+    }
+    return `确认存在反复尝试未通过${evidenceText}，但数据库没有匹配到具体题目和知识点；请先同步题目明细，不能笼统写成“关键知识点没打通”。`
+  } else if (group === 'PROBLEM_NOT_PASSED' || type === 'PROBLEM_NOT_PASSED' || reason.includes('关键题') || reason.includes('未完全通过')) {
+    if (weakPoint.hasProblem) {
+      return `具体卡在${weakPoint.location}${evidenceText}。${weakPoint.evidence || '该题尚未通过'}，教师应围绕这个错误点讲解并布置同知识点变式题。`
+    }
+    return `确认有未通过题${evidenceText}，但当前报告缺少题号、题名和知识点映射；需要重新生成报告补齐题目明细，不能让教师自行猜测。`
+  } else if (
+    group === 'LOW_SCORE' ||
+    type === 'LOW_SCORE' ||
+    reason.includes('低分') ||
+    hasLowScore
+  ) {
+    const label = hasVeryLowScore ? '基础断点比较明显' : '基础不稳但仍可短练纠偏'
+    return `判断为“${label}”${evidenceText}。优先从最低分题或最近一次低分实验切入，让学生写清“错因—修改—验证”，避免泛泛重做。`
+  } else if (hasProblemGap) {
+    if (weakPoint.hasProblem) return `具体卡在${weakPoint.location}${evidenceText}。请直接用该题最后一次代码定位并复测。`
+    return `确认题目通过率不足${evidenceText}，但当前报告未带回具体题目和知识点，需要重新生成后再给出教学结论。`
+  } else if (hasWeakCompletion) {
+    return `判断为“完成稳定性不足”${evidenceText}。先查是否存在拖交、漏交或实验步骤断点，再用一次短任务确认能否独立完成。`
+  } else if (trendLabel || portraitLabel) {
+    return `判断为“波动观察”${evidenceText}。先看最近几次实验是持续下滑还是偶发波动，再决定是否升级为 P2/P1 跟进。`
+  }
+
+  if (reason) return `${reason}${evidenceText ? `（${evidence}）` : ''}`
+  return `需要结合最近的提交、成绩和错题记录进一步判断${evidenceText}。`
+}
+
+function buildStudentStuckPoint(item, fallbackReason = '') {
+  const followUpType = String(item?.followUpType || '').toUpperCase()
+  const reason = String(fallbackReason || '').trim()
+  const problem = String(item?.problem || '').trim()
+  const cause = String(item?.cause || '').trim()
+  const score = toNumber(item?.score)
+  const averageScore = toNumber(item?.averageScore)
+  const completionRate = toNumber(item?.completionRate)
+  const attempts = toNumber(item?.averageAttempts)
+  const failed = toNumber(item?.failedProblemCount)
+  const accepted = toNumber(item?.acceptedProblemCount)
+  const total = toNumber(item?.problemCount)
+  const weakPoint = studentWeakPointDetails(item)
+
+  if (weakPoint.hasProblem) {
+    return `卡在${weakPoint.location}${weakPoint.evidence ? `（${weakPoint.evidence}）` : ''}`
+  }
+
+  if (problem && !isGenericKnowledgeProblem(problem)) return problem
+
+  if (followUpType === 'INCOMPLETE' || reason.includes('未完成') || reason.includes('未提交')) {
+    const bits = []
+    if (completionRate > 0 && completionRate < 80) bits.push(`完成率 ${formatMetric(completionRate)}%`)
+    if (cause) bits.push(cause)
+    return `卡在提交链路：${bits.length ? bits.join('，') : '缺交、PTA 同步或环境配置'}`
+  }
+
+  if (followUpType === 'REPEATED_FAILED_ATTEMPTS' || attempts >= 3 || reason.includes('反复') || reason.includes('尝试')) {
+    const bits = []
+    if (attempts > 0) bits.push(`平均尝试 ${formatMetric(attempts)} 次`)
+    if (cause) bits.push(cause)
+    return `卡在反复调试后仍未打通：${bits.length ? bits.join('，') : '边界样例、关键分支或调试顺序'}`
+  }
+
+  if (followUpType === 'PROBLEM_NOT_PASSED' || reason.includes('关键题') || reason.includes('未完全通过') || (total > 0 && accepted < total)) {
+    const bits = []
+    if (total > 0 && accepted < total) bits.push(`只通过 ${formatMetric(accepted)}/${formatMetric(total)} 题`)
+    if (failed > 0) bits.push(`还有 ${formatMetric(failed)} 个题目未过`)
+    if (cause) bits.push(cause)
+    return `存在未通过题，但题号、题名和知识点数据缺失：${bits.length ? bits.join('，') : '请重新生成报告以补齐题目明细'}`
+  }
+
+  if (followUpType === 'LOW_SCORE' || reason.includes('低分') || (hasValue(item?.score) && score > 0 && score < 70) || (hasValue(item?.averageScore) && averageScore > 0 && averageScore < 70)) {
+    const bits = []
+    if (score > 0) bits.push(`本次 ${formatMetric(score)} 分`)
+    if (averageScore > 0) bits.push(`均分 ${formatMetric(averageScore)}`)
+    if (cause) bits.push(cause)
+    return `卡在基础步骤不稳：${bits.length ? bits.join('，') : '最低分题、核心步骤或报告分析'}`
+  }
+
+  if (completionRate > 0 && completionRate < 80) {
+    return `卡在完成稳定性不足：完成率 ${formatMetric(completionRate)}%，需要先核对拖交、漏交或实验流程断点。`
+  }
+
+  return reason || '卡点暂未收敛到具体步骤，建议结合提交记录和错题进一步定位。'
+}
+
 function hasValue(value) {
   return value !== null && value !== undefined && value !== ''
 }
@@ -1604,7 +1783,7 @@ function riskTone(reason, item) {
   if (text.includes('未完成') || text.includes('未提交') || text.includes('缺')) {
     return { tag: 'P2', priority: 'P2', riskLevel: 'MEDIUM', levelClass: 'text-[#c2410c]', tone: 'border-[#fed7aa] bg-[#fff7ed]', dotClass: 'bg-[#f97316]' }
   }
-  if (text.includes('低分') || toNumber(item.score) < 60 || toNumber(item.averageScore) < 60) {
+  if (text.includes('低分') || (hasValue(item.score) && toNumber(item.score) < 60) || (hasValue(item.averageScore) && toNumber(item.averageScore) < 60)) {
     return { tag: 'P2', priority: 'P2', riskLevel: 'MEDIUM', levelClass: 'text-[#c2410c]', tone: 'border-[#fed7aa] bg-[#fff7ed]', dotClass: 'bg-[#f97316]' }
   }
   return { tag: 'P3', priority, riskLevel: riskLevel || 'LOW', levelClass: 'text-[#1d4ed8]', tone: 'border-[#bfdbfe] bg-[#eff6ff]', dotClass: 'bg-[#3b82f6]' }
@@ -1630,7 +1809,7 @@ function specificStudentSuggestion(item, reason = '') {
   if (text.includes('关键题') || text.includes('未完全通过') || text.includes('PROBLEM_NOT_PASSED')) {
     return `让学生拿出未通过题的最后一次代码，先说清输入、输出和关键判断条件，再做 1 道同知识点最小变式题。${scoreText ? `当前分数参考：${scoreText}。` : ''}`
   }
-  if (text.includes('低分') || text.includes('LOW_SCORE') || toNumber(item.score) < 70 || toNumber(item.averageScore) < 70) {
+  if (text.includes('低分') || text.includes('LOW_SCORE') || (hasValue(item.score) && toNumber(item.score) < 70) || (hasValue(item.averageScore) && toNumber(item.averageScore) < 70)) {
     return '选最低分实验的一道代表题，让学生复述解题步骤，并补一张“错因—修改—验证”三列表，不再只要求笼统重做。'
   }
   return '抽查最近一次波动实验，让学生对比一次成功提交和一次失败提交的差异，再补一个边界样例确认是否稳定。'
@@ -1647,7 +1826,7 @@ function specificStudentValidation(item, reason = '') {
   if (text.includes('关键题') || text.includes('未完全通过') || text.includes('PROBLEM_NOT_PASSED')) {
     return '当场完成 1 道同知识点小题，并指出原题中 1 个具体自查点。'
   }
-  if (text.includes('低分') || text.includes('LOW_SCORE') || toNumber(item.score) < 70 || toNumber(item.averageScore) < 70) {
+  if (text.includes('低分') || text.includes('LOW_SCORE') || (hasValue(item.score) && toNumber(item.score) < 70) || (hasValue(item.averageScore) && toNumber(item.averageScore) < 70)) {
     return '重新提交或完成同类短练后，能用一句话说明原错误和修正依据。'
   }
   return '后续一次同类实验不再出现相同错误类型，并主动写出自查点。'
@@ -1672,10 +1851,6 @@ function toNumber(value) {
 
 function joinRefs(refs) {
   return Array.isArray(refs) && refs.length ? refs.join('、') : '暂无'
-}
-
-function knowledgeSourceLabel(item) {
-  return item?.knowledgeSource === 'PTA_KNOWLEDGE_LEAF' ? '题目知识点' : '推断知识点'
 }
 
 function jumpToStudentLayer() {
@@ -1704,16 +1879,18 @@ async function copyRawAdvice() {
   }
 }
 
-function displayEvidenceFields(value) {
-  if (!value || typeof value !== 'object') return []
-  return Object.entries(value)
-    .filter(([key, fieldValue]) => !hiddenEvidenceFields.has(key) && fieldValue !== null && fieldValue !== undefined && typeof fieldValue !== 'object')
-    .slice(0, 8)
-    .map(([key, fieldValue]) => ({ key, label: fieldLabels[key] || key, value: fieldValue === '' ? '-' : fieldValue }))
-}
-
 function scopeLabel(value) {
   return scopeOptions.find(item => item.value === value)?.label || value
+}
+
+function changeScope(nextLevel) {
+  if (scopeLevel.value === nextLevel) return
+  scopeLevel.value = nextLevel
+  activeReport.value = null
+  contextData.value = null
+  focusPanelOpen.value = false
+  expandedFocusStudentKey.value = ''
+  errorMessage.value = ''
 }
 
 function formatTime(value) {
@@ -1733,6 +1910,9 @@ function requestPayload() {
 
 async function loadContext() {
   activeReport.value = null
+  contextData.value = null
+  focusPanelOpen.value = false
+  expandedFocusStudentKey.value = ''
   errorMessage.value = ''
   if (!canGenerate.value) {
     contextData.value = null
@@ -1765,9 +1945,16 @@ async function loadReports() {
 async function generateReport() {
   if (!canGenerate.value || generating.value) return
   generating.value = true
+  focusPanelOpen.value = false
+  expandedFocusStudentKey.value = ''
   errorMessage.value = ''
   try {
-    activeReport.value = unwrap(await generateTeachingAdvice(requestPayload()))
+    const generatedReport = unwrap(await generateTeachingAdvice(requestPayload()))
+    const returnedLevel = String(generatedReport?.scopeLevel || generatedReport?.scope?.level || '').toUpperCase()
+    if (returnedLevel && returnedLevel !== scopeLevel.value) {
+      throw new Error(`接口返回了${scopeLabel(returnedLevel)}报告，当前选择的是${scopeLabel(scopeLevel.value)}，已阻止显示旧范围结果`)
+    }
+    activeReport.value = generatedReport
     await loadReports()
     uiMessage.success('教学建议已生成并保存')
   } catch (error) {
@@ -1781,6 +1968,8 @@ async function generateReport() {
 
 function selectReport(report) {
   activeReport.value = report
+  focusPanelOpen.value = false
+  expandedFocusStudentKey.value = ''
 }
 
 watch(() => props.experiments, rows => {
@@ -1800,6 +1989,154 @@ watch(renderedAdviceSections, sections => {
 </script>
 
 <style scoped>
+.teaching-advice-shell {
+  display: flex;
+  height: calc(100vh - 118px);
+  min-height: 680px;
+  max-height: 1000px;
+  flex-direction: column;
+  overflow: hidden;
+  color: #1f2937;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.teaching-advice-body {
+  min-height: 0;
+}
+
+.teaching-advice-report {
+  display: flex;
+  flex-direction: column;
+}
+
+.teaching-advice-report-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.teaching-advice-report-grid {
+  min-height: 0;
+}
+
+.teaching-advice-outline,
+.teaching-advice-content {
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.teaching-advice-outline::-webkit-scrollbar,
+.teaching-advice-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.teaching-advice-outline::-webkit-scrollbar-track,
+.teaching-advice-content::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.teaching-advice-outline::-webkit-scrollbar-thumb,
+.teaching-advice-content::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(241, 245, 249, 0.8);
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.75);
+}
+
+.teaching-advice-outline::-webkit-scrollbar-thumb:hover,
+.teaching-advice-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.85);
+}
+
+.report-section-enter-active,
+.report-section-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.report-section-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.report-section-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.focus-panel-enter-active,
+.focus-panel-leave-active {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.focus-panel-enter-from,
+.focus-panel-leave-to {
+  opacity: 0;
+  transform: translateX(16px) scale(0.98);
+}
+
+.detail-fade-enter-active,
+.detail-fade-leave-active {
+  overflow: hidden;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    max-height 180ms ease;
+}
+
+.detail-fade-enter-from,
+.detail-fade-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.detail-fade-enter-to,
+.detail-fade-leave-from {
+  max-height: 220px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-section-enter-active,
+  .report-section-leave-active,
+  .focus-panel-enter-active,
+  .focus-panel-leave-active,
+  .detail-fade-enter-active,
+  .detail-fade-leave-active {
+    transition: none;
+  }
+}
+
+@media (max-width: 1279px) {
+  .teaching-advice-shell {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .teaching-advice-body,
+  .teaching-advice-report,
+  .teaching-advice-report-body,
+  .teaching-advice-report-grid {
+    overflow: visible;
+  }
+
+  .teaching-advice-outline,
+  .teaching-advice-content {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 .compact-line-clamp-2,
 .compact-line-clamp-3 {
   display: -webkit-box;

@@ -217,6 +217,11 @@ const routes = [
         name: 'ClassProfile',
         component: () => import('../views/teacher/ClassProfile.vue')
       },
+      {
+        path: 'teaching-advice',
+        name: 'TeachingAdvicePage',
+        component: () => import('../views/teacher/TeachingAdvicePage.vue')
+      },
       // 教辅工具 (tap-backend)
       {
         path: 'document-center',
