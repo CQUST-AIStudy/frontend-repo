@@ -90,9 +90,10 @@
         <option v-for="exp in experimentOptions" :key="exp.id" :value="exp.id">{{ exp.label }}</option>
       </select>
       <UiButton
+        type="primary"
         :disabled="bindingSaving || !bindingDirty"
         @click="saveExperimentBinding"
-        class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] active:scale-[0.96] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        class="h-[38px] px-5 rounded-[10px] text-sm font-medium cursor-pointer active:scale-[0.96] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span v-if="bindingSaving" class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
         保存绑定
@@ -132,10 +133,11 @@
             <span v-else-if="batchReview.status === 'COMPLETED'" class="text-[11px] text-[#16a34a]">已完成</span>
           </div>
           <UiButton
+            type="primary"
             v-if="batchReview.status === 'FAILED'"
             :disabled="batchReviewLoading || task.completedCount === 0"
             @click="doGenerateBatchReview"
-            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-[var(--app-primary)] border-none cursor-pointer hover:bg-[var(--app-primary-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LoaderCircle v-if="batchReviewLoading" class="w-3.5 h-3.5 animate-spin" />
             重新生成
@@ -188,10 +190,11 @@
         <span class="text-[16px] font-semibold text-[#1d1d1f]">提交列表</span>
         <div class="flex items-center gap-3 flex-wrap justify-end">
           <UiButton
+            type="success"
             :disabled="publishingTask || allPublished || hasUnconfirmedMatches || scoredValues.length === 0"
             :title="hasUnconfirmedMatches ? '请先确认学生匹配' : ''"
             @click="doPublishTask"
-            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium text-white bg-[#16a34a] border-none disabled:opacity-50 disabled:cursor-not-allowed"
+            class="h-[32px] px-4 rounded-[8px] text-[12px] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >{{ allPublished ? '已全部发布' : (hasUnconfirmedMatches ? '请先确认学生匹配' : '批量发布成绩') }}</UiButton>
           <UiButton
             v-if="publishedCount > 0"

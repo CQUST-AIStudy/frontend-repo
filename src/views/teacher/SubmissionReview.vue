@@ -70,7 +70,7 @@
                   {{ student.studentNo || '无学号' }} · {{ student.studentName }}
                 </option>
               </select>
-              <UiButton :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-[10px] border-none bg-[var(--app-primary)] hover:bg-[var(--app-primary-dark)] shadow-[0_2px_6px_rgba(var(--app-primary-rgb),0.3)] text-white text-sm disabled:opacity-50">
+              <UiButton type="primary" :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-[10px] text-sm disabled:opacity-50">
                 {{ rematching ? '确认重新匹配' : '确认匹配' }}
               </UiButton>
               <UiButton v-if="rematching" @click="rematching = false" class="h-9 px-4 rounded-[10px] border border-[#d9e2ec] bg-white hover:bg-[#f5f5f7] text-sm text-[#6e6e73]">
@@ -88,20 +88,19 @@
           <span class="font-semibold text-[#1d1d1f]">教师总评</span>
           <div class="flex gap-2 flex-wrap">
             <UiButton
+              :type="isReportFailed ? 'danger' : 'success'"
               @click="isReportFailed ? preGenerateResources() : downloadReport()"
               :disabled="downloadingReport || isReportGenerating || preGeneratingResources"
-              class="h-9 px-4 rounded-[10px] text-sm font-medium shadow-sm transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="isReportFailed
-                ? 'text-white bg-[#c44b3f] hover:bg-[#a63d33] shadow-[0_2px_6px_rgba(196,75,63,0.3)]'
-                : 'text-white bg-[#6b8f6b] hover:bg-[#5a7a5a] shadow-[0_2px_6px_rgba(107,143,107,0.3)]'"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="downloadingReport || preGeneratingResources" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               {{ isReportFailed ? '重新生成批注报告' : (isReportGenerating ? '批注报告生成中...' : (preGeneratingResources ? '正在生成报告...' : (detail?.hasDownloadableReport ? '下载批注报告' : '生成并下载报告'))) }}
             </UiButton>
             <UiButton
+              type="primary"
               @click="generateReview"
               :disabled="generatingReview"
-              class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[var(--app-primary)] hover:bg-[var(--app-primary-dark)] shadow-[0_2px_6px_rgba(var(--app-primary-rgb),0.3)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="generatingReview" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               AI 生成总评
@@ -115,10 +114,11 @@
               保存总评
             </UiButton>
             <UiButton
+              type="danger"
               @click="togglePublication"
               :disabled="publishingReport || (!detail.published && !matchConfirmed)"
               :title="!matchConfirmed && !detail.published ? '请先确认学生匹配' : ''"
-              class="h-9 px-4 rounded-[10px] text-sm font-medium text-white bg-[#c44b3f] hover:bg-[#a63d33] shadow-[0_2px_6px_rgba(196,75,63,0.3)] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="h-9 px-4 rounded-[10px] text-sm font-medium active:scale-[0.96] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="publishingReport" class="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5"></span>
               {{ detail.published ? '撤回发布' : (matchConfirmed ? '发布给学生' : '请先确认学生匹配') }}
@@ -168,9 +168,10 @@
           <LucideIcon name="alert-circle" :size="24" class="mb-2 text-[#dc2626]" />
           <div class="text-sm font-medium text-[#334155]">可视化演示生成失败</div>
           <UiButton
+            type="danger"
             @click="preGenerateResources"
             :disabled="preGeneratingResources"
-            class="mt-3 h-8 px-3 rounded-lg text-xs font-medium text-white bg-[#dc2626] hover:bg-[#b91d1d] border-none disabled:opacity-50"
+            class="mt-3 h-8 px-3 rounded-lg text-xs font-medium disabled:opacity-50"
           >
             <span v-if="preGeneratingResources" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5"></span>
             重新生成
