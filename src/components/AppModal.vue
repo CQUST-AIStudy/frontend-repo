@@ -10,8 +10,8 @@
     >
       <div v-if="modelValue" class="fixed inset-0 z-[2000] flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @mousedown="handleBackdropClick"></div>
-        <div class="relative w-full max-w-[var(--modal-width)] bg-white rounded-[20px] shadow-[0_24px_80px_rgba(0,0,0,0.18),0_0_1px_rgba(0,0,0,0.1)] overflow-hidden" :style="modalStyle">
-          <div v-if="title || $slots.header" class="flex items-center justify-between px-7 pt-6 pb-0">
+        <div class="relative w-full max-w-[var(--modal-width)] max-h-[calc(100vh-2rem)] flex flex-col bg-white rounded-[20px] shadow-[0_24px_80px_rgba(0,0,0,0.18),0_0_1px_rgba(0,0,0,0.1)] overflow-hidden" :style="modalStyle">
+          <div v-if="title || $slots.header" class="shrink-0 flex items-center justify-between px-7 pt-6 pb-0">
             <slot name="header">
               <h2 class="text-[17px] font-semibold text-[#1d1d1f] tracking-tight">{{ title }}</h2>
             </slot>
@@ -27,10 +27,10 @@
               </svg>
             </button>
           </div>
-          <div class="px-7 py-5">
+          <div class="min-h-0 overflow-y-auto px-7 py-5">
             <slot></slot>
           </div>
-          <div v-if="$slots.footer" class="flex items-center justify-end gap-3 px-7 pb-6 pt-0">
+          <div v-if="$slots.footer" class="shrink-0 flex items-center justify-end gap-3 px-7 pb-6 pt-0">
             <slot name="footer"></slot>
           </div>
         </div>
