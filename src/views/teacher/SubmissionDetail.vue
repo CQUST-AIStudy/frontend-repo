@@ -347,7 +347,14 @@
                   <div v-if="hasAiRemarks" class="p-4 bg-[#f5f7fa] rounded-xl leading-relaxed text-sm text-[#1d1d1f]" v-html="renderMarkdown(submission.aiRemarks)"></div>
                   <div v-else class="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed border-[#e8dfcf] bg-[#faf6ef] text-center">
                     <LucideIcon name="sparkles" :size="22" class="mb-2 text-[var(--app-primary)] opacity-50" />
-                    <span class="text-sm text-[#a89b87]">AI 助教暂未生成点评</span>
+                    <span class="text-sm text-[#a89b87] mb-3">AI 助教暂未生成点评</span>
+                    <UiButton
+                      @click="generateAiRemarks"
+                      :disabled="aiGenerating"
+                      class="h-[34px] px-4 rounded-[10px] text-[13px] font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {{ aiGenerating ? '生成中...' : '生成AI点评' }}
+                    </UiButton>
                   </div>
                 </div>
 
@@ -920,7 +927,29 @@ const starClass = (value, i) => {
   return 'text-[var(--app-warning)]'
 }
 
+const aiGenerating = ref(false)
 const hasAiRemarks = computed(() => !!(submission.value.aiRemarks && submission.value.aiRemarks.trim()))
+
+const generateAiRemarks = async () => {
+  aiGenerating.value = true
+  try {
+    const routeParts = (route.params.submissionId || '').split('-')
+    const expId = submission.value.experimentId
+      || (routeParts.length > 1 ? parseInt(routeParts[routeParts.length - 1]) : null)
+    const stuId = submission.value.studentId
+      || submission.value.username
+      || (routeParts.length > 1 ? routeParts.slice(0, -1).join('-') : null)
+      || String(submission.value.studentId || '')
+    const result = await api.generateAiComment(expId, stuId, submission.value.code)
+    if (result?.aiComment) {
+      submission.value.aiRemarks = result.aiComment
+    }
+  } catch (e) {
+    logger.error('生成AI点评失败:', e)
+  } finally {
+    aiGenerating.value = false
+  }
+}
 
 const loadSubmissionDetail = async () => {
   loading.value = true

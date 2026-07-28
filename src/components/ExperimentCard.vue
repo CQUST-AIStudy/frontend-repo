@@ -57,12 +57,14 @@ const hasScore = computed(() => props.experiment.score !== null && props.experim
 const statusText = computed(() => ({
   completed: '已完成',
   in_progress: '进行中',
+  submitted: '已提交',
   not_started: '未开始'
 }[props.experiment.status] || '未知'))
 
 const actionText = computed(() => ({
   completed: '查看结果',
   in_progress: '继续实验',
+  submitted: '查看结果',
   not_started: '开始实验'
 }[props.experiment.status] || '查看详情'))
 </script>
