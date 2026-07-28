@@ -6,7 +6,7 @@
     />
 
     <div class="mt-4 flex gap-3 items-center mb-8 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
-      <div v-if="classPrefixes.length > 1" class="relative w-[180px] max-[768px]:!w-full">
+      <div v-if="classPrefixes.length >= 1" class="relative w-[180px] max-[768px]:!w-full">
         <UiSelect
           v-model="selectedClass"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
