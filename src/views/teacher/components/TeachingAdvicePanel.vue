@@ -48,18 +48,7 @@
           <span class="shrink-0 leading-none">同课程历史学期</span>
         </button>
 
-        <div class="flex flex-col items-stretch gap-1 sm:items-end">
-          <button
-            type="button"
-            :disabled="generateButtonDisabled"
-            :title="disabledReason || '生成教学建议'"
-            class="inline-flex h-9 min-w-[130px] items-center justify-center rounded-[10px] border border-[var(--app-primary)] bg-[var(--app-primary)] px-4 text-xs font-semibold text-white shadow-[0_5px_12px_rgba(47,111,237,0.18)] transition-all hover:bg-[var(--app-primary-strong)] active:scale-[0.96] disabled:border-[#d1d5db] disabled:bg-[#e5e7eb] disabled:text-[#6b7280] disabled:shadow-none disabled:cursor-not-allowed"
-            @click="generateReport"
-          >
-            {{ generateButtonLabel }}
-          </button>
-          <span v-if="disabledReason" class="text-right text-[11px] leading-4 text-[#a15c00]">{{ disabledReason }}</span>
-        </div>
+        <span v-if="disabledReason" class="rounded-full bg-[#fff7ed] px-3 py-1.5 text-right text-[11px] leading-4 text-[#a15c00]">{{ disabledReason }}</span>
       </div>
     </div>
 
@@ -155,9 +144,9 @@
             </div>
 
             <div v-if="!advice" class="rounded-[22px] border border-dashed border-[#f2d49b] bg-[#fffaf0] px-5 py-10 text-center">
-              <h3 class="text-lg font-semibold text-[#111827]">{{ reportGateMessage ? '请重新生成通过质量门禁的报告' : '先生成 AI 教学决策报告' }}</h3>
+              <h3 class="text-lg font-semibold text-[#111827]">{{ activeReportGenerating ? 'AI 正在生成教学建议' : (reportGateMessage ? '请重新生成通过质量门禁的报告' : '先生成 AI 教学决策报告') }}</h3>
               <p class="mx-auto mt-2 max-w-[680px] text-sm leading-6 text-[#6e6e73]">
-                {{ reportGateMessage || '当前范围已就绪。点击生成后，页面会直接给出“核心教学问题、下一节课怎么教、分层学生怎么跟、实验/学期/课程怎么调”，不会在主区域重复堆数据。' }}
+                {{ activeReportGenerating ? '后端已经保存生成任务，正在调用 AI 整理“核心教学问题、下一节课怎么教、分层学生怎么跟、实验/学期/课程怎么调”。页面会自动刷新结果。' : (reportGateMessage || '当前范围已就绪。点击生成后，页面会直接给出“核心教学问题、下一节课怎么教、分层学生怎么跟、实验/学期/课程怎么调”，不会在主区域重复堆数据。') }}
               </p>
               <button
                 type="button"
@@ -388,12 +377,12 @@
                     type="button"
                     :disabled="!focusStudentTotal"
                     :aria-expanded="focusPanelOpen"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-xs font-semibold text-[#9a5a16] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                    class="focus-panel-toggle inline-flex items-center gap-2 rounded-full border border-[#eadfce] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#9a5a16] shadow-[0_4px_12px_rgba(92,74,52,0.08)] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-[0_8px_18px_rgba(92,74,52,0.13)] active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                     @click.stop="toggleFocusPanel"
                   >
-                    <span class="h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#d97706]' : 'bg-[#f6c56d]'"></span>
-                    {{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentTotal} 人` }}
-                    <span class="text-[11px]">{{ focusPanelOpen ? '▲' : '▼' }}</span>
+                    <span class="focus-panel-toggle-dot h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#d97706]' : 'bg-[#f6c56d]'"></span>
+                    <span>{{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentTotal} 人` }}</span>
+                    <span class="focus-panel-toggle-arrow text-[11px]" :class="{ 'is-open': focusPanelOpen }">⌄</span>
                   </button>
                   <button
                     type="button"
@@ -670,14 +659,15 @@
                   </span>
                   <span
                     aria-hidden="true"
-                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-200 group-hover:bg-[#e8eef7]"
+                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:bg-[#e8eef7]"
                     :class="focusFollowExpanded ? 'rotate-180' : ''"
                   >⌄</span>
                 </span>
               </button>
 
               <Transition name="sidebar-accordion">
-              <div v-if="focusFollowExpanded" id="focus-follow-content" class="border-t border-black/[0.06] px-4 pb-4 pt-3">
+              <div v-if="focusFollowExpanded" id="focus-follow-content" class="sidebar-accordion-shell">
+                <div class="sidebar-accordion-inner border-t border-black/[0.06] px-4 pb-4 pt-3">
                 <div class="grid grid-cols-2 gap-2" aria-label="重点学生分类">
                   <button
                     v-for="stat in focusStudentFilterStats"
@@ -775,6 +765,7 @@
                 <p v-else class="mt-3 rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
                   当前分类暂无重点学生。
                 </p>
+                </div>
               </div>
               </Transition>
             </section>
@@ -795,18 +786,19 @@
                   <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[11px] font-semibold text-[#9a5a16]">{{ teacherFocusRows.length }} 项</span>
                   <span
                     aria-hidden="true"
-                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-200 group-hover:bg-[#e8eef7]"
+                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:bg-[#e8eef7]"
                     :class="prepReminderExpanded ? 'rotate-180' : ''"
                   >⌄</span>
                 </span>
               </button>
               <Transition name="sidebar-accordion">
-              <div v-if="prepReminderExpanded" id="prep-reminder-content" class="border-t border-black/[0.06] px-4 pb-4 pt-3">
+              <div v-if="prepReminderExpanded" id="prep-reminder-content" class="sidebar-accordion-shell">
+                <div class="sidebar-accordion-inner border-t border-black/[0.06] px-4 pb-4 pt-3">
                 <div v-if="teacherFocusRows.length" class="teaching-advice-side-list space-y-3 pr-1">
                   <div v-for="item in teacherFocusRows" :key="item.key" class="rounded-[14px] border border-[#eadfce] bg-[#fffdf8] px-4 py-3">
                     <div class="text-xs font-semibold text-[#8a5b22]">{{ item.title }}</div>
-                    <p class="mt-2 compact-line-clamp-2 text-xs leading-5 text-[#374151]">{{ item.instruction }}</p>
-                    <p class="mt-2 text-[11px] font-medium leading-5 text-[#6e6e73]">
+                    <p class="mt-2 whitespace-pre-wrap break-words text-xs leading-6 text-[#374151]">{{ item.instruction }}</p>
+                    <p class="mt-2 whitespace-pre-wrap break-words text-[11px] font-medium leading-5 text-[#6e6e73]">
                       {{ item.when }} · {{ item.target }}
                     </p>
                   </div>
@@ -814,6 +806,7 @@
                 <p v-else class="rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
                   生成后会从 AI 报告里提炼“讲什么、补什么、怎么跟进”。
                 </p>
+                </div>
               </div>
               </Transition>
             </section>
@@ -827,7 +820,9 @@
                 <span class="text-sm font-semibold text-[#1d1d1f]">{{ historyExpanded ? '▾' : '▸' }} 历史建议报告</span>
                 <span class="text-xs text-[#8a8a8f]">{{ filteredReports.length }} 条</span>
               </button>
-              <div v-if="historyExpanded" class="border-t border-black/[0.06] px-5 py-3">
+              <Transition name="sidebar-accordion">
+              <div v-if="historyExpanded" class="sidebar-accordion-shell">
+                <div class="sidebar-accordion-inner border-t border-black/[0.06] px-5 py-3">
                 <div v-if="filteredReports.length" class="divide-y divide-black/[0.05]">
                   <button
                     v-for="report in filteredReports"
@@ -855,7 +850,9 @@
                   </button>
                 </div>
                 <p v-else class="py-5 text-sm text-[#8a8a8f]">当前班级暂无历史建议。</p>
+                </div>
               </div>
+              </Transition>
             </section>
           </aside>
           </Transition>
@@ -894,13 +891,14 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import {
   generateTeachingAdvice,
   getTeachingAdviceContext,
+  getTeachingAdviceReport,
   getTeachingAdviceReports
 } from '@/api/tap'
 
@@ -946,6 +944,8 @@ const studentActionPopover = ref({
   style: {}
 })
 let contextRequestId = 0
+let generationRequestId = 0
+let componentUnmounted = false
 
 const unwrap = response => response?.data ?? response
 const activeData = computed(() => activeReport.value || contextData.value)
@@ -954,6 +954,8 @@ const metrics = computed(() => activeData.value?.metrics || {})
 const rawAdvice = computed(() => activeReport.value?.advice || null)
 const reportGateMessage = computed(() => reportGateMessageFor(activeReport.value))
 const advice = computed(() => reportGateMessage.value ? null : rawAdvice.value)
+const activeReportStatus = computed(() => String(activeReport.value?.status || '').toUpperCase())
+const activeReportGenerating = computed(() => activeReportStatus.value === 'GENERATING')
 const activeScopeLevel = computed(() => String(activeReport.value?.scopeLevel || scope.value.level || '').toUpperCase())
 const activeScopeLevelLabel = computed(() => scopeLabel(activeScopeLevel.value || scopeLevel.value))
 const currentScopeTitle = computed(() => {
@@ -1018,9 +1020,9 @@ const disabledReason = computed(() => {
   if (scopeLevel.value === 'EXPERIMENT' && !experimentId.value) return '请选择实验后生成'
   return ''
 })
-const generateButtonDisabled = computed(() => generating.value || !!disabledReason.value)
+const generateButtonDisabled = computed(() => generating.value || activeReportGenerating.value || !!disabledReason.value)
 const generateButtonLabel = computed(() => {
-  if (generating.value) return 'AI 分析中...'
+  if (generating.value || activeReportGenerating.value) return 'AI 生成中...'
   return disabledReason.value || '生成教学建议'
 })
 const filteredReports = computed(() => reports.value.filter(report => String(report.scope?.classId || '') === String(props.classId)).slice(0, 8))
@@ -1048,9 +1050,11 @@ const hasConclusionDetails = computed(() => !!teachingConclusion.value?.cause ||
 function reportGateMessageFor(report) {
   if (!report) return ''
   const status = String(report.status || '').toUpperCase()
+  if (status === 'GENERATING') return ''
   if (status && status !== 'COMPLETED') {
     return report.errorMessage || '后端已将该报告标记为生成失败，未作为正式教学建议放行。'
   }
+  if (!report.advice && report.qualityStatus === 'PASS') return ''
   if (!isSupportedPromptVersion(report.promptVersion)) {
     return `该历史报告由 ${report.promptVersion || '旧版提示词'} 生成，未按当前质量门禁校验。请重新生成后再给教师查看。`
   }
@@ -1116,15 +1120,17 @@ function clientCompleteSentence(value) {
 
 function reportQualityLabel(report) {
   const status = String(report?.status || '').toUpperCase()
+  if (status === 'GENERATING') return '生成中'
   if (status && status !== 'COMPLETED') return '失败'
   if (!isSupportedPromptVersion(report?.promptVersion)) return '旧版'
-  if (report?.advice?.qualityGate?.status === 'PASS') return '已校验'
+  if (report?.advice?.qualityGate?.status === 'PASS' || report?.qualityStatus === 'PASS') return '已校验'
   return '未校验'
 }
 
 function reportQualityClass(report) {
   const label = reportQualityLabel(report)
   if (label === '已校验') return 'bg-[#ecfdf3] text-[#18794e]'
+  if (label === '生成中') return 'bg-[#eff6ff] text-[#2563eb]'
   if (label === '失败') return 'bg-[#fff1f1] text-[#b42318]'
   return 'bg-[#fff7ed] text-[#c2410c]'
 }
@@ -2424,8 +2430,28 @@ async function loadReports() {
   }
 }
 
+function sleep(ms) {
+  return new Promise(resolve => window.setTimeout(resolve, ms))
+}
+
+async function pollGeneratedReport(reportId, requestId) {
+  if (!reportId) return null
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (componentUnmounted || requestId !== generationRequestId) return null
+    const report = unwrap(await getTeachingAdviceReport(reportId))
+    if (componentUnmounted || requestId !== generationRequestId) return null
+    activeReport.value = report
+    const status = String(report?.status || '').toUpperCase()
+    if (status === 'COMPLETED') return report
+    if (status === 'FAILED') throw new Error(report?.errorMessage || '教学建议生成失败')
+    await sleep(2500)
+  }
+  return activeReport.value
+}
+
 async function generateReport() {
   if (!canGenerate.value || generating.value) return
+  const requestId = ++generationRequestId
   generating.value = true
   focusPanelOpen.value = false
   focusFollowExpanded.value = false
@@ -2440,9 +2466,23 @@ async function generateReport() {
       throw new Error(`接口返回了${scopeLabel(returnedLevel)}报告，当前选择的是${scopeLabel(scopeLevel.value)}，已阻止显示旧范围结果`)
     }
     activeReport.value = generatedReport
+    if (String(generatedReport?.status || '').toUpperCase() === 'GENERATING') {
+      uiMessage.success('教学建议已进入后台生成，页面会自动刷新结果')
+      await loadReports()
+      const completedReport = await pollGeneratedReport(generatedReport.id, requestId)
+      if (completedReport && String(completedReport.status || '').toUpperCase() === 'COMPLETED') {
+        await loadReports()
+        uiMessage.success('教学建议已生成并保存')
+      } else if (!componentUnmounted && requestId === generationRequestId) {
+        await loadReports()
+        uiMessage.warning('教学建议仍在后台生成，可稍后从历史报告打开')
+      }
+      return
+    }
     await loadReports()
     uiMessage.success('教学建议已生成并保存')
   } catch (error) {
+    if (requestId !== generationRequestId) return
     errorMessage.value = error?.message || '教学建议生成失败'
     uiMessage.warning(errorMessage.value)
     logger.error('生成可信教学建议失败:', error)
@@ -2452,13 +2492,22 @@ async function generateReport() {
   }
 }
 
-function selectReport(report) {
+async function selectReport(report) {
+  if (!report?.id) return
   activeReport.value = report
   focusPanelOpen.value = false
   focusFollowExpanded.value = false
   prepReminderExpanded.value = false
   expandedFocusStudentKey.value = ''
   selectedFocusPriority.value = 'ALL'
+  try {
+    const detail = unwrap(await getTeachingAdviceReport(report.id))
+    activeReport.value = detail
+  } catch (error) {
+    errorMessage.value = error?.message || '历史教学建议详情加载失败'
+    uiMessage.warning(errorMessage.value)
+    logger.error('加载教学建议详情失败:', error)
+  }
 }
 
 watch(() => props.experiments, rows => {
@@ -2477,6 +2526,11 @@ watch(renderedAdviceSections, sections => {
     resetMarkdownScroll()
   }
 }, { immediate: true })
+
+onBeforeUnmount(() => {
+  componentUnmounted = true
+  generationRequestId += 1
+})
 </script>
 
 <style scoped>
@@ -2756,31 +2810,96 @@ watch(renderedAdviceSections, sections => {
   transform: translateY(-6px);
 }
 
+.focus-panel-toggle {
+  will-change: transform, box-shadow, background-color;
+}
+
+.focus-panel-toggle-dot {
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.08);
+  transition:
+    background-color 260ms ease,
+    box-shadow 260ms ease,
+    transform 260ms ease;
+}
+
+.focus-panel-toggle:hover .focus-panel-toggle-dot {
+  transform: scale(1.16);
+  box-shadow: 0 0 0 5px rgba(217, 119, 6, 0.12);
+}
+
+.focus-panel-toggle-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  transition:
+    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 220ms ease;
+}
+
+.focus-panel-toggle-arrow.is-open {
+  transform: rotate(180deg);
+}
+
 .focus-panel-enter-active,
 .focus-panel-leave-active {
   transition:
-    opacity 220ms ease,
-    transform 220ms ease;
+    opacity 280ms ease,
+    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .focus-panel-enter-from,
 .focus-panel-leave-to {
   opacity: 0;
-  transform: translateX(16px) scale(0.98);
+  transform: translateX(18px) scale(0.985);
 }
 
 .sidebar-accordion-enter-active,
 .sidebar-accordion-leave-active {
-  transform-origin: top center;
+  overflow: hidden;
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+    grid-template-rows 430ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms ease;
 }
 
 .sidebar-accordion-enter-from,
 .sidebar-accordion-leave-to {
+  grid-template-rows: 0fr;
   opacity: 0;
-  transform: translateY(-6px) scaleY(0.98);
+}
+
+.sidebar-accordion-enter-to,
+.sidebar-accordion-leave-from {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.sidebar-accordion-shell {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+}
+
+.sidebar-accordion-inner {
+  min-height: 0;
+  overflow: hidden;
+  transform-origin: right top;
+  will-change: transform, opacity;
+  transition:
+    transform 430ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms ease;
+}
+
+.sidebar-accordion-enter-from .sidebar-accordion-inner,
+.sidebar-accordion-leave-to .sidebar-accordion-inner {
+  transform: translateX(18px);
+  opacity: 0;
+}
+
+.sidebar-accordion-enter-to .sidebar-accordion-inner,
+.sidebar-accordion-leave-from .sidebar-accordion-inner {
+  transform: translateX(0);
+  opacity: 1;
 }
 
 .detail-fade-enter-active,
