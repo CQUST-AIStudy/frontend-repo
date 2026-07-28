@@ -11,6 +11,7 @@ coverage
 .webpack
 .turbo
 .npm
+.npm-cache
 .pnpm-store
 .env
 .env.*
