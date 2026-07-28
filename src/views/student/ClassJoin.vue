@@ -27,14 +27,14 @@
           </ui-form-item>
         </ui-form>
 
-        <div class="join-actions [display:flex] [gap:12px]">
+        <div class="join-actions [display:flex] [gap:12px] [margin-top:16px] [margin-bottom:12px]">
           <ui-button type="primary" :loading="joining" :disabled="!canSubmit" @click="submitJoin">
             加入班级
           </ui-button>
           <ui-button @click="goAssistant">前往 AI 助手</ui-button>
         </div>
 
-        <div class="join-tip [margin-top:12px] [color:#909399] [font-size:13px] [line-height:1.6]">
+        <div class="join-tip [color:#909399] [font-size:13px] [line-height:1.6]">
           加入成功后，AI 助手会自动展示你当前教学班有权限访问的课程空间。
         </div>
       </ui-card>
