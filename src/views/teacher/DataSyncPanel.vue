@@ -127,42 +127,22 @@
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
-                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">增量同步</div>
-                <div class="text-[12px] text-[#6e6e73]">新实验全量爬取；未截止实验更新提交+导出；已截止跳过</div>
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">快速同步（默认）</div>
+                <div class="text-[12px] text-[#6e6e73]">每个题目集只取最新 200 条，仅追加更新；不生成整组答卷和成绩单</div>
               </div>
               <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('incremental')">
                 <span v-if="syncLoading === 'incremental'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span v-else>开始同步</span>
+                <span v-else>快速同步</span>
               </UiButton>
             </div>
             <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div class="flex-1">
-                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">拉取提交记录</div>
-                <div class="text-[12px] text-[#6e6e73]">拉取已有题目集的最新提交（轻量，冷却 4h）</div>
-              </div>
-              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#5ac476] to-[#6b8f6b] shadow-[0_2px_8px_rgba(107,143,107,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('submissions')">
-                <span v-if="syncLoading === 'submissions'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span v-else>拉取提交</span>
-              </UiButton>
-            </div>
-            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="flex-1">
-                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">刷新导出</div>
-                <div class="text-[12px] text-[#6e6e73]">重新导出成绩单/答题卡/代码（较重，冷却 24h）</div>
-              </div>
-              <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ffb340] to-[#c49a3c] shadow-[0_2px_8px_rgba(196,154,60,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('refresh')">
-                <span v-if="syncLoading === 'refresh'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span v-else>刷新导出</span>
-              </UiButton>
-            </div>
-            <div class="flex items-center justify-between p-3 px-4 rounded-[10px] bg-[#f9f9f9] border border-black/[0.06] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-              <div class="flex-1">
-                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">全量同步</div>
-                <div class="text-[12px] text-[#6e6e73]">增量 + 提交 + 导出，耗时较长</div>
+                <div class="text-[14px] font-semibold text-[#1d1d1f] mb-0.5">完整历史同步</div>
+                <div class="text-[12px] text-[#6e6e73]">逐学生抓取全部历史提交并生成成绩单和答卷，仅用于期末归档</div>
               </div>
               <UiButton class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#ff6259] to-[#c44b3f] shadow-[0_2px_8px_rgba(196,75,63,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0" :disabled="!selectedClassId || !!syncLoading" @click="triggerSync('full')">
                 <span v-if="syncLoading === 'full'" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span v-else>全量同步</span>
+                <span v-else>完整历史同步</span>
               </UiButton>
             </div>
           </div>
@@ -577,8 +557,27 @@ async function triggerSync(mode) {
   }
   await probeSpiderHealth()
 
+  const submissionPolicy =
+    mode === 'full' || mode === 'refresh'
+      ? 'FULL_HISTORY'
+      : 'LATEST_200'
+
+  if (submissionPolicy === 'FULL_HISTORY') {
+    try {
+      await messageBox.confirm(
+        '完整历史同步会逐学生抓取全部提交，并重新生成成绩单和答卷，可能持续较长时间。确定继续吗？',
+        '完整历史同步确认',
+        {
+          confirmButtonText: '继续完整同步',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+    } catch { return }
+  }
+
   // 强制模式需二次确认
-  if (forceMode.value) {
+  if (forceMode.value && submissionPolicy !== 'FULL_HISTORY') {
     try {
       await messageBox.confirm(
         '强制更新将跳过冷却时间限制，频繁请求可能影响 PTA 平台。确定继续？',
@@ -615,6 +614,7 @@ async function triggerSync(mode) {
       ptaGroupId: groupId,
       ptaGroupName: keyword,
       mode,
+      submissionPolicy,
       force: forceMode.value,
       ...(username ? { ptaUsername: username, ptaPassword: password } : {})
     }
@@ -632,6 +632,7 @@ async function triggerSync(mode) {
     if (taskId) {
       currentTask.value = { task_id: taskId, status: 'QUEUED', new_sets_count: 0,
         refreshed_count: 0, submissions_count: 0, error: null, warnings: [], skipped_cooldown: [], force: forceMode.value,
+        submission_policy: submissionPolicy,
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value }
       pollTaskStatus(taskId)
     } else {
@@ -645,6 +646,7 @@ async function triggerSync(mode) {
         warnings: Array.isArray(r?.warnings) ? r.warnings : [],
         skipped_cooldown: [],
         force: forceMode.value,
+        submission_policy: submissionPolicy,
         credential_source: r?.credentialSource || r?.credential_source || plannedCredentialSource.value
       }
     }

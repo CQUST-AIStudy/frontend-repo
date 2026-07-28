@@ -954,7 +954,11 @@ const submitClassForm = async () => {
       uiMessage.success('班级创建成功')
       if (ptaGroupName && created?.id) {
         try {
-          await triggerPtaSync(created.id, { ptaGroupName })
+          await triggerPtaSync(created.id, {
+            ptaGroupName,
+            mode: 'incremental',
+            submissionPolicy: 'LATEST_200'
+          })
           uiMessage.success('已自动触发PTA 数据同步')
         } catch (syncError) {
           uiMessage.warning(`班级已创建，但自动同步失败：${syncError.message || '数据同步服务可能未启动'}`)
@@ -1107,7 +1111,11 @@ const triggerSyncForClass = async () => {
         ptaGroupId,
         ptaGroupName,
         mode: 'incremental',
-        force: true,
+        submissionPolicy: 'LATEST_200',
+        // “立即同步”只绕过后端班级级冷却；仍保持爬虫增量语义，
+        // 避免把 19 个已存在题目集误当成强制全量重抓。
+        force: false,
+        bypassCooldown: true,
         ...(username ? { ptaUsername: username, ptaPassword: password } : {})
       })
     const data = extract(res) || {}

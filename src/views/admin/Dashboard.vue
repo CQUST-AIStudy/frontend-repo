@@ -97,7 +97,7 @@
               <div class="panel-header">
                 <div>
                   <div class="panel-title">教师侧数据时效性</div>
-                  <div class="panel-desc">管理员可按班级查看 PTA 增量同步状态并直接触发</div>
+                  <div class="panel-desc">管理员可按班级触发快速同步，或手动执行完整历史归档</div>
                 </div>
                 <ui-button text @click="loadDashboard">刷新班级状态</ui-button>
               </div>
@@ -142,7 +142,7 @@
                         :disabled="!row.syncEnabled || (!row.ptaGroupName && !row.ptaGroupId) || syncingClassId === row.id"
                         @click="triggerSync(row, 'incremental')"
                       >
-                        增量同步
+                        快速同步
                       </ui-button>
                       <ui-button
                         type="danger"
@@ -150,7 +150,7 @@
                         :disabled="!row.syncEnabled || (!row.ptaGroupName && !row.ptaGroupId) || syncingClassId === row.id"
                         @click="confirmFullSync(row)"
                       >
-                        全量同步
+                        完整历史同步
                       </ui-button>
                     </div>
                   </template>
@@ -382,7 +382,12 @@ async function submitCookieForm() {
 async function triggerSync(row, mode, force = false) {
   syncingClassId.value = row.id
   try {
-    const res = await api.triggerAdminClassSync(row.id, { mode, force })
+    const submissionPolicy = mode === 'full' ? 'FULL_HISTORY' : 'LATEST_200'
+    const res = await api.triggerAdminClassSync(row.id, {
+      mode,
+      submissionPolicy,
+      force
+    })
     const data = res?.data ?? res ?? {}
     if (data.blocked) {
       uiMessage.warning(getFriendlyResponseMessage(data, '任务被系统拦截，请稍后重试'))
@@ -400,8 +405,8 @@ async function triggerSync(row, mode, force = false) {
 async function confirmFullSync(row) {
   try {
     await messageBox.confirm(
-      `确认对班级“${row.name}”执行全量同步？该操作会重新抓取内容、提交记录和导出数据。`,
-      '全量同步确认',
+      `确认对班级“${row.name}”执行完整历史同步？该操作会逐学生抓取全部提交，并重新生成成绩单和答卷，可能持续较长时间。`,
+      '完整历史同步确认',
       {
         confirmButtonText: '确认同步',
         cancelButtonText: '取消',
