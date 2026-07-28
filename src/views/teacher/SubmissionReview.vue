@@ -64,12 +64,32 @@
               </div>
             </div>
             <div v-if="!matchConfirmed || rematching" class="flex items-center gap-2">
-              <select v-model="selectedStudentId" class="h-9 min-w-[220px] rounded-lg border border-[#d9e2ec] bg-white px-3 text-sm outline-none">
-                <option value="">请选择班级学生</option>
-                <option v-for="student in matchCandidates" :key="student.studentId" :value="student.studentId">
-                  {{ student.studentNo || '无学号' }} · {{ student.studentName }}
-                </option>
-              </select>
+              <div class="relative">
+                <input
+                  v-model="candidateSearch"
+                  type="text"
+                  placeholder="搜索学号或姓名选择学生"
+                  class="h-9 min-w-[220px] rounded-lg border border-[#d9e2ec] bg-white px-3 text-sm outline-none focus:border-[var(--app-primary)]"
+                  @focus="candidateListOpen = true"
+                  @input="onCandidateSearchInput"
+                  @blur="candidateListOpen = false"
+                />
+                <div
+                  v-if="candidateListOpen"
+                  class="absolute left-0 top-full z-30 mt-1 max-h-[240px] w-full min-w-[220px] overflow-y-auto rounded-lg border border-[#d9e2ec] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+                >
+                  <div
+                    v-for="student in filteredCandidates"
+                    :key="student.studentId"
+                    class="cursor-pointer px-3 py-2 text-sm hover:bg-[#f5f5f7]"
+                    :class="{ 'bg-[#f0f6ff] text-[var(--app-primary)]': String(student.studentId) === String(selectedStudentId) }"
+                    @mousedown.prevent="selectCandidate(student)"
+                  >
+                    {{ candidateLabel(student) }}
+                  </div>
+                  <div v-if="!filteredCandidates.length" class="px-3 py-2 text-sm text-[#6e6e73]">无匹配学生</div>
+                </div>
+              </div>
               <UiButton type="primary" :disabled="!selectedStudentId || confirmingMatch" @click="confirmMatch" class="h-9 px-4 rounded-[10px] text-sm disabled:opacity-50">
                 {{ rematching ? '确认重新匹配' : '确认匹配' }}
               </UiButton>
@@ -599,10 +619,43 @@ const preGeneratingResources = ref(false)
 const matchCandidates = ref([])
 const selectedStudentId = ref('')
 const rematching = ref(false)
+const candidateSearch = ref('')
+const candidateListOpen = ref(false)
+
+function candidateLabel(student) {
+  return `${student.studentNo || '无学号'} · ${student.studentName || ''}`
+}
+
+const filteredCandidates = computed(() => {
+  const keyword = candidateSearch.value.trim().toLowerCase()
+  if (!keyword) return matchCandidates.value
+  const selected = matchCandidates.value.find(s => String(s.studentId) === String(selectedStudentId.value))
+  // 已选中时输入框显示的是选中项文本，此时不过滤，方便重新浏览全部候选
+  if (selected && candidateSearch.value === candidateLabel(selected)) return matchCandidates.value
+  return matchCandidates.value.filter(s =>
+    String(s.studentNo || '').toLowerCase().includes(keyword) ||
+    String(s.studentName || '').toLowerCase().includes(keyword))
+})
+
+function selectCandidate(student) {
+  selectedStudentId.value = student.studentId
+  candidateSearch.value = candidateLabel(student)
+  candidateListOpen.value = false
+}
+
+function onCandidateSearchInput() {
+  // 手动改动搜索词后，若与选中项不再一致则清空选择，避免误确认
+  const selected = matchCandidates.value.find(s => String(s.studentId) === String(selectedStudentId.value))
+  if (selected && candidateSearch.value !== candidateLabel(selected)) {
+    selectedStudentId.value = ''
+  }
+  candidateListOpen.value = true
+}
 
 function startRematch() {
   rematching.value = true
   selectedStudentId.value = ''
+  candidateSearch.value = ''
 }
 let detailPollTimer = null
 const confirmingMatch = ref(false)
