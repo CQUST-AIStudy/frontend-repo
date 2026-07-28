@@ -12,7 +12,7 @@
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
           @change="onClassChange"
         >
-          <UiOption :value="null">全部实验</UiOption>
+          <UiOption :value="null">全部班级</UiOption>
           <UiOption
             v-for="cls in classList"
             :key="cls.classId"
@@ -37,7 +37,7 @@
       </div>
       <div v-else class="flex min-h-10 w-[360px] items-center justify-between gap-3 rounded-[10px] bg-[#f5f5f7] px-3 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] max-[768px]:!w-full">
         <span class="text-[12px] font-semibold text-[#6e6e73]">对比范围</span>
-        <span class="min-w-0 truncate text-sm font-medium text-[#1d1d1f]">{{ selectedClassName || '全部实验' }}</span>
+        <span class="min-w-0 truncate text-sm font-medium text-[#1d1d1f]">{{ selectedClassName || '全部班级' }}</span>
       </div>
 
       <UiButton
@@ -48,7 +48,7 @@
       </UiButton>
 
       <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)] ml-auto max-[768px]:ml-0">
-        {{ selectedClassName || '全部实验' }} / {{ experiments.length }} 个可分析实验
+        {{ selectedClassName || '全部班级' }} / {{ experiments.length }} 个可分析实验
       </span>
     </div>
 
