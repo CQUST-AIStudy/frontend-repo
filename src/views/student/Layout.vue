@@ -361,10 +361,7 @@ const menuItems = [
     ]
   },
   {
-    group: 'knowledge', icon: Connection, label: '知识体系',
-    children: [
-      { path: '/student/knowledge-graph', label: '我的学习图谱' }
-    ]
+    path: '/student/knowledge-graph', icon: Connection, label: '知识图谱'
   }
 ]
 

@@ -6,7 +6,6 @@ import KnowledgeGraphDetailPanel from '@/features/knowledge-graph/components/Kno
 import KnowledgeGraphPayloadPreview from '@/features/knowledge-graph/components/KnowledgeGraphPayloadPreview.vue'
 import KnowledgeGraphToolbar from '@/features/knowledge-graph/components/KnowledgeGraphToolbar.vue'
 import {
-  GRAPH_CODE,
   nodeTypeOptions,
   relationTypeOptions
 } from '@/features/knowledge-graph/dataStructureGraph'
@@ -20,7 +19,6 @@ import {
   validateGraph
 } from '@/features/knowledge-graph/graphDatabaseAdapter'
 import { createEmptyKnowledgeGraph, loadKnowledgeGraph } from '@/features/knowledge-graph/knowledgeGraphDataSource'
-import { useStateForGraph } from '@/features/knowledge-graph/learningState'
 import {
   exportGraphJSON
 } from '@/features/knowledge-graph/exportUtils'
@@ -38,8 +36,6 @@ const selectedNodeId = shallowRef('')
 const collapsedChapterIds = shallowRef([])
 const payloadVisible = shallowRef(false)
 const resultMessage = shallowRef(null)
-
-const { state: learningState, update: updateLearningState } = useStateForGraph(GRAPH_CODE)
 
 const normalizedGraph = computed(() => normalizeGraph(graphData.value))
 const validation = computed(() => validateGraph(graphData.value))
@@ -208,11 +204,6 @@ function handleExportJson() {
   }
 }
 
-function handleUpdateState(patch) {
-  if (!selectedNodeId.value) return
-  updateLearningState(selectedNodeId.value, patch)
-}
-
 onMounted(async () => {
   loading.value = true
   try {
@@ -309,7 +300,7 @@ onMounted(async () => {
         <div class="graph-main">
           <div class="graph-topline">
             <div>
-              <h2>课程章节知识体系</h2>
+              <h2>课程章节知识图谱</h2>
               <p>点击节点查看前置知识、后续知识、关联练习和图谱属性。</p>
             </div>
             <div class="type-breakdown" aria-label="节点类型统计">
@@ -325,15 +316,13 @@ onMounted(async () => {
             :selected-node-id="selectedNodeId"
             :highlight-paths="highlightPaths"
             :chapter-child-counts="chapterChildCounts"
-            :learning-state="learningState"
             @select-node="selectNode"
           />
         </div>
 
         <KnowledgeGraphDetailPanel
           :context="selectedContext"
-          :learning-state="learningState"
-          @update-state="handleUpdateState"
+          :show-learning-state="false"
           @select-node="selectNode"
         />
       </section>

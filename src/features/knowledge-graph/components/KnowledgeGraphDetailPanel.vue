@@ -15,6 +15,10 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
+  showLearningState: {
+    type: Boolean,
+    default: true
+  },
   // 当前节点的画像掌握度信息 { level, score, isWeak, evidence, dimension, experimentName }
   masteryInfo: {
     type: Object,
@@ -263,7 +267,7 @@ const relationGroups = computed(() => {
         </div>
       </dl>
 
-      <section class="learning-state-section">
+      <section v-if="showLearningState" class="learning-state-section">
         <div class="relation-title">
           <LucideIcon name="bookmark" :size="15" />
           学习状态

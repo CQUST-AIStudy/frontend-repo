@@ -106,7 +106,7 @@ const routes = [
       {
         path: 'knowledge-graph',
         name: 'KnowledgeGraph',
-        component: () => import('../features/knowledge-graph/views/StudentLearningGraph.vue')
+        component: () => import('../views/common/DataStructureKnowledgeGraph.vue')
       },
       {
         path: 'profile',
