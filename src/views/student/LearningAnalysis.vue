@@ -45,7 +45,7 @@
         <ui-row :gutter="20" class="chart-row [margin:0]">
           <ui-col :span="12">
             <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
-              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>知识掌握雷达图</span></div></template>
+              <template #header><div class="card-header [display:flex] [align-items:center] [justify-content:space-between] [gap:12px] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>知识掌握雷达图</span><span class="[font-size:11px] [font-weight:400] [color:var(--app-text-soft)]">能力维度固定 · 分值按最新提交计算</span></div></template>
               <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="radarChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
@@ -57,12 +57,12 @@
           </ui-col>
         </ui-row>
 
-        <!-- 各实验掌握度排行 + 提交效率分析 -->
+        <!-- 知识维度学习投入 + 提交效率分析 -->
         <ui-row :gutter="20" class="chart-row [margin:0]">
           <ui-col :span="12">
             <ui-card class="chart-card [height:380px] [border-radius:16px] [border:1px_solid_var(--app-border)] [box-shadow:none]">
-              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>各实验掌握度排行</span></div></template>
-              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="dimBarChartRef" class="chart [width:100%] [height:100%]"></div></div>
+              <template #header><div class="card-header [display:flex] [align-items:center] [font-size:15px] [font-weight:500] [color:var(--app-text)]"><span>知识维度学习投入占比</span></div></template>
+              <div class="chart-container [height:292px] [width:100%] [position:relative]"><div ref="effortChartRef" class="chart [width:100%] [height:100%]"></div></div>
             </ui-card>
           </ui-col>
           <ui-col :span="12">
@@ -361,9 +361,9 @@ let classCompareChart = null
 
 const radarChartRef = ref(null)
 const trendChartRef = ref(null)
-const dimBarChartRef = ref(null)
+const effortChartRef = ref(null)
 const efficiencyChartRef = ref(null)
-let radarChart = null, trendChart = null, dimBarChart = null, efficiencyChart = null
+let radarChart = null, trendChart = null, effortChart = null, efficiencyChart = null
 let analysisResizeObserver = null
 
 // AI 学习建议
@@ -656,7 +656,7 @@ async function loadData() {
       setTimeout(() => {
         radarChart?.resize()
         trendChart?.resize()
-        dimBarChart?.resize()
+        effortChart?.resize()
         efficiencyChart?.resize()
       }, 500)
     }, 200)
@@ -667,7 +667,7 @@ async function loadData() {
 }
 
 function initCharts() {
-  initRadar(); initTrend(); initDimBar(); initEfficiency()
+  initRadar(); initTrend(); initEffort(); initEfficiency()
 }
 
 function initRadar() {
@@ -719,55 +719,52 @@ function initTrend() {
   })
 }
 
-function initDimBar() {
-  if (!dimBarChartRef.value) return
-  if (dimBarChart) dimBarChart.dispose()
-  dimBarChart = echarts.init(dimBarChartRef.value)
-  const series = profileData.value.trend?.series
-  if (!series?.length) {
-    setEmptyChart(dimBarChart, '暂无实验掌握度数据')
-    return
-  }
-  const items = series
-    .map(item => {
-      const value = Number(item.mastery)
+function initEffort() {
+  if (!effortChartRef.value) return
+  if (effortChart) effortChart.dispose()
+  effortChart = echarts.init(effortChartRef.value)
+  const items = (profileData.value.skillTree || [])
+    .map(dim => {
+      const children = dim.children || []
       return {
-        name: item.name || '未命名实验',
-        mastery: Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0
+        name: dim.dimension || '未分类',
+        value: children.reduce((sum, child) => sum + (Number(child.totalSubmissions) || 0), 0),
+        acCount: children.reduce((sum, child) => sum + (Number(child.acCount) || 0), 0),
+        questionCount: children.reduce((sum, child) => sum + (Number(child.questionCount) || 0), 0)
       }
     })
-    .sort((a, b) => a.mastery - b.mastery)
-  dimBarChart.setOption({
+    .filter(item => item.value > 0)
+  if (!items.length) {
+    setEmptyChart(effortChart, '暂无学习投入数据')
+    return
+  }
+  effortChart.setOption({
+    color: ['#d18a61', '#67C23A', '#E6A23C', '#6b8fa3', '#9b7eaa', '#c46b5e'],
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
+      trigger: 'item',
       formatter(params) {
-        if (!params?.length) return ''
-        const index = params[0].dataIndex
-        const item = items[index]
-        if (!item) return ''
-        return `${item.name}<br/>掌握度：${item.mastery}分`
+        const item = params.data
+        return `${item.name}<br/>提交次数：${item.value}次（${params.percent}%）<br/>AC次数：${item.acCount}次<br/>练习题数：${item.questionCount}题`
       }
     },
-    grid: { left: 16, right: 24, bottom: 16, top: 16, containLabel: true },
-    xAxis: { type: 'value', min: 0, max: 100, name: '掌握度' },
-    yAxis: {
-      type: 'category',
-      data: items.map(item => item.name),
-      axisLabel: { width: 120, overflow: 'truncate' }
-    },
+    legend: { orient: 'vertical', right: 16, top: 'middle', itemWidth: 12, itemHeight: 12 },
     series: [{
-      name: '掌握度',
-      type: 'bar',
-      data: items.map(item => ({
-        value: item.mastery,
-        itemStyle: {
-          color: item.mastery >= 70 ? '#67C23A' : item.mastery >= 40 ? '#E6A23C' : '#F56C6C',
-          borderRadius: [0, 4, 4, 0]
-        }
-      })),
-      barWidth: 18,
-      label: { show: true, position: 'right', formatter: '{c}分' }
+      name: '提交次数',
+      type: 'pie',
+      radius: ['38%', '66%'],
+      center: ['38%', '50%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderColor: '#fff', borderWidth: 2, borderRadius: 5 },
+      label: { color: '#606266', fontSize: 11, formatter: '{b}\n{c}次 ({d}%)' },
+      labelLine: { length: 10, length2: 8 },
+      data: items
+    }],
+    media: [{
+      query: { maxWidth: 520 },
+      option: {
+        legend: { orient: 'horizontal', left: 'center', right: 'auto', top: 'auto', bottom: 0 },
+        series: [{ center: ['50%', '40%'], radius: ['30%', '53%'], label: { show: false } }]
+      }
     }]
   })
 }
@@ -861,7 +858,7 @@ function initClassCompareChart() {
   })
 }
 
-function handleResize() { radarChart?.resize(); trendChart?.resize(); dimBarChart?.resize(); efficiencyChart?.resize(); classCompareChart?.resize() }
+function handleResize() { radarChart?.resize(); trendChart?.resize(); effortChart?.resize(); efficiencyChart?.resize(); classCompareChart?.resize() }
 onMounted(() => {
   loadData()
   window.addEventListener('resize', handleResize)
@@ -873,7 +870,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   analysisResizeObserver?.disconnect()
-  radarChart?.dispose(); trendChart?.dispose(); dimBarChart?.dispose(); efficiencyChart?.dispose(); classCompareChart?.dispose()
+  radarChart?.dispose(); trendChart?.dispose(); effortChart?.dispose(); efficiencyChart?.dispose(); classCompareChart?.dispose()
 })
 </script>
 
