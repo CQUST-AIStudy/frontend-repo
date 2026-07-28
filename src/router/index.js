@@ -76,6 +76,11 @@ const routes = [
         component: () => import('../views/student/CodeDemoPage.vue')
       },
       {
+        path: 'code-playground',
+        name: 'StudentCodePlayground',
+        component: () => import('../views/student/CodePlayground.vue')
+      },
+      {
         path: 'leetcode-search',
         name: 'LeetCodeSearch',
         component: () => import('../views/student/LeetCodeSearch.vue')

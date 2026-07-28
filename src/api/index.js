@@ -577,6 +577,23 @@ export default {
     return apiClient.post('/api/student/code-demo/generate', { experimentId, problemNo, stdin, force }, { timeout: 180000 })
   },
 
+  // AI 助教「代码演示（手动输入）」：学生贴代码+题目 → 生成执行/错误动画 + 历史
+  async generatePlaygroundDemo({ title, problemMd, code, stdin }) {
+    return apiClient.post('/api/student/ai-assistant/code-demo/generate', { title, problemMd, code, stdin }, { timeout: 180000 })
+  },
+
+  async getPlaygroundHistory() {
+    return apiClient.get('/api/student/ai-assistant/code-demo/history')
+  },
+
+  async getPlaygroundDemo(id) {
+    return apiClient.get(`/api/student/ai-assistant/code-demo/history/${id}`)
+  },
+
+  async deletePlaygroundDemo(id) {
+    return apiClient.delete(`/api/student/ai-assistant/code-demo/history/${id}`)
+  },
+
   async getNotifications(limit = 50) {
     return apiClient.get('/api/student/notifications', { params: { limit } })
   },

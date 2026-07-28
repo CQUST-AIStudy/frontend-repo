@@ -357,7 +357,8 @@ const menuItems = [
     group: 'ai', icon: ChatDotRound, label: 'AI 智能助手',
     children: [
       { path: '/student/ai-assistant', label: 'AI 学习助手' },
-      { path: '/student/ai-report', label: 'AI 报告生成' }
+      { path: '/student/ai-report', label: 'AI 报告生成' },
+      { path: '/student/code-playground', label: '代码演示' }
     ]
   },
   {
