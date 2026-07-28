@@ -28,7 +28,7 @@
           <!-- Menu items rendered via menuItems data -->
           <template v-for="item in visibleMenuItems" :key="item.path || item.group">
             <!-- Single item -->
-            <router-link v-if="!item.children" :to="item.path" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === item.path, 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': activeMenu !== item.path }">
+            <router-link v-if="!item.children" :to="item.path" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === item.path, 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': activeMenu !== item.path }">
               <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
               <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
             </router-link>
@@ -60,7 +60,7 @@
               >
                 <div v-if="openGroups[item.group] && !collapsed" class="relative mt-1 ml-[20px] pl-3 py-0.5 space-y-0.5 overflow-hidden before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-[var(--app-border-soft)]">
                   <template v-for="child in item.children" :key="child.path">
-                    <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }">
+                    <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[15px] text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }">
                       <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)] transition-colors" :class="{ '!border-[var(--app-primary)] !bg-[var(--app-primary)]': isChildActive(child.path), 'group-hover/child:border-[var(--app-text-soft)]': !isChildActive(child.path) }"></span>
                       <span class="truncate">{{ child.label }}</span>
                     </router-link>
@@ -72,7 +72,7 @@
 
           <div class="h-px bg-[var(--app-border-soft)] mx-3 my-2.5"></div>
 
-          <router-link to="/teacher/profile" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === '/teacher/profile', 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': activeMenu !== '/teacher/profile' }">
+          <router-link to="/teacher/profile" class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === '/teacher/profile', 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': activeMenu !== '/teacher/profile' }">
             <Setting class="w-[18px] h-[18px] shrink-0" />
             <span v-if="!collapsed" class="truncate">个人设置</span>
           </router-link>
@@ -111,7 +111,7 @@
           <nav class="flex-1 overflow-y-auto px-2 py-3">
             <div class="space-y-0.5">
               <template v-for="item in visibleMenuItems" :key="item.path || item.group">
-                <router-link v-if="!item.children" :to="item.path" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)] transition-all duration-150" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === item.path, 'hover:bg-[var(--app-primary-tint-8)]': activeMenu !== item.path }" @click="closeMobileMenu">
+                <router-link v-if="!item.children" :to="item.path" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] text-[var(--app-text-secondary)] transition-all duration-150" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === item.path, 'hover:bg-[var(--app-primary-tint-8)]': activeMenu !== item.path }" @click="closeMobileMenu">
                   <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" />
                   <span>{{ item.label }}</span>
                 </router-link>
@@ -133,7 +133,7 @@
                   </UiButton>
                   <div v-if="openGroups[item.group]" class="relative ml-[20px] mt-1 pl-3 py-0.5 space-y-0.5 before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px before:bg-[var(--app-border-soft)]">
                     <template v-for="child in item.children" :key="child.path">
-                      <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150" :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }" @click="closeMobileMenu">
+                      <router-link v-if="!child.permission || hasPermission(child.permission)" :to="child.path" class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[15px] text-[var(--app-text-secondary)] transition-all duration-150" :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }" @click="closeMobileMenu">
                         <span class="absolute left-[-15px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[var(--app-border-soft)] bg-[var(--app-surface-muted)] transition-colors" :class="{ '!border-[var(--app-primary)] !bg-[var(--app-primary)]': isChildActive(child.path), 'group-hover/child:border-[var(--app-text-soft)]': !isChildActive(child.path) }"></span>
                         <span class="truncate">{{ child.label }}</span>
                       </router-link>
@@ -142,7 +142,7 @@
                 </div>
               </template>
               <div class="h-px bg-[var(--app-border-soft)] mx-3 my-2.5"></div>
-              <router-link to="/teacher/profile" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)]" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === '/teacher/profile' }" @click="closeMobileMenu">
+              <router-link to="/teacher/profile" class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] text-[var(--app-text-secondary)]" :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': activeMenu === '/teacher/profile' }" @click="closeMobileMenu">
                 <Setting class="w-[18px] h-[18px] shrink-0" />
                 <span>个人设置</span>
               </router-link>
@@ -413,7 +413,7 @@ function getGroupButtonClass(item) {
   const active = isGroupActive(item)
   const open = openGroups[item.group]
   return [
-    'flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer',
+    'flex items-center overflow-hidden text-[15px] font-medium transition-all duration-150 cursor-pointer',
     '!min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none',
     active
       ? '!border-[var(--app-primary)]/25 !bg-[var(--app-primary-tint-12)] !text-[var(--app-primary)]'

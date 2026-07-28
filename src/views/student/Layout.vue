@@ -27,7 +27,7 @@
                 <router-link
                   v-if="!item.children"
                   :to="item.path"
-                  class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
+                  class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
                   :class="{
                     'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive(item.path),
                     'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isItemActive(item.path)
@@ -40,7 +40,7 @@
                 <!-- Group with children -->
                 <div v-else>
                   <UiButton
-                    class="nav-item group relative flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
+                    class="nav-item group relative flex items-center overflow-hidden text-[15px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
                     :class="getGroupButtonClass(item)"
                     @click="toggleGroup(item.group)"
                   >
@@ -66,7 +66,7 @@
                         v-for="child in item.children"
                         :key="child.path"
                         :to="child.path"
-                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
+                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[15px] text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
                         :class="{
                           'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path),
                           'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path)
@@ -84,7 +84,7 @@
 
               <router-link
                 to="/student/profile"
-                class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
+                class="nav-item group flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] font-normal text-[var(--app-text-secondary)] transition-all duration-150 cursor-pointer"
                 :class="{
                   'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive('/student/profile'),
                   'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isItemActive('/student/profile')
@@ -121,7 +121,7 @@
                   <router-link
                     v-if="!item.children"
                     :to="item.path"
-                    class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)] transition-all duration-150"
+                    class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] text-[var(--app-text-secondary)] transition-all duration-150"
                     :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive(item.path), 'hover:bg-[var(--app-primary-tint-8)]': !isItemActive(item.path) }"
                     @click="closeMobileMenu"
                   >
@@ -131,7 +131,7 @@
 
                   <div v-else>
                     <UiButton
-                      class="group relative flex items-center overflow-hidden text-[13px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
+                      class="group relative flex items-center overflow-hidden text-[15px] font-medium transition-all duration-150 cursor-pointer !min-h-0 !h-[40px] !w-full !justify-start !gap-2.5 !px-2.5 !py-0 !rounded-[11px] !shadow-none"
                       :class="getGroupButtonClass(item)"
                       @click="toggleGroup(item.group)"
                     >
@@ -149,7 +149,7 @@
                         v-for="child in item.children"
                         :key="child.path"
                         :to="child.path"
-                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[12px] text-[var(--app-text-secondary)] transition-all duration-150"
+                        class="group/child relative flex items-center h-[30px] px-2.5 rounded-md text-[15px] text-[var(--app-text-secondary)] transition-all duration-150"
                         :class="{ 'bg-[var(--app-primary-tint-8)] !text-[var(--app-primary)] !font-semibold': isChildActive(child.path), 'hover:bg-[var(--app-primary-tint-8)] hover:text-[var(--app-text)]': !isChildActive(child.path) }"
                         @click="closeMobileMenu"
                       >
@@ -164,7 +164,7 @@
 
                 <router-link
                   to="/student/profile"
-                  class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[13px] text-[var(--app-text-secondary)]"
+                  class="flex items-center gap-2.5 h-[38px] px-3 rounded-[10px] text-[15px] text-[var(--app-text-secondary)]"
                   :class="{ 'bg-[var(--app-primary-soft)] !text-[var(--app-primary)] !font-semibold': isItemActive('/student/profile') }"
                   @click="closeMobileMenu"
                 >
