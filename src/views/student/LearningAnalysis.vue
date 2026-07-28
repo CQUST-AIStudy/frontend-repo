@@ -30,13 +30,13 @@
           <router-link to="/student/leetcode-search"
              class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#e6f4ea] [color:#1e8e3e] [border:1px_solid_#ceead6] hover:[background:#ceead6] hover:[border-color:#1e8e3e]">
             <span style="font-size:18px">💡</span>
-            <span>LeetCode 推荐题目</span>
+            <span>薄弱强化题集</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
           </router-link>
           <router-link to="/student/leetcode-search"
              class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#fef7e0] [color:#e37400] [border:1px_solid_#fdecc8] hover:[background:#fdecc8] hover:[border-color:#e37400]">
             <span style="font-size:18px">📝</span>
-            <span>个性化推荐练习</span>
+            <span>薄弱强化题集</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
           </router-link>
         </div>
@@ -282,7 +282,7 @@
 
             <!-- 推荐练习 -->
             <div v-if="aiSuggestions.recommendedProblems?.length" class="sug-section">
-              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📌 推荐练习方向</h4>
+              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📌 薄弱强化方向</h4>
               <div class="sug-rec-list [display:flex] [gap:8px] [flex-wrap:wrap]">
                 <router-link v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i" to="/student/leetcode-search"
                       class="sug-rec-chip [display:inline-block] [font-size:13px] [padding:6px_14px] [border-radius:100px] [background:#e8f0fe] [color:#1a73e8] [font-weight:500] [text-decoration:none] [cursor:pointer] hover:[background:#d2e3fc]">
@@ -291,7 +291,7 @@
               </div>
               <div class="[margin-top:10px]">
                 <router-link to="/student/leetcode-search" class="[font-size:13px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
-                  👉 前往个性化练习，针对性提升 →
+                  👉 前往薄弱强化题集，针对性提升 →
                 </router-link>
               </div>
             </div>

@@ -23,12 +23,12 @@
       <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
         <h3 class="text-base font-semibold text-[#1d1d1f] mb-5">📊 练习情况摘要</h3>
 
-        <!-- PTA 推荐题目集 -->
+        <!-- PTA 实验情况 -->
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-3">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#007aff]/10 text-[#007aff]">PTA</span>
             <span class="text-sm font-medium text-[#1d1d1f]">
-              推荐题目集
+              实验情况
               <span class="text-[#6e6e73] font-normal">
                 （共 {{ summary.ptaTotalSets }} 个，完成 {{ summary.ptaCompletedSets }} 个）
               </span>
@@ -72,14 +72,14 @@
             </table>
           </div>
           <div v-else class="text-sm text-[#aeaeb2] py-3">
-            暂无 PTA 推荐题目集
+            暂无实验情况
           </div>
         </div>
 
-        <!-- LeetCode 推荐练习 -->
+        <!-- 薄弱强化题集 -->
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#34c759]/10 text-[#34c759]">LeetCode</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#34c759]/10 text-[#34c759]">薄弱强化题集</span>
             <span class="text-sm font-medium text-[#1d1d1f]">推荐练习</span>
           </div>
 
@@ -112,7 +112,7 @@
             <span class="text-xs font-medium text-[#1d1d1f] w-12 text-right">{{ Math.round(summary.leetcode.completionRate * 100) }}%</span>
           </div>
           <div v-else class="text-sm text-[#aeaeb2] py-3">
-            暂无 LeetCode 练习记录
+            暂无薄弱强化题集记录
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@ const {
 const filters = [
   { key: 'all', label: '全部' },
   { key: 'pta', label: 'PTA' },
-  { key: 'leetcode', label: 'LeetCode' }
+  { key: 'leetcode', label: '薄弱强化题集' }
 ]
 
 const filteredTimeline = computed(() => {

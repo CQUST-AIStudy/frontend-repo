@@ -105,10 +105,10 @@
         </div>
       </div>
 
-      <!-- 模块4: 今日推荐练习 -->
+      <!-- 模块4: 今日薄弱强化题集 -->
       <div v-if="practiceRecommendations.length" class="dash-card [padding:20px_24px]">
         <div class="dash-section-head [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:8px]">
-          <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">今日推荐练习（基于你的薄弱点）</span>
+          <span class="[font-size:15px] [font-weight:700] [color:#1a1a2e]">今日薄弱强化题集（基于你的薄弱点）</span>
           <UiButton class="[background:#fff] [border:1px_solid_#e5e7eb] [border-radius:100px] [padding:5px_14px] [font-size:12px] [color:#6b7280] [cursor:pointer] [font-weight:500] hover:[background:#f9fafb] hover:[border-color:#d1d5db]" @click="refreshRecommendations" :disabled="recLoading">
             <span class="[display:inline-flex] [align-items:center] [gap:6px]">
               <span class="[display:inline-flex]" :class="{ 'dash-spin': recLoading }">
@@ -128,8 +128,8 @@
           <div v-for="(rec, i) in practiceRecommendations" :key="rec.problemId || rec.title || i"
                class="rec-item [padding:16px] [border:1px_solid_#eef1f5] [border-radius:12px] [cursor:pointer] [transition:all_0.2s] [background:#fafbfc] hover:[border-color:#e3bea8] hover:[background:#fff] hover:[box-shadow:0_6px_16px_rgba(209, 138, 97,0.1)]" @click="goToPractice(rec)">
             <div class="[display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
-              <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#fbf1eb] [color:#d18a61]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source }}</span>
-              <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : (rec.tag || '推荐拓展') }}</span>
+              <span class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [font-weight:600] [letter-spacing:0.02em]" :class="rec.source === 'PTA' ? '[background:#fbf1eb] [color:#d18a61]' : '[background:#fef3c7] [color:#92400e]'">{{ rec.source === 'PTA' ? 'PTA' : '薄弱强化题集' }}</span>
+              <span class="[font-size:12px] [font-weight:500] [color:#8c959f] [margin-left:auto]">{{ rec.source === 'PTA' ? 'PTA | ' + rec.tag : (rec.tag || '薄弱强化题集') }}</span>
             </div>
             <div class="[font-size:11px] [padding:2px_8px] [border-radius:100px] [display:inline-block] [margin-bottom:12px] [font-weight:500]" :class="rec._diffClass">{{ rec._diffLabel }}</div>
             <div class="[font-size:14px] [font-weight:700] [color:#1a1a2e] [margin-bottom:14px] [line-height:1.4]">{{ rec.title }}</div>
@@ -351,7 +351,7 @@ function feedbackIconStyle(fb) {
 const quickEntries = [
   { iconName: 'clipboard-text', label: '实验列表', path: '/student/experiments', bg: 'linear-gradient(135deg,#fbf1eb,#f1d5c2)', color: '#ac6843' },
   { iconName: 'circle-x', label: '错题本', path: '/student/wrong-notebook', bg: 'linear-gradient(135deg,#fef2f2,#fce4e4)', color: '#dc2626' },
-  { iconName: 'check', label: '推荐练习', path: '/student/leetcode-search', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
+  { iconName: 'check', label: '薄弱强化题集', path: '/student/leetcode-search', bg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)', color: '#059669' },
   { iconName: 'brain', label: '知识图谱', path: '/student/knowledge-graph', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', color: '#ea580c' },
   { iconName: 'bot', label: 'AI 学习助手', path: '/student/ai-assistant', bg: 'linear-gradient(135deg,#fbf1eb,#edd0bc)', color: '#d18a61' }
 ]

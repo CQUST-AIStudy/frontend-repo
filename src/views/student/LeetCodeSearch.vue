@@ -1,8 +1,8 @@
 <template>
   <div class="leetcode-search page [display:flex] [flex-direction:column] [gap:16px] [height:100%] [min-height:0]">
     <UiPageHeader
-      title="LeetCode 拓展练习"
-      description="基于个性化推荐结果筛选 LeetCode 题目，支持关键词与难度过滤。"
+      title="薄弱强化题集"
+      description="基于个性化推荐结果筛选题目，支持关键词与难度过滤。"
     >
     </UiPageHeader>
 
@@ -24,7 +24,7 @@
           数量
           <ui-input v-model.number="limit" type="number" min="1" max="50" />
         </label>
-        <ui-button type="primary" :loading="loading" @click="searchProblems">筛选推荐题目</ui-button>
+        <ui-button type="primary" :loading="loading" @click="searchProblems">筛选薄弱强化题目</ui-button>
       </div>
     </ui-card>
 
@@ -42,7 +42,7 @@
             ></div>
           </div>
           <div class="[margin-top:12px] [font-size:13px] [color:#64748b] [text-align:center]">
-            正在为你筛选 {{ normalizedLimit }} 道个性化 LeetCode 推荐题
+            正在为你筛选 {{ normalizedLimit }} 道个性化薄弱强化题
           </div>
         </div>
       </div>
@@ -73,7 +73,7 @@
             {{ item.errors.join('；') }}
           </div>
           <div v-if="item.sourceUrl" class="[margin-top:10px] [display:flex] [align-items:center] [gap:8px]">
-            <ui-tag size="small" type="primary" effect="plain">{{ item.sourceLabel || 'LeetCode' }}</ui-tag>
+            <ui-tag size="small" type="primary" effect="plain">{{ item.sourceLabel || '薄弱强化题集' }}</ui-tag>
             <a :href="item.sourceUrl" target="_blank" rel="noopener noreferrer"
               class="[display:inline-flex] [align-items:center] [gap:3px] [font-size:12px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
               <span>前往原题</span>
@@ -82,7 +82,7 @@
           </div>
         </ui-card>
       </div>
-      <ui-empty v-else description="输入关键词或难度后，可在个性化推荐结果中进一步筛选 LeetCode 题目。" :image-size="96" />
+      <ui-empty v-else description="输入关键词或难度后，可在个性化推荐结果中进一步筛选题目。" :image-size="96" />
     </div>
   </div>
 </template>
