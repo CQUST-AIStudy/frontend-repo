@@ -244,6 +244,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '@/api'
 import { wrongNotebookApi } from '@/api/wrongNotebook'
+import { renderMarkdownWithMath } from '@/utils/markdownMath.mjs'
 import { persistClawProblemBySlug } from '../../api/leetcodeClaw'
 import { getCurrentStudentId as readCurrentStudentId } from '../../constants/auth'
 import {
@@ -531,7 +532,8 @@ const hasSolutionContent = computed(() => {
 function renderMarkdown(content) {
   const text = normalizeLeetCodeMarkdown(content)
   if (!text) return ''
-  return DOMPurify.sanitize(decorateCodeBlocks(marked(renderMathExpressions(text))))
+  const renderedMarkdown = renderMarkdownWithMath(text, (source) => marked(source))
+  return DOMPurify.sanitize(decorateCodeBlocks(renderedMarkdown))
 }
 
 function normalizeLeetCodeMarkdown(content) {
@@ -881,103 +883,6 @@ function decodeHtmlEntities(value) {
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-}
-
-function renderMathExpressions(text) {
-  let output = ''
-  let index = 0
-
-  while (index < text.length) {
-    if (text[index] === '\\' && text[index + 1] === '$') {
-      output += '$'
-      index += 2
-      continue
-    }
-
-    if (text.startsWith('$$', index)) {
-      const end = findMathDelimiter(text, index + 2, '$$')
-      if (end === -1) {
-        output += text.slice(index)
-        break
-      }
-
-      output += `\n<div class="math-block">${formatMathExpression(text.slice(index + 2, end))}</div>\n`
-      index = end + 2
-      continue
-    }
-
-    if (text[index] === '$') {
-      const end = findMathDelimiter(text, index + 1, '$')
-      if (end === -1) {
-        output += text[index]
-        index += 1
-        continue
-      }
-
-      output += `<span class="math-inline">${formatMathExpression(text.slice(index + 1, end))}</span>`
-      index = end + 1
-      continue
-    }
-
-    output += text[index]
-    index += 1
-  }
-
-  return output
-}
-
-function findMathDelimiter(text, start, delimiter) {
-  for (let index = start; index < text.length; index += 1) {
-    if (text[index] === '\\') {
-      index += 1
-      continue
-    }
-
-    if (delimiter === '$$' && text.startsWith('$$', index)) {
-      return index
-    }
-
-    if (delimiter === '$' && text[index] === '$' && !text.startsWith('$$', index)) {
-      return index
-    }
-  }
-
-  return -1
-}
-
-function formatMathExpression(value) {
-  const replacements = {
-    '\\\\log': 'log',
-    '\\\\ln': 'ln',
-    '\\\\leq': '≤',
-    '\\\\geq': '≥',
-    '\\\\neq': '≠',
-    '\\\\times': '×',
-    '\\\\cdot': '·',
-    '\\\\infty': '∞',
-    '\\\\left': '',
-    '\\\\right': '',
-    '\\\\theta': 'θ',
-    '\\\\Theta': 'Θ',
-    '\\\\alpha': 'α',
-    '\\\\beta': 'β'
-  }
-
-  let expression = String(value || '').trim()
-  Object.entries(replacements).forEach(([source, target]) => {
-    expression = expression.replace(new RegExp(source, 'g'), target)
-  })
-
-  expression = expression
-    .replace(/\\[,;:!]/g, ' ')
-    .replace(/\\([{}()[\]])/g, '$1')
-    .replace(/\\/g, '')
-
-  return escapeHtml(expression)
-    .replace(/_\{([^{}]+)\}/g, '<sub>$1</sub>')
-    .replace(/\^\{([^{}]+)\}/g, '<sup>$1</sup>')
-    .replace(/_([A-Za-z0-9+-]+)/g, '<sub>$1</sub>')
-    .replace(/\^([A-Za-z0-9+-]+)/g, '<sup>$1</sup>')
 }
 
 function escapeHtml(value) {
@@ -1633,42 +1538,6 @@ watch(() => route.params.id, () => {
 </script>
 
 <style scoped>
-:deep(.math-inline) {
-  display: inline-flex;
-  align-items: baseline;
-  max-width: 100%;
-  margin: 0 2px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: #eef2f7;
-  color: #1f2937;
-  font-family: var(--font-page);
-  font-style: italic;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-
-:deep(.math-inline sub),
-:deep(.math-inline sup),
-:deep(.math-block sub),
-:deep(.math-block sup) {
-  font-size: 0.72em;
-  line-height: 0;
-}
-
-:deep(.math-block) {
-  margin: 12px 0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #fbf1eb;
-  color: #8f4f31;
-  font-family: var(--font-page);
-  font-style: italic;
-  line-height: 1.6;
-  text-align: center;
-  overflow-x: auto;
-}
-
 :deep(.solution-markdown p),
 :deep(.formatted-content p),
 :deep(.constraints-content p),

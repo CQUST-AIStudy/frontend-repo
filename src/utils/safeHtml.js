@@ -12,6 +12,7 @@ import python from 'highlight.js/lib/languages/python'
 import sql from 'highlight.js/lib/languages/sql'
 import xml from 'highlight.js/lib/languages/xml'
 import MarkdownIt from 'markdown-it'
+import { renderMarkdownWithMath } from './markdownMath.mjs'
 
 hljs.registerLanguage('bash', bash)
 hljs.registerLanguage('c', c)
@@ -96,28 +97,8 @@ export function sanitizeHtml(html) {
   return DOMPurify.sanitize(String(html ?? ''))
 }
 
-function normalizeLatexMathExpression(expression) {
-  return String(expression ?? '')
-    .replace(/\\leq?/g, '<=')
-    .replace(/\\geq?/g, '>=')
-    .replace(/\\neq/g, '!=')
-    .replace(/\\times|\\cdot/g, '*')
-    .replace(/\\infty/g, 'inf')
-    .replace(/\\ldots/g, '...')
-    .trim()
-}
-
-function normalizeProblemStatementMarkdown(content) {
+export function renderSafeMarkdown(content) {
   const text = String(content ?? '')
   if (!text) return ''
-
-  return text
-    .replace(/\\\(([\s\S]+?)\\\)/g, (_, expression) => normalizeLatexMathExpression(expression))
-    .replace(/\$([^\n$]+?)\$/g, (_, expression) => normalizeLatexMathExpression(expression))
-}
-
-export function renderSafeMarkdown(content) {
-  const text = normalizeProblemStatementMarkdown(content)
-  if (!text) return ''
-  return sanitizeHtml(markdown.render(text))
+  return sanitizeHtml(renderMarkdownWithMath(text, (source) => markdown.render(source)))
 }

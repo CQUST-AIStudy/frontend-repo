@@ -202,6 +202,7 @@ import { message as uiMessage, messageBox } from '@/services/feedback'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { ensureHandwritingFont } from '@/utils/handwritingFont'
+import { renderMarkdownWithMath } from '@/utils/markdownMath.mjs'
 
 const props = defineProps({
   reportData: {
@@ -230,7 +231,7 @@ const processContent = content => {
     /<div class="comment-image-container" data-image="(.*?)"><\/div>/g,
     (_, imageDataUrl) => `<div class="teacher-comment-image [margin:14px_auto] [max-width:520px] [margin:10px_0] [max-width:100%]"><img src="${imageDataUrl}" alt="教师评语" /></div>`,
   )
-  const html = marked.parse(processedContent)
+  const html = renderMarkdownWithMath(processedContent, value => marked.parse(value))
   return DOMPurify.sanitize(html)
 }
 
