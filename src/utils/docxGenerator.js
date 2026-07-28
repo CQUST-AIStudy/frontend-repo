@@ -83,7 +83,7 @@ export class DocxGenerator {
 
   _createTeacherReviewTable(data, teacherCommentBlocks) {
     const reviewChildren = [
-      paragraph(`教师评分：${text(data.score) || '待评分'}`, {
+      paragraph(`实验评分：${text(data.score) || '待评分'}`, {
         font: 'SimHei',
         size: 28,
         bold: true,

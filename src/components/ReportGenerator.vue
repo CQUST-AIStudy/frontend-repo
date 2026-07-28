@@ -113,7 +113,7 @@
           <div v-if="hasTeacherReview" class="teacher-review-banner [margin-bottom:18px] [padding:18px_20px] [border:2px_solid_#f3b8b8] [border-radius:14px] [background:linear-gradient(180deg,_#fff7f7,_#fff1f1)]">
             <div class="teacher-review-top [display:flex] [justify-content:space-between] [align-items:center] [gap:16px]">
               <div class="teacher-review-score [display:flex] [align-items:baseline] [gap:10px]">
-                <span class="score-label">教师评分</span>
+                <span class="score-label">实验评分</span>
                 <span class="score-value">{{ displayScore }}</span>
               </div>
               <div class="teacher-review-meta [font-size:13px] [color:#7f1d1d]">
@@ -126,7 +126,7 @@
             </div>
           </div>
 
-          <UiTable class="info-table [width:100%] [border-collapse:collapse] [border:2px_solid_#111827]">
+          <table class="info-table [width:100%] [border-collapse:collapse] [border:2px_solid_#111827]">
             <tbody>
               <tr>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">课程名称</td>
@@ -155,7 +155,7 @@
                 <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]">{{ experimentData.className || '-' }}</td>
               </tr>
             </tbody>
-          </UiTable>
+          </table>
 
           <div class="report-content-sections [width:100%]">
             <section class="content-section [border-left:2px_solid_#111827] [border-right:2px_solid_#111827] [border-bottom:1px_solid_#111827] [padding:18px_24px] last:[border-bottom:2px_solid_#111827]">
