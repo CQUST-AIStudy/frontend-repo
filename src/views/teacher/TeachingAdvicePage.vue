@@ -1,30 +1,30 @@
 <template>
-  <div class="teaching-advice-page space-y-5">
+  <div class="teaching-advice-page space-y-3">
     <UiPageHeader
       title="AI 教学建议"
       description="按实验级、班级级或课程级汇总真实提交结果、错误点和成绩分层，生成对应范围的可执行教学建议。"
     />
 
-    <section class="rounded-[24px] border border-black/[0.06] bg-gradient-to-br from-white via-[#fffaf6] to-[#f7fbff] p-5 shadow-[0_10px_30px_rgba(31,41,55,0.06)]">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="min-w-0">
+    <section class="rounded-[16px] border border-black/[0.06] bg-gradient-to-br from-white via-[#fffaf6] to-[#f7fbff] px-4 py-3 shadow-[0_6px_20px_rgba(31,41,55,0.05)]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--app-primary)] text-sm font-semibold text-white">AI</span>
-            <h2 class="m-0 text-lg font-semibold text-[#1d1d1f]">独立教学建议工作台</h2>
-            <span class="rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 py-1 text-xs font-medium text-[#2563eb]">已从教学班分析拆分</span>
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--app-primary)] text-xs font-semibold text-white">AI</span>
+            <h2 class="m-0 text-base font-semibold text-[#1d1d1f]">独立教学建议工作台</h2>
+            <span class="rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-2.5 py-0.5 text-[11px] font-medium text-[#2563eb]">已从教学班分析拆分</span>
           </div>
-          <p class="mt-2 text-sm leading-6 text-[#6e6e73]">
+          <p class="mt-1 text-xs leading-5 text-[#6e6e73] lg:truncate">
             当前页面只负责“下一节课怎么教、重点学生怎么跟进、哪些知识点需要补救”，班级画像与分层数据请在“教学班级分析”中查看。
           </p>
         </div>
-        <div class="grid min-w-[240px] grid-cols-2 gap-3 text-sm">
-          <div class="rounded-2xl border border-black/[0.06] bg-white/80 px-4 py-3">
-            <div class="text-xs text-[#8a8a8f]">当前教学班</div>
-            <div class="mt-1 truncate font-semibold text-[#1d1d1f]">{{ selectedClassName }}</div>
+        <div class="flex shrink-0 flex-wrap items-center justify-end gap-2 text-xs">
+          <div class="flex min-w-0 items-center gap-2 rounded-[10px] border border-black/[0.06] bg-white/85 px-3 py-2">
+            <span class="text-[#8a8a8f]">当前教学班</span>
+            <span class="max-w-[150px] truncate font-semibold text-[#1d1d1f]">{{ selectedClassName }}</span>
           </div>
-          <div class="rounded-2xl border border-black/[0.06] bg-white/80 px-4 py-3">
-            <div class="text-xs text-[#8a8a8f]">可选实验</div>
-            <div class="mt-1 font-semibold text-[#1d1d1f]">{{ experiments.length }} 个</div>
+          <div class="flex items-center gap-2 rounded-[10px] border border-black/[0.06] bg-white/85 px-3 py-2">
+            <span class="text-[#8a8a8f]">可选实验</span>
+            <span class="font-semibold text-[#1d1d1f]">{{ experiments.length }} 个</span>
           </div>
         </div>
       </div>
@@ -49,10 +49,13 @@
       </div>
     </div>
 
-    <TeachingAdvicePanel
-      :class-id="selectedClassId"
-      :experiments="experiments"
-    />
+    <Transition name="class-switch" mode="out-in">
+      <TeachingAdvicePanel
+        :key="selectedClassId || 'no-class'"
+        :class-id="selectedClassId"
+        :experiments="experiments"
+      />
+    </Transition>
   </div>
 </template>
 
@@ -102,3 +105,29 @@ async function loadExperiments() {
 
 watch(selectedClassId, loadExperiments, { immediate: true })
 </script>
+
+<style scoped>
+.class-switch-enter-active,
+.class-switch-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.class-switch-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.class-switch-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .class-switch-enter-active,
+  .class-switch-leave-active {
+    transition: none;
+  }
+}
+</style>
