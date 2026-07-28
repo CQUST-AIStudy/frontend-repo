@@ -7,7 +7,7 @@
         <!-- 左侧实验列表【已修复滚动截断】 -->
         <ui-col :span="8">
           <!-- 父级flex容器增加 [min-height:0] 打破flex高度限制链 -->
-          <ui-card class="experiments-card [height:80vh] [display:flex] [flex-direction:column] [min-height:0] [&_.ui-card__body]:[flex:1] [&_.ui-card__body]:[min-height:0] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[flex-direction:column] [&_.ui-card__body]:[overflow:hidden]">
+          <ui-card class="experiments-card">
             <template #header>
               <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [&_h3]:[margin:0] [&_h3]:[color:#202124] [align-items:flex-start] [gap:16px] [gap:12px] [margin-bottom:16px] [padding-bottom:10px] [border-bottom:1px_solid_#ebeef5]">
                 <h3>我的实验列表</h3>
@@ -17,13 +17,9 @@
 
             <!-- 滚动容器核心修复：删除冲突height:65vh + min-height:0 + 底部padding留白 -->
             <div class="experiment-list
-              [flex:1]
-              [min-height:0]
-              [overflow-y:auto]
               [margin-top:10px]
               [padding-bottom:48px]
-              [box-sizing:border-box]
-              [&_.g-loading-state]:[min-height:0]">
+              [box-sizing:border-box]">
               <loading-state :loading="experimentStore.loading">
                 <ui-empty v-if="filteredExperiments.length === 0" description="没有找到实验"></ui-empty>
 
@@ -616,9 +612,7 @@ const handleReportDataUpdate = (newData) => {
 onMounted(async () => {
   loading.value = true
   try {
-    if (experimentStore.experimentList.length === 0) {
-      await experimentStore.fetchExperimentList()
-    }
+    await experimentStore.fetchExperimentList()
   } catch (error) {
     logger.error(error)
   } finally {
@@ -649,3 +643,43 @@ const generateWordDoc = async () => {
   }
 }
 </script>
+
+<style scoped>
+.experiments-card {
+  display: flex;
+  flex-direction: column;
+  height: max(420px, calc(100dvh - 180px));
+  min-height: 0;
+}
+
+.experiments-card :deep(.ui-card__body) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.experiment-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.experiment-list :deep(.g-loading-state) {
+  min-height: 0;
+}
+
+@media (max-width: 960px) {
+  .experiments-card {
+    height: auto;
+  }
+
+  .experiments-card :deep(.ui-card__body),
+  .experiment-list {
+    overflow: visible;
+  }
+}
+</style>
