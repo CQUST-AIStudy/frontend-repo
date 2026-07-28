@@ -6,18 +6,18 @@
     />
 
     <div class="mt-4 flex gap-3 items-center mb-8 flex-wrap max-[768px]:items-stretch max-[768px]:[&>*]:!w-full">
-      <div v-if="classPrefixes.length >= 1" class="relative w-[180px] max-[768px]:!w-full">
+      <div v-if="classList.length >= 1" class="relative w-[180px] max-[768px]:!w-full">
         <UiSelect
-          v-model="selectedClass"
+          v-model="selectedClassId"
           class="w-full h-10 px-3 pr-8 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer"
           @change="onClassChange"
         >
-          <UiOption value="">全部实验</UiOption>
+          <UiOption :value="null">全部实验</UiOption>
           <UiOption
-            v-for="prefix in classPrefixes"
-            :key="prefix"
-            :value="prefix"
-          >{{ prefix }}</UiOption>
+            v-for="cls in classList"
+            :key="cls.classId"
+            :value="cls.classId"
+          >{{ cls.name }}</UiOption>
         </UiSelect>
       </div>
 
@@ -37,7 +37,7 @@
       </div>
       <div v-else class="flex min-h-10 w-[360px] items-center justify-between gap-3 rounded-[10px] bg-[#f5f5f7] px-3 shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] max-[768px]:!w-full">
         <span class="text-[12px] font-semibold text-[#6e6e73]">对比范围</span>
-        <span class="min-w-0 truncate text-sm font-medium text-[#1d1d1f]">{{ comparisonScopeLabel }}</span>
+        <span class="min-w-0 truncate text-sm font-medium text-[#1d1d1f]">{{ selectedClassName || '全部实验' }}</span>
       </div>
 
       <UiButton
@@ -48,7 +48,7 @@
       </UiButton>
 
       <span class="inline-flex items-center h-[22px] px-2 rounded-full text-[11px] font-medium bg-[rgba(194,112,62,0.08)] text-[var(--app-primary)] ml-auto max-[768px]:ml-0">
-        {{ activeClassLabel }} / {{ experiments.length }} 个可分析实验
+        {{ selectedClassName || '全部实验' }} / {{ experiments.length }} 个可分析实验
       </span>
     </div>
 
@@ -308,8 +308,8 @@ const BACKEND_INTERNAL_ERROR_PATTERNS = [
 const userStore = useUserStore()
 
 const experiments = ref([])
-const classPrefixes = ref([])
-const selectedClass = ref('')
+const classList = ref([])
+const selectedClassId = ref(null)
 const selectedExp = ref(null)
 const data = ref(null)
 const loading = ref(false)
@@ -319,23 +319,14 @@ const filterFallback = ref(false)
 const comparisonItems = ref([])
 const errorMessage = ref('')
 
-const currentCourseScope = computed(() => {
-  const currentClass = userStore.selectedClass || {}
-  return {
-    classId: currentClass.id || currentClass.classId || null,
-    courseId: currentClass.courseId || currentClass.course_id || null,
-    courseName: currentClass.courseName || currentClass.course_name || '',
-  }
+const selectedClassName = computed(() => {
+  if (selectedClassId.value == null) return ''
+  const found = classList.value.find(c => c.classId === selectedClassId.value)
+  return found?.name || ''
 })
 
-function analyticsScope(classPrefix = '') {
-  const scope = {
-    ...currentCourseScope.value,
-    classPrefix: classPrefix || undefined,
-  }
-  // 不传 classId，由 classPrefix 控制班级范围，否则会与全局 selectedClass 冲突
-  delete scope.classId
-  return scope
+function analyticsScope() {
+  return { classId: selectedClassId.value || undefined }
 }
 
 // Independent request counters prevent one panel from cancelling another.
@@ -368,27 +359,15 @@ function problemDisplayName(item = {}) {
   return '未命名题目'
 }
 
-const activeClassLabel = computed(() => {
-  if (selectedClass.value) return selectedClass.value
-  // When no class prefix is selected, try to show the actual teaching class name
-  const clsName = userStore.selectedClass?.name
-  return clsName ? `${clsName}（全部实验）` : '全部实验'
-})
-const currentCourseName = computed(() => (
-  currentCourseScope.value.courseName || userStore.selectedClass?.name || '当前课程'
-))
-const comparisonScopeLabel = computed(() => selectedClass.value
-  ? `${currentCourseName.value} / ${selectedClass.value}`
-  : `${currentCourseName.value}全部实验`)
 const comparisonSummary = computed(() => (
-  `${comparisonScopeLabel.value}内共有 ${experiments.value.length} 个可分析实验，当前展示 ${comparisonItems.value.length} 个有对比指标的实验。`
+  `共有 ${experiments.value.length} 个可分析实验，当前展示 ${comparisonItems.value.length} 个有对比指标的实验。`
 ))
 const scopeInfo = computed(() => data.value?.scope || null)
 
 const scopeTitle = computed(() => {
   const scope = scopeInfo.value
   if (!scope) return ''
-  const parts = [scope.classPrefix, scope.className, scope.courseName].filter(Boolean)
+  const parts = [scope.className, scope.courseName].filter(Boolean)
   return parts.length ? `统计范围：${parts.join(' / ')}` : '统计范围'
 })
 
@@ -396,13 +375,8 @@ const scopeDescription = computed(() => {
   const scope = scopeInfo.value
   if (!scope) return ''
   const parts = []
-  const teachingCls = userStore.selectedClass?.name
-  if (teachingCls && teachingCls !== scope.className) {
-    parts.push(`当前教学班：${teachingCls}`)
-  }
-  if (scope.className) parts.push(`数据班级：${scope.className}`)
+  if (scope.className) parts.push(`班级：${scope.className}`)
   if (scope.courseName) parts.push(`课程：${scope.courseName}`)
-  parts.push(`范围：仅${scope.courseName || currentCourseName.value}实验，已排除其他课程数据`)
   if (scope.rosterCount != null) parts.push(`名单人数：${safeNumber(scope.rosterCount)}`)
   if (scope.submittedCount != null) parts.push(`已提交：${safeNumber(scope.submittedCount)}`)
   if (scope.scoredCount != null) parts.push(`有成绩：${safeNumber(scope.scoredCount)}`)
@@ -596,29 +570,13 @@ function accuracyBarStyle(rate) {
   }
 }
 
-function resolveInitialClassPrefix(prefixes) {
-  if (!prefixes.length) return ''
-
-  const candidates = [
-    userStore.selectedClass?.ptaGroupName,
-    userStore.selectedClass?.pta_group_name,
-    userStore.selectedClass?.ptaKeyword,
-    userStore.selectedClass?.name,
-  ]
-    .filter(Boolean)
-    .map(item => String(item).trim())
-
-  for (const candidate of candidates) {
-    const exact = prefixes.find(prefix => prefix === candidate)
-    if (exact) return exact
-  }
-
-  for (const candidate of candidates) {
-    const fuzzy = prefixes.find(prefix => candidate.includes(prefix) || prefix.includes(candidate))
-    if (fuzzy) return fuzzy
-  }
-
-  return prefixes.length === 1 ? prefixes[0] : ''
+function resolveInitialClassId(list) {
+  if (!list.length) return null
+  // 优先匹配当前登录老师选的班级
+  const currentId = userStore.selectedClass?.id || userStore.selectedClass?.classId
+  if (currentId && list.some(c => c.classId === currentId)) return currentId
+  // 只有一个班则默认选中
+  return list.length === 1 ? list[0].classId : null
 }
 
 function disposeCharts() {
@@ -644,19 +602,16 @@ function clearDetailData() {
 
 async function loadClassPrefixes() {
   const seq = ++prefixRequestSeq
-  const scope = { ...currentCourseScope.value }
-  // 不应传 classId，否则只返回当前班级的前缀，合并了其他班级
-  delete scope.classId
   try {
-    const res = await getClassPrefixes(scope)
+    const res = await getClassPrefixes()
     if (seq !== prefixRequestSeq) return false
-    classPrefixes.value = normalizeArray(res)
-    selectedClass.value = resolveInitialClassPrefix(classPrefixes.value)
+    classList.value = normalizeArray(res)
+    selectedClassId.value = resolveInitialClassId(classList.value)
   } catch (error) {
     if (seq !== prefixRequestSeq) return false
-    classPrefixes.value = []
-    selectedClass.value = ''
-    logger.warn('加载实验班级前缀失败:', error)
+    classList.value = []
+    selectedClassId.value = null
+    logger.warn('加载教师班级列表失败:', error)
   }
   return true
 }
@@ -669,22 +624,15 @@ async function loadExperiments({ autoSelect = true } = {}) {
   compLoading.value = false
   filterFallback.value = false
   errorMessage.value = ''
-  // Clear stale data immediately so old scope info isn't shown during loading
+  // Clear stale data immediately
   experiments.value = []
   selectedExp.value = null
   comparisonItems.value = []
   clearDetailData()
 
   try {
-    let list = normalizeExperimentList(await getAnalyticsExperiments(analyticsScope(selectedClass.value)))
-    if (seq !== scopeRequestSeq) return // stale request, discard
-
-    if (!list.length && selectedClass.value) {
-      filterFallback.value = true
-      selectedClass.value = ''
-      list = normalizeExperimentList(await getAnalyticsExperiments(analyticsScope()))
-      if (seq !== scopeRequestSeq) return
-    }
+    const list = normalizeExperimentList(await getAnalyticsExperiments(analyticsScope()))
+    if (seq !== scopeRequestSeq) return
 
     experiments.value = list
 
@@ -732,10 +680,9 @@ async function loadAnalytics(parentSeq = null) {
   const seq = ++detailRequestSeq
   loading.value = true
   errorMessage.value = ''
-  // Clear stale data before fetching new
   clearDetailData()
   try {
-    const res = await getExperimentAnalytics(selectedExp.value, currentCourseScope.value)
+    const res = await getExperimentAnalytics(selectedExp.value, analyticsScope())
     if (seq !== detailRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     data.value = normalizePayload(res)
     await nextTick()
@@ -761,7 +708,7 @@ async function loadComparison(parentSeq = null) {
   errorMessage.value = ''
 
   try {
-    const res = await getExperimentComparison(analyticsScope(selectedClass.value))
+    const res = await getExperimentComparison(analyticsScope())
     if (seq !== comparisonRequestSeq || expectedScopeSeq !== scopeRequestSeq) return
     comparisonItems.value = alignComparisonItems(res)
   } catch (error) {
@@ -961,9 +908,7 @@ function renderComparisonChart() {
   })
 }
 
-function onClassChange(value) {
-  selectedClass.value = value ?? ''
-  // Immediately clear stale data and charts so old scope/numbers aren't shown
+function onClassChange() {
   clearDetailData()
   loadExperiments()
 }
@@ -992,24 +937,6 @@ watch(showComparison, async value => {
     ++comparisonRequestSeq
     compLoading.value = false
     await loadAnalytics()
-  }
-})
-
-// React to global teaching class changes even when the route is not remounted.
-watch(currentCourseScope, async (newScope, oldScope) => {
-  if (JSON.stringify(newScope) !== JSON.stringify(oldScope)) {
-    ++scopeRequestSeq
-    ++detailRequestSeq
-    ++comparisonRequestSeq
-    loading.value = false
-    compLoading.value = false
-    experiments.value = []
-    comparisonItems.value = []
-    selectedExp.value = null
-    clearDetailData()
-    if (await loadClassPrefixes()) {
-      await loadExperiments()
-    }
   }
 })
 
