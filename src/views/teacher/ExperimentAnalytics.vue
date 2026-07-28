@@ -329,10 +329,13 @@ const currentCourseScope = computed(() => {
 })
 
 function analyticsScope(classPrefix = '') {
-  return {
+  const scope = {
     ...currentCourseScope.value,
     classPrefix: classPrefix || undefined,
   }
+  // 不传 classId，由 classPrefix 控制班级范围，否则会与全局 selectedClass 冲突
+  delete scope.classId
+  return scope
 }
 
 // Independent request counters prevent one panel from cancelling another.
@@ -642,6 +645,8 @@ function clearDetailData() {
 async function loadClassPrefixes() {
   const seq = ++prefixRequestSeq
   const scope = { ...currentCourseScope.value }
+  // 不应传 classId，否则只返回当前班级的前缀，合并了其他班级
+  delete scope.classId
   try {
     const res = await getClassPrefixes(scope)
     if (seq !== prefixRequestSeq) return false
