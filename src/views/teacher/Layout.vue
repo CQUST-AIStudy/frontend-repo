@@ -256,7 +256,6 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { messageBox } from '@/services/feedback'
 import {
   ArrowDown,
-  Briefcase,
   ChatDotRound,
   Collection,
   DataAnalysis,
@@ -349,6 +348,7 @@ const menuItems = [
       { path: '/teacher/teaching-advice', label: '教学建议' }
     ]
   },
+  /*
   {
     group: 'tools', icon: Briefcase, label: '教辅工具',
     children: [
@@ -358,6 +358,7 @@ const menuItems = [
       { path: '/teacher/ai-organize', label: '智能整理' }
     ]
   },
+  */
   { path: '/teacher/course-analysis', icon: DataAnalysis, label: '课程分析', permission: ['view_course_classes', 'analyze_course_classes'] },
   {
     group: 'dept', icon: OfficeBuilding, label: '院系管理', permission: ['view_all_teachers'],
