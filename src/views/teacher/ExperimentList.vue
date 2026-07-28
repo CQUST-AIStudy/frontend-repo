@@ -5,6 +5,23 @@
     </UiPageHeader>
 
     <div class="mt-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] p-5 min-w-0 overflow-x-auto max-[640px]:p-4 max-[640px]:rounded-2xl">
+      <div class="mb-4 flex w-fit items-center gap-1 rounded-xl bg-[#f5f5f7] p-1" role="tablist" aria-label="实验状态筛选">
+        <button
+          v-for="tab in statusTabs"
+          :key="tab.value"
+          type="button"
+          role="tab"
+          :aria-selected="activeTab === tab.value"
+          class="flex h-9 items-center gap-2 rounded-[9px] border-0 px-4 text-[13px] font-medium transition-all cursor-pointer"
+          :class="activeTab === tab.value
+            ? 'bg-white text-[var(--app-primary-strong)] shadow-[0_1px_4px_rgba(0,0,0,0.1)]'
+            : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
+          @click="activeTab = tab.value"
+        >
+          <span>{{ tab.label }}</span>
+          <span class="min-w-5 rounded-full bg-black/[0.05] px-1.5 py-0.5 text-center text-[11px]">{{ tab.count }}</span>
+        </button>
+      </div>
       <table class="w-full text-left text-[13px]">
         <thead>
           <tr class="border-b border-black/[0.06]">
@@ -34,8 +51,8 @@
               </div>
             </td>
           </tr>
-          <template v-else-if="experiments.length">
-            <tr v-for="row in experiments" :key="row.rowKey" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
+          <template v-else-if="visibleExperiments.length">
+            <tr v-for="row in visibleExperiments" :key="row.rowKey" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
               <td class="py-3 px-3 text-[#6e6e73]">{{ row.displayId }}</td>
               <td class="py-3 px-3 text-[#1d1d1f] font-medium">{{ row.name }}</td>
               <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
@@ -51,7 +68,7 @@
             </tr>
           </template>
           <tr v-else>
-            <td colspan="7" class="py-12 text-center text-[#aeaeb2] text-sm">暂无我创建的实验</td>
+            <td colspan="7" class="py-12 text-center text-[#aeaeb2] text-sm">{{ emptyStateText }}</td>
           </tr>
         </tbody>
       </table>
@@ -61,17 +78,26 @@
 
 <script setup>
 import logger from '@/utils/logger'
-import { ref, onMounted, shallowRef } from 'vue'
+import { computed, ref, onMounted, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api'
 import { useUserStore } from '../../store'
 import { formatDate } from '@/utils/dateUtils'
+import { getExperimentRowsByStatus } from './experimentListRows.mjs'
 
 const router = useRouter()
 const userStore = useUserStore()
 const experiments = ref([])
+const activeTab = shallowRef('active')
 const loading = shallowRef(false)
 const errorMessage = shallowRef('')
+
+const visibleExperiments = computed(() => getExperimentRowsByStatus(experiments.value, activeTab.value))
+const statusTabs = computed(() => [
+  { value: 'active', label: '进行中', count: experiments.value.filter(item => item.status === 'active').length },
+  { value: 'expired', label: '已截止', count: experiments.value.filter(item => item.status === 'expired').length }
+])
+const emptyStateText = computed(() => activeTab.value === 'active' ? '暂无进行中的实验' : '暂无已截止的实验')
 
 const getSelectedClassQuery = () => {
   const selectedClass = userStore.selectedClass || {}
@@ -102,13 +128,16 @@ const formatNumber = value => {
 
 const normalizeExperiment = (item = {}, index) => {
   const id = item.id ?? item.experimentId ?? item.experiment_id
+  const rawDeadline = item.deadline || item.dueDate || item.endTime
+  const parsedDeadline = new Date(rawDeadline).getTime()
 
   return {
     id,
     rowKey: id ?? `${item.name || item.experimentName || 'experiment'}-${index}`,
     displayId: id ?? '-',
     name: item.name || item.experimentName || item.title || '未命名实验',
-    deadline: formatDate(item.deadline || item.dueDate || item.endTime, 'YYYY-MM-DD HH:mm:ss') || '-',
+    deadline: formatDate(rawDeadline, 'YYYY-MM-DD HH:mm:ss') || '-',
+    deadlineTimestamp: Number.isFinite(parsedDeadline) ? parsedDeadline : null,
     submissionCount: formatNumber(item.submissionCount ?? item.submittedCount ?? item.submitCount ?? item.submission_count ?? 0),
     averageScore: formatNumber(item.averageScore ?? item.avgScore ?? item.avg_score),
     status: item.status || 'unknown'
