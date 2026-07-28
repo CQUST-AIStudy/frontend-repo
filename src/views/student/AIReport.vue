@@ -264,7 +264,12 @@
                         <div v-if="question.code" class="[margin-bottom:16px]">
                           <div class="[display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:8px]">
                             <span class="[font-size:13px] [font-weight:600] [color:var(--app-text)]">第{{ question.number }}题代码</span>
-                            <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
+                            <div class="[display:flex] [align-items:center] [gap:8px]">
+                              <span v-if="question.testResults" class="[font-size:12px] [color:var(--app-text-secondary)]">测试结果已提供</span>
+                              <ui-button type="primary" size="small" @click="goCodeDemo(question)">
+                                <ui-icon class="[margin-right:4px]"><MagicStick /></ui-icon>生成演示
+                              </ui-button>
+                            </div>
                           </div>
                           <CodeViewer :code="question.code" language="cpp" maxHeight="none" hideCopy />
                         </div>
@@ -305,6 +310,7 @@
 <script setup>
 import { useExperimentStore, useUserStore } from '@/store'
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import {
@@ -319,6 +325,16 @@ import ReportGenerator from '@/components/ReportGenerator.vue'
 
 const experimentStore = useExperimentStore()
 const userStore = useUserStore()
+const router = useRouter()
+
+function goCodeDemo(question) {
+  if (!selectedExperiment.value) return
+  router.push({
+    name: 'StudentCodeDemoPage',
+    params: { experimentId: selectedExperiment.value.id },
+    query: { problemNo: question.problemNo ?? '', number: question.number }
+  })
+}
 
 function renderMarkdown(text) {
   return renderSafeMarkdown(text)

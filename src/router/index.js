@@ -71,6 +71,11 @@ const routes = [
         component: () => import('../views/student/AIReport.vue')
       },
       {
+        path: 'code-demo/:experimentId',
+        name: 'StudentCodeDemoPage',
+        component: () => import('../views/student/CodeDemoPage.vue')
+      },
+      {
         path: 'leetcode-search',
         name: 'LeetCodeSearch',
         component: () => import('../views/student/LeetCodeSearch.vue')

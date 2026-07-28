@@ -6,6 +6,7 @@
 import { computed } from 'vue'
 import {
   AlertTriangle,
+  ArrowLeft,
   ArrowUpRight,
   BarChart3,
   BookOpen,
@@ -104,6 +105,7 @@ const props = defineProps({
 
 const icons = {
   'alert-triangle': AlertTriangle,
+  'arrow-left': ArrowLeft,
   'arrow-up-right': ArrowUpRight,
   'bar-chart': BarChart3,
   bot: Bot,

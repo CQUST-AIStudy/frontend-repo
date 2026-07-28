@@ -564,6 +564,14 @@ export default {
     })
   },
 
+  async getCodeDemo({ experimentId, problemNo }) {
+    return apiClient.get('/api/student/code-demo', { params: { experimentId, problemNo } })
+  },
+
+  async generateCodeDemo({ experimentId, problemNo, stdin, force }) {
+    return apiClient.post('/api/student/code-demo/generate', { experimentId, problemNo, stdin, force }, { timeout: 180000 })
+  },
+
   async getNotifications(limit = 50) {
     return apiClient.get('/api/student/notifications', { params: { limit } })
   },

@@ -105,7 +105,8 @@ function render() {
     case 'hash-table': renderHashTable(svg, nodes, width, height); break
     case 'pointer': renderPointer(svg, nodes, edges, width, height); break
     case 'loop': renderLoop(svg, nodes, width, height); break
-    default: renderEmpty(svg, width, height)
+    case 'code': renderScalars(svg, nodes, width, height); break
+    default: renderScalars(svg, nodes, width, height)
   }
 }
 
@@ -734,6 +735,33 @@ function renderLoop(svg, nodes, width, height) {
 function renderEmpty(svg, width, height) {
   svg.append('text').attr('x', width / 2).attr('y', height / 2).attr('text-anchor', 'middle')
     .attr('font-size', 14).attr('fill', '#94a3b8').text('当前步骤无可视化状态')
+}
+
+// 标量变量视图：无数据结构可画时，把当前作用域的变量画成带名字的值盒子（自动换行居中）
+function renderScalars(svg, nodes, width, height) {
+  const items = (nodes || []).filter(n => n && (String(n.label ?? '') !== '' || String(n.value ?? '') !== ''))
+  if (!items.length) return renderEmpty(svg, width, height)
+  const boxW = 96, boxH = 50, gapX = 22, gapY = 42, padTop = 30
+  const perRow = Math.max(1, Math.floor((width - 24 + gapX) / (boxW + gapX)))
+  const rows = Math.ceil(items.length / perRow)
+  const totalH = rows * boxH + (rows - 1) * gapY
+  const startY = Math.max(padTop, (height - totalH) / 2 + 6)
+  items.forEach((node, i) => {
+    const row = Math.floor(i / perRow)
+    const colCount = Math.min(perRow, items.length - row * perRow)
+    const rowW = colCount * boxW + (colCount - 1) * gapX
+    const startX = Math.max(12, (width - rowW) / 2)
+    const x = startX + (i % perRow) * (boxW + gapX)
+    const y = startY + row * (boxH + gapY)
+    const c = colorsFor(node)
+    const g = svg.append('g')
+    g.append('text').attr('x', x + boxW / 2).attr('y', y - 9).attr('text-anchor', 'middle')
+      .attr('font-size', 12).attr('font-weight', 600).attr('fill', '#64748b').text(truncate(node.label, 12))
+    g.append('rect').attr('x', x).attr('y', y).attr('width', boxW).attr('height', boxH).attr('rx', 8)
+      .attr('fill', c.fill).attr('stroke', c.stroke).attr('stroke-width', 2).attr('stroke-dasharray', c.dash)
+    g.append('text').attr('x', x + boxW / 2).attr('y', y + boxH / 2 + 6).attr('text-anchor', 'middle')
+      .attr('font-size', 16).attr('font-weight', 700).attr('fill', c.text).text(truncate(node.value, 12))
+  })
 }
 
 function bound(v, min, max) { return Math.max(min, Math.min(max, v)) }
