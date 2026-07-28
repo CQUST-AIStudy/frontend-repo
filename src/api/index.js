@@ -430,6 +430,11 @@ export default {
     return sanitizeSubmissionTiming(response?.data || response)
   },
 
+  async generateAiComment(experimentId, studentId, code) {
+    const params = studentId ? { studentId, force: true } : { force: true }
+    return apiClient.post(`/api/experiments/${experimentId}/ai-comment/generate`, { code }, { params })
+  },
+
   async getClassList() {
     const response = await apiClient.get('/api/classes')
     // apiClient 拦截器已返回 response.data，即 {data: [...]}

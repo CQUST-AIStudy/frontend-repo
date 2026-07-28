@@ -75,19 +75,19 @@
           <a @click="goToExperiments" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl">
-          <table class="w-full text-left text-[13px]">
+          <table class="w-full text-left text-[13px] table-fixed">
             <thead>
               <tr class="border-b border-black/[0.06]">
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">实验名称</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[128px]">截止日期</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[108px]">状态</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[90px]">操作</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[40%]">实验名称</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[20%]">截止日期</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[20%]">状态</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[20%]">操作</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="row in recentExperiments" :key="row.id" class="border-b border-black/[0.04] transition-colors hover:bg-[rgba(194,112,62,0.03)]">
-                <td class="py-3 px-3 text-[#1d1d1f]">{{ row.name }}</td>
-                <td class="py-3 px-3 text-[#6e6e73]">{{ row.deadline }}</td>
+                <td class="py-3 px-3 text-[#1d1d1f] truncate" :title="row.name">{{ row.name }}</td>
+                <td class="py-3 px-3 text-[#6e6e73]">{{ formatDeadline(row.deadline) }}</td>
                 <td class="py-3 px-3"><span class="inline-flex items-center h-7 px-2.5 rounded-full text-[12px] font-bold" :class="statusClass(row.status)">{{ getExpStatusText(row.status) }}</span></td>
                 <td class="py-3 px-3"><a @click="goToExperimentDetail(row.id)" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)]">详情</a></td>
               </tr>
@@ -109,13 +109,13 @@
           <a @click="goToSubmissions" class="text-[13px] font-semibold text-[var(--app-primary)] cursor-pointer hover:text-[var(--app-primary-strong)] transition-colors">查看全部</a>
         </div>
         <div class="overflow-x-auto rounded-xl mt-4">
-          <table class="w-full text-left text-[13px]">
+          <table class="w-full text-left text-[13px] table-fixed">
             <thead>
               <tr class="border-b border-black/[0.06]">
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[110px]">学生</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[90px]">实验 ID</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9]">提交时间</th>
-                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[100px]">状态</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[25%]">学生</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[25%]">实验 ID</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[25%]">提交时间</th>
+                <th class="py-3 px-3 text-[12px] font-semibold text-[#6e6e73] uppercase tracking-wide bg-[#f9f9f9] w-[25%]">状态</th>
               </tr>
             </thead>
             <tbody>
@@ -228,6 +228,7 @@ function extractList(response) {
   if (Array.isArray(response)) return response
   if (Array.isArray(response?.data)) return response.data
   if (Array.isArray(response?.data?.data)) return response.data.data
+  if (Array.isArray(response?.experiments)) return response.experiments
   if (Array.isArray(response?.rows)) return response.rows
   if (Array.isArray(response?.items)) return response.items
   return []
@@ -357,6 +358,18 @@ async function loadClassCount() {
   } catch (error) {
     logger.error('加载教学班数量失败', error)
   }
+}
+
+function formatSubmissionTimeLocal(value) {
+  return formatSubmissionTime(value)
+}
+
+function formatDeadline(value) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  const pad = (v) => String(v).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 function getExpStatusText(status) {
