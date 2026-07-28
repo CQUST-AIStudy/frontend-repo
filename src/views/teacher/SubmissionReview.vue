@@ -623,7 +623,8 @@ const candidateSearch = ref('')
 const candidateListOpen = ref(false)
 
 function candidateLabel(student) {
-  return `${student.studentNo || '无学号'} · ${student.studentName || ''}`
+  const base = `${student.studentNo || '无学号'} · ${student.studentName || ''}`
+  return student.className ? `${base} · ${student.className}` : base
 }
 
 const filteredCandidates = computed(() => {
@@ -634,7 +635,8 @@ const filteredCandidates = computed(() => {
   if (selected && candidateSearch.value === candidateLabel(selected)) return matchCandidates.value
   return matchCandidates.value.filter(s =>
     String(s.studentNo || '').toLowerCase().includes(keyword) ||
-    String(s.studentName || '').toLowerCase().includes(keyword))
+    String(s.studentName || '').toLowerCase().includes(keyword) ||
+    String(s.className || '').toLowerCase().includes(keyword))
 })
 
 function selectCandidate(student) {
