@@ -1,24 +1,24 @@
 <template>
-  <section class="teaching-advice-shell rounded-[24px] border border-black/[0.06] bg-white/95 p-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] lg:p-6">
-    <div class="shrink-0 flex flex-col gap-4 border-b border-black/[0.06] pb-5 xl:flex-row xl:items-center xl:justify-between">
+  <section class="teaching-advice-shell rounded-[18px] border border-black/[0.06] bg-white/95 px-4 py-3.5 shadow-[0_4px_14px_rgba(0,0,0,0.05)]">
+    <div class="shrink-0 flex flex-col gap-3 border-b border-black/[0.06] pb-3 xl:flex-row xl:items-center xl:justify-between">
       <div class="min-w-0">
-        <div class="flex items-center gap-3">
-          <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--app-primary)] text-sm font-bold text-white">AI</span>
+        <div class="flex items-center gap-2.5">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--app-primary)] text-xs font-bold text-white">AI</span>
           <div>
-            <h2 class="text-lg font-semibold text-[#1d1d1f]">AI 助教 · 教学建议</h2>
-            <p class="mt-1 text-xs leading-5 text-[#6e6e73]">给老师看的版本：先给可执行教学动作，再把数据依据折叠到后面核对。</p>
+            <h2 class="text-base font-semibold text-[#1d1d1f]">AI 助教 · 教学建议</h2>
+            <p class="mt-0.5 text-xs leading-4 text-[#6e6e73]">先给可执行教学动作，数据依据放在后面核对。</p>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-        <div class="inline-flex h-10 items-center rounded-[10px] bg-[#f1f3f5] p-1" aria-label="建议分析层级">
+      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+        <div class="inline-flex h-9 items-center rounded-[9px] bg-[#eef2f7] p-1 shadow-inner shadow-black/[0.04]" aria-label="建议分析层级">
           <button
             v-for="item in scopeOptions"
             :key="item.value"
             type="button"
-            class="h-8 min-w-[82px] rounded-[7px] border-none px-3 text-sm font-medium transition-colors"
-            :class="scopeLevel === item.value ? 'bg-white text-[#1d1d1f] shadow-[0_1px_4px_rgba(0,0,0,0.12)]' : 'bg-transparent text-[#6e6e73] hover:text-[#1d1d1f]'"
+            class="h-7 min-w-[70px] rounded-[6px] border-none px-2.5 text-xs font-semibold transition-all duration-200 ease-out"
+            :class="scopeLevel === item.value ? 'translate-y-[-1px] bg-white text-[#1d1d1f] shadow-[0_3px_8px_rgba(15,23,42,0.14)]' : 'bg-transparent text-[#64748b] hover:bg-white/55 hover:text-[#1d1d1f]'"
             @click="changeScope(item.value)"
           >
             {{ item.label }}
@@ -29,7 +29,7 @@
           v-if="scopeLevel === 'EXPERIMENT'"
           v-model="experimentId"
           placeholder="选择实验"
-          class="h-10 min-w-[220px] rounded-[10px] bg-[#f5f5f7] px-3 text-sm"
+          class="h-9 min-w-[200px] rounded-[9px] bg-[#f5f5f7] px-3 text-xs"
         >
           <UiOption v-for="item in experiments" :key="item.id" :value="item.id">{{ item.name }}</UiOption>
         </UiSelect>
@@ -39,11 +39,11 @@
           type="button"
           role="switch"
           :aria-checked="includeHistory"
-          class="inline-flex h-10 items-center gap-3 rounded-[10px] border border-black/[0.08] bg-white px-3.5 text-sm text-[#374151]"
+          class="inline-flex h-9 items-center gap-2.5 rounded-[9px] border border-[#d7dee8] bg-white px-3 text-xs font-medium text-[#334155] shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-all duration-200 ease-out hover:border-[#b8c7dc] hover:bg-[#f8fafc]"
           @click="includeHistory = !includeHistory"
         >
-          <span class="relative h-5 w-10 shrink-0 rounded-full transition-colors" :class="includeHistory ? 'bg-[var(--app-primary)]' : 'bg-[#d1d5db]'">
-            <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all" :class="includeHistory ? 'right-0.5' : 'left-0.5'"></span>
+          <span class="relative h-5 w-9 shrink-0 rounded-full transition-colors duration-300 ease-out" :class="includeHistory ? 'bg-[var(--app-primary)]' : 'bg-[#cbd5e1]'">
+            <span class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-[0_1px_4px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]" :class="includeHistory ? 'translate-x-4' : 'translate-x-0'"></span>
           </span>
           <span class="shrink-0 leading-none">同课程历史学期</span>
         </button>
@@ -53,7 +53,7 @@
             type="button"
             :disabled="generateButtonDisabled"
             :title="disabledReason || '生成教学建议'"
-            class="inline-flex h-11 min-w-[148px] items-center justify-center rounded-[13px] border border-[var(--app-primary)] bg-[var(--app-primary)] px-5 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(47,111,237,0.22)] transition-all hover:bg-[var(--app-primary-strong)] active:scale-[0.96] disabled:border-[#d1d5db] disabled:bg-[#e5e7eb] disabled:text-[#6b7280] disabled:shadow-none disabled:cursor-not-allowed"
+            class="inline-flex h-9 min-w-[130px] items-center justify-center rounded-[10px] border border-[var(--app-primary)] bg-[var(--app-primary)] px-4 text-xs font-semibold text-white shadow-[0_5px_12px_rgba(47,111,237,0.18)] transition-all hover:bg-[var(--app-primary-strong)] active:scale-[0.96] disabled:border-[#d1d5db] disabled:bg-[#e5e7eb] disabled:text-[#6b7280] disabled:shadow-none disabled:cursor-not-allowed"
             @click="generateReport"
           >
             {{ generateButtonLabel }}
@@ -63,9 +63,26 @@
       </div>
     </div>
 
-    <div class="teaching-advice-body mt-5 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+    <div class="teaching-advice-body mt-3.5 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
       <div v-if="errorMessage" class="rounded-[12px] border border-[#f0c4bd] bg-[#fff7f5] px-4 py-3 text-sm text-[#a63d32]">
         {{ errorMessage }}
+      </div>
+
+      <div v-if="reportGateMessage" class="rounded-[14px] border border-[#f0c4bd] bg-[#fff7f5] px-4 py-3 text-sm leading-6 text-[#a63d32] shadow-[0_6px_16px_rgba(166,61,50,0.06)]">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-semibold">这份教学建议没有通过质量门禁</div>
+            <p class="mt-1 text-xs leading-5 text-[#8a3a32]">{{ reportGateMessage }}</p>
+          </div>
+          <button
+            type="button"
+            :disabled="generateButtonDisabled"
+            class="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#f0c4bd] bg-white px-3 text-xs font-semibold text-[#a63d32] transition-all hover:bg-[#fff1ee] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+            @click="generateReport"
+          >
+            重新生成
+          </button>
+        </div>
       </div>
 
       <div v-if="contextLoading" class="space-y-3 py-4">
@@ -78,12 +95,12 @@
           :class="{ 'xl:grid-cols-[minmax(0,1fr)_360px]': advice && focusPanelOpen }"
         >
           <div class="min-w-0 min-h-0 flex flex-col space-y-4">
-            <section v-if="!advice && scopePreviewRows.length" class="rounded-[18px] border border-[#dbeafe] bg-[#f8fbff] px-4 py-3.5">
+            <section v-if="!advice && scopePreviewRows.length" class="rounded-[18px] border border-[#f2d49b] bg-[#fffaf0] px-4 py-3.5">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <h3 class="text-sm font-bold text-[#111827]">{{ currentScopeTitle }}数据预览</h3>
-                    <span class="rounded-full bg-[#dbeafe] px-2.5 py-1 text-[11px] font-semibold text-[#1d4ed8]">{{ scopeDescription }}</span>
+                    <span class="rounded-full bg-[#fff7e6] px-2.5 py-1 text-[11px] font-semibold text-[#a15c00]">{{ scopeDescription }}</span>
                   </div>
                   <p class="mt-1 text-xs leading-5 text-[#64748b]">生成按钮会基于这组范围数据生成对应层级的教学建议。</p>
                 </div>
@@ -98,7 +115,7 @@
               </div>
             </section>
 
-            <div v-if="false && advice" class="rounded-[22px] border border-[#d6e7ff] bg-gradient-to-br from-[#eef7ff] to-[#ecfbf4] p-4 shadow-[0_10px_28px_rgba(47,111,237,0.08)] lg:p-5">
+            <div v-if="false && advice" class="rounded-[22px] border border-[#f2d49b] bg-[#fffaf0] p-4 shadow-[0_10px_28px_rgba(180,120,40,0.08)] lg:p-5">
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="min-w-0">
                   <div class="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#991b1b]">
@@ -137,10 +154,10 @@
               </div>
             </div>
 
-            <div v-if="!advice" class="rounded-[22px] border border-dashed border-[#c7d7fe] bg-[#f8fbff] px-5 py-10 text-center">
-              <h3 class="text-lg font-semibold text-[#111827]">先生成 AI 教学决策报告</h3>
+            <div v-if="!advice" class="rounded-[22px] border border-dashed border-[#f2d49b] bg-[#fffaf0] px-5 py-10 text-center">
+              <h3 class="text-lg font-semibold text-[#111827]">{{ reportGateMessage ? '请重新生成通过质量门禁的报告' : '先生成 AI 教学决策报告' }}</h3>
               <p class="mx-auto mt-2 max-w-[680px] text-sm leading-6 text-[#6e6e73]">
-                当前范围已就绪。点击生成后，页面会直接给出“核心教学问题、下一节课怎么教、分层学生怎么跟、实验/学期/课程怎么调”，不会在主区域重复堆数据。
+                {{ reportGateMessage || '当前范围已就绪。点击生成后，页面会直接给出“核心教学问题、下一节课怎么教、分层学生怎么跟、实验/学期/课程怎么调”，不会在主区域重复堆数据。' }}
               </p>
               <button
                 type="button"
@@ -154,7 +171,7 @@
             </div>
 
             <div v-if="false && advice" class="overflow-hidden rounded-[22px] border border-[#c7d7fe] bg-[#fbfdff] shadow-[0_10px_26px_rgba(47,111,237,0.06)]">
-              <div class="border-b border-[#dbeafe] bg-gradient-to-r from-[#eff6ff] via-white to-[#f8fafc] px-4 py-4">
+              <div class="border-b border-[#f2d49b] bg-[#fffaf0] px-4 py-4">
                 <div class="flex flex-wrap items-end justify-between gap-2">
                   <div>
                     <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2f6fed]">Teaching Workflow</div>
@@ -291,8 +308,8 @@
                   </div>
                 </article>
 
-                <article v-if="priorityKnowledgeRows.length" class="rounded-[16px] border border-[#bfdbfe] bg-[#eff6ff] p-4">
-                  <div class="text-xs font-semibold text-[#1d4ed8]">优先补救知识点</div>
+                <article v-if="priorityKnowledgeRows.length" class="rounded-[16px] border border-[#f2d49b] bg-[#fff7e6] p-4">
+                  <div class="text-xs font-semibold text-[#a15c00]">优先补救知识点</div>
                   <div class="mt-3 space-y-3">
                     <div v-for="item in priorityKnowledgeRows" :key="item.knowledge" class="text-xs leading-5 text-[#374151]">
                       <div class="font-semibold text-[#1d1d1f]">{{ item.knowledge }} <span class="font-normal text-[#6e6e73]">· {{ item.confidence || 'MEDIUM' }}</span></div>
@@ -311,7 +328,7 @@
                 </div>
                 <button
                   type="button"
-                  class="h-8 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 text-xs font-medium text-[#1d4ed8]"
+                  class="h-8 rounded-full border border-[#f2d49b] bg-[#fff7e6] px-3 text-xs font-medium text-[#a15c00]"
                   @click="jumpToStudentLayer"
                 >
                   跳转到分层分析
@@ -343,11 +360,11 @@
               </div>
             </div>
 
-            <article v-if="advice" id="teaching-advice-markdown-root" class="teaching-advice-report min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[#bfdbfe] bg-gradient-to-br from-[#f8fbff] via-white to-[#fffaf5] p-4 shadow-[0_14px_36px_rgba(47,111,237,0.10)]">
+            <article v-if="advice" id="teaching-advice-markdown-root" ref="reportRootRef" class="teaching-advice-report min-h-0 flex-1 overflow-hidden rounded-[24px] border border-[#eadfce] bg-white p-4 shadow-[0_16px_38px_rgba(92,74,52,0.10)]">
               <button
                 v-if="false"
                 type="button"
-                class="flex w-full flex-wrap items-center justify-between gap-3 border-none bg-gradient-to-r from-[#f8fbff] via-white to-[#f8fafc] px-5 py-4 text-left"
+                class="flex w-full flex-wrap items-center justify-between gap-3 border-none bg-[#fffaf0] px-5 py-4 text-left"
                 @click="reportExpanded = !reportExpanded"
               >
                 <div class="min-w-0">
@@ -371,45 +388,47 @@
                     type="button"
                     :disabled="!focusStudentTotal"
                     :aria-expanded="focusPanelOpen"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 py-1 text-xs font-semibold text-[#2563eb] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#dbeafe] hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-xs font-semibold text-[#9a5a16] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-md active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-[#e5e7eb] disabled:bg-[#f8fafc] disabled:text-[#9ca3af] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                     @click.stop="toggleFocusPanel"
                   >
-                    <span class="h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#2563eb]' : 'bg-[#93c5fd]'"></span>
+                    <span class="h-1.5 w-1.5 rounded-full" :class="focusPanelOpen ? 'bg-[#d97706]' : 'bg-[#f6c56d]'"></span>
                     {{ focusPanelOpen ? '收起重点学生' : `重点学生 ${focusStudentTotal} 人` }}
                     <span class="text-[11px]">{{ focusPanelOpen ? '▲' : '▼' }}</span>
                   </button>
                   <button
                     type="button"
-                    class="rounded-full border border-[#dbeafe] bg-white/90 px-3 py-1 text-xs font-medium text-[#2f6fed] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#eff6ff] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
+                    class="rounded-full border border-[#eadfce] bg-white px-3 py-1 text-xs font-medium text-[#6b5a45] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
                     @click.stop="copyRawAdvice"
                   >
                     {{ rawAdviceCopied ? '已复制' : '复制 Markdown' }}
                   </button>
                 </div>
-                <div v-if="renderedAdviceSections.length" class="teaching-advice-report-grid grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-                  <aside class="teaching-advice-outline sticky top-4 self-start min-h-0 space-y-3 xl:pr-1">
-                    <div class="rounded-[20px] border border-[#bfdbfe] bg-gradient-to-br from-[#f7fbff] via-white to-[#fff7ed] px-4 py-4 shadow-[0_10px_24px_rgba(47,111,237,0.10)]">
+                <div v-if="renderedAdviceSections.length" class="teaching-advice-report-grid relative grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden xl:grid-cols-[286px_minmax(0,1fr)]">
+                  <aside ref="markdownOutlineRef" class="teaching-advice-outline min-w-0 self-start space-y-2.5 xl:pr-1">
+                    <div class="rounded-[16px] border border-[#eadfce] bg-white px-3.5 py-3 shadow-[0_10px_24px_rgba(92,74,52,0.08)]">
                       <div class="flex items-start justify-between gap-3">
                         <div>
-                          <div class="text-base font-bold text-[#111827]">报告目录</div>
-                          <p class="mt-1 text-sm font-semibold leading-5 text-[#1d4ed8]">先看结论，再看怎么教，最后核对依据。</p>
+                          <div class="text-[15px] font-bold text-[#111827]">报告目录</div>
+                          <p class="mt-1 text-xs font-semibold leading-5 text-[#6b5a45]">结论优先，动作跟上，依据后核。</p>
                         </div>
-                        <span class="rounded-full bg-[#2f6fed] px-3 py-1.5 text-[11px] font-bold text-white shadow-sm">
-                          当前 {{ activeMarkdownSectionIndex + 1 }}
+                        <span
+                          class="flex h-7 min-w-7 items-center justify-center rounded-full bg-[#c7781e] px-2 text-xs font-bold text-white shadow-sm transition-colors duration-200"
+                        >
+                          {{ activeMarkdownSectionIndex + 1 }}
                         </span>
                       </div>
-                      <div class="mt-3 rounded-[14px] border border-[#bfdbfe] bg-white px-3 py-2 text-sm font-semibold leading-6 text-[#1d4ed8]">
-                        <span class="text-[#111827]">推荐阅读：</span>结论 → 怎么教 → 找谁跟进 → 分层/课程调整 → 依据核对
+                      <div class="mt-2 rounded-[12px] border border-[#eadfce] bg-[#fffaf3] px-3 py-2 text-xs font-semibold leading-5 text-[#8a5b22]">
+                        结论 → 怎么教 → 找谁跟进 → 依据核对
                       </div>
                     </div>
 
-                    <div class="relative space-y-2 before:absolute before:bottom-4 before:left-4 before:top-4 before:w-px before:bg-[#dbeafe]">
+                    <div class="relative space-y-2 before:absolute before:bottom-4 before:left-4 before:top-4 before:w-px before:bg-[#e9dfd2]">
                       <button
                         v-for="section in renderedAdviceSections"
                         :key="section.key"
                         type="button"
-                        class="relative w-full rounded-[18px] border px-3.5 py-3.5 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985]"
-                        :class="expandedMarkdownSectionKey === section.key ? `${section.tone} shadow-[0_10px_22px_rgba(47,111,237,0.14)] ring-2 ring-inset ring-[rgba(47,111,237,0.24)]` : 'border-[#e5e7eb] bg-white hover:border-[#bfdbfe] hover:bg-[#fbfdff]'"
+                        class="relative w-full rounded-[16px] border px-3 py-3 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985]"
+                        :class="expandedMarkdownSectionKey === section.key ? `${section.tone} shadow-[0_12px_26px_rgba(92,74,52,0.11)] ring-2 ring-inset ring-[rgba(180,120,40,0.18)]` : 'border-[#eadfce] bg-white hover:border-[#dfc79f] hover:bg-[#fffdf8]'"
                         @click="toggleMarkdownSection(section.key)"
                       >
                         <div class="flex items-start gap-3">
@@ -419,13 +438,13 @@
                           <div class="min-w-0 flex-1">
                             <div class="flex items-start justify-between gap-2">
                               <div class="min-w-0">
-                                <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2563eb]">
-                                  Level 1 · {{ section.badge }}
+                                <div class="text-[11px] font-bold text-[#8a5b22]">
+                                  {{ activeMarkdownSectionIndexFor(section.key) + 1 }} · {{ section.badge }}
                                 </div>
-                                <h4 class="mt-1 truncate text-[15px] font-bold text-[#111827]">{{ section.title }}</h4>
+                                <h4 class="mt-1 truncate text-sm font-bold text-[#111827]">{{ section.title }}</h4>
                               </div>
                             </div>
-                            <p class="mt-1 compact-line-clamp-2 text-xs font-medium leading-5 text-[#4b5563]">{{ section.hint }}</p>
+                            <p class="mt-1 text-xs font-medium leading-5 text-[#475569]">{{ section.hint }}</p>
                           </div>
                         </div>
                       </button>
@@ -433,48 +452,54 @@
                   </aside>
 
                   <Transition name="report-section" mode="out-in">
-                  <section v-if="activeMarkdownSection" :key="activeMarkdownSection.key" class="teaching-advice-content min-h-0 space-y-3">
-                    <div class="rounded-[22px] border border-[#bfdbfe] bg-gradient-to-br from-white via-[#fbfdff] to-[#fff7ed] p-5 shadow-[0_10px_24px_rgba(47,111,237,0.08)]">
+                  <section
+                    v-if="activeMarkdownSection"
+                    :key="activeMarkdownSection.key"
+                    ref="markdownContentRef"
+                    class="teaching-advice-content min-h-0 min-w-0 space-y-3"
+                    @scroll="handleMarkdownScroll"
+                  >
+                    <div class="rounded-[18px] border border-[#eadfce] bg-white p-4 shadow-[0_10px_24px_rgba(92,74,52,0.08)]">
                       <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#4b5563]">
-                        <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 font-semibold text-[#2f6fed]">原文</span>
+                        <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 font-semibold text-[#9a5a16]">AI 建议</span>
                         <span>›</span>
                         <span class="rounded-full bg-[#f3f6fb] px-2.5 py-1 text-[#374151]">{{ activeMarkdownSection.title }}</span>
                       </div>
                       <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="min-w-0">
-                          <div class="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
-                            Level 1 · {{ activeMarkdownSection.badge }}
+                          <div class="mt-3 text-[11px] font-bold text-[#8a5b22]">
+                            {{ activeMarkdownSectionIndex + 1 }} · {{ activeMarkdownSection.badge }}
                           </div>
                           <h4 class="mt-1 text-xl font-bold text-[#111827]">{{ activeMarkdownSection.title }}</h4>
-                          <p class="mt-1 text-sm font-medium leading-6 text-[#4b5563]">{{ activeMarkdownSection.hint }}</p>
+                          <p class="mt-1 text-sm font-medium leading-6 text-[#475569]">{{ activeMarkdownSection.hint }}</p>
                         </div>
                         <div class="flex shrink-0 items-center gap-2">
                           <button
                             type="button"
-                            class="rounded-full border border-[#bfdbfe] bg-white px-3 py-1.5 text-xs font-semibold text-[#2563eb] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#eff6ff] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
+                            class="rounded-full border border-[#eadfce] bg-white px-3 py-1.5 text-xs font-semibold text-[#6b5a45] shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-md active:translate-y-0 active:scale-[0.98]"
                             @click="scrollMarkdownToTop"
                           >
                             回到目录顶部
                           </button>
                         </div>
                       </div>
-                      <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_190px]">
-                        <p class="rounded-[14px] bg-[#f3f6fb] px-4 py-3 text-sm font-medium leading-6 text-[#374151]">
+                      <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_188px]">
+                        <p class="advice-soft-card rounded-[14px] px-4 py-3 text-sm font-medium leading-6 text-[#334155]">
                           <span class="font-semibold text-[#1d1d1f]">本节摘要：</span>{{ activeMarkdownSection.preview }}
                         </p>
-                        <div class="rounded-[14px] bg-[#eef5ff] px-4 py-3 text-sm font-semibold leading-6 text-[#2563eb]">
-                          <span class="font-semibold">阅读目标：</span>{{ activeMarkdownSection.readingGoal }}
+                        <div class="advice-soft-card advice-soft-card-accent rounded-[14px] px-4 py-3 text-sm font-semibold leading-6 text-[#7b4f17]">
+                          {{ activeMarkdownSection.readingGoal }}
                         </div>
                       </div>
                     </div>
 
                     <div v-if="isStudentFollowSection(activeMarkdownSection) && focusStudentRows.length" class="space-y-3">
-                      <div class="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border border-[#bfdbfe] bg-[#eff6ff] px-4 py-2.5 text-xs font-medium text-[#1d4ed8]">
+                      <div class="advice-soft-card flex flex-wrap items-center justify-between gap-2 rounded-[14px] px-4 py-2.5 text-xs font-medium text-[#6b5a45]">
                         <span v-if="focusStudentRosterComplete">已展示全部 {{ focusStudentTotal }} 名重点学生，并按问题严重程度分为 P1/P2/P3。</span>
                         <span v-else>当前历史报告只保存了 {{ focusStudentRows.length }} / {{ focusStudentTotal }} 人，重新生成后可查看完整名单。</span>
                         <span class="rounded-full bg-white px-2.5 py-1 font-semibold">AI 深度分析 {{ focusStudentAiAnalyzedCount }} 人</span>
                       </div>
-                      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                      <div class="grid grid-cols-1 gap-3 p-1 sm:grid-cols-2 xl:grid-cols-4">
                         <button
                           v-for="stat in focusStudentFilterStats"
                           :key="stat.key"
@@ -482,7 +507,7 @@
                           :aria-pressed="selectedFocusPriority === stat.key"
                           aria-controls="focus-student-group-list"
                           :disabled="stat.count === 0"
-                          class="rounded-[16px] border px-3 py-3 text-left transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          class="rounded-[16px] border px-3.5 py-3 text-left transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d97706] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           :class="[
                             stat.tone,
                             selectedFocusPriority === stat.key
@@ -503,7 +528,7 @@
                       <section
                         v-for="group in visibleFocusStudentGroups"
                         :key="group.key"
-                        class="overflow-hidden rounded-[18px] border bg-white shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
+                        class="overflow-hidden rounded-[18px] border bg-white shadow-[0_8px_18px_rgba(100,116,139,0.08)]"
                         :class="group.borderClass"
                       >
                         <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3" :class="group.headerClass">
@@ -519,11 +544,11 @@
                           </span>
                         </div>
 
-                        <div class="grid max-h-[560px] grid-cols-1 gap-3 overflow-y-auto overscroll-contain p-3 pr-2 xl:grid-cols-2">
+                        <div class="teaching-advice-student-list grid grid-cols-1 gap-3 p-3 xl:grid-cols-2">
                           <article
                             v-for="student in group.students"
                             :key="student.key"
-                            class="rounded-[16px] border border-black/[0.06] bg-white px-4 py-3"
+                            class="advice-soft-card rounded-[16px] px-4 py-3"
                           >
                             <div class="flex flex-wrap items-start justify-between gap-3">
                               <div class="min-w-0">
@@ -531,7 +556,7 @@
                                   <span class="rounded-full px-2.5 py-1 text-[11px] font-bold text-white" :class="student.dotClass">
                                     {{ student.priority }}
                                   </span>
-                                  <span v-if="student.aiAnalyzed" class="rounded-full bg-[#eff6ff] px-2 py-0.5 text-[10px] font-semibold text-[#2563eb]">AI 详析</span>
+                                  <span v-if="student.aiAnalyzed" class="rounded-full bg-[#fff7ed] px-2 py-0.5 text-[10px] font-semibold text-[#9a5a16]">AI 详析</span>
                                   <h6 class="text-sm font-semibold text-[#1d1d1f]">
                                     {{ student.studentName || '未命名学生' }}
                                     <span class="font-normal text-[#6e6e73]">{{ student.studentNo ? `· ${student.studentNo}` : '' }}</span>
@@ -548,22 +573,22 @@
                             </div>
 
                             <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                              <div class="rounded-[12px] bg-[#f8fafc] px-3 py-2">
+                              <div class="rounded-[12px] border border-[#e8edf5] bg-[#f9fbfd] px-3 py-2">
                                 <div class="text-[11px] font-semibold text-[#64748b]">类型</div>
                                 <p class="mt-1 text-xs font-semibold text-[#1d1d1f]">{{ student.typeLabel }}</p>
                               </div>
-                              <div class="rounded-[12px] bg-[#f8fafc] px-3 py-2">
+                              <div class="rounded-[12px] border border-[#e8edf5] bg-[#f9fbfd] px-3 py-2">
                                 <div class="text-[11px] font-semibold text-[#64748b]">数据证据</div>
                                 <p class="mt-1 text-xs leading-5 text-[#1d1d1f]">{{ student.evidenceSummary }}</p>
                               </div>
                             </div>
 
-                            <div class="mt-3 rounded-[14px] border border-[#dbeafe] bg-[#fbfdff] px-3 py-2">
-                              <div class="text-[11px] font-semibold text-[#2563eb]">老师下一步直接做</div>
+                            <div class="mt-3 rounded-[14px] border border-[#eadfce] bg-[#fffaf3] px-3 py-2 shadow-[0_4px_12px_rgba(92,74,52,0.06)]">
+                              <div class="text-[11px] font-semibold text-[#9a5a16]">老师下一步直接做</div>
                               <p class="mt-1 text-sm font-medium leading-6 text-[#1d1d1f]">{{ student.suggestion }}</p>
                             </div>
 
-                            <div class="mt-2 rounded-[14px] bg-[#f8fafc] px-3 py-2">
+                            <div class="mt-2 rounded-[14px] border border-[#e8edf5] bg-[#f9fbfd] px-3 py-2">
                               <div class="text-[11px] font-semibold text-[#64748b]">验收方式</div>
                               <p class="mt-1 text-xs font-medium leading-5 text-[#374151]">{{ student.validation }}</p>
                             </div>
@@ -577,30 +602,42 @@
                       <article
                         v-for="child in activeMarkdownSection.children"
                         :key="child.key"
-                        class="overflow-hidden rounded-[16px] border border-black/[0.06] bg-white shadow-[0_6px_16px_rgba(15,23,42,0.04)]"
+                        class="overflow-hidden rounded-[16px] border border-[#eadfce] bg-white shadow-[0_8px_18px_rgba(100,116,139,0.08)]"
                       >
-                        <div class="flex items-center justify-between gap-3 border-b border-black/[0.05] bg-[#fbfdff] px-3 py-2">
+                        <div class="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-[#fffdf8] px-3 py-2">
                           <div class="min-w-0">
-                            <div class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#2f6fed]">Level 2 · {{ child.badge }}</div>
+                            <div class="text-[10px] font-semibold text-[#8a5b22]">{{ child.badge }}</div>
                             <div class="mt-0.5 text-xs font-semibold text-[#1d1d1f]">{{ child.title }}</div>
                             <div class="mt-0.5 text-xs font-medium leading-5 text-[#4b5563]">{{ child.hint }}</div>
                           </div>
                         </div>
-                        <div class="teaching-advice-markdown markdown-body max-h-[300px] overflow-y-auto px-3 py-3 pr-2 text-sm leading-7 text-[#1d1d1f]" v-html="child.html"></div>
+                        <div class="teaching-advice-markdown markdown-body max-h-[300px] overflow-y-auto bg-white px-3 py-3 pr-2 text-sm leading-7 text-[#1d1d1f]" v-html="child.html"></div>
                       </article>
                     </div>
 
                     <div
                       v-else
-                      class="teaching-advice-markdown markdown-body max-h-[460px] overflow-y-auto rounded-[18px] border border-black/[0.06] bg-white px-4 py-4 text-sm leading-7 text-[#1d1d1f]"
+                      class="teaching-advice-markdown markdown-body max-h-[460px] overflow-y-auto rounded-[18px] border border-[#eadfce] bg-white px-4 py-4 text-sm leading-7 text-[#1d1d1f] shadow-[0_8px_18px_rgba(100,116,139,0.08)]"
                       v-html="activeMarkdownSection.html"
                     ></div>
                   </section>
                   </Transition>
+                  <Transition name="back-top">
+                    <button
+                      v-if="showBackToTop"
+                      type="button"
+                      class="teaching-advice-back-top absolute bottom-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfce] bg-white text-base font-bold text-[#8a5b22] shadow-[0_10px_24px_rgba(92,74,52,0.16)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-[0_14px_28px_rgba(92,74,52,0.20)] active:translate-y-0 active:scale-[0.96]"
+                      title="回到顶部"
+                      aria-label="回到顶部"
+                      @click="scrollMarkdownToTop"
+                    >
+                      ↑
+                    </button>
+                  </Transition>
                 </div>
                 <div
                   v-else
-                  class="teaching-advice-markdown markdown-body rounded-[18px] border border-black/[0.06] bg-white px-4 py-4 text-sm leading-7 text-[#1d1d1f]"
+                  class="teaching-advice-markdown markdown-body rounded-[18px] border border-[#eadfce] bg-white px-4 py-4 text-sm leading-7 text-[#1d1d1f] shadow-[0_8px_18px_rgba(100,116,139,0.08)]"
                   v-html="renderedAdviceMarkdown"
                 ></div>
               </div>
@@ -611,12 +648,14 @@
           <Transition name="focus-panel">
           <aside
             v-if="advice && focusPanelOpen"
-            class="min-w-0 min-h-0 space-y-5 overflow-y-auto xl:sticky xl:top-4 xl:max-h-[calc(100vh-120px)] xl:pr-1"
+            ref="focusPanelRef"
+            class="teaching-advice-side-panel min-w-0 min-h-0 space-y-4 overflow-y-auto xl:max-h-[calc(100vh-150px)] xl:pr-1"
+            @scroll="handleFocusPanelScroll"
           >
-            <section class="overflow-hidden rounded-[20px] border border-black/[0.07] bg-white">
+            <section class="overflow-visible rounded-[18px] border border-[#cbd5e1] bg-white shadow-[0_8px_18px_rgba(15,23,42,0.05)]">
               <button
                 type="button"
-                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#f8fafc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2563eb]"
+                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#fffdf8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d97706]"
                 :aria-expanded="focusFollowExpanded"
                 aria-controls="focus-follow-content"
                 @click="toggleFocusFollow"
@@ -626,7 +665,7 @@
                   <span class="mt-1 block text-xs leading-5 text-[#6e6e73]">按严重程度分类，优先处理最需要介入的学生</span>
                 </span>
                 <span class="flex shrink-0 items-center gap-2">
-                  <span class="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-semibold text-[#2563eb]">
+                  <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[11px] font-semibold text-[#9a5a16]">
                     {{ selectedFocusPriority === 'ALL' ? `${focusStudentTotal} 人` : `${selectedFocusPriority} · ${visibleFocusStudentRows.length} 人` }}
                   </span>
                   <span
@@ -647,7 +686,7 @@
                     :aria-pressed="selectedFocusPriority === stat.key"
                     aria-controls="sidebar-focus-student-list"
                     :disabled="stat.count === 0"
-                    class="flex min-h-[58px] items-center justify-between gap-2 rounded-[12px] border px-3 py-2 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-45"
+                    class="flex min-h-[58px] items-center justify-between gap-2 rounded-[12px] border px-3 py-2 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d97706] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-45"
                     :class="[
                       stat.tone,
                       selectedFocusPriority === stat.key
@@ -661,7 +700,7 @@
                   </button>
                 </div>
 
-                <p class="mt-3 rounded-[12px] border border-[#bfdbfe] bg-[#eff6ff] px-3 py-2 text-xs font-medium leading-5 text-[#1d4ed8]">
+                <p class="mt-3 rounded-[12px] border border-[#eadfce] bg-[#fffdf8] px-3 py-2 text-xs font-medium leading-5 text-[#6b5a45]">
                   {{ focusStudentRosterComplete
                     ? `已加载全部 ${focusStudentTotal} 人，其中 ${focusStudentAiAnalyzedCount} 人含 AI 深度建议，其余人员依据数据库做题结果生成跟进动作。`
                     : `当前历史报告仅包含 ${focusStudentRows.length} / ${focusStudentTotal} 人，重新生成后可查看完整名单。` }}
@@ -671,59 +710,66 @@
                   id="sidebar-focus-student-list"
                   name="focus-filter"
                   tag="div"
-                  class="mt-3 max-h-[520px] space-y-3 overflow-y-auto overscroll-contain pr-1"
+                  class="teaching-advice-side-list teaching-advice-popover-list mt-3 space-y-3 overflow-visible pb-28 pr-1"
                 >
                 <article
                   v-for="student in visibleFocusStudentRows"
                   :key="student.key"
-                  class="rounded-[16px] border px-3.5 py-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(15,23,42,0.08)]"
+                  class="student-card relative cursor-pointer rounded-[16px] border px-3.5 py-3 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
                   :class="student.tone"
+                  @mouseenter="showStudentActionPopover(student, $event)"
+                  @focusin="showStudentActionPopover(student, $event)"
+                  @mouseleave="hideStudentActionPopover"
+                  @focusout="hideStudentActionPopover"
+                  @click="toggleFocusStudentDetail(student.key)"
                 >
-                  <div class="flex items-start gap-3">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" :class="student.dotClass">{{ student.tag }}</span>
-                    <div class="min-w-0">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <div class="min-w-0 truncate text-sm font-semibold text-[#1d1d1f]">
-                          {{ student.studentNo || '未知学号' }}
-                          <span v-if="student.studentName" class="font-normal text-[#6e6e73]">· {{ student.studentName }}</span>
+                  <div class="student-card-readable transition-all duration-200 ease-out">
+                    <div class="flex items-start gap-3">
+                      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" :class="student.dotClass">{{ student.tag }}</span>
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div class="min-w-0 truncate text-sm font-semibold text-[#1d1d1f]">
+                            {{ student.studentNo || '未知学号' }}
+                            <span v-if="student.studentName" class="font-normal text-[#6e6e73]">· {{ student.studentName }}</span>
+                          </div>
+                          <span class="rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-semibold" :class="student.levelClass">
+                            {{ student.priority }} · {{ student.riskLevel }}
+                          </span>
                         </div>
-                        <span class="rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-semibold" :class="student.levelClass">
-                          {{ student.priority }} · {{ student.riskLevel }}
-                        </span>
-                      </div>
-                        <p class="mt-1 compact-line-clamp-2 text-xs leading-5 text-[#6e6e73]">
+                        <p
+                          class="mt-1 text-xs leading-5 transition-colors duration-200"
+                          :class="expandedFocusStudentKey === student.key ? 'whitespace-normal break-words text-[#4b5563]' : 'compact-line-clamp-2 text-[#6e6e73]'"
+                        >
                           <span class="font-semibold text-[#1d1d1f]">卡点：</span>{{ student.stuckPoint || student.reason }}
                         </p>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      class="mt-2 inline-flex items-center gap-1 rounded-full border border-transparent px-2 py-1 text-[11px] font-medium text-[#8a5b22] transition-all duration-200 ease-out hover:border-[#dfc79f] hover:bg-white/80 active:scale-[0.97]"
+                      :aria-expanded="expandedFocusStudentKey === student.key"
+                      @click.stop="toggleFocusStudentDetail(student.key)"
+                    >
+                      {{ expandedFocusStudentKey === student.key ? '收起详情' : '查看详情' }}
+                      <span>{{ expandedFocusStudentKey === student.key ? '▲' : '▼' }}</span>
+                    </button>
+                    <Transition name="detail-fade">
+                    <div v-if="expandedFocusStudentKey === student.key" class="mt-2 space-y-2.5 rounded-[13px] border border-[#eadfce] bg-white px-3.5 py-3 text-xs leading-6 text-[#334155] shadow-[0_6px_16px_rgba(92,74,52,0.08)]">
+                      <p v-if="student.problemTitle"><span class="font-semibold text-[#1d1d1f]">定位题目：</span>第 {{ student.problemNo || '-' }} 题“{{ student.problemTitle }}”</p>
+                      <p v-if="student.hasSpecificKnowledge"><span class="font-semibold text-[#1d1d1f]">薄弱知识点：</span>{{ student.knowledgeSourceText }}“{{ student.inferredKnowledge }}”<span v-if="student.knowledgeConfidence">（置信度 {{ student.knowledgeConfidence }}）</span></p>
+                      <p v-if="student.errorPoint"><span class="font-semibold text-[#1d1d1f]">具体错误点：</span>{{ student.errorPoint }}<span v-if="student.problemStatus">（{{ student.problemStatus }}）</span></p>
+                      <p v-if="student.problem"><span class="font-semibold text-[#1d1d1f]">具体问题：</span>{{ student.problem }}</p>
+                      <p v-if="student.cause"><span class="font-semibold text-[#1d1d1f]">卡住原因：</span>{{ student.cause }}</p>
+                      <p v-if="student.followUpType"><span class="font-semibold text-[#1d1d1f]">问题类型：</span>{{ student.followUpType }}</p>
+                      <p v-if="student.studentPortraitSummary"><span class="font-semibold text-[#1d1d1f]">画像摘要：</span>{{ student.studentPortraitSummary }}</p>
+                      <p v-if="student.abilityTrendLabel"><span class="font-semibold text-[#1d1d1f]">趋势判断：</span>{{ student.abilityTrendLabel }}</p>
+                      <p v-if="student.riskSummary"><span class="font-semibold text-[#1d1d1f]">分级依据：</span>{{ student.riskSummary }}</p>
+                      <p v-if="student.evidenceSummary"><span class="font-semibold text-[#1d1d1f]">数据证据：</span>{{ student.evidenceSummary }}</p>
+                      <p v-if="student.validation"><span class="font-semibold text-[#1d1d1f]">验收方式：</span>{{ student.validation }}</p>
+                      <p v-if="student.evidenceRefs?.length" class="font-mono text-[11px] text-[#64748b]">证据：{{ joinRefs(student.evidenceRefs) }}</p>
+                    </div>
+                    </Transition>
                   </div>
-                  <div class="mt-2 rounded-[12px] border border-white/80 bg-white/80 px-3 py-2 text-xs leading-5 text-[#374151]">
-                    <span class="font-semibold text-[#1d1d1f]">下一步：</span>{{ student.suggestion }}
-                  </div>
-                  <button
-                    type="button"
-                    class="mt-2 inline-flex items-center gap-1 rounded-full border border-transparent px-2 py-1 text-[11px] font-medium text-[#2563eb] transition-all duration-200 ease-out hover:border-[#bfdbfe] hover:bg-white/80 active:scale-[0.97]"
-                    :aria-expanded="expandedFocusStudentKey === student.key"
-                    @click="toggleFocusStudentDetail(student.key)"
-                  >
-                    {{ expandedFocusStudentKey === student.key ? '收起详情' : '查看详情' }}
-                    <span>{{ expandedFocusStudentKey === student.key ? '▲' : '▼' }}</span>
-                  </button>
-                  <Transition name="detail-fade">
-                  <div v-if="expandedFocusStudentKey === student.key" class="mt-2 space-y-2 rounded-[12px] border border-white/80 bg-white/70 px-3 py-2 text-[11px] leading-5 text-[#4b5563]">
-                    <p v-if="student.problemTitle"><span class="font-semibold text-[#1d1d1f]">定位题目：</span>第 {{ student.problemNo || '-' }} 题“{{ student.problemTitle }}”</p>
-                    <p v-if="student.hasSpecificKnowledge"><span class="font-semibold text-[#1d1d1f]">薄弱知识点：</span>{{ student.knowledgeSourceText }}“{{ student.inferredKnowledge }}”<span v-if="student.knowledgeConfidence">（置信度 {{ student.knowledgeConfidence }}）</span></p>
-                    <p v-if="student.errorPoint"><span class="font-semibold text-[#1d1d1f]">具体错误点：</span>{{ student.errorPoint }}<span v-if="student.problemStatus">（{{ student.problemStatus }}）</span></p>
-                    <p v-if="student.problem"><span class="font-semibold text-[#1d1d1f]">具体问题：</span>{{ student.problem }}</p>
-                    <p v-if="student.cause"><span class="font-semibold text-[#1d1d1f]">卡住原因：</span>{{ student.cause }}</p>
-                    <p v-if="student.followUpType"><span class="font-semibold text-[#1d1d1f]">问题类型：</span>{{ student.followUpType }}</p>
-                    <p v-if="student.studentPortraitSummary"><span class="font-semibold text-[#1d1d1f]">画像摘要：</span>{{ student.studentPortraitSummary }}</p>
-                    <p v-if="student.abilityTrendLabel"><span class="font-semibold text-[#1d1d1f]">趋势判断：</span>{{ student.abilityTrendLabel }}</p>
-                    <p v-if="student.riskSummary"><span class="font-semibold text-[#1d1d1f]">分级依据：</span>{{ student.riskSummary }}</p>
-                    <p v-if="student.evidenceSummary"><span class="font-semibold text-[#1d1d1f]">数据证据：</span>{{ student.evidenceSummary }}</p>
-                    <p v-if="student.validation"><span class="font-semibold text-[#1d1d1f]">验收方式：</span>{{ student.validation }}</p>
-                    <p v-if="student.evidenceRefs?.length" class="font-mono text-[10px] text-[#8a8a8f]">证据：{{ joinRefs(student.evidenceRefs) }}</p>
-                  </div>
-                  </Transition>
                 </article>
                 </TransitionGroup>
                 <p v-else class="mt-3 rounded-[14px] bg-[#f8fafc] px-4 py-6 text-center text-sm text-[#8a8a8f]">
@@ -733,10 +779,10 @@
               </Transition>
             </section>
 
-            <section class="overflow-hidden rounded-[20px] border border-black/[0.07] bg-white">
+            <section class="overflow-hidden rounded-[18px] border border-[#eadfce] bg-white shadow-[0_8px_18px_rgba(92,74,52,0.06)]">
               <button
                 type="button"
-                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#fffaf5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f97316]"
+                class="group flex w-full items-center justify-between gap-4 border-none bg-transparent px-5 py-4 text-left transition-colors duration-200 hover:bg-[#fffdf8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d97706]"
                 :aria-expanded="prepReminderExpanded"
                 aria-controls="prep-reminder-content"
                 @click="prepReminderExpanded = !prepReminderExpanded"
@@ -746,19 +792,19 @@
                   <span class="mt-1 block text-xs leading-5 text-[#6e6e73]">讲什么、补什么、课后怎么追</span>
                 </span>
                 <span class="flex shrink-0 items-center gap-2">
-                  <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[11px] font-semibold text-[#c2410c]">{{ teacherFocusRows.length }} 项</span>
+                  <span class="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[11px] font-semibold text-[#9a5a16]">{{ teacherFocusRows.length }} 项</span>
                   <span
                     aria-hidden="true"
-                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#fff7ed] text-sm font-semibold text-[#c2410c] transition-transform duration-200 group-hover:bg-[#ffedd5]"
+                    class="sidebar-chevron flex h-7 w-7 items-center justify-center rounded-full bg-[#f3f6fb] text-sm font-semibold text-[#4b5563] transition-transform duration-200 group-hover:bg-[#e8eef7]"
                     :class="prepReminderExpanded ? 'rotate-180' : ''"
                   >⌄</span>
                 </span>
               </button>
               <Transition name="sidebar-accordion">
               <div v-if="prepReminderExpanded" id="prep-reminder-content" class="border-t border-black/[0.06] px-4 pb-4 pt-3">
-                <div v-if="teacherFocusRows.length" class="max-h-[420px] space-y-3 overflow-y-auto overscroll-contain pr-1">
-                  <div v-for="item in teacherFocusRows" :key="item.key" class="rounded-[14px] border border-[#fed7aa] bg-[#fffaf5] px-4 py-3">
-                    <div class="text-xs font-semibold text-[#9a3412]">{{ item.title }}</div>
+                <div v-if="teacherFocusRows.length" class="teaching-advice-side-list space-y-3 pr-1">
+                  <div v-for="item in teacherFocusRows" :key="item.key" class="rounded-[14px] border border-[#eadfce] bg-[#fffdf8] px-4 py-3">
+                    <div class="text-xs font-semibold text-[#8a5b22]">{{ item.title }}</div>
                     <p class="mt-2 compact-line-clamp-2 text-xs leading-5 text-[#374151]">{{ item.instruction }}</p>
                     <p class="mt-2 text-[11px] font-medium leading-5 text-[#6e6e73]">
                       {{ item.when }} · {{ item.target }}
@@ -794,7 +840,16 @@
                       <div class="truncate text-sm font-medium text-[#374151]">
                         {{ scopeLabel(report.scopeLevel) }} · {{ report.scope?.experimentName || report.scope?.className || report.scope?.courseName }}
                       </div>
-                      <div class="mt-1 text-xs text-[#8a8a8f]">{{ report.promptVersion }} · {{ report.model || '默认模型' }}</div>
+                      <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#8a8a8f]">
+                        <span>{{ report.promptVersion }} · {{ report.model || '默认模型' }}</span>
+                        <span
+                          v-if="reportQualityLabel(report)"
+                          class="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                          :class="reportQualityClass(report)"
+                        >
+                          {{ reportQualityLabel(report) }}
+                        </span>
+                      </div>
                     </div>
                     <span class="shrink-0 text-xs text-[#6e6e73]">{{ formatTime(report.createdAt) }}</span>
                   </button>
@@ -804,6 +859,18 @@
             </section>
           </aside>
           </Transition>
+          <Transition name="back-top">
+            <button
+              v-if="advice && focusPanelOpen && showFocusBackToTop"
+              type="button"
+              class="teaching-advice-side-back-top fixed bottom-6 right-6 z-[80] flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfce] bg-white text-base font-bold text-[#8a5b22] shadow-[0_10px_24px_rgba(92,74,52,0.18)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#dfc79f] hover:bg-[#fffaf3] hover:shadow-[0_14px_28px_rgba(92,74,52,0.22)] active:translate-y-0 active:scale-[0.96]"
+              title="回到重点学生顶部"
+              aria-label="回到重点学生顶部"
+              @click="scrollFocusPanelToTop"
+            >
+              ↑
+            </button>
+          </Transition>
         </div>
       </template>
 
@@ -811,11 +878,23 @@
         {{ scopeLevel === 'EXPERIMENT' ? '请先选择一个实验。' : '当前班级暂时无法形成分析范围。' }}
       </div>
     </div>
+
+    <Transition name="student-popover">
+      <div
+        v-if="studentActionPopover.visible"
+        class="student-action-floating-popover"
+        :style="studentActionPopover.style"
+      >
+        <div class="text-[11px] font-bold text-[#c2410c]">下一步</div>
+        <p class="mt-1 text-sm font-medium leading-6 text-[#3f2f22]">{{ studentActionPopover.student?.suggestion }}</p>
+        <div class="mt-2 text-[11px] font-semibold text-[#9a3412]">移开鼠标后收起</div>
+      </div>
+    </Transition>
   </section>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
@@ -849,19 +928,32 @@ const diagnosisExpanded = ref(false)
 const reportExpanded = ref(true)
 const rawAdviceCopied = ref(false)
 const expandedMarkdownSectionKey = ref('')
+const reportRootRef = ref(null)
+const markdownOutlineRef = ref(null)
+const markdownContentRef = ref(null)
+const showBackToTop = ref(false)
+const focusPanelRef = ref(null)
+const showFocusBackToTop = ref(false)
 const focusPanelOpen = ref(false)
 const focusFollowExpanded = ref(false)
 const prepReminderExpanded = ref(false)
 const expandedFocusStudentKey = ref('')
 const selectedFocusPriority = ref('ALL')
 const historyExpanded = ref(false)
+const studentActionPopover = ref({
+  visible: false,
+  student: null,
+  style: {}
+})
 let contextRequestId = 0
 
 const unwrap = response => response?.data ?? response
 const activeData = computed(() => activeReport.value || contextData.value)
 const scope = computed(() => activeData.value?.scope || {})
 const metrics = computed(() => activeData.value?.metrics || {})
-const advice = computed(() => activeReport.value?.advice || null)
+const rawAdvice = computed(() => activeReport.value?.advice || null)
+const reportGateMessage = computed(() => reportGateMessageFor(activeReport.value))
+const advice = computed(() => reportGateMessage.value ? null : rawAdvice.value)
 const activeScopeLevel = computed(() => String(activeReport.value?.scopeLevel || scope.value.level || '').toUpperCase())
 const activeScopeLevelLabel = computed(() => scopeLabel(activeScopeLevel.value || scopeLevel.value))
 const currentScopeTitle = computed(() => {
@@ -952,6 +1044,90 @@ const priorityBadge = computed(() => {
   return { label: '中', hint: '需要短练验证', className: 'text-[#a15c00]' }
 })
 const hasConclusionDetails = computed(() => !!teachingConclusion.value?.cause || !!teachingConclusion.value?.impact)
+
+function reportGateMessageFor(report) {
+  if (!report) return ''
+  const status = String(report.status || '').toUpperCase()
+  if (status && status !== 'COMPLETED') {
+    return report.errorMessage || '后端已将该报告标记为生成失败，未作为正式教学建议放行。'
+  }
+  if (!isSupportedPromptVersion(report.promptVersion)) {
+    return `该历史报告由 ${report.promptVersion || '旧版提示词'} 生成，未按当前质量门禁校验。请重新生成后再给教师查看。`
+  }
+  const gate = report.advice?.qualityGate
+  if (gate?.status !== 'PASS') {
+    return '该报告没有服务端质量门禁通过标记，不能按正式教学建议展示。请重新生成。'
+  }
+  const clientIssue = clientAdviceIssue(report.advice)
+  return clientIssue
+}
+
+function isSupportedPromptVersion(version) {
+  const match = String(version || '').match(/teaching-advice-v(\d+)/)
+  return !!match && Number(match[1]) >= 9
+}
+
+function clientAdviceIssue(value) {
+  if (!value) return '报告内容为空，不能展示。'
+  const requiredTexts = [
+    ['summary', value.summary],
+    ['teachingConclusion.problem', value.teachingConclusion?.problem],
+    ['teachingConclusion.cause', value.teachingConclusion?.cause],
+    ['teachingConclusion.impact', value.teachingConclusion?.impact]
+  ]
+  for (const [label, text] of requiredTexts) {
+    if (!clientCompleteSentence(text)) return `${label} 不是完整句，已阻断展示。`
+  }
+  const steps = Array.isArray(value.nextTeachingPlan?.steps) ? value.nextTeachingPlan.steps : []
+  if (steps.length < 3) return '下一节课教学步骤少于 3 步，已阻断展示。'
+  for (let index = 0; index < Math.min(3, steps.length); index += 1) {
+    const item = steps[index]
+    if (!clientCompleteSentence(item.teacherAction || item.howToTeach)) return `第 ${index + 1} 步教师动作不完整，已阻断展示。`
+    if (!clientCompleteSentence(item.studentTask)) return `第 ${index + 1} 步学生任务不完整，已阻断展示。`
+    if (!clientCompleteSentence(item.successMetric || item.expectedChange)) return `第 ${index + 1} 步验收方式不完整，已阻断展示。`
+  }
+  const markdown = String(value.markdown || '')
+  const requiredSections = ['核心教学结论', '下一节课怎么教', '分层教学安排', '重点学生跟进', '实验/学期/课程调整', '依据与局限']
+  const missing = requiredSections.find(item => !markdown.includes(item))
+  if (missing) return `Markdown 缺少“${missing}”部分，已阻断展示。`
+  const sections = parseMarkdownSections(markdown)
+  if (!sections.length) return 'Markdown 无法解析成报告目录，已阻断展示。'
+  const broken = sections.find(section => !clientCompleteSentence(section.preview))
+  if (broken) return `“${broken.title}”不是完整句，已阻断展示。`
+  return ''
+}
+
+function clientCompleteSentence(value) {
+  let text = String(value || '')
+    .replace(/[#>*_`|]+/g, ' ')
+    .replaceAll('[', ' ')
+    .replaceAll(']', ' ')
+    .replaceAll('(', ' ')
+    .replaceAll(')', ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (text.length < 6) return false
+  if (/[：:]\s*$/.test(text)) return false
+  while (text && '）)】]》"\'”’'.includes(text[text.length - 1])) {
+    text = text.slice(0, -1).trim()
+  }
+  return /[。！？!?.；;]$/.test(text)
+}
+
+function reportQualityLabel(report) {
+  const status = String(report?.status || '').toUpperCase()
+  if (status && status !== 'COMPLETED') return '失败'
+  if (!isSupportedPromptVersion(report?.promptVersion)) return '旧版'
+  if (report?.advice?.qualityGate?.status === 'PASS') return '已校验'
+  return '未校验'
+}
+
+function reportQualityClass(report) {
+  const label = reportQualityLabel(report)
+  if (label === '已校验') return 'bg-[#ecfdf3] text-[#18794e]'
+  if (label === '失败') return 'bg-[#fff1f1] text-[#b42318]'
+  return 'bg-[#fff7ed] text-[#c2410c]'
+}
 
 const quickActionRows = computed(() => {
   const rows = Array.isArray(advice.value?.quickActions) && advice.value.quickActions.length
@@ -1289,9 +1465,9 @@ const focusStudentFilterStats = computed(() => [
     title: '全部重点学生',
     count: focusStudentTotal.value,
     hint: '查看完整风险名单',
-    tone: 'border-[#dbe3ee] bg-white',
-    textClass: 'text-[#1d1d1f]',
-    activeClass: 'ring-2 ring-[#64748b] ring-offset-1 shadow-[0_8px_18px_rgba(15,23,42,0.12)]'
+    tone: 'border-[#eadfce] bg-[#fffdf8]',
+    textClass: 'text-[#8a5b22]',
+    activeClass: 'ring-2 ring-[#c7781e] ring-offset-1 shadow-[0_8px_18px_rgba(92,74,52,0.12)]'
   },
   ...focusStudentStats.value
 ])
@@ -1526,14 +1702,28 @@ function markdownChildMeta(sectionTitle, block, index) {
 }
 
 function summarizeSectionText(text) {
-  return String(text || '')
+  const value = String(text || '')
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/!\[[^\]]*]\([^)]+\)/g, ' ')
     .replace(/\[[^\]]+]\([^)]+\)/g, ' ')
+    .replace(/(^|\n)\s*(?:[-*]|\d+[.)])\s+/g, '$1')
+    .replace(/\s+-\s+/g, ' ')
     .replace(/[#>*_`|]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 96)
+  if (!value) return ''
+
+  const sentences = value.match(/[^。！？!?]+[。！？!?]/g) || []
+  if (!sentences.length) return value
+
+  let summary = ''
+  for (const sentence of sentences) {
+    const next = `${summary}${sentence.trim()}`
+    if (summary && next.length > 160) break
+    summary = next
+    if (summary.length >= 72) break
+  }
+  return summary || sentences[0].trim()
 }
 
 function markdownSectionMeta(title, index) {
@@ -1544,8 +1734,8 @@ function markdownSectionMeta(title, index) {
       badge: '先读',
       hint: '一句话判断主要教学问题和优先级',
       readingGoal: '看清主要问题',
-      tone: 'border-[#dbeafe] bg-[#fbfdff]',
-      dotClass: 'bg-[#2f6fed]'
+      tone: 'border-[#eadfce] bg-[#fffdf8]',
+      dotClass: 'bg-[#c7781e]'
     }
   }
   if (value.includes('下一') || value.includes('怎么教')) {
@@ -1603,26 +1793,32 @@ function markdownSectionMeta(title, index) {
     badge: '补充',
     hint: 'AI 原文中的补充说明',
     readingGoal: '补充阅读',
-    tone: 'border-black/[0.06] bg-white',
+    tone: 'border-[#e6edf7] bg-white',
     dotClass: 'bg-[#6b7280]'
   }
 }
 
 function toggleMarkdownSection(key) {
   expandedMarkdownSectionKey.value = key
+  resetMarkdownScroll()
 }
 
 function toggleFocusStudentDetail(key) {
   expandedFocusStudentKey.value = expandedFocusStudentKey.value === key ? '' : key
+  hideStudentActionPopover()
 }
 
 function toggleFocusFollow() {
   focusFollowExpanded.value = !focusFollowExpanded.value
+  hideStudentActionPopover()
+  showFocusBackToTop.value = false
   if (!focusFollowExpanded.value) expandedFocusStudentKey.value = ''
 }
 
 function toggleFocusPanel() {
   focusPanelOpen.value = !focusPanelOpen.value
+  hideStudentActionPopover()
+  showFocusBackToTop.value = false
   if (!focusPanelOpen.value) {
     focusFollowExpanded.value = false
     prepReminderExpanded.value = false
@@ -1633,6 +1829,52 @@ function toggleFocusPanel() {
 function selectFocusPriority(priority) {
   selectedFocusPriority.value = priority
   expandedFocusStudentKey.value = ''
+  hideStudentActionPopover()
+  showFocusBackToTop.value = false
+  nextTick(() => {
+    const el = focusPanelRef.value
+    if (el) el.scrollTop = 0
+  })
+}
+
+function showStudentActionPopover(student, event) {
+  if (typeof window === 'undefined') return
+  if (expandedFocusStudentKey.value === student?.key) {
+    hideStudentActionPopover()
+    return
+  }
+  const target = event?.currentTarget
+  const rect = target?.getBoundingClientRect?.()
+  if (!rect) return
+
+  const width = 280
+  const gap = 14
+  const pagePadding = 12
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1440
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 900
+  const rawLeft = rect.left - width - gap
+  const left = Math.max(pagePadding, Math.min(rawLeft, viewportWidth - width - pagePadding))
+  const top = Math.max(pagePadding, Math.min(rect.top + 4, viewportHeight - 190))
+  const arrowTop = Math.max(24, Math.min(rect.top + rect.height / 2 - top, 118))
+
+  studentActionPopover.value = {
+    visible: true,
+    student,
+    style: {
+      left: `${Math.round(left)}px`,
+      top: `${Math.round(top)}px`,
+      width: `${width}px`,
+      '--student-popover-arrow-top': `${Math.round(arrowTop)}px`
+    }
+  }
+}
+
+function hideStudentActionPopover() {
+  studentActionPopover.value = {
+    visible: false,
+    student: null,
+    style: {}
+  }
 }
 
 function mergeFocusStudent(item) {
@@ -1729,7 +1971,7 @@ function focusPriorityMeta(priority) {
       title: 'P1｜下次课前必须先找',
       hint: '先确认是否缺交、关键题完全卡住或多个风险叠加，不能等到期末再补。',
       borderClass: 'border-[#fecaca]',
-      headerClass: 'bg-gradient-to-r from-[#fff1f2] to-white',
+      headerClass: 'bg-[#fff1f2]',
       dotClass: 'bg-[#ef4444]',
       textClass: 'text-[#b42318]'
     }
@@ -1740,7 +1982,7 @@ function focusPriorityMeta(priority) {
       title: 'P2｜本周安排一次短跟进',
       hint: '不是简单催交，要用一次代码/错题复盘确认具体卡点。',
       borderClass: 'border-[#fed7aa]',
-      headerClass: 'bg-gradient-to-r from-[#fff7ed] to-white',
+      headerClass: 'bg-[#fff7ed]',
       dotClass: 'bg-[#f97316]',
       textClass: 'text-[#c2410c]'
     }
@@ -1750,7 +1992,7 @@ function focusPriorityMeta(priority) {
     title: 'P3｜观察复测即可',
     hint: '暂不扩大干预，用一次同知识点小题或补交结果确认是否稳定。',
     borderClass: 'border-[#bfdbfe]',
-    headerClass: 'bg-gradient-to-r from-[#eff6ff] to-white',
+    headerClass: 'bg-[#eff6ff]',
     dotClass: 'bg-[#3b82f6]',
     textClass: 'text-[#1d4ed8]'
   }
@@ -2010,7 +2252,7 @@ function quickActionTone(index) {
   return [
     'border-[#dce8ff] bg-[#fbfdff]',
     'border-[#d7f1e1] bg-[#fbfffc]',
-    'border-[#fae7c4] bg-[#fffdf8]'
+    'border-[#eadfce] bg-[#fffdf8]'
   ][index % 3]
 }
 
@@ -2027,16 +2269,76 @@ function joinRefs(refs) {
   return Array.isArray(refs) && refs.length ? refs.join('、') : '暂无'
 }
 
+function activeMarkdownSectionIndexFor(key) {
+  const index = renderedAdviceSections.value.findIndex(item => item.key === key)
+  return index >= 0 ? index : 0
+}
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+}
+
+function handleMarkdownScroll(event) {
+  showBackToTop.value = Number(event?.target?.scrollTop || 0) > 240
+}
+
+function handleFocusPanelScroll(event) {
+  hideStudentActionPopover()
+  showFocusBackToTop.value = Number(event?.target?.scrollTop || 0) > 220
+}
+
+function resetMarkdownScroll() {
+  showBackToTop.value = false
+  nextTick(() => {
+    const el = markdownContentRef.value
+    if (el) el.scrollTop = 0
+  })
+}
+
 function jumpToStudentLayer() {
   document
     .getElementById('student-layer-analysis')
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    ?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+}
+
+function scrollElementToTop(el) {
+  if (!el) return false
+  const behavior = prefersReducedMotion() ? 'auto' : 'smooth'
+  if (typeof el.scrollTo === 'function') {
+    el.scrollTo({ top: 0, behavior })
+  } else {
+    el.scrollTop = 0
+  }
+  return true
 }
 
 function scrollMarkdownToTop() {
-  document
-    .getElementById('teaching-advice-markdown-root')
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  let scrolled = false
+  const contentEl = markdownContentRef.value
+
+  scrolled = scrollElementToTop(contentEl) || scrolled
+  scrolled = scrollElementToTop(markdownOutlineRef.value) || scrolled
+
+  contentEl
+    ?.querySelectorAll?.('.teaching-advice-markdown, .markdown-body')
+    ?.forEach(node => {
+      scrolled = scrollElementToTop(node) || scrolled
+    })
+
+  if (!scrolled) {
+    const root = reportRootRef.value || document.getElementById('teaching-advice-markdown-root')
+    root?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+  }
+  showBackToTop.value = false
+}
+
+function scrollFocusPanelToTop() {
+  hideStudentActionPopover()
+  const el = focusPanelRef.value
+  if (el) {
+    el.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    showFocusBackToTop.value = false
+  }
 }
 
 async function copyRawAdvice() {
@@ -2144,6 +2446,7 @@ async function generateReport() {
     errorMessage.value = error?.message || '教学建议生成失败'
     uiMessage.warning(errorMessage.value)
     logger.error('生成可信教学建议失败:', error)
+    await loadReports()
   } finally {
     generating.value = false
   }
@@ -2166,10 +2469,12 @@ watch(() => props.classId, loadReports, { immediate: true })
 watch(renderedAdviceSections, sections => {
   if (!sections.length) {
     expandedMarkdownSectionKey.value = ''
+    showBackToTop.value = false
     return
   }
   if (!sections.some(item => item.key === expandedMarkdownSectionKey.value)) {
     expandedMarkdownSectionKey.value = sections[0].key
+    resetMarkdownScroll()
   }
 }, { immediate: true })
 </script>
@@ -2182,6 +2487,8 @@ watch(renderedAdviceSections, sections => {
   max-height: 1000px;
   flex-direction: column;
   overflow: hidden;
+  border-color: rgba(160, 132, 92, 0.16);
+  background: #faf8f3 !important;
   color: #1f2937;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -2193,8 +2500,14 @@ watch(renderedAdviceSections, sections => {
 }
 
 .teaching-advice-report {
+  position: relative;
   display: flex;
   flex-direction: column;
+  border-color: #eadfce !important;
+  background: #ffffff !important;
+  transition:
+    filter 240ms ease,
+    opacity 240ms ease;
 }
 
 .teaching-advice-report-body {
@@ -2204,38 +2517,226 @@ watch(renderedAdviceSections, sections => {
 }
 
 .teaching-advice-report-grid {
+  height: 100%;
   min-height: 0;
 }
 
 .teaching-advice-outline,
-.teaching-advice-content {
+.teaching-advice-content,
+.teaching-advice-side-panel {
   max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
+.teaching-advice-content {
+  height: 100%;
+  padding-right: 4px;
+}
+
+.teaching-advice-outline {
+  scrollbar-color: rgba(148, 163, 184, 0.7) rgba(241, 245, 249, 0.85);
+  scrollbar-width: thin;
+}
+
+.teaching-advice-content {
+  scrollbar-color: rgba(82, 137, 211, 0.82) rgba(235, 242, 252, 0.9);
+  scrollbar-width: thin;
+}
+
+.teaching-advice-side-panel {
+  position: relative;
+  z-index: 10;
+  scrollbar-color: rgba(82, 137, 211, 0.72) rgba(235, 242, 252, 0.86);
+  scrollbar-width: thin;
+}
+
+.teaching-advice-markdown {
+  scrollbar-color: rgba(82, 137, 211, 0.72) rgba(235, 242, 252, 0.86);
+  scrollbar-width: thin;
+}
+
 .teaching-advice-outline::-webkit-scrollbar,
-.teaching-advice-content::-webkit-scrollbar {
+.teaching-advice-content::-webkit-scrollbar,
+.teaching-advice-side-panel::-webkit-scrollbar,
+.teaching-advice-markdown::-webkit-scrollbar {
   width: 8px;
 }
 
 .teaching-advice-outline::-webkit-scrollbar-track,
-.teaching-advice-content::-webkit-scrollbar-track {
+.teaching-advice-content::-webkit-scrollbar-track,
+.teaching-advice-side-panel::-webkit-scrollbar-track,
+.teaching-advice-markdown::-webkit-scrollbar-track {
   border-radius: 999px;
   background: rgba(241, 245, 249, 0.8);
 }
 
 .teaching-advice-outline::-webkit-scrollbar-thumb,
-.teaching-advice-content::-webkit-scrollbar-thumb {
+.teaching-advice-content::-webkit-scrollbar-thumb,
+.teaching-advice-side-panel::-webkit-scrollbar-thumb,
+.teaching-advice-markdown::-webkit-scrollbar-thumb {
   border: 2px solid rgba(241, 245, 249, 0.8);
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.75);
 }
 
+.teaching-advice-content::-webkit-scrollbar-track {
+  background: rgba(235, 242, 252, 0.9);
+}
+
+.teaching-advice-content::-webkit-scrollbar-thumb {
+  border-color: rgba(235, 242, 252, 0.9);
+  background: rgba(82, 137, 211, 0.82);
+}
+
+.teaching-advice-side-panel::-webkit-scrollbar-track {
+  background: rgba(235, 242, 252, 0.86);
+}
+
+.teaching-advice-side-panel::-webkit-scrollbar-thumb {
+  border-color: rgba(235, 242, 252, 0.86);
+  background: rgba(82, 137, 211, 0.72);
+}
+
 .teaching-advice-outline::-webkit-scrollbar-thumb:hover,
-.teaching-advice-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.85);
+.teaching-advice-content::-webkit-scrollbar-thumb:hover,
+.teaching-advice-side-panel::-webkit-scrollbar-thumb:hover,
+.teaching-advice-markdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(47, 111, 237, 0.86);
+}
+
+.teaching-advice-markdown::-webkit-scrollbar-track {
+  background: rgba(235, 242, 252, 0.86);
+}
+
+.teaching-advice-markdown::-webkit-scrollbar-thumb {
+  border-color: rgba(235, 242, 252, 0.86);
+  background: rgba(82, 137, 211, 0.72);
+}
+
+.advice-soft-card {
+  border: 1px solid #eadfce;
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 8px 18px rgba(92, 74, 52, 0.06);
+}
+
+.advice-soft-card-accent {
+  border-color: #eadfce;
+  background: #fffaf3;
+  color: #7b4f17 !important;
+}
+
+.student-action-floating-popover {
+  position: fixed;
+  z-index: 90;
+  border: 1px solid #ead3ad;
+  border-right-color: #c7781e;
+  border-radius: 16px;
+  background: #fff8e8;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92) inset,
+    0 18px 36px rgba(120, 72, 20, 0.14);
+  padding: 14px 15px;
+  pointer-events: none;
+  color: #2f2419;
+}
+
+.student-action-floating-popover::before,
+.student-action-floating-popover::after {
+  position: absolute;
+  top: var(--student-popover-arrow-top, 42px);
+  width: 0;
+  height: 0;
+  content: '';
+  transform: translateY(-50%);
+}
+
+.student-action-floating-popover::before {
+  right: -11px;
+  border-bottom: 10px solid transparent;
+  border-left: 11px solid #c7781e;
+  border-top: 10px solid transparent;
+}
+
+.student-action-floating-popover::after {
+  right: -9px;
+  border-bottom: 9px solid transparent;
+  border-left: 10px solid #fff8e8;
+  border-top: 9px solid transparent;
+}
+
+.student-card {
+  isolation: isolate;
+  transform-origin: center;
+  will-change: transform, box-shadow;
+}
+
+.student-card:hover,
+.student-card:focus-within {
+  z-index: 50;
+  outline: 1px solid rgba(255, 255, 255, 0.94);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.96),
+    0 0 0 5px rgba(204, 137, 48, 0.10),
+    0 12px 26px rgba(15, 23, 42, 0.12);
+}
+
+.student-card:hover .student-card-readable,
+.student-card:focus-within .student-card-readable {
+  opacity: 1;
+  filter: none;
+}
+
+.student-card-readable p {
+  text-rendering: geometricPrecision;
+}
+
+.student-card-readable p span.font-semibold {
+  color: #111827;
+  font-weight: 700;
+}
+
+.teaching-advice-body:has(.student-card:hover) .teaching-advice-report {
+  opacity: 1;
+  filter: none;
+  transition:
+    filter 240ms ease,
+    opacity 240ms ease;
+}
+
+.teaching-advice-body:has(.student-card:hover) .teaching-advice-side-panel {
+  opacity: 1;
+  filter: none;
+}
+
+.student-popover-enter-active,
+.student-popover-leave-active {
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.student-popover-enter-from,
+.student-popover-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
+}
+
+.back-top-enter-active,
+.back-top-leave-active {
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.back-top-enter-from,
+.back-top-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.92);
 }
 
 .report-section-enter-active,
@@ -2328,7 +2829,11 @@ watch(renderedAdviceSections, sections => {
   .detail-fade-enter-active,
   .detail-fade-leave-active,
   .focus-filter-enter-active,
-  .focus-filter-leave-active {
+  .focus-filter-leave-active,
+  .student-popover-enter-active,
+  .student-popover-leave-active,
+  .back-top-enter-active,
+  .back-top-leave-active {
     transition: none;
   }
 
@@ -2352,9 +2857,15 @@ watch(renderedAdviceSections, sections => {
   }
 
   .teaching-advice-outline,
-  .teaching-advice-content {
+  .teaching-advice-content,
+  .teaching-advice-side-panel {
     max-height: none;
     overflow: visible;
+  }
+
+  .teaching-advice-content {
+    height: auto;
+    padding-right: 0;
   }
 }
 
@@ -2424,36 +2935,44 @@ watch(renderedAdviceSections, sections => {
 
 .teaching-advice-markdown :deep(li) {
   margin: 8px 0;
+  border: 1px solid #eadfce;
   border-radius: 12px;
-  background: rgba(248, 250, 252, 0.85);
+  background: #fffdf8;
   padding: 8px 10px;
   color: #374151;
+  box-shadow: 0 3px 10px rgba(92, 74, 52, 0.04);
 }
 
 .teaching-advice-markdown :deep(li::marker) {
-  color: #2f6fed;
+  color: #c7781e;
   font-weight: 700;
 }
 
 .teaching-advice-markdown :deep(blockquote) {
   margin: 12px 0;
-  border-left: 4px solid var(--app-primary);
-  border-radius: 0 12px 12px 0;
-  background: #eef5ff;
+  border: 1px solid #eadfce;
+  border-left: 4px solid #c7781e;
+  border-radius: 12px;
+  background: #fffaf3;
   padding: 12px 14px;
-  color: #4b5563;
+  color: #334155;
+  box-shadow: 0 5px 14px rgba(92, 74, 52, 0.06);
 }
 
 .teaching-advice-markdown :deep(table) {
   width: 100%;
   margin: 12px 0;
   border-collapse: collapse;
+  border: 1px solid #eadfce;
+  border-radius: 12px;
+  overflow: hidden;
   font-size: 13px;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.06);
 }
 
 .teaching-advice-markdown :deep(th),
 .teaching-advice-markdown :deep(td) {
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid #eadfce;
   padding: 8px 10px;
   text-align: left;
 }
