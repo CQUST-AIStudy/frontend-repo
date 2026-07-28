@@ -27,11 +27,23 @@ hljs.registerLanguage('xml', xml)
 hljs.registerAliases(['proto', 'pb'], { languageName: 'protobuf' })
 
 const markdown = new MarkdownIt({
-  html: false,
+  // PTA 题面会混用 Markdown 与 <br>/<img> 等 HTML。输出仍会在
+  // renderSafeMarkdown 中经过 DOMPurify 清洗，避免直接信任源 HTML。
+  html: true,
   linkify: true,
   typographer: true,
   breaks: true,
   highlight: highlightMarkdownCode
+})
+
+// PTA 图片 CDN 会拒绝来自非 PTA 站点的 Referer，但允许无 Referer 请求。
+// 在 DOMPurify 完成清洗后统一加到 Markdown 图片和源 HTML 图片上。
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.nodeName === 'IMG') {
+    node.setAttribute('referrerpolicy', 'no-referrer')
+    node.setAttribute('loading', 'lazy')
+    node.setAttribute('decoding', 'async')
+  }
 })
 
 const HTML_ESCAPE_MAP = {
