@@ -25,9 +25,9 @@
 
           <div class="filter-content">
             <ui-radio-group v-model="activeTab" class="status-tabs" @change="onTabChange">
-              <ui-radio-button label="all">全部 {{ stats.total || 0 }}</ui-radio-button>
-              <ui-radio-button label="unresolved">待攻克 {{ stats.unresolved || 0 }}</ui-radio-button>
-              <ui-radio-button label="resolved">已掌握 {{ stats.resolved || 0 }}</ui-radio-button>
+              <ui-radio-button label="all">全部 {{ statusCounts.total }}</ui-radio-button>
+              <ui-radio-button label="unresolved">待攻克 {{ statusCounts.unresolved }}</ui-radio-button>
+              <ui-radio-button label="resolved">已掌握 {{ statusCounts.resolved }}</ui-radio-button>
             </ui-radio-group>
 
             <div class="filter-controls">
@@ -52,7 +52,7 @@
           v-if="ptaErrorState === 'error'"
           type="warning"
           :closable="false"
-          title="PTA 错题知识点暂时加载失败，当前仍可查看已同步到错题本的记录。"
+          title="PTA 错题知识点暂时加载失败，当前仍可查看错题本中的其他记录。"
           show-icon
         />
 
@@ -184,10 +184,10 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import { wrongNotebookApi } from '@/api/wrongNotebook'
-import { getUserInfo } from '@/constants/auth'
-import api from '@/api'
+import { useUserStore } from '@/store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const rows = ref([])
 const ptaErrors = ref([])
@@ -370,11 +370,27 @@ const visibleItems = computed(() => {
   return [...items.values()]
 })
 
+const standalonePtaCount = computed(() => {
+  const notebookPtaKeys = new Set(rows.value
+    .filter(row => row.sourceType === 'PTA_SYNCED')
+    .flatMap(row => [normalizedText(row.problemTitle), normalizedText(row.problemSlug)].filter(Boolean)))
+  return ptaErrors.value.filter(item => {
+    const keys = [normalizedText(item.problem_title), normalizedText(item.source_problem_id)].filter(Boolean)
+    return !keys.some(key => notebookPtaKeys.has(key))
+  }).length
+})
+
+const statusCounts = computed(() => ({
+  total: Number(stats.total || 0) + standalonePtaCount.value,
+  unresolved: Number(stats.unresolved || 0) + standalonePtaCount.value,
+  resolved: Number(stats.resolved || 0)
+}))
+
 const summaryCards = computed(() => [
   { label: '当前错题', value: visibleItems.value.length, tip: '当前筛选范围内', color: 'var(--app-text)' },
   { label: '待攻克', value: visibleItems.value.filter(item => !item.resolved).length, tip: '可直接开始回炉', color: 'var(--app-danger)' },
   { label: '错题知识点', value: knowledgeGroups.value.length, tip: '零错题知识点已隐藏', color: 'var(--app-primary)' },
-  { label: 'PTA 错题', value: visibleItems.value.filter(item => item.sourceType === 'PTA_SYNCED').length, tip: '已关联 PTA 知识点', color: 'var(--app-warning)' }
+  { label: 'PTA 错题', value: visibleItems.value.filter(item => item.sourceType === 'PTA_SYNCED').length, tip: '来自 PTA 提交与知识点元数据', color: 'var(--app-warning)' }
 ])
 
 watch(knowledgeGroups, (groups) => {
@@ -432,16 +448,14 @@ async function loadStats() {
 }
 
 async function loadPtaErrors() {
-  const studentNo = getUserInfo()?.usernum
-  if (!studentNo) {
-    ptaErrors.value = []
-    ptaErrorState.value = 'error'
-    return
-  }
   ptaErrorState.value = 'loading'
   try {
-    const response = await api.getPtaHighFrequencyErrors(String(studentNo), 1)
-    const data = response?.data || response || {}
+    const classId = userStore.selectedClass?.id ?? userStore.selectedClass?.classId
+    const response = await wrongNotebookApi.ptaErrors({
+      minErrors: 1,
+      ...(classId ? { classId } : {})
+    })
+    const data = response?.data ?? response ?? {}
     ptaErrors.value = Array.isArray(data.items) ? data.items : []
     ptaErrorState.value = 'loaded'
   } catch {

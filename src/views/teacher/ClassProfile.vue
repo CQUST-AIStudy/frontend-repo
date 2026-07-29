@@ -1,5 +1,35 @@
 <template>
   <div class="space-y-4">
+    <UiPageHeader
+      title="教学班级分析"
+      description="基于当前教学班的真实 PTA 提交数据，分析能力维度、薄弱方向与学生分层。"
+    />
+
+    <div class="flex flex-wrap items-center gap-3 rounded-[14px] border border-black/[0.06] bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+      <span class="text-[12px] font-semibold text-[#6e6e73]">分析班级</span>
+      <UiSelect
+        v-model="selectedClassId"
+        class="h-10 min-w-[220px] rounded-[10px] bg-[#f5f5f7] px-3 text-sm"
+        :disabled="loading || !classList.length"
+        @change="handleClassChange"
+      >
+        <UiOption v-for="cls in classList" :key="cls.id" :value="cls.id">
+          {{ cls.name }}<template v-if="cls.courseName"> · {{ cls.courseName }}</template>
+        </UiOption>
+      </UiSelect>
+      <span v-if="selectedClass" class="text-[12px] text-[#6e6e73]">
+        {{ selectedClass.courseName || '未设置课程' }} · 名册 {{ data.totalStudents || selectedClass.studentCount || 0 }} 人
+        <template v-if="data.totalSubmissions"> · 有效提交 {{ data.totalSubmissions }} 次</template>
+      </span>
+      <UiButton
+        class="ml-auto h-[34px] rounded-[9px] border border-black/[0.08] bg-[#f5f5f7] px-4 text-[12px] font-medium text-[#1d1d1f] hover:bg-[#e8e8ed] disabled:opacity-50"
+        :disabled="loading || !selectedClassId"
+        @click="fetchData"
+      >
+        刷新数据
+      </UiButton>
+    </div>
+
     <!-- Loading state -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="flex flex-col items-center gap-3">
@@ -23,12 +53,16 @@
       </UiButton>
     </div>
 
-    <template v-else>
+    <template v-else-if="hasAnalysisData">
       <!-- Overview stat cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
           <div class="text-[24px] font-bold text-[var(--app-primary)] mb-1">{{ data.totalStudents }}</div>
-          <div class="text-[12px] text-[#6e6e73] mt-2">学生总数</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">班级人数</div>
+        </div>
+        <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+          <div class="text-[24px] font-bold text-[#5b78a6] mb-1">{{ data.analyzedStudents }}</div>
+          <div class="text-[12px] text-[#6e6e73] mt-2">已分析学生</div>
         </div>
         <div class="text-center p-[18px] bg-gradient-to-br from-[#f9f9f9] to-[#f5f5f7] rounded-[14px] border border-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
           <div class="text-[24px] font-bold text-[#6b8f6b] mb-1">{{ tierCount('A') }}</div>
@@ -130,6 +164,17 @@
       </div>
     </template>
 
+    <div v-else class="rounded-[20px] border border-dashed border-black/10 bg-white px-6 py-16 text-center">
+      <div class="text-[15px] font-semibold text-[#1d1d1f]">
+        {{ classList.length ? '当前教学班暂无可分析的提交数据' : '当前账号下暂无教学班' }}
+      </div>
+      <div class="mt-2 text-[13px] leading-6 text-[#6e6e73]">
+        {{ classList.length
+          ? '请先完成 PTA 数据同步；系统只会统计所选教学班及其当前课程的数据。'
+          : '请先在“教学班列表”中创建或绑定教学班。' }}
+      </div>
+    </div>
+
     <!-- Student profile modal -->
     <AppModal v-model="dialogVisible" :title="'学生画像 - ' + dialogStudentName" width="960px" @close="disposeDialogCharts">
       <div class="max-h-[75vh] overflow-y-auto pr-1">
@@ -164,19 +209,30 @@
 import logger from '@/utils/logger'
 import { computed, ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
+import api from '@/api'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import { getClassProfile, getStudentProfile } from '../../api/tap'
+import { useUserStore } from '../../store'
 import AppModal from '../../components/AppModal.vue'
 
+const userStore = useUserStore()
 const loading = ref(true)
 const errorMsg = ref('')
 const data = ref({})
+const classList = ref([])
+const selectedClassId = ref(null)
 const barChartRef = ref(null)
 let barChartInst = null
 const activeTab = ref('A')
+let classProfileRequestSeq = 0
 
 const emptyClassProfile = () => ({
+  classId: null,
+  className: '',
+  courseName: '',
   totalStudents: 0,
+  analyzedStudents: 0,
+  totalSubmissions: 0,
   dimensions: [],
   dimensionAvg: {},
   weakRanking: [],
@@ -235,6 +291,8 @@ function normalizeClassProfile(payload) {
     ...fallback,
     ...payload,
     totalStudents: toFiniteNumber(payload?.totalStudents),
+    analyzedStudents: toFiniteNumber(payload?.analyzedStudents),
+    totalSubmissions: toFiniteNumber(payload?.totalSubmissions),
     dimensions,
     dimensionAvg,
     weakRanking,
@@ -245,6 +303,15 @@ function normalizeClassProfile(payload) {
     }
   }
 }
+
+const selectedClass = computed(() => classList.value.find(
+  cls => String(cls.id) === String(selectedClassId.value)
+) || null)
+const hasAnalysisData = computed(() => (
+  data.value.totalSubmissions > 0
+  && data.value.analyzedStudents > 0
+  && data.value.dimensions.length > 0
+))
 
 // Dialog state
 const dialogVisible = ref(false)
@@ -301,17 +368,22 @@ function isTimeoutError(error) {
 }
 
 async function fetchData() {
+  const seq = ++classProfileRequestSeq
+  if (!selectedClassId.value) {
+    data.value = emptyClassProfile()
+    loading.value = false
+    return
+  }
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await getClassProfile()
+    const res = await getClassProfile(selectedClassId.value)
+    if (seq !== classProfileRequestSeq) return
     const d = res?.data || res
     if (!d) throw new Error('后端未返回班级画像数据')
     if (d.error) { errorMsg.value = getFriendlyResponseMessage(d, '班级画像加载失败，请稍后重试'); return }
     data.value = normalizeClassProfile(d)
-    if (!data.value.tiers?.[activeTab.value]) {
-      activeTab.value = 'A'
-    }
+    activeTab.value = ['A', 'B', 'C'].find(key => data.value.tiers?.[key]?.count > 0) || 'A'
     logger.debug('[ClassProfile] 数据加载成功:', {
       totalStudents: data.value.totalStudents,
       dimensions: data.value.dimensions,
@@ -320,18 +392,45 @@ async function fetchData() {
     await nextTick()
     setTimeout(() => renderBar(), 100)
   } catch (e) {
+    if (seq !== classProfileRequestSeq) return
     if (isTimeoutError(e)) {
-      data.value = emptyClassProfile()
-      barChartInst?.dispose()
-      barChartInst = null
-      logger.warn('[ClassProfile] 班级画像请求超时，回退为空数据界面', e)
-      await nextTick()
-      return
+      errorMsg.value = '班级画像计算超时，请稍后重试。'
+    } else {
+      errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
     }
-    errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
+    logger.warn('[ClassProfile] 班级画像加载失败', e)
   } finally {
+    if (seq === classProfileRequestSeq) {
+      loading.value = false
+    }
+  }
+}
+
+async function initializePage() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    const classes = await api.getClassList()
+    classList.value = Array.isArray(classes) ? classes : []
+    const preferredId = userStore.selectedClass?.id ?? userStore.selectedClass?.classId
+    const preferred = classList.value.find(cls => String(cls.id) === String(preferredId))
+    selectedClassId.value = preferred?.id ?? classList.value[0]?.id ?? null
+    if (selectedClass.value) {
+      userStore.setSelectedClass(selectedClass.value)
+    }
+    await fetchData()
+  } catch (e) {
+    errorMsg.value = getFriendlyErrorMessage(e, '教学班列表加载失败，请稍后重试')
     loading.value = false
   }
+}
+
+function handleClassChange(value) {
+  selectedClassId.value = value ?? null
+  if (selectedClass.value) {
+    userStore.setSelectedClass(selectedClass.value)
+  }
+  fetchData()
 }
 
 function renderBar() {
@@ -427,7 +526,7 @@ async function viewStudent(studentId) {
 }
 
 onMounted(() => {
-  fetchData()
+  initializePage()
   window.addEventListener('resize', handleProfileResize)
 })
 

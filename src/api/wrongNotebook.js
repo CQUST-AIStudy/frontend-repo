@@ -13,6 +13,10 @@ export const wrongNotebookApi = {
     return apiClient.get('/api/student/wrong-questions/stats')
   },
 
+  ptaErrors(params = {}) {
+    return apiClient.get('/api/student/wrong-questions/pta-errors', { params })
+  },
+
   detail(id) {
     return apiClient.get(`/api/student/wrong-questions/${id}`)
   },
