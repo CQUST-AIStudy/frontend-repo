@@ -324,8 +324,9 @@
               重试失败
             </button>
             <button v-if="row.status === 'COMPLETED'" @click="exportTask(row.taskId)"
-              class="h-8 px-3 rounded-lg bg-[#e8f8ed] text-[#30d158] text-[12px] font-medium border-none cursor-pointer hover:bg-[#d4f5e0] transition-colors">
-              导出报告
+              :disabled="exportingTaskId === row.taskId"
+              class="h-8 px-3 rounded-lg bg-[#e8f8ed] text-[#30d158] text-[12px] font-medium border-none cursor-pointer hover:bg-[#d4f5e0] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+              {{ exportingTaskId === row.taskId ? '导出中…' : '导出报告' }}
             </button>
             <button @click="confirmDeleteTask(row)"
               class="h-8 px-3 rounded-lg bg-[#f5f5f7] text-[#6e6e73] text-[12px] font-medium border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors">
@@ -558,6 +559,7 @@ const batchFilter = ref('')
 const selectedTaskIds = ref([])
 const exportingBatch = ref(false)
 const exportingMerged = ref(false)
+const exportingTaskId = ref(null)
 
 const displayedTasks = computed(() => {
   if (!batchFilter.value) return tasks.value
@@ -928,6 +930,8 @@ async function deleteTask(id) {
 }
 
 async function exportTask(id) {
+  if (exportingTaskId.value) return
+  exportingTaskId.value = id
   try {
     const res = await exportGradingTask(id)
     const blob = new Blob([res], { type: 'application/zip' })
@@ -935,6 +939,7 @@ async function exportTask(id) {
     const a = document.createElement('a')
     a.href = url; a.download = `grading-export-${id}.zip`; a.click()
     URL.revokeObjectURL(url)
+    uiMessage.success('批改报告已导出')
   } catch (e) {
     const message = String(e?.message || '')
     if (message.includes('Report not yet generated') || message.includes('404')) {
@@ -942,6 +947,8 @@ async function exportTask(id) {
       return
     }
     uiMessage.error(message || '导出失败')
+  } finally {
+    exportingTaskId.value = null
   }
 }
 
