@@ -177,32 +177,27 @@
         <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
           <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
-            <UiTable class="w-full text-[12px] border-collapse">
-              <thead>
-                <tr class="bg-[#f9f9fb]">
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">任务ID</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">用户组</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">模式</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">状态</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">来源</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">强制</th>
-                  <th class="text-left px-3 py-2 font-medium text-[#6e6e73] border-b border-black/[0.06]">创建时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in taskHistory" :key="row.task_id" class="border-b border-black/[0.04] last:border-b-0 hover:bg-[#f5f5f7]/60">
-                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.task_id }}</td>
-                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</td>
-                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></td>
-                  <td class="px-3 py-2">
+            <UiTable :data="taskHistory" row-key="task_id" class="w-full text-[12px] border-collapse">
+              <UiTableColumn prop="task_id" label="任务ID" />
+              <UiTableColumn label="用户组">
+                <template #default="{ row }">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</template>
+              </UiTableColumn>
+              <UiTableColumn label="模式">
+                <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></template>
+              </UiTableColumn>
+              <UiTableColumn label="状态">
+                <template #default="{ row }">
                     <span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="taskStatusClass(row)">{{ taskStatusTextFor(row) }}</span>
                     <div v-if="row.warnings && row.warnings.length" class="mt-1 text-[11px] text-[#b26a00]" :title="row.warnings.join('；')">答题卡数据缺失</div>
-                  </td>
-                  <td class="px-3 py-2"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></td>
-                  <td class="px-3 py-2 text-[#1d1d1f]">{{ row.force ? '是' : '' }}</td>
-                  <td class="px-3 py-2 text-[#6e6e73]">{{ row.created_at }}</td>
-                </tr>
-              </tbody>
+                </template>
+              </UiTableColumn>
+              <UiTableColumn label="来源">
+                <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></template>
+              </UiTableColumn>
+              <UiTableColumn label="强制">
+                <template #default="{ row }">{{ row.force ? '是' : '' }}</template>
+              </UiTableColumn>
+              <UiTableColumn prop="created_at" label="创建时间" />
             </UiTable>
           </div>
         </div>
