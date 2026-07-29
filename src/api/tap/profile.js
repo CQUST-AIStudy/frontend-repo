@@ -4,8 +4,9 @@ export function getMyProfile() {
   return tapClient.get('/api/profile/me', { timeout: 30000 })
 }
 
-export function getClassProfile() {
-  return tapClient.get('/api/profile/class', { timeout: 30000 })
+export function getClassProfile(classId) {
+  if (!classId) throw new Error('classId is required')
+  return tapClient.get(`/api/teacher/classes/${encodeURIComponent(classId)}/profile`, { timeout: 30000 })
 }
 
 export function getStudentProfile(studentId) {

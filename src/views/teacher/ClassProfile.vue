@@ -65,7 +65,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, idx) in data.weakRanking" :key="idx" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
+                <tr v-for="(row, idx) in visibleWeakRanking" :key="idx" class="border-b border-black/[0.03] hover:bg-black/[0.02] transition-colors">
                   <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.dimension }}</td>
                   <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.avgScore }}</td>
                   <td class="py-2.5 px-3 text-[#1d1d1f]">{{ row.weakCount }}</td>
@@ -162,18 +162,23 @@
 
 <script setup>
 import logger from '@/utils/logger'
-import { computed, ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import * as echarts from 'echarts'
+import { useUserStore } from '@/store'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import { getClassProfile, getStudentProfile } from '../../api/tap'
 import AppModal from '../../components/AppModal.vue'
 
+const userStore = useUserStore()
+const selectedClassId = computed(() => userStore.selectedClass?.id || userStore.selectedClass?.classId || '')
 const loading = ref(true)
 const errorMsg = ref('')
 const data = ref({})
 const barChartRef = ref(null)
 let barChartInst = null
 const activeTab = ref('A')
+let requestVersion = 0
+const OVERVIEW_LIMIT = 6
 
 const emptyClassProfile = () => ({
   totalStudents: 0,
@@ -233,7 +238,6 @@ function normalizeClassProfile(payload) {
 
   return {
     ...fallback,
-    ...payload,
     totalStudents: toFiniteNumber(payload?.totalStudents),
     dimensions,
     dimensionAvg,
@@ -266,6 +270,7 @@ const hasDialogChartData = computed(() => hasDialogRadarData.value || hasDialogT
 const hasDialogContent = computed(() => Boolean(
   hasDialogChartData.value || dialogProfile.value?.feedback || dialogProfile.value?.patterns?.length
 ))
+const visibleWeakRanking = computed(() => data.value.weakRanking?.slice(0, OVERVIEW_LIMIT) || [])
 let dialogRadarChart = null
 let dialogTrendChart = null
 
@@ -300,15 +305,41 @@ function isTimeoutError(error) {
   return code === 'ECONNABORTED' || /timeout|timed out|超时/i.test(message)
 }
 
+function getOverviewDimensions() {
+  return data.value.dimensions
+    .map(dimension => ({
+      dimension,
+      score: toFiniteNumber(data.value.dimensionAvg?.[dimension])
+    }))
+    .sort((left, right) => left.score - right.score || left.dimension.localeCompare(right.dimension, 'zh-CN'))
+    .slice(0, OVERVIEW_LIMIT)
+}
+
 async function fetchData() {
+  const classId = selectedClassId.value
+  const currentRequest = ++requestVersion
   loading.value = true
   errorMsg.value = ''
+  data.value = emptyClassProfile()
+  barChartInst?.dispose()
+  barChartInst = null
+
+  if (!classId) {
+    loading.value = false
+    errorMsg.value = '请先选择需要分析的教学班。'
+    return
+  }
+
   try {
-    const res = await getClassProfile()
-    const d = res?.data || res
-    if (!d) throw new Error('后端未返回班级画像数据')
-    if (d.error) { errorMsg.value = getFriendlyResponseMessage(d, '班级画像加载失败，请稍后重试'); return }
-    data.value = normalizeClassProfile(d)
+    const res = await getClassProfile(classId)
+    if (currentRequest !== requestVersion) return
+    const payload = res?.data || res
+    if (!payload) throw new Error('后端未返回班级画像数据')
+    if (payload.error) { throw new Error(getFriendlyResponseMessage(payload, '班级画像加载失败，请稍后重试')) }
+    if (String(payload.scope?.classId ?? '') !== String(classId)) {
+      throw new Error('返回数据与当前教学班不一致，已停止展示')
+    }
+    data.value = normalizeClassProfile(payload)
     if (!data.value.tiers?.[activeTab.value]) {
       activeTab.value = 'A'
     }
@@ -317,46 +348,57 @@ async function fetchData() {
       dimensions: data.value.dimensions,
       dimensionAvg: data.value.dimensionAvg
     })
+    loading.value = false
     await nextTick()
-    setTimeout(() => renderBar(), 100)
+    if (currentRequest !== requestVersion) return
+    renderBar()
   } catch (e) {
+    if (currentRequest !== requestVersion) return
     if (isTimeoutError(e)) {
       data.value = emptyClassProfile()
       barChartInst?.dispose()
       barChartInst = null
       logger.warn('[ClassProfile] 班级画像请求超时，回退为空数据界面', e)
-      await nextTick()
       return
     }
     errorMsg.value = getFriendlyErrorMessage(e, '班级画像加载失败，请稍后重试')
   } finally {
-    loading.value = false
+    if (currentRequest === requestVersion) loading.value = false
   }
 }
 
 function renderBar() {
+  barChartInst?.dispose()
+  barChartInst = null
   if (!barChartRef.value) {
     logger.warn('[ClassProfile] barChartRef 未就绪')
     return
   }
-  const dims = data.value.dimensions
-  const avg = data.value.dimensionAvg
-  if (!dims || !avg) {
-    logger.warn('[ClassProfile] 无维度数据', { dims, avg })
+  const overviewItems = getOverviewDimensions()
+  if (!overviewItems.length) {
+    logger.warn('[ClassProfile] 无维度数据', { dimensions: data.value.dimensions, avg: data.value.dimensionAvg })
     return
   }
 
-  barChartInst?.dispose()
+  const dims = overviewItems.map(item => item.dimension)
+  const values = overviewItems.map(item => item.score)
+  const scoreScale = getDimensionScoreScale(values)
   const chart = echarts.init(barChartRef.value)
   barChartInst = chart
 
-  const values = dims.map(d => Number(avg[d] ?? 0))
-  const scoreScale = getDimensionScoreScale(values)
-  logger.debug('[ClassProfile] 渲染柱状图', { dims, values })
-
   chart.setOption({
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: dims, axisLabel: { fontSize: 12 } },
+    tooltip: {
+      trigger: 'axis',
+      formatter: params => {
+        const point = params?.[0]
+        return `${point?.axisValue || ''}<br/>班级均分：${point?.value ?? '-'}分`
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: dims,
+      axisLabel: { fontSize: 12, interval: 0, formatter: value => String(value).length > 8 ? `${String(value).slice(0, 8)}...` : value }
+    },
     yAxis: { type: 'value', min: 0, max: scoreScale, name: `均分/${scoreScale}分` },
     series: [{
       type: 'bar',
@@ -426,12 +468,11 @@ async function viewStudent(studentId) {
   }
 }
 
-onMounted(() => {
-  fetchData()
-  window.addEventListener('resize', handleProfileResize)
-})
+watch(selectedClassId, fetchData, { immediate: true })
+window.addEventListener('resize', handleProfileResize)
 
 onBeforeUnmount(() => {
+  requestVersion++
   window.removeEventListener('resize', handleProfileResize)
   barChartInst?.dispose()
   disposeDialogCharts()
