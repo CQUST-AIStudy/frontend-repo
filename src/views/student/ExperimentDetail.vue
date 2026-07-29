@@ -389,6 +389,7 @@ import CodeViewer from '@/components/CodeViewer.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import axios from 'axios'
 import api from '@/api'
+import { buildAiCommentRequest } from '@/api/aiCommentRequest.mjs'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
@@ -607,7 +608,8 @@ async function generateAiComment(force) {
   if (!isCompleted.value) return
   aiGenerating.value = true; aiSource.value = ''
   try {
-    const res = await axios.post(`${API_BASE}/api/experiments/${experimentId.value}/ai-comment/generate?force=${force}`, null, { withCredentials: true })
+    const request = buildAiCommentRequest(experimentId.value, force)
+    const res = await axios.post(`${API_BASE}${request.url}`, request.data, request.config)
     const data = res.data || res
     if (data.success && data.aiComment) {
       localAiComment.value = data.aiComment; aiSource.value = data.source || 'deepseek'
