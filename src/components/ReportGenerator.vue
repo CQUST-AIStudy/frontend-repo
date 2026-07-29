@@ -283,4 +283,30 @@ function cancelEdits() {
 }
 </script>
 
+<style scoped>
+.report-card {
+  display: flex;
+  height: 80vh;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.report-card :deep(.ui-card__header) {
+  flex: 0 0 auto;
+}
+
+.report-card :deep(.ui-card__body) {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.report-generator,
+.report-container {
+  max-height: none;
+  overflow: visible;
+}
+</style>
+
 
