@@ -1140,6 +1140,12 @@ const emptyGraphic = (text) => [{
 
 const buildScoreOption = (labels, scores, classAvg) => {
   const empty = !scores || scores.length === 0
+  const chartValues = [...(scores || []), ...(classAvg || [])]
+    .map(value => Number(value))
+    .filter(value => Number.isFinite(value))
+  const highestScore = chartValues.length > 0 ? Math.max(...chartValues) : 100
+  // Keep the usual percentage scale, but expand it when aggregate scores exceed 100.
+  const yAxisMax = highestScore > 100 ? Math.ceil(highestScore / 50) * 50 : 100
   return {
     tooltip: { trigger: 'axis' },
     legend: { data: ['成绩', '班级平均'], top: 0, textStyle: { color: CHART_TEXT } },
@@ -1161,7 +1167,7 @@ const buildScoreOption = (labels, scores, classAvg) => {
       type: 'value',
       name: '分数',
       min: 0,
-      max: 100,
+      max: yAxisMax,
       nameTextStyle: { color: CHART_SOFT },
       axisLabel: { color: CHART_TEXT },
       splitLine: { lineStyle: { color: CHART_GRID } }
