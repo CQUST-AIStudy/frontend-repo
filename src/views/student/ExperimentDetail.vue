@@ -213,7 +213,7 @@
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
               <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">AI 错误代码分析</div>
               <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">点击下方按钮，AI将分析您的最新提交代码</div>
-              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="errorLoading" @click="runErrorAnalysis">
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="errorLoading" @click="runErrorAnalysis(false)">
                 {{ errorLoading ? '分析中...' : '开始分析' }}
               </UiButton>
             </div>
@@ -366,7 +366,7 @@
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="alert-triangle" :size="48" /></div>
               <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">分析失败</div>
               <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">AI 错误分析服务暂时不可用，请稍后重试</div>
-              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" :disabled="errorLoading" @click="runErrorAnalysis">重试</UiButton>
+              <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc]" :disabled="errorLoading" @click="runErrorAnalysis(false)">重试</UiButton>
             </div>
           </div>
         </div>
@@ -390,6 +390,7 @@ import { renderSafeMarkdown } from '@/utils/safeHtml'
 import axios from 'axios'
 import api from '@/api'
 import { buildAiCommentRequest } from '@/api/aiCommentRequest.mjs'
+import { buildErrorAnalysisPayload } from '@/api/errorAnalysisRequest.mjs'
 import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
@@ -624,10 +625,11 @@ async function runErrorAnalysis(forceRefresh = false) {
   errorChecked.value = true
   warningData.value = null
   try {
-    const res = await api.analyzeError({ experimentId: experimentId.value, forceRefresh })
+    const payload = buildErrorAnalysisPayload(experimentId.value, forceRefresh)
+    const res = await api.analyzeError(payload)
     if (res?.success && res.data) {
       errorAnalysisData.value = res.data
-      await checkAndLoadWarning(forceRefresh)
+      await checkAndLoadWarning(payload.forceRefresh)
     }
   } catch (e) {
     logger.error('错误分析失败:', e)
