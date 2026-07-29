@@ -45,11 +45,11 @@
             v-model="filterForm.status"
             class="h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm outline-none appearance-none cursor-pointer w-[150px]"
           >
-            <UiOption value="">全部</UiOption>
-            <UiOption value="submitted">已提交</UiOption>
-            <UiOption value="graded">已评分</UiOption>
-            <UiOption value="rejected">已退回</UiOption>
-            <UiOption value="not_started">未开始</UiOption>
+            <UiOption
+              v-for="option in SUBMISSION_STATUS_OPTIONS"
+              :key="option.value"
+              :value="option.value"
+            >{{ option.label }}</UiOption>
           </UiSelect>
         </div>
 
@@ -64,9 +64,8 @@
       <div class="mb-4 flex justify-between items-center gap-2.5 flex-wrap">
         <div class="flex flex-wrap gap-2.5">
           <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-black/5 text-[#6e6e73]">总数：{{ filteredSubmissions.length }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">已评分：{{ getStatusCount('graded') }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,154,60,0.1)] text-[#c49a3c]">已提交：{{ getStatusCount('submitted') }}</span>
-          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,75,63,0.1)] text-[#c44b3f]">未开始：{{ getStatusCount('not_started') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(107,143,107,0.12)] text-[#6b8f6b]">已提交：{{ getStatusCount('submitted') }}</span>
+          <span class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[rgba(196,75,63,0.1)] text-[#c44b3f]">未提交：{{ getStatusCount('not_started') }}</span>
           <span v-if="selectedRows.length" class="inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-bold bg-[var(--app-primary-soft)] text-[var(--app-primary)]">已选：{{ selectedRows.length }}</span>
         </div>
 
@@ -138,7 +137,7 @@
               <td class="py-3 px-3">
                 <div class="flex gap-2">
                   <UiButton class="text-[var(--app-primary)] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="viewSubmissionDetail(row.id)">详情</UiButton>
-                  <UiButton v-if="row.status === 'submitted'" class="text-[#6b8f6b] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</UiButton>
+                  <UiButton v-if="row.status === 'submitted' && row.score === null" class="text-[#6b8f6b] text-sm font-medium bg-transparent border-none cursor-pointer hover:underline" @click="gradeSubmission(row)">评分</UiButton>
                 </div>
               </td>
             </tr>
@@ -283,6 +282,11 @@ import api from '../../api'
 import { useUserStore } from '../../store'
 import AppPagination from '../../components/AppPagination.vue'
 import LucideIcon from '../../components/LucideIcon.vue'
+import {
+  SUBMISSION_STATUS_OPTIONS,
+  getSubmissionStatusText,
+  normalizeSubmissionStatus
+} from './submissionListStatus.mjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -464,9 +468,7 @@ const getPlagiarismRateTagClass = (rate) => {
 
 const getStatusType = (status) => {
   const typeMap = {
-    submitted: 'warning',
-    graded: 'success',
-    rejected: 'danger',
+    submitted: 'success',
     not_started: 'info'
   }
   return typeMap[status] || 'info'
@@ -484,13 +486,7 @@ const getStatusTagClass = (status) => {
 }
 
 const getStatusText = (status) => {
-  const textMap = {
-    submitted: '已提交',
-    graded: '已评分',
-    rejected: '已退回',
-    not_started: '未开始'
-  }
-  return textMap[status] || '未知'
+  return getSubmissionStatusText(status)
 }
 
 const normalizeStudentId = (value) => {
@@ -508,24 +504,9 @@ const parseSubmissionCompositeId = (submissionId) => {
   }
 }
 
-const normalizeStatus = (item) => {
-  if (item.status === 'completed') {
-    // 改用 score != null 判断，而非 score > 0，避免 score=0 时误判为 submitted
-    if (item.submissionStatus === 'GRADED') return 'graded'
-    if (item.score != null && !isNaN(Number(item.score))) return 'graded'
-    return 'submitted'
-  }
-  if (['submitted', 'graded', 'rejected', 'not_started'].includes(item.status)) {
-    return item.status
-  }
-  return 'not_started'
-}
-
 const getStatusPriority = (status) => {
   const priorities = {
-    graded: 4,
-    submitted: 3,
-    rejected: 2,
+    submitted: 2,
     not_started: 1
   }
   return priorities[status] || 0
@@ -571,8 +552,11 @@ const loadSubmissions = async () => {
     const raw = await api.getAllStudentExperiments(params)
     const list = Array.isArray(raw) ? raw : raw?.data || []
     const data = list.map((item) => {
-      const status = normalizeStatus(item)
-      const hasSubmission = status === 'submitted' || status === 'graded' || status === 'rejected'
+      const status = normalizeSubmissionStatus(item)
+      const hasSubmission = status === 'submitted'
+      const numericScore = item.score != null && !isNaN(Number(item.score))
+        ? Number(item.score)
+        : null
       return {
         id: `${normalizeStudentId(item.studentId)}-${item.experimentId}`,
         experimentId: Number(item.experimentId),
@@ -582,7 +566,7 @@ const loadSubmissions = async () => {
         studentUsername: item.studentUsername,
         class: item.className,
         submitTime: normalizeSubmitTime(item.submitTime),
-        score: status === 'graded' ? Number(item.score) : null,
+        score: numericScore,
         plagiarismRate: hasSubmission ? Number(item.plagiarismRate ?? 0) : null,
         status
       }
@@ -671,7 +655,7 @@ const submitGrade = async () => {
         ...submissions.value[index],
         score: Number(gradeForm.score),
         plagiarismRate: Number(gradeForm.plagiarismRate),
-        status: 'graded'
+        status: 'submitted'
       }
     }
   } catch (error) {

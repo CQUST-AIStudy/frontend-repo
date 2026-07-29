@@ -197,7 +197,9 @@
               <UiTableColumn label="强制">
                 <template #default="{ row }">{{ row.force ? '是' : '' }}</template>
               </UiTableColumn>
-              <UiTableColumn prop="created_at" label="创建时间" />
+              <UiTableColumn label="创建时间">
+                <template #default="{ row }">{{ formatSyncTime(row.created_at) }}</template>
+              </UiTableColumn>
             </UiTable>
           </div>
         </div>
@@ -319,6 +321,7 @@ import {
   crawlLeetCodeProblems,
   mapClawItemToPractice
 } from '../../api/leetcodeClaw'
+import { formatSyncTime } from './dataSyncFormatters.mjs'
 
 const showPassword = ref(false)
 
