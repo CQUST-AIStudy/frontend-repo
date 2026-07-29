@@ -5,6 +5,7 @@ export function getMyProfile() {
 }
 
 export function getClassProfile(classId) {
+  if (!classId) throw new Error('classId is required')
   return tapClient.get('/api/profile/class', {
     params: { classId },
     timeout: 30000
