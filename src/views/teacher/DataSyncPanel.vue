@@ -174,9 +174,13 @@
         </div>
 
         <!-- Task history -->
-        <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+        <div v-if="taskHistoryLoading || taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
-          <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
+          <div v-if="taskHistoryLoading" class="flex items-center justify-center gap-2 py-8 text-[12px] text-[#6e6e73]">
+            <span class="inline-block w-4 h-4 border-2 border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></span>
+            正在加载同步记录…
+          </div>
+          <div v-else class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
             <UiTable :data="taskHistory" row-key="task_id" class="w-full text-[12px] border-collapse">
               <UiTableColumn prop="task_id" label="任务ID" />
               <UiTableColumn label="用户组">
@@ -322,6 +326,7 @@ import {
   mapClawItemToPractice
 } from '../../api/leetcodeClaw'
 import { formatSyncTime } from './dataSyncFormatters.mjs'
+import { findFirstHealthyCandidate } from './spiderCandidateProbe.mjs'
 
 const showPassword = ref(false)
 
@@ -392,6 +397,7 @@ const lastSync = ref('')
 const syncLoading = ref('')
 const currentTask = ref(null)
 const taskHistory = ref([])
+const taskHistoryLoading = ref(true)
 const cookieInput = ref('')
 const cookieSubmitting = ref(false)
 const cookieResult = ref(null)
@@ -456,17 +462,19 @@ const plannedCredentialSource = computed(() => {
 
 async function probeSpiderHealth() {
   spiderHealthError.value = ''
-  for (const base of buildSpiderCandidates()) {
+  const healthyBase = await findFirstHealthyCandidate(buildSpiderCandidates(), async (base) => {
     try {
       const r = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
-      if (r.status === 200) {
-        spiderAlive.value = true
-        spiderUrl.value = base
-        return true
-      }
+      return r.status === 200
     } catch (e) {
       spiderHealthError.value = e?.response?.data?.detail || e?.message || 'network error'
+      return false
     }
+  })
+  if (healthyBase) {
+    spiderAlive.value = true
+    spiderUrl.value = healthyBase
+    return true
   }
   spiderAlive.value = false
   return false
@@ -479,7 +487,6 @@ async function loadCookieStatus() {
     cookieStatus.value = d?.status || 'UNKNOWN'
     lastSync.value = d?.lastUpdated || d?.updated_at || ''
   } catch { /* ignore */ }
-  await probeSpiderHealth()
 }
 
 async function loadBoundCredentials() {
@@ -511,14 +518,19 @@ async function loadCooldown() {
 }
 
 async function loadTaskHistory() {
+  taskHistoryLoading.value = true
   if (!spiderAlive.value) {
     taskHistory.value = []
+    taskHistoryLoading.value = false
     return
   }
   try {
     const r = await axios.get(spiderApi('/tasks'), spiderRequestConfig({ timeout: 5000 }))
     taskHistory.value = r.data || []
   } catch { /* spider not running */ }
+  finally {
+    taskHistoryLoading.value = false
+  }
 }
 
 function submitTempCredential() {
@@ -729,9 +741,14 @@ onMounted(() => {
   syncKeyword.value = currentKeyword.value
   clearTempCredential()
   setTimeout(() => clearTempCredential(), 300)
-  loadCookieStatus().then(() => {
-    loadTaskHistory()
-    loadCooldown()
+  loadCookieStatus()
+  probeSpiderHealth().then((alive) => {
+    if (alive) {
+      loadTaskHistory()
+      loadCooldown()
+    } else {
+      taskHistoryLoading.value = false
+    }
   })
   loadBoundCredentials()
 })
