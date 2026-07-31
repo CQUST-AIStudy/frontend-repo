@@ -775,8 +775,33 @@ onMounted(loadAll)
 .knowledge-layout {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  height: calc(100vh - 360px);
+  min-height: 520px;
   gap: 18px;
   align-items: start;
+}
+
+.knowledge-sidebar,
+.knowledge-detail {
+  height: 100%;
+  min-height: 0;
+}
+
+.knowledge-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.knowledge-sidebar :deep(.ui-card__body) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.knowledge-detail {
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .knowledge-sidebar :deep(.ui-card__header),
@@ -1009,6 +1034,14 @@ onMounted(loadAll)
 @media (max-width: 900px) {
   .knowledge-layout {
     grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+
+  .knowledge-sidebar,
+  .knowledge-detail {
+    height: auto;
+    max-height: 62vh;
   }
 
   .knowledge-list {
