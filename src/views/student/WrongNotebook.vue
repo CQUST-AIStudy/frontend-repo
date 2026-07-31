@@ -800,13 +800,26 @@ onMounted(loadAll)
 }
 
 .knowledge-detail {
-  overflow-y: auto;
-  padding-right: 4px;
+  overflow: hidden;
 }
 
 .knowledge-sidebar :deep(.ui-card__header),
 .question-panel :deep(.ui-card__header) {
   padding: 16px 18px;
+}
+
+.question-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.question-panel :deep(.ui-card__body) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel-head > div:first-child {
@@ -826,6 +839,12 @@ onMounted(loadAll)
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.question-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .knowledge-item {
