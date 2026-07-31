@@ -817,8 +817,10 @@ onMounted(loadAll)
 }
 
 .question-panel :deep(.ui-card__body) {
+  display: flex;
   flex: 1;
   min-height: 0;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -843,6 +845,7 @@ onMounted(loadAll)
 
 .question-list {
   min-height: 0;
+  flex: 1;
   overflow-y: auto;
   padding-right: 4px;
 }
