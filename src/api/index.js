@@ -594,6 +594,32 @@ export default {
     return apiClient.delete(`/api/student/ai-assistant/code-demo/history/${id}`)
   },
 
+  // PTA 批改（教师）：预览客观分 / 批量生成AI评语 / 列表 / 详情 / 发布
+  async previewPtaGrading(offeringId) {
+    return apiClient.post('/api/grading/pta/preview', { offeringId })
+  },
+
+  async generatePtaGrading(offeringId, force = false) {
+    return apiClient.post('/api/grading/pta/generate', { offeringId, force }, { timeout: 300000 })
+  },
+
+  async listPtaGrading(offeringId) {
+    return apiClient.get('/api/grading/pta/list', { params: { offeringId } })
+  },
+
+  async getPtaGradingDetail(id) {
+    return apiClient.get(`/api/grading/pta/detail/${id}`)
+  },
+
+  async publishPtaGrading(offeringId) {
+    return apiClient.post('/api/grading/pta/publish', { offeringId })
+  },
+
+  // PTA 批改（学生只读）：查看本人已发布结果
+  async getStudentPtaGradingResult(offeringId) {
+    return apiClient.get('/api/student/pta-grading', { params: { offeringId } })
+  },
+
   async getNotifications(limit = 50) {
     return apiClient.get('/api/student/notifications', { params: { limit } })
   },

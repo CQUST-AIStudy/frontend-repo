@@ -285,6 +285,11 @@ const routes = [
         name: 'RubricEditor',
         component: () => import('../views/teacher/RubricEditor.vue')
       },
+      {
+        path: 'grading/pta',
+        name: 'PtaGrading',
+        component: () => import('../views/teacher/PtaGradingCenter.vue')
+      },
       // 课程知识库（RAG）
       {
         path: 'knowledge-base',

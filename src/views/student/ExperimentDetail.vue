@@ -60,6 +60,16 @@
           </div>
         </section>
 
+        <section v-if="ptaGrading?.published" class="rounded-[16px] border border-[#bfe2ca] bg-[#f6fcf8] p-5">
+          <div class="text-sm font-semibold text-[#1f5130]">PTA 批改结果</div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-3xl font-semibold text-[#15803d]">{{ ptaGrading.score ?? '-' }}</span>
+            <span class="text-sm text-[#5f6f64]">分</span>
+            <span v-if="ptaGrading.acceptedCount != null" class="ml-2 text-xs text-[#5f6f64]">通过 {{ ptaGrading.acceptedCount }}/{{ ptaGrading.problemCount }} 题</span>
+          </div>
+          <p v-if="ptaGrading.comment" class="mt-3 max-w-4xl whitespace-pre-line text-sm leading-7 text-[#33453a]">{{ ptaGrading.comment }}</p>
+        </section>
+
         <!-- 标签页-->
         <div class="g-card flex flex-col flex-1 min-h-0 [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
           <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px]">
@@ -422,6 +432,7 @@ const errorChecked = ref(false)
 const warningData = ref(null)
 const analysisActiveProblemIndex = ref(0)
 const publishedGrading = ref(null)
+const ptaGrading = ref(null)
 const downloadingPublishedReport = ref(false)
 
 const experimentId = computed(() => Number(route.params.id))
@@ -747,6 +758,13 @@ async function fetchPublishedGrading() {
   } catch (error) {
     logger.warn('获取已发布批改结果失败:', error)
     publishedGrading.value = null
+  }
+  try {
+    const ptaRes = await api.getStudentPtaGradingResult(experimentId.value)
+    ptaGrading.value = ptaRes?.data || ptaRes
+  } catch (error) {
+    logger.warn('获取 PTA 批改结果失败:', error)
+    ptaGrading.value = null
   }
 }
 

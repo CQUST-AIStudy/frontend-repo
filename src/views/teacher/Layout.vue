@@ -330,7 +330,8 @@ const menuItems = [
   {
     group: 'grading', icon: DocumentChecked, label: 'AI 批改',
     children: [
-      { path: '/teacher/grading', label: '批改中心' },
+      { path: '/teacher/grading', label: '文件批改' },
+      { path: '/teacher/grading/pta', label: 'PTA 批改' },
       { path: '/teacher/grading/rubrics', label: '评分标准' }
     ]
   },
