@@ -180,29 +180,35 @@
             <span class="inline-block w-4 h-4 border-2 border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></span>
             正在加载同步记录…
           </div>
-          <div v-else class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
-            <UiTable :data="taskHistory" row-key="task_id" class="w-full text-[12px] border-collapse">
-              <UiTableColumn prop="task_id" label="任务ID" />
-              <UiTableColumn label="用户组">
-                <template #default="{ row }">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</template>
+          <div v-else class="overflow-auto max-h-[320px] rounded-[10px] border border-black/[0.06]">
+            <UiTable :data="taskHistory" row-key="task_id" class="sync-history-table w-full min-w-[980px] text-[12px] border-collapse">
+              <UiTableColumn prop="task_id" label="任务ID" width="180" />
+              <UiTableColumn label="用户组" min-width="180">
+                <template #default="{ row }">
+                  <span class="sync-cell-text" :title="row.group_name || row.groupName || row.group_id || row.groupId">
+                    {{ row.group_name || row.groupName || row.group_id || row.groupId || '-' }}
+                  </span>
+                </template>
               </UiTableColumn>
-              <UiTableColumn label="模式">
+              <UiTableColumn label="模式" width="110">
                 <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></template>
               </UiTableColumn>
-              <UiTableColumn label="状态">
+              <UiTableColumn label="状态" width="120">
                 <template #default="{ row }">
                     <span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="taskStatusClass(row)">{{ taskStatusTextFor(row) }}</span>
                     <div v-if="row.warnings && row.warnings.length" class="mt-1 text-[11px] text-[#b26a00]" :title="row.warnings.join('；')">答题卡数据缺失</div>
                 </template>
               </UiTableColumn>
-              <UiTableColumn label="来源">
+              <UiTableColumn label="来源" width="130">
                 <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></template>
               </UiTableColumn>
-              <UiTableColumn label="强制">
+              <UiTableColumn label="强制" width="80" align="center">
                 <template #default="{ row }">{{ row.force ? '是' : '' }}</template>
               </UiTableColumn>
-              <UiTableColumn label="创建时间">
-                <template #default="{ row }">{{ formatSyncTime(row.created_at) }}</template>
+              <UiTableColumn label="创建时间（北京时间）" width="180">
+                <template #default="{ row }">
+                  <span class="sync-time-text">{{ formatSyncTime(row.created_at || row.createdAt) }}</span>
+                </template>
               </UiTableColumn>
             </UiTable>
           </div>
@@ -762,3 +768,30 @@ watch([ptaUsername, ptaPassword], () => {
 })
 onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer) })
 </script>
+
+<style scoped>
+.sync-history-table :deep(th),
+.sync-history-table :deep(td) {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.sync-history-table :deep(th) {
+  white-space: nowrap;
+}
+
+.sync-cell-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.sync-time-text {
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+</style>

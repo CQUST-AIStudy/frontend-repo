@@ -1,8 +1,35 @@
 export function formatSyncTime(value) {
   if (!value) return '-'
 
-  const match = String(value).trim().match(
-    /^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2}:\d{2})/
-  )
-  return match ? `${match[1]} ${match[2]}` : String(value)
+  const raw = String(value).trim()
+  const normalized = normalizeDateInput(raw)
+  const date = new Date(normalized)
+  if (Number.isNaN(date.getTime())) {
+    return raw
+  }
+
+  const parts = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).formatToParts(date)
+
+  const map = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`
+}
+
+function normalizeDateInput(value) {
+  const text = value.replace(' ', 'T')
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(text)) {
+    return text
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(text)) {
+    return `${text}Z`
+  }
+  return value
 }
