@@ -181,6 +181,13 @@ const activeId = ref(null)
 const loadingTip = ref('准备执行环境…')
 const LOADING_TIPS = ['准备执行环境…', '正在编译代码…', '逐行捕捉变量状态…', '生成可视化动画…']
 let tipTimer = null
+let pollTimer = null
+function stopPoll() {
+  if (pollTimer) {
+    window.clearTimeout(pollTimer)
+    pollTimer = null
+  }
+}
 function startTips() {
   stopTips()
   let idx = 0
@@ -255,9 +262,15 @@ async function generate() {
       stdin: stdinInput.value.trim().length ? stdinInput.value : null
     })
     const view = res?.data || res
-    applyView(view)
     activeId.value = view?.id ?? null
-    if (!hasDemo.value) {
+    // 后端异步生成：先返回 PROCESSING 记录，轮询详情直到 COMPLETED/FAILED
+    const finalView = view?.status === 'PROCESSING' && view?.id != null
+      ? await pollUntilDone(view.id)
+      : view
+    applyView(finalView)
+    if (finalView?.status === 'FAILED') {
+      loadError.value = '生成失败，请稍后重试或修改输入'
+    } else if (!hasDemo.value) {
       loadError.value = '生成完成，但没有可用的演示帧，请稍后重试或修改输入'
     }
     await refreshHistory()
@@ -269,14 +282,56 @@ async function generate() {
   }
 }
 
+// 轮询异步生成结果：每 2s 拉取一次详情，直到状态不再是 PROCESSING（最长约 150s）
+function pollUntilDone(id) {
+  const POLL_INTERVAL = 2000
+  const MAX_POLLS = 75
+  return new Promise((resolve, reject) => {
+    let count = 0
+    const tick = async () => {
+      count += 1
+      try {
+        const res = await api.getPlaygroundDemo(id)
+        const view = res?.data || res
+        if (view?.status !== 'PROCESSING') {
+          pollTimer = null
+          resolve(view)
+          return
+        }
+        if (count >= MAX_POLLS) {
+          pollTimer = null
+          resolve(view)
+          return
+        }
+      } catch (e) {
+        if (count >= MAX_POLLS) {
+          pollTimer = null
+          reject(e)
+          return
+        }
+      }
+      pollTimer = window.setTimeout(tick, POLL_INTERVAL)
+    }
+    tick()
+  })
+}
+
 async function loadDemo(id) {
   loading.value = true
   loadError.value = ''
   startTips()
   try {
     const res = await api.getPlaygroundDemo(id)
-    applyView(res?.data || res)
+    let view = res?.data || res
+    // 历史记录可能仍在异步生成中，同样轮询等待完成
+    if (view?.status === 'PROCESSING') {
+      view = await pollUntilDone(id)
+    }
+    applyView(view)
     activeId.value = id
+    if (view?.status === 'FAILED') {
+      loadError.value = '该演示生成失败，请重新生成'
+    }
   } catch (e) {
     loadError.value = e?.message || '加载失败，请稍后重试'
   } finally {
@@ -289,6 +344,7 @@ async function del(id) {
   try {
     await api.deletePlaygroundDemo(id)
     if (activeId.value === id) {
+      stopPoll()
       demo.value = null
       workflow.value = ''
       usedStdin.value = ''
@@ -309,5 +365,8 @@ function goBack() {
 }
 
 onMounted(refreshHistory)
-onBeforeUnmount(stopTips)
+onBeforeUnmount(() => {
+  stopTips()
+  stopPoll()
+})
 </script>
