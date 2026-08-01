@@ -30,13 +30,13 @@
           <router-link to="/student/leetcode-search"
              class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#e6f4ea] [color:#1e8e3e] [border:1px_solid_#ceead6] hover:[background:#ceead6] hover:[border-color:#1e8e3e]">
             <span style="font-size:18px">💡</span>
-            <span>薄弱强化题集</span>
+            <span>强化薄弱题集</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
           </router-link>
           <router-link to="/student/leetcode-search"
              class="quick-action-btn [display:inline-flex] [align-items:center] [gap:8px] [padding:10px_20px] [border-radius:10px] [font-size:14px] [font-weight:500] [text-decoration:none] [transition:all_0.2s] [background:#fef7e0] [color:#e37400] [border:1px_solid_#fdecc8] hover:[background:#fdecc8] hover:[border-color:#e37400]">
             <span style="font-size:18px">📝</span>
-            <span>薄弱强化题集</span>
+            <span>强化薄弱题集</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7m10 0v10"/></svg>
           </router-link>
         </div>
@@ -222,90 +222,109 @@
           </div>
         </ui-card>
 
-        <!-- 🤖 AI 个性化学习建议 -->
-        <ui-card v-if="aiSuggestions" class="ai-suggestions-card">
+        <!-- AI 个性化学习建议 -->
+        <ui-card v-if="aiSuggestions" class="ai-suggestions-card analysis-section-card">
           <template #header>
-            <div class="card-header [display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
-              <div class="ai-suggestions-title [display:flex] [align-items:center] [gap:8px] [font-weight:500] [font-size:15px] [color:#202124]">
-                <ui-icon class="[font-size:20px] [color:#1a73e8]"><MagicStick /></ui-icon>
-                <span>🤖 AI 个性化学习建议</span>
+            <div class="section-head">
+              <div class="section-title-group">
+                <span class="section-icon section-icon-primary"><LucideIcon name="sparkles" :size="18" /></span>
+                <div>
+                  <div class="section-title">AI 个性化学习建议</div>
+                  <div class="section-subtitle">把薄弱点、计划和下一步练习放到同一张行动清单里</div>
+                </div>
               </div>
-              <ui-tag v-if="aiSuggestions.aiGenerated" type="success" effect="dark">AI 生成</ui-tag>
-              <ui-tag v-else type="info" effect="plain">规则引擎</ui-tag>
+              <div class="section-actions">
+                <ui-tag v-if="aiSuggestions.aiGenerated" type="success" effect="plain">AI 生成</ui-tag>
+                <ui-tag v-else type="info" effect="plain">规则引擎</ui-tag>
+                <UiButton
+                  class="refresh-btn"
+                  size="small"
+                  plain
+                  @click="fetchAiLearningSuggestions"
+                  :disabled="aiSuggestionsLoading"
+                >
+                  <LucideIcon name="refresh-cw" :size="14" />
+                  {{ aiSuggestionsLoading ? '加载中' : '刷新' }}
+                </UiButton>
+              </div>
             </div>
           </template>
+
           <div class="ai-suggestions-body">
-            <!-- 总结语 -->
-            <div v-if="aiSuggestions.summaryMessage" class="ai-summary-msg [padding:12px_16px] [background:#e6f4ea] [border-radius:10px] [margin-bottom:16px] [font-size:14px] [color:#1e8e3e] [line-height:1.7]">
-              🌟 {{ aiSuggestions.summaryMessage }}
+            <div v-if="aiSuggestions.summaryMessage" class="ai-summary-panel">
+              <div class="summary-kicker">本次判断</div>
+              <div class="summary-text">{{ aiSuggestions.summaryMessage }}</div>
             </div>
 
-            <!-- 薄弱知识点 -->
-            <div v-if="aiSuggestions.weakPoints?.length" class="sug-section [margin-bottom:16px]">
-              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">🎯 识别的薄弱知识点</h4>
-              <div class="sug-weak-list [display:flex] [gap:10px] [flex-wrap:wrap]">
-                <div v-for="(wp, i) in aiSuggestions.weakPoints" :key="i"
-                     class="sug-weak-card [display:flex] [align-items:center] [gap:12px] [padding:12px_16px] [background:#fff] [border:1px_solid_#fce8e6] [border-radius:10px] [flex:1] [min-width:220px]">
-                  <span class="sug-weak-icon [font-size:28px]">🎯</span>
-                  <div class="sug-weak-info [flex:1]">
-                    <div class="sug-weak-name [font-size:14px] [font-weight:500] [color:#202124]">{{ wp.tagName }}</div>
-                    <div class="sug-weak-reason [font-size:12px] [color:#5f6368] [margin-top:2px]">{{ wp.reason }}</div>
-                  </div>
-                  <ui-tag :type="wp.severity === 'HIGH' ? 'danger' : wp.severity === 'MEDIUM' ? 'warning' : 'info'" size="small">{{ wp.severity }}</ui-tag>
-                </div>
-              </div>
-            </div>
-
-            <!-- 学习计划 -->
-            <div v-if="aiSuggestions.studyPlan?.length" class="sug-section [margin-bottom:16px]">
-              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📋 个性化学习计划</h4>
-              <div class="sug-plan-list [display:flex] [flex-direction:column] [gap:8px]">
-                <div v-for="(item, i) in aiSuggestions.studyPlan" :key="i"
-                     class="sug-plan-item [display:flex] [align-items:center] [gap:12px] [padding:10px_16px] [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px]">
-                  <span class="sug-plan-num [display:inline-flex] [align-items:center] [justify-content:center] [width:28px] [height:28px] [border-radius:50%] [background:#e6f4ea] [color:#1e8e3e] [font-size:13px] [font-weight:700] [flex-shrink:0]">{{ i + 1 }}</span>
-                  <div class="sug-plan-body [flex:1]">
-                    <div class="sug-plan-topic [font-size:14px] [font-weight:500] [color:#202124]">{{ item.topic }}</div>
-                    <div v-if="item.suggestedResources" class="sug-plan-resource [font-size:12px] [color:#5f6368] [margin-top:2px]">{{ item.suggestedResources }}</div>
-                  </div>
-                  <div class="sug-plan-meta [display:flex] [align-items:center] [gap:8px] [flex-shrink:0]">
-                    <span class="sug-plan-priority [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:600]"
-                          :class="{'sug-priority-high [background:#fce8e6] [color:#d93025]': item.priority === 'HIGH',
-                                  'sug-priority-med [background:#fef7e0] [color:#e37400]': item.priority === 'MEDIUM',
-                                  'sug-priority-low [background:#e6f4ea] [color:#1e8e3e]': item.priority === 'LOW'}">
-                      {{ item.priority === 'HIGH' ? '🔴 高优' : item.priority === 'MEDIUM' ? '🟡 中优' : '🟢 低优' }}
-                    </span>
-                    <span v-if="item.estimatedTime" class="sug-plan-time [font-size:12px] [color:#5f6368]">⏱ {{ item.estimatedTime }}</span>
+            <div class="suggestion-layout">
+              <section v-if="aiSuggestions.weakPoints?.length" class="suggestion-panel weak-panel">
+                <div class="panel-head">
+                  <span class="panel-icon danger"><LucideIcon name="target" :size="16" /></span>
+                  <div>
+                    <h4>识别的薄弱知识点</h4>
+                    <p>优先处理高风险知识点，减少重复失分。</p>
                   </div>
                 </div>
-              </div>
+
+                <div class="weak-list">
+                  <div v-for="(wp, i) in aiSuggestions.weakPoints" :key="i" class="weak-item">
+                    <div class="weak-index">{{ i + 1 }}</div>
+                    <div class="weak-content">
+                      <div class="weak-name-row">
+                        <span class="weak-name">{{ wp.tagName }}</span>
+                        <ui-tag :type="severityType(wp.severity)" size="small" effect="plain">{{ severityLabel(wp.severity) }}</ui-tag>
+                      </div>
+                      <div class="weak-reason">{{ wp.reason }}</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section v-if="aiSuggestions.studyPlan?.length" class="suggestion-panel plan-panel">
+                <div class="panel-head">
+                  <span class="panel-icon primary"><LucideIcon name="list-checks" :size="16" /></span>
+                  <div>
+                    <h4>个性化学习计划</h4>
+                    <p>按优先级安排复习和练习，避免平均用力。</p>
+                  </div>
+                </div>
+
+                <div class="plan-list">
+                  <div v-for="(item, i) in aiSuggestions.studyPlan" :key="i" class="plan-item">
+                    <span class="plan-num">{{ i + 1 }}</span>
+                    <div class="plan-main">
+                      <div class="plan-topic">{{ item.topic }}</div>
+                      <div v-if="item.suggestedResources" class="plan-resource">{{ item.suggestedResources }}</div>
+                    </div>
+                    <div class="plan-meta">
+                      <ui-tag :type="priorityType(item.priority)" size="small" effect="plain">{{ priorityLabel(item.priority) }}</ui-tag>
+                      <span v-if="item.estimatedTime" class="plan-time"><LucideIcon name="clock" :size="13" />{{ item.estimatedTime }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
 
-            <!-- 推荐练习 -->
-            <div v-if="aiSuggestions.recommendedProblems?.length" class="sug-section">
-              <h4 class="sug-section-title [font-size:14px] [font-weight:600] [color:#202124] [margin-bottom:10px]">📌 薄弱强化方向</h4>
-              <div class="sug-rec-list [display:flex] [gap:8px] [flex-wrap:wrap]">
-                <router-link v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i" to="/student/leetcode-search"
-                      class="sug-rec-chip [display:inline-block] [font-size:13px] [padding:6px_14px] [border-radius:100px] [background:#e8f0fe] [color:#1a73e8] [font-weight:500] [text-decoration:none] [cursor:pointer] hover:[background:#d2e3fc]">
-                  📌 {{ rec }}
-                </router-link>
+            <section v-if="aiSuggestions.recommendedProblems?.length" class="practice-panel">
+              <div class="practice-copy">
+                <div class="panel-head compact">
+                  <span class="panel-icon success"><LucideIcon name="route" :size="16" /></span>
+                  <div>
+                    <h4>强化方向</h4>
+                    <p>根据建议直接进入对应练习，完成后回到本页看变化。</p>
+                  </div>
+                </div>
+                <div class="rec-chip-list">
+                  <router-link v-for="(rec, i) in aiSuggestions.recommendedProblems" :key="i" to="/student/leetcode-search" class="rec-chip">
+                    {{ rec }}
+                  </router-link>
+                </div>
               </div>
-              <div class="[margin-top:10px]">
-                <router-link to="/student/leetcode-search" class="[font-size:13px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
-                  👉 前往薄弱强化题集，针对性提升 →
-                </router-link>
-              </div>
-            </div>
-
-            <!-- 刷新按钮 -->
-            <div class="sug-refresh [text-align:right] [margin-top:16px]">
-              <UiButton
-                class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:6px_16px] [font-size:12px] [color:#5f6368] [cursor:pointer] hover:[background:#f8f9fa]"
-                @click="fetchAiLearningSuggestions"
-                :disabled="aiSuggestionsLoading"
-              >
-                {{ aiSuggestionsLoading ? '加载中...' : '🔄 刷新 AI 建议' }}
-              </UiButton>
-            </div>
+              <router-link to="/student/leetcode-search" class="practice-action">
+                <LucideIcon name="arrow-up-right" :size="16" />
+                前往强化薄弱题集
+              </router-link>
+            </section>
           </div>
         </ui-card>
 
@@ -319,18 +338,34 @@
         />
 
         <!-- 学习方法推荐 -->
-        <ui-card>
-          <template #header><div class="card-header [display:flex] [align-items:center] [gap:12px]"><span><LucideIcon name="book-open" :size="18" class="mr-2" /> 学习方法推荐</span></div></template>
-          <div class="method-container [display:grid] [grid-template-columns:repeat(auto-fill,_minmax(200px,_1fr))] [gap:16px]">
-            <ui-card v-for="(item, index) in learningMethods" :key="index" class="method-card [text-align:center] [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)]" shadow="hover">
-              <div class="method-header [display:flex] [flex-direction:column] [align-items:center] [gap:8px] [margin-bottom:8px]">
-                <ui-icon :size="24" class="method-icon [color:#1a73e8]"><component :is="item.icon" /></ui-icon>
-                <h4>{{ item.title }}</h4>
+        <ui-card class="learning-methods-card analysis-section-card">
+          <template #header>
+            <div class="section-head">
+              <div class="section-title-group">
+                <span class="section-icon section-icon-success"><LucideIcon name="book-open" :size="18" /></span>
+                <div>
+                  <div class="section-title">学习方法推荐</div>
+                  <div class="section-subtitle">把方法转成可执行动作，和上方建议配合使用</div>
+                </div>
               </div>
+            </div>
+          </template>
+          <div class="method-container">
+            <article v-for="(item, index) in learningMethods" :key="index" class="method-card" :class="item.tone">
+              <div class="method-topline">
+                <span class="method-icon"><LucideIcon :name="item.icon" :size="18" /></span>
+                <span class="method-step">策略 {{ index + 1 }}</span>
+              </div>
+              <h4>{{ item.title }}</h4>
               <p>{{ item.description }}</p>
-            </ui-card>
+              <div class="method-action">
+                <LucideIcon name="check-circle-2" :size="14" />
+                {{ item.action }}
+              </div>
+            </article>
           </div>
         </ui-card>
+
       </div>
     </loading-state>
   </div>
@@ -339,7 +374,6 @@
 <script setup>
 import logger from '@/utils/logger'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { Reading, VideoPlay, ChatDotRound, Notebook, Connection, MagicStick } from '@/components/ui/icons'
 import { TrendCharts, DataAnalysis, Finished, List as ListIcon } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import LoadingState from '../../components/LoadingState.vue'
@@ -404,7 +438,7 @@ const overviewCards = computed(() => {
     { label: '总提交次数', value: o.totalSubmissions || 0, icon: TrendCharts, color: '#d18a61', bg: 'linear-gradient(135deg,#d18a61,#e8c4b0)' },
     { label: '通过次数', value: o.totalAc || 0, icon: Finished, color: '#67C23A', bg: 'linear-gradient(135deg,#67C23A,#95d475)' },
     { label: '总体AC率', value: (o.overallAcRate || 0) + '%', icon: DataAnalysis, color: '#E6A23C', bg: 'linear-gradient(135deg,#E6A23C,#eebe77)' },
-    { label: '已参与实验', value: (o.experimentsCovered || 0) + '/' + (o.totalExperiments || 19), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
+    { label: '已参与实验', value: (o.experimentsCovered || 0) + '/' + (o.totalExperiments ?? 0), icon: ListIcon, color: '#909399', bg: 'linear-gradient(135deg,#909399,#b1b3b8)' }
   ]
 })
 
@@ -490,12 +524,68 @@ function weaknessBgStyle(index) {
 }
 
 const learningMethods = [
-  { icon: Reading, title: '系统学习', description: '通过教材和参考书籍系统地学习理论知识，掌握数据结构的基本概念和算法原理。' },
-  { icon: Notebook, title: '动手实践', description: '多做实验和编程练习，将理论知识应用到实际问题中，加深对算法的理解。' },
-  { icon: Connection, title: '知识关联', description: '将不同的数据结构和算法进行对比和关联，理解它们的优缺点和适用场景。' },
-  { icon: VideoPlay, title: '观看教学视频', description: '利用在线教学资源，观看算法演示和可视化过程，帮助理解复杂概念。' },
-  { icon: ChatDotRound, title: '小组讨论', description: '与同学交流学习心得和解题思路，通过讲解来加深对知识点的掌握。' }
+  {
+    icon: 'book-open',
+    tone: 'method-blue',
+    title: '系统复盘',
+    description: '先回看教材、课件和课堂示例，把概念、接口、复杂度和典型写法重新串起来。',
+    action: '适合处理概念不稳'
+  },
+  {
+    icon: 'keyboard',
+    tone: 'method-green',
+    title: '限时重做',
+    description: '挑选错题或相似题，在不看答案的情况下限时重写，结束后对比关键分支。',
+    action: '适合减少反复提交'
+  },
+  {
+    icon: 'git-branch',
+    tone: 'method-amber',
+    title: '知识关联',
+    description: '把相近结构和算法放在一起比较，记录适用场景、边界条件和常见误区。',
+    action: '适合建立迁移能力'
+  },
+  {
+    icon: 'play-circle',
+    tone: 'method-purple',
+    title: '可视化理解',
+    description: '遇到递归、图、树和动态规划时，先画状态变化，再回到代码实现。',
+    action: '适合突破抽象过程'
+  },
+  {
+    icon: 'messages-square',
+    tone: 'method-slate',
+    title: '讲解输出',
+    description: '用自己的话讲清题意、算法选择和失败原因，暴露隐藏的理解缺口。',
+    action: '适合巩固表达和审题'
+  }
 ]
+
+function severityType(severity) {
+  if (severity === 'HIGH') return 'danger'
+  if (severity === 'MEDIUM') return 'warning'
+  return 'info'
+}
+
+function severityLabel(severity) {
+  if (severity === 'HIGH') return '高风险'
+  if (severity === 'MEDIUM') return '需关注'
+  if (severity === 'LOW') return '观察'
+  return severity || '待评估'
+}
+
+function priorityType(priority) {
+  if (priority === 'HIGH') return 'danger'
+  if (priority === 'MEDIUM') return 'warning'
+  return 'success'
+}
+
+function priorityLabel(priority) {
+  if (priority === 'HIGH') return '高优先'
+  if (priority === 'MEDIUM') return '中优先'
+  if (priority === 'LOW') return '低优先'
+  return priority || '待安排'
+}
 
 function masteryColor(v) { return v >= 70 ? '#67C23A' : v >= 40 ? '#E6A23C' : '#F56C6C' }
 function patternEmoji(tag) {
@@ -875,6 +965,450 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.analysis-section-card {
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  box-shadow: none;
+  background: var(--app-surface);
+}
+
+.analysis-section-card :deep(.ui-card__header) {
+  padding: 18px 20px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.analysis-section-card :deep(.ui-card__body) {
+  padding: 20px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.section-icon,
+.panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+.section-icon-primary {
+  color: #1a73e8;
+  background: #e8f0fe;
+}
+
+.section-icon-success {
+  color: #1e8e3e;
+  background: #e6f4ea;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #172033;
+  line-height: 1.35;
+}
+
+.section-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+}
+
+.ai-suggestions-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-summary-panel {
+  padding: 16px 18px;
+  border: 1px solid #cfe8d6;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0f9f3, #ffffff);
+}
+
+.summary-kicker {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e8e3e;
+}
+
+.summary-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.7;
+  color: #1f2937;
+}
+
+.suggestion-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+  gap: 16px;
+}
+
+.suggestion-panel,
+.practice-panel {
+  border: 1px solid #e7edf5;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.suggestion-panel {
+  padding: 16px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.panel-head.compact {
+  margin-bottom: 10px;
+}
+
+.panel-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+}
+
+.panel-icon.danger {
+  color: #d93025;
+  background: #fce8e6;
+}
+
+.panel-icon.primary {
+  color: #1a73e8;
+  background: #e8f0fe;
+}
+
+.panel-icon.success {
+  color: #1e8e3e;
+  background: #e6f4ea;
+}
+
+.panel-head h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.panel-head p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.weak-list,
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weak-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #f3d7d4;
+  border-radius: 12px;
+  background: #fffafa;
+}
+
+.weak-index,
+.plan-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.weak-index {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  color: #d93025;
+  background: #fce8e6;
+}
+
+.weak-content,
+.plan-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.weak-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.weak-name,
+.plan-topic {
+  font-size: 14px;
+  font-weight: 700;
+  color: #202124;
+}
+
+.weak-reason,
+.plan-resource {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #5f6368;
+}
+
+.plan-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  background: #fbfdff;
+}
+
+.plan-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1a73e8;
+  background: #e8f0fe;
+}
+
+.plan-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.plan-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #5f6368;
+  white-space: nowrap;
+}
+
+.practice-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #fbfffc, #f7fbff);
+}
+
+.practice-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.rec-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rec-chip,
+.practice-action {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.rec-chip {
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #d5e3f7;
+  border-radius: 999px;
+  background: #fff;
+  color: #1a73e8;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rec-chip:hover {
+  background: #e8f0fe;
+}
+
+.practice-action {
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.practice-action:hover {
+  background: #1558b0;
+}
+
+.method-container {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.method-card {
+  min-height: 198px;
+  padding: 16px;
+  border: 1px solid #e7edf5;
+  border-radius: 14px;
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.method-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.method-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.method-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.method-step {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.method-card h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #172033;
+}
+
+.method-card p {
+  margin: 0;
+  min-height: 66px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #5f6368;
+}
+
+.method-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.method-blue .method-icon,
+.method-blue .method-action {
+  color: #1a73e8;
+}
+
+.method-blue .method-icon {
+  background: #e8f0fe;
+}
+
+.method-green .method-icon,
+.method-green .method-action {
+  color: #1e8e3e;
+}
+
+.method-green .method-icon {
+  background: #e6f4ea;
+}
+
+.method-amber .method-icon,
+.method-amber .method-action {
+  color: #e37400;
+}
+
+.method-amber .method-icon {
+  background: #fef7e0;
+}
+
+.method-purple .method-icon,
+.method-purple .method-action {
+  color: #8250df;
+}
+
+.method-purple .method-icon {
+  background: #f1eafe;
+}
+
+.method-slate .method-icon,
+.method-slate .method-action {
+  color: #475569;
+}
+
+.method-slate .method-icon {
+  background: #f1f5f9;
+}
+
 @media (max-width: 768px) {
   .overview-row {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -897,11 +1431,43 @@ onBeforeUnmount(() => {
   .chart-row :deep(.ui-col) {
     grid-column: span 1 / span 1 !important;
   }
+
+  .section-head,
+  .practice-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .section-actions,
+  .practice-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .plan-item {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .plan-meta {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 1024px) {
   .ai-profile-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .suggestion-layout,
+  .method-container {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .method-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 </style>

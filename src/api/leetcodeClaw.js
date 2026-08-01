@@ -11,7 +11,7 @@ const leetCodeClawClient = axios.create({
   }
 })
 
-/** 搜索 LeetCode 题库（学生端，请求 Java 后端，不直连爬虫服务） */
+/** 搜索强化薄弱题集（学生端，请求 Java 后端，不直连爬虫服务） */
 export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 20, offset = 0 } = {}) {
   return axios.get('/api/leetcode/problems/search', {
     params: { keyword, difficulty, limit, offset }
@@ -24,7 +24,7 @@ export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
   })
 }
 
-/** 将后端 LeetCodeProblem 实体映射为前端练习卡片格式 */
+/** 将后端题目实体映射为前端练习卡片格式 */
 function createPracticeCard(fields = {}, overrides = {}) {
   const title = fields.title || '未命名题目'
   return {
@@ -41,7 +41,7 @@ function createPracticeCard(fields = {}, overrides = {}) {
     source: fields.source || '',
     type: fields.type || '',
     sourceUrl: fields.sourceUrl || '',
-    sourceLabel: fields.sourceLabel || 'LeetCode',
+    sourceLabel: fields.sourceLabel || '强化薄弱题集',
     persisted: !!fields.persisted,
     warnings: fields.warnings || [],
     errors: fields.errors || [],
@@ -66,7 +66,7 @@ export function mapProblemToPractice(problem = {}) {
     title: problem.titleMain || problem.titleAlt || '未命名题目',
     difficulty: problem.difficulty,
     estimatedMinutes: problem.estimatedMinutes || 30,
-    reason: '来自 LeetCode 题库',
+    reason: '来自强化薄弱题集',
     source: 'leetcode_bank',
     type: 'leetcode_bank_problem',
     sourceUrl: problem.sourceUrl || (slug ? `https://leetcode.cn/problems/${slug}/` : ''),
@@ -98,7 +98,7 @@ export function mapRecommendationItemToPractice(item = {}) {
 
 leetCodeClawClient.interceptors.response.use(
   response => response.data,
-  error => Promise.reject(createFriendlyError(error, 'LeetCode 题库服务请求失败，请检查服务是否已启动'))
+  error => Promise.reject(createFriendlyError(error, '强化薄弱题集服务请求失败，请检查服务是否已启动'))
 )
 
 export function normalizeLeetCodeDifficulty(difficulty) {
@@ -153,11 +153,11 @@ export function mapClawItemToPractice(item = {}) {
     difficulty,
     estimatedMinutes: difficulty === 'hard' ? 50 : difficulty === 'easy' ? 20 : 35,
     matchRate: toMatchRatePercent(item.score),
-    reason: item.reason || '来自 LeetCodeClaw 关键词推荐',
+    reason: item.reason || '来自强化薄弱题集关键词推荐',
     source: 'leetcode_claw',
     type: 'leetcode_claw_problem',
     sourceUrl,
-    sourceLabel: 'LeetCode',
+    sourceLabel: '强化薄弱题集',
     persisted: !!item.persisted,
     warnings: item.warnings || [],
     errors: item.errors || []
@@ -190,7 +190,7 @@ export function getLeetCodeProblemBySlug(slug, { crawl = false } = {}) {
   })
 }
 
-/** 全量抓取 LeetCode CN 公开题库（异步任务） */
+/** 全量抓取强化薄弱题集公开题库（异步任务） */
 export function crawlAllLeetCodeProblems({ persist = true, forceRefresh = false } = {}) {
   return leetCodeClawClient.post('/api/leetcode/crawl/all', {
     persist,

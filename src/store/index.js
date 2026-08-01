@@ -6,7 +6,9 @@ import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 import { MOCK_USERS, MOCK_TAP_TOKEN, MOCK_TOKEN } from '../constants/mockUsers'
 
-const USE_MOCK_DATA = process.env.VUE_APP_USE_MOCK_DATA === 'true'
+// Mock 数据仅在显式声明 VUE_APP_USE_MOCK_DATA=true 且非生产构建时启用。
+// 生产构建(.env.production)强制为 false；即便环境误注入 true，运行环境守卫也会拦截。
+const USE_MOCK_DATA = process.env.VUE_APP_USE_MOCK_DATA === 'true' && process.env.NODE_ENV !== 'production'
 
 function normalizeUserInfo(userInfo, teacherLevel) {
   const normalized = { ...(userInfo || {}) }

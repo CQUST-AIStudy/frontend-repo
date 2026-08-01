@@ -12,25 +12,38 @@
           </UiButton>
         </div>
 
-        <experiment-tab-content :experiments="filteredExperiments" />
-
-        <!-- 底部：完成情况统计 -->
-        <div class="g-bottom-row">
-          <div class="g-card [min-width:0]">
-            <div class="g-card-head"><span>完成情况</span></div>
-            <div ref="progressChartRef" class="g-chart [height:240px] [width:100%]"></div>
-            <div class="g-stats [padding:0_4px]">
-              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>总实验数</span><span class="g-stat-v [font-weight:600] [color:#202124]">{{ allExperiments.length }}</span></div>
-              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>已完成</span><span class="g-stat-v [color:#1e8e3e] [font-weight:600] [color:#202124]">{{ completedExperiments.length }}</span></div>
-              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>进行中</span><span class="g-stat-v [font-weight:600] [color:#202124]">{{ inProgressExperiments.length }}</span></div>
-              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]"><span>未开始</span><span class="g-stat-v [font-weight:600] [color:#202124]">{{ notStartedExperiments.length }}</span></div>
-              <div class="g-stat-line [display:flex] [justify-content:space-between] [padding:8px_0] [border-bottom:1px_solid_#f1f3f4] [font-size:13px] [color:#5f6368] last:[border-bottom:none]">
-                <span>完成率</span>
-                <span class="g-stat-v [color:#1a73e8] [font-weight:600] [color:#202124]">{{ completionRate }}%</span>
-              </div>
+        <section class="g-progress-summary [display:flex] [align-items:center] [gap:32px] [padding:18px_22px] [background:#fff] [border:1px_solid_#ece8e1] [border-radius:12px] [box-shadow:0_2px_8px_rgba(60,47,35,0.05)] max-[768px]:[align-items:stretch] max-[768px]:[flex-direction:column] max-[768px]:[gap:18px] max-[640px]:[padding:16px]" aria-label="实验完成概览">
+          <div class="g-progress-overview [flex:1] [min-width:220px] max-[768px]:[min-width:0]">
+            <div class="[display:flex] [align-items:baseline] [justify-content:space-between] [gap:16px] [margin-bottom:10px]">
+              <span class="[font-size:14px] [font-weight:600] [color:#3c4043]">学习进度</span>
+              <strong class="[font-size:22px] [line-height:1] [color:#e98b52]">{{ completionRate }}%</strong>
+            </div>
+            <div class="g-progress-track [height:8px] [overflow:hidden] [background:#f2eee9] [border-radius:999px]" role="progressbar" aria-label="实验完成率" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="completionRate">
+              <span class="g-progress-fill [display:block] [height:100%] [background:#e98b52] [border-radius:inherit] [transition:width_0.3s_ease]" :style="{ width: `${completionRate}%` }"></span>
             </div>
           </div>
-        </div>
+
+          <div class="g-progress-stats [display:grid] [grid-template-columns:repeat(4,minmax(82px,1fr))] [min-width:440px] [border-left:1px_solid_#eee9e3] max-[768px]:[min-width:0] max-[768px]:[border-left:none] max-[768px]:[border-top:1px_solid_#eee9e3] max-[768px]:[padding-top:16px] max-[520px]:[grid-template-columns:repeat(2,minmax(0,1fr))] max-[520px]:[row-gap:16px]">
+            <div class="[display:flex] [flex-direction:column] [align-items:center] [gap:5px] [padding:0_14px]">
+              <span class="[font-size:12px] [color:#8a8178]">总实验数</span>
+              <strong class="[font-size:20px] [line-height:1.2] [color:#3c4043]">{{ allExperiments.length }}</strong>
+            </div>
+            <div class="[display:flex] [flex-direction:column] [align-items:center] [gap:5px] [padding:0_14px]">
+              <span class="[font-size:12px] [color:#8a8178]">已完成</span>
+              <strong class="[font-size:20px] [line-height:1.2] [color:#1e8e3e]">{{ completedExperiments.length }}</strong>
+            </div>
+            <div class="[display:flex] [flex-direction:column] [align-items:center] [gap:5px] [padding:0_14px]">
+              <span class="[font-size:12px] [color:#8a8178]">进行中</span>
+              <strong class="[font-size:20px] [line-height:1.2] [color:#e59a23]">{{ inProgressExperiments.length }}</strong>
+            </div>
+            <div class="[display:flex] [flex-direction:column] [align-items:center] [gap:5px] [padding:0_14px]">
+              <span class="[font-size:12px] [color:#8a8178]">未开始</span>
+              <strong class="[font-size:20px] [line-height:1.2] [color:#9aa0a6]">{{ notStartedExperiments.length }}</strong>
+            </div>
+          </div>
+        </section>
+
+        <experiment-tab-content :experiments="filteredExperiments" />
       </div>
     </loading-state>
   </div>
@@ -38,17 +51,14 @@
 
 <script setup>
 import logger from '@/utils/logger'
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import LoadingState from '../../components/LoadingState.vue'
 import ExperimentTabContent from './components/ExperimentTabContent.vue'
 import { useExperimentStore } from '../../store'
-import * as echarts from 'echarts'
 
 const experimentStore = useExperimentStore()
 const loading = ref(true)
 const activeTab = ref('all')
-const progressChartRef = ref(null)
-let progressChart = null
 
 const allExperiments = computed(() => {
   let list = experimentStore.experimentList; if (!Array.isArray(list)) return []; return [...list]
@@ -74,33 +84,12 @@ const tabs = computed(() => [
   { key: 'not-started', label: '未开始', count: notStartedExperiments.value.length }
 ])
 
-function initChart() {
-  if (!progressChartRef.value) return
-  if (progressChart) progressChart.dispose()
-  progressChart = echarts.init(progressChartRef.value)
-  progressChart.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 12, color: '#5f6368' } },
-    series: [{ type: 'pie', radius: ['40%', '65%'], center: ['50%', '42%'],
-      itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, position: 'inside', formatter: p => p.value > 0 ? p.name : '', fontSize: 11, color: '#fff' },
-      data: [
-        { value: completedExperiments.value.length, name: '已完成', itemStyle: { color: '#1e8e3e' } },
-        { value: inProgressExperiments.value.length, name: '进行中', itemStyle: { color: '#f59e0b' } },
-        { value: notStartedExperiments.value.length, name: '未开始', itemStyle: { color: '#dadce0' } }
-      ]
-    }]
-  })
-}
-
 onMounted(async () => {
   loading.value = true
   try {
     if (!experimentStore.experimentList?.length) await experimentStore.fetchExperimentList()
-    setTimeout(initChart, 300)
   } catch (e) { logger.error('加载失败:', e) }
   finally { loading.value = false }
 })
-onBeforeUnmount(() => { progressChart?.dispose() })
 </script>
 

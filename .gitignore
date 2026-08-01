@@ -68,6 +68,7 @@ where-npm.txt
 !.env.development.example
 !.env.production.example
 !.env.docker.example
+!.env.production
 
 # Test and browser artifacts
 coverage-final.json

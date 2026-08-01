@@ -49,7 +49,7 @@
 
             <ui-menu-item index="/admin/leetcode-claw">
               <ui-icon><DataAnalysis /></ui-icon>
-              <template #title>LeetCodeClaw</template>
+              <template #title>强化薄弱题集</template>
             </ui-menu-item>
 
             <div class="menu-divider [height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>
@@ -115,7 +115,7 @@
 
               <ui-menu-item index="/admin/leetcode-claw">
                 <ui-icon><DataAnalysis /></ui-icon>
-                <template #title>LeetCodeClaw</template>
+                <template #title>强化薄弱题集</template>
               </ui-menu-item>
 
               <div class="menu-divider [height:1px] [background:var(--app-border-soft)] [margin:10px_12px]"></div>

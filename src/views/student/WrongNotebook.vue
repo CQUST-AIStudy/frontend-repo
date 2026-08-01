@@ -1,6 +1,6 @@
 <template>
   <div class="wrong-notebook-page">
-    <UiPageHeader title="错题本" description="按知识点归档 PTA 与 LeetCode 错题，并在同一处完成针对性回炉。">
+    <UiPageHeader title="错题本" description="按知识点归档 PTA 与强化薄弱题集错题，并在同一处完成针对性回炉。">
       <ui-button :loading="loading" class="warm-normal-button" @click="loadAll">刷新数据</ui-button>
     </UiPageHeader>
 
@@ -25,14 +25,14 @@
 
           <div class="filter-content">
             <ui-radio-group v-model="activeTab" class="status-tabs" @change="onTabChange">
-              <ui-radio-button label="all">全部 {{ stats.total || 0 }}</ui-radio-button>
-              <ui-radio-button label="unresolved">待攻克 {{ stats.unresolved || 0 }}</ui-radio-button>
-              <ui-radio-button label="resolved">已掌握 {{ stats.resolved || 0 }}</ui-radio-button>
+              <ui-radio-button label="all">全部 {{ statusCounts.total }}</ui-radio-button>
+              <ui-radio-button label="unresolved">待攻克 {{ statusCounts.unresolved }}</ui-radio-button>
+              <ui-radio-button label="resolved">已掌握 {{ statusCounts.resolved }}</ui-radio-button>
             </ui-radio-group>
 
             <div class="filter-controls">
               <ui-select v-model="filters.sourceType" class="toolbar-control" placeholder="来源" clearable size="small" @change="reloadList">
-                <ui-option label="LeetCode" value="LEETCODE_PRACTICE" />
+                <ui-option label="强化薄弱题集" value="LEETCODE_PRACTICE" />
                 <ui-option label="PTA" value="PTA_SYNCED" />
               </ui-select>
               <ui-select v-model="filters.difficulty" class="toolbar-control" placeholder="难度" clearable size="small" @change="reloadList">
@@ -52,7 +52,7 @@
           v-if="ptaErrorState === 'error'"
           type="warning"
           :closable="false"
-          title="PTA 错题知识点暂时加载失败，当前仍可查看已同步到错题本的记录。"
+          title="PTA 错题知识点暂时加载失败，当前仍可查看错题本中的其他记录。"
           show-icon
         />
 
@@ -114,11 +114,11 @@
                 <div class="panel-head">
                   <div>
                     <strong>{{ selectedGroup.name }}错题</strong>
-                    <span>PTA 知识点与 LeetCode 标签已合并归档</span>
+                    <span>PTA 知识点与强化薄弱题集标签已合并归档</span>
                   </div>
                   <div class="source-tags">
                     <ui-tag v-if="selectedGroup.ptaCount" type="info" effect="plain">PTA {{ selectedGroup.ptaCount }}</ui-tag>
-                    <ui-tag v-if="selectedGroup.leetcodeCount" type="success" effect="plain">LeetCode {{ selectedGroup.leetcodeCount }}</ui-tag>
+                    <ui-tag v-if="selectedGroup.leetcodeCount" type="success" effect="plain">强化薄弱题集 {{ selectedGroup.leetcodeCount }}</ui-tag>
                   </div>
                 </div>
               </template>
@@ -129,7 +129,7 @@
                     <div class="question-title-row">
                       <span class="question-title">{{ item.title }}</span>
                       <ui-tag :type="item.sourceType === 'PTA_SYNCED' ? 'info' : 'success'" size="small" effect="plain">
-                        {{ item.sourceType === 'PTA_SYNCED' ? 'PTA' : 'LeetCode' }}
+                        {{ item.sourceType === 'PTA_SYNCED' ? 'PTA' : '强化薄弱题集' }}
                       </ui-tag>
                       <ui-tag v-if="item.resolved" type="success" size="small">已掌握</ui-tag>
                       <ui-tag v-if="item.difficulty" :type="difficultyTagType(item.difficulty)" size="small" effect="plain">
@@ -184,10 +184,10 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import { wrongNotebookApi } from '@/api/wrongNotebook'
-import { getUserInfo } from '@/constants/auth'
-import api from '@/api'
+import { useUserStore } from '@/store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const rows = ref([])
 const ptaErrors = ref([])
@@ -370,11 +370,27 @@ const visibleItems = computed(() => {
   return [...items.values()]
 })
 
+const standalonePtaCount = computed(() => {
+  const notebookPtaKeys = new Set(rows.value
+    .filter(row => row.sourceType === 'PTA_SYNCED')
+    .flatMap(row => [normalizedText(row.problemTitle), normalizedText(row.problemSlug)].filter(Boolean)))
+  return ptaErrors.value.filter(item => {
+    const keys = [normalizedText(item.problem_title), normalizedText(item.source_problem_id)].filter(Boolean)
+    return !keys.some(key => notebookPtaKeys.has(key))
+  }).length
+})
+
+const statusCounts = computed(() => ({
+  total: Number(stats.total || 0) + standalonePtaCount.value,
+  unresolved: Number(stats.unresolved || 0) + standalonePtaCount.value,
+  resolved: Number(stats.resolved || 0)
+}))
+
 const summaryCards = computed(() => [
   { label: '当前错题', value: visibleItems.value.length, tip: '当前筛选范围内', color: 'var(--app-text)' },
   { label: '待攻克', value: visibleItems.value.filter(item => !item.resolved).length, tip: '可直接开始回炉', color: 'var(--app-danger)' },
   { label: '错题知识点', value: knowledgeGroups.value.length, tip: '零错题知识点已隐藏', color: 'var(--app-primary)' },
-  { label: 'PTA 错题', value: visibleItems.value.filter(item => item.sourceType === 'PTA_SYNCED').length, tip: '已关联 PTA 知识点', color: 'var(--app-warning)' }
+  { label: 'PTA 错题', value: visibleItems.value.filter(item => item.sourceType === 'PTA_SYNCED').length, tip: '来自 PTA 提交与知识点元数据', color: 'var(--app-warning)' }
 ])
 
 watch(knowledgeGroups, (groups) => {
@@ -432,16 +448,14 @@ async function loadStats() {
 }
 
 async function loadPtaErrors() {
-  const studentNo = getUserInfo()?.usernum
-  if (!studentNo) {
-    ptaErrors.value = []
-    ptaErrorState.value = 'error'
-    return
-  }
   ptaErrorState.value = 'loading'
   try {
-    const response = await api.getPtaHighFrequencyErrors(String(studentNo), 1)
-    const data = response?.data || response || {}
+    const classId = userStore.selectedClass?.id ?? userStore.selectedClass?.classId
+    const response = await wrongNotebookApi.ptaErrors({
+      minErrors: 1,
+      ...(classId ? { classId } : {})
+    })
+    const data = response?.data ?? response ?? {}
     ptaErrors.value = Array.isArray(data.items) ? data.items : []
     ptaErrorState.value = 'loaded'
   } catch {
@@ -761,13 +775,53 @@ onMounted(loadAll)
 .knowledge-layout {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  height: calc(100vh - 360px);
+  min-height: 520px;
   gap: 18px;
   align-items: start;
+}
+
+.knowledge-sidebar,
+.knowledge-detail {
+  height: 100%;
+  min-height: 0;
+}
+
+.knowledge-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.knowledge-sidebar :deep(.ui-card__body) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.knowledge-detail {
+  overflow: hidden;
 }
 
 .knowledge-sidebar :deep(.ui-card__header),
 .question-panel :deep(.ui-card__header) {
   padding: 16px 18px;
+}
+
+.question-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.question-panel :deep(.ui-card__body) {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .panel-head > div:first-child {
@@ -787,6 +841,13 @@ onMounted(loadAll)
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.question-list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .knowledge-item {
@@ -995,6 +1056,14 @@ onMounted(loadAll)
 @media (max-width: 900px) {
   .knowledge-layout {
     grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+
+  .knowledge-sidebar,
+  .knowledge-detail {
+    height: auto;
+    max-height: 62vh;
   }
 
   .knowledge-list {

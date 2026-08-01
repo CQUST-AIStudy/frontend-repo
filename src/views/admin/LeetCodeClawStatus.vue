@@ -1,8 +1,8 @@
 <template>
   <div class="leetcode-claw-status page [display:flex] [flex-direction:column] [gap:16px]">
     <UiPageHeader
-      title="LeetCodeClaw 服务状态"
-      description="检查 LeetCodeClaw 抓题服务、数据库连接和题库表结构是否可用"
+      title="强化薄弱题集服务状态"
+      description="检查强化薄弱题集抓题服务、数据库连接和题库表结构是否可用"
     >
       <ui-button type="primary" :loading="loading" @click="loadHealth">刷新状态</ui-button>
     </UiPageHeader>
@@ -28,13 +28,13 @@
     <ui-card shadow="never" class="[border-radius:16px] [border:1px_solid_#e8eef6]">
       <template #header>
         <div class="[display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
-          <span>全量抓取 LeetCode CN 公开题库</span>
+          <span>全量抓取强化薄弱题集公开题库</span>
           <ui-tag effect="plain">异步任务</ui-tag>
         </div>
       </template>
       <div class="[display:flex] [flex-direction:column] [gap:14px]">
         <p class="[margin:0] [font-size:13px] [color:#64748b] [line-height:1.6]">
-          一键抓取 LeetCode 中文站所有公开题目并写入本地题库。任务在后台异步执行，可关闭页面后稍后查看进度。
+          一键抓取强化薄弱题集所有公开题目并写入本地题库。任务在后台异步执行，可关闭页面后稍后查看进度。
           同一时间只允许一个全量任务运行。
         </p>
         <div class="[display:flex] [align-items:center] [gap:10px]">
@@ -163,7 +163,7 @@ const cards = computed(() => {
       label: '上游',
       value: data.leetcode || '未知',
       ok: data.leetcode === 'configured',
-      tip: '用于判断 LeetCode 中文站抓取配置是否就绪'
+      tip: '用于判断强化薄弱题集抓取配置是否就绪'
     }
   ]
 })
@@ -178,7 +178,7 @@ async function loadHealth() {
     health.value = {
       success: false,
       service: 'unavailable',
-      message: error.friendlyMessage || error.message || 'LeetCodeClaw 服务不可用'
+      message: error.friendlyMessage || error.message || '强化薄弱题集服务不可用'
     }
     uiMessage.error(health.value.message)
   } finally {
@@ -217,7 +217,7 @@ const crawlAllJobFailedItems = computed(() => crawlAllJob.value?.failed || [])
 async function startCrawlAll() {
   try {
     await messageBox.confirm(
-      '全量抓取将枚举 LeetCode CN 所有公开题目并逐一抓取入库，耗时较长（可能数十分钟）。确定继续？',
+      '全量抓取将枚举强化薄弱题集所有公开题目并逐一抓取入库，耗时较长（可能数十分钟）。确定继续？',
       '确认全量抓取',
       { confirmButtonText: '开始抓取', cancelButtonText: '取消', type: 'warning' }
     )

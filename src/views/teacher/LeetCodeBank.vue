@@ -1,8 +1,8 @@
 <template>
   <div class="leetcode-bank page [display:flex] [flex-direction:column] [gap:16px]">
     <UiPageHeader
-      title="LeetCode 题库管理"
-      description="检查 LeetCodeClaw 服务状态，按 slug 或关键词抓取题目并写入本地题库"
+      title="强化薄弱题集管理"
+      description="检查强化薄弱题集服务状态，按 slug 或关键词抓取题目并写入本地题库"
     >
       <ui-button plain :loading="healthLoading" @click="loadHealth">检查服务</ui-button>
     </UiPageHeader>
@@ -60,13 +60,13 @@
     <ui-card shadow="never" class="[border-radius:16px] [border:1px_solid_#e8eef6]">
       <template #header>
         <div class="[display:flex] [justify-content:space-between] [align-items:center] [gap:12px]">
-          <span>全量抓取 LeetCode CN 公开题库</span>
+          <span>全量抓取强化薄弱题集公开题库</span>
           <ui-tag effect="plain">异步任务</ui-tag>
         </div>
       </template>
       <div class="[display:flex] [flex-direction:column] [gap:14px]">
         <p class="[margin:0] [font-size:13px] [color:#64748b] [line-height:1.6]">
-          一键抓取 LeetCode 中文站所有公开题目并写入本地题库。任务在后台异步执行，可关闭页面后稍后查看进度。
+          一键抓取强化薄弱题集所有公开题目并写入本地题库。任务在后台异步执行，可关闭页面后稍后查看进度。
           同一时间只允许一个全量任务运行。
         </p>
         <div class="[display:flex] [align-items:center] [gap:10px]">
@@ -240,7 +240,7 @@ const crawlAllJobFailedItems = computed(() => crawlAllJob.value?.failed || [])
 async function startCrawlAll() {
   try {
     await messageBox.confirm(
-      '全量抓取将枚举 LeetCode CN 所有公开题目并逐一抓取入库，耗时较长（可能数十分钟）。确定继续？',
+      '全量抓取将枚举强化薄弱题集所有公开题目并逐一抓取入库，耗时较长（可能数十分钟）。确定继续？',
       '确认全量抓取',
       { confirmButtonText: '开始抓取', cancelButtonText: '取消', type: 'warning' }
     )
@@ -293,7 +293,7 @@ const healthCards = computed(() => {
     { label: '服务', value: data.service || '未检查', ok: data.success === true },
     { label: '数据库', value: data.database || '未知', ok: data.database === 'ok' },
     { label: '表结构', value: data.schema || '未知', ok: data.schema === 'ok' },
-    { label: 'LeetCode', value: data.leetcode || '未知', ok: data.leetcode === 'configured' }
+    { label: '强化薄弱题集', value: data.leetcode || '未知', ok: data.leetcode === 'configured' }
   ]
 })
 
@@ -310,7 +310,7 @@ async function loadHealth() {
     health.value = await getLeetCodeClawHealth()
   } catch (error) {
     health.value = { success: false, service: '不可用', database: '未知', schema: '未知', leetcode: '未知' }
-    uiMessage.error(error.friendlyMessage || error.message || 'LeetCodeClaw 服务不可用')
+    uiMessage.error(error.friendlyMessage || error.message || '强化薄弱题集服务不可用')
   } finally {
     healthLoading.value = false
   }

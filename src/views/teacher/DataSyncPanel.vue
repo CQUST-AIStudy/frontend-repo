@@ -174,31 +174,41 @@
         </div>
 
         <!-- Task history -->
-        <div v-if="taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
+        <div v-if="taskHistoryLoading || taskHistory.length" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">最近同步记录</div>
-          <div class="overflow-auto max-h-[240px] rounded-[10px] border border-black/[0.06]">
-            <UiTable :data="taskHistory" row-key="task_id" class="w-full text-[12px] border-collapse">
-              <UiTableColumn prop="task_id" label="任务ID" />
-              <UiTableColumn label="用户组">
-                <template #default="{ row }">{{ row.group_name || row.groupName || row.group_id || row.groupId }}</template>
+          <div v-if="taskHistoryLoading" class="flex items-center justify-center gap-2 py-8 text-[12px] text-[#6e6e73]">
+            <span class="inline-block w-4 h-4 border-2 border-black/10 border-t-[var(--app-primary)] rounded-full animate-spin"></span>
+            正在加载同步记录…
+          </div>
+          <div v-else class="overflow-auto max-h-[320px] rounded-[10px] border border-black/[0.06]">
+            <UiTable :data="taskHistory" row-key="task_id" class="sync-history-table w-full min-w-[980px] text-[12px] border-collapse">
+              <UiTableColumn prop="task_id" label="任务ID" width="180" />
+              <UiTableColumn label="用户组" min-width="180">
+                <template #default="{ row }">
+                  <span class="sync-cell-text" :title="row.group_name || row.groupName || row.group_id || row.groupId">
+                    {{ row.group_name || row.groupName || row.group_id || row.groupId || '-' }}
+                  </span>
+                </template>
               </UiTableColumn>
-              <UiTableColumn label="模式">
+              <UiTableColumn label="模式" width="110">
                 <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="modeBadgeClass(row.mode)">{{ modeCn(row.mode) }}</span></template>
               </UiTableColumn>
-              <UiTableColumn label="状态">
+              <UiTableColumn label="状态" width="120">
                 <template #default="{ row }">
                     <span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="taskStatusClass(row)">{{ taskStatusTextFor(row) }}</span>
                     <div v-if="row.warnings && row.warnings.length" class="mt-1 text-[11px] text-[#b26a00]" :title="row.warnings.join('；')">答题卡数据缺失</div>
                 </template>
               </UiTableColumn>
-              <UiTableColumn label="来源">
+              <UiTableColumn label="来源" width="130">
                 <template #default="{ row }"><span class="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold" :class="credentialSourceBadgeClass(row.credential_source || row.credentialSource)">{{ credentialSourceText(row.credential_source || row.credentialSource) }}</span></template>
               </UiTableColumn>
-              <UiTableColumn label="强制">
+              <UiTableColumn label="强制" width="80" align="center">
                 <template #default="{ row }">{{ row.force ? '是' : '' }}</template>
               </UiTableColumn>
-              <UiTableColumn label="创建时间">
-                <template #default="{ row }">{{ formatSyncTime(row.created_at) }}</template>
+              <UiTableColumn label="创建时间（北京时间）" width="180">
+                <template #default="{ row }">
+                  <span class="sync-time-text">{{ formatSyncTime(row.created_at || row.createdAt) }}</span>
+                </template>
               </UiTableColumn>
             </UiTable>
           </div>
@@ -207,8 +217,8 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="flex items-start justify-between gap-4 mb-4">
             <div>
-              <div class="text-[14px] font-semibold text-[#1d1d1f]">LeetCode 题库抓取</div>
-              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个 LeetCode 中文站 slug，抓取后写入本地题库。</div>
+              <div class="text-[14px] font-semibold text-[#1d1d1f]">强化薄弱题集抓取</div>
+              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个强化薄弱题集 slug，抓取后写入本地题库。</div>
             </div>
             <UiButton
               class="h-[34px] px-4 rounded-[9px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] disabled:opacity-50"
@@ -322,6 +332,7 @@ import {
   mapClawItemToPractice
 } from '../../api/leetcodeClaw'
 import { formatSyncTime } from './dataSyncFormatters.mjs'
+import { findFirstHealthyCandidate } from './spiderCandidateProbe.mjs'
 
 const showPassword = ref(false)
 
@@ -392,6 +403,7 @@ const lastSync = ref('')
 const syncLoading = ref('')
 const currentTask = ref(null)
 const taskHistory = ref([])
+const taskHistoryLoading = ref(true)
 const cookieInput = ref('')
 const cookieSubmitting = ref(false)
 const cookieResult = ref(null)
@@ -456,17 +468,19 @@ const plannedCredentialSource = computed(() => {
 
 async function probeSpiderHealth() {
   spiderHealthError.value = ''
-  for (const base of buildSpiderCandidates()) {
+  const healthyBase = await findFirstHealthyCandidate(buildSpiderCandidates(), async (base) => {
     try {
       const r = await axios.get(`${base}/health`, spiderRequestConfig({ timeout: 3000 }))
-      if (r.status === 200) {
-        spiderAlive.value = true
-        spiderUrl.value = base
-        return true
-      }
+      return r.status === 200
     } catch (e) {
       spiderHealthError.value = e?.response?.data?.detail || e?.message || 'network error'
+      return false
     }
+  })
+  if (healthyBase) {
+    spiderAlive.value = true
+    spiderUrl.value = healthyBase
+    return true
   }
   spiderAlive.value = false
   return false
@@ -479,7 +493,6 @@ async function loadCookieStatus() {
     cookieStatus.value = d?.status || 'UNKNOWN'
     lastSync.value = d?.lastUpdated || d?.updated_at || ''
   } catch { /* ignore */ }
-  await probeSpiderHealth()
 }
 
 async function loadBoundCredentials() {
@@ -511,14 +524,19 @@ async function loadCooldown() {
 }
 
 async function loadTaskHistory() {
+  taskHistoryLoading.value = true
   if (!spiderAlive.value) {
     taskHistory.value = []
+    taskHistoryLoading.value = false
     return
   }
   try {
     const r = await axios.get(spiderApi('/tasks'), spiderRequestConfig({ timeout: 5000 }))
     taskHistory.value = r.data || []
   } catch { /* spider not running */ }
+  finally {
+    taskHistoryLoading.value = false
+  }
 }
 
 function submitTempCredential() {
@@ -705,7 +723,7 @@ function parseLeetCodeSlugs() {
 async function crawlLeetCodeSlugs() {
   const slugs = parseLeetCodeSlugs()
   if (!slugs.length) {
-    uiMessage.warning('请先输入 LeetCode 题目 slug')
+    uiMessage.warning('请先输入强化薄弱题集题目 slug')
     return
   }
 
@@ -716,10 +734,10 @@ async function crawlLeetCodeSlugs() {
     if (res?.failed?.length) {
       uiMessage.warning(`部分题目抓取失败：${res.failed.map(item => item.slug || item.error).join('，')}`)
     } else {
-      uiMessage.success('LeetCode 题目抓取入库完成')
+      uiMessage.success('强化薄弱题集题目抓取入库完成')
     }
   } catch (error) {
-    uiMessage.error(error.friendlyMessage || error.message || 'LeetCode 题目抓取失败')
+    uiMessage.error(error.friendlyMessage || error.message || '强化薄弱题集题目抓取失败')
   } finally {
     leetcodeCrawlLoading.value = false
   }
@@ -729,9 +747,14 @@ onMounted(() => {
   syncKeyword.value = currentKeyword.value
   clearTempCredential()
   setTimeout(() => clearTempCredential(), 300)
-  loadCookieStatus().then(() => {
-    loadTaskHistory()
-    loadCooldown()
+  loadCookieStatus()
+  probeSpiderHealth().then((alive) => {
+    if (alive) {
+      loadTaskHistory()
+      loadCooldown()
+    } else {
+      taskHistoryLoading.value = false
+    }
   })
   loadBoundCredentials()
 })
@@ -745,3 +768,30 @@ watch([ptaUsername, ptaPassword], () => {
 })
 onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer) })
 </script>
+
+<style scoped>
+.sync-history-table :deep(th),
+.sync-history-table :deep(td) {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.sync-history-table :deep(th) {
+  white-space: nowrap;
+}
+
+.sync-cell-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.sync-time-text {
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+</style>
