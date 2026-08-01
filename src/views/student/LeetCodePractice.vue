@@ -426,21 +426,21 @@ const codeEditorHighlightStyle = HighlightStyle.define([
 const missingStarterCodeTemplates = {
   java: `class Solution {
     // 当前题目暂无 Java 初始化代码模板。
-    // 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+    // 请重新通过强化薄弱题集入口加入练习，或切换到已有模板的语言。
 }`,
   python: `class Solution:
     # 当前题目暂无 Python 初始化代码模板。
-    # 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+    # 请重新通过强化薄弱题集入口加入练习，或切换到已有模板的语言。
     pass`,
   c: `// 当前题目暂无 C 初始化代码模板。
-// 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。`,
+// 请重新通过强化薄弱题集入口加入练习，或切换到已有模板的语言。`,
   cpp: `class Solution {
 public:
     // 当前题目暂无 C++ 初始化代码模板。
-    // 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。
+    // 请重新通过强化薄弱题集入口加入练习，或切换到已有模板的语言。
 };`,
   javascript: `// 当前题目暂无 JavaScript 初始化代码模板。
-// 请重新通过 LeetCode 拓展入口加入练习，或切换到已有模板的语言。`
+// 请重新通过强化薄弱题集入口加入练习，或切换到已有模板的语言。`
 }
 
 // 编辑器配置
@@ -1237,7 +1237,7 @@ async function loadProblem() {
   const slug = typeof route.query.slug === 'string' ? route.query.slug.trim() : ''
   if (slug && !route.params.id) {
     try {
-      uiMessage.info('正在从 LeetCodeClaw 抓取题目并写入本地题库')
+      uiMessage.info('正在从强化薄弱题集服务抓取题目并写入本地题库')
       const result = await persistClawProblemBySlug(slug)
       router.replace({
         path: `/student/leetcode-practice/${result.problemId}`,
@@ -1248,8 +1248,8 @@ async function loadProblem() {
       })
       return
     } catch (error) {
-      logger.error('LeetCodeClaw 抓题入库失败:', error)
-      uiMessage.error(error.friendlyMessage || error.message || 'LeetCodeClaw 抓题入库失败')
+      logger.error('强化薄弱题集抓题入库失败:', error)
+      uiMessage.error(error.friendlyMessage || error.message || '强化薄弱题集抓题入库失败')
       router.push('/student/leetcode-search')
       return
     }
@@ -1337,7 +1337,7 @@ async function redirectToProblemBySlug(slug) {
       query: { ...route.query, slug }
     })
   } catch (error) {
-    logger.error('按 slug 校准 LeetCode 题目失败:', error)
+    logger.error('按 slug 校准强化薄弱题集题目失败:', error)
     uiMessage.error(error.friendlyMessage || error.message || '加载题目失败')
     router.push('/student/leetcode-search')
   }
@@ -1421,7 +1421,7 @@ async function ensureStarterCodeForProblem(problemData) {
 
     uiMessage.warning('暂未获取到该题的初始代码模板')
   } catch (error) {
-    logger.warn('补全 LeetCode 初始代码模板失败:', error)
+    logger.warn('补全强化薄弱题集初始代码模板失败:', error)
     uiMessage.warning(error.friendlyMessage || error.message || '暂未获取到该题的初始代码模板')
   }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="leetcode-search page [display:flex] [flex-direction:column] [gap:16px] [height:100%] [min-height:0]">
     <UiPageHeader
-      title="薄弱强化题集"
+      title="强化薄弱题集"
       description="基于个性化推荐结果筛选题目，支持关键词与难度过滤。"
     >
     </UiPageHeader>
@@ -73,7 +73,7 @@
             {{ item.errors.join('；') }}
           </div>
           <div v-if="item.sourceUrl" class="[margin-top:10px] [display:flex] [align-items:center] [gap:8px]">
-            <ui-tag size="small" type="primary" effect="plain">{{ item.sourceLabel || '薄弱强化题集' }}</ui-tag>
+            <ui-tag size="small" type="primary" effect="plain">{{ item.sourceLabel || '强化薄弱题集' }}</ui-tag>
             <a :href="item.sourceUrl" target="_blank" rel="noopener noreferrer"
               class="[display:inline-flex] [align-items:center] [gap:3px] [font-size:12px] [color:#1a73e8] [text-decoration:none] hover:[text-decoration:underline]">
               <span>前往原题</span>
@@ -140,7 +140,7 @@ async function searchProblems() {
       items.value = fallbackItems
       uiMessage.warning(fallbackItems.length
         ? '当前个性化推荐中没有匹配题目，已展示题库筛选结果。'
-        : '暂未获取到符合条件的 LeetCode 题目。')
+        : '暂未获取到符合条件的强化薄弱题集题目。')
     }
   } catch (error) {
     try {

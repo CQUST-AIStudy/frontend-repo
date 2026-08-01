@@ -353,10 +353,10 @@
                 </div>
               </template>
 
-              <!-- 薄弱强化题集入口（全 AC 和 有错误 都显示） -->
+              <!-- 强化薄弱题集入口（全 AC 和 有错误 都显示） -->
               <div class="g-leetcode-entry [margin-top:14px] [text-align:center]">
                 <UiButton class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:10px_24px] [font-size:15px] [color:#1a73e8] [font-weight:500] [cursor:pointer] [transition:all_0.2s] hover:[background:#e8f0fe] hover:[border-color:#1a73e8]" @click="router.push('/student/leetcode-search')">
-                  前往薄弱强化题集
+                  前往强化薄弱题集
                 </UiButton>
               </div>
             </template>

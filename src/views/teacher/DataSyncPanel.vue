@@ -211,8 +211,8 @@
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mt-4">
           <div class="flex items-start justify-between gap-4 mb-4">
             <div>
-              <div class="text-[14px] font-semibold text-[#1d1d1f]">LeetCode 题库抓取</div>
-              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个 LeetCode 中文站 slug，抓取后写入本地题库。</div>
+              <div class="text-[14px] font-semibold text-[#1d1d1f]">强化薄弱题集抓取</div>
+              <div class="text-[12px] text-[#6e6e73] mt-1">每行输入一个强化薄弱题集 slug，抓取后写入本地题库。</div>
             </div>
             <UiButton
               class="h-[34px] px-4 rounded-[9px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] disabled:opacity-50"
@@ -717,7 +717,7 @@ function parseLeetCodeSlugs() {
 async function crawlLeetCodeSlugs() {
   const slugs = parseLeetCodeSlugs()
   if (!slugs.length) {
-    uiMessage.warning('请先输入 LeetCode 题目 slug')
+    uiMessage.warning('请先输入强化薄弱题集题目 slug')
     return
   }
 
@@ -728,10 +728,10 @@ async function crawlLeetCodeSlugs() {
     if (res?.failed?.length) {
       uiMessage.warning(`部分题目抓取失败：${res.failed.map(item => item.slug || item.error).join('，')}`)
     } else {
-      uiMessage.success('LeetCode 题目抓取入库完成')
+      uiMessage.success('强化薄弱题集题目抓取入库完成')
     }
   } catch (error) {
-    uiMessage.error(error.friendlyMessage || error.message || 'LeetCode 题目抓取失败')
+    uiMessage.error(error.friendlyMessage || error.message || '强化薄弱题集题目抓取失败')
   } finally {
     leetcodeCrawlLoading.value = false
   }

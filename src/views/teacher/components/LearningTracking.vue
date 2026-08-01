@@ -140,7 +140,7 @@ const {
 const filters = [
   { key: 'all', label: '全部' },
   { key: 'pta', label: 'PTA' },
-  { key: 'leetcode', label: '薄弱强化题集' }
+  { key: 'leetcode', label: '强化薄弱题集' }
 ]
 
 const filteredTimeline = computed(() => {

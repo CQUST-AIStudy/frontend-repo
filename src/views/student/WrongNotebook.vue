@@ -1,6 +1,6 @@
 <template>
   <div class="wrong-notebook-page">
-    <UiPageHeader title="错题本" description="按知识点归档 PTA 与 LeetCode 错题，并在同一处完成针对性回炉。">
+    <UiPageHeader title="错题本" description="按知识点归档 PTA 与强化薄弱题集错题，并在同一处完成针对性回炉。">
       <ui-button :loading="loading" class="warm-normal-button" @click="loadAll">刷新数据</ui-button>
     </UiPageHeader>
 
@@ -32,7 +32,7 @@
 
             <div class="filter-controls">
               <ui-select v-model="filters.sourceType" class="toolbar-control" placeholder="来源" clearable size="small" @change="reloadList">
-                <ui-option label="LeetCode" value="LEETCODE_PRACTICE" />
+                <ui-option label="强化薄弱题集" value="LEETCODE_PRACTICE" />
                 <ui-option label="PTA" value="PTA_SYNCED" />
               </ui-select>
               <ui-select v-model="filters.difficulty" class="toolbar-control" placeholder="难度" clearable size="small" @change="reloadList">
@@ -114,11 +114,11 @@
                 <div class="panel-head">
                   <div>
                     <strong>{{ selectedGroup.name }}错题</strong>
-                    <span>PTA 知识点与 LeetCode 标签已合并归档</span>
+                    <span>PTA 知识点与强化薄弱题集标签已合并归档</span>
                   </div>
                   <div class="source-tags">
                     <ui-tag v-if="selectedGroup.ptaCount" type="info" effect="plain">PTA {{ selectedGroup.ptaCount }}</ui-tag>
-                    <ui-tag v-if="selectedGroup.leetcodeCount" type="success" effect="plain">LeetCode {{ selectedGroup.leetcodeCount }}</ui-tag>
+                    <ui-tag v-if="selectedGroup.leetcodeCount" type="success" effect="plain">强化薄弱题集 {{ selectedGroup.leetcodeCount }}</ui-tag>
                   </div>
                 </div>
               </template>
@@ -129,7 +129,7 @@
                     <div class="question-title-row">
                       <span class="question-title">{{ item.title }}</span>
                       <ui-tag :type="item.sourceType === 'PTA_SYNCED' ? 'info' : 'success'" size="small" effect="plain">
-                        {{ item.sourceType === 'PTA_SYNCED' ? 'PTA' : 'LeetCode' }}
+                        {{ item.sourceType === 'PTA_SYNCED' ? 'PTA' : '强化薄弱题集' }}
                       </ui-tag>
                       <ui-tag v-if="item.resolved" type="success" size="small">已掌握</ui-tag>
                       <ui-tag v-if="item.difficulty" :type="difficultyTagType(item.difficulty)" size="small" effect="plain">
