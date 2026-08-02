@@ -77,6 +77,11 @@ export function mapProblemToPractice(problem = {}) {
 export function mapRecommendationItemToPractice(item = {}) {
   const problem = item.problem || {}
   const mapped = mapProblemToPractice(problem)
+  const recallSources = String(item.recallSource || '')
+    .split(',')
+    .map(source => source.trim().toLowerCase())
+    .filter(Boolean)
+  const isColdStart = recallSources.includes('fallback')
   const tags = Array.isArray(problem.tags || item.tags)
     ? (problem.tags || item.tags).map(t => typeof t === 'string' ? t : t.tagName || t.name || '')
     : []
@@ -84,10 +89,13 @@ export function mapRecommendationItemToPractice(item = {}) {
     ...mapped,
     id: problem.id || item.problemId || mapped.id,
     problemId: problem.id || item.problemId || mapped.problemId,
-    matchRate: toMatchRatePercent(item.scoreNeedMatch),
-    reason: item.reasonText || '来自个性化推荐',
+    matchRate: isColdStart ? null : toMatchRatePercent(item.scoreNeedMatch),
+    reason: isColdStart
+      ? '当前画像数据不足，系统暂按题目质量提供冷启动推荐。'
+      : (item.reasonText || '来自个性化推荐'),
     source: 'leetcode_recommendation',
     type: 'leetcode_problem',
+    sourceLabel: isColdStart ? '冷启动推荐' : mapped.sourceLabel,
     requestId: item.requestId || null,
     rankNo: item.rankNo || null,
     tags,
