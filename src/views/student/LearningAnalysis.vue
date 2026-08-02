@@ -325,6 +325,17 @@
                 前往强化薄弱题集
               </router-link>
             </section>
+
+            <!-- 重新生成按钮 -->
+            <div class="sug-refresh [text-align:right] [margin-top:16px]">
+              <UiButton
+                class="g-outline-btn [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:6px_16px] [font-size:12px] [color:#5f6368] [cursor:pointer] hover:[background:#f8f9fa]"
+                @click="fetchAiLearningSuggestions(true)"
+                :disabled="aiSuggestionsLoading"
+              >
+                {{ aiSuggestionsLoading ? '重新生成中...' : '🔄 重新生成' }}
+              </UiButton>
+            </div>
           </div>
         </ui-card>
 
@@ -631,7 +642,7 @@ function setEmptyChart(chart, message) {
   })
 }
 
-async function fetchAiLearningSuggestions() {
+async function fetchAiLearningSuggestions(forceRefresh = false) {
   aiSuggestionsLoading.value = true
   aiSuggestionsError.value = ''
   try {
@@ -674,21 +685,18 @@ async function fetchAiLearningSuggestions() {
         count: Math.max(1, Math.round((100 - w.mastery) / 10))
       })
     }
-    if (!errorHistory.length) {
-      aiSuggestions.value = null
-      aiSuggestionsError.value = '暂无错误历史数据，暂无法生成个性化学习建议'
-      return
-    }
+    // errorHistory 可能为空（学生无薄弱点）：仍尝试读取数据库已缓存建议，由后端决定是否生成
 
     const payload = {
       studentId,
       studentName: resolveStudentName(),
       errorHistory,
       skillStates,
-      previousRemark: ''
+      previousRemark: '',
+      forceRefresh
     }
 
-    const res = await api.getLearningSuggestions(payload)
+    const res = await api.getLearningSuggestionsProfile(payload)
     if (res?.success && res?.data) {
       aiSuggestions.value = res.data
     } else if (res?.code === 200 && res?.data) {

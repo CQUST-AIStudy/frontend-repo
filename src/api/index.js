@@ -372,6 +372,11 @@ export default {
     return apiClient.post('/api/analysis/learning', payload, { timeout: 60000 })
   },
 
+  // 画像页专用：数据库优先读取，未命中或 forceRefresh 才生成
+  async getLearningSuggestionsProfile(payload) {
+    return apiClient.post('/api/analysis/learning/profile', payload, { timeout: 60000 })
+  },
+
   async getWarningAnalysis(payload) {
     return apiClient.post('/api/analysis/warning', payload, { timeout: 60000 })
   },
