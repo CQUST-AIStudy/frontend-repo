@@ -88,7 +88,7 @@
         <!-- Weak ranking table card -->
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <h3 class="text-[15px] font-semibold text-[#1d1d1f] mb-4">薄弱维度排行</h3>
-          <div class="overflow-x-auto">
+          <div class="overflow-auto max-h-[350px]">
             <table class="w-full border-separate border-spacing-0 text-[13px]">
               <thead>
                 <tr class="border-b border-black/[0.06]">
@@ -225,7 +225,6 @@ const barChartRef = ref(null)
 let barChartInst = null
 const activeTab = ref('A')
 let requestVersion = 0
-const OVERVIEW_LIMIT = 6
 
 const emptyClassProfile = () => ({
   classId: null,
@@ -336,7 +335,7 @@ const hasDialogChartData = computed(() => hasDialogRadarData.value || hasDialogT
 const hasDialogContent = computed(() => Boolean(
   hasDialogChartData.value || dialogProfile.value?.feedback || dialogProfile.value?.patterns?.length
 ))
-const visibleWeakRanking = computed(() => data.value.weakRanking?.slice(0, OVERVIEW_LIMIT) || [])
+const visibleWeakRanking = computed(() => data.value.weakRanking || [])
 let dialogRadarChart = null
 let dialogTrendChart = null
 
@@ -378,7 +377,6 @@ function getOverviewDimensions() {
       score: toFiniteNumber(data.value.dimensionAvg?.[dimension])
     }))
     .sort((left, right) => left.score - right.score || left.dimension.localeCompare(right.dimension, 'zh-CN'))
-    .slice(0, OVERVIEW_LIMIT)
 }
 
 async function fetchData() {
@@ -472,6 +470,8 @@ function renderBar() {
   const dims = overviewItems.map(item => item.dimension)
   const values = overviewItems.map(item => item.score)
   const scoreScale = getDimensionScoreScale(values)
+  const needsZoom = dims.length > 8
+  const zoomEnd = Math.min(100, Math.max(10, Math.round(800 / dims.length)))
   const chart = echarts.init(barChartRef.value)
   barChartInst = chart
 
@@ -483,6 +483,10 @@ function renderBar() {
         return `${point?.axisValue || ''}<br/>班级均分：${point?.value ?? '-'}分`
       }
     },
+    dataZoom: needsZoom ? [
+      { type: 'inside', start: 0, end: zoomEnd },
+      { type: 'slider', start: 0, end: zoomEnd, height: 16, bottom: 10 }
+    ] : [],
     xAxis: {
       type: 'category',
       data: dims,
@@ -498,7 +502,7 @@ function renderBar() {
       barWidth: '50%',
       label: { show: true, position: 'top', formatter: '{c}', fontSize: 12, fontWeight: 600 }
     }],
-    grid: { left: 50, right: 20, bottom: 30, top: 30 }
+    grid: { left: 50, right: 20, bottom: needsZoom ? 55 : 30, top: 30 }
   })
 }
 
