@@ -69,13 +69,16 @@
         :with-header="false"
         class="layout-drawer"
       >
-        <div class="app-layout-aside layout-aside mobile-aside [width:100%] [border-right:none]">
-          <div class="logo-container">
-            <img src="../../assets/logo.png" alt="Logo" class="logo" />
-            <span class="logo-title">系统管理后台</span>
+        <div class="app-layout-aside layout-aside mobile-aside [width:100%] [border-right:none] flex flex-col h-full">
+          <div class="flex items-center gap-3.5 h-[68px] px-[18px] border-b border-[var(--app-border-soft)] shrink-0">
+            <img src="../../assets/logo.png" alt="Logo" class="w-[38px] h-[38px] rounded-[10px] border border-[var(--app-border-soft)] shadow-sm shrink-0" />
+            <div class="flex flex-col gap-0.5">
+              <span class="text-[11px] font-medium text-[var(--app-text-soft)] uppercase tracking-wide">管理员工作台</span>
+              <span class="text-base font-bold text-[var(--app-text)] tracking-normal whitespace-nowrap">系统管理后台</span>
+            </div>
           </div>
 
-          <ui-scrollbar class="menu-scrollbar">
+          <ui-scrollbar class="menu-scrollbar flex-1 min-h-0">
             <ui-menu
               :default-active="activeMenu"
               class="layout-menu"

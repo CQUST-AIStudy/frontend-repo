@@ -1259,10 +1259,6 @@
     border-right: none;
   }
   
-  .mobile-aside .logo-title {
-    display: inline-flex;
-  }
-  
   @media (max-width: 960px) {
     .layout-header {
         align-items: flex-start;
