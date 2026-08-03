@@ -1307,7 +1307,7 @@ export const UiCol = defineComponent({
   name: 'UiCol',
   props: { span: { type: Number, default: 24 } },
   setup(props, { attrs, slots }) {
-    return () => h('div', { ...attrs, style: [{ gridColumn: `span ${props.span} / span ${props.span}` }, attrs.style], class: cls('ui-col min-w-0 max-[768px]:col-span-24', attrs.class) }, slots.default?.())
+    return () => h('div', { ...attrs, style: [{ gridColumn: `span ${props.span} / span ${props.span}` }, attrs.style], class: cls('ui-col min-w-0 max-[768px]:![grid-column:span_24/span_24]', attrs.class) }, slots.default?.())
   }
 })
 

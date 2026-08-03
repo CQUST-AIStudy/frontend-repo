@@ -20,11 +20,11 @@
     <!-- 正常内容 -->
     <template v-else>
       <!-- ========== 练习时间线 ========== -->
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <h3 class="text-base font-semibold text-[#1d1d1f] mb-4">📅 练习时间线</h3>
 
         <!-- 筛选栏 -->
-        <div class="flex items-center gap-2 mb-5">
+        <div class="flex items-center gap-2 mb-5 flex-wrap">
           <button v-for="f in filters" :key="f.key"
                   @click="setActiveFilter(f.key)"
                   class="px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer"

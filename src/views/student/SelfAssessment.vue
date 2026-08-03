@@ -1,7 +1,7 @@
 <template>
   <div class="self-assessment-container [height:100%]">
     <UiPageHeader
-        class="my-page-header [padding:20px]"
+        class="my-page-header [padding:20px] max-[768px]:[padding:16px]"
       title="自我评估"
       description="评估您在每次实验中实际独立完成的部分，以获得更准确的学习分析"
     />
@@ -25,7 +25,7 @@
         <ui-tabs v-model="activeTab" class="assessment-tabs [margin-top:20px]">
           <ui-tab-pane label="实验自评" name="experiments">
             <ui-card v-for="exp in completedExperiments" :key="exp.id" class="assessment-card [margin-bottom:20px]">
-              <div class="experiment-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:15px]">
+              <div class="experiment-header [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:15px] [flex-wrap:wrap] [gap:10px]">
                 <h3>{{ exp.name }}</h3>
                 <ui-tag type="success" size="small">已完成</ui-tag>
               </div>
@@ -45,7 +45,7 @@
                 </div>
               </div>
 
-              <div class="assessment-form [border:1px_solid_#ebeef5] [border-radius:4px] [padding:20px] [background-color:#f9f9f9] [margin-bottom:15px]">
+              <div class="assessment-form [border:1px_solid_#ebeef5] [border-radius:4px] [padding:20px] [background-color:#f9f9f9] [margin-bottom:15px] max-[640px]:[padding:14px]">
                 <div class="completion-rate [margin-bottom:20px] [display:flex] [flex-wrap:wrap] [align-items:center]">
                   <div class="rate-label [margin-bottom:10px] [color:#606266] [font-weight:500]">独立完成比例：</div>
                   <ui-slider

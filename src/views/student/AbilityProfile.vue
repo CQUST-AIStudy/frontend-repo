@@ -1,13 +1,13 @@
 <template>
   <div class="ability-profile [padding:0] [font-family:var(--font-page)]">
-    <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%]">
+    <div v-if="loading" class="loading-container [padding:40px] [display:flex] [justify-content:center] [align-items:center] [min-height:400px] [width:100%] max-[640px]:[padding:24px]">
       <ui-skeleton :rows="10" animated />
     </div>
     <ui-alert v-else-if="errorMsg" :title="errorMsg" type="warning" show-icon :closable="false" />
     <template v-else>
       <!-- 概览卡片 -->
       <ui-row :gutter="16" class="overview-row [margin-bottom:20px]">
-        <ui-col :span="6" v-for="item in overviewCards" :key="item.label">
+        <ui-col :span="6" v-for="item in overviewCards" :key="item.label" class="overview-col">
           <ui-card shadow="hover" class="stat-card [border-radius:16px] [border:1px_solid_#dadce0] [box-shadow:none] hover:[box-shadow:0_1px_3px_rgba(60,64,67,0.15),_0_4px_8px_rgba(60,64,67,0.08)] [&_.ui-card__body]:[display:flex] [&_.ui-card__body]:[align-items:center] [&_.ui-card__body]:[gap:14px] [&_.ui-card__body]:[padding:18px] [text-align:center] [padding:20px_0] [padding:20px] [background:linear-gradient(135deg,_#f8f9fa,_#f1f3f4)] [border-radius:10px] [flex:1] [min-width:180px] [padding:18px]">
             <div class="stat-icon [width:48px] [height:48px] [border-radius:12px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]" :class="overviewIconClass(item)">
               <ui-icon :size="24" color="#fff"><component :is="item.icon" /></ui-icon>
@@ -25,7 +25,7 @@
         <ui-col :span="12">
           <ui-card shadow="hover">
             <template #header><span class="card-title [font-weight:500] [font-size:15px] [color:#202124] [font-weight:600] [font-size:16px]"><LucideIcon name="target" :size="18" class="mr-2" /> 能力雷达图</span></template>
-            <div ref="radarChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
+            <div ref="radarChartRef" class="chart-box [height:340px] [width:100%] [min-width:0] max-[640px]:[height:240px]"></div>
           </ui-card>
         </ui-col>
         <ui-col :span="12">
@@ -34,7 +34,7 @@
               <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="trend" :size="18" class="mr-2" /> 学期趋势</span>
               <ui-tag :type="trendTagType" size="small" class="[margin-left:8px]" effect="dark">{{ trendText }}</ui-tag>
             </template>
-            <div ref="trendChartRef" class="chart-box [height:340px] [width:100%] [min-width:0]"></div>
+            <div ref="trendChartRef" class="chart-box [height:340px] [width:100%] [min-width:0] max-[640px]:[height:240px]"></div>
           </ui-card>
         </ui-col>
       </ui-row>
@@ -42,7 +42,7 @@
       <!-- AI学习建议 (全宽) -->
       <ui-card shadow="hover" class="feedback-card [margin-top:16px]">
         <template #header>
-          <div class="[display:flex] [align-items:center] [justify-content:space-between]">
+          <div class="[display:flex] [align-items:center] [justify-content:space-between] [flex-wrap:wrap] [gap:8px]">
             <span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="bot" :size="18" class="mr-2" /> AI 学习建议</span>
             <ui-button type="primary" size="small" :loading="refreshingFeedback" @click="handleRefreshFeedback" round>
               {{ refreshingFeedback ? '分析中...' : '重新分析' }}
@@ -53,7 +53,7 @@
           <ui-skeleton :rows="4" animated />
           <div class="feedback-loading-tip [text-align:center] [color:#5f6368] [font-size:13px] [margin-top:12px]">正在调用 DeepSeek 分析学习数据，请稍候...</div>
         </div>
-        <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#d18a61]" v-html="renderedFeedback"></div>
+        <div v-else-if="profile.feedback" class="feedback-content [font-size:14px] [line-height:1.9] [color:#202124] [background:#e6f4ea] [padding:20px_24px] [border-radius:12px] [border-left:4px_solid_#1e8e3e] [background:#f8f9fa] [padding:16px] [border-radius:8px] [border-left:4px_solid_#d18a61] max-[640px]:[padding:14px]" v-html="renderedFeedback"></div>
         <div v-else class="feedback-empty [padding:20px_0]">
           <ui-empty description="暂无AI分析，点击上方按钮生成" :image-size="80" />
         </div>
@@ -109,7 +109,7 @@
         <template #header><span class="card-title [font-weight:600] [font-size:16px] [color:#202124]"><LucideIcon name="tree" :size="18" class="mr-2" /> 技能树详情</span></template>
         <div class="skill-tree [display:flex] [flex-direction:column] [gap:20px]">
           <div v-for="dim in profile.skillTree" :key="dim.dimension" class="tree-dimension [border:1px_solid_#eee] [border-radius:12px] [overflow:hidden] [transition:box-shadow_.2s] hover:[box-shadow:0_2px_12px_rgba(0,0,0,0.06)]">
-            <div class="tree-dim-header [display:flex] [align-items:center] [justify-content:space-between] [padding:14px_18px] [background:#fafafa] [&.dim-good]:[background:linear-gradient(90deg,_#f0f9eb,_#fafafa)] [&.dim-medium]:[background:linear-gradient(90deg,_#fdf6ec,_#fafafa)] [&.dim-weak]:[background:linear-gradient(90deg,_#fef0f0,_#fafafa)]" :class="'dim-' + dim.level">
+            <div class="tree-dim-header [display:flex] [align-items:center] [justify-content:space-between] [padding:14px_18px] [background:#fafafa] [flex-wrap:wrap] [gap:8px] [&.dim-good]:[background:linear-gradient(90deg,_#f0f9eb,_#fafafa)] [&.dim-medium]:[background:linear-gradient(90deg,_#fdf6ec,_#fafafa)] [&.dim-weak]:[background:linear-gradient(90deg,_#fef0f0,_#fafafa)]" :class="'dim-' + dim.level">
               <div class="dim-left [display:flex] [align-items:center] [gap:8px]">
                 <span class="dim-icon"><LucideIcon :name="dimEmoji(dim.dimension)" :size="20" /></span>
                 <span class="dim-name [font-size:16px] [font-weight:700] [color:#303133]">{{ dim.dimension }}</span>
@@ -320,5 +320,14 @@ function handleResize() { radarChart?.resize(); trendChart?.resize() }
 onMounted(() => { fetchProfile(); window.addEventListener('resize', handleResize) })
 onBeforeUnmount(() => { window.removeEventListener('resize', handleResize); radarChart?.dispose(); trendChart?.dispose() })
 </script>
+
+<style scoped>
+/* 概览卡片：中等屏 4 列降 2 列，窄屏由 ui-col 内置规则降单列 */
+@media (max-width: 960px) {
+  .overview-col {
+    grid-column: span 12 / span 12 !important;
+  }
+}
+</style>
 
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[var(--app-bg)] p-6">
+  <div class="min-h-screen bg-[var(--app-bg)] p-6 max-[640px]:p-4">
     <div class="mx-auto max-w-7xl">
       <!-- Header -->
       <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -35,7 +35,7 @@
       <!-- Empty -->
       <div
         v-else-if="!loading && demonstrations.length === 0"
-        class="rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-12 text-center"
+        class="rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-12 text-center max-[640px]:p-8"
       >
         <LucideIcon name="inbox" :size="48" class="mx-auto text-[var(--app-text-soft)]" />
         <p class="mt-4 text-[var(--app-text-soft)]">暂无错误演示内容</p>

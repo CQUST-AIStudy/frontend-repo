@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[var(--app-bg)] p-6">
+  <div class="min-h-screen bg-[var(--app-bg)] p-6 max-[640px]:p-4">
     <div class="mx-auto max-w-7xl">
       <!-- Header -->
       <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -34,7 +34,7 @@
           class="w-full resize-y rounded-lg border border-[var(--app-border-soft)] bg-[var(--app-bg)] p-3 font-mono text-sm text-[var(--app-text)] outline-none focus:border-[var(--app-primary)]"
           :disabled="loading"
         ></textarea>
-        <div class="mt-3 flex items-center gap-3">
+        <div class="mt-3 flex items-center gap-3 flex-wrap">
           <button
             class="inline-flex items-center gap-2 rounded-lg bg-[var(--app-primary)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
             :disabled="loading"

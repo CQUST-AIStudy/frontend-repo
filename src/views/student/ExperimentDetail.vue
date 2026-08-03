@@ -7,7 +7,7 @@
     <loading-state :loading="loading">
       <div v-if="currentExp" class="g-content [display:flex] [flex-direction:column] [gap:16px]">
         <!-- 信息条-->
-        <div class="g-info-bar [display:flex] [align-items:center] [gap:20px] [padding:16px_20px] [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [flex-wrap:wrap]">
+        <div class="g-info-bar [display:flex] [align-items:center] [gap:20px] [padding:16px_20px] [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [flex-wrap:wrap] max-[640px]:[gap:10px] max-[640px]:[padding:12px_14px]">
           <span class="g-chip [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="'c-' + currentExp.status">{{ statusText }}</span>
           <span v-if="hasScore" class="g-info-item [display:flex] [align-items:center] [gap:6px]">
             <span class="g-info-label [font-size:12px] [color:#5f6368]">得分</span>
@@ -72,15 +72,15 @@
 
         <!-- 标签页-->
         <div class="g-card flex flex-col flex-1 min-h-0 [background:#fff] [border-radius:16px] [border:1px_solid_#dadce0] [overflow:hidden]">
-          <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px]">
-            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'"><LucideIcon name="code" :size="16" class="mr-1.5" /> 代码</UiButton>
-            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'" v-if="false"><LucideIcon name="bot" :size="16" class="mr-1.5" /> AI助教点评</UiButton>
-            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed]" :class="{ active: activeTab === 'report' }" @click="activeTab = 'report'" :disabled="!isCompleted"><LucideIcon name="clipboard-text" :size="16" class="mr-1.5" /> 实验报告</UiButton>
-            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8]" :class="{ active: activeTab === 'analysis' }" @click="activeTab = 'analysis'"><LucideIcon name="search" :size="16" class="mr-1.5" /> AI 错误分析</UiButton>
+          <div class="g-tabs [display:flex] [border-bottom:1px_solid_#dadce0] [padding:0_20px] max-[640px]:[padding:0_10px] max-[640px]:[overflow-x:auto]">
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed] max-[640px]:[padding:12px_10px] max-[640px]:[white-space:nowrap] max-[640px]:[flex-shrink:0]" :class="{ active: activeTab === 'code' }" @click="activeTab = 'code'"><LucideIcon name="code" :size="16" class="mr-1.5" /> 代码</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed] max-[640px]:[padding:12px_10px] max-[640px]:[white-space:nowrap] max-[640px]:[flex-shrink:0]" :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'" v-if="false"><LucideIcon name="bot" :size="16" class="mr-1.5" /> AI助教点评</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] disabled:[color:#9aa0a6] disabled:[cursor:not-allowed] max-[640px]:[padding:12px_10px] max-[640px]:[white-space:nowrap] max-[640px]:[flex-shrink:0]" :class="{ active: activeTab === 'report' }" @click="activeTab = 'report'" :disabled="!isCompleted"><LucideIcon name="clipboard-text" :size="16" class="mr-1.5" /> 实验报告</UiButton>
+            <UiButton class="g-tab [background:none] [border:none] [padding:12px_16px] [font-size:14px] [font-weight:500] [color:#5f6368] [cursor:pointer] [border-bottom:2px_solid_transparent] [transition:all_0.2s] [&.active]:[color:#1a73e8] [&.active]:[border-bottom-color:#1a73e8] max-[640px]:[padding:12px_10px] max-[640px]:[white-space:nowrap] max-[640px]:[flex-shrink:0]" :class="{ active: activeTab === 'analysis' }" @click="activeTab = 'analysis'"><LucideIcon name="search" :size="16" class="mr-1.5" /> AI 错误分析</UiButton>
           </div>
 
           <!-- 代码 -->
-          <div v-if="activeTab === 'code'" class="flex flex-col flex-1 min-h-0" style="padding:20px">
+          <div v-if="activeTab === 'code'" class="flex flex-col flex-1 min-h-0 [padding:20px] max-[640px]:[padding:12px]">
             <!-- 空状态 -->
             <div v-if="!hasAnyCode && !hasStudentQuestions" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="file-code" :size="48" /></div>
@@ -95,11 +95,11 @@
               </div>
 
               <!-- 双栏布局 -->
-              <div v-if="displayQuestions.length" class="flex min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden" style="height:min(610px,calc(100vh - 260px));min-height:330px">
+              <div v-if="displayQuestions.length" class="g-code-split flex min-h-0 border border-[#e8eaed] rounded-xl overflow-hidden max-[640px]:flex-col" style="height:min(610px,calc(100vh - 260px));min-height:330px">
                 <!-- 左侧题目导航 -->
-                <div class="flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto min-h-0" style="padding:0 0 16px 0;scrollbar-gutter:stable">
-                  <UiButton @click="activeCodeQuestion = 'full'" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none shrink-0" :class="activeCodeQuestion === 'full' ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">完整源码</UiButton>
-                  <UiButton v-for="(q, i) in displayQuestions" :key="'qn'+i" @click="activeCodeQuestion = String(i)" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none truncate shrink-0" :class="activeCodeQuestion === String(i) ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">第{{ q.number || (i+1) }}题</UiButton>
+                <div class="g-code-split-nav flex flex-col border-r border-[#e8eaed] bg-[#f9f9fb] w-[120px] shrink-0 overflow-y-auto min-h-0 max-[640px]:flex-row max-[640px]:w-auto max-[640px]:overflow-x-auto max-[640px]:border-r-0 max-[640px]:border-b max-[640px]:[border-bottom-color:#e8eaed]" style="padding:0 0 16px 0;scrollbar-gutter:stable">
+                  <UiButton @click="activeCodeQuestion = 'full'" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none shrink-0 max-[640px]:whitespace-nowrap" :class="activeCodeQuestion === 'full' ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">完整源码</UiButton>
+                  <UiButton v-for="(q, i) in displayQuestions" :key="'qn'+i" @click="activeCodeQuestion = String(i)" class="px-3 py-2.5 text-[13px] font-medium text-left border-none cursor-pointer rounded-none truncate shrink-0 max-[640px]:whitespace-nowrap" :class="activeCodeQuestion === String(i) ? 'bg-white text-[#1a73e8] shadow-[inset_3px_0_0_#1a73e8]' : 'bg-transparent text-[#5f6368] hover:bg-white/60'">第{{ q.number || (i+1) }}题</UiButton>
                 </div>
                 <!-- 右侧：代码 + 测试点 -->
                 <div class="flex-1 flex flex-col min-h-0">
@@ -135,7 +135,7 @@
                         </CodeViewer>
                         <div v-else class="flex items-center justify-center h-full text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
                         <!-- 测试点浮层（覆盖在代码右上角） -->
-                        <div v-if="expandedTestResults[i] && q.testResults" class="absolute right-0 top-0 w-[36%] min-w-[260px] bg-white/97 backdrop-blur-sm border-l border-b border-[#d0d7de] shadow-[-8px_0_24px_rgba(0,0,0,0.1)] flex flex-col rounded-l-xl rounded-br-xl z-10 max-h-[220px]">
+                        <div v-if="expandedTestResults[i] && q.testResults" class="absolute right-0 top-0 w-[36%] min-w-[260px] bg-white/97 backdrop-blur-sm border-l border-b border-[#d0d7de] shadow-[-8px_0_24px_rgba(0,0,0,0.1)] flex flex-col rounded-l-xl rounded-br-xl z-10 max-h-[220px] max-[640px]:w-full max-[640px]:min-w-0 max-[640px]:max-h-[60%] max-[640px]:rounded-none">
                           <div class="flex items-center justify-between px-3 py-2 bg-[#f6f8fa] border-b border-[#e0e0e0] shrink-0 rounded-tl-xl">
                             <span class="text-[12px] font-semibold text-[#24292f]">测试点</span>
                             <button @click="toggleTestResults(i)" class="text-[11px] text-[#57606a] bg-transparent border-none cursor-pointer hover:text-[#24292f]">收起</button>
@@ -176,8 +176,8 @@
           </div>
 
           <!-- AI点评 -->
-          <div v-if="activeTab === 'ai'" class="g-tab-body [padding:20px]">
-            <div class="g-toolbar [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px]">
+          <div v-if="activeTab === 'ai'" class="g-tab-body [padding:20px] max-[640px]:[padding:14px]">
+            <div class="g-toolbar [display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:12px] [flex-wrap:wrap] [gap:8px]">
               <div class="g-ai-badge [display:flex] [align-items:center] [gap:8px] [font-size:14px] [font-weight:500] [color:#202124]">
                 <span class="g-ai-dot [width:8px] [height:8px] [border-radius:50%] [background:#1e8e3e] [animation:pulse_2s_infinite]"></span> AI 助教点评
                 <span v-if="aiSource === 'cache'" class="g-chip c-info [display:inline-block] [font-size:11px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#f1f3f4] [color:#5f6368]">已缓存</span>
@@ -194,7 +194,7 @@
                 正在调用 DeepSeek 分析代码，预计需要10-20 秒..
               </div>
             </div>
-            <div v-else-if="hasAiComment" class="g-ai-content markdown-body [background:#f8f9fa] [padding:24px] [border-radius:12px] [border:1px_solid_#e8eaed] [font-size:14px] [line-height:1.8] [color:#202124] [&_h1]:[color:#202124] [&_h1]:[margin:20px_0_10px] [&_h1]:[font-size:16px] [&_h2]:[color:#202124] [&_h2]:[margin:20px_0_10px] [&_h2]:[font-size:16px] [&_h3]:[color:#202124] [&_h3]:[margin:20px_0_10px] [&_h3]:[font-size:16px] [&_h3]:[font-size:15px] [&_p]:[margin:8px_0] [&_p]:[line-height:1.8] [&_ul]:[padding-left:20px] [&_ul]:[margin:8px_0] [&_ol]:[padding-left:20px] [&_ol]:[margin:8px_0] [&_li]:[margin:4px_0] [&_strong]:[color:#1a73e8] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_blockquote]:[border-left:4px_solid_#1a73e8] [&_blockquote]:[padding:8px_16px] [&_blockquote]:[margin:10px_0] [&_blockquote]:[background:#e8f0fe] [&_blockquote]:[border-radius:0_8px_8px_0] [&_blockquote]:[color:#5f6368]" v-html="renderedAiComment"></div>
+            <div v-else-if="hasAiComment" class="g-ai-content markdown-body [background:#f8f9fa] [padding:24px] [border-radius:12px] [border:1px_solid_#e8eaed] [font-size:14px] [line-height:1.8] [color:#202124] max-[640px]:[padding:16px] [&_h1]:[color:#202124] [&_h1]:[margin:20px_0_10px] [&_h1]:[font-size:16px] [&_h2]:[color:#202124] [&_h2]:[margin:20px_0_10px] [&_h2]:[font-size:16px] [&_h3]:[color:#202124] [&_h3]:[margin:20px_0_10px] [&_h3]:[font-size:16px] [&_h3]:[font-size:15px] [&_p]:[margin:8px_0] [&_p]:[line-height:1.8] [&_ul]:[padding-left:20px] [&_ul]:[margin:8px_0] [&_ol]:[padding-left:20px] [&_ol]:[margin:8px_0] [&_li]:[margin:4px_0] [&_strong]:[color:#1a73e8] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:13px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:16px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_blockquote]:[border-left:4px_solid_#1a73e8] [&_blockquote]:[padding:8px_16px] [&_blockquote]:[margin:10px_0] [&_blockquote]:[background:#e8f0fe] [&_blockquote]:[border-radius:0_8px_8px_0] [&_blockquote]:[color:#5f6368]" v-html="renderedAiComment"></div>
             <div v-else class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="bot" :size="48" /></div>
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">{{ isCompleted ? '暂无AI点评' : '请先完成实验' }}</div>
@@ -204,7 +204,7 @@
           </div>
 
           <!-- 报告 -->
-          <div v-if="activeTab === 'report'" class="g-tab-body [padding:20px]">
+          <div v-if="activeTab === 'report'" class="g-tab-body [padding:20px] max-[640px]:[padding:14px]">
             <div v-if="!isCompleted" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">完成实验后可生成报告</div>
             </div>
@@ -217,7 +217,7 @@
           </div>
 
           <!-- AI错误分析（点击触发 → 功能一：代码诊断 + 条件触发 功能二：主动干预） -->
-          <div v-if="activeTab === 'analysis'" class="g-tab-body [padding:20px]">
+          <div v-if="activeTab === 'analysis'" class="g-tab-body [padding:20px] max-[640px]:[padding:14px]">
             <!-- 未分析 / 空状态 -->
             <div v-if="!errorChecked && !errorLoading && !errorAnalysisData" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
@@ -258,7 +258,7 @@
 
                 <!-- 提交代码（多题目 tab 切换） -->
                 <div v-if="displayQuestions.length || errorAnalysisData.latestCode || errorAnalysisData.latestJudgeStatus" class="g-latest-submission [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:14px]">
-                  <div class="g-latest-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px]">
+                  <div class="g-latest-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px] [flex-wrap:wrap]">
                     <span class="g-latest-label [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
                     <span v-if="errorAnalysisData.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(errorAnalysisData.latestJudgeStatus)">
                       判题结果：{{ judgeStatusLabel(errorAnalysisData.latestJudgeStatus) }}
@@ -798,5 +798,22 @@ onMounted(async () => {
   finally { loading.value = false }
 })
 </script>
+
+<style scoped>
+/* 窄屏下空状态与信息条内边距收紧，避免内容撑破小屏 */
+@media (max-width: 640px) {
+  .g-empty {
+    padding: 32px 16px !important;
+  }
+
+  .g-empty-text {
+    font-size: 16px !important;
+  }
+
+  .g-empty-sub {
+    font-size: 13px !important;
+  }
+}
+</style>
 
 

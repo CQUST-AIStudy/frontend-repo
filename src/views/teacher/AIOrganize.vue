@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full">
     <!-- Hero -->
-    <div class="rounded-[14px] bg-gradient-to-br from-[var(--app-primary)] to-[#4285f4] px-9 py-7 mb-6 text-white relative overflow-hidden">
+    <div class="rounded-[14px] bg-gradient-to-br from-[var(--app-primary)] to-[#4285f4] px-9 py-7 mb-6 text-white relative overflow-hidden max-[640px]:px-4 max-[640px]:py-5">
       <div>
         <h1 class="m-0 mb-1 text-2xl font-bold">AI 智能整理</h1>
         <p class="m-0 text-sm opacity-90">支持文档中心整理和隔离 ZIP 整理。ZIP 模式不会把文件写入文档中心，只返回整理后的结果包。</p>
@@ -9,9 +9,9 @@
     </div>
 
     <!-- Cards Grid -->
-    <div class="grid grid-cols-[repeat(auto-fit,_minmax(420px,_1fr))] gap-5">
+    <div class="grid grid-cols-[repeat(auto-fit,_minmax(min(420px,100%),_1fr))] gap-5">
       <!-- Upload Card -->
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <div class="flex items-center gap-2.5 mb-2.5">
           <span class="text-sm text-[var(--app-primary)] font-bold min-w-[30px]">上传</span>
           <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">上传与提交</h3>
@@ -24,7 +24,7 @@
           <UiInput
             v-model="folderName"
             placeholder="文件夹名称（可选）"
-            class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm"
+            class="w-[240px] h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm max-[640px]:w-full"
           />
           <div class="flex rounded-[10px] overflow-hidden border border-black/10">
             <UiButton
@@ -150,7 +150,7 @@
       </div>
 
       <!-- Progress Card -->
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <div class="flex items-center gap-2.5 mb-2.5">
           <span class="text-sm text-[var(--app-primary)] font-bold min-w-[30px]">任务</span>
           <h3 class="m-0 text-[17px] font-semibold text-[#1d1d1f]">整理进度</h3>
@@ -192,7 +192,7 @@
 
           <!-- Result Section -->
           <template v-if="jobData?.status === 'SUCCEEDED' && resultData">
-            <div class="flex gap-6 my-4">
+            <div class="flex gap-6 my-4 max-[640px]:gap-4">
               <div class="text-center">
                 <span class="block text-[28px] font-bold text-[var(--app-primary)]">{{ resultData.totalFiles || 0 }}</span>
                 <span class="text-[13px] text-[#6e6e73] mt-1">文件</span>

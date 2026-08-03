@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full">
     <!-- 顶部 -->
-    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6 flex items-center">
+    <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 mb-6 flex items-center max-[640px]:p-4">
       <div class="flex items-center gap-4">
         <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#fbf1eb] text-[#d18a61]">
           <LucideIcon name="book-open" :size="26" />
@@ -14,10 +14,10 @@
     </div>
 
     <!-- Tab 切换 -->
-    <div class="flex gap-0 mb-5 border-b border-black/[0.06]">
+    <div class="flex gap-0 mb-5 border-b border-black/[0.06] max-[640px]:overflow-x-auto">
       <div v-for="t in tabs" :key="t.key"
         :class="[
-          'flex items-center gap-2 px-4 py-3 text-sm cursor-pointer transition-all border-b-2',
+          'flex items-center gap-2 px-4 py-3 text-sm cursor-pointer transition-all border-b-2 whitespace-nowrap shrink-0',
           activeTab === t.key
             ? 'border-[var(--app-primary)] text-[var(--app-primary)] font-medium'
             : 'border-transparent text-[#6e6e73] hover:text-[#1d1d1f]'
@@ -29,7 +29,7 @@
     </div>
 
     <!-- arXiv -->
-    <div v-if="activeTab === 'arxiv'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+    <div v-if="activeTab === 'arxiv'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
       <p class="text-[#6e6e73] text-[13px] m-0 mb-4">输入 arXiv ID，自动抓取论文全文并生成精读卡（首次抓取可能需要30-60 秒）</p>
       <div class="flex gap-2.5 items-center flex-wrap">
         <UiInput v-model="arxivId" placeholder="例如：706.03762"
@@ -52,7 +52,7 @@
     </div>
 
     <!-- DOI -->
-    <div v-if="activeTab === 'doi'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+    <div v-if="activeTab === 'doi'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
       <p class="text-[#6e6e73] text-[13px] m-0 mb-4">输入论文 DOI，通过 Crossref 获取元数据并生成精读卡</p>
       <div class="flex gap-2.5 items-center flex-wrap">
         <UiInput v-model="doi" placeholder="例如：0.1145/3292500.3330919"
@@ -66,7 +66,7 @@
     </div>
 
     <!-- 粘贴文本 -->
-    <div v-if="activeTab === 'freetext'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+    <div v-if="activeTab === 'freetext'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
       <p class="text-[#6e6e73] text-[13px] m-0 mb-4">粘贴论文标题和摘要，快速生成精读卡</p>
       <UiInput v-model="ftTitle" placeholder="论文标题"
         class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm mb-3" />
@@ -79,7 +79,7 @@
     </div>
 
     <!-- 文档精读 -->
-    <div v-if="activeTab === 'doc'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+    <div v-if="activeTab === 'doc'" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
       <p class="text-[#6e6e73] text-[13px] m-0 mb-4">对已上传的本地文档生成精读卡</p>
       <div class="flex gap-2.5 items-center flex-wrap">
         <UiSelect v-model="docId"

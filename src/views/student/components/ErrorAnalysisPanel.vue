@@ -1,7 +1,7 @@
 <template>
   <div class="error-analysis-panel">
     <!-- 空状态：无提交记录 -->
-    <div v-if="!submissions || submissions.length === 0" class="g-empty [text-align:center] [padding:48px_20px]">
+    <div v-if="!submissions || submissions.length === 0" class="g-empty [text-align:center] [padding:48px_20px] max-[640px]:[padding:32px_16px]">
       <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
       <div class="g-empty-text [font-size:16px] [font-weight:500] [color:#202124] [margin-bottom:6px]">暂无提交记录</div>
       <div class="g-empty-sub [font-size:13px] [color:#5f6368]">请先提交代码到PTA平台，系统将自动分析错误并提供学习建议</div>
@@ -36,7 +36,7 @@
         <div
           v-for="(s, idx) in submissions"
           :key="idx"
-          class="g-submission-row [display:flex] [align-items:flex-start] [gap:12px] [padding:12px_16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:8px] [border:1px_solid_#e8eaed]"
+          class="g-submission-row [display:flex] [align-items:flex-start] [gap:12px] [padding:12px_16px] [background:#f8f9fa] [border-radius:8px] [margin-bottom:8px] [border:1px_solid_#e8eaed] max-[640px]:[padding:10px_12px]"
         >
           <span class="g-attempt-badge [display:inline-flex] [align-items:center] [justify-content:center] [min-width:28px] [height:28px] [border-radius:50%] [font-size:12px] [font-weight:600] [flex-shrink:0]"
             :class="'badge-' + (s.judgeStatus || 'UNKNOWN').toLowerCase()">
@@ -74,7 +74,7 @@
       <!-- 分析结果 -->
       <div v-if="hasResult && !analyzing" class="g-analysis-result">
         <!-- 总体评估 -->
-        <div class="g-result-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:12px] [padding:20px] [margin-bottom:16px]">
+        <div class="g-result-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:12px] [padding:20px] [margin-bottom:16px] max-[640px]:[padding:14px]">
           <div class="g-result-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:12px]">
             <span class="g-result-icon [font-size:20px]">{{ severityIcon(result.severity) }}</span>
             <span class="g-result-title [font-size:15px] [font-weight:600] [color:#202124]">AI 错误分析报告</span>
@@ -94,7 +94,7 @@
           <div
             v-for="(cat, ci) in result.errorCategories"
             :key="ci"
-            class="g-error-category [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:16px] [margin-bottom:12px]"
+            class="g-error-category [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:16px] [margin-bottom:12px] max-[640px]:[padding:12px]"
           >
             <div class="g-cat-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
               <span class="g-cat-type [font-size:13px] [font-weight:600] [color:#202124]">{{ cat.type }}</span>
@@ -152,7 +152,7 @@
       </div>
 
       <!-- 无结果提示 -->
-      <div v-if="!analyzing && !hasResult && analysisAttempted" class="g-empty [text-align:center] [padding:24px_20px]">
+      <div v-if="!analyzing && !hasResult && analysisAttempted" class="g-empty [text-align:center] [padding:24px_20px] max-[640px]:[padding:20px_14px]">
         <div class="g-empty-sub [font-size:13px] [color:#5f6368]">分析失败，请稍后重试</div>
       </div>
     </div>

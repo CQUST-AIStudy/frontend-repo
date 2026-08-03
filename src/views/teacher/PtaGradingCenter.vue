@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[var(--app-bg)] p-6">
+  <div class="min-h-screen bg-[var(--app-bg)] p-6 max-[640px]:p-4">
     <div class="mx-auto max-w-7xl">
       <!-- Header -->
       <div class="mb-6">
@@ -63,8 +63,8 @@
       <!-- 学生列表 -->
       <div v-if="loadError" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{{ loadError }}</div>
 
-      <div v-else-if="students.length" class="overflow-hidden rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)]">
-        <table class="w-full border-collapse text-sm">
+      <div v-else-if="students.length" class="overflow-x-auto rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)]">
+        <table class="w-full min-w-[760px] border-collapse text-sm">
           <thead>
             <tr class="border-b border-[var(--app-border-soft)] text-left text-xs text-[#6e6e73]">
               <th class="px-4 py-3 font-medium">学号</th>

@@ -1836,12 +1836,6 @@
     border-radius: 10px;
   }
   
-  @media (max-width: 768px) {
-    .checkbox-grid {
-        grid-template-columns: 1fr;
-      }
-  }
-  
   /* src/views/teacher/ClassAnalysis.vue */
   
   .loading-container,

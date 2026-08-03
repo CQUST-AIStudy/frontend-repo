@@ -7,9 +7,9 @@
 
     <!-- Rubrics Card -->
     <div :class="cardClass">
-      <div class="flex justify-between items-center mb-5">
+      <div class="flex justify-between items-center mb-5 max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-3">
         <span class="text-[15px] font-medium text-[#1d1d1f]">我的评分标准</span>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center max-[640px]:flex-wrap">
           <UiButton @click="pickTemplate" :disabled="drafting"
             class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed">
             <span v-if="drafting" class="inline-flex items-center gap-1.5">
@@ -87,17 +87,17 @@
         ]">权重合计: {{ weightSum }}%</span>
       </div>
 
-      <div v-for="(dim, i) in form.dimensions" :key="i" class="flex gap-2 mb-2 items-center">
+      <div v-for="(dim, i) in form.dimensions" :key="i" class="flex gap-2 mb-2 items-center max-[640px]:flex-col max-[640px]:items-stretch">
         <UiInput v-model="dim.name" placeholder="维度名称"
-          class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
+          class="w-[150px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm max-[640px]:w-full" />
         <UiInput v-model="dim.description" placeholder="描述"
-          class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
+          class="flex-1 h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm max-[640px]:w-full" />
         <UiInput v-model.number="dim.maxScore" type="number" min="1" max="100" placeholder="满分"
-          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm max-[640px]:w-full" />
         <UiInput v-model.number="dim.weight" type="number" min="1" max="100" placeholder="权重%"
-          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm" />
+          class="w-[90px] h-9 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(var(--app-primary-rgb),0.15),inset_0_0_0_1px_rgba(var(--app-primary-rgb),0.5)] transition-all outline-none text-sm max-[640px]:w-full" />
         <UiButton @click="form.dimensions.splice(i, 1)"
-          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none">删除</UiButton>
+          class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#c44b3f] bg-[rgba(196,75,63,0.08)] hover:bg-[rgba(196,75,63,0.12)] active:scale-[0.96] transition-all cursor-pointer border-none max-[640px]:w-full">删除</UiButton>
       </div>
       <UiButton @click="addDimension"
         class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</UiButton>
@@ -151,7 +151,7 @@ const formatRubricTime = value => formatDate(value, 'YYYY-MM-DD HH:mm:ss') || '-
 const cardClass = computed(() =>
   props.embedded
     ? ''
-    : 'rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6'
+    : 'rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4'
 )
 
 async function loadRubrics() {

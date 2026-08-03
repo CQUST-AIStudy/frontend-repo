@@ -8,7 +8,7 @@
 
     <div class="flex flex-col gap-5 mb-10 py-2.5">
       <!-- Form Card -->
-      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <div class="flex items-start gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <span class="text-[15px] font-semibold text-[#1d1d1f]">分析配置</span>
           <div class="flex flex-wrap gap-2.5 text-[12px] text-[#86868b] ml-auto" v-if="courseData">
@@ -21,7 +21,7 @@
         <div class="pt-1">
           <div class="mb-4">
             <label class="block text-[13px] font-medium text-[#6e6e73] mb-3">分析内容</label>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-3 max-[640px]:grid-cols-1">
               <label class="flex items-center gap-2.5 p-3 rounded-[10px] bg-[#f5f5f7] cursor-pointer transition-all hover:bg-[#ededf0] has-[:checked]:bg-[rgba(194,112,62,0.08)] has-[:checked]:shadow-[inset_0_0_0_1.5px_rgba(194,112,62,0.4)]">
                 <UiInput type="checkbox" v-model="analysisForm.content" value="learning_status" class="w-4 h-4 rounded accent-[var(--app-primary)]" />
                 <span class="text-[13px] text-[#1d1d1f]">学习状态分析</span>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Data Loading Card -->
-      <div v-if="dataLoading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div v-if="dataLoading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <div class="flex items-center gap-2.5 py-5 text-[#86868b]">
           <Loading class="w-6 h-6 animate-spin text-[var(--app-primary)]" />
           <span class="text-[14px]">正在加载课程数据...</span>
@@ -75,7 +75,7 @@
       </div>
 
       <!-- Result Card -->
-      <div v-if="aiContent || loading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
+      <div v-if="aiContent || loading" class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6 max-[640px]:p-4">
         <div class="flex items-center gap-3 mb-4 pb-2.5 border-b border-black/[0.06]">
           <div class="flex items-center gap-2.5">
             <span class="text-[15px] font-semibold text-[#1d1d1f]">AI 教学建议</span>

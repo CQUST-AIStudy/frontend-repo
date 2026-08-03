@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-full">
     <!-- 顶部横幅 -->
-    <div class="flex items-center justify-between bg-white rounded-[16px] p-[28px_32px] mb-6 border border-black/[0.06]">
+    <div class="flex items-center justify-between bg-white rounded-[16px] p-[28px_32px] mb-6 border border-black/[0.06] max-[640px]:flex-col max-[640px]:items-start max-[640px]:p-[20px] max-[640px]:gap-4">
       <div>
         <h1 class="m-0 mb-1.5 text-[22px] font-normal text-[#1d1d1f]">文档中心</h1>
         <p class="m-0 text-sm text-[#6e6e73]">上传、管理教学文档，一键翻译或 AI 精读</p>
       </div>
-      <div class="flex gap-2.5">
+      <div class="flex gap-2.5 max-[640px]:flex-wrap">
         <UiButton
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-white bg-gradient-to-b from-[#d49068] to-[var(--app-primary)] shadow-[0_2px_8px_rgba(194,112,62,0.25)] hover:-translate-y-px active:scale-[0.96] transition-all cursor-pointer border-none inline-flex items-center gap-1.5"
           @click="showUpload = true"
@@ -78,7 +78,7 @@
     </AppDrawer>
 
     <!-- 文档列表 -->
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4" :aria-busy="docsLoading">
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4" :aria-busy="docsLoading">
       <!-- 空状态 -->
       <div v-if="docs.length === 0 && !docsLoading" class="col-span-full flex flex-col items-center justify-center py-20">
         <svg class="w-16 h-16 text-[#c7c7cc] mb-4" viewBox="0 0 64 64" fill="none">
@@ -91,7 +91,7 @@
       <!-- 文档卡片 -->
       <div
         v-for="doc in docs" :key="doc.id"
-        class="flex items-center gap-3.5 bg-white rounded-[16px] p-[18px_20px] border border-black/[0.06] transition-all hover:shadow-[0_1px_3px_rgba(60,64,67,0.15),0_4px_8px_rgba(60,64,67,0.08)] hover:-translate-y-px"
+        class="flex items-center gap-3.5 bg-white rounded-[16px] p-[18px_20px] border border-black/[0.06] transition-all hover:shadow-[0_1px_3px_rgba(60,64,67,0.15),0_4px_8px_rgba(60,64,67,0.08)] hover:-translate-y-px max-[640px]:p-4"
       >
         <div class="w-12 h-12 rounded-xl bg-[#e8f0fe] flex items-center justify-center shrink-0">
           <span class="text-[var(--app-primary)] text-[11px] font-semibold tracking-wide">{{ getExt(doc.filename) }}</span>

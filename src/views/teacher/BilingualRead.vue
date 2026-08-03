@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full">
     <!-- Hero -->
-    <div class="flex items-center gap-4 p-7 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+    <div class="flex items-center gap-4 p-7 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:p-4 max-[640px]:flex-wrap">
       <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#fbf1eb] text-[#d18a61]">
         <LucideIcon name="globe" :size="26" />
       </div>
@@ -12,7 +12,7 @@
     </div>
 
     <!-- Control Panel -->
-    <div class="flex items-center gap-3 flex-wrap p-4 px-5 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+    <div class="flex items-center gap-3 flex-wrap p-4 px-5 mb-6 rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)] max-[640px]:p-3.5">
       <UiSelect v-model="docId" @change="onDocChange" class="flex-1 min-w-[200px] h-10 px-3.5 rounded-[10px] bg-[rgba(245,245,247,0.8)] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] text-sm text-[#1d1d1f] outline-none transition-all focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] appearance-none cursor-pointer">
         <UiOption value="" disabled>选择文档</UiOption>
         <UiOption v-for="d in docs" :key="d.id" :value="String(d.id)">{{ d.filename }} ({{ (d.sizeBytes/1024).toFixed(0) }} KB)</UiOption>
@@ -51,16 +51,16 @@
       <div class="flex justify-between items-center mb-3">
         <span class="text-[13px] text-[#6e6e73]">共 {{ segments.length }} 段</span>
       </div>
-      <div v-for="seg in segments" :key="seg.index" class="flex items-stretch gap-0 bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-        <div class="w-11 flex items-center justify-center bg-[#f9f9f9] text-[#aeaeb2] text-[13px] font-medium shrink-0 border-r border-black/[0.06]">{{ seg.index + 1 }}</div>
-        <div class="flex-1 p-4 px-5">
+      <div v-for="seg in segments" :key="seg.index" class="flex items-stretch gap-0 bg-white rounded-2xl overflow-hidden border border-black/[0.06] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] max-[640px]:flex-col">
+        <div class="w-11 flex items-center justify-center bg-[#f9f9f9] text-[#aeaeb2] text-[13px] font-medium shrink-0 border-r border-black/[0.06] max-[640px]:w-full max-[640px]:border-r-0 max-[640px]:border-b max-[640px]:py-1.5">{{ seg.index + 1 }}</div>
+        <div class="flex-1 p-4 px-5 max-[640px]:px-3.5 max-[640px]:py-3">
           <div class="text-[11px] font-medium uppercase text-[var(--app-primary)] mb-2 tracking-wide">原文</div>
-          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.source }}</div>
+          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap break-words">{{ seg.source }}</div>
         </div>
-        <div class="w-px bg-black/[0.06] shrink-0"></div>
-        <div class="flex-1 p-4 px-5">
+        <div class="w-px bg-black/[0.06] shrink-0 max-[640px]:w-full max-[640px]:h-px"></div>
+        <div class="flex-1 p-4 px-5 max-[640px]:px-3.5 max-[640px]:py-3">
           <div class="text-[11px] font-medium uppercase text-[#6b8f6b] mb-2 tracking-wide">译文</div>
-          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap">{{ seg.target }}</div>
+          <div class="text-sm leading-[1.8] text-[#1d1d1f] whitespace-pre-wrap break-words">{{ seg.target }}</div>
         </div>
       </div>
     </div>
