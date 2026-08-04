@@ -256,19 +256,13 @@ async function runAnalysis() {
   result.value = {}
 
   try {
-    // 1. 先触发异步分析管线
-    try {
-      await api.triggerErrorAnalysis(props.experimentId)
-    } catch (triggerErr) {
-      logger.warn('触发异步分析失败，尝试同步分析:', triggerErr)
-    }
-
-    // 2. 构建同步分析请求
+    // 每次点击只发起一次分析，避免异步管线和同步请求重复调用模型。
     const payload = {
       studentId: String(props.studentId || ''),
       studentName: String(props.studentName || ''),
       experimentId: Number(props.experimentId),
       experimentName: String(props.experimentName || ''),
+      forceRefresh: true,
       problemTitle: props.submissions[0]?.problemTitle || props.experimentName || '',
       submissions: props.submissions.map((s, i) => ({
         attemptNo: s.attemptNo || (i + 1),
@@ -282,7 +276,7 @@ async function runAnalysis() {
       }))
     }
 
-    // 3. 调用错误分析 API
+    // 调用错误分析 API
     const analysisRes = await api.analyzeError(payload)
     const analysisData = analysisRes?.data || analysisRes
 
@@ -317,14 +311,18 @@ async function runAnalysis() {
       submissions: payload.submissions
     }
 
-    const warningRes = await api.getWarningAnalysis(warningPayload)
-    const warningData = warningRes?.data || warningRes
+    try {
+      const warningRes = await api.getWarningAnalysis(warningPayload)
+      const warningData = warningRes?.data || warningRes
 
-    if (warningData?.triggered) {
-      emit('warning-triggered', warningData)
-      if (warningData.warning?.warningMessage) {
-        uiMessage.warning(warningData.warning.warningMessage)
+      if (warningData?.triggered) {
+        emit('warning-triggered', warningData)
+        if (warningData.warning?.warningMessage) {
+          uiMessage.warning(warningData.warning.warningMessage)
+        }
       }
+    } catch (warningErr) {
+      logger.warn('预警分析失败，不影响已生成的 AI 错误分析:', warningErr)
     }
 
     // 5. 如果分析成功但缺少学习建议，则单独获取

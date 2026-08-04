@@ -283,7 +283,12 @@
                 <div class="g-section-header [display:flex] [align-items:center] [justify-content:space-between] [margin-bottom:12px]">
                   <span class="g-section-title [font-size:17px] [font-weight:500] [color:#202124]">
                     代码错误诊断
-                    <span v-if="!errorAnalysisData.aiGenerated" class="g-chip c-warning [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [background:#fef7e0] [color:#e37400] [margin-left:8px]">规则引擎</span>
+                    <span
+                      v-if="analysisSourceLabel"
+                      class="g-chip [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [margin-left:8px]"
+                      :class="analysisSourceClass"
+                      :title="analysisSourceTitle"
+                    >{{ analysisSourceLabel }}</span>
                   </span>
                   <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:14px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">重新分析</UiButton>
                 </div>
@@ -292,13 +297,13 @@
                 <div v-if="displayQuestions.length || errorAnalysisData.latestCode || errorAnalysisData.latestJudgeStatus" class="g-latest-submission [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:14px]">
                   <div class="g-latest-header [display:flex] [align-items:center] [gap:10px] [margin-bottom:8px] [flex-wrap:wrap]">
                     <span class="g-latest-label [font-size:14px] [font-weight:500] [color:#202124]">提交代码</span>
-                    <span v-if="errorAnalysisData.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(errorAnalysisData.latestJudgeStatus)">
-                      判题结果：{{ judgeStatusLabel(errorAnalysisData.latestJudgeStatus) }}
+                    <span v-if="currentAnalysisData?.latestJudgeStatus" class="g-judge-badge [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500]" :class="judgeBadgeClass(currentAnalysisData.latestJudgeStatus)">
+                      判题结果：{{ judgeStatusLabel(currentAnalysisData.latestJudgeStatus) }}
                     </span>
                   </div>
                   <!-- 题目标签栏 -->
                   <div v-if="displayQuestions.length > 1" class="flex items-center gap-1 mb-0 border-b border-[#e8eaed] overflow-x-auto" style="margin:0 -16px 12px -16px;padding:0 16px">
-                    <button v-for="(q, i) in displayQuestions" :key="i"
+                    <button v-for="(q, i) in displayQuestions" :key="q.problemId || q.problemNo || i"
                       @click="analysisActiveProblemIndex = i"
                       style="border:none;cursor:pointer;white-space:nowrap;background:none;padding:8px 14px 10px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:all 0.2s"
                       :style="analysisActiveProblemIndex === i
@@ -315,40 +320,45 @@
                   />
                   <div v-else-if="displayQuestions.length" class="text-center py-12 text-[13px] text-[#9aa0a6]">本题暂无代码提交</div>
                   <!-- Fallback: 单题 -->
-                  <CodeViewer v-else-if="errorAnalysisData.latestCode" :code="errorAnalysisData.latestCode" language="cpp" maxHeight="400px" />
+                  <CodeViewer v-else-if="currentAnalysisData?.latestCode" :code="currentAnalysisData.latestCode" language="cpp" maxHeight="400px" />
                 </div>
 
-                <!-- 全 AC / 无错误 正面反馈 -->
-                <div v-if="!errorAnalysisData.errorCategories?.length" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
-                  <div class="g-all-clear-icon [margin-bottom:8px]"><LucideIcon name="party-popper" :size="28" /></div>
-                  <div class="g-all-clear-text [font-size:17px] [font-weight:500] [color:#137333] [margin-bottom:4px]">未检测到错误，所有提交均已通过！</div>
-                  <div class="g-all-clear-sub [font-size:15px] [color:#3c4043]">以下是代码优化和进阶学习建议</div>
+                <div v-if="!currentAnalysisData" class="g-assessment [background:#f8f9fa] [border:1px_solid_#e8eaed] [padding:16px_20px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#5f6368] [margin-bottom:14px] [text-align:center]">
+                  该题当前没有可量化错误记录
                 </div>
 
-                <!-- 总体评估 -->
-                <div v-if="errorAnalysisData.overallAssessment" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
-                  {{ errorAnalysisData.overallAssessment }}
-                </div>
+                <template v-else>
+                  <!-- 全 AC / 无错误 正面反馈 -->
+                  <div v-if="!currentAnalysisData.errorCategories?.length" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
+                    <div class="g-all-clear-icon [margin-bottom:8px]"><LucideIcon name="party-popper" :size="28" /></div>
+                    <div class="g-all-clear-text [font-size:17px] [font-weight:500] [color:#137333] [margin-bottom:4px]">本题未检测到错误，当前提交已通过</div>
+                  </div>
 
-                <!-- 错误分类 + 修改建议 -->
-                <div v-for="(cat, idx) in errorAnalysisData.errorCategories" :key="idx" class="g-error-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:10px]">
-                  <div class="g-error-card-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
-                    <span class="g-error-type-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:4px] [font-weight:500]" :class="errorBadgeClass(cat.type)">
-                      {{ errorTypeLabel(cat.type) }}
-                    </span>
-                    <span class="g-error-count [font-size:14px] [color:#5f6368]">{{ cat.count }}次</span>
-                    <span v-if="cat.isSystemic" class="g-chip c-danger [display:inline-block] [font-size:12px] [padding:1px_6px] [border-radius:100px] [font-weight:500] [background:#fce8e6] [color:#c5221f]">系统性问题</span>
+                  <!-- 当前题评估 -->
+                  <div v-if="currentAnalysisData.overallAssessment" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
+                    {{ currentAnalysisData.overallAssessment }}
                   </div>
-                  <div v-if="cat.rootCause" class="g-root-cause [font-size:15px] [color:#5f6368] [margin-bottom:6px]">
-                    <span class="g-label [font-weight:500] [color:#202124]">根本原因：</span>{{ cat.rootCause }}
+
+                  <!-- 当前题错误分类 + 修改建议 -->
+                  <div v-for="(cat, idx) in currentAnalysisData.errorCategories" :key="idx" class="g-error-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:10px]">
+                    <div class="g-error-card-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
+                      <span class="g-error-type-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:4px] [font-weight:500]" :class="errorBadgeClass(cat.type)">
+                        {{ errorTypeLabel(cat.type) }}
+                      </span>
+                      <span class="g-error-count [font-size:14px] [color:#5f6368]">{{ cat.count }}次</span>
+                      <span v-if="cat.isSystemic" class="g-chip c-danger [display:inline-block] [font-size:12px] [padding:1px_6px] [border-radius:100px] [font-weight:500] [background:#fce8e6] [color:#c5221f]">系统性问题</span>
+                    </div>
+                    <div v-if="cat.rootCause" class="g-root-cause [font-size:15px] [color:#5f6368] [margin-bottom:6px]">
+                      <span class="g-label [font-weight:500] [color:#202124]">根本原因：</span>{{ cat.rootCause }}
+                    </div>
+                    <div v-if="cat.suggestions?.length" class="g-fix-suggestions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px]">
+                      <div class="g-fix-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">修改建议</div>
+                      <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
+                        <li v-for="(sug, si) in cat.suggestions" :key="si">{{ sug }}</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div v-if="cat.suggestions?.length" class="g-fix-suggestions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px]">
-                    <div class="g-fix-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">修改建议</div>
-                    <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
-                      <li v-for="(sug, si) in cat.suggestions" :key="si">{{ sug }}</li>
-                    </ul>
-                  </div>
-                </div>
+                </template>
               </div>
 
               <!-- 分隔 + 功能二：主动干预（≥3次错误时展示） -->
@@ -383,9 +393,9 @@
                   </div>
 
                   <!-- 学习建议（复用 error 分析的结果） -->
-                  <div v-if="errorAnalysisData.learningSuggestions?.length" class="g-learning-section [margin-top:14px]">
+                  <div v-if="currentAnalysisData?.learningSuggestions?.length" class="g-learning-section [margin-top:14px]">
                     <div class="g-sub-title [font-size:14px] [font-weight:500] [color:#5f6368] [margin-bottom:8px]">学习建议</div>
-                    <div v-for="(ls, idx) in errorAnalysisData.learningSuggestions" :key="'ls-'+idx" class="g-learning-item [background:#e8f0fe] [border-radius:8px] [padding:10px_14px] [margin-bottom:8px]">
+                    <div v-for="(ls, idx) in currentAnalysisData.learningSuggestions" :key="'ls-'+idx" class="g-learning-item [background:#e8f0fe] [border-radius:8px] [padding:10px_14px] [margin-bottom:8px]">
                       <span class="g-priority-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:100px] [font-weight:500] [margin-right:8px]" :class="priorityBadgeClass(ls.priority)">{{ ls.priority }}</span>
                       <span class="g-topic [font-weight:500] [font-size:15px] [color:#202124]">{{ ls.topic }}</span>
                       <span v-if="ls.reason" class="g-reason [font-size:14px] [color:#5f6368] [margin-left:8px]">— {{ ls.reason }}</span>
@@ -525,6 +535,7 @@ const parsedStudentQuestions = computed(() => {
       number: markers[i].number,
       code: codePart || null,
       testResults: testResults && testResults.length > 0 ? testResults : null,
+      problemId: null,
       problemTitle: null,
       statementMd: null,
       problemNo: null
@@ -565,11 +576,15 @@ const displayQuestions = computed(() => {
   const other = useProblems ? parsed : problems
   return base.map((q, i) => {
     // 从另一边找匹配的题来补元数据
-    const match = other.find(o => o.number === q.number) || other[i] || {}
+    const match = other.find(o => q.problemId != null && String(o.problemId) === String(q.problemId))
+      || other.find(o => o.number === q.number)
+      || other[i]
+      || {}
     return {
       number: q.number || (i + 1),
       code: q.code || match.code || '',
       testResults: q.testResults || match.testResults || null,
+      problemId: q.problemId ?? match.problemId ?? null,
       problemTitle: q.problemTitle || match.problemTitle || null,
       statementMd: q.statementMd || match.statementMd || null,
       problemNo: q.problemNo || match.problemNo || null
@@ -581,7 +596,10 @@ function focusRequestedProblem() {
   const problemNo = String(route.query.problemNo || '').trim()
   if (!problemNo) return
   const index = displayQuestions.value.findIndex(question => String(question.problemNo || '').trim() === problemNo)
-  if (index >= 0) activeCodeQuestion.value = String(index)
+  if (index >= 0) {
+    activeCodeQuestion.value = String(index)
+    analysisActiveProblemIndex.value = index
+  }
 }
 
 // 完整源码去除测试点表格，只保留纯代码（去掉所有 | 开头的表格行）
@@ -633,6 +651,60 @@ const hasAiComment = computed(() => {
   const c = aiCommentRaw.value; return c && c.trim() && !c.includes('暂时还没有生成AI点评')
 })
 const renderedAiComment = computed(() => hasAiComment.value ? renderSafeMarkdown(aiCommentRaw.value) : '')
+const currentAnalysisData = computed(() => {
+  const data = errorAnalysisData.value
+  if (!data) return null
+  if (!displayQuestions.value.length) return data
+
+  const question = displayQuestions.value[analysisActiveProblemIndex.value]
+  if (!question) return null
+  if (question.problemId == null) {
+    return displayQuestions.value.length === 1 ? data : null
+  }
+
+  const analyses = Array.isArray(data.problemAnalyses) ? data.problemAnalyses : []
+  return analyses.find(item => item?.problemId != null
+    && String(item.problemId) === String(question.problemId)) || null
+})
+const analysisGenerationMode = computed(() => {
+  const data = currentAnalysisData.value
+  if (!data) return ''
+  const mode = String(data.generationMode || '').trim().toUpperCase()
+  if (mode) return mode
+  if (data.aiGenerated === true) return 'AI_MODEL'
+  const hasNoErrors = !(Array.isArray(data.errorCategories) && data.errorCategories.length > 0)
+  const latestStatus = String(data.latestJudgeStatus || '').trim().toUpperCase()
+  if (data.aiGenerated === false && hasNoErrors && ['AC', 'ACCEPTED'].includes(latestStatus)) {
+    return 'JUDGE_RESULT'
+  }
+  if (data.aiGenerated === false) return 'RULE_FALLBACK'
+  return ''
+})
+const analysisSourceLabel = computed(() => {
+  const labels = {
+    AI_MODEL: 'AI 模型生成',
+    RULE_FALLBACK: '规则兜底',
+    JUDGE_RESULT: '基于判题结果'
+  }
+  return labels[analysisGenerationMode.value] || ''
+})
+const analysisSourceClass = computed(() => {
+  const classes = {
+    AI_MODEL: 'c-info [background:#e8f0fe] [color:#174ea6]',
+    RULE_FALLBACK: 'c-warning [background:#fef7e0] [color:#e37400]',
+    JUDGE_RESULT: 'c-ok [background:#e6f4ea] [color:#137333]'
+  }
+  return classes[analysisGenerationMode.value] || 'c-info [background:#f1f3f4] [color:#5f6368]'
+})
+const analysisSourceTitle = computed(() => {
+  if (currentAnalysisData.value?.fallbackReason) return String(currentAnalysisData.value.fallbackReason)
+  const titles = {
+    AI_MODEL: '本次错误分析由 AI 模型生成',
+    RULE_FALLBACK: 'AI 服务不可用或返回兜底结果时展示',
+    JUDGE_RESULT: '当前结果来自真实判题记录，不冒充 AI 分析'
+  }
+  return titles[analysisGenerationMode.value] || ''
+})
 
 function copyCode() {
   let code = ''
