@@ -20,12 +20,17 @@
         </div>
       </div>
 
-      <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div class="grid gap-6" :class="sidebarCollapsed ? 'lg:grid-cols-[1fr]' : 'lg:grid-cols-[260px_1fr]'">
         <!-- History sidebar -->
-        <aside class="rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-3">
+        <aside v-show="!sidebarCollapsed" class="rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-3">
           <div class="mb-2 flex items-center justify-between px-1">
             <span class="text-sm font-semibold text-[var(--app-text)]">历史记录</span>
-            <button class="text-xs text-[var(--app-text-soft)] hover:text-[var(--app-primary)]" @click="refreshHistory">刷新</button>
+            <span class="flex items-center gap-2">
+              <button class="text-xs text-[var(--app-text-soft)] hover:text-[var(--app-primary)]" @click="refreshHistory">刷新</button>
+              <button class="text-[var(--app-text-soft)] hover:text-[var(--app-primary)]" title="收起侧边栏" @click="toggleSidebar">
+                <LucideIcon name="panel-left-close" :size="15" />
+              </button>
+            </span>
           </div>
           <div v-if="history.length === 0" class="py-8 text-center text-xs text-[var(--app-text-soft)]">暂无历史记录</div>
           <ul v-else class="space-y-1">
@@ -53,6 +58,16 @@
 
         <!-- Main -->
         <div class="space-y-6">
+          <div v-if="sidebarCollapsed" class="flex">
+            <button
+              class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--app-border-soft)] bg-[var(--app-card)] px-2.5 py-1.5 text-xs text-[var(--app-text-soft)] transition hover:text-[var(--app-primary)]"
+              title="展开历史记录"
+              @click="toggleSidebar"
+            >
+              <LucideIcon name="panel-left-open" :size="14" />
+              历史记录
+            </button>
+          </div>
           <!-- Input form -->
           <div class="space-y-3 rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-4">
             <div>
@@ -177,6 +192,13 @@ const workflow = ref('')
 const usedStdin = ref('')
 const history = ref([])
 const activeId = ref(null)
+
+// 历史记录侧边栏折叠状态（localStorage 持久化，类似 DeepSeek 官网的 sidebar 收起）
+const sidebarCollapsed = ref(localStorage.getItem('codeplayground.sidebar.collapsed') === '1')
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+  localStorage.setItem('codeplayground.sidebar.collapsed', sidebarCollapsed.value ? '1' : '0')
+}
 
 const loadingTip = ref('准备执行环境…')
 const LOADING_TIPS = ['准备执行环境…', '正在编译代码…', '逐行捕捉变量状态…', '生成可视化动画…']

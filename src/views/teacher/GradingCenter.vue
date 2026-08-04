@@ -941,7 +941,17 @@ async function exportTask(id) {
     URL.revokeObjectURL(url)
     uiMessage.success('批改报告已导出')
   } catch (e) {
-    const message = String(e?.message || '')
+    let message = String(e?.message || '')
+    const data = e?.response?.data
+    if (data instanceof Blob) {
+      try {
+        const text = await data.text()
+        const parsed = JSON.parse(text)
+        if (parsed?.message) message = parsed.message
+      } catch { /* 保留原始错误信息 */ }
+    } else if (data && typeof data === 'object' && data.message) {
+      message = data.message
+    }
     if (message.includes('Report not yet generated') || message.includes('404')) {
       uiMessage.warning('当前批改报告尚未生成，暂时无法导出 ZIP。')
       return
