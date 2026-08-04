@@ -58,6 +58,38 @@
               readonly
             />
           </div>
+          <div v-if="publishedGrading.codeAnalysis" class="mt-5 border-t border-[#d8ebde] pt-5">
+            <div class="mb-1 flex items-center gap-2 text-sm font-semibold text-[#1f5130]">
+              <LucideIcon name="search" :size="16" />代码问题定位
+            </div>
+            <p class="mb-3 text-xs leading-5 text-[#5f6f64]">由 AI 阅读报告中的代码/运行日志判断逻辑与边界问题（非硬编码规则匹配）。</p>
+            <div v-if="publishedGrading.codeAnalysis.code_summary" class="mb-3 rounded-xl bg-white/80 px-4 py-3 text-sm leading-6 text-[#33453a]">
+              <span class="mr-2 rounded-md bg-[#eef7f0] px-2 py-0.5 text-xs font-medium text-[#1f5130]">{{ publishedGrading.codeAnalysis.language || 'unknown' }}</span>
+              {{ publishedGrading.codeAnalysis.code_summary }}
+            </div>
+            <div v-if="publishedGrading.codeAnalysis.findings?.length" class="space-y-3">
+              <div
+                v-for="(f, idx) in publishedGrading.codeAnalysis.findings"
+                :key="idx"
+                class="rounded-xl border border-[#d8ebde] bg-white/80 p-4"
+                :class="severityBorderClass(f.severity)"
+              >
+                <div class="mb-1.5 flex flex-wrap items-center gap-2">
+                  <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold" :class="severityBadgeClass(f.severity)">
+                    {{ severityLabel(f.severity) }}
+                  </span>
+                  <span class="text-sm font-semibold text-[#1d1d1f]">{{ f.issue_type || '问题' }}</span>
+                  <span v-if="f.evidence_id" class="text-[11px] text-[#aeaeb2]">位置 {{ f.evidence_id }}</span>
+                </div>
+                <pre v-if="f.anchor_text" class="mb-2 overflow-x-auto rounded-lg bg-[#1d1d1f] px-3 py-2 text-xs leading-5 text-[#e6e6e6] whitespace-pre-wrap">{{ f.anchor_text }}</pre>
+                <p v-if="f.explanation" class="m-0 text-sm leading-6 text-[#33453a]"><span class="font-medium text-[#5f6f64]">问题：</span>{{ f.explanation }}</p>
+                <p v-if="f.suggestion" class="m-0 mt-1 text-sm leading-6 text-[#16794c]"><span class="font-medium">建议：</span>{{ f.suggestion }}</p>
+              </div>
+            </div>
+            <div v-else class="rounded-xl border border-dashed border-[#d8ebde] bg-white/60 px-5 py-4 text-center text-sm text-[#5f6f64]">
+              未发现明显的逻辑/边界问题。
+            </div>
+          </div>
         </section>
 
         <section v-if="ptaGrading?.published" class="rounded-[16px] border border-[#bfe2ca] bg-[#f6fcf8] p-5">
@@ -750,6 +782,19 @@ function warningLevelLabel(level) {
   }
   return labels[level] || level
 }
+
+// 代码问题定位严重度展示（与教师端 SubmissionReview 口径一致）
+const severityLabel = (s) => ({ HIGH: '高', MEDIUM: '中', LOW: '低' }[String(s || '').toUpperCase()] || '中')
+const severityBadgeClass = (s) => ({
+  HIGH: 'bg-[rgba(196,75,63,0.1)] text-[#c44b3f]',
+  MEDIUM: 'bg-[rgba(196,154,60,0.12)] text-[#b8860b]',
+  LOW: 'bg-[rgba(22,121,76,0.1)] text-[#16794c]'
+}[String(s || '').toUpperCase()] || 'bg-[rgba(196,154,60,0.12)] text-[#b8860b]')
+const severityBorderClass = (s) => ({
+  HIGH: 'border-l-[3px] border-l-[#c44b3f]',
+  MEDIUM: 'border-l-[3px] border-l-[#c49a3c]',
+  LOW: 'border-l-[3px] border-l-[#16794c]'
+}[String(s || '').toUpperCase()] || '')
 
 async function fetchPublishedGrading() {
   try {

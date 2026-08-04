@@ -189,6 +189,16 @@ const items = computed(() => props.demonstrations || [])
 const current = computed(() => items.value[activeIndex.value] || { sourceCode: '', correctedCode: '', frames: [], explanation: '' })
 const steps = computed(() => current.value.frames || [])
 const activeStep = computed(() => steps.value[stepIndex.value] || { order: 0, variables: {}, memory: [], explanation: '', line: 0, error: false })
+
+// 首个有可视化状态（节点/内存/变量）的帧：打开演示时直接定位，避免首帧空白画布
+const firstVisualIndex = computed(() => {
+  const arr = steps.value
+  for (let i = 0; i < arr.length; i += 1) {
+    const s = arr[i]
+    if ((s?.state?.nodes || []).length || (s?.memory || []).length || hasVariables(s)) return i
+  }
+  return 0
+})
 const sourceLines = computed(() => String(current.value.sourceCode || '').split('\n'))
 const hasCode = computed(() => String(current.value.sourceCode || '').trim().length > 0)
 
@@ -329,7 +339,7 @@ function stop() {
 function goTo(index) { stepIndex.value = Math.max(0, Math.min(index, steps.value.length - 1)); stop() }
 function previous() { goTo(stepIndex.value - 1) }
 function next() { goTo(stepIndex.value + 1) }
-function reset() { stop(); stepIndex.value = 0 }
+function reset() { stop(); stepIndex.value = firstVisualIndex.value }
 const playSpeed = ref(900)
 const speedOptions = [{ ms: 1400, label: '0.7×' }, { ms: 900, label: '1×' }, { ms: 450, label: '2×' }]
 function advance() {
