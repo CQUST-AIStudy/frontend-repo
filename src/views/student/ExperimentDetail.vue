@@ -254,9 +254,9 @@
             <div v-if="!errorChecked && !errorLoading && !errorAnalysisData" class="g-empty [text-align:center] [padding:48px_20px]">
               <div class="g-empty-icon [margin-bottom:12px]"><LucideIcon name="search" :size="48" /></div>
               <div class="g-empty-text [font-size:18px] [font-weight:500] [color:#202124] [margin-bottom:6px]">AI 错误代码分析</div>
-              <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">点击下方按钮，AI将分析您的最新提交代码</div>
+              <div class="g-empty-sub [font-size:15px] [color:#5f6368] [margin-bottom:20px]">点击下方按钮加载提交记录，之后可对每道题按需单独生成AI深度解析</div>
               <UiButton class="g-primary-btn [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:10px_24px] [font-size:15px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="errorLoading" @click="runErrorAnalysis(false)">
-                {{ errorLoading ? '分析中...' : '开始分析' }}
+                {{ errorLoading ? '加载中...' : '加载提交记录' }}
               </UiButton>
             </div>
 
@@ -265,7 +265,7 @@
               <ui-skeleton :rows="6" animated />
               <div class="g-ai-loading-tip [display:flex] [align-items:center] [justify-content:center] [gap:8px] [color:#5f6368] [font-size:15px] [margin-top:16px]">
                 <ui-icon class="is-loading"><Loading /></ui-icon>
-                正在分析提交记录，预计需要10-20 秒..
+                正在加载提交记录与历史解析结果..
               </div>
             </div>
 
@@ -290,7 +290,7 @@
                       :title="analysisSourceTitle"
                     >{{ analysisSourceLabel }}</span>
                   </span>
-                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:14px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">重新分析</UiButton>
+                  <UiButton class="g-outline-btn-sm [background:#fff] [border:1px_solid_#dadce0] [border-radius:100px] [padding:4px_14px] [font-size:14px] [color:#5f6368] [cursor:pointer] [transition:all_0.2s] hover:[background:#f8f9fa]" :disabled="errorLoading" @click="runErrorAnalysis(true)">刷新数据</UiButton>
                 </div>
 
                 <!-- 提交代码（多题目 tab 切换） -->
@@ -323,19 +323,111 @@
                   <CodeViewer v-else-if="currentAnalysisData?.latestCode" :code="currentAnalysisData.latestCode" language="cpp" maxHeight="400px" />
                 </div>
 
-                <div v-if="!currentAnalysisData" class="g-assessment [background:#f8f9fa] [border:1px_solid_#e8eaed] [padding:16px_20px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#5f6368] [margin-bottom:14px] [text-align:center]">
-                  该题当前没有可量化错误记录
+                <!-- 分题 AI 深度解析操作栏（按需单题生成，节省 token） -->
+                <div class="g-deep-header [display:flex] [align-items:center] [justify-content:space-between] [gap:10px] [margin-bottom:12px] [flex-wrap:wrap]">
+                  <span class="[font-size:15px] [font-weight:500] [color:#202124]">
+                    分题AI深度解析
+                    <span v-if="currentDeepAnalysis?.aiGenerated" class="g-chip [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [margin-left:8px] [background:#e8f0fe] [color:#174ea6]">AI 模型生成</span>
+                    <span v-else-if="currentDeepAnalysis && currentDeepAnalysis.fallbackReason !== 'NO_CODE_FOR_PROBLEM'" class="g-chip [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [margin-left:8px] [background:#fef7e0] [color:#e37400]">规则兜底</span>
+                  </span>
+                  <UiButton class="g-primary-btn-sm [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:6px_18px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="problemDeepLoading" @click="runProblemDeepAnalysis(!!currentDeepAnalysis)">
+                    {{ problemDeepLoading ? 'AI 正在深度解析本题...' : (currentDeepAnalysis ? '重新生成本题解析' : '生成本题AI深度解析') }}
+                  </UiButton>
                 </div>
 
-                <template v-else>
-                  <!-- 全 AC / 无错误 正面反馈 -->
-                  <div v-if="!currentAnalysisData.errorCategories?.length" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
+                <div v-if="problemDeepLoading" class="[background:#f8f9fa] [border:1px_solid_#e8eaed] [padding:14px_16px] [border-radius:10px] [margin-bottom:14px] [display:flex] [align-items:center] [gap:8px] [color:#5f6368] [font-size:14px]">
+                  <ui-icon class="is-loading"><Loading /></ui-icon>
+                  AI 正在结合题面与完整代码深度解析本题，预计需要 10~30 秒...
+                </div>
+
+                <!-- 本题无代码 -->
+                <div v-if="currentDeepAnalysis && currentDeepAnalysis.fallbackReason === 'NO_CODE_FOR_PROBLEM'" class="g-assessment [background:#f8f9fa] [border:1px_solid_#e8eaed] [padding:16px_20px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#5f6368] [margin-bottom:14px] [text-align:center]">
+                  {{ currentDeepAnalysis.overallAssessment }}
+                </div>
+
+                <template v-else-if="currentDeepAnalysis">
+                  <!-- 总体评价 -->
+                  <div v-if="currentDeepAnalysis.overallAssessment" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
+                    {{ currentDeepAnalysis.overallAssessment }}
+                  </div>
+                  <!-- 题目理解 -->
+                  <div v-if="currentDeepAnalysis.problemUnderstanding" class="g-deep-block [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:12px_16px] [margin-bottom:10px]">
+                    <div class="[font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">题目理解</div>
+                    <div class="[font-size:15px] [line-height:1.8] [color:#3c4043] [white-space:pre-wrap]">{{ currentDeepAnalysis.problemUnderstanding }}</div>
+                  </div>
+                  <!-- 思路点评 -->
+                  <div v-if="currentDeepAnalysis.approachReview" class="g-deep-block [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:12px_16px] [margin-bottom:10px]">
+                    <div class="[font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">思路点评</div>
+                    <div class="[font-size:15px] [line-height:1.8] [color:#3c4043] [white-space:pre-wrap]">{{ currentDeepAnalysis.approachReview }}</div>
+                  </div>
+                  <!-- 代码详细分析 -->
+                  <div v-if="currentDeepAnalysis.detailedAnalysis" class="g-deep-block [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:12px_16px] [margin-bottom:10px]">
+                    <div class="[font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">代码详细分析</div>
+                    <div class="[font-size:15px] [line-height:1.9] [color:#3c4043] [white-space:pre-wrap]">{{ currentDeepAnalysis.detailedAnalysis }}</div>
+                  </div>
+
+                  <!-- 错误分类 + 修改建议 -->
+                  <div v-for="(cat, idx) in currentDeepAnalysis.errorCategories" :key="idx" class="g-error-card [background:#fff] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:14px_16px] [margin-bottom:10px]">
+                    <div class="g-error-card-header [display:flex] [align-items:center] [gap:8px] [margin-bottom:8px]">
+                      <span class="g-error-type-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:4px] [font-weight:500]" :class="errorBadgeClass(cat.type)">
+                        {{ errorTypeLabel(cat.type) }}
+                      </span>
+                      <span class="g-error-count [font-size:14px] [color:#5f6368]">{{ cat.count }}次</span>
+                      <span v-if="cat.isSystemic" class="g-chip c-danger [display:inline-block] [font-size:12px] [padding:1px_6px] [border-radius:100px] [font-weight:500] [background:#fce8e6] [color:#c5221f]">系统性问题</span>
+                    </div>
+                    <div v-if="cat.rootCause" class="g-root-cause [font-size:15px] [color:#5f6368] [margin-bottom:6px]">
+                      <span class="g-label [font-weight:500] [color:#202124]">根本原因：</span>{{ cat.rootCause }}
+                    </div>
+                    <div v-if="cat.suggestions?.length" class="g-fix-suggestions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px]">
+                      <div class="g-fix-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">修改建议</div>
+                      <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
+                        <li v-for="(sug, si) in cat.suggestions" :key="si">{{ sug }}</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- 改进步骤 -->
+                  <div v-if="currentDeepAnalysis.fixPlan?.length" class="g-fix-suggestions [background:#f8f9fa] [border-radius:8px] [padding:10px_14px] [margin-bottom:10px]">
+                    <div class="g-fix-title [font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">改进步骤</div>
+                    <ul class="g-fix-list [margin:0] [padding-left:18px] [font-size:15px] [line-height:1.8] [color:#3c4043]">
+                      <li v-for="(step, si) in currentDeepAnalysis.fixPlan" :key="si">{{ step }}</li>
+                    </ul>
+                  </div>
+                  <!-- 自测用例建议 -->
+                  <div v-if="currentDeepAnalysis.testCases?.length" class="g-deep-block [background:#f8f9fa] [border:1px_solid_#e8eaed] [border-radius:10px] [padding:12px_16px] [margin-bottom:10px]">
+                    <div class="[font-size:14px] [font-weight:500] [color:#1a73e8] [margin-bottom:6px]">自测用例建议</div>
+                    <div v-for="(tc, ti) in currentDeepAnalysis.testCases" :key="ti" class="[font-size:14px] [line-height:1.7] [color:#3c4043] [margin-bottom:8px]">
+                      <div><span class="[font-weight:500] [color:#202124]">输入：</span><code class="[background:#f1f3f4] [padding:1px_6px] [border-radius:4px]">{{ tc.input }}</code></div>
+                      <div><span class="[font-weight:500] [color:#202124]">预期输出：</span><code class="[background:#f1f3f4] [padding:1px_6px] [border-radius:4px]">{{ tc.expectedOutput }}</code></div>
+                      <div v-if="tc.purpose" class="[color:#5f6368]">验证目的：{{ tc.purpose }}</div>
+                    </div>
+                  </div>
+                  <!-- 知识点 -->
+                  <div v-if="currentDeepAnalysis.knowledgePoints?.length" class="[display:flex] [gap:8px] [flex-wrap:wrap] [margin-bottom:10px]">
+                    <span v-for="(kp, ki) in currentDeepAnalysis.knowledgePoints" :key="ki" class="[display:inline-block] [font-size:13px] [padding:3px_12px] [border-radius:100px] [background:#e8f0fe] [color:#174ea6]">{{ kp }}</span>
+                  </div>
+                  <!-- 学习建议 -->
+                  <div v-if="currentDeepAnalysis.learningSuggestions?.length" class="g-learning-section [margin-top:4px]">
+                    <div class="g-sub-title [font-size:14px] [font-weight:500] [color:#5f6368] [margin-bottom:8px]">学习建议</div>
+                    <div v-for="(ls, idx) in currentDeepAnalysis.learningSuggestions" :key="'dls-'+idx" class="g-learning-item [background:#e8f0fe] [border-radius:8px] [padding:10px_14px] [margin-bottom:8px]">
+                      <span class="g-priority-badge [display:inline-block] [font-size:12px] [padding:2px_8px] [border-radius:100px] [font-weight:500] [margin-right:8px]" :class="priorityBadgeClass(ls.priority)">{{ ls.priority }}</span>
+                      <span class="g-topic [font-weight:500] [font-size:15px] [color:#202124]">{{ ls.topic }}</span>
+                      <span v-if="ls.reason" class="g-reason [font-size:14px] [color:#5f6368] [margin-left:8px]">— {{ ls.reason }}</span>
+                      <div v-if="ls.suggestedResources" class="g-resource [font-size:14px] [color:#1a73e8] [margin-top:4px] [margin-left:42px]">{{ ls.suggestedResources }}</div>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- 尚未生成深度解析：只展示已有的基础判题信息 -->
+                <template v-else-if="currentAnalysisData">
+                  <!-- 全 AC / 无错误 正面反馈（非快照模式才展示，避免误报） -->
+                  <div v-if="!currentAnalysisData.errorCategories?.length && currentAnalysisData.generationMode !== 'SNAPSHOT'" class="g-all-clear [background:#e6f4ea] [border:1px_solid_#a8dab5] [padding:16px_20px] [border-radius:10px] [text-align:center] [margin-bottom:14px]">
                     <div class="g-all-clear-icon [margin-bottom:8px]"><LucideIcon name="party-popper" :size="28" /></div>
                     <div class="g-all-clear-text [font-size:17px] [font-weight:500] [color:#137333] [margin-bottom:4px]">本题未检测到错误，当前提交已通过</div>
                   </div>
 
                   <!-- 当前题评估 -->
-                  <div v-if="currentAnalysisData.overallAssessment" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
+                  <div v-if="currentAnalysisData.overallAssessment && currentAnalysisData.generationMode !== 'SNAPSHOT'" class="g-assessment [background:#fbf1eb] [border:1px_solid_#c2dbfe] [padding:12px_16px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#174ea6] [margin-bottom:14px]">
                     {{ currentAnalysisData.overallAssessment }}
                   </div>
 
@@ -358,7 +450,15 @@
                       </ul>
                     </div>
                   </div>
+
+                  <div class="[background:#f8f9fa] [border:1px_dashed_#dadce0] [padding:14px_16px] [border-radius:10px] [font-size:14px] [line-height:1.8] [color:#5f6368] [text-align:center]">
+                    本题尚未生成详细解析，点击上方“生成本题AI深度解析”按钮，AI将结合题面与您的代码进行深入分析（按题生成，节省 token）。
+                  </div>
                 </template>
+
+                <div v-else class="g-assessment [background:#f8f9fa] [border:1px_solid_#e8eaed] [padding:16px_20px] [border-radius:10px] [font-size:15px] [line-height:1.8] [color:#5f6368] [margin-bottom:14px] [text-align:center]">
+                  该题暂未找到提交记录，完成PTA平台提交后可生成深度解析
+                </div>
               </div>
 
               <!-- 分隔 + 功能二：主动干预（≥3次错误时展示） -->
@@ -440,7 +540,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import CodeViewer from '@/components/CodeViewer.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '@/api'
-import { buildErrorAnalysisPayload } from '@/api/errorAnalysisRequest.mjs'
+import { buildErrorAnalysisPayload, buildProblemDeepAnalysisPayload } from '@/api/errorAnalysisRequest.mjs'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 
@@ -469,6 +569,8 @@ const errorLoading = ref(false)
 const errorChecked = ref(false)
 const warningData = ref(null)
 const analysisActiveProblemIndex = ref(0)
+const problemDeepLoading = ref(false)
+const localProblemDeep = ref({})
 const publishedGrading = ref(null)
 const ptaGrading = ref(null)
 const downloadingPublishedReport = ref(false)
@@ -647,6 +749,19 @@ const hasAiComment = computed(() => {
   const c = aiCommentRaw.value; return c && c.trim() && !c.includes('暂时还没有生成AI点评')
 })
 const renderedAiComment = computed(() => hasAiComment.value ? renderSafeMarkdown(aiCommentRaw.value) : '')
+
+// 分题深度解析结果：后端快照附带的已存储解析 + 本次会话新生成的解析
+const problemDeepMap = computed(() => {
+  const stored = errorAnalysisData.value?.problemDeepAnalyses || {}
+  return { ...stored, ...localProblemDeep.value }
+})
+const currentDeepAnalysis = computed(() => {
+  const question = displayQuestions.value[analysisActiveProblemIndex.value]
+  if (!question || question.problemId == null) return null
+  const entry = problemDeepMap.value[String(question.problemId)]
+  return entry && entry.generationMode !== 'SNAPSHOT' ? entry : null
+})
+
 const currentAnalysisData = computed(() => {
   const data = errorAnalysisData.value
   if (!data) return null
@@ -654,6 +769,14 @@ const currentAnalysisData = computed(() => {
 
   const question = displayQuestions.value[analysisActiveProblemIndex.value]
   if (!question) return null
+
+  // 优先返回分题深度解析（按需单题生成）
+  if (question.problemId != null) {
+    const deep = problemDeepMap.value[String(question.problemId)]
+    if (deep && deep.generationMode !== 'SNAPSHOT' && deep.fallbackReason !== 'NO_CODE_FOR_PROBLEM') {
+      return deep
+    }
+  }
 
   const analyses = Array.isArray(data.problemAnalyses) ? data.problemAnalyses : []
   if (question.problemId != null) {
@@ -762,16 +885,43 @@ async function runErrorAnalysis(forceRefresh = false) {
   errorChecked.value = true
   warningData.value = null
   try {
+    // skipAi=true：只加载提交快照与已存储的分题深度解析，不触发全量 AI（节省 token）
     const payload = buildErrorAnalysisPayload(experimentId.value, forceRefresh)
     const res = await api.analyzeError(payload)
     if (res?.success && res.data) {
       errorAnalysisData.value = res.data
+      localProblemDeep.value = {}
       await checkAndLoadWarning(payload.forceRefresh)
     }
   } catch (e) {
     logger.error('错误分析失败:', e)
   } finally {
     errorLoading.value = false
+  }
+}
+
+// 分题按需深度解析：只对当前题真实调用 AI，避免一次性全量消耗 token
+async function runProblemDeepAnalysis(forceRefresh = false) {
+  const question = displayQuestions.value[analysisActiveProblemIndex.value]
+  if (!question || question.problemId == null) {
+    uiMessage.warning('本题缺少题目ID，无法生成分题深度解析')
+    return
+  }
+  problemDeepLoading.value = true
+  try {
+    const payload = buildProblemDeepAnalysisPayload(experimentId.value, question.problemId, forceRefresh)
+    const res = await api.analyzeProblemError(payload)
+    if (res?.success && res.data) {
+      localProblemDeep.value = { ...localProblemDeep.value, [String(question.problemId)]: res.data }
+      uiMessage.success(res.data.fallbackReason === 'NO_CODE_FOR_PROBLEM' ? '本题暂无可分析代码' : '本题深度解析已生成')
+    } else {
+      uiMessage.warning(getFriendlyResponseMessage(res, '深度解析生成失败，请稍后重试'))
+    }
+  } catch (e) {
+    logger.error('分题深度解析失败:', e)
+    uiMessage.error(getFriendlyErrorMessage(e, '深度解析生成失败，请稍后重试'))
+  } finally {
+    problemDeepLoading.value = false
   }
 }
 

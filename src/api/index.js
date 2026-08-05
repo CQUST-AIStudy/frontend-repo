@@ -368,6 +368,11 @@ export default {
     return apiClient.post('/api/analysis/error', payload, { timeout: 60000 })
   },
 
+  // 分题深度解析：单题真实调用 AI，耗时较长
+  async analyzeProblemError(payload) {
+    return apiClient.post('/api/analysis/error/problem', payload, { timeout: 180000 })
+  },
+
   async getLearningSuggestions(payload) {
     return apiClient.post('/api/analysis/learning', payload, { timeout: 60000 })
   },
