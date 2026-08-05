@@ -439,15 +439,11 @@ import { Loading } from '@/components/ui/icons'
 import LucideIcon from '@/components/LucideIcon.vue'
 import CodeViewer from '@/components/CodeViewer.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
-import axios from 'axios'
 import api from '@/api'
-import { buildAiCommentRequest } from '@/api/aiCommentRequest.mjs'
 import { buildErrorAnalysisPayload } from '@/api/errorAnalysisRequest.mjs'
-import { API_BASE_URL } from '../../config/runtime'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../../utils/errorMessage'
 import ErrorDemonstrationPlayer from '@/components/grading/ErrorDemonstrationPlayer.vue'
 
-const API_BASE = API_BASE_URL
 const route = useRoute()
 const router = useRouter()
 const experimentStore = useExperimentStore()
@@ -751,10 +747,9 @@ async function generateAiComment(force) {
   if (!isCompleted.value) return
   aiGenerating.value = true; aiSource.value = ''
   try {
-    const request = buildAiCommentRequest(experimentId.value, force)
-    const res = await axios.post(`${API_BASE}${request.url}`, request.data, request.config)
-    const data = res.data || res
-    if (data.success && data.aiComment) {
+    // 走 apiClient（自动携带 Bearer token），避免裸 axios 无凭证导致 401
+    const data = await api.generateAiComment(experimentId.value, null, undefined, force)
+    if (data?.success && data.aiComment) {
       localAiComment.value = data.aiComment; aiSource.value = data.source || 'deepseek'
       if (data.source === 'deepseek') uiMessage.success('AI点评已生成')
     } else { uiMessage.warning(getFriendlyResponseMessage(data, 'AI 点评生成失败，请稍后重试')) }

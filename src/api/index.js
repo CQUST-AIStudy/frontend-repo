@@ -428,8 +428,8 @@ export default {
     return sanitizeSubmissionTiming(response?.data || response)
   },
 
-  async generateAiComment(experimentId, studentId, code) {
-    const params = studentId ? { studentId, force: true } : { force: true }
+  async generateAiComment(experimentId, studentId, code, force = true) {
+    const params = studentId ? { studentId, force } : { force }
     return apiClient.post(`/api/experiments/${experimentId}/ai-comment/generate`, { code }, { params })
   },
 
