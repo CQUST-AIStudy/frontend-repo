@@ -658,13 +658,40 @@ const currentAnalysisData = computed(() => {
 
   const question = displayQuestions.value[analysisActiveProblemIndex.value]
   if (!question) return null
-  if (question.problemId == null) {
-    return displayQuestions.value.length === 1 ? data : null
-  }
 
   const analyses = Array.isArray(data.problemAnalyses) ? data.problemAnalyses : []
-  return analyses.find(item => item?.problemId != null
-    && String(item.problemId) === String(question.problemId)) || null
+  if (question.problemId != null) {
+    const byId = analyses.find(item => item?.problemId != null
+      && String(item.problemId) === String(question.problemId))
+    if (byId) return byId
+  }
+  // 兜底：旧数据/legacy 路径可能没有 problemId，按题号、标题或题序匹配，避免全部显示“无可量化错误记录”
+  if (question.problemNo != null) {
+    const byNo = analyses.find(item => item?.problemNo != null
+      && String(item.problemNo) === String(question.problemNo))
+    if (byNo) return byNo
+  }
+  if (question.problemTitle) {
+    const byTitle = analyses.find(item => item?.problemTitle
+      && String(item.problemTitle).trim() === String(question.problemTitle).trim())
+    if (byTitle) return byTitle
+  }
+  if (analyses.length) {
+    // 按题目在 problems 列表中的顺序匹配：后端 problemAnalyses 按 assignment_problem 排序分组生成，
+    // 与 problems 列表同序；题目数一致时按下标兜底，避免串题同时避免误显示“无可量化错误记录”
+    const backendProblems = currentExp.value?.problems || []
+    const backendIndex = backendProblems.findIndex(p =>
+      (question.problemId != null && p.problemId != null && String(p.problemId) === String(question.problemId))
+      || (question.problemNo != null && p.problemNo != null && String(p.problemNo) === String(question.problemNo)))
+    if (backendIndex >= 0 && backendIndex < analyses.length) {
+      return analyses[backendIndex]
+    }
+    if (analyses.length === displayQuestions.value.length) {
+      return analyses[analysisActiveProblemIndex.value] || null
+    }
+  }
+  if (question.problemId == null && displayQuestions.value.length === 1) return data
+  return null
 })
 const analysisGenerationMode = computed(() => {
   const data = currentAnalysisData.value
