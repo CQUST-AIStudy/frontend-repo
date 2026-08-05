@@ -12,8 +12,14 @@ import './utils'
 import { installUiComponents } from './components/ui'
 import { installUiIcons } from './components/ui/icons'
 import { installFeedback } from './services/feedback'
-import { AUTH_STORAGE_CLEARED_EVENT, AUTH_STORAGE_KEYS } from './constants/auth'
+import {
+  AUTH_STORAGE_CLEARED_EVENT,
+  AUTH_STORAGE_KEYS,
+  USER_SCOPED_STORAGE_CLEARED_EVENT
+} from './constants/auth'
 import { useUserStore } from './store'
+import { useStudentAiChatStore } from './store/studentAiChat'
+import { useTeacherAiChatStore } from './store/teacherAiChat'
 import { useThemeStore } from './store/theme'
 
 const browserConsole = window.console
@@ -40,6 +46,14 @@ const userStore = useUserStore()
 window.addEventListener(AUTH_STORAGE_CLEARED_EVENT, () => {
   userStore.resetAuthState()
   localStorage.removeItem(AUTH_STORAGE_KEYS.PINIA_USER)
+})
+window.addEventListener(USER_SCOPED_STORAGE_CLEARED_EVENT, () => {
+  const studentChatStore = useStudentAiChatStore()
+  const teacherChatStore = useTeacherAiChatStore()
+  Object.keys(studentChatStore.abortControllers || {}).forEach(id => studentChatStore.stopGeneration(id))
+  Object.keys(teacherChatStore.abortControllers || {}).forEach(id => teacherChatStore.stopGeneration(id))
+  studentChatStore.$reset()
+  teacherChatStore.$reset()
 })
 
 // 应用启动前先从 localStorage 恢复并应用外观主题，避免首屏闪烁

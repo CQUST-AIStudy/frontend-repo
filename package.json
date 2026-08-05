@@ -7,6 +7,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint src",
+    "test:audit": "node scripts/verify-functional-hardcoding.mjs",
     "api:local": "node scripts/switch-api.js local",
     "api:server": "node scripts/switch-api.js server",
     "api:status": "node scripts/switch-api.js status"

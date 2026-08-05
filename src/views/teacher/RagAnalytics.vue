@@ -102,7 +102,7 @@
       </ui-row>
     </div>
 
-    <div v-else class="empty-state">请选择一个课程知识库查看分析数据。</div>
+    <div v-else class="empty-state">{{ courseSpaces.length ? '请选择一个课程知识库查看分析数据。' : '当前课程或班级没有匹配的知识库。' }}</div>
   </div>
 </template>
 
@@ -111,7 +111,10 @@ import { computed, onMounted, ref, shallowRef } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage } from '@/services/feedback'
 import { getCourseSpaces, getRagAnalytics } from '../../api/rag'
+import { useUserStore } from '../../store'
+import { filterCourseSpacesForClass } from '../../utils/courseSpaceScope'
 
+const userStore = useUserStore()
 const courseSpaces = ref([])
 const analyticsData = ref(null)
 const selectedSpaceId = shallowRef('')
@@ -218,7 +221,8 @@ async function loadSpaces() {
   spacesLoading.value = true
   try {
     const res = await getCourseSpaces()
-    courseSpaces.value = Array.isArray(res) ? res : (res?.data || [])
+    const spaces = Array.isArray(res) ? res : (res?.data || [])
+    courseSpaces.value = filterCourseSpacesForClass(spaces, userStore.selectedClass)
     const firstSpace = courseSpaces.value[0]
     selectedSpaceId.value = firstSpace ? String(firstSpace.id) : ''
     if (selectedSpaceId.value) {

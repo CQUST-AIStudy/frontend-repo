@@ -131,9 +131,9 @@ export class DocxGenerator {
 
   _createInfoTable(data) {
     const rows = [
-      ['课程名称', text(data.courseName) || '课程待补充', '实验项目', text(data.experimentName) || '实验待补充'],
-      ['机房名称', text(data.labName) || '实验机房', '上机时间', text(data.labTime) || new Date().toLocaleDateString()],
-      ['指导教师', text(data.teacherName) || '指导教师', '上机成绩', text(data.score)],
+      ['课程名称', text(data.courseName) || '未设置', '实验项目', text(data.experimentName) || '未设置'],
+      ['机房名称', text(data.labName) || '未设置', '上机时间', text(data.labTime) || '未设置'],
+      ['指导教师', text(data.teacherName) || '未设置', '上机成绩', text(data.score)],
       ['学生姓名', text(data.studentName), '学号', text(data.studentId), '专业班级', text(data.className)],
     ]
 

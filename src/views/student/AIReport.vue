@@ -344,6 +344,11 @@ const isReportViewVisible = ref(false)
 const reportData = ref({})
 const activeQuestionTab = ref('0')
 
+const firstConfiguredValue = (...values) => {
+  const value = values.find(item => String(item ?? '').trim())
+  return value === undefined ? '未设置' : String(value).trim()
+}
+
 const canGenerateReport = computed(() => {
   if (!selectedExperiment.value || selectedExperiment.value.status !== 'completed') return false
   if (selectedExperiment.value.aiReportEligible === false) return false
@@ -451,10 +456,24 @@ const generateReport = async () => {
   }
 
   // 准备用户数据
+  const selectedClass = userStore.selectedClass || {}
+  const profile = userStore.userInfo || {}
   const userData = {
-    studentName: userStore.userInfo?.realName || userStore.userInfo?.name || userStore.userInfo?.username || '',
-    studentId: userStore.userInfo?.usernum || userStore.userInfo?.username || userStore.userInfo?.id || '',
-    className: userStore.userInfo?.class || userStore.userInfo?.classname || '',
+    studentName: firstConfiguredValue(profile.realName, profile.name, profile.username),
+    studentId: firstConfiguredValue(profile.usernum, profile.studentId, profile.username, profile.id),
+    className: firstConfiguredValue(selectedClass.name, profile.class, profile.classname),
+    courseName: firstConfiguredValue(selectedExperiment.value.courseName, selectedClass.courseName),
+    teacherName: firstConfiguredValue(
+      selectedExperiment.value.teacherName,
+      selectedClass.teacherName,
+      profile.teacherName
+    ),
+    labName: firstConfiguredValue(
+      selectedExperiment.value.labName,
+      selectedExperiment.value.labRoomName,
+      selectedExperiment.value.labRoom
+    ),
+    labTime: firstConfiguredValue(selectedExperiment.value.labTime, selectedExperiment.value.experimentTime),
     experimentContent: selectedExperiment.value.description || selectedExperiment.value.content || '',
     experimentName: selectedExperiment.value.name,
     experimentId: selectedExperiment.value.id,
@@ -467,8 +486,6 @@ const generateReport = async () => {
     aiComment: selectedExperiment.value.aiComment
   }
 
-  userData.courseName = "数据结构"
-  userData.teacherName = selectedExperiment.value.teacherName || ''
   userData.summary = ''
 
   try {
@@ -557,20 +574,21 @@ const prepareReportData = () => {
   parseQuestionCode()
   const profile = userStore.userInfo || {}
   const reportMeta = selectedExperiment.value.reportData || {}
+  const selectedClass = userStore.selectedClass || {}
   reportData.value = {
     experimentName: selectedExperiment.value.name,
-    studentName: reportMeta.studentName || profile.realName || profile.name || profile.username || '',
-    studentId: reportMeta.studentId || profile.usernum || profile.username || profile.id || '',
-    className: profile.class || profile.classname || '',
-    courseName: '数据结构',
+    studentName: firstConfiguredValue(reportMeta.studentName, profile.realName, profile.name, profile.username),
+    studentId: firstConfiguredValue(reportMeta.studentId, profile.usernum, profile.studentId, profile.username, profile.id),
+    className: firstConfiguredValue(reportMeta.className, selectedClass.name, profile.class, profile.classname),
+    courseName: firstConfiguredValue(reportMeta.courseName, selectedExperiment.value.courseName, selectedClass.courseName),
     steps: '',
     results: '',
     submitTime: selectedExperiment.value.submitTime,
     deadline: selectedExperiment.value.deadline,
     plagiarismRate: selectedExperiment.value.plagiarismRate,
-    labName: reportMeta.labName || reportMeta.labRoomName || selectedExperiment.value.labName || selectedExperiment.value.labRoomName || '',
-    labTime: reportMeta.labTime || selectedExperiment.value.labTime || '',
-    teacherName: selectedExperiment.value.teacherName || '',
+    labName: firstConfiguredValue(reportMeta.labName, reportMeta.labRoomName, selectedExperiment.value.labName, selectedExperiment.value.labRoomName),
+    labTime: firstConfiguredValue(reportMeta.labTime, selectedExperiment.value.labTime, selectedExperiment.value.experimentTime),
+    teacherName: firstConfiguredValue(reportMeta.teacherName, selectedExperiment.value.teacherName, selectedClass.teacherName, profile.teacherName),
   }
   if (selectedExperiment.value.report) {
     try {

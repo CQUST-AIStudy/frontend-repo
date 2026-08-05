@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { clearAuthStorage, getSessionToken, getUserInfo } from '../constants/auth'
+import { clearAuthStorage, getSessionState, getUserInfo } from '../constants/auth'
 
 const routes = [
   {
@@ -392,7 +392,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes
 })
 
@@ -430,11 +430,11 @@ router.beforeEach((to, from, next) => {
     return
   }
   const isLoginPage = to.path === '/login'
-  const token = getSessionToken()
+  const sessionState = getSessionState()
   const userInfo = getUserInfo()
   const userRole = userInfo?.role
 
-  if (!token) {
+  if (!sessionState) {
     if (isLoginPage) {
       next()
       return

@@ -4,6 +4,10 @@ export function getTeachingClasses() {
   return tapClient.get('/api/classes')
 }
 
+export function getStudentClasses() {
+  return tapClient.get('/api/student-classes')
+}
+
 export function createTeachingClass(data) {
   return tapClient.post('/api/classes', data)
 }

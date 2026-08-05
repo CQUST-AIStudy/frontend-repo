@@ -130,19 +130,19 @@
             <tbody>
               <tr>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">课程名称</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.courseName || '课程待补充' }}</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.courseName || '未设置' }}</td>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">实验项目</td>
                 <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.experimentName || '实验待补充' }}</td>
               </tr>
               <tr>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">机房名称</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.labName || '实验机房' }}</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.labName || '未设置' }}</td>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">上机时间</td>
                 <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.labTime || currentDate }}</td>
               </tr>
               <tr>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">指导教师</td>
-                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.teacherName || '指导教师' }}</td>
+                <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ experimentData.teacherName || '未设置' }}</td>
                 <td class="label-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)] [width:12%]">上机成绩</td>
                 <td class="value-cell [border:1px_solid_#111827] [padding:12px_8px] [text-align:center] [vertical-align:middle] [font-size:15px] [font-family:var(--font-page)]" colspan="2">{{ displayScore }}</td>
               </tr>

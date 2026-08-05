@@ -90,6 +90,8 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '../../store'
+import { getStudentClasses } from '../../api/tap/classes'
 import { message as uiMessage } from '@/services/feedback'
 import {
   getDifficultyText,
@@ -102,6 +104,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const keyword = ref(String(route.query.keyword || ''))
 const difficulty = ref('')
 const limit = ref(5)
@@ -118,11 +121,14 @@ async function searchProblems() {
   const value = keyword.value.trim()
   const requestLimit = normalizedLimit.value
   limit.value = requestLimit
+  const selectedClassId = await ensureSelectedClassId()
+  if (!selectedClassId) return
   loading.value = true
   startSearchProgress()
   try {
     const res = await getPersonalizedLeetCodeRecommendations({
-      limit: requestLimit
+      limit: requestLimit,
+      classId: selectedClassId
     })
     finishSearchProgress()
 
@@ -159,6 +165,29 @@ async function searchProblems() {
   } finally {
     stopSearchProgress()
     loading.value = false
+  }
+}
+
+async function ensureSelectedClassId() {
+  try {
+    const response = await getStudentClasses()
+    const classes = Array.isArray(response) ? response : response?.data || []
+    const selectedClass = classes.find(item =>
+      String(item.id) === String(userStore.selectedClass?.id || '')
+    )
+    if (selectedClass?.id) return selectedClass.id
+    if (classes.length === 1) {
+      userStore.setSelectedClass(classes[0])
+      return classes[0].id
+    }
+    userStore.setSelectedClass(null)
+    uiMessage.warning(classes.length > 1
+      ? '你已加入多个班级，请先在“加入班级”页面选择当前班级，再获取个性化推荐。'
+      : '你尚未加入班级，请先加入并选择班级，再获取个性化推荐。')
+    return null
+  } catch (error) {
+    uiMessage.error(error.friendlyMessage || error.message || '无法确认当前班级，请稍后重试')
+    return null
   }
 }
 

@@ -1,5 +1,8 @@
 const { DefinePlugin } = require('webpack')
 
+const proxyTarget = (name, fallback) => process.env[name] || fallback
+const backendTarget = proxyTarget('DEV_BACKEND_TARGET', 'http://localhost:8081')
+
 module.exports = {
   configureWebpack: {
     performance: {
@@ -30,43 +33,43 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
       '/leetcode-claw': {
-        target: 'http://127.0.0.1:10170',
+        target: proxyTarget('DEV_LEETCODE_CLAW_TARGET', 'http://127.0.0.1:10170'),
         changeOrigin: true,
         pathRewrite: {
           '^/leetcode-claw': '',
         },
       },
       '^/api(?:/|$)': {
-        target: 'http://localhost:8081',
+        target: backendTarget,
         changeOrigin: true,
       },
       '^/rag(?:/|$)': {
-        target: 'http://127.0.0.1:8081',
+        target: proxyTarget('DEV_RAG_TARGET', backendTarget),
         changeOrigin: true,
       },
       '^/spider(?:/|$)': {
-        target: 'http://127.0.0.1:8100',
+        target: proxyTarget('DEV_SPIDER_TARGET', 'http://127.0.0.1:8100'),
         changeOrigin: true,
         pathRewrite: {
           '^/spider': '',
         },
       },
       '^/recommend(?:/|$)': {
-        target: 'http://127.0.0.1:8003',
+        target: proxyTarget('DEV_RECOMMENDATION_TARGET', 'http://127.0.0.1:8003'),
         changeOrigin: true,
         pathRewrite: {
           '^/recommend': '',
         },
       },
       '^/error-analysis(?:/|$)': {
-        target: 'http://127.0.0.1:8002',
+        target: proxyTarget('DEV_ERROR_ANALYSIS_TARGET', 'http://127.0.0.1:8002'),
         changeOrigin: true,
         pathRewrite: {
           '^/error-analysis': '',
         },
       },
       '/knowledge-graph': {
-        target: 'http://127.0.0.1:10171',
+        target: proxyTarget('DEV_KNOWLEDGE_GRAPH_TARGET', 'http://127.0.0.1:10171'),
         changeOrigin: true,
         pathRewrite: {
           '^/knowledge-graph': '',

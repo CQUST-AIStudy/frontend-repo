@@ -597,7 +597,14 @@ const userStore = useUserStore()
 
 const loading = ref(false)
 const classes = ref([])
-const gradeOptions = ['2022', '2023', '2024', '2025', '2026', '2027']
+const gradeOptions = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const values = new Set(Array.from({ length: 8 }, (_, index) => String(currentYear + 1 - index)))
+  classes.value.forEach(cls => {
+    if (String(cls?.grade || '').trim()) values.add(String(cls.grade).trim())
+  })
+  return Array.from(values).sort((a, b) => Number(b) - Number(a))
+})
 const courseOptions = ref([])
 const termOptions = ref([])
 

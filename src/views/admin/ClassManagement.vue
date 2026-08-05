@@ -17,10 +17,7 @@
         <ui-form-item label="年级">
           <ui-select v-model="filterForm.grade" placeholder="选择年级" clearable>
             <ui-option label="全部" value=""/>
-            <ui-option label="2023级" value="2023"/>
-            <ui-option label="2022级" value="2022"/>
-            <ui-option label="2021级" value="2021"/>
-            <ui-option label="2020级" value="2020"/>
+            <ui-option v-for="year in gradeOptions" :key="year" :label="`${year}级`" :value="year"/>
           </ui-select>
         </ui-form-item>
 
@@ -79,10 +76,7 @@
 
         <ui-form-item label="年级" prop="grade">
           <ui-select v-model="classForm.grade" placeholder="选择年级" class="[width:100%]">
-            <ui-option label="2023级" value="2023"/>
-            <ui-option label="2022级" value="2022"/>
-            <ui-option label="2021级" value="2021"/>
-            <ui-option label="2020级" value="2020"/>
+            <ui-option v-for="year in gradeOptions" :key="year" :label="`${year}级`" :value="year"/>
           </ui-select>
         </ui-form-item>
 
@@ -118,6 +112,14 @@ import { extractErrorPayload, getFriendlyErrorMessage } from '../../utils/errorM
 
 const router = useRouter()
 const classes = ref([])
+const gradeOptions = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const values = new Set(Array.from({ length: 8 }, (_, index) => String(currentYear + 1 - index)))
+  classes.value.forEach(cls => {
+    if (String(cls?.grade || '').trim()) values.add(String(cls.grade).trim())
+  })
+  return Array.from(values).sort((a, b) => Number(b) - Number(a))
+})
 
 const CLASS_DELETE_CONFLICT = 'CLASS_DELETE_CONFLICT'
 

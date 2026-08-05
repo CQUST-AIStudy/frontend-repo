@@ -13,14 +13,14 @@ const leetCodeClawClient = axios.create({
 
 /** 搜索强化薄弱题集（学生端，请求 Java 后端，不直连爬虫服务） */
 export function searchLeetCodeProblems({ keyword = '', difficulty = '', limit = 20, offset = 0 } = {}) {
-  return axios.get('/api/leetcode/problems/search', {
+  return apiClient.get('/api/leetcode/problems/search', {
     params: { keyword, difficulty, limit, offset }
-  }).then(res => res.data)
+  })
 }
 
-export function getPersonalizedLeetCodeRecommendations({ limit = 20 } = {}) {
+export function getPersonalizedLeetCodeRecommendations({ limit = 20, classId = null } = {}) {
   return apiClient.get('/api/recommendations/leetcode/sync', {
-    params: { limit }
+    params: { limit, ...(classId ? { classId } : {}) }
   })
 }
 

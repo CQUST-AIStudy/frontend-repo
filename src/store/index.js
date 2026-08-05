@@ -1,7 +1,18 @@
 import logger from '@/utils/logger'
 import { defineStore } from 'pinia'
 import api from '../api'
-import { clearAuthStorage, getTapToken, setSessionToken, setTapToken, setTapUser, setUserInfo } from '../constants/auth'
+import {
+  AUTH_SESSION_STATES,
+  clearAuthStorage,
+  clearUserScopedStorage,
+  getSessionState,
+  getTapToken,
+  setSessionState,
+  setSessionToken,
+  setTapToken,
+  setTapUser,
+  setUserInfo
+} from '../constants/auth'
 import { getTeacherPermissions } from '../constants/teacherPermissions'
 import { getFriendlyErrorMessage, getFriendlyResponseMessage } from '../utils/errorMessage'
 import { MOCK_USERS, MOCK_TAP_TOKEN, MOCK_TOKEN } from '../constants/mockUsers'
@@ -27,6 +38,7 @@ function normalizeUserInfo(userInfo, teacherLevel) {
 export const useUserStore = defineStore('user', {
   state: () => ({
     token: null,
+    sessionState: null,
     userInfo: null,
     loading: false,
     selectedClass: null,
@@ -34,7 +46,15 @@ export const useUserStore = defineStore('user', {
   persist: {
     key: 'user',
     storage: localStorage,
-    paths: ['token', 'userInfo', 'selectedClass']
+    paths: ['token', 'sessionState', 'userInfo', 'selectedClass'],
+    afterRestore: ({ store }) => {
+      if (store.token === 'legacy_session') {
+        store.token = null
+        setSessionToken(null)
+        setSessionState(AUTH_SESSION_STATES.COOKIE)
+      }
+      store.sessionState = getSessionState()
+    }
   },
   actions: {
     async login(username, password, teacherLevel) {
@@ -47,10 +67,13 @@ export const useUserStore = defineStore('user', {
           const rawUserInfo = MOCK_USERS[role] || MOCK_USERS.student
           const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
 
+          clearUserScopedStorage()
           this.userInfo = userInfo
           this.token = MOCK_TOKEN
+          this.sessionState = AUTH_SESSION_STATES.TOKEN
 
           setSessionToken(this.token)
+          setSessionState(this.sessionState)
           setUserInfo(this.userInfo)
           // 写入假 TAP token / TAP user，使 getTapToken() 非空，跳过 restoreTapSession() 真实换票。
           setTapToken(MOCK_TAP_TOKEN)
@@ -70,10 +93,13 @@ export const useUserStore = defineStore('user', {
         }
         const userInfo = normalizeUserInfo(rawUserInfo, teacherLevel)
 
+        clearUserScopedStorage()
         this.userInfo = userInfo
-        this.token = res.token || 'legacy_session'
+        this.token = res.token || null
+        this.sessionState = this.token ? AUTH_SESSION_STATES.TOKEN : AUTH_SESSION_STATES.COOKIE
 
         setSessionToken(this.token)
+        setSessionState(this.sessionState)
         setUserInfo(this.userInfo)
 
         if (!getTapToken()) {
@@ -100,6 +126,7 @@ export const useUserStore = defineStore('user', {
 
     resetAuthState({ clearStorage = false } = {}) {
       this.token = null
+      this.sessionState = null
       this.userInfo = null
       this.selectedClass = null
       if (clearStorage) {
@@ -120,7 +147,7 @@ export const useUserStore = defineStore('user', {
     }
   },
   getters: {
-    isLoggedIn: (state) => !!state.token,
+    isLoggedIn: (state) => !!state.token || state.sessionState === AUTH_SESSION_STATES.COOKIE,
     username: (state) => state.userInfo?.name || state.userInfo?.username || '未登录',
     currentClassName: (state) => state.selectedClass?.name || ''
   }

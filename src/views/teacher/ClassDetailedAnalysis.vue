@@ -55,8 +55,8 @@
                   <h3 class="text-base font-semibold text-[#1d1d1f] mb-3">{{ classItem.name }}</h3>
                   <div class="flex-grow mb-4 space-y-2 text-sm text-[#6e6e73]">
                     <p><strong class="text-[#1d1d1f]">学生数量:</strong> {{ classItem.studentCount }}人</p>
-                    <p><strong class="text-[#1d1d1f]">课程:</strong> {{ classItem.courseName || '数据结构' }}</p>
-                    <p><strong class="text-[#1d1d1f]">学期:</strong> {{ classItem.semester || '2023-2024' }}</p>
+                    <p><strong class="text-[#1d1d1f]">课程:</strong> {{ classItem.courseName || '未设置' }}</p>
+                    <p><strong class="text-[#1d1d1f]">学期:</strong> {{ classItem.semester || classItem.termName || '未设置' }}</p>
                   </div>
                   <div class="flex justify-between gap-2.5 mt-auto pt-1.5 flex-wrap">
                     <UiButton @click.stop="viewDetailedAnalysis(classItem)"

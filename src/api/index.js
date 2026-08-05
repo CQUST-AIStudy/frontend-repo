@@ -3,6 +3,8 @@ import axios from 'axios'
 import {
   clearAuthStorage,
   getTapToken,
+  AUTH_SESSION_STATES,
+  setSessionState,
   setSessionToken,
   setTapToken,
   setTapUser,
@@ -209,11 +211,8 @@ export default {
 
   async login(username, password, teacherLevel) {
     try {
-      const normalizedUsername = teacherLevel === 'admin' && username === 'admin'
-        ? 'admin1'
-        : username
       const requestData = {
-        username: normalizedUsername,
+        username,
         password
       }
       if (teacherLevel) {
@@ -226,14 +225,15 @@ export default {
 
       if (response?.success && response.user) {
         setUserInfo(response.user)
-        setSessionToken(response.token || 'legacy_session')
+        setSessionToken(response.token || null)
+        setSessionState(response.token ? AUTH_SESSION_STATES.TOKEN : AUTH_SESSION_STATES.COOKIE)
       }
 
       if (response?.success) {
         try {
           const tapResponse = await axios.post(
             `${API_BASE_URL_WITH_SLASH}api/auth/login`,
-            { username: normalizedUsername, password },
+            { username, password },
             {
               withCredentials: true,
               headers: { 'Content-Type': 'application/json' }
@@ -245,7 +245,7 @@ export default {
             setTapUser({
               userId: tapData.userId,
               role: tapData.role,
-              username: normalizedUsername
+              username
             })
           }
         } catch (tapError) {

@@ -8,6 +8,7 @@ import { useTeacherAiChatStore } from '../../store/teacherAiChat'
 import { formatStudentAssistantError } from '../../store/studentAiChat'
 import { useUserStore } from '@/store'
 import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
+import { filterCourseSpacesForClass } from '@/utils/courseSpaceScope'
 import {
   ChatDotRound,
   Check,
@@ -70,10 +71,7 @@ const currentClassId = computed(() => {
 })
 
 const classScopedSpaces = computed(() => {
-  if (!currentClassId.value) return []
-  return allSpaces.value.filter((space) =>
-    Array.isArray(space.boundClassIds) && space.boundClassIds.includes(currentClassId.value)
-  )
+  return filterCourseSpacesForClass(allSpaces.value, userStore.selectedClass)
 })
 
 const visibleMessages = computed(() => {
@@ -236,10 +234,20 @@ async function fetchCourseSpaces() {
   try {
     const spaces = await getCourseSpaces()
     allSpaces.value = Array.isArray(spaces) ? spaces : []
-    // 按当前班级过滤：有班级专属空间则只展示这些，否则回退全部。
-    courseSpaces.value = classScopedSpaces.value.length > 0 ? classScopedSpaces.value : allSpaces.value
-    if (!selectedCourseSpaceId.value && courseSpaces.value.length > 0 && assistantMode.value === 'rag') {
+    courseSpaces.value = classScopedSpaces.value
+    const selectedStillMatches = courseSpaces.value.some(space =>
+      String(space.id) === String(selectedCourseSpaceId.value || '')
+    )
+    if (!selectedStillMatches) {
+      chatStore.setCourseSpace(null)
+    }
+    if (!selectedStillMatches && courseSpaces.value.length > 0 && assistantMode.value === 'rag') {
       chatStore.setCourseSpace(courseSpaces.value[0].id)
+    }
+    if (assistantMode.value === 'rag' && courseSpaces.value.length === 0) {
+      chatStore.setAssistantNotice(userStore.selectedClass
+        ? '当前课程或班级没有可用的课程空间，请先完成知识库绑定。'
+        : '请先选择当前班级，再使用 RAG 模式。')
     }
   } catch (error) {
     const friendlyMessage = formatStudentAssistantError(error?.message, assistantMode.value)
@@ -367,9 +375,7 @@ watch(userInput, () => {
   nextTick(autoResize)
 })
 // 当前班级变化时重新过滤课程空间（切班会重挂组件，此处作双保险）。
-watch(currentClassId, () => {
-  courseSpaces.value = classScopedSpaces.value.length > 0 ? classScopedSpaces.value : allSpaces.value
-})
+watch(currentClassId, fetchCourseSpaces)
 watch(selectedCourseSpaceId, (value) => {
   chatStore.setCourseSpace(value)
 })

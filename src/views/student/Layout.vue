@@ -191,7 +191,7 @@
               </ui-breadcrumb-item>
             </ui-breadcrumb>
             <div class="[display:flex] [align-items:center] [gap:8px] [font-size:12px] [color:var(--app-text-secondary)] [margin-left:12px] [padding-left:12px] [border-left:1px_solid_var(--app-border-soft)] max-[768px]:hidden">
-              <span>当前课程：<strong class="[color:var(--app-text)]">数据结构</strong></span>
+              <span>当前课程：<strong class="[color:var(--app-text)]">{{ headerCourseName }}</strong></span>
               <span class="[color:var(--app-text-soft)]">|</span>
               <span>当前班级：<strong class="[color:var(--app-text)]">{{ headerClassName }}</strong></span>
             </div>
@@ -311,6 +311,7 @@ import { useUserStore } from '../../store'
 import { useNotificationStore } from '../../store/notification'
 import { useResponsiveLayout } from '../../composables/useResponsiveLayout'
 import { resolveBreadcrumbs } from '../../utils/breadcrumbLabels.mjs'
+import { getStudentClasses } from '../../api/tap/classes'
 
 const route = useRoute()
 const router = useRouter()
@@ -331,8 +332,12 @@ const {
 
 const userInfo = computed(() => userStore.userInfo || {})
 
+const headerCourseName = computed(() => {
+  return userStore.selectedClass?.courseName || '未选择课程'
+})
+
 const headerClassName = computed(() => {
-  return userInfo.value?.class || userInfo.value?.className || '数据结构 1 班'
+  return userStore.selectedClass?.name || userInfo.value?.class || userInfo.value?.className || '未选择班级'
 })
 
 // ── Menu data ──────────────────────────────────────────────
@@ -463,12 +468,28 @@ function handleCommand(command) {
   }).catch(() => {})
 }
 
+async function ensureCurrentClass() {
+  try {
+    const response = await getStudentClasses()
+    const classes = Array.isArray(response) ? response : response?.data || []
+    const selectedExists = classes.some(item =>
+      String(item.id) === String(userStore.selectedClass?.id || '')
+    )
+    if (!selectedExists) {
+      userStore.setSelectedClass(classes.length === 1 ? classes[0] : null)
+    }
+  } catch {
+    userStore.setSelectedClass(null)
+  }
+}
+
 onMounted(() => {
   if (!userStore.isLoggedIn) {
     router.push('/login')
     uiMessage.warning('请先登录')
     return
   }
+  ensureCurrentClass()
   notificationStore.startPolling()
 })
 

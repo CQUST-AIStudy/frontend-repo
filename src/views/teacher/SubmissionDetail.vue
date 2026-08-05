@@ -455,7 +455,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import logger from '@/utils/logger'
 import { message as uiMessage, loading as uiLoading } from '@/services/feedback'
-import api from '../../api'
+import api, { apiClient } from '../../api'
+import { useUserStore } from '../../store'
 import AppModal from '../../components/AppModal.vue'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { parseSubmissionQuestions } from '@/utils/submissionQuestionParser.mjs'
@@ -463,7 +464,6 @@ import CodeViewer from '@/components/CodeViewer.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import hljs from 'highlight.js/lib/common'
 import * as echarts from 'echarts/core'
-import axios from 'axios'
 
 function highlightText(value) {
   const source = String(value ?? '')
@@ -506,6 +506,7 @@ echarts.use([
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(true)
 const activeTab = ref('code')
 const submissionId = computed(() => String(route.params.id))
@@ -671,6 +672,11 @@ const learningRecommendations = ref([])
 // 报告相关
 const reportData = ref({})
 const reportGeneratorRef = ref(null)
+
+const firstConfiguredValue = (...values) => {
+  const value = values.find(item => String(item ?? '').trim())
+  return value === undefined ? '未设置' : String(value).trim()
+}
 
 // 解析提交代码，按题目分割
 /* eslint-disable no-unreachable */
@@ -1340,18 +1346,21 @@ const submitGrade = async () => {
 
 const prepareReportData = () => {
   if (!submission.value) return
+  const selectedClass = userStore.selectedClass || {}
+  const profile = userStore.userInfo || {}
+  const reportMeta = submission.value.reportData || {}
 
   reportData.value = {
-    experimentName: submission.value.experimentName || '数据结构实验',
-    studentName: submission.value.studentName || '未知',
-    studentId: submission.value.studentId || '未知学号',
-    className: submission.value.class || '未知班级',
-    courseName: '数据结构',
+    experimentName: firstConfiguredValue(submission.value.experimentName, submission.value.experiment?.name),
+    studentName: firstConfiguredValue(submission.value.studentName),
+    studentId: firstConfiguredValue(submission.value.studentId),
+    className: firstConfiguredValue(submission.value.class, submission.value.className, selectedClass.name),
+    courseName: firstConfiguredValue(reportMeta.courseName, submission.value.courseName, submission.value.experiment?.courseName, selectedClass.courseName),
     score: submission.value.score !== null && submission.value.score !== undefined
         ? Number(submission.value.score) : null,
-    teacherName: '指导教师',
-    labName: '计算机实验室',
-    labTime: new Date().toLocaleDateString(),
+    teacherName: firstConfiguredValue(reportMeta.teacherName, submission.value.teacherName, selectedClass.teacherName, profile.realName, profile.name, profile.username),
+    labName: firstConfiguredValue(reportMeta.labName, reportMeta.labRoomName, submission.value.labName, submission.value.labRoomName, submission.value.experiment?.labName, submission.value.experiment?.labRoomName),
+    labTime: firstConfiguredValue(reportMeta.labTime, submission.value.labTime, submission.value.experiment?.labTime),
   }
 
   if (submission.value.report) {
@@ -1449,8 +1458,9 @@ const downloadWordDoc = async () => {
 }
 
 const downloadPDF = async () => {
+  let loadingInstance
   try {
-    const loadingInstance = uiLoading.service({
+    loadingInstance = uiLoading.service({
       lock: true,
       text: 'PDF生成中，请稍候..',
       background: 'rgba(0, 0, 0, 0.7)'
@@ -1472,27 +1482,26 @@ const downloadPDF = async () => {
     const formData = new FormData();
     formData.append('wordFile', new Blob([wordBlob]), 'report.docx');
 
-    const response = await axios.post('/api/convert-to-pdf', formData, {
+    const pdfBlob = await apiClient.post('/api/convert-to-pdf', formData, {
       responseType: 'blob',
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    loadingInstance.close();
-
     const fileName = `${submission.value.studentId}_${submission.value.studentName}_${submission.value.experimentName}.pdf`;
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const url = window.URL.createObjectURL(pdfBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
     link.click();
+    window.URL.revokeObjectURL(url);
 
     uiMessage.success('PDF文档下载成功');
   } catch (error) {
     logger.error('生成PDF文档失败:', error);
     uiMessage.error('生成PDF文档失败，请稍后重试');
 
-    const loadingInstance = uiLoading.service();
-    loadingInstance.close();
+  } finally {
+    loadingInstance?.close();
   }
 }
 

@@ -60,7 +60,13 @@
               </div>
             </div>
             <div class="joined-side">
-              <ui-button size="small" @click="goAssistant">去问 AI</ui-button>
+              <ui-button
+                size="small"
+                :type="isCurrentClass(item) ? 'primary' : 'default'"
+                @click="selectCurrentClass(item)"
+              >
+                {{ isCurrentClass(item) ? '当前课程' : '切换到此课程' }}
+              </ui-button>
             </div>
           </div>
         </div>
@@ -73,10 +79,12 @@
 import { useRouter } from 'vue-router'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message as uiMessage } from '@/services/feedback'
+import { useUserStore } from '../../store'
 import { buildApiUrl } from '../../config/runtime'
 import { getFriendlyErrorMessage } from '../../utils/errorMessage'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const joining = ref(false)
 const joinedClasses = ref([])
@@ -98,6 +106,10 @@ async function loadJoinedClasses() {
     }
     const data = await response.json()
     joinedClasses.value = Array.isArray(data) ? data : data?.data || []
+    const selectedStillExists = joinedClasses.value.some(item => isCurrentClass(item))
+    if (!selectedStillExists) {
+      userStore.setSelectedClass(joinedClasses.value.length === 1 ? joinedClasses.value[0] : null)
+    }
   } catch (error) {
     uiMessage.error(getFriendlyErrorMessage(error, '加载已加入班级失败，请稍后重试'))
   } finally {
@@ -135,6 +147,15 @@ async function submitJoin() {
 
 function goAssistant() {
   router.push('/student/ai-assistant')
+}
+
+function isCurrentClass(item) {
+  return String(userStore.selectedClass?.id || '') === String(item?.id || '')
+}
+
+function selectCurrentClass(item) {
+  userStore.setSelectedClass(item)
+  uiMessage.success(`已切换到${item.courseName || item.name}`)
 }
 
 onMounted(() => {

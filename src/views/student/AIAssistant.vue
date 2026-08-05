@@ -4,8 +4,10 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { message as uiMessage, messageBox } from '@/services/feedback'
 import { renderSafeMarkdown } from '@/utils/safeHtml'
 import { getKnowledgeBases } from '../../api/rag'
+import { useUserStore } from '@/store'
 import { formatStudentAssistantError, useStudentAiChatStore } from '../../store/studentAiChat'
 import { buildQuickPromptPool, samplePrompts } from '@/utils/aiQuickPrompts'
+import { filterCourseSpacesForClass } from '@/utils/courseSpaceScope'
 import {
   ChatDotRound,
   Check,
@@ -23,6 +25,7 @@ import {
 } from '@/components/ui/icons'
 
 const chatStore = useStudentAiChatStore()
+const userStore = useUserStore()
 const {
   userInput,
   isTyping,
@@ -219,9 +222,20 @@ async function scrollToBottom() {
 async function fetchCourseSpaces() {
   try {
     const spaces = await getKnowledgeBases()
-    courseSpaces.value = spaces
-    if (!selectedCourseSpaceId.value && spaces.length > 0 && assistantMode.value === 'rag') {
-      chatStore.setCourseSpace(spaces[0].id)
+    courseSpaces.value = filterCourseSpacesForClass(spaces, userStore.selectedClass)
+    const selectedStillMatches = courseSpaces.value.some(space =>
+      String(space.id) === String(selectedCourseSpaceId.value || '')
+    )
+    if (!selectedStillMatches) {
+      chatStore.setCourseSpace(null)
+    }
+    if (!selectedStillMatches && courseSpaces.value.length > 0 && assistantMode.value === 'rag') {
+      chatStore.setCourseSpace(courseSpaces.value[0].id)
+    }
+    if (assistantMode.value === 'rag' && courseSpaces.value.length === 0) {
+      chatStore.setAssistantNotice(userStore.selectedClass
+        ? '当前课程或班级没有可用的课程空间，请联系教师配置。'
+        : '请先选择当前班级，再使用 RAG 模式。')
     }
   } catch (error) {
     const friendlyMessage = formatStudentAssistantError(error?.message, assistantMode.value)
@@ -350,6 +364,7 @@ watch(userInput, () => {
 watch(selectedCourseSpaceId, (value) => {
   chatStore.setCourseSpace(value)
 })
+watch(() => userStore.selectedClass?.id, fetchCourseSpaces)
 
 onMounted(() => {
   chatStore.ensureActiveConversation()
