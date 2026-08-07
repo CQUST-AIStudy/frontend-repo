@@ -141,7 +141,8 @@
                 <LucideIcon name="code" :size="22" class="absolute inset-0 m-auto text-[var(--app-primary)]" />
               </div>
               <p class="text-sm font-semibold text-[var(--app-text)]">{{ loadingTip }}</p>
-              <p class="mt-1 text-xs text-[var(--app-text-soft)]">正在编译并逐行捕捉执行过程，首次生成可能需要十几秒…</p>
+              <p class="mt-1 text-xs text-[var(--app-text-soft)]">优先真实执行并逐行捕捉，通常 10~60 秒；AI 拥挤时可能更久，可取消等待稍后在历史中查看</p>
+              <button type="button" class="mt-4 rounded-lg border border-[var(--app-border-soft)] bg-white px-4 py-1.5 text-xs text-[var(--app-text-soft)] transition hover:text-[var(--app-text)]" @click="cancelWait">取消等待（后台继续生成）</button>
               <div class="mt-6 w-full max-w-md space-y-2.5">
                 <div class="h-3 w-3/4 animate-pulse rounded bg-[var(--app-border-soft)]"></div>
                 <div class="h-3 w-full animate-pulse rounded bg-[var(--app-border-soft)]" style="animation-delay:.15s"></div>
@@ -204,6 +205,7 @@ const loadingTip = ref('准备执行环境…')
 const LOADING_TIPS = ['准备执行环境…', '正在编译代码…', '逐行捕捉变量状态…', '生成可视化动画…']
 let tipTimer = null
 let pollTimer = null
+let pollCancel = null
 function stopPoll() {
   if (pollTimer) {
     window.clearTimeout(pollTimer)
@@ -290,7 +292,9 @@ async function generate() {
       ? await pollUntilDone(view.id)
       : view
     applyView(finalView)
-    if (finalView?.status === 'FAILED') {
+    if (finalView?.status === 'PROCESSING') {
+      loadError.value = '后台仍在生成（AI 拥挤时可能需要几分钟），稍后在左侧历史中点开查看即可，无需重复提交。'
+    } else if (finalView?.status === 'FAILED') {
       loadError.value = '生成失败，请稍后重试或修改输入'
     } else if (!hasDemo.value) {
       loadError.value = '生成完成，但没有可用的演示帧，请稍后重试或修改输入'
@@ -304,29 +308,30 @@ async function generate() {
   }
 }
 
-// 轮询异步生成结果：每 2s 拉取一次详情，直到状态不再是 PROCESSING（最长约 150s）
+// 轮询异步生成结果：每 2s 拉取一次详情，直到状态不再是 PROCESSING（最长约 150s）；cancelWait 可提前返回
 function pollUntilDone(id) {
   const POLL_INTERVAL = 2000
   const MAX_POLLS = 75
   return new Promise((resolve, reject) => {
     let count = 0
+    const done = (view) => { pollCancel = null; pollTimer = null; resolve(view) }
+    pollCancel = () => done({ status: 'PROCESSING' })
     const tick = async () => {
       count += 1
       try {
         const res = await api.getPlaygroundDemo(id)
         const view = res?.data || res
         if (view?.status !== 'PROCESSING') {
-          pollTimer = null
-          resolve(view)
+          done(view)
           return
         }
         if (count >= MAX_POLLS) {
-          pollTimer = null
-          resolve(view)
+          done(view)
           return
         }
       } catch (e) {
         if (count >= MAX_POLLS) {
+          pollCancel = null
           pollTimer = null
           reject(e)
           return
@@ -336,6 +341,14 @@ function pollUntilDone(id) {
     }
     tick()
   })
+}
+
+// 取消等待：停止轮询与提示动画，后台仍会继续生成，稍后从历史进入查看
+function cancelWait() {
+  if (pollCancel) pollCancel()
+  stopTips()
+  loading.value = false
+  loadError.value = '已取消等待，后台仍在生成；稍后在左侧历史中点开查看即可，无需重复提交。'
 }
 
 async function loadDemo(id) {
@@ -351,7 +364,9 @@ async function loadDemo(id) {
     }
     applyView(view)
     activeId.value = id
-    if (view?.status === 'FAILED') {
+    if (view?.status === 'PROCESSING') {
+      loadError.value = '该演示后台仍在生成，稍后在左侧历史中再次点开查看即可。'
+    } else if (view?.status === 'FAILED') {
       loadError.value = '该演示生成失败，请重新生成'
     }
   } catch (e) {

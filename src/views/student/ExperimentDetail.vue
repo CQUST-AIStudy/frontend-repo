@@ -452,7 +452,7 @@
                   </div>
 
                   <div class="[background:#f8f9fa] [border:1px_dashed_#dadce0] [padding:14px_16px] [border-radius:10px] [font-size:14px] [line-height:1.8] [color:#5f6368] [text-align:center]">
-                    本题尚未生成详细解析，点击上方“生成本题AI深度解析”按钮，AI将结合题面与您的代码进行深入分析（按题生成，节省 token）。
+                    本题尚未生成详细解析，点击上方“生成本题AI深度解析”按钮，AI将结合题面与您的代码进行深入分析。
                   </div>
                 </template>
 
