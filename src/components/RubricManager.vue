@@ -102,6 +102,13 @@
       <UiButton @click="addDimension"
         class="w-full h-9 rounded-[10px] text-sm font-medium text-[#6e6e73] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.98] transition-all cursor-pointer border border-dashed border-black/10 mt-1">+ 添加维度</UiButton>
 
+      <!-- 权重未凑满 100% 时给出原因与一键修正，避免“改完存不了”无从下手 -->
+      <div v-if="form.dimensions.length && weightSum !== 100" class="mt-2 flex items-center justify-between gap-2 rounded-[10px] bg-[rgba(196,75,63,0.06)] px-3 py-2">
+        <span class="text-xs leading-5 text-[#c44b3f]">权重合计必须等于 100% 才能保存（当前 {{ weightSum }}%），保存按钮因此禁用。</span>
+        <UiButton @click="normalizeWeights"
+          class="h-8 shrink-0 rounded-[10px] border-none bg-[rgba(196,75,63,0.1)] px-3 text-xs font-medium text-[#c44b3f] hover:bg-[rgba(196,75,63,0.16)] cursor-pointer">一键凑满 100%</UiButton>
+      </div>
+
       <template #footer>
         <UiButton @click="dialogVisible = false"
           class="h-[38px] px-5 rounded-[10px] text-sm font-medium text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-[0.96] transition-all cursor-pointer border-none">取消</UiButton>
@@ -225,6 +232,24 @@ async function editRubric(row) {
 
 function addDimension() {
   form.value.dimensions.push({ name: '', description: '', maxScore: 10, weight: 0 })
+}
+
+// 按当前权重比例缩放为合计 100 的整数（余数补到最大权重维度），让修改后可直接保存
+function normalizeWeights() {
+  const dims = form.value.dimensions
+  if (!dims.length) return
+  const raw = dims.map(d => Math.max(1, Number(d.weight) || 1))
+  const sum = raw.reduce((s, w) => s + w, 0)
+  const scaled = raw.map(w => Math.max(1, Math.round((w * 100) / sum)))
+  const diff = 100 - scaled.reduce((s, w) => s + w, 0)
+  if (diff !== 0) {
+    let idx = 0
+    for (let i = 1; i < scaled.length; i += 1) {
+      if (scaled[i] > scaled[idx]) idx = i
+    }
+    scaled[idx] = Math.max(1, scaled[idx] + diff)
+  }
+  dims.forEach((d, i) => { d.weight = scaled[i] })
 }
 
 async function saveRubric() {
