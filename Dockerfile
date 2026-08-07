@@ -28,6 +28,10 @@ ENV VUE_APP_API_BASE_URL="" \
 # 先拷依赖描述，利用层缓存
 COPY package.json package-lock.json ./
 
+# 国内服务器（如 121 阿里云）拉 npmjs 极慢且易中断（曾致 npm ci 半成品退出 0）：
+# 构建期把 lockfile 的 tarball 地址改写为 npmmirror 国内镜像，仅影响镜像构建，不改仓库文件
+RUN sed -i 's|https://registry.npmjs.org/|https://registry.npmmirror.com/|g' package-lock.json
+
 # package.json 显式列了 @tailwindcss/oxide-win32-x64-msvc、lightningcss-win32-x64-msvc
 # 两个 Windows 原生包（devDependencies），在 Linux 镜像里会触发 EBADPLATFORM。
 # --force 将该平台校验降级为 warning，linux 变体由 tailwindcss/lightningcss 主包的
