@@ -200,29 +200,71 @@ function drawPointerBadge(g, cx, topY, name, color = 'var(--app-primary)') {
 
 // ---------- 线性表 ----------
 function renderArray(svg, nodes, width, height) {
-  const margin = { left: 24 }
-  const cellW = Math.min(80, (width - margin.left * 2) / Math.max(nodes.length, 1))
-  const cellH = 64
-  const startX = margin.left
-  const startY = (height - cellH) / 2
+  // 多个数组（如 graph[i]/visited[i]）按名字分组各占一行，裸变量归入标量行，
+  // 避免把 22 个格子挤进同一行导致标签重叠
+  const groups = []
+  const byKey = new Map()
+  for (const node of nodes) {
+    const m = String(node.label || '').match(/^(.+)\[\d+\]$/)
+    const key = m ? m[1] : '__scalar__'
+    if (!byKey.has(key)) {
+      byKey.set(key, [])
+      groups.push(key)
+    }
+    byKey.get(key).push(node)
+  }
+  const cellH = 44
+  const rowGap = 30
+  const totalH = groups.length * (cellH + rowGap) - rowGap
+  let y = Math.max(16, (height - totalH) / 2)
   const g = svg.append('g')
 
-  nodes.forEach((node, i) => {
-    const x = startX + i * cellW
-    g.append('text')
-      .attr('x', x + (cellW - 4) / 2).attr('y', startY - 8)
-      .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#64748b')
-      .text(node.label || `[${node.index}]`)
-    const c = colorsFor(node)
-    g.append('rect')
-      .attr('x', x).attr('y', startY).attr('width', cellW - 4).attr('height', cellH).attr('rx', 6)
-      .attr('fill', c.fill).attr('stroke', c.stroke).attr('stroke-width', node.outOfBounds ? 2 : 1.5)
-      .attr('stroke-dasharray', c.dash)
-    g.append('text')
-      .attr('x', x + (cellW - 4) / 2).attr('y', startY + cellH / 2 + 5)
-      .attr('text-anchor', 'middle').attr('font-size', 14).attr('font-weight', 600).attr('fill', c.text)
-      .text(truncate(node.value, 8))
-  })
+  for (const key of groups) {
+    const arr = byKey.get(key)
+    if (key === '__scalar__') {
+      const cellW = Math.min(96, (width - 48) / Math.max(arr.length, 1))
+      const startX = (width - cellW * arr.length) / 2
+      arr.forEach((node, i) => {
+        const x = startX + i * cellW
+        g.append('text')
+          .attr('x', x + (cellW - 6) / 2).attr('y', y - 6)
+          .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#64748b')
+          .text(truncate(node.label || node.id, 10))
+        const c = colorsFor(node)
+        g.append('rect')
+          .attr('x', x).attr('y', y).attr('width', cellW - 6).attr('height', cellH - 8).attr('rx', 6)
+          .attr('fill', c.fill).attr('stroke', c.stroke).attr('stroke-width', 1.5).attr('stroke-dasharray', c.dash)
+        g.append('text')
+          .attr('x', x + (cellW - 6) / 2).attr('y', y + (cellH - 8) / 2 + 5)
+          .attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 600).attr('fill', c.text)
+          .text(truncate(node.value, 8))
+      })
+    } else {
+      const cellW = Math.min(64, (width - 130) / Math.max(arr.length, 1))
+      const startX = 106
+      g.append('text')
+        .attr('x', 24).attr('y', y + cellH / 2 + 4)
+        .attr('font-size', 12).attr('font-weight', 600).attr('fill', '#475569')
+        .text(truncate(key, 12))
+      arr.forEach((node, i) => {
+        const x = startX + i * cellW
+        g.append('text')
+          .attr('x', x + (cellW - 4) / 2).attr('y', y - 5)
+          .attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', '#94a3b8')
+          .text(String(node.label || '').slice(key.length + 1, -1) || String(node.index))
+        const c = colorsFor(node)
+        g.append('rect')
+          .attr('x', x).attr('y', y).attr('width', cellW - 4).attr('height', cellH).attr('rx', 6)
+          .attr('fill', c.fill).attr('stroke', c.stroke).attr('stroke-width', node.outOfBounds ? 2 : 1.5)
+          .attr('stroke-dasharray', c.dash)
+        g.append('text')
+          .attr('x', x + (cellW - 4) / 2).attr('y', y + cellH / 2 + 5)
+          .attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 600).attr('fill', c.text)
+          .text(truncate(node.value, 6))
+      })
+    }
+    y += cellH + rowGap
+  }
 }
 
 function renderMatrix(svg, nodes, width, height) {

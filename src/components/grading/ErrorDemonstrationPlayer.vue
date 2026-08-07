@@ -89,7 +89,7 @@
             <div v-for="(value, key) in activeStep.variables" :key="key + '=' + value" class="text-center">
               <div class="mb-1 font-mono text-[11px] text-[#64748b]">{{ key }}</div>
               <div class="code-demo-cell flex h-11 min-w-[52px] items-center justify-center rounded-lg border-[1.5px] px-3 font-mono text-lg font-bold transition-colors"
-                :class="changedKeys.has(key) ? 'border-[var(--app-primary)] bg-[var(--app-primary-soft)] text-[var(--app-primary)]' : 'border-[#cbd5e1] bg-white text-[#334155]'">{{ value }}</div>
+                :class="changedKeys.has(key) ? 'border-[var(--app-primary)] bg-[var(--app-primary-soft)] text-[var(--app-primary)]' : 'border-[#cbd5e1] bg-white text-[#334155]'">{{ formatVarValue(value) }}</div>
             </div>
           </div>
           <div v-else-if="hasVariables(activeStep)" class="mb-4 flex flex-wrap gap-2">
@@ -97,7 +97,7 @@
               class="inline-flex items-center gap-1 rounded-lg border border-[#dce3ec] bg-white px-2.5 py-1 font-mono text-xs">
               <span class="text-[#64748b]">{{ key }}</span>
               <span class="text-[#94a3b8]">=</span>
-              <span class="font-semibold text-[#172033]">{{ value }}</span>
+              <span class="font-semibold text-[#172033]">{{ formatVarValue(value) }}</span>
             </span>
           </div>
 
@@ -205,6 +205,15 @@ const hasCode = computed(() => String(current.value.sourceCode || '').trim().len
 function hasVariables(step) {
   const vars = step?.variables
   return vars && typeof vars === 'object' && Object.keys(vars).length > 0
+}
+
+// 变量值紧凑展示：tracer 的数组对象（{type:'array',values:[...]}）显示为 array[size]，不再直出原始 JSON
+function formatVarValue(v) {
+  if (v && typeof v === 'object') {
+    if (v.type === 'array' && Array.isArray(v.values)) return `array[${v.size ?? v.values.length}]`
+    try { return JSON.stringify(v) } catch (e) { return String(v) }
+  }
+  return String(v)
 }
 
 function lineClass(lineNumber) {
