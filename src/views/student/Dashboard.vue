@@ -270,13 +270,14 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import logger from '@/utils/logger'
-import { useExperimentStore } from '../../store'
+import { useExperimentStore, useUserStore } from '../../store'
 import * as echarts from 'echarts'
 import api, { apiClient } from '@/api'
 import LucideIcon from '@/components/LucideIcon.vue'
 
 const router = useRouter()
 const experimentStore = useExperimentStore()
+const userStore = useUserStore()
 const loading = ref(true)
 const loadError = ref(false)
 const profileData = ref({})
@@ -523,7 +524,7 @@ async function refreshRecommendations() {
 
 async function loadRecommendations() {
   try {
-    const [ptaRes, lcRes] = await Promise.allSettled([api.getPtaPracticeSets(), api.getRecommendedPractices()])
+    const [ptaRes, lcRes] = await Promise.allSettled([api.getPtaPracticeSets(), api.getRecommendedPractices(userStore.selectedClass?.id || null)])
     const items = []
     if (ptaRes.status === 'fulfilled' && ptaRes.value) {
       const list = Array.isArray(ptaRes.value) ? ptaRes.value : (ptaRes.value?.data || ptaRes.value?.items || [])

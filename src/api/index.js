@@ -340,9 +340,9 @@ export default {
     })
   },
 
-  async getRecommendedPractices() {
+  async getRecommendedPractices(classId = null) {
     return apiClient.get('/api/recommendations/leetcode/sync', {
-      params: { limit: 20 }
+      params: { limit: 20, ...(classId ? { classId } : {}) }
     })
   },
 
