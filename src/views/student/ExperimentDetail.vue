@@ -328,7 +328,6 @@
                   <span class="[font-size:15px] [font-weight:500] [color:#202124]">
                     分题AI深度解析
                     <span v-if="currentDeepAnalysis?.aiGenerated" class="g-chip [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [margin-left:8px] [background:#e8f0fe] [color:#174ea6]">AI 模型生成</span>
-                    <span v-else-if="currentDeepAnalysis && currentDeepAnalysis.fallbackReason !== 'NO_CODE_FOR_PROBLEM'" class="g-chip [display:inline-block] [font-size:12px] [padding:2px_10px] [border-radius:100px] [font-weight:500] [margin-left:8px] [background:#fef7e0] [color:#e37400]">规则兜底</span>
                   </span>
                   <UiButton class="g-primary-btn-sm [background:#1a73e8] [color:#fff] [border:none] [border-radius:100px] [padding:6px_18px] [font-size:14px] [font-weight:500] [cursor:pointer] [transition:background_0.2s] hover:[background:#1765cc] disabled:[background:#9aa0a6]" :disabled="problemDeepLoading" @click="runProblemDeepAnalysis(!!currentDeepAnalysis)">
                     {{ problemDeepLoading ? 'AI 正在深度解析本题...' : (currentDeepAnalysis ? '重新生成本题解析' : '生成本题AI深度解析') }}
@@ -909,11 +908,18 @@ async function runProblemDeepAnalysis(forceRefresh = false) {
   }
   problemDeepLoading.value = true
   try {
-    const payload = buildProblemDeepAnalysisPayload(experimentId.value, question.problemId, forceRefresh)
-    const res = await api.analyzeProblemError(payload)
-    if (res?.success && res.data) {
+    let res = await api.analyzeProblemError(buildProblemDeepAnalysisPayload(experimentId.value, question.problemId, forceRefresh))
+    // 后端未命中缓存时会后台生成并先答 PROCESSING：轮询直到命中（每次轮询只是读缓存，很快）
+    const startedAt = Date.now()
+    while (res?.success && res.data?.status === 'PROCESSING' && Date.now() - startedAt < 150000) {
+      await new Promise(r => setTimeout(r, 3000))
+      res = await api.analyzeProblemError(buildProblemDeepAnalysisPayload(experimentId.value, question.problemId, false))
+    }
+    if (res?.success && res.data && res.data.status !== 'PROCESSING') {
       localProblemDeep.value = { ...localProblemDeep.value, [String(question.problemId)]: res.data }
       uiMessage.success(res.data.fallbackReason === 'NO_CODE_FOR_PROBLEM' ? '本题暂无可分析代码' : '本题深度解析已生成')
+    } else if (res?.success && res.data?.status === 'PROCESSING') {
+      uiMessage.info('深度解析仍在后台生成，请稍后再点一次查看')
     } else {
       uiMessage.warning(getFriendlyResponseMessage(res, '深度解析生成失败，请稍后重试'))
     }
