@@ -144,7 +144,7 @@
               </div>
               <details v-if="p.statement" class="mt-2">
                 <summary class="cursor-pointer text-[12px] text-[var(--app-primary)]">查看题面</summary>
-                <pre class="mt-2 max-h-[200px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#f8f9fa] p-3 text-[12px] leading-5 text-[#3c4043]">{{ p.statement }}</pre>
+                <div class="markdown-body mt-2 max-h-[320px] overflow-auto rounded-lg bg-[#f8f9fa] p-3 text-[13px] leading-[1.7] text-[#1d1d1f] [&_p]:[margin:8px_0] [&_code]:[background:#e8eaed] [&_code]:[padding:2px_6px] [&_code]:[border-radius:4px] [&_code]:[font-size:12px] [&_code]:[color:#d93025] [&_pre]:[background:#f6f8fa] [&_pre]:[color:#24292f] [&_pre]:[padding:12px] [&_pre]:[border-radius:8px] [&_pre]:[overflow-x:auto] [&_pre]:[margin:10px_0] [&_pre_code]:[background:none] [&_pre_code]:[color:inherit] [&_pre_code]:[padding:0] [&_ul]:[padding-left:20px] [&_ol]:[padding-left:20px] [&_li]:[margin:4px_0]" v-html="renderSafeMarkdown(p.statement)"></div>
               </details>
               <pre v-if="p.code" class="mt-2 max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#0f172a] p-3 font-mono text-[12px] leading-5 text-[#e2e8f0]">{{ p.code }}</pre>
               <p v-else class="mt-2 text-[12px] text-[#8a8a8f]">该生本题未提交代码</p>
@@ -161,6 +161,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useUserStore } from '../../store'
 import { message as uiMessage } from '@/services/feedback'
 import LucideIcon from '../../components/LucideIcon.vue'
+import { renderSafeMarkdown } from '@/utils/safeHtml'
 import api from '../../api'
 
 const userStore = useUserStore()
