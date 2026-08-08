@@ -73,6 +73,7 @@
               <th class="px-4 py-3 font-medium">客观分</th>
               <th class="px-4 py-3 font-medium">教师评语</th>
               <th class="px-4 py-3 font-medium">状态</th>
+              <th class="px-4 py-3 font-medium">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -90,6 +91,12 @@
                 <span v-else-if="s.comment" class="rounded-full bg-[#eef5ff] px-2 py-0.5 text-[11px] text-[var(--app-primary)]">待发布</span>
                 <span v-else class="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[11px] text-[#8a8a8f]">未批改</span>
               </td>
+              <td class="px-4 py-3">
+                <button
+                  class="rounded-lg border border-[var(--app-border-soft)] px-2.5 py-1 text-[12px] text-[var(--app-primary)] transition hover:bg-[#fbf1eb]"
+                  @click="openDetail(s)"
+                >查看</button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -103,6 +110,47 @@
       <div v-else-if="!selectedOfferingId" class="rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-12 text-center">
         <LucideIcon name="clipboard" :size="44" class="mx-auto text-[var(--app-text-soft)]" />
         <p class="mt-4 text-[var(--app-text-soft)]">选择一个题集，加载学生的 PTA 判题结果进行批改</p>
+      </div>
+    </div>
+
+    <!-- 学生详情弹窗：每题判题状态 + 代码 + 题面 -->
+    <div v-if="detailStudent" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="detailStudent = null">
+      <div class="flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between border-b border-[var(--app-border-soft)] px-6 py-4">
+          <div>
+            <div class="text-[16px] font-semibold text-[#1d1d1f]">
+              {{ detailStudent.studentName || '-' }}
+              <span class="ml-2 font-mono text-[12px] font-normal text-[#6e6e73]">{{ detailStudent.studentNo }}</span>
+            </div>
+            <div class="mt-1 text-[12px] text-[#6e6e73]">
+              通过 {{ detailData?.acceptedCount ?? '-' }}/{{ detailData?.problemCount ?? '-' }} 题 · 客观分 {{ fmtScore(detailData?.score) }}
+            </div>
+          </div>
+          <button class="rounded-lg px-2 py-1 text-[#6e6e73] transition hover:bg-[#f5f5f7]" @click="detailStudent = null">✕</button>
+        </div>
+        <div class="overflow-y-auto px-6 py-4">
+          <div v-if="detailLoading" class="py-10 text-center text-sm text-[#6e6e73]">加载中…</div>
+          <template v-else-if="detailData">
+            <div v-if="detailData.comment" class="mb-4 rounded-lg bg-[#fbf1eb] px-4 py-3 text-[13px] leading-6 text-[#8a5a3b]">
+              <span class="font-medium">教师评语：</span>{{ detailData.comment }}
+            </div>
+            <div v-for="(p, i) in detailData.problems || []" :key="i" class="mb-4 rounded-xl border border-[var(--app-border-soft)] p-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[14px] font-semibold text-[#1d1d1f]">{{ i + 1 }}. {{ p.title || p.problemNo }}</span>
+                <span v-if="p.accepted" class="rounded-full bg-[#e8f8ed] px-2 py-0.5 text-[11px] text-[#30d158]">通过</span>
+                <span v-else-if="p.status" class="rounded-full bg-[#fdecea] px-2 py-0.5 text-[11px] text-[#c44b3f]">未通过 · {{ p.status }}</span>
+                <span v-else class="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[11px] text-[#8a8a8f]">未提交</span>
+                <span class="ml-auto text-[12px] text-[#6e6e73]">得分 {{ p.bestScore ?? '-' }} / {{ p.maxScore ?? '-' }}</span>
+              </div>
+              <details v-if="p.statement" class="mt-2">
+                <summary class="cursor-pointer text-[12px] text-[var(--app-primary)]">查看题面</summary>
+                <pre class="mt-2 max-h-[200px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#f8f9fa] p-3 text-[12px] leading-5 text-[#3c4043]">{{ p.statement }}</pre>
+              </details>
+              <pre v-if="p.code" class="mt-2 max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#0f172a] p-3 font-mono text-[12px] leading-5 text-[#e2e8f0]">{{ p.code }}</pre>
+              <p v-else class="mt-2 text-[12px] text-[#8a8a8f]">该生本题未提交代码</p>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
   </div>
@@ -126,6 +174,9 @@ const generating = ref(false)
 const publishing = ref(false)
 const loadError = ref('')
 const tip = ref('')
+const detailStudent = ref(null)
+const detailData = ref(null)
+const detailLoading = ref(false)
 
 const selectedClassId = computed(() => userStore.selectedClass?.id || '')
 const selectedClassName = computed(() => userStore.selectedClass?.name || '当前教学班')
@@ -218,6 +269,21 @@ async function publish() {
     uiMessage.error(e?.message || '发布失败')
   } finally {
     publishing.value = false
+  }
+}
+
+async function openDetail(s) {
+  detailStudent.value = s
+  detailData.value = null
+  detailLoading.value = true
+  try {
+    const res = await api.ptaStudentDetail(Number(selectedOfferingId.value), s.studentId)
+    detailData.value = res?.data || res
+  } catch (e) {
+    uiMessage.error(e?.message || '加载学生详情失败')
+    detailStudent.value = null
+  } finally {
+    detailLoading.value = false
   }
 }
 

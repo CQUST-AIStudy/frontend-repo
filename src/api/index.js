@@ -614,6 +614,10 @@ export default {
     return apiClient.get(`/api/grading/pta/detail/${id}`)
   },
 
+  async ptaStudentDetail(offeringId, studentId) {
+    return apiClient.post('/api/grading/pta/student-detail', { offeringId, studentId })
+  },
+
   async publishPtaGrading(offeringId) {
     return apiClient.post('/api/grading/pta/publish', { offeringId })
   },
