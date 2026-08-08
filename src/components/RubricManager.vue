@@ -224,7 +224,7 @@ async function editRubric(row) {
     editingId.value = r.id
     form.value = { name: r.name, subject: r.subject, description: r.description,
       customPrompt: r.customPrompt || '',
-      dimensions: (r.dimensions || []).map(d => ({ name: d.name, description: d.description, maxScore: d.maxScore, weight: d.weight }))
+      dimensions: (r.dimensions || []).map(d => ({ id: d.id, name: d.name, description: d.description, maxScore: d.maxScore, weight: d.weight }))
     }
     dialogVisible.value = true
   } catch (e) { uiMessage.error(e.message) }
