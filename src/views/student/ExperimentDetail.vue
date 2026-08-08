@@ -915,7 +915,9 @@ async function runProblemDeepAnalysis(forceRefresh = false) {
       await new Promise(r => setTimeout(r, 3000))
       res = await api.analyzeProblemError(buildProblemDeepAnalysisPayload(experimentId.value, question.problemId, false))
     }
-    if (res?.success && res.data && res.data.status !== 'PROCESSING') {
+    if (res?.success && res.data?.status === 'FAILED') {
+      uiMessage.error(res.data.message || '深度解析生成失败，请稍后重试')
+    } else if (res?.success && res.data && res.data.status !== 'PROCESSING') {
       localProblemDeep.value = { ...localProblemDeep.value, [String(question.problemId)]: res.data }
       uiMessage.success(res.data.fallbackReason === 'NO_CODE_FOR_PROBLEM' ? '本题暂无可分析代码' : '本题深度解析已生成')
     } else if (res?.success && res.data?.status === 'PROCESSING') {
