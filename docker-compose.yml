@@ -42,6 +42,10 @@ services:
       # 知识图谱服务
       KNOWLEDGE_GRAPH_HOST: ${KNOWLEDGE_GRAPH_HOST:-host.docker.internal}
       KNOWLEDGE_GRAPH_PORT: ${KNOWLEDGE_GRAPH_PORT:-10171}
+      # 后端 API 鉴权密钥（可选，空值 = 后端未启用鉴权，nginx 注入空头无副作用）
+      # 与 knowledge-graph-service/.env、LeetCodeClaw/.env 中的值一致后才生效
+      KG_API_KEY: ${KG_API_KEY:-}
+      LEETCODE_CLAW_API_KEY: ${LEETCODE_CLAW_API_KEY:-}
     extra_hosts:
       # Linux 上兼容 host.docker.internal，访问宿主上的服务
       - "host.docker.internal:host-gateway"

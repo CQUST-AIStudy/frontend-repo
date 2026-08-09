@@ -59,7 +59,9 @@ ENV TZ=Asia/Shanghai \
     ERROR_ANALYSIS_HOST=host.docker.internal \
     ERROR_ANALYSIS_PORT=8002 \
     KNOWLEDGE_GRAPH_HOST=host.docker.internal \
-    KNOWLEDGE_GRAPH_PORT=10171
+    KNOWLEDGE_GRAPH_PORT=10171 \
+    KG_API_KEY= \
+    LEETCODE_CLAW_API_KEY=
 
 # 静态产物
 COPY --from=builder /app/dist /usr/share/nginx/html
