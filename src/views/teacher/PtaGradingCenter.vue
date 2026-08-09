@@ -149,6 +149,20 @@
               <pre v-if="p.code" class="mt-2 max-h-[320px] overflow-auto whitespace-pre-wrap rounded-lg bg-[#0f172a] p-3 font-mono text-[12px] leading-5 text-[#e2e8f0]">{{ p.code }}</pre>
               <p v-else class="mt-2 text-[12px] text-[#8a8a8f]">该生本题未提交代码</p>
             </div>
+            <section v-if="detailData.studentReflection" class="mt-6 rounded-xl border border-[#eadfd7] bg-[#fffaf7] p-5">
+              <div class="mb-3 flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-2 text-[15px] font-semibold text-[#3f3028]">
+                  <LucideIcon name="pen" :size="17" class="text-[var(--app-primary)]" />
+                  学生心得体会
+                </div>
+                <span class="rounded-full bg-white px-2.5 py-1 text-[11px] text-[#8a5a3b] ring-1 ring-[#eadfd7]">
+                  {{ detailData.studentReflection.sourceLabel }}
+                </span>
+              </div>
+              <p v-if="detailData.studentReflection.content" class="m-0 whitespace-pre-wrap text-[13px] leading-7 text-[#4d433e]">
+                {{ detailData.studentReflection.content }}
+              </p>
+            </section>
           </template>
         </div>
       </div>
