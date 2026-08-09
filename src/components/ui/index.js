@@ -882,13 +882,18 @@ export const UiSelect = defineComponent({
       const viewportPadding = 8
       const below = window.innerHeight - rect.bottom - viewportPadding
       const above = rect.top - viewportPadding
-      const placeAbove = below < 160 && above > below
+      // 面板实际内容高度：已挂载时用实测高度，否则按选项数估算（选项 h-9=36px + 面板 py-1=8px）
+      const measuredHeight = panelRef.value ? panelRef.value.scrollHeight : 0
+      const estimatedHeight = options.value.length * 36 + 8
+      const contentHeight = measuredHeight || estimatedHeight
+      const placeAbove = below < contentHeight + gap && above > below
       const available = Math.max(0, (placeAbove ? above : below) - gap)
       const maxHeight = Math.min(280, available)
+      const panelHeight = Math.min(contentHeight, maxHeight)
       const left = Math.min(Math.max(viewportPadding, rect.left), Math.max(viewportPadding, window.innerWidth - rect.width - viewportPadding))
       panelStyle.value = {
         left: `${left}px`,
-        top: `${placeAbove ? Math.max(viewportPadding, rect.top - gap - maxHeight) : rect.bottom + gap}px`,
+        top: `${placeAbove ? Math.max(viewportPadding, rect.top - gap - panelHeight) : rect.bottom + gap}px`,
         width: `${rect.width}px`,
         maxHeight: `${maxHeight}px`
       }
@@ -901,6 +906,8 @@ export const UiSelect = defineComponent({
     const openPanel = () => {
       if (props.disabled) return
       highlightedIndex.value = selectedIndex.value >= 0 ? selectedIndex.value : firstEnabledIndex()
+      // 先同步计算位置再置 open，避免面板首帧以 fixed 且无 top/left 渲染在 body 静态位置造成闪现错位
+      updatePanelPosition()
       open.value = true
       nextTick(() => {
         updatePanelPosition()
