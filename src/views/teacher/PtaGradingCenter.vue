@@ -155,9 +155,6 @@
                   <LucideIcon name="pen" :size="17" class="text-[var(--app-primary)]" />
                   学生心得体会
                 </div>
-                <span class="rounded-full bg-white px-2.5 py-1 text-[11px] text-[#8a5a3b] ring-1 ring-[#eadfd7]">
-                  {{ detailData.studentReflection.sourceLabel }}
-                </span>
               </div>
               <p v-if="detailData.studentReflection.content" class="m-0 whitespace-pre-wrap text-[13px] leading-7 text-[#4d433e]">
                 {{ detailData.studentReflection.content }}
