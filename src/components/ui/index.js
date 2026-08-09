@@ -809,6 +809,7 @@ export const UiSelect = defineComponent({
     const open = ref(false)
     const highlightedIndex = ref(-1)
     const panelStyle = ref({})
+    let settleTimer = null
 
     const isMultiple = computed(() => attrs.multiple !== undefined && attrs.multiple !== false)
     const optionText = (node) => {
@@ -882,7 +883,7 @@ export const UiSelect = defineComponent({
       const below = window.innerHeight - rect.bottom - viewportPadding
       const above = rect.top - viewportPadding
       const placeAbove = below < 160 && above > below
-      const available = Math.max(120, (placeAbove ? above : below) - gap)
+      const available = Math.max(0, (placeAbove ? above : below) - gap)
       const maxHeight = Math.min(280, available)
       const left = Math.min(Math.max(viewportPadding, rect.left), Math.max(viewportPadding, window.innerWidth - rect.width - viewportPadding))
       panelStyle.value = {
@@ -905,6 +906,9 @@ export const UiSelect = defineComponent({
         updatePanelPosition()
         scrollHighlightedIntoView()
       })
+      // 弹窗过渡动画（如 AppModal 250ms 位移/缩放）期间按钮位置仍在变化，动画结束后校正一次面板位置
+      if (settleTimer) clearTimeout(settleTimer)
+      settleTimer = setTimeout(updatePanelPosition, 320)
     }
     const closePanel = () => {
       open.value = false
@@ -987,6 +991,7 @@ export const UiSelect = defineComponent({
       window.addEventListener('scroll', handleViewportChange, true)
     })
     onUnmounted(() => {
+      if (settleTimer) clearTimeout(settleTimer)
       document.removeEventListener('mousedown', handleOutsideMouseDown)
       document.removeEventListener('keydown', handleDocumentKeydown)
       window.removeEventListener('resize', handleViewportChange)
@@ -1016,7 +1021,7 @@ export const UiSelect = defineComponent({
           'aria-controls': triggerId ? `${triggerId}-listbox` : undefined,
           style: triggerStyle,
           class: cls(
-            'ui-select inline-flex !h-10 !min-h-10 max-w-full min-w-[160px] items-center justify-between gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] !bg-[var(--app-surface)] !px-3.5 !py-0 text-left text-[14px] leading-none text-[var(--app-text)] shadow-[var(--app-shadow-soft)] transition-colors duration-150 focus:outline-none focus-visible:border-[var(--app-primary)] focus-visible:ring-4 focus-visible:ring-[var(--app-primary-tint-15)] disabled:cursor-not-allowed disabled:bg-[var(--app-surface-muted)] disabled:text-[var(--app-text-soft)]',
+            'ui-select inline-flex h-10 min-h-10 max-w-full min-w-[160px] items-center justify-between gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] !bg-[var(--app-surface)] !px-3.5 !py-0 text-left text-[14px] leading-none text-[var(--app-text)] shadow-[var(--app-shadow-soft)] transition-colors duration-150 focus:outline-none focus-visible:border-[var(--app-primary)] focus-visible:ring-4 focus-visible:ring-[var(--app-primary-tint-15)] disabled:cursor-not-allowed disabled:bg-[var(--app-surface-muted)] disabled:text-[var(--app-text-soft)]',
             triggerClass
           ),
           onClick: handleTriggerClick,

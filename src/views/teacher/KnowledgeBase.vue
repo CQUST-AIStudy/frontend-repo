@@ -296,15 +296,16 @@
         </div>
         <div v-if="spaceForm.docVisibility === 'class'">
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">绑定班级</label>
-          <UiSelect v-model="spaceForm.classIds" multiple class="w-full h-24 px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
+          <UiSelect v-model="spaceForm.classIds" multiple class="w-full min-h-[96px] px-3 py-2 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
             <UiOption v-for="cls in teacherClasses" :key="cls.id" :value="cls.id">{{ cls.name }}{{ cls.courseName ? ' / ' + cls.courseName : '' }}</UiOption>
           </UiSelect>
         </div>
         <div>
           <label class="block text-sm font-medium text-[#1d1d1f] mb-1.5">默认模式</label>
+          <p class="text-xs text-[#6e6e73] mb-1.5">严格模式：仅依据知识库内容回答；开放模式：可结合模型自身知识回答</p>
           <UiSelect v-model="spaceForm.defaultMode" class="w-full h-10 px-3 rounded-[10px] bg-[#f5f5f7] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.1)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(194,112,62,0.15),inset_0_0_0_1px_rgba(194,112,62,0.5)] transition-all outline-none text-sm">
-            <UiOption value="strict">Strict</UiOption>
-            <UiOption value="open">Open</UiOption>
+            <UiOption value="strict">严格模式</UiOption>
+            <UiOption value="open">开放模式</UiOption>
           </UiSelect>
         </div>
         <div class="flex items-center gap-6">
@@ -429,7 +430,7 @@ function emptyDocSummary() {
   }
 }
 
-const modeLabel = (mode) => (mode === 'open' ? 'Open' : 'Strict')
+const modeLabel = (mode) => (mode === 'open' ? '开放模式' : '严格模式')
 
 function visibilityLabel(visibility) {
   if (visibility === 'public') return '公开'
