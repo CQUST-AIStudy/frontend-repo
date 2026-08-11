@@ -26,8 +26,8 @@
       </div>
     </Transition>
 
-    <main class="relative z-[1] mx-auto grid min-h-screen min-h-[100dvh] w-[min(100%,1500px)] grid-cols-[minmax(420px,0.95fr)_minmax(460px,554px)] items-center gap-[142px] px-[108px] py-[46px] max-[1180px]:grid-cols-[minmax(0,1fr)] max-[1180px]:content-center max-[1180px]:gap-7 max-[720px]:flex max-[720px]:min-h-[100dvh] max-[720px]:flex-col max-[720px]:items-center max-[720px]:justify-center max-[720px]:gap-4 max-[720px]:px-3 max-[720px]:py-5 max-[360px]:py-4">
-      <section class="relative flex min-h-[600px] max-w-[720px] translate-x-[2px] flex-col justify-center max-[720px]:min-h-0 max-[720px]:w-full max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:items-center max-[720px]:text-center" aria-label="平台简介">
+    <main class="login-main relative z-[1] mx-auto grid min-h-screen min-h-[100dvh] w-[min(100%,1500px)] grid-cols-[minmax(420px,0.95fr)_minmax(460px,554px)] items-center gap-[142px] px-[108px] py-[46px] max-[1180px]:grid-cols-[minmax(0,1fr)] max-[1180px]:content-center max-[1180px]:gap-7 max-[720px]:flex max-[720px]:min-h-[100dvh] max-[720px]:flex-col max-[720px]:items-center max-[720px]:justify-center max-[720px]:gap-4 max-[720px]:px-3 max-[720px]:py-5 max-[360px]:py-4">
+      <section class="login-intro relative flex min-h-[600px] max-w-[720px] translate-x-[2px] flex-col justify-center max-[720px]:min-h-0 max-[720px]:w-full max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:items-center max-[720px]:text-center" aria-label="平台简介">
         <div class="absolute -top-2 right-2 text-[58px] font-bold tracking-normal text-[rgba(203,128,83,0.18)] max-[720px]:hidden" aria-hidden="true">
           &lt;/&gt;
         </div>
@@ -39,7 +39,7 @@
         </p>
         <div class="mb-6 mt-6 h-[5px] w-[54px] rounded-full bg-[linear-gradient(90deg,#cb8053,#a8613f)] shadow-[0_0_22px_rgba(203,128,83,0.28)] max-[720px]:mb-0 max-[720px]:mt-3 max-[720px]:h-1 max-[720px]:w-12" aria-hidden="true"></div>
 
-        <div class="grid w-[min(100%,680px)] grid-cols-[repeat(3,max-content)] gap-[46px] max-[720px]:hidden max-[720px]:grid-cols-1 max-[720px]:gap-3.5">
+        <div class="login-features grid w-[min(100%,680px)] grid-cols-[repeat(3,max-content)] gap-[46px] max-[720px]:hidden max-[720px]:grid-cols-1 max-[720px]:gap-3.5">
           <article
             v-for="feature in features"
             :key="feature.title"
@@ -108,7 +108,7 @@
         </div>
       </section>
 
-      <section class="relative w-full max-w-[554px] translate-x-1.5 translate-y-[18px] overflow-hidden rounded-[24px] border border-[rgba(168,97,63,0.18)] bg-[rgba(255,252,248,0.94)] px-[60px] pb-[30px] pt-10 text-[#3d3529] shadow-[0_28px_70px_rgba(111,67,42,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl max-[1180px]:max-w-[560px] max-[720px]:mx-auto max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:translate-y-0 max-[720px]:rounded-[24px] max-[720px]:px-4 max-[720px]:pb-4 max-[720px]:pt-5 max-[360px]:px-3.5" aria-label="账号登录">
+      <section class="login-card relative w-full max-w-[554px] translate-x-1.5 translate-y-[18px] overflow-hidden rounded-[24px] border border-[rgba(168,97,63,0.18)] bg-[rgba(255,252,248,0.94)] px-[60px] pb-[30px] pt-10 text-[#3d3529] shadow-[0_28px_70px_rgba(111,67,42,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl max-[1180px]:max-w-[560px] max-[720px]:mx-auto max-[720px]:max-w-[520px] max-[720px]:translate-x-0 max-[720px]:translate-y-0 max-[720px]:rounded-[24px] max-[720px]:px-4 max-[720px]:pb-4 max-[720px]:pt-5 max-[360px]:px-3.5" aria-label="账号登录">
         <div class="pointer-events-none absolute inset-x-0 top-0 h-[130px] bg-[radial-gradient(circle_at_50%_0%,rgba(203,128,83,0.12),transparent_70%)]"></div>
         <div class="relative">
           <div class="relative mb-[34px] flex border-b-2 border-[#ead8cc] max-[720px]:mb-4" role="tablist" aria-label="账号操作">
@@ -141,7 +141,7 @@
               leave-from-class="translate-x-0 opacity-100"
               :leave-to-class="formTransitionLeaveToClass"
             >
-              <form v-if="activeTab === 'login'" key="login" class="space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleLogin">
+              <form v-if="activeTab === 'login'" key="login" class="login-form space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleLogin">
                 <div>
                   <label class="mb-2.5 block text-[17px] font-[650] leading-[1.2] tracking-normal text-[#3d3529] max-[720px]:mb-2 max-[720px]:text-[15px]">角色</label>
                   <div class="flex w-full overflow-hidden rounded-xl border border-[#ead8cc] bg-white">
@@ -241,7 +241,7 @@
                 </div>
               </form>
 
-              <form v-else key="register" class="space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleRegister">
+              <form v-else key="register" class="login-form space-y-7 will-change-transform motion-reduce:transform-none max-[720px]:space-y-4" @submit.prevent="handleRegister">
                 <TextField
                   id="register-username"
                   v-model="registerForm.username"
@@ -853,6 +853,84 @@ function createIcon(name, children) {
 @media (max-width: 720px) {
   .login-decoration {
     display: none;
+  }
+}
+
+/* 1920×1080 等低高度桌面视口：压缩间距，避免特性卡片被登录卡遮盖、页面出现纵向滚动；更高视口不受影响 */
+@media (min-width: 1181px) and (max-height: 1080px) {
+  .login-main {
+    gap: 80px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .login-intro {
+    min-height: 0;
+  }
+
+  .login-intro h1 {
+    font-size: 48px;
+  }
+
+  .login-intro > p {
+    margin-top: 12px;
+    font-size: 18px;
+  }
+
+  .login-features {
+    gap: 18px;
+  }
+
+  .login-features article {
+    grid-template-columns: 48px max-content;
+    gap: 10px;
+  }
+
+  .login-features article > div:first-child {
+    width: 48px;
+    height: 48px;
+  }
+
+  .login-features article svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .login-features h2 {
+    margin-bottom: 4px;
+    font-size: 16px;
+  }
+
+  .login-features p {
+    font-size: 11px;
+  }
+
+  .login-card {
+    padding-top: 28px;
+    padding-bottom: 18px;
+    translate: 6px 6px;
+  }
+
+  .login-card [role='tablist'] {
+    margin-bottom: 22px;
+  }
+
+  .login-card [role='tablist'] button {
+    height: 46px;
+    font-size: 20px;
+  }
+
+  .login-form > * + * {
+    margin-top: 20px !important;
+  }
+
+  .login-form label {
+    margin-bottom: 8px;
+  }
+
+  .login-form button[type='submit'] {
+    min-height: 52px;
+    font-size: 18px;
   }
 }
 </style>
