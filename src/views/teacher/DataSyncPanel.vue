@@ -19,7 +19,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
       <!-- Left column -->
-      <div>
+      <div class="min-w-0">
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-5">数据同步操作</div>
           <div class="flex gap-6 items-center flex-wrap">
@@ -254,7 +254,7 @@
       </div>
 
       <!-- Right column: Cookie management -->
-      <div>
+      <div class="min-w-0">
         <div class="rounded-[20px] border border-black/[0.06] bg-white/95 backdrop-blur-[20px] shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-6">
           <div class="text-[14px] font-semibold text-[#1d1d1f] mb-4">Cookie 管理</div>
           <div class="text-[13px] text-[#6e6e73] mb-3">
