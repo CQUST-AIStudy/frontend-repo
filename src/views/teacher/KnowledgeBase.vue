@@ -35,9 +35,9 @@
           @click="selectSpace(space)"
         >
           <div class="flex justify-between items-center gap-3 p-5 pb-3 border-b border-black/[0.06]">
-            <span class="font-semibold text-[16px] text-[#1d1d1f] truncate">{{ space.name }}</span>
-            <div class="flex items-center gap-2">
-              <span :class="visibilityBadgeClass(space.docVisibility)" class="text-xs px-2 py-0.5 rounded-full font-medium">
+            <span class="min-w-0 flex-1 font-semibold text-[16px] text-[#1d1d1f] truncate">{{ space.name }}</span>
+            <div class="flex shrink-0 items-center gap-2">
+              <span :class="visibilityBadgeClass(space.docVisibility)" class="whitespace-nowrap text-xs px-2 py-0.5 rounded-full font-medium">
                 {{ visibilityLabel(space.docVisibility) }}
               </span>
               <div class="relative" @click.stop>
