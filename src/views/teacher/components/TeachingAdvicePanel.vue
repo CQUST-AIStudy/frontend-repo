@@ -80,7 +80,7 @@
 
       <template v-else-if="activeData">
         <div
-          class="grid h-full min-h-0 grid-cols-1 gap-5"
+          class="teaching-advice-outer grid h-full min-h-0 grid-cols-1 gap-5"
           :class="{ 'xl:grid-cols-[minmax(0,1fr)_360px]': advice && focusPanelOpen }"
         >
           <div class="min-w-0 min-h-0 flex flex-col space-y-4">
@@ -2579,10 +2579,32 @@ onBeforeUnmount(() => {
 @media (min-width: 1181px) and (max-height: 1080px) {
   .teaching-advice-report-grid {
     grid-template-columns: 286px minmax(0, 1fr);
+    align-items: stretch;
   }
 
   .teaching-advice-outline {
     padding-right: 4px;
+    align-self: stretch;
+  }
+
+  .teaching-advice-content {
+    height: 100%;
+  }
+
+  /* 重点学生面板默认是悬停浮层（opacity 0），1080p 不再为其预留 360px 空列，改为右侧绝对定位浮层，内容列占满宽度 */
+  .teaching-advice-outer {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teaching-advice-side-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(360px, 92%);
+    max-height: none;
   }
 }
 
