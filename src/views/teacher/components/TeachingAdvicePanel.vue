@@ -2575,6 +2575,17 @@ onBeforeUnmount(() => {
   min-height: 0;
 }
 
+/* 1080p 特调（含 1920 系统缩放下 CSS 视口不足 1280 的场景）：报告目录回左栏，两列各自内滚，接近高分屏效果；更高视口不变 */
+@media (min-width: 1181px) and (max-height: 1080px) {
+  .teaching-advice-report-grid {
+    grid-template-columns: 286px minmax(0, 1fr);
+  }
+
+  .teaching-advice-outline {
+    padding-right: 4px;
+  }
+}
+
 .teaching-advice-outline,
 .teaching-advice-content,
 .teaching-advice-side-panel {
