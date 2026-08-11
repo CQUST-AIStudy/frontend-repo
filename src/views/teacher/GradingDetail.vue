@@ -102,7 +102,7 @@
     </div>
 
     <!-- Distribution and batch review -->
-    <div v-if="task" class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,1fr)] gap-4 mb-4">
+    <div v-if="task" class="grading-overview-grid grid grid-cols-1 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,1fr)] gap-4 mb-4">
       <section class="rounded-[16px] border border-black/[0.06] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.05)] px-6 py-5 min-h-[300px]">
         <div class="text-[16px] font-semibold text-[#1d1d1f] mb-4">班级分数分布</div>
         <div class="relative h-[230px] pl-9 pt-4 pb-7">
@@ -988,6 +988,13 @@ onUnmounted(() => {
 
   .review-insight-row {
     grid-template-columns: 20px 72px minmax(0, 1fr);
+  }
+}
+
+/* 1080p 特调（含 1920 系统缩放下 CSS 视口不足 1280 的场景）：分数分布与批次总评恢复左右两栏，接近高分屏；更高视口不变 */
+@media (min-width: 1181px) and (max-height: 1080px) {
+  .grading-overview-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(360px, 1fr);
   }
 }
 </style>
