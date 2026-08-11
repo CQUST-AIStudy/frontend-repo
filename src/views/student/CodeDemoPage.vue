@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[var(--app-bg)] p-6 max-[640px]:p-4">
+  <div class="demo-page min-h-screen bg-[var(--app-bg)] p-6 max-[640px]:p-4">
     <div class="mx-auto max-w-7xl">
       <!-- Header -->
-      <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div class="demo-page-header mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 text-sm text-[var(--app-text-soft)]">
             <button
@@ -25,7 +25,7 @@
       </div>
 
       <!-- Controls -->
-      <div class="mb-6 rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-4">
+      <div class="demo-stdin-card mb-6 rounded-xl border border-[var(--app-border-soft)] bg-[var(--app-card)] p-4">
         <label class="mb-2 block text-sm font-semibold text-[var(--app-text)]">标准输入 (stdin)</label>
         <textarea
           v-model="stdinInput"
@@ -221,3 +221,31 @@ onMounted(() => {
 
 onBeforeUnmount(stopTips)
 </script>
+
+<style scoped>
+/* 1080p 特调：压缩页头与输入区，把垂直空间让给演示主体；更高视口不变 */
+@media (min-width: 1181px) and (max-height: 1080px) {
+  .demo-page {
+    padding: 16px;
+  }
+
+  .demo-page-header {
+    margin-bottom: 12px;
+  }
+
+  .demo-page-header h1 {
+    margin-top: 4px;
+    font-size: 20px;
+  }
+
+  .demo-stdin-card {
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
+  .demo-stdin-card textarea {
+    height: 72px;
+    min-height: 0;
+  }
+}
+</style>

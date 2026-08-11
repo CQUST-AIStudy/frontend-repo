@@ -1,6 +1,6 @@
 <template>
   <section v-if="items.length" class="overflow-hidden rounded-xl border border-[#dbe3ef] bg-white">
-    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-[#e8edf4] px-5 py-4">
+    <header class="demo-player-header flex flex-wrap items-center justify-between gap-3 border-b border-[#e8edf4] px-5 py-4">
       <div>
         <div class="flex items-center gap-2">
           <LucideIcon :name="isError ? 'bug' : 'code'" :size="18" :class="isError ? 'text-[#ef4444]' : 'text-[var(--app-primary)]'" />
@@ -16,12 +16,12 @@
     <!-- 统一步骤播放器（图码式）：代码行 ↔ 画面 ↔ 字幕 三轨同步 -->
     <div class="grid gap-0" :class="hasCode ? 'lg:grid-cols-[minmax(0,0.9fr)_minmax(440px,1.1fr)]' : 'grid-cols-1'">
       <!-- 左：代码面板，随当前步高亮 -->
-      <div v-if="hasCode" class="border-b border-[#e8edf4] p-5 lg:border-b-0 lg:border-r">
+      <div v-if="hasCode" class="demo-code border-b border-[#e8edf4] p-5 lg:border-b-0 lg:border-r">
         <div class="mb-3 flex items-center justify-between">
           <span class="text-sm font-semibold text-[#172033]">代码</span>
           <span class="text-xs" :class="isError ? 'text-[#dc2626]' : 'text-[var(--app-primary)]'">{{ current.title }}</span>
         </div>
-        <div class="overflow-hidden rounded-lg border border-[#dce3ec] bg-[#fbfcfe] font-mono text-[13px] leading-7">
+        <div class="demo-codebox overflow-hidden rounded-lg border border-[#dce3ec] bg-[#fbfcfe] font-mono text-[13px] leading-7">
           <div
             v-for="(line, index) in sourceLines"
             :key="`line-${index}`"
@@ -41,7 +41,7 @@
       </div>
 
       <!-- 右：画布 + 旁白字幕 + 变量 + 步骤控件 -->
-      <div class="p-5">
+      <div class="demo-stage p-5">
         <div class="mb-3 flex items-center justify-between gap-3">
           <span class="text-sm font-semibold text-[#172033]">{{ current.title }} <span v-if="readonly" class="font-normal text-[#8b96a8]">（只读）</span></span>
           <span v-if="steps.length" class="text-xs text-[#64748b]">第 {{ activeStep.order }} 步 / 共 {{ steps.length }} 步</span>
@@ -49,8 +49,8 @@
 
         <template v-if="steps.length">
           <!-- 画布：结构可视化（标量执行演示直接用下方变量盒，避免重复） -->
-          <div v-if="showCanvas" class="mb-3">
-            <PythonTutorRenderer v-if="activeStep.state" :state="activeStep.state" :height="300" />
+          <div v-if="showCanvas" class="demo-canvas mb-3">
+            <PythonTutorRenderer v-if="activeStep.state" :state="activeStep.state" :height="compactViewport ? 210 : 300" />
             <div v-else-if="activeStep.memory?.length" class="rounded-lg border border-[#dce3ec] bg-[#fbfcfe] p-4">
               <div class="mb-3 text-xs font-semibold text-[#475569]">内存状态</div>
               <div class="flex flex-wrap items-end gap-1.5">
@@ -66,14 +66,14 @@
           </div>
 
           <!-- 旁白字幕：totuma 式，居中醒目 -->
-          <div class="mb-4 rounded-lg border px-4 py-3 text-center text-[15px] font-medium leading-7"
+          <div class="demo-banner mb-4 rounded-lg border px-4 py-3 text-center text-[15px] font-medium leading-7"
             :class="activeStep.error ? 'border-[#fecaca] bg-[#fff7f7] text-[#b91c1c]' : 'border-[#bfdbfe] bg-[#f5f9ff] text-[#1e3a8a]'">
             <LucideIcon v-if="activeStep.error" name="triangle-alert" :size="16" class="mr-1 inline align-[-3px]" />
             {{ activeStep.explanation || '—' }}
           </div>
 
           <!-- 调用栈（执行演示）：由源码函数范围 + 行号序列推导 -->
-          <div v-if="!isError && callStack.length" class="mb-4 rounded-lg border border-[#dce3ec] bg-[#fbfcfe] p-3">
+          <div v-if="!isError && callStack.length" class="demo-stack mb-4 rounded-lg border border-[#dce3ec] bg-[#fbfcfe] p-3">
             <div class="mb-2 font-mono text-[11px] uppercase tracking-wider text-[#94a3b8]">调用栈 · call stack</div>
             <div class="flex flex-col gap-1.5">
               <div v-for="(fn, i) in callStack" :key="fn + '#' + i"
@@ -85,7 +85,7 @@
           </div>
 
           <!-- 变量：执行演示用值盒（变化时脉冲）；错误演示保持芯片 -->
-          <div v-if="!isError && hasVariables(activeStep)" class="mb-4 flex flex-wrap gap-3">
+          <div v-if="!isError && hasVariables(activeStep)" class="demo-vars mb-4 flex flex-wrap gap-3">
             <div v-for="(value, key) in activeStep.variables" :key="key + '=' + value" class="text-center">
               <div class="mb-1 font-mono text-[11px] text-[#64748b]">{{ key }}</div>
               <div class="code-demo-cell flex h-11 min-w-[52px] items-center justify-center rounded-lg border-[1.5px] px-3 font-mono text-lg font-bold transition-colors"
@@ -110,7 +110,7 @@
           </div>
 
           <!-- 步骤控件 -->
-          <div class="mt-1 flex items-center gap-2">
+          <div class="demo-controls mt-1 flex items-center gap-2">
             <UiButton :disabled="stepIndex === 0" @click="previous" class="h-9 rounded-lg border border-[#d7dfeb] bg-white px-4 text-sm text-[#334155] disabled:opacity-40">上一步</UiButton>
             <UiButton type="primary" @click="togglePlay" class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold shadow-sm">
               <LucideIcon :name="playing ? 'pause' : 'play'" :size="18" />{{ playing ? '暂停' : '播放' }}
@@ -141,7 +141,7 @@
       </div>
     </div>
 
-    <footer class="border-t border-[#e8edf4] bg-[#fbfcfe] px-5 py-4">
+    <footer class="demo-player-footer border-t border-[#e8edf4] bg-[#fbfcfe] px-5 py-4">
       <div class="grid gap-3 md:grid-cols-2">
         <div class="rounded-lg border p-3" :class="isError ? 'border-[#fecaca] bg-[#fff7f7]' : 'border-[#dbe3ef] bg-white'">
           <div class="mb-1 text-xs font-semibold" :class="isError ? 'text-[#dc2626]' : 'text-[var(--app-primary)]'">{{ isError ? '为什么错' : '说明' }}</div>
@@ -157,7 +157,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import hljs from 'highlight.js/lib/common'
 import LucideIcon from '@/components/LucideIcon.vue'
 import PythonTutorRenderer from '@/components/grading/PythonTutorRenderer.vue'
@@ -177,6 +177,13 @@ const props = defineProps({
   readonly: { type: Boolean, default: false },
   variant: { type: String, default: 'error' }
 })
+
+// 1920×1080 等低高度桌面视口：压缩画布与间距，让演示内容一屏可见
+const compactViewport = ref(false)
+let compactMq = null
+function onCompactChange(e) {
+  compactViewport.value = e.matches
+}
 
 const isError = computed(() => props.variant !== 'plain')
 
@@ -369,7 +376,18 @@ function togglePlay() {
   timer = window.setInterval(advance, playSpeed.value)
 }
 
-onBeforeUnmount(stop)
+onBeforeUnmount(() => {
+  stop()
+  if (compactMq?.removeEventListener) compactMq.removeEventListener('change', onCompactChange)
+})
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    compactMq = window.matchMedia('(min-width: 1181px) and (max-height: 1080px)')
+    compactViewport.value = compactMq.matches
+    if (compactMq.addEventListener) compactMq.addEventListener('change', onCompactChange)
+  }
+})
 </script>
 
 <style scoped>
@@ -385,4 +403,61 @@ onBeforeUnmount(stop)
   100% { transform: scale(1); }
 }
 .code-demo-cell { animation: codeDemoFlash .5s ease; }
+
+/* 1080p 特调：压缩演示区垂直占用，画布+字幕+调用栈+变量+控件一屏可见；更高视口不变 */
+@media (min-width: 1181px) and (max-height: 1080px) {
+  .demo-player-header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .demo-player-footer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .demo-code {
+    padding: 14px;
+  }
+
+  .demo-codebox {
+    line-height: 24px;
+  }
+
+  .demo-stage {
+    padding: 14px;
+  }
+
+  .demo-canvas {
+    margin-bottom: 10px;
+  }
+
+  .demo-banner {
+    margin-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 14px;
+    line-height: 24px;
+  }
+
+  .demo-stack {
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+
+  .demo-vars {
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .demo-vars .code-demo-cell {
+    height: 40px;
+    min-width: 46px;
+    font-size: 16px;
+  }
+
+  .demo-controls {
+    margin-top: 4px;
+  }
+}
 </style>
