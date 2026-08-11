@@ -994,7 +994,8 @@ onUnmounted(() => {
 /* 1080p 特调（含 1920 系统缩放下 CSS 视口不足 1280 的场景）：分数分布与批次总评恢复左右两栏，接近高分屏；更高视口不变 */
 @media (min-width: 1181px) and (max-height: 1080px) {
   .grading-overview-grid {
-    grid-template-columns: minmax(0, 1.45fr) minmax(360px, 1fr);
+    /* 视口变窄后把比例从 1.45:1 调到 ~1.1:1，避免总评栏过窄 */
+    grid-template-columns: minmax(0, 1.1fr) minmax(400px, 1fr);
   }
 }
 </style>
